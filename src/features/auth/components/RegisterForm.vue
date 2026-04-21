@@ -1,0 +1,134 @@
+<script setup>
+defineProps({
+  form: {
+    type: Object,
+    required: true,
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  error: {
+    type: String,
+    default: '',
+  },
+  passwordStrength: {
+    type: Number,
+    default: 0,
+  },
+})
+
+defineEmits(['submit'])
+</script>
+
+<template>
+  <form class="form" @submit.prevent="$emit('submit')">
+    <div class="two-cols">
+      <div>
+        <label>Họ</label>
+        <input v-model="form.lastName" type="text" placeholder="Nguyễn" required />
+      </div>
+      <div>
+        <label>Tên</label>
+        <input v-model="form.firstName" type="text" placeholder="Văn A" required />
+      </div>
+    </div>
+
+    <label>Email</label>
+    <input v-model="form.email" type="email" placeholder="hello@email.com" required />
+
+    <label>Số điện thoại</label>
+    <input v-model="form.phone" type="tel" placeholder="0901 234 567" required />
+
+    <label>Mật khẩu</label>
+    <input v-model="form.password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
+    <div class="strength">
+      <span v-for="idx in 4" :key="idx" :class="{ active: idx <= passwordStrength }" />
+    </div>
+
+    <label class="checkbox">
+      <input v-model="form.agree" type="checkbox" />
+      <span>Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</span>
+    </label>
+
+    <p v-if="error" class="error">{{ error }}</p>
+    <button class="submit-btn" type="submit" :disabled="loading">
+      {{ loading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
+    </button>
+  </form>
+</template>
+
+<style scoped>
+.form {
+  display: grid;
+  gap: 0.45rem;
+}
+label {
+  color: var(--auth-text-secondary);
+  font-size: 0.76rem;
+}
+input[type='text'],
+input[type='email'],
+input[type='tel'],
+input[type='password'] {
+  min-height: 2.55rem;
+  border-radius: var(--auth-radius-md);
+  border: 1px solid var(--auth-border);
+  background: var(--auth-surface-secondary);
+  color: var(--auth-text-primary);
+  padding: 0 0.72rem;
+}
+input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
+}
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+.strength {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.22rem;
+}
+.strength span {
+  height: 3px;
+  border-radius: 999px;
+  background: var(--auth-border);
+}
+.strength span.active {
+  background: var(--auth-brand-end);
+}
+.checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin-top: 0.2rem;
+}
+.checkbox input {
+  margin-top: 0.2rem;
+}
+.checkbox span {
+  font-size: 0.75rem;
+  color: var(--auth-text-secondary);
+}
+.submit-btn {
+  min-height: 2.7rem;
+  border: none;
+  border-radius: var(--auth-radius-md);
+  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+.error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.8rem;
+}
+</style>

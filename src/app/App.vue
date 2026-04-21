@@ -1,15 +1,18 @@
 <script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
-import AppFooter from '@shared/layout/AppFooter.vue'
+
+const route = useRoute()
+const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
 </script>
 
 <template>
   <div class="app-shell">
-    <AppHeader />
-    <main class="app-main">
+    <AppHeader v-if="!isRoom3DPage" />
+    <main class="app-main" :class="{ 'app-main--fluid': isRoom3DPage }">
       <RouterView />
     </main>
-    <AppFooter />
   </div>
 </template>
 
@@ -27,5 +30,11 @@ import AppFooter from '@shared/layout/AppFooter.vue'
   margin: 0 auto;
   padding: 1.5rem 1.25rem;
   box-sizing: border-box;
+}
+
+.app-main--fluid {
+  max-width: none;
+  margin: 0;
+  padding: 0;
 }
 </style>

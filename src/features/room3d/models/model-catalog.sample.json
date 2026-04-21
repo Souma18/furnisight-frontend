@@ -1,0 +1,18 @@
+{
+  "rooms": [
+    {
+      "id": "bedroom",
+      "name": "Phong Ngu",
+      "file": "rooms/bedroom.glb"
+    }
+  ],
+  "furniture": [
+    {
+      "id": "chair-ergonomic",
+      "name": "Ghe Ergonomic ProFlex",
+      "file": "furniture/chair-ergonomic.glb",
+      "scale": [1, 1, 1],
+      "defaultPosition": [0, 0, 0]
+    }
+  ]
+}

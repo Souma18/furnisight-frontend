@@ -11,6 +11,22 @@
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
+  /* Auth tokens */
+  --auth-bg-overlay: rgba(11, 57, 84, 0.55);
+  --auth-surface: #ffffff;
+  --auth-surface-secondary: #f8fafc;
+  --auth-border: #e2e8f0;
+  --auth-text-primary: #0f172a;
+  --auth-text-secondary: #64748b;
+  --auth-brand-start: #947458;
+  --auth-brand-end: #ffb128;
+  --auth-focus-ring: rgba(255, 177, 40, 0.35);
+  --auth-success: #27ae60;
+  --auth-radius-sm: 8px;
+  --auth-radius-md: 10px;
+  --auth-radius-lg: 14px;
+  --auth-radius-xl: 18px;
+
   font: 16px/1.5 var(--sans);
   color: var(--text);
   background: var(--bg);
@@ -30,6 +46,14 @@
     --accent: #a78bfa;
     --accent-hover: #c4b5fd;
     --accent-soft: rgba(167, 139, 250, 0.12);
+
+    --auth-bg-overlay: rgba(2, 20, 34, 0.68);
+    --auth-surface: #0f172a;
+    --auth-surface-secondary: #111f35;
+    --auth-border: #31425e;
+    --auth-text-primary: #e2e8f0;
+    --auth-text-secondary: #94a3b8;
+    --auth-focus-ring: rgba(255, 177, 40, 0.4);
   }
 }
 

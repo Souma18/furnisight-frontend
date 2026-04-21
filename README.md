@@ -61,12 +61,15 @@ src/
     │
     └── room3d/                       # Trực quan phòng 3D, ghép nội thất
         ├── pages/Room3DPage.vue      # `/room3d`
-        ├── components/               # Canvas wrapper, panel đặt đồ, gizmo…
-        ├── store/room3DStore.js     # Context phòng đang xem, gợi ý loại phòng…
-        ├── api/roomApi.js           # Upload ảnh phòng, lấy scene từ backend
-        ├── composables/useRoom3D.js
-        └── core/                     # Engine 3D (scene, loader, camera) tách khỏi Vue
-            └── index.js              # Entry stub — sau này tích hợp Three.js v.v.
+        ├── components/               # Topbar/left/canvas/right/cart/modal tách nhỏ theo UI
+        ├── store/room3DStore.js      # State room mode, product placed, cart, checkout
+        ├── api/roomApi.js            # Mock service cho analyze room, room templates, suggestions
+        ├── composables/useRoom3D.js  # Orchestrate flow UI -> API -> store
+        ├── core/                     # Mock data + cấu hình scene dùng cho TroisJS
+        └── models/                   # Nơi bỏ file .glb/.gltf phòng mẫu và nội thất
+            ├── rooms/
+            ├── furniture/
+            └── model-catalog.sample.json
 ```
 
 ## Alias import (Vite)
@@ -99,3 +102,28 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+## Room3D Mock Flow (đang dùng để demo)
+
+- Chế độ `Upload`: mô phỏng AI phân tích loại phòng.
+- Chế độ `Phòng có sẵn`: chọn trực tiếp room template nếu không upload ảnh.
+- Product panel bên phải: lọc/tìm kiếm, thêm vào scene 3D, đồng bộ giỏ hàng.
+- Checkout/success hiện ở dạng mock để ráp backend sau.
+
+## Thêm model 3D mới trong 3 bước
+
+1. Bỏ file model vào:
+   - phòng: `src/features/room3d/models/rooms/`
+   - nội thất: `src/features/room3d/models/furniture/`
+2. Cập nhật mapping trong:
+   - `src/features/room3d/models/model-catalog.sample.json`
+   - `src/features/room3d/core/mockData.js` (trường `modelUrl`, `fallback`, `roomTypes`)
+3. Chạy `npm run dev` và kiểm tra trang `/room3d`. Nếu thiếu model thì app tự fallback sang primitive shape.
+
+## Smoke test checklist cho `/room3d`
+
+- Chuyển giữa 2 mode `Hình ảnh` và `Phòng có sẵn`.
+- Chọn một phòng mẫu, xác nhận AI suggestion strip và canvas hiển thị.
+- Tìm kiếm + lọc category bên panel phải.
+- Thêm/xóa sản phẩm khỏi cart, kiểm tra tổng tiền cập nhật.
+- Mở checkout, submit mock, kiểm tra success modal và cart được reset.
