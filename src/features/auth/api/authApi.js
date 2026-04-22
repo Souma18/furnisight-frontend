@@ -21,9 +21,6 @@ export function requestVerification(payload) {
   return apiClient.post(`${baseUrl}/verify/request`, payload)
 }
 
-export function resendVerifyCode(payload) {
-  return apiClient.post(`${baseUrl}/verify/resend`, payload)
-}
 
 export function logoutRequest(payload) {
   return apiClient.post(`${baseUrl}/logout`, payload)
@@ -45,8 +42,8 @@ export function resetPasswordRequest(payload) {
   return apiClient.post(`${baseUrl}/password/reset`, payload, { skipAuth: true })
 }
 
-export function resendResetPasswordCodeRequest(payload) {
-  return apiClient.post(`${baseUrl}/password/resend`, payload, { skipAuth: true })
+export function verifyResetPasswordCode(payload) {
+  return apiClient.post(`${baseUrl}/password/verify`, payload, { skipAuth: true })
 }
 
 export function renewAccessTokenRequest(payload) {

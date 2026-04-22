@@ -18,7 +18,7 @@ const props = defineProps({
 const emit = defineEmits(['close', 'authenticated'])
 
 const authViewState = useAuthViewState()
-const { AUTH_VIEWS, activeView, successState, showTabs } = authViewState
+const { AUTH_VIEWS, activeView, successState, showTabs, setView } = authViewState
 
 const {
   loading,
@@ -31,13 +31,18 @@ const {
   submitLogin,
   submitRegister,
   submitForgot,
+  handleSendCode,
   handleTabChange,
 } = useAuthForms({ emit, props, authViewState })
 </script>
 
 <template>
   <div class="auth-shell" :class="{ 'auth-shell--embedded': embedded }">
-    <section id="auth-box" class="auth-card">
+    <section 
+      id="auth-box" 
+      class="auth-card" 
+      :class="{ 'auth-card--register': activeView === AUTH_VIEWS.REGISTER }"
+    >
       <div class="auth-header">
         <div class="brand-row">
           <div class="brand-icon"><AppIcon name="lock" :size="14" :stroke-width="2" /></div>
@@ -53,38 +58,41 @@ const {
       </div>
 
       <div class="auth-body">
-        <LoginForm
-          v-if="activeView === AUTH_VIEWS.LOGIN"
-          :form="loginForm"
-          :loading="loading"
-          :error="errorMessage"
-          :show-password="showPassword"
-          @submit="submitLogin"
-          @forgot="setView(AUTH_VIEWS.FORGOT)"
-          @toggle-password="showPassword = !showPassword"
-        />
-        <RegisterForm
-          v-else-if="activeView === AUTH_VIEWS.REGISTER"
-          :form="registerForm"
-          :loading="loading"
-          :error="errorMessage"
-          :password-strength="passwordStrength"
-          @submit="submitRegister"
-        />
-        <ForgotPasswordForm
-          v-else-if="activeView === AUTH_VIEWS.FORGOT"
-          :form="forgotForm"
-          :loading="loading"
-          :error="errorMessage"
-          @submit="submitForgot"
-          @back="setView(AUTH_VIEWS.LOGIN)"
-        />
-        <AuthSuccessState
-          v-else
-          :title="successState.title"
-          :message="successState.message"
-          :loading="loading || successState.mode === AUTH_VIEWS.LOGIN"
-        />
+        <Transition name="form-fade" mode="out-in">
+          <LoginForm
+            v-if="activeView === AUTH_VIEWS.LOGIN"
+            :form="loginForm"
+            :loading="loading"
+            :error="errorMessage"
+            :show-password="showPassword"
+            @submit="submitLogin"
+            @forgot="setView(AUTH_VIEWS.FORGOT)"
+            @toggle-password="showPassword = !showPassword"
+          />
+          <RegisterForm
+            v-else-if="activeView === AUTH_VIEWS.REGISTER"
+            :form="registerForm"
+            :loading="loading"
+            :error="errorMessage"
+            :password-strength="passwordStrength"
+            @submit="submitRegister"
+          />
+          <ForgotPasswordForm
+            v-else-if="activeView === AUTH_VIEWS.FORGOT"
+            :form="forgotForm"
+            :loading="loading"
+            :error="errorMessage"
+            @submit="submitForgot"
+            @send-code="handleSendCode"
+            @back="setView(AUTH_VIEWS.LOGIN)"
+          />
+          <AuthSuccessState
+            v-else
+            :title="successState.title"
+            :message="successState.message"
+            :loading="loading || successState.mode === AUTH_VIEWS.LOGIN"
+          />
+        </Transition>
       </div>
     </section>
   </div>
@@ -114,6 +122,12 @@ const {
   width: 100%;
   max-width: 400px;
   overflow: hidden;
+  transition: max-width 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  margin: 0 auto;
+}
+
+.auth-card--register {
+  max-width: 480px;
 }
 
 .auth-header {
@@ -162,5 +176,21 @@ const {
 
 .auth-body {
   padding: 1.2rem 1.4rem 1.4rem;
+}
+
+/* Animations cho form */
+.form-fade-enter-active,
+.form-fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.form-fade-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.form-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 </style>

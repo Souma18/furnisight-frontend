@@ -5,6 +5,8 @@ import {
   loginRequest,
   registerRequest,
   forgotPasswordRequest,
+  resetPasswordRequest,
+  verifyResetPasswordCode
 } from '../api/authApi'
 
 export function useAuthForms({ emit, props, authViewState }) {
@@ -31,7 +33,11 @@ export function useAuthForms({ emit, props, authViewState }) {
     agree: false,
   })
   const forgotForm = reactive({
-    email: '',
+    method: 'EMAIL',
+    destination: '',
+    code: '',
+    newPassword: '',
+    step: 1,
   })
 
   const passwordStrength = computed(() => {
@@ -99,22 +105,56 @@ export function useAuthForms({ emit, props, authViewState }) {
     }
   }
 
-  async function submitForgot() {
+  async function handleSendCode() {
     errorMessage.value = ''
     loading.value = true
     try {
       await forgotPasswordRequest({
-        channel: 'EMAIL',
-        destination: forgotForm.email,
+        channel: forgotForm.method,
+        destination: forgotForm.destination,
+      })
+      // Không gọi showSuccess vì nó sẽ che mất form, chỉ cần clear error
+    } catch (error) {
+      errorMessage.value = error.response?.data?.message || error.message || 'Gửi mã thất bại.'
+    } finally {
+      loading.value = false
+    }
+  }
+
+  async function submitForgot() {
+    if (forgotForm.step === 1) {
+      if (!forgotForm.code) {
+        errorMessage.value = 'Vui lòng nhập mã xác nhận.'
+        return
+      }
+      errorMessage.value = ''
+      loading.value = true
+      try {
+        await verifyResetPasswordCode({ code: forgotForm.code })
+        forgotForm.step = 2
+      } catch (error) {
+        errorMessage.value = error.response?.data?.message || error.message || 'Mã xác nhận không hợp lệ.'
+      } finally {
+        loading.value = false
+      }
+      return
+    }
+
+    errorMessage.value = ''
+    loading.value = true
+    try {
+      await resetPasswordRequest({
+        token: forgotForm.code,
+        newPassword: forgotForm.newPassword,
       })
       showSuccess({
-        title: 'Email đã được gửi!',
-        message: 'Link đặt lại mật khẩu có hiệu lực trong 15 phút.',
-        mode: AUTH_VIEWS.FORGOT,
+        title: 'Đổi mật khẩu thành công!',
+        message: 'Bạn có thể đăng nhập bằng mật khẩu mới.',
+        mode: AUTH_VIEWS.LOGIN,
       })
-      setTimeout(() => setView(AUTH_VIEWS.LOGIN), 1300)
+      setTimeout(() => setView(AUTH_VIEWS.LOGIN), 1500)
     } catch (error) {
-      errorMessage.value = error.response?.data?.message || error.message || 'Gửi email thất bại.'
+      errorMessage.value = error.response?.data?.message || error.message || 'Đổi mật khẩu thất bại.'
     } finally {
       loading.value = false
     }
@@ -136,6 +176,7 @@ export function useAuthForms({ emit, props, authViewState }) {
     submitLogin,
     submitRegister,
     submitForgot,
+    handleSendCode,
     handleTabChange,
   }
 }

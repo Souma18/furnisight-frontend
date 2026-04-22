@@ -71,6 +71,8 @@ input {
   background: var(--auth-surface-secondary);
   color: var(--auth-text-primary);
   padding: 0 0.72rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 input:focus {
   outline: none;
