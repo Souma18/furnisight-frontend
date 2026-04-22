@@ -1,13 +1,6 @@
 <script setup>
-import { computed, reactive, ref } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '../store/authStore'
 import { useAuthViewState } from '../composables/useAuthViewState'
-import {
-  mockLoginRequest,
-  mockRegisterRequest,
-  mockForgotPasswordRequest,
-} from '../api/authMockApi'
+import { useAuthForms } from '../composables/useAuthForms'
 import AuthTabs from './AuthTabs.vue'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
@@ -24,108 +17,22 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'authenticated'])
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-const { AUTH_VIEWS, activeView, successState, showTabs, setView, showSuccess } = useAuthViewState()
+const authViewState = useAuthViewState()
+const { AUTH_VIEWS, activeView, successState, showTabs } = authViewState
 
-const loading = ref(false)
-const errorMessage = ref('')
-const showPassword = ref(false)
-
-const loginForm = reactive({
-  email: '',
-  password: '',
-})
-const registerForm = reactive({
-  firstName: '',
-  lastName: '',
-  email: '',
-  phone: '',
-  password: '',
-  agree: false,
-})
-const forgotForm = reactive({
-  email: '',
-})
-
-const passwordStrength = computed(() => {
-  const pw = registerForm.password
-  let score = 0
-  if (pw.length >= 8) score += 1
-  if (/[A-Z]/.test(pw)) score += 1
-  if (/[0-9]/.test(pw)) score += 1
-  if (/[^A-Za-z0-9]/.test(pw)) score += 1
-  return score
-})
-
-async function submitLogin() {
-  errorMessage.value = ''
-  loading.value = true
-  try {
-    const session = await mockLoginRequest(loginForm)
-    authStore.setSession(session)
-    showSuccess({
-      title: 'Đăng nhập thành công!',
-      message: 'Chào mừng trở lại. Bạn đang được chuyển hướng...',
-      mode: AUTH_VIEWS.LOGIN,
-    })
-    setTimeout(async () => {
-      emit('authenticated')
-      if (props.embedded) {
-        emit('close')
-        return
-      }
-      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-      await router.push(redirect)
-    }, 900)
-  } catch (error) {
-    errorMessage.value = error.message ?? 'Đăng nhập thất bại.'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function submitRegister() {
-  errorMessage.value = ''
-  loading.value = true
-  try {
-    await mockRegisterRequest(registerForm)
-    showSuccess({
-      title: 'Tạo tài khoản thành công!',
-      message: 'Email xác nhận đã được gửi. Vui lòng kiểm tra hộp thư của bạn.',
-      mode: AUTH_VIEWS.REGISTER,
-    })
-    setTimeout(() => setView(AUTH_VIEWS.LOGIN), 1300)
-  } catch (error) {
-    errorMessage.value = error.message ?? 'Đăng ký thất bại.'
-  } finally {
-    loading.value = false
-  }
-}
-
-async function submitForgot() {
-  errorMessage.value = ''
-  loading.value = true
-  try {
-    await mockForgotPasswordRequest(forgotForm)
-    showSuccess({
-      title: 'Email đã được gửi!',
-      message: 'Link đặt lại mật khẩu có hiệu lực trong 15 phút.',
-      mode: AUTH_VIEWS.FORGOT,
-    })
-    setTimeout(() => setView(AUTH_VIEWS.LOGIN), 1300)
-  } catch (error) {
-    errorMessage.value = error.message ?? 'Gửi email thất bại.'
-  } finally {
-    loading.value = false
-  }
-}
-
-function handleTabChange(tab) {
-  errorMessage.value = ''
-  setView(tab)
-}
+const {
+  loading,
+  errorMessage,
+  showPassword,
+  loginForm,
+  registerForm,
+  forgotForm,
+  passwordStrength,
+  submitLogin,
+  submitRegister,
+  submitForgot,
+  handleTabChange,
+} = useAuthForms({ emit, props, authViewState })
 </script>
 
 <template>
