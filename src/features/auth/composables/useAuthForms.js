@@ -4,11 +4,12 @@ import { useAuthStore } from '../store/authStore'
 import {
   loginRequest,
   registerRequest,
+} from '../api/authApi'
+import {
   forgotPasswordRequest,
   resetPasswordRequest,
   verifyResetPasswordCode
-// } from '../api/authApi'
-} from '../api/authMockApi' // Sử dụng mock API cho demo
+} from '../../account/api/accountApi'
 
 export function useAuthForms({ emit, props, authViewState }) {
   const router = useRouter()

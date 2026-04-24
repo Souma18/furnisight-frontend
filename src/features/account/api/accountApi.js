@@ -38,3 +38,35 @@ export function getWishlist() {
 export function getSavedProjects() {
   return apiClient.get('/account/projects')
 }
+
+// ─── Account Security & Management ──────────────────────────────────────────
+
+const authBaseUrl = '/auth'
+
+export function verifyRequest(payload) {
+  return apiClient.post(`${authBaseUrl}/verify`, payload)
+}
+
+export function requestVerification(payload) {
+  return apiClient.post(`${authBaseUrl}/verify/request`, payload)
+}
+
+export function changePasswordRequest(payload) {
+  return apiClient.post(`${authBaseUrl}/password/change`, payload)
+}
+
+export function forgotPasswordRequest(payload) {
+  return apiClient.post(`${authBaseUrl}/password/forgot`, payload, { skipAuth: true })
+}
+
+export function resetPasswordRequest(payload) {
+  return apiClient.post(`${authBaseUrl}/password/reset`, payload, { skipAuth: true })
+}
+
+export function verifyResetPasswordCode(payload) {
+  return apiClient.post(`${authBaseUrl}/password/verify`, payload, { skipAuth: true })
+}
+
+export function deleteOwnAccountRequest() {
+  return apiClient.delete(`${authBaseUrl}`)
+}

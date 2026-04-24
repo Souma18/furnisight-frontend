@@ -2,10 +2,10 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import {
   fetchAccountOverviewMock,
-  saveProfileMock,
   saveAddressMock,
   uploadAvatarMock,
 } from '../api/accountMockApi'
+import { getProfile, updateProfile } from '../api/profileApi'
 // TODO(BE): replace mock imports with accountApi calls in production
 
 export const useAccountStore = defineStore('account', () => {
@@ -27,8 +27,16 @@ export const useAccountStore = defineStore('account', () => {
   async function hydrate() {
     loading.value = true
     try {
+      // Load real profile from backend
+      const profileRes = await getProfile().catch(() => null)
+      
       const data = await fetchAccountOverviewMock()
-      profile.value = data.profile
+      
+      if (profileRes && profileRes.data) {
+        profile.value = profileRes.data
+      } else {
+        profile.value = data.profile // fallback to mock if backend not ready
+      }
       addresses.value = data.addresses
       orders.value = data.orders
       cartItems.value = data.cartItems
@@ -41,7 +49,8 @@ export const useAccountStore = defineStore('account', () => {
   }
 
   async function saveProfile(payload) {
-    profile.value = await saveProfileMock(payload)
+    const response = await updateProfile(payload)
+    profile.value = response.data || response
   }
 
   async function addAddress(payload) {
