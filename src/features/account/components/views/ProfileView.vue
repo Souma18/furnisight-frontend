@@ -17,6 +17,8 @@ const avatarInput = ref(null)
 const form = reactive({
   firstName: '',
   lastName: '',
+  email: '',
+  phone: '',
   birthday: '',
   gender: 'MALE',
   bio: '',
@@ -97,7 +99,7 @@ function onAvatarSelected(event) {
           <option value="OTHER">Khác</option>
         </select>
       </label>
-      <label class="full">Giới thiệu <textarea v-model="form.bio" placeholder="Viết một chút về bản thân..." rows="3" /></label>
+      <label class="full">Giới thiệu <textarea v-model="form.bio" rows="3" /></label>
       <div class="actions full">
         <button type="button" class="ghost" @click="$emit('notify', 'Đã huỷ thay đổi', 'error')">Huỷ</button>
         <button type="submit" class="primary">Lưu thay đổi</button>
