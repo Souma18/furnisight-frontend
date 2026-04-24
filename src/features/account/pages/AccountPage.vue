@@ -72,7 +72,12 @@ function handleLogout() {
       <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
       <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
-      <SecurityView v-else-if="activeView === 'security'" @notify="showToast" />
+      <SecurityView
+        v-else-if="activeView === 'security'"
+        :profile="profile"
+        @notify="showToast"
+        @save-contact="saveProfile"
+      />
       <SettingsView v-else-if="activeView === 'settings'" :settings="settings" />
       <Projects3DView v-else :projects="projects" />
     </main>
