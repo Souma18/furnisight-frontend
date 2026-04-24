@@ -205,9 +205,9 @@ const navGroups = [
   margin: 0.2rem 0.7rem 0.8rem;
   min-height: 2.35rem;
   border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--account-stat-danger) 35%, var(--auth-border));
+  border: 1px solid color-mix(in srgb, var(--account-stat-danger) 60%, var(--auth-border));
   background: var(--account-surface);
-  color: color-mix(in srgb, var(--account-stat-danger) 35%, var(--auth-border));
+  color: color-mix(in srgb, var(--account-stat-danger) 60%, var(--auth-border));
   display: inline-flex;
   align-items: center;
   justify-content: center;

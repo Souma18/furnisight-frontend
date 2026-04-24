@@ -41,6 +41,16 @@
   --account-toast-error: #b91c1c;
   --color-white: #ffffff;
 
+  --account-field-bg: #ffffff;
+  --account-field-border: var(--account-border);
+  --account-field-text: var(--auth-text-primary);
+  --account-field-placeholder: color-mix(in srgb, var(--auth-text-secondary) 75%, transparent);
+  --account-field-focus: var(--auth-focus-ring);
+
+  --account-upload-bg: #0f3f5c;
+  --account-upload-text: #ffffff;
+  --account-upload-hover: #0c3148;
+
   font: 16px/1.5 var(--sans);
   color: var(--text);
   background: var(--bg);
@@ -82,6 +92,15 @@
     --account-toast-bg: #0b3954;
     --account-toast-error: #dc2626;
     --color-white: #ffffff;
+
+    --account-field-bg: rgba(255, 255, 255, 0.08);
+    --account-field-border: rgba(255, 255, 255, 0.22);
+    --account-field-text: #e2e8f0;
+    --account-field-focus: rgba(255, 177, 40, 0.35);
+
+    --account-upload-bg: #1e293b;   /* xanh đậm dịu */
+    --account-upload-text: #cbd5e1; /* chữ sáng mềm */
+    --account-upload-hover: #334155;
   }
 }
 

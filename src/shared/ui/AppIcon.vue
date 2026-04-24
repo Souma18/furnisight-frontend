@@ -15,6 +15,8 @@ import {
   ShoppingCart,
   User,
   X,
+  Eye, 
+  EyeOff,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -43,6 +45,8 @@ const iconMap = {
   box: Box,
   camera: Camera,
   heart: Heart,
+  eye: Eye,
+  eyeOff: EyeOff,
   settings: Settings,
   cube: Box,
   logout: LogOut,

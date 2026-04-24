@@ -120,9 +120,8 @@ function submitAddress() {
     <div class="modal">
       <h4>Thêm địa chỉ</h4>
       <div class="form-grid">
-        <label>Họ tên <input v-model="form.fullName" /></label>
-        <label>Số điện thoại <input v-model="form.phone" /></label>
-        <label class="full">Địa chỉ cụ thể <input v-model="form.detail" /></label>
+        <label>Họ tên <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A"/></label>
+        <label>Số điện thoại <input v-model.trim="form.phone" placeholder="0123456789" /></label>
         <label>
           Tỉnh/Thành
           <select v-model="form.provinceCode" :disabled="fallbackMode" @change="onProvinceChange">
@@ -148,14 +147,15 @@ function submitAddress() {
             <option v-for="ward in wards" :key="ward.code" :value="ward.code">{{ ward.name }}</option>
           </select>
         </label>
+          <label >Địa chỉ cụ thể <input v-model="form.detail" /></label>
       </div>
-      <p class="loading" v-if="loadingProvince || loadingDistrict || loadingWard">Đang tải dữ liệu địa chỉ...</p>
+      <!-- <p class="loading" v-if="loadingProvince || loadingDistrict || loadingWard">Đang tải dữ liệu địa chỉ...</p> -->
       <div class="actions">
         <button class="ghost" @click="showModal = false">Huỷ</button>
         <button class="primary" @click="submitAddress">Lưu địa chỉ</button>
       </div>
     </div>
-  </div>
+  </div> 
 </template>
 
 <style scoped>
@@ -169,10 +169,14 @@ function submitAddress() {
 .full { grid-column:1 / -1; }
 label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
 input,select { min-height:2.45rem; border:1px solid var(--auth-border); border-radius:10px; padding:0 0.65rem; }
-.loading { color:var(--account-badge); font-size:0.78rem; margin:0.5rem 0 0; }
+.loading { color:var(--account-badge); font-size:0.78rem; margin:0.5rem 0 0; } 
 .actions { margin-top:0.8rem; display:flex; justify-content:flex-end; gap:0.5rem; }
 .ghost,.primary { border:none; border-radius:10px; min-height:2.45rem; padding:0 0.86rem; cursor:pointer; }
 .ghost { background:var(--account-ghost-bg); }
 .primary { color:var(--color-white); background:linear-gradient(135deg,var(--auth-brand-start),var(--auth-brand-end)); }
+input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
 @media (max-width: 900px) { .form-grid { grid-template-columns:1fr; } }
 </style>

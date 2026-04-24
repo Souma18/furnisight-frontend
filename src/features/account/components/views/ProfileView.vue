@@ -76,10 +76,10 @@ function onAvatarSelected(event) {
     </section>
 
     <form class="grid" @submit.prevent="submit">
-      <label>Họ <input v-model="form.lastName" required /></label>
-      <label>Tên <input v-model="form.firstName" required /></label>
-      <label>Email <input v-model="form.email" type="email" required /></label>
-      <label>Số điện thoại <input v-model="form.phone" /></label>
+      <label>Họ <input v-model="form.lastName" placeholder="Nguyễn" required /></label>
+      <label>Tên <input v-model="form.firstName" placeholder="Văn A" required /></label>
+      <label>Email <input v-model="form.email" type="email" placeholder="nguyenvana@example.com" required /></label>
+      <label>Số điện thoại <input v-model="form.phone" placeholder="0123456789" /></label>
       <label>Ngày sinh <input v-model="form.birthday" type="date" /></label>
       <label>
         Giới tính
@@ -89,7 +89,7 @@ function onAvatarSelected(event) {
           <option value="other">Khác</option>
         </select>
       </label>
-      <label class="full">Giới thiệu <textarea v-model="form.bio" rows="3" /></label>
+      <label class="full">Giới thiệu <textarea v-model="form.bio" placeholder="Viết một chút về bản thân..." rows="3" /></label>
       <div class="actions full">
         <button type="button" class="ghost" @click="$emit('notify', 'Đã huỷ thay đổi', 'error')">Huỷ</button>
         <button type="submit" class="primary">Lưu thay đổi</button>
@@ -144,7 +144,8 @@ function onAvatarSelected(event) {
   min-height: 2.05rem;
   padding: 0 0.95rem;
   color: var(--color-white);
-  background: var(--account-stat-default);
+  background: var(--account-upload-bg);
+  color: var(--account-upload-text);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -153,14 +154,14 @@ function onAvatarSelected(event) {
   font-weight: 500;
 }
 .upload-btn:hover {
-  background: color-mix(in srgb, var(--account-stat-default) 84%, black);
+  background: color-mix(in srgb, var(--account-upload-hover) 84%, black);
 }
 .hidden-input {
   display: none;
 }
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
 label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
-input,select,textarea { min-height:2.5rem; border:1px solid var(--auth-border); border-radius:10px; padding:0 0.68rem; }
+input,select,textarea { min-height:2.5rem; border:1px solid var(--account-field-border); border-radius:10px; padding:0 0.68rem; background: var(--account-field-bg); color: var(--account-field-text); }
 textarea { min-height:5rem; padding-top:0.6rem; }
 .full { grid-column:1 / -1; }
 .actions { display:flex; justify-content:flex-end; gap:0.55rem; }
