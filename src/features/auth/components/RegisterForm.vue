@@ -120,7 +120,7 @@ input:focus {
   border: none;
   border-radius: var(--auth-radius-md);
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
   cursor: pointer;
 }
@@ -130,7 +130,7 @@ input:focus {
 }
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: var(--account-toast-error);
   font-size: 0.8rem;
 }
 </style>

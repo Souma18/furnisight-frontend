@@ -7,7 +7,8 @@ import {
   forgotPasswordRequest,
   resetPasswordRequest,
   verifyResetPasswordCode
-} from '../api/authApi'
+// } from '../api/authApi'
+} from '../api/authMockApi' // Sử dụng mock API cho demo
 
 export function useAuthForms({ emit, props, authViewState }) {
   const router = useRouter()

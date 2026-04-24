@@ -6,55 +6,126 @@ function isValidEmail(email) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
 }
 
-export async function mockLoginRequest(payload) {
+function buildAxiosLikeResponse(data) {
+  return { data }
+}
+
+function throwAxiosLikeError(message) {
+  throw {
+    response: {
+      data: {
+        message,
+      },
+    },
+    message,
+  }
+}
+
+export async function loginRequest(payload) {
   await sleep()
 
-  if (!isValidEmail(payload.email)) {
-    throw new Error('Email không hợp lệ.')
+  const user = MOCK_USERS.find(user => user.identifier.toLowerCase() === String(payload.identifier).toLowerCase())
+  if (!user) {
+    throwAxiosLikeError('Email hoặc mật khẩu không hợp lệ.')
   }
-  if (!payload.password || payload.password.length < 8) {
-    throw new Error('Mật khẩu tối thiểu 8 ký tự.')
+  if (user.password !== payload.password) {
+    throwAxiosLikeError('Email hoặc mật khẩu không hợp lệ.')
   }
 
-  // TODO(BE): Replace mock with loginRequest(payload) from authApi.js
   return {
-    accessToken: 'mock-access-token',
-    profile: {
-      id: 'user-mock-001',
-      firstName: 'Nguyen',
-      lastName: 'Van A',
-      email: payload.email,
+    data: {
+      accessToken: 'mock-access-token',
+      refreshToken: 'mock-refresh-token',
+      profile: user.profile,
     },
   }
 }
 
-export async function mockRegisterRequest(payload) {
+export async function registerRequest(payload) {
   await sleep()
 
   if (!isValidEmail(payload.email)) {
-    throw new Error('Email đăng ký không hợp lệ.')
+    throwAxiosLikeError('Email đăng ký không hợp lệ.')
   }
-  if (!payload.phone || payload.phone.replace(/\D/g, '').length < 10) {
-    throw new Error('Số điện thoại chưa hợp lệ.')
+  if (!payload.phoneNumber || String(payload.phoneNumber).replace(/\D/g, '').length < 10) {
+    throwAxiosLikeError('Số điện thoại chưa hợp lệ.')
   }
   if (!payload.password || payload.password.length < 8) {
-    throw new Error('Mật khẩu tối thiểu 8 ký tự.')
-  }
-  if (!payload.agree) {
-    throw new Error('Vui lòng đồng ý điều khoản dịch vụ.')
+    throwAxiosLikeError('Mật khẩu tối thiểu 8 ký tự.')
   }
 
   // TODO(BE): Replace mock with registerRequest(payload) when backend is ready
-  return { success: true }
+  return buildAxiosLikeResponse({
+    success: true,
+    userId: 'user-mock-001',
+  })
 }
 
-export async function mockForgotPasswordRequest(payload) {
+export async function forgotPasswordRequest(payload) {
   await sleep()
 
-  if (!isValidEmail(payload.email)) {
-    throw new Error('Email không hợp lệ.')
+  if (payload.channel === 'EMAIL' && !isValidEmail(payload.destination)) {
+    throwAxiosLikeError('Email không hợp lệ.')
   }
 
   // TODO(BE): Replace mock with forgotPasswordRequest(payload) when available
-  return { success: true }
+  return buildAxiosLikeResponse({
+    success: true,
+    challengeId: 'challenge-mock-001',
+  })
 }
+
+export async function verifyResetPasswordCode(payload) {
+  await sleep()
+  if (!payload.code || payload.code.length < 4) {
+    throwAxiosLikeError('Mã xác nhận không hợp lệ.')
+  }
+  return buildAxiosLikeResponse({ success: true })
+}
+
+export async function resetPasswordRequest(payload) {
+  await sleep()
+  if (!payload.token) {
+    throwAxiosLikeError('Token đặt lại mật khẩu không hợp lệ.')
+  }
+  if (!payload.newPassword || payload.newPassword.length < 8) {
+    throwAxiosLikeError('Mật khẩu mới tối thiểu 8 ký tự.')
+  }
+  return buildAxiosLikeResponse({ success: true })
+}
+
+const MOCK_USERS = [
+  {
+    id: 'u-001',
+    identifier: 'admin@gmail.com',
+    password: 'Admin@123',
+    profile: {
+      firstName: 'Admin',
+      lastName: 'Luxnest',
+      email: 'admin@gmail.com',
+      role: 'ADMIN',
+    },
+  },
+  {
+    id: 'u-002',
+    identifier: 'user1@gmail.com',
+    password: 'User@1234',
+    profile: {
+      firstName: 'Văn',
+      lastName: 'Nguyễn',
+      email: 'user1@gmail.com',
+      role: 'CUSTOMER',
+    },
+  },
+  {
+    id: 'u-003',
+    identifier: 'staff@gmail.com',
+    password: 'Staff@123',
+    profile: {
+      firstName: 'Nhân',
+      lastName: 'Viên',
+      email: 'staff@gmail.com',
+      role: 'STAFF',
+    },
+  },
+]
