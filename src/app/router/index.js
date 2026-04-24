@@ -28,6 +28,11 @@ const routes = [
     component: () => import('@features/cart/pages/CartPage.vue'),
   },
   {
+    path: '/account',
+    name: 'account',
+    component: () => import('@features/account/pages/AccountPage.vue'),
+  },
+  {
     path: '/room3d',
     name: 'room3d',
     component: () => import('@features/room3d/pages/Room3DPage.vue'),
