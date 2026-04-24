@@ -29,7 +29,6 @@ export const useAccountStore = defineStore('account', () => {
     try {
       // Load real profile from backend
       const profileRes = await getProfile().catch(() => null)
-      console.log(profileRes)
       
       const data = await fetchAccountOverviewMock()
       
