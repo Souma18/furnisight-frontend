@@ -1,6 +1,6 @@
 import { apiClient } from '@shared/lib/api'
 
-const baseUrl = '/profile'
+const baseUrl = '/users/profile'
 
 export function getProfile() {
   return apiClient.get(baseUrl)
