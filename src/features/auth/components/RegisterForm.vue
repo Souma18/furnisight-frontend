@@ -37,9 +37,6 @@ defineEmits(['submit'])
     <label>Email</label>
     <input v-model="form.email" type="email" placeholder="hello@email.com" required />
 
-    <label>Số điện thoại</label>
-    <input v-model="form.phone" type="tel" placeholder="0901 234 567" required />
-
     <label>Mật khẩu</label>
     <input v-model="form.password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
     <div class="strength">
