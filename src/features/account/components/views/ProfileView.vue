@@ -17,8 +17,6 @@ const avatarInput = ref(null)
 const form = reactive({
   firstName: '',
   lastName: '',
-  email: '',
-  phone: '',
   birthday: '',
   gender: 'MALE',
   bio: '',
@@ -172,6 +170,19 @@ function onAvatarSelected(event) {
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
 label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
 input,select,textarea { min-height:2.5rem; border:1px solid var(--account-field-border); border-radius:10px; padding:0 0.68rem; background: var(--account-field-bg); color: var(--account-field-text); }
+.readonly-field {
+  min-height: 2.5rem;
+  border: 1px solid var(--account-field-border);
+  border-radius: 10px;
+  padding: 0 0.68rem;
+  background: color-mix(in srgb, var(--account-field-bg) 80%, transparent);
+  color: var(--auth-text-secondary);
+  display: flex;
+  align-items: center;
+  font-size: 0.88rem;
+  cursor: default;
+  user-select: none;
+}
 textarea { min-height:5rem; padding-top:0.6rem; }
 .full { grid-column:1 / -1; }
 .actions { display:flex; justify-content:flex-end; gap:0.55rem; }
