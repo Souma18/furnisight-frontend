@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const routes = [
   {
@@ -23,6 +24,11 @@ const routes = [
     component: () => import('@features/auth/pages/LoginPage.vue'),
   },
   {
+    path: '/auth/callback',
+    name: 'auth-callback',
+    component: () => import('@features/auth/pages/OAuthCallbackPage.vue'),
+  },
+  {
     path: '/cart',
     name: 'cart',
     component: () => import('@features/cart/pages/CartPage.vue'),
@@ -31,6 +37,7 @@ const routes = [
     path: '/account',
     name: 'account',
     component: () => import('@features/account/pages/AccountPage.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/room3d',
@@ -42,6 +49,15 @@ const routes = [
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+})
+
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else {
+    next()
+  }
 })
 
 export default router
