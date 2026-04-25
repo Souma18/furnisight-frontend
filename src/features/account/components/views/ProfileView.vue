@@ -17,8 +17,6 @@ const avatarInput = ref(null)
 const form = reactive({
   firstName: '',
   lastName: '',
-  email: '',
-  phone: '',
   birthday: '',
   gender: 'MALE',
   bio: '',
