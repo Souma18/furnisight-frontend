@@ -41,7 +41,7 @@ export function getSavedProjects() {
 
 // ─── Account Security & Management ──────────────────────────────────────────
 
-const authBaseUrl = '/users/auth'
+const authBaseUrl = '/auth/api/v1'
 
 export function verifyRequest(payload) {
   return apiClient.post(`${authBaseUrl}/verify`, payload)
