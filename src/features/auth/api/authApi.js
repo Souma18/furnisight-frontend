@@ -1,6 +1,6 @@
 import { apiClient } from '@shared/lib/api'
 
-const baseUrl = '/auth/api/v1'
+const baseUrl = '/users/auth'
 
 export function loginRequest(payload) {
   return apiClient.post(`${baseUrl}/login`, payload, { skipAuth: true })
