@@ -53,7 +53,7 @@ export function markAllNotificationsRead() {
 
 // ─── Account Security & Management ──────────────────────────────────────────
 
-const authBaseUrl = '/auth/api/v1'
+const authBaseUrl = '/users/auth'
 
 export function verifyRequest(payload) {
   return apiClient.post(`${authBaseUrl}/verify`, payload)
