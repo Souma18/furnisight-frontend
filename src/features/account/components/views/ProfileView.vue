@@ -17,10 +17,8 @@ const avatarInput = ref(null)
 const form = reactive({
   firstName: '',
   lastName: '',
-  email: '',
-  phone: '',
   birthday: '',
-  gender: 'male',
+  gender: 'MALE',
   bio: '',
 })
 
@@ -78,15 +76,25 @@ function onAvatarSelected(event) {
     <form class="grid" @submit.prevent="submit">
       <label>Họ <input v-model="form.lastName" placeholder="Nguyễn" required /></label>
       <label>Tên <input v-model="form.firstName" placeholder="Văn A" required /></label>
-      <label>Email <input v-model="form.email" type="email" placeholder="nguyenvana@example.com" required /></label>
-      <label>Số điện thoại <input v-model="form.phone" placeholder="0123456789" /></label>
+      <label>
+        Email
+        <div class="readonly-field">
+          {{ profile?.email || 'Chưa liên kết' }}
+        </div>
+      </label>
+      <label>
+        Số điện thoại
+        <div class="readonly-field">
+          {{ profile?.phone || 'Chưa liên kết' }}
+        </div>
+      </label>
       <label>Ngày sinh <input v-model="form.birthday" type="date" /></label>
       <label>
         Giới tính
         <select v-model="form.gender">
-          <option value="male">Nam</option>
-          <option value="female">Nữ</option>
-          <option value="other">Khác</option>
+          <option value="MALE">Nam</option>
+          <option value="FEMALE">Nữ</option>
+          <option value="OTHER">Khác</option>
         </select>
       </label>
       <label class="full">Giới thiệu <textarea v-model="form.bio" placeholder="Viết một chút về bản thân..." rows="3" /></label>
@@ -162,6 +170,19 @@ function onAvatarSelected(event) {
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:0.8rem; }
 label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
 input,select,textarea { min-height:2.5rem; border:1px solid var(--account-field-border); border-radius:10px; padding:0 0.68rem; background: var(--account-field-bg); color: var(--account-field-text); }
+.readonly-field {
+  min-height: 2.5rem;
+  border: 1px solid var(--account-field-border);
+  border-radius: 10px;
+  padding: 0 0.68rem;
+  background: color-mix(in srgb, var(--account-field-bg) 80%, transparent);
+  color: var(--auth-text-secondary);
+  display: flex;
+  align-items: center;
+  font-size: 0.88rem;
+  cursor: default;
+  user-select: none;
+}
 textarea { min-height:5rem; padding-top:0.6rem; }
 .full { grid-column:1 / -1; }
 .actions { display:flex; justify-content:flex-end; gap:0.55rem; }
