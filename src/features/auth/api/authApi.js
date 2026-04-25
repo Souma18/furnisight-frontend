@@ -21,7 +21,3 @@ export function logoutAllRequest() {
 export function renewAccessTokenRequest(payload) {
   return apiClient.post(`${baseUrl}/refresh-token`, payload, { skipAuth: true })
 }
-
-export function googleLoginUrl() {
-  return apiClient.get(`${baseUrl}/login/google`, { skipAuth: true })
-}
