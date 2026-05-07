@@ -21,7 +21,7 @@ export const ROOM_TEMPLATES = [
     tags: ['Hien dai', 'Sang trong', 'Rong rai'],
     isAvailable: false,
     statusText: 'Phong nay dang duoc bo sung model.',
-    modelUrl: null,
+    modelUrl: '/src/features/room3d/models/rooms/2_dense.glb',
   },
   {
     id: 'dining',

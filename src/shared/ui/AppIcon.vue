@@ -5,7 +5,9 @@ import {
   Box,
   Camera,
   Check,
+  Facebook,
   Heart,
+  Instagram,
   Lock,
   LogOut,
   Map,
@@ -13,6 +15,7 @@ import {
   Settings,
   Shield,
   ShoppingCart,
+  Youtube,
   User,
   X,
   Eye, 
@@ -52,6 +55,9 @@ const iconMap = {
   logout: LogOut,
   close: X,
   check: Check,
+  facebook: Facebook,
+  instagram: Instagram,
+  youtube: Youtube,
 }
 
 const iconComponent = computed(() => iconMap[props.name] ?? User)
