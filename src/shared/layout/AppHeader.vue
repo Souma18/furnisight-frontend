@@ -65,7 +65,7 @@ function handleUserAction() {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  right: var(--app-main-scrollbar-width, 0px);
   z-index: 120;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -74,6 +74,7 @@ function handleUserAction() {
   padding: 0.7rem 1rem;
   background: linear-gradient(180deg, #133f5c 0%, #0c3148 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
 }
 
 .brand {

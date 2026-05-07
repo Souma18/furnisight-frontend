@@ -185,7 +185,7 @@ function setupOrbitControls() {
   orbitControls.dampingFactor = 0.08
   orbitControls.minDistance = 1.5
   orbitControls.maxDistance = 28
-  orbitControls.autoRotate = props.mode === 'room'
+  orbitControls.autoRotate = false
   orbitControls.autoRotateSpeed = 0.9
   orbitControls.target.set(0, 1, 0)
   orbitControls.update()
@@ -716,7 +716,7 @@ watch(
   () => props.mode,
   () => {
     if (orbitControls) {
-      orbitControls.autoRotate = props.mode === 'room'
+      orbitControls.autoRotate = false
       orbitControls.update()
     }
   },
