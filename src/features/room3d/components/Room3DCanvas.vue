@@ -570,6 +570,28 @@ function setupSceneVisuals() {
   }
 }
 
+function centerRoomModelOnXYGrid(model, scaleUniform = 0.9) {
+  model.position.set(0, 0, 0)
+  model.rotation.set(0, 0, 0)
+  model.scale.setScalar(scaleUniform)
+  model.updateMatrixWorld(true)
+
+  const box = new Box3().setFromObject(model)
+  if (box.isEmpty()) return
+
+  const center = box.getCenter(new Vector3())
+
+  model.position.x = -center.x
+  model.position.z = -center.z
+  model.updateMatrixWorld(true)
+
+  const boxAfter = new Box3().setFromObject(model)
+  if (!Number.isFinite(boxAfter.min.y)) return
+
+  model.position.y -= boxAfter.min.y
+  model.updateMatrixWorld(true)
+}
+
 async function loadRoomModel() {
   if (!sceneRef.value?.scene) return
 
@@ -586,12 +608,10 @@ async function loadRoomModel() {
   try {
     const gltf = await loader.loadAsync(props.selectedRoom.modelUrl)
     const model = gltf.scene
-    model.position.set(0, 0, 0)
-    model.scale.set(0.9, 0.9, 0.9)
+    centerRoomModelOnXYGrid(model, 0.9)
     sceneRef.value.scene.add(model)
     roomModelGroup.value = model
 
-    // Snap grid to actual room floor so it never cuts through the model center.
     const box = new Box3().setFromObject(model)
     const floorY = Number.isFinite(box.min.y) ? box.min.y : 0
     roomBoundsRef.value = {

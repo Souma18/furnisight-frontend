@@ -28,15 +28,15 @@ export const homeFeatures = [
 ]
 
 export const homeCategories = [
-  { id: 'ghe', icon: '🪑', name: 'Ghe', count: '19 san pham' },
-  { id: 'giuong', icon: '🛏️', name: 'Giuong', count: '12 san pham' },
-  { id: 'ban', icon: '🪞', name: 'Ban', count: '24 san pham' },
+  { id: 'ghe', icon: '🪑', name: 'Ghế', count: '19 san pham' },
+  { id: 'giuong', icon: '🛏️', name: 'Gường', count: '12 san pham' },
+  { id: 'ban', icon: '🪞', name: 'Bàn', count: '24 san pham' },
   { id: 'sofa', icon: '🛋️', name: 'Sofa', count: '8 san pham' },
-  { id: 'tu-ke', icon: '📚', name: 'Tu ke', count: '16 san pham' },
-  { id: 'den', icon: '💡', name: 'Den', count: '31 san pham' },
+  { id: 'tu-ke', icon: '📚', name: 'Tủ kệ', count: '16 san pham' },
+  { id: 'den', icon: '💡', name: 'Đèn', count: '31 san pham' },
 ]
 
-export const homeRoomFilters = ['Tat ca', 'Phong ngu', 'Phong khach', 'Phong bep', 'Phong lam viec']
+export const homeRoomFilters = ['Tat ca', 'Phòng ngủ', 'Phòng khách', 'Phòng bếp', 'Phòng tắm', 'Phòng đọc sách']
 
 export const homeRooms = [
   {
@@ -59,9 +59,9 @@ export const homeRooms = [
     image: '/home/rooms/livingroom.jpeg',
   },
   {
-    id: 'wfh',
+    id: 'bathroom',
     type: 'Phòng tắm',
-    name: 'Work From Home',
+    name: 'bathroom essentials',
     count: '6 san pham',
     placeholder: '',
     // TODO: replace mock image path with real image.
@@ -69,7 +69,7 @@ export const homeRooms = [
   },
   {
     id: 'kitchen',
-    type: 'Phong bep',
+    type: 'Phòng bếp',
     name: 'Kitchen Essential',
     count: '15 san pham',
     placeholder: '',
@@ -101,7 +101,7 @@ export const homeProducts = [
     image: '/home/products/ergonomic-proflex.jpg',
   },
   {
-    id: 'oak-bed',
+    id: 'oak-bed-minimalist',
     category: 'Giuong ngu',
     name: 'Giuong Go Soi Minimalist',
     price: '5.200.000 d',
@@ -113,16 +113,17 @@ export const homeProducts = [
     image: '/home/products/oak-bed.jpg',
   },
   {
-    id: 'nordic-sofa',
-    category: 'Sofa',
-    name: 'Sofa Nordic 3 cho',
-    price: '8.500.000 d',
-    oldPrice: '10.200.000 d',
-    tag: 'SALE',
-    tagType: 'sale',
-    placeholder: '🛋️',
+    id: 'agape-bed',
+    detailId: 'agape-bed',
+    category: 'Giuong ngu',
+    name: 'Giuong Agape Premium',
+    price: '5.900.000 d',
+    oldPrice: '7.100.000 d',
+    tag: 'NEW',
+    tagType: 'new',
+    placeholder: '🛏️',
     // TODO: replace mock image path with real image.
-    image: '/home/products/nordic-sofa.jpg',
+    image: '/home/products/bed-agape.jpg',
   },
   {
     id: 'tea-table',

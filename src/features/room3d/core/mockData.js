@@ -62,13 +62,23 @@ export const PRODUCTS_3D = [
   },
   {
     id: 2,
-    name: 'Giuong Go Soi',
+    name: 'Giuong Agape',
     emoji: '🛏️',
-    price: 5200000,
+    price: 5900000,
     category: 'bed',
     roomTypes: ['bedroom'],
-    modelUrl: '/src/features/room3d/models/furniture/bed-oak.glb',
-    fallback: { width: 1.8, height: 0.5, depth: 2.2, color: '#8b6e4e' },
+    modelUrl: '/src/features/room3d/models/furniture/bed_agape.glb',
+    fallback: { width: 1.9, height: 0.55, depth: 2.25, color: '#8b6e4e' },
+  },
+  {
+    id: 7,
+    name: 'Giuong SoftSleep',
+    emoji: '🛌',
+    price: 6800000,
+    category: 'bed',
+    roomTypes: ['bedroom'],
+    modelUrl: '/src/features/room3d/models/furniture/bed_agape.glb',
+    fallback: { width: 2, height: 0.6, depth: 2.3, color: '#7c6652' },
   },
   {
     id: 3,
@@ -113,9 +123,9 @@ export const PRODUCTS_3D = [
 ]
 
 export const PRODUCT_FILTERS = [
-  { label: 'Tat ca', value: 'all' },
-  { label: 'Ghe', value: 'chair' },
+  { label: 'Tất cả', value: 'all' },
+  { label: 'Ghế', value: 'chair' },
   { label: 'Giuong', value: 'bed' },
-  { label: 'Ban', value: 'table' },
+  { label: 'Bàn', value: 'table' },
   { label: 'Sofa', value: 'sofa' },
 ]
