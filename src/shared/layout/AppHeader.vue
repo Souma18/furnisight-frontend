@@ -8,6 +8,7 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
