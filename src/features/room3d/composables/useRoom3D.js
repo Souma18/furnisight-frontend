@@ -1,17 +1,20 @@
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
 import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
 import { PRODUCTS_3D, PRODUCT_FILTERS } from '../core/mockData'
 import { formatCurrency } from '@shared/utils'
 
 export function useRoom3D() {
+  const route = useRoute()
   const store = useRoom3DStore()
   const state = storeToRefs(store)
   const roomTemplates = ref([])
   const isLoadingTemplates = ref(false)
   const orderCode = ref('')
   const uploadError = ref('')
+  const appliedDeepLinkKey = ref('')
 
   const QUALITY_TO_MESH_RESOLUTION = {
     '128': 128,
@@ -102,7 +105,12 @@ export function useRoom3D() {
     store.selectTemplateRoom(type)
   }
 
-  function addProductToCart(product) {
+  function addProductToCart(productOrId) {
+    const product =
+      typeof productOrId === 'number'
+        ? PRODUCTS_3D.find((item) => item.id === productOrId)
+        : productOrId
+    if (!product) return
     store.addToCart(product)
   }
 
@@ -116,6 +124,48 @@ export function useRoom3D() {
     store.openSuccess()
     store.clearCart()
   }
+
+  function applyDeepLinkProduct() {
+    const roomTypeRaw = route.query.roomType
+    const productIdRaw = route.query.productId
+    const roomType = typeof roomTypeRaw === 'string' ? roomTypeRaw.trim() : ''
+    const productId = Number.parseInt(String(productIdRaw ?? ''), 10)
+    const deepLinkKey = `${roomType || 'none'}:${Number.isFinite(productId) ? productId : 'none'}`
+    if (appliedDeepLinkKey.value === deepLinkKey) return
+
+    let applied = false
+
+    if (roomType) {
+      const templateExists = roomTemplates.value.some((item) => item.type === roomType)
+      if (templateExists) {
+        store.selectTemplateRoom(roomType)
+        applied = true
+      }
+    }
+
+    if (Number.isFinite(productId)) {
+      const target = PRODUCTS_3D.find((item) => item.id === productId)
+      if (target) {
+        store.addToCart(target)
+        // Ensure users can still see all cards after deep-link add.
+        store.setCategory('all')
+        store.setSearchKeyword('')
+        applied = true
+      }
+    }
+
+    if (applied) {
+      appliedDeepLinkKey.value = deepLinkKey
+    }
+  }
+
+  watch(
+    () => [route.query.roomType, route.query.productId, roomTemplates.value.length],
+    () => {
+      applyDeepLinkProduct()
+    },
+    { immediate: true },
+  )
 
   return {
     ...state,

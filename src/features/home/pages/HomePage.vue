@@ -179,13 +179,16 @@ useRevealOnScroll('.fade-up')
 .product-card { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
 .product-img { height: 200px; background: #f0e9dd; position: relative; overflow: hidden; }
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
+.product-img-disabled { width: 100%; height: 100%; object-fit: cover; opacity: .92; }
 .product-fallback { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 64px; }
 .product-tag { position: absolute; top: 12px; left: 12px; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px; color: #fff; }
 .tag-hot { background: #e64444; } .tag-new { background: #12202e; } .tag-ai { background: #7c3aed; } .tag-sale { background: #c9922a; color: #12202e; }
 .product-wish { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,.85); border: none; cursor: pointer; }
 .product-body { padding: 16px; }
 .product-cat { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+.product-name-link { text-decoration: none; color: inherit; }
 .product-name { font-size: 15px; font-weight: 500; margin-bottom: 10px; line-height: 1.35; }
+.product-name-disabled { color: #444; cursor: default; }
 .product-footer { display: flex; align-items: center; justify-content: space-between; }
 .product-price { font-size: 16px; font-weight: 600; color: #c9922a; }
 .product-price-old { font-size: 12px; color: #888; text-decoration: line-through; margin-left: 6px; }

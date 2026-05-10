@@ -1,10 +1,18 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+import { getProductDetailById } from '@features/product/mock/productDetailMockData'
+
 defineProps({
   products: { type: Array, default: () => [] },
   wishedProductIds: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['toggle-wish'])
+
+function getDetailRoute(productId) {
+  const detail = getProductDetailById(productId)
+  return detail ? `/products/${productId}` : null
+}
 </script>
 
 <template>
@@ -18,7 +26,16 @@ const emit = defineEmits(['toggle-wish'])
     <div class="products-grid">
       <article v-for="product in products" :key="product.id" class="product-card">
         <div class="product-img">
-          <img :src="product.image" :alt="product.name" @error="$event.target.style.display = 'none'" />
+          <RouterLink v-if="getDetailRoute(product.detailId ?? product.id)" :to="getDetailRoute(product.detailId ?? product.id)">
+            <img :src="product.image" :alt="product.name" @error="$event.target.style.display = 'none'" />
+          </RouterLink>
+          <img
+            v-else
+            :src="product.image"
+            :alt="product.name"
+            class="product-img-disabled"
+            @error="$event.target.style.display = 'none'"
+          />
           <span :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
           <button type="button" class="product-wish" @click="emit('toggle-wish', product.id)">
             {{ wishedProductIds.includes(product.id) ? '♥' : '♡' }}
@@ -27,7 +44,14 @@ const emit = defineEmits(['toggle-wish'])
         </div>
         <div class="product-body">
           <div class="product-cat">{{ product.category }}</div>
-          <div class="product-name">{{ product.name }}</div>
+          <RouterLink
+            v-if="getDetailRoute(product.detailId ?? product.id)"
+            :to="getDetailRoute(product.detailId ?? product.id)"
+            class="product-name-link"
+          >
+            <div class="product-name">{{ product.name }}</div>
+          </RouterLink>
+          <div v-else class="product-name product-name-disabled">{{ product.name }}</div>
           <div class="product-footer">
             <div>
               <span class="product-price">{{ product.price }}</span>

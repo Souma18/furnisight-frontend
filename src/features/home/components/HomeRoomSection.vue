@@ -14,8 +14,8 @@ const emit = defineEmits(['select-filter'])
   <section id="rooms" class="hn-section-dark js-reveal">
     <div class="hn-section-head">
       <div>
-        <p class="hn-label">Bo suu tap</p>
-        <h2 class="hn-title">Kham pha <em>khong gian</em> song</h2>
+        <p class="hn-label">Bộ sưu tập</p>
+        <h2 class="hn-title">Khám phá <em>không gian</em> sống</h2>
       </div>
       <a href="#" class="hn-link">Xem tat ca</a>
     </div>
