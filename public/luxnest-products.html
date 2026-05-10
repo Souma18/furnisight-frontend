@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nội thất Phòng Ngủ – LUXNEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ─── DESIGN TOKENS (shared across all pages) ─── */
+:root {
+  --navy:        #12202e;
+  --navy-light:  #1c3148;
+  --gold:        #c9922a;
+  --gold-light:  #e5b84a;
+  --gold-pale:   #f5e6c8;
+  --cream:       #faf6f0;
+  --cream-dark:  #f0e9dd;
+  --cream-mid:   #ece2cf;
+  --text-dark:   #1a1a1a;
+  --text-mid:    #555;
+  --text-light:  #888;
+  --white:       #ffffff;
+  --red:         #e53e3e;
+  --green:       #2d9e6b;
+  --r:           12px;
+  --r-lg:        20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+
+/* ─── HEADER (shared) ─── */
+header{
+  position:sticky;top:0;z-index:200;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:58px;
+  box-shadow:0 2px 20px rgba(0,0,0,.35);
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:2px;color:#fff}
+nav{display:flex;align-items:center;gap:4px}
+nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;padding:6px 16px;border-radius:8px;transition:all .2s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:var(--gold-light);background:rgba(201,146,42,.15);font-weight:500}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn-3d-hdr{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:13px;font-weight:600;padding:8px 18px;border-radius:22px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(201,146,42,.4);transition:transform .2s,box-shadow .2s}
+.btn-3d-hdr:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(201,146,42,.55)}
+.icon-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);font-size:16px;text-decoration:none;transition:background .2s}
+.icon-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ─── BREADCRUMB ─── */
+.breadcrumb{background:var(--white);border-bottom:1px solid var(--cream-dark)}
+.bc-inner{max-width:1300px;margin:0 auto;padding:11px 60px;display:flex;align-items:center;gap:8px}
+.bc-inner a{font-size:13px;color:var(--text-light);text-decoration:none;transition:color .2s}
+.bc-inner a:hover{color:var(--gold)}
+.bc-inner span{font-size:13px;color:var(--text-light)}
+.bc-inner .cur{font-size:13px;color:var(--text-dark);font-weight:500}
+
+/* ─── CATEGORY HERO ─── */
+.cat-hero{
+  background:var(--navy);
+  position:relative;overflow:hidden;
+}
+.cat-hero-bg{
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 55% 90% at 85% 50%,rgba(201,146,42,.14) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 70%,rgba(28,49,72,.9) 0%,transparent 60%);
+}
+.cat-hero-orb{position:absolute;border-radius:50%;filter:blur(70px);opacity:.15}
+.orb-a{width:300px;height:300px;background:var(--gold);top:-60px;right:5%;animation:floatO 9s ease-in-out infinite alternate}
+.orb-b{width:180px;height:180px;background:#3a7bd5;bottom:0;left:10%;animation:floatO 7s ease-in-out infinite alternate;animation-delay:-3s}
+@keyframes floatO{0%{transform:translate(0,0)}100%{transform:translate(16px,-24px)}}
+.cat-hero-inner{
+  position:relative;z-index:2;
+  max-width:1300px;margin:0 auto;padding:44px 60px;
+  display:flex;align-items:center;justify-content:space-between;gap:40px;
+}
+.cat-hero-left{}
+.cat-collection{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-weight:600;margin-bottom:10px}
+.cat-title{font-family:'Cormorant Garamond',serif;font-size:46px;font-weight:300;color:#fff;line-height:1.15;margin-bottom:10px}
+.cat-title em{font-style:italic;color:var(--gold-light)}
+.cat-desc{font-size:14px;color:rgba(255,255,255,.5);line-height:1.7;max-width:420px}
+.cat-hero-stats{display:flex;gap:0}
+.cat-stat{text-align:center;padding:0 36px;border-right:1px solid rgba(255,255,255,.12)}
+.cat-stat:first-child{padding-left:0}
+.cat-stat:last-child{border-right:none}
+.cat-stat-num{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;color:var(--gold-light);line-height:1}
+.cat-stat-label{font-size:12px;color:rgba(255,255,255,.45);margin-top:4px;letter-spacing:.5px}
+
+/* ─── SEARCH + QUICK FILTERS ─── */
+.search-bar-wrap{
+  background:var(--white);
+  border-bottom:1px solid var(--cream-dark);
+  padding:18px 60px;
+  display:flex;align-items:center;gap:14px;
+  position:sticky;top:58px;z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.04);
+}
+.search-input-wrap{
+  position:relative;flex-shrink:0;width:300px;
+}
+.search-input{
+  width:100%;padding:10px 16px 10px 40px;
+  border:1.5px solid var(--cream-mid);border-radius:22px;
+  font-size:14px;font-family:'DM Sans',sans-serif;
+  background:var(--cream);outline:none;color:var(--text-dark);
+  transition:border-color .2s;
+}
+.search-input:focus{border-color:var(--gold)}
+.search-ico{position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none}
+.quick-filters{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.qf-chip{
+  padding:7px 16px;border-radius:20px;font-size:13px;
+  border:1.5px solid var(--cream-mid);background:var(--white);
+  cursor:pointer;color:var(--text-mid);transition:all .2s;white-space:nowrap;
+}
+.qf-chip:hover{border-color:var(--gold);color:var(--gold)}
+.qf-chip.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:500}
+.qf-chip.sale{border-color:#ffcdd2;background:#fff5f5;color:var(--red)}
+.qf-chip.sale.active{background:var(--red);border-color:var(--red);color:#fff}
+.view-toggle{display:flex;gap:4px;margin-left:auto;flex-shrink:0}
+.vt-btn{width:34px;height:34px;border-radius:8px;border:1.5px solid var(--cream-mid);background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.vt-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* ─── PAGE LAYOUT ─── */
+.page-body{max-width:1300px;margin:0 auto;padding:32px 60px 80px;display:grid;grid-template-columns:260px 1fr;gap:32px;align-items:start}
+
+/* ─── SIDEBAR FILTERS ─── */
+.sidebar-filters{position:sticky;top:130px}
+.filter-block{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--cream-dark);margin-bottom:14px;overflow:hidden}
+.filter-block-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;cursor:pointer;user-select:none;
+  border-bottom:1px solid var(--cream-dark);
+}
+.filter-block-header:last-child{border-bottom:none}
+.fb-title{font-size:13px;font-weight:600;color:var(--text-dark);display:flex;align-items:center;gap:8px}
+.fb-icon{font-size:15px}
+.fb-count{font-size:11px;font-weight:700;background:var(--gold-pale);color:var(--gold);padding:2px 8px;border-radius:8px}
+.fb-toggle{font-size:12px;color:var(--text-light);transition:transform .2s}
+.fb-toggle.open{transform:rotate(180deg)}
+.filter-body{padding:16px 20px}
+
+/* Category list */
+.cat-list{list-style:none}
+.cat-list li{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--cream-dark);cursor:pointer;transition:all .2s}
+.cat-list li:last-child{border-bottom:none}
+.cat-list li:hover .cl-name,.cat-list li.active .cl-name{color:var(--gold)}
+.cat-list li.active{font-weight:600}
+.cl-name{font-size:13px;color:var(--text-mid);transition:color .2s}
+.cl-count{font-size:12px;color:var(--text-light);background:var(--cream);padding:2px 8px;border-radius:8px}
+.cat-list li.active .cl-count{background:var(--gold-pale);color:var(--gold)}
+
+/* Price range */
+.price-range-display{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.price-val{font-size:13px;font-weight:500;color:var(--text-dark);flex:1}
+.price-sep{font-size:12px;color:var(--text-light)}
+.range-slider{width:100%;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--cream-mid);outline:none;cursor:pointer}
+.range-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--gold);cursor:pointer;border:3px solid var(--white);box-shadow:0 2px 6px rgba(201,146,42,.4)}
+.price-checks{margin-top:14px;display:flex;flex-direction:column;gap:10px}
+.check-row{display:flex;align-items:center;gap:10px;cursor:pointer}
+.check-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
+.check-row span{font-size:13px;color:var(--text-mid)}
+
+/* Material / Color checkboxes */
+.mat-list{display:flex;flex-direction:column;gap:9px}
+.mat-row{display:flex;align-items:center;gap:10px;cursor:pointer}
+.mat-row input{width:15px;height:15px;accent-color:var(--navy);cursor:pointer}
+.mat-row span{font-size:13px;color:var(--text-mid)}
+.color-filter-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.cf-swatch{width:30px;height:30px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.cf-swatch:hover,.cf-swatch.active{border-color:var(--gold);transform:scale(1.1)}
+
+/* Star rating */
+.star-rows{display:flex;flex-direction:column;gap:9px}
+.star-row{display:flex;align-items:center;gap:10px;cursor:pointer}
+.star-row input{width:15px;height:15px;accent-color:var(--gold);cursor:pointer}
+.star-icons{color:var(--gold);font-size:13px}
+.star-num{font-size:12px;color:var(--text-light)}
+
+/* Apply button */
+.filter-apply{
+  width:100%;padding:13px;
+  background:var(--navy);color:#fff;
+  font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;
+  border:none;border-radius:var(--r);cursor:pointer;
+  transition:all .25s;margin-top:4px;
+}
+.filter-apply:hover{background:var(--navy-light);box-shadow:0 6px 18px rgba(18,32,46,.3)}
+.filter-clear{display:block;text-align:center;font-size:13px;color:var(--text-light);margin-top:10px;cursor:pointer;text-decoration:none;transition:color .2s}
+.filter-clear:hover{color:var(--red)}
+
+/* ─── PRODUCTS PANEL ─── */
+.products-panel{}
+.products-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.products-found{font-size:14px;color:var(--text-mid)}
+.products-found strong{color:var(--text-dark);font-weight:600}
+.active-tags{display:flex;flex-wrap:wrap;gap:8px;flex:1}
+.a-tag{display:flex;align-items:center;gap:6px;background:var(--navy);color:rgba(255,255,255,.85);font-size:12px;padding:5px 12px;border-radius:20px}
+.a-tag-x{cursor:pointer;opacity:.6;font-size:14px;transition:opacity .2s}
+.a-tag-x:hover{opacity:1}
+.sort-select{
+  padding:8px 14px;border-radius:10px;border:1.5px solid var(--cream-mid);
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  background:var(--white);color:var(--text-dark);cursor:pointer;
+  outline:none;transition:border-color .2s;margin-left:auto;
+}
+.sort-select:focus{border-color:var(--gold)}
+
+/* ─── PRODUCT CARD (shared component) ─── */
+.products-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:20px;
+}
+.products-grid.list-view{
+  grid-template-columns:1fr;
+}
+.products-grid.list-view .product-card{
+  display:grid;grid-template-columns:200px 1fr;
+}
+.products-grid.list-view .product-card-img{
+  height:160px;border-radius:var(--r-lg) 0 0 var(--r-lg);
+}
+.products-grid.list-view .product-card-body{
+  padding:24px 24px 20px;display:flex;flex-direction:column;justify-content:space-between;
+}
+
+/* THE CARD – reusable across all pages */
+.product-card{
+  background:var(--white);
+  border-radius:var(--r-lg);overflow:hidden;
+  border:1.5px solid var(--cream-dark);
+  cursor:pointer;
+  transition:transform .3s cubic-bezier(.22,.68,0,1.2), box-shadow .3s, border-color .3s;
+  position:relative;
+}
+.product-card:hover{
+  transform:translateY(-6px);
+  box-shadow:0 20px 48px rgba(18,32,46,.12);
+  border-color:var(--cream-mid);
+}
+.product-card-img{
+  height:210px;
+  background:var(--cream-dark);
+  display:flex;align-items:center;justify-content:center;
+  font-size:72px;
+  position:relative;overflow:hidden;
+  transition:background .3s;
+}
+.product-card:hover .product-card-img{background:var(--cream-mid)}
+
+/* Badge cluster */
+.badge-tl{position:absolute;top:12px;left:12px;display:flex;gap:6px;flex-wrap:wrap}
+.badge-tr{position:absolute;top:12px;right:12px;display:flex;gap:6px}
+.badge{font-size:10px;font-weight:700;letter-spacing:.5px;padding:3px 9px;border-radius:7px;text-transform:uppercase}
+.badge-new{background:var(--navy);color:#fff}
+.badge-hot{background:var(--red);color:#fff}
+.badge-sale{background:var(--red);color:#fff}
+.badge-ai{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff}
+.badge-soon{background:var(--gold);color:var(--navy)}
+
+/* Wish + Quick 3D overlay */
+.card-actions{
+  position:absolute;bottom:12px;right:12px;
+  display:flex;gap:7px;
+  opacity:0;transform:translateY(6px);
+  transition:opacity .25s,transform .25s;
+}
+.product-card:hover .card-actions{opacity:1;transform:translateY(0)}
+.ca-btn{
+  width:34px;height:34px;border-radius:10px;border:none;cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);transition:all .2s;
+}
+.ca-wish{background:rgba(255,255,255,.88)}
+.ca-wish:hover{background:#fff;color:var(--red)}
+.ca-wish.wished{background:#fff;color:var(--red)}
+.ca-3d{background:rgba(18,32,46,.82);color:var(--gold-light);font-size:12px;font-weight:700;padding:0 10px;width:auto;border:1px solid rgba(201,146,42,.4)}
+.ca-3d:hover{background:var(--navy);border-color:var(--gold-light);box-shadow:0 4px 14px rgba(201,146,42,.35)}
+
+/* Card body */
+.product-card-body{padding:16px 18px 18px}
+.pc-category{font-size:11px;color:var(--text-light);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.pc-name{font-size:15px;font-weight:500;color:var(--text-dark);line-height:1.4;margin-bottom:8px}
+.pc-rating{display:flex;align-items:center;gap:6px;margin-bottom:12px}
+.pc-stars{color:var(--gold);font-size:12px}
+.pc-rating-num{font-size:12px;font-weight:600;color:var(--text-dark)}
+.pc-rating-count{font-size:11px;color:var(--text-light)}
+.pc-footer{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pc-price-wrap{}
+.pc-price{font-size:17px;font-weight:700;color:var(--gold);font-family:'Cormorant Garamond',serif}
+.pc-price-old{font-size:12px;color:var(--text-light);text-decoration:line-through;margin-top:1px}
+
+/* Add to cart button – same gold style as other pages */
+.pc-add-btn{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  border:none;cursor:pointer;
+  font-size:20px;font-weight:700;color:var(--navy);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(201,146,42,.4);
+  transition:transform .2s,box-shadow .2s;
+  flex-shrink:0;
+}
+.pc-add-btn:hover{transform:scale(1.12) rotate(90deg);box-shadow:0 6px 20px rgba(201,146,42,.6)}
+
+/* ─── LIST-VIEW card adjustments ─── */
+.list-view .product-card-img{height:auto;min-height:160px;border-radius:var(--r-lg) 0 0 var(--r-lg)}
+.list-view .card-actions{bottom:auto;top:12px}
+.list-view .pc-name{font-size:16px}
+.list-view .pc-price{font-size:19px}
+
+/* ─── EMPTY STATE ─── */
+.empty-state{text-align:center;padding:80px 20px;grid-column:1/-1}
+.empty-icon{font-size:64px;margin-bottom:20px;opacity:.4}
+.empty-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;color:var(--text-dark);margin-bottom:10px}
+.empty-sub{font-size:14px;color:var(--text-light)}
+
+/* ─── PAGINATION ─── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:40px}
+.pg-btn{
+  width:38px;height:38px;border-radius:10px;
+  border:1.5px solid var(--cream-mid);background:var(--white);
+  font-size:14px;cursor:pointer;color:var(--text-mid);
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;text-decoration:none;
+}
+.pg-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pg-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+.pg-btn.arrow{font-size:16px}
+.pg-ellipsis{font-size:14px;color:var(--text-light);padding:0 4px}
+
+/* ─── SCROLL ANIMATIONS ─── */
+.fade-in{opacity:0;transform:translateY(20px);transition:opacity .55s ease,transform .55s ease}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER (shared) ── -->
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">🪺</div>
+    <span class="logo-text">LUXNEST</span>
+  </a>
+  <nav>
+    <a href="#">Trang Chủ</a>
+    <a href="#" class="active">Sản phẩm</a>
+    <a href="#">Trực quan 3D</a>
+    <a href="#">Dự án</a>
+    <a href="#">Liên hệ</a>
+  </nav>
+  <div class="header-right">
+    <a href="#" class="btn-3d-hdr">🏠 Trực quan hoa</a>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🛒</button>
+    <button class="icon-btn">👤</button>
+  </div>
+</header>
+
+<!-- ── BREADCRUMB ── -->
+<div class="breadcrumb">
+  <div class="bc-inner">
+    <a href="#">Trang chủ</a><span>›</span>
+    <a href="#">Sản phẩm</a><span>›</span>
+    <span class="cur">Phòng ngủ</span>
+  </div>
+</div>
+
+<!-- ── CATEGORY HERO ── -->
+<div class="cat-hero">
+  <div class="cat-hero-bg"></div>
+  <div class="cat-hero-orb orb-a"></div>
+  <div class="cat-hero-orb orb-b"></div>
+  <div class="cat-hero-inner">
+    <div class="cat-hero-left">
+      <div class="cat-collection">Danh mục · Heritage Collection</div>
+      <h1 class="cat-title">Nội thất <em>Phòng Ngủ</em></h1>
+      <p class="cat-desc">Khám phá 248 sản phẩm tinh tuyển cho không gian thư giãn hoàn hảo</p>
+    </div>
+    <div class="cat-hero-stats">
+      <div class="cat-stat">
+        <div class="cat-stat-num">248</div>
+        <div class="cat-stat-label">Sản phẩm</div>
+      </div>
+      <div class="cat-stat">
+        <div class="cat-stat-num">12</div>
+        <div class="cat-stat-label">Thương hiệu</div>
+      </div>
+      <div class="cat-stat">
+        <div class="cat-stat-num">4.9<span style="font-size:22px">★</span></div>
+        <div class="cat-stat-label">Đánh giá TB</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SEARCH + QUICK FILTERS ── -->
+<div class="search-bar-wrap">
+  <div class="search-input-wrap">
+    <span class="search-ico">🔍</span>
+    <input class="search-input" id="searchInp" type="text" placeholder="giường ngủ walnut..." oninput="liveSearch(this.value)">
+  </div>
+  <div class="quick-filters">
+    <button class="qf-chip active" onclick="toggleChip(this)">Giường ngủ</button>
+    <button class="qf-chip" onclick="toggleChip(this)">Tủ quần áo</button>
+    <button class="qf-chip" onclick="toggleChip(this)">Đầu tủ</button>
+    <button class="qf-chip" onclick="toggleChip(this)">Bàn trang điểm</button>
+    <button class="qf-chip" onclick="toggleChip(this)">Đèn ngủ</button>
+    <button class="qf-chip sale" onclick="toggleChip(this)">Sale −30%</button>
+  </div>
+  <div class="view-toggle">
+    <button class="vt-btn active" id="gridBtn" onclick="setView('grid')" title="Lưới">⊞</button>
+    <button class="vt-btn" id="listBtn" onclick="setView('list')" title="Danh sách">☰</button>
+  </div>
+</div>
+
+<!-- ── PAGE BODY ── -->
+<div class="page-body">
+
+  <!-- ── SIDEBAR FILTERS ── -->
+  <aside class="sidebar-filters">
+
+    <!-- Category -->
+    <div class="filter-block">
+      <div class="filter-block-header" onclick="toggleBlock(this)">
+        <div class="fb-title"><span class="fb-icon">📂</span> Danh mục <span class="fb-count">248</span></div>
+        <span class="fb-toggle open">▲</span>
+      </div>
+      <div class="filter-body">
+        <ul class="cat-list">
+          <li class="active"><span class="cl-name">Tất cả phòng ngủ</span><span class="cl-count">248</span></li>
+          <li onclick="filterCat(this)"><span class="cl-name">Giường ngủ</span><span class="cl-count">87</span></li>
+          <li onclick="filterCat(this)"><span class="cl-name">Tủ quần áo</span><span class="cl-count">54</span></li>
+          <li onclick="filterCat(this)"><span class="cl-name">Đầu tủ &amp; kệ</span><span class="cl-count">38</span></li>
+          <li onclick="filterCat(this)"><span class="cl-name">Bàn trang điểm</span><span class="cl-count">29</span></li>
+          <li onclick="filterCat(this)"><span class="cl-name">Đèn &amp; phụ kiện</span><span class="cl-count">40</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Price -->
+    <div class="filter-block">
+      <div class="filter-block-header" onclick="toggleBlock(this)">
+        <div class="fb-title"><span class="fb-icon">💰</span> Khoảng giá</div>
+        <span class="fb-toggle open">▲</span>
+      </div>
+      <div class="filter-body">
+        <div class="price-range-display">
+          <span class="price-val" id="priceMin">0đ</span>
+          <span class="price-sep">—</span>
+          <span class="price-val" id="priceMax" style="text-align:right">30tr+</span>
+        </div>
+        <input class="range-slider" type="range" min="0" max="100" value="70" oninput="updatePrice(this.value)">
+        <div class="price-checks">
+          <label class="check-row"><input type="checkbox"> <span>Dưới 5.000.000đ</span></label>
+          <label class="check-row"><input type="checkbox" checked> <span>5 – 15.000.000đ</span></label>
+          <label class="check-row"><input type="checkbox" checked> <span>15 – 30.000.000đ</span></label>
+          <label class="check-row"><input type="checkbox"> <span>Trên 30.000.000đ</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Material -->
+    <div class="filter-block">
+      <div class="filter-block-header" onclick="toggleBlock(this)">
+        <div class="fb-title"><span class="fb-icon">🪵</span> Chất liệu</div>
+        <span class="fb-toggle open">▲</span>
+      </div>
+      <div class="filter-body">
+        <div class="mat-list">
+          <label class="mat-row"><input type="checkbox" checked> <span>Gỗ Walnut Mỹ</span></label>
+          <label class="mat-row"><input type="checkbox"> <span>Gỗ Sồi (Oak)</span></label>
+          <label class="mat-row"><input type="checkbox"> <span>Gỗ Tần bì (Ash)</span></label>
+          <label class="mat-row"><input type="checkbox"> <span>MDF cao cấp</span></label>
+          <label class="mat-row"><input type="checkbox"> <span>Kim loại &amp; Gỗ</span></label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Color -->
+    <div class="filter-block">
+      <div class="filter-block-header" onclick="toggleBlock(this)">
+        <div class="fb-title"><span class="fb-icon">🎨</span> Màu sắc</div>
+        <span class="fb-toggle open">▲</span>
+      </div>
+      <div class="filter-body">
+        <div class="color-filter-row">
+          <div class="cf-swatch active" style="background:#c4903a" title="Walnut Nâu"></div>
+          <div class="cf-swatch" style="background:#2a2a2a" title="Đen Ebony"></div>
+          <div class="cf-swatch" style="background:#8b6340" title="Nâu Teak"></div>
+          <div class="cf-swatch" style="background:#d4b896" title="Kem Sáng"></div>
+          <div class="cf-swatch" style="background:#b8c4cc" title="Xám Bắc Âu"></div>
+          <div class="cf-swatch" style="background:#f5f5f0" title="Trắng Ngà" style="border:1px solid var(--cream-mid)"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating -->
+    <div class="filter-block">
+      <div class="filter-block-header" onclick="toggleBlock(this)">
+        <div class="fb-title"><span class="fb-icon">⭐</span> Đánh giá</div>
+        <span class="fb-toggle open">▲</span>
+      </div>
+      <div class="filter-body">
+        <div class="star-rows">
+          <label class="star-row"><input type="radio" name="stars"> <span class="star-icons">★★★★★</span> <span class="star-num">(97)</span></label>
+          <label class="star-row"><input type="radio" name="stars" checked> <span class="star-icons">★★★★☆</span> <span class="star-num">4 sao+ (142)</span></label>
+          <label class="star-row"><input type="radio" name="stars"> <span class="star-icons">★★★☆☆</span> <span class="star-num">3 sao+ (189)</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="filter-block" style="border:none;background:transparent">
+      <button class="filter-apply">Áp dụng bộ lọc</button>
+      <a class="filter-clear" href="#" onclick="clearFilters(event)">✕ Xóa tất cả bộ lọc</a>
+    </div>
+
+  </aside>
+
+  <!-- ── PRODUCTS PANEL ── -->
+  <div class="products-panel">
+
+    <!-- Toolbar -->
+    <div class="products-toolbar fade-in">
+      <div class="products-found">Tìm thấy <strong id="foundCount">87</strong> sản phẩm</div>
+      <div class="active-tags">
+        <div class="a-tag">Giường ngủ <span class="a-tag-x" onclick="removeTag(this)">✕</span></div>
+        <div class="a-tag">Walnut Mỹ <span class="a-tag-x" onclick="removeTag(this)">✕</span></div>
+        <div class="a-tag">4 sao+ <span class="a-tag-x" onclick="removeTag(this)">✕</span></div>
+      </div>
+      <select class="sort-select" onchange="sortProducts(this.value)">
+        <option value="popular">Phổ biến nhất</option>
+        <option value="newest">Mới nhất</option>
+        <option value="price-asc">Giá tăng dần</option>
+        <option value="price-desc">Giá giảm dần</option>
+        <option value="rating">Đánh giá cao nhất</option>
+      </select>
+    </div>
+
+    <!-- Grid -->
+    <div class="products-grid" id="productsGrid">
+
+      <!-- Card 1 -->
+      <div class="product-card fade-in" style="transition-delay:.05s" onclick="goDetail()">
+        <div class="product-card-img">
+          🛏️
+          <div class="badge-tl"><span class="badge badge-new">Mới</span></div>
+          <div class="badge-tr"><span class="badge badge-sale">−20%</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)" title="Yêu thích">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()" title="Xem 3D">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Giường ngủ</div>
+          <div class="pc-name">Giường ngủ Walnut Premium Heritage 2024</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★★</span>
+            <span class="pc-rating-num">4.9</span>
+            <span class="pc-rating-count">(128)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">12.500.000đ</div>
+              <div class="pc-price-old">15.600.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="product-card fade-in" style="transition-delay:.1s">
+        <div class="product-card-img">
+          🗄️
+          <div class="badge-tl"><span class="badge badge-sale">−25%</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Tủ quần áo</div>
+          <div class="pc-name">Tủ quần áo 4 cánh Walnut Nordic</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★★</span>
+            <span class="pc-rating-num">4.8</span>
+            <span class="pc-rating-count">(63)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">18.000.000đ</div>
+              <div class="pc-price-old">24.000.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="product-card fade-in" style="transition-delay:.15s">
+        <div class="product-card-img" style="background:#f5ede0">
+          🪞
+          <div class="badge-tl"><span class="badge badge-hot">HOT</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Bàn trang điểm</div>
+          <div class="pc-name">Bàn trang điểm Gương Oval Vintage</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★☆</span>
+            <span class="pc-rating-num">4.5</span>
+            <span class="pc-rating-count">(42)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">6.800.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4 -->
+      <div class="product-card fade-in" style="transition-delay:.2s">
+        <div class="product-card-img">
+          💡
+          <div class="badge-tl"><span class="badge badge-sale">−8%</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Đèn phòng ngủ</div>
+          <div class="pc-name">Đèn đầu giường Nordic Brass Edition</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★★</span>
+            <span class="pc-rating-num">4.9</span>
+            <span class="pc-rating-count">(91)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">1.260.000đ</div>
+              <div class="pc-price-old">1.800.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5 -->
+      <div class="product-card fade-in" style="transition-delay:.25s">
+        <div class="product-card-img">
+          🛏️
+          <div class="badge-tl"><span class="badge badge-new">Mới</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Giường ngủ</div>
+          <div class="pc-name">Giường ngủ Oak Minimalist 1m6</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★☆</span>
+            <span class="pc-rating-num">4.3</span>
+            <span class="pc-rating-count">(20)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">9.200.000đ</div>
+              <div class="pc-price-old">11.000.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 6 -->
+      <div class="product-card fade-in" style="transition-delay:.3s">
+        <div class="product-card-img" style="background:#f0ebe3">
+          🪑
+          <div class="badge-tl"><span class="badge badge-ai">AI+</span></div>
+          <div class="badge-tl" style="top:36px"><span class="badge badge-soon">Gợi ý</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Đầu tủ 4 kệ</div>
+          <div class="pc-name">Tủ đầu giường Walnut 2 ngăn kéo</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★★</span>
+            <span class="pc-rating-num">4.7</span>
+            <span class="pc-rating-count">(71)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">3.800.000đ</div>
+              <div class="pc-price-old">4.300.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 7 -->
+      <div class="product-card fade-in" style="transition-delay:.35s">
+        <div class="product-card-img">
+          🛋️
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Sofa phòng ngủ</div>
+          <div class="pc-name">Sofa Cuối Giường Velvet Emerald</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★☆</span>
+            <span class="pc-rating-num">4.4</span>
+            <span class="pc-rating-count">(33)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">5.600.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 8 -->
+      <div class="product-card fade-in" style="transition-delay:.4s">
+        <div class="product-card-img" style="background:#ede8e0">
+          🪞
+          <div class="badge-tl"><span class="badge badge-hot">HOT</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Gương phòng ngủ</div>
+          <div class="pc-name">Gương Đứng Full Body Khung Vàng</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★★</span>
+            <span class="pc-rating-num">4.8</span>
+            <span class="pc-rating-count">(55)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">2.400.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 9 -->
+      <div class="product-card fade-in" style="transition-delay:.45s">
+        <div class="product-card-img">
+          📚
+          <div class="badge-tl"><span class="badge badge-ai">AI+</span></div>
+          <div class="card-actions">
+            <button class="ca-btn ca-wish" onclick="event.stopPropagation();toggleWish(this)">♡</button>
+            <button class="ca-btn ca-3d" onclick="event.stopPropagation()">📦 3D</button>
+          </div>
+        </div>
+        <div class="product-card-body">
+          <div class="pc-category">Kệ sách</div>
+          <div class="pc-name">Kệ Sách Treo Tường Walnut 5 tầng</div>
+          <div class="pc-rating">
+            <span class="pc-stars">★★★★☆</span>
+            <span class="pc-rating-num">4.6</span>
+            <span class="pc-rating-count">(48)</span>
+          </div>
+          <div class="pc-footer">
+            <div class="pc-price-wrap">
+              <div class="pc-price">1.900.000đ</div>
+            </div>
+            <button class="pc-add-btn" onclick="event.stopPropagation()">+</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /products-grid -->
+
+    <!-- PAGINATION -->
+    <div class="pagination fade-in">
+      <a class="pg-btn arrow" href="#">‹</a>
+      <a class="pg-btn active" href="#">1</a>
+      <a class="pg-btn" href="#">2</a>
+      <a class="pg-btn" href="#">3</a>
+      <a class="pg-btn" href="#">4</a>
+      <span class="pg-ellipsis">…</span>
+      <a class="pg-btn" href="#">15</a>
+      <a class="pg-btn arrow" href="#">›</a>
+    </div>
+
+  </div><!-- /products-panel -->
+</div><!-- /page-body -->
+
+<script>
+/* ── View toggle ── */
+function setView(v) {
+  const grid = document.getElementById('productsGrid');
+  const gBtn = document.getElementById('gridBtn');
+  const lBtn = document.getElementById('listBtn');
+  if (v === 'list') {
+    grid.classList.add('list-view');
+    gBtn.classList.remove('active');
+    lBtn.classList.add('active');
+  } else {
+    grid.classList.remove('list-view');
+    lBtn.classList.remove('active');
+    gBtn.classList.add('active');
+  }
+}
+
+/* ── Accordion blocks ── */
+function toggleBlock(header) {
+  const body = header.nextElementSibling;
+  const tog = header.querySelector('.fb-toggle');
+  const open = body.style.display !== 'none' && body.style.display !== '';
+  if (open || body.style.display === '') {
+    body.style.display = body.style.display === '' ? 'none' : (open ? 'none' : 'block');
+  } else {
+    body.style.display = 'block';
+  }
+  // simpler toggle
+  const visible = body.offsetParent !== null;
+  body.style.display = visible ? 'none' : 'block';
+  tog.classList.toggle('open', !visible);
+}
+
+/* ── Quick filter chips ── */
+function toggleChip(btn) {
+  btn.classList.toggle('active');
+}
+
+/* ── Category list ── */
+function filterCat(li) {
+  document.querySelectorAll('.cat-list li').forEach(i => i.classList.remove('active'));
+  li.classList.add('active');
+}
+
+/* ── Remove active tag ── */
+function removeTag(x) {
+  x.parentElement.remove();
+  const count = document.querySelectorAll('.a-tag').length;
+  // animate card count update
+  const fc = document.getElementById('foundCount');
+  fc.textContent = Math.max(0, parseInt(fc.textContent) - Math.floor(Math.random()*8+3));
+}
+
+/* ── Wishlist ── */
+function toggleWish(btn) {
+  btn.classList.toggle('wished');
+  btn.textContent = btn.classList.contains('wished') ? '♥' : '♡';
+}
+
+/* ── Price slider display ── */
+function updatePrice(val) {
+  const max = Math.round(val / 100 * 30);
+  document.getElementById('priceMax').textContent = max >= 30 ? '30tr+' : max + 'tr';
+}
+
+/* ── Sort ── */
+function sortProducts(val) {
+  // visual feedback only
+  const cards = [...document.querySelectorAll('.product-card')];
+  const grid = document.getElementById('productsGrid');
+  if (val === 'price-asc' || val === 'price-desc') {
+    cards.sort((a, b) => {
+      const pa = parseInt(a.querySelector('.pc-price').textContent.replace(/\D/g,''));
+      const pb = parseInt(b.querySelector('.pc-price').textContent.replace(/\D/g,''));
+      return val === 'price-asc' ? pa - pb : pb - pa;
+    });
+    cards.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(10px)'; grid.appendChild(c); });
+    setTimeout(() => cards.forEach(c => { c.style.opacity = ''; c.style.transform = ''; }), 50);
+  }
+}
+
+/* ── Live search ── */
+function liveSearch(query) {
+  const q = query.toLowerCase();
+  let count = 0;
+  document.querySelectorAll('.product-card').forEach(card => {
+    const name = card.querySelector('.pc-name').textContent.toLowerCase();
+    const cat = card.querySelector('.pc-category').textContent.toLowerCase();
+    const match = !q || name.includes(q) || cat.includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) count++;
+  });
+  document.getElementById('foundCount').textContent = count;
+}
+
+/* ── Clear filters ── */
+function clearFilters(e) {
+  e.preventDefault();
+  document.querySelectorAll('input[type=checkbox]').forEach(cb => cb.checked = false);
+  document.querySelectorAll('input[type=radio]').forEach(rb => rb.checked = false);
+  document.querySelectorAll('.cf-swatch').forEach(s => s.classList.remove('active'));
+  document.getElementById('searchInp').value = '';
+  liveSearch('');
+}
+
+/* ── Go to detail page ── */
+function goDetail() {
+  // In real app: window.location.href = '/product/walnut-bed';
+  alert('→ Điều hướng đến trang chi tiết sản phẩm');
+}
+
+/* ── Color swatches ── */
+document.querySelectorAll('.cf-swatch').forEach(s => {
+  s.addEventListener('click', () => {
+    document.querySelectorAll('.cf-swatch').forEach(x => x.classList.remove('active'));
+    s.classList.add('active');
+  });
+});
+
+/* ── Scroll reveal ── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+/* ── Pagination click ── */
+document.querySelectorAll('.pg-btn:not(.arrow)').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.pg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    window.scrollTo({ top: 400, behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>

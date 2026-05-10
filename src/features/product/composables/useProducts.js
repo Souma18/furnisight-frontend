@@ -3,6 +3,6 @@ import { useProductStore } from '../store/productStore'
 
 export function useProducts() {
   const store = useProductStore()
-  const { items, loading, error } = storeToRefs(store)
-  return { items, loading, error, loadList: store.loadList }
+  const { items, total, facets, loading, error } = storeToRefs(store)
+  return { items, total, facets, loading, error, loadList: store.loadList }
 }
