@@ -29,6 +29,11 @@ const routes = [
     component: () => import('@features/auth/pages/OAuthCallbackPage.vue'),
   },
   {
+    path: '/auth/verify',
+    name: 'auth-verify',
+    component: () => import('@features/auth/pages/VerifyEmailPage.vue'),
+  },
+  {
     path: '/cart',
     name: 'cart',
     component: () => import('@features/cart/pages/CartPage.vue'),

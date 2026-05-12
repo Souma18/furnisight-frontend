@@ -16,6 +16,7 @@ const {
   contactModalOpen,
   linkModalOpen,
   contactType,
+  verificationMethod,
   activeContactTab,
   verifyCode,
   verifiedOldContact,
@@ -36,6 +37,7 @@ const {
   submitContactChange,
   sendLinkCode,
   submitLink,
+  removeOldContact,
 } = useSecurity(props, emit)
 </script>
 
@@ -60,9 +62,10 @@ const {
               <p class="link-label">Email</p>
               <p class="link-value">{{ maskedEmail || 'Chưa liên kết' }}</p>
             </div>
-            <button v-if="maskedEmail" class="secondary" type="button" @click="openContactModal('email')">
-              Thay đổi
-            </button>
+            <div class="action-buttons" v-if="maskedEmail">
+              <button class="secondary" type="button" @click="openContactModal('email')">Thay đổi</button>
+              <button class="danger" type="button" @click="removeOldContact('email')">Xoá</button>
+            </div>
             <button v-else class="link-btn" type="button" @click="openLinkModal('email')">
               Liên kết
             </button>
@@ -73,9 +76,10 @@ const {
               <p class="link-label">Số điện thoại</p>
               <p class="link-value">{{ maskedPhone || 'Chưa liên kết' }}</p>
             </div>
-            <button v-if="maskedPhone" class="secondary" type="button" @click="openContactModal('phone')">
-              Thay đổi
-            </button>
+            <div class="action-buttons" v-if="maskedPhone">
+              <button class="secondary" type="button" @click="openContactModal('phone')">Thay đổi</button>
+              <button class="danger" type="button" @click="removeOldContact('phone')">Xoá</button>
+            </div>
             <button v-else class="link-btn" type="button" @click="openLinkModal('phone')">
               Liên kết
             </button>
@@ -135,6 +139,12 @@ const {
       </div>
 
       <div v-if="activeContactTab === 'old'" class="panel">
+        <label>Phương thức xác minh
+          <select v-model="verificationMethod" class="method-select" :disabled="isLoading">
+            <option value="EMAIL" :disabled="!maskedEmail">Qua Email</option>
+            <option value="PHONE" :disabled="!maskedPhone">Qua Số điện thoại</option>
+          </select>
+        </label>
         <label>{{ contactTitles.old }}
           <input :value="currentContactLabel" disabled />
         </label>
@@ -207,6 +217,21 @@ const {
 label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
 input { min-height:2.45rem; border:1px solid var(--auth-border); border-radius:10px; padding:0 0.65rem; background:var(--account-field-bg); color:var(--account-field-text); }
 input:disabled { opacity:0.7; cursor:not-allowed; }
+.method-select {
+  border: 1px solid var(--auth-border);
+  border-radius: 10px;
+  min-height: 2.45rem;
+  padding: 0 0.65rem;
+  background: var(--account-field-bg);
+  color: var(--account-field-text);
+  font-family: inherit;
+  font-size: 0.85rem;
+  width: 100%;
+}
+.method-select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 .primary { border:none; border-radius:10px; min-height:2.5rem; color:var(--color-white); background:linear-gradient(135deg,var(--auth-brand-start),var(--auth-brand-end)); cursor:pointer; }
 .primary:disabled { opacity:0.65; cursor:not-allowed; }
 .secondary {
@@ -226,6 +251,24 @@ input:disabled { opacity:0.7; cursor:not-allowed; }
   border: 1px solid var(--account-border);
   border-radius: 12px;
   padding: 0.75rem;
+}
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+.danger {
+  border: 1px solid color-mix(in srgb, var(--color-error) 30%, transparent);
+  border-radius: 10px;
+  min-height: 2.5rem;
+  padding: 0 0.75rem;
+  background: var(--account-surface);
+  color: var(--color-error);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+.danger:hover {
+  background: color-mix(in srgb, var(--color-error) 8%, var(--account-surface));
 }
 .link-info {
   min-width: 0;

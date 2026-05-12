@@ -1,10 +1,16 @@
 <script setup>
-const loginGoogle = () => {
-  window.location.href =
-    'http://localhost:8081/oauth2/authorization/google'
+import { loginGoogleRequest } from '../api/authApi'
+
+const loginGoogle = async () => {
+  try {
+    const response = await loginGoogleRequest()
+    console.log(response)
+  } catch (error) {
+    console.log(error)
+  }
 }
 
-const loginFacebook = () => {
+const loginFacebook = async () => {
   // nếu sau này có backend OAuth Facebook
   window.location.href =
     'http://localhost:8081/oauth2/authorization/facebook'

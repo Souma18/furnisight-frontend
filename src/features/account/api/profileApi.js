@@ -26,3 +26,15 @@ export function confirmContactChange(payload) {
   return apiClient.post(`${baseUrl}/contact/change/confirm`, payload)
 }
 
+export function requestLinkContact(payload) {
+  return apiClient.post(`${baseUrl}/contact/link/request`, payload)
+}
+
+export function confirmLinkContact(payload) {
+  return apiClient.post(`${baseUrl}/contact/link/confirm`, payload)
+}
+
+export function removeContact(payload) {
+  return apiClient.post(`${baseUrl}/contact/remove`, payload)
+}
+

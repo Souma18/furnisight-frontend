@@ -7,17 +7,8 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
-    host: '0.0.0.0',
-    proxy: {
-      '/api/v1/notifications': {
-        target: 'http://localhost:8082',
-        changeOrigin: true,
-      },
-      '/api/v1': {
-        target: 'http://localhost:8081',
-        changeOrigin: true,
-      }
-    }
+    host: true,
+    allowedHosts: ["furnisight.store"]
   },
   resolve: {
     alias: {

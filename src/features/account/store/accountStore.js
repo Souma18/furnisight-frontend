@@ -29,18 +29,14 @@ export const useAccountStore = defineStore('account', () => {
     try {
       // Load real profile from backend
       const profileRes = await getProfile().catch(() => null)
+      console.log(profileRes)
       
       const data = await fetchAccountOverviewMock()
       
       if (profileRes && profileRes.data) {
         // profile.value = profileRes.data
         const beProfile = profileRes.data
-        const merged = { ...data.profile }
-        Object.keys(beProfile).forEach((key) => {
-          if (beProfile[key] !== null && beProfile[key] !== undefined && beProfile[key] !== '') {
-            merged[key] = beProfile[key]
-          }
-        })
+        const merged = { ...data.profile, ...beProfile }
         profile.value = merged
       } else {
         profile.value = data.profile // fallback to mock if backend not ready

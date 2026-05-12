@@ -61,6 +61,7 @@ export function useAuthForms({ emit, props, authViewState }) {
         password: loginForm.password,
       })
       authStore.setSession(response.data)
+      console.log(authStore.token)
       showSuccess({
         title: 'Đăng nhập thành công!',
         message: 'Chào mừng trở lại. Bạn đang được chuyển hướng...',
