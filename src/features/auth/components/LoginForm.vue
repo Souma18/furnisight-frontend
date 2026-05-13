@@ -1,5 +1,6 @@
 <script setup>
 import AuthSocialButtons from './AuthSocialButtons.vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
   form: {
@@ -37,8 +38,13 @@ defineEmits(['submit', 'forgot', 'toggle-password'])
         minlength="8"
         required
       />
-      <button type="button" class="ghost-btn" @click="$emit('toggle-password')">
-        {{ showPassword ? 'Ẩn' : 'Hiện' }}
+      <button
+        type="button"
+        class="ghost-btn"
+        :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+        @click="$emit('toggle-password')"
+      >
+        <AppIcon :name="showPassword ? 'eyeOff' : 'eye'" :size="16" />
       </button>
     </div>
 
@@ -95,6 +101,10 @@ input:focus {
   background: transparent;
   color: var(--auth-text-secondary);
   cursor: pointer;
+  width: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .right-link {
   text-align: right;
@@ -111,7 +121,7 @@ input:focus {
   border: none;
   border-radius: var(--auth-radius-md);
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
   cursor: pointer;
 }
@@ -121,7 +131,7 @@ input:focus {
 }
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: var(--account-toast-error);
   font-size: 0.8rem;
 }
 </style>

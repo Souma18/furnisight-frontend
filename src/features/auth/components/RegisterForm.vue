@@ -37,9 +37,6 @@ defineEmits(['submit'])
     <label>Email</label>
     <input v-model="form.email" type="email" placeholder="hello@email.com" required />
 
-    <label>Số điện thoại</label>
-    <input v-model="form.phone" type="tel" placeholder="0901 234 567" required />
-
     <label>Mật khẩu</label>
     <input v-model="form.password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
     <div class="strength">
@@ -120,7 +117,7 @@ input:focus {
   border: none;
   border-radius: var(--auth-radius-md);
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
   cursor: pointer;
 }
@@ -130,7 +127,7 @@ input:focus {
 }
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: var(--account-toast-error);
   font-size: 0.8rem;
 }
 </style>

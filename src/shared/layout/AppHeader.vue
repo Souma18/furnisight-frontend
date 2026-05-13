@@ -1,14 +1,24 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
 import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
+
+function handleUserAction() {
+  if (isAuthenticated.value) {
+    router.push('/account')
+    return
+  }
+  isAuthModalOpen.value = true
+}
 </script>
 
 <template>
@@ -41,7 +51,7 @@ const isAuthModalOpen = ref(false)
         class="icon-btn user"
         type="button"
         :aria-label="isAuthenticated ? 'Tai khoan' : 'Dang nhap'"
-        @click="isAuthModalOpen = true"
+        @click="handleUserAction"
       >
         <AppIcon name="user" :size="14" />
       </button>
@@ -52,6 +62,11 @@ const isAuthModalOpen = ref(false)
 
 <style scoped>
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 120;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;

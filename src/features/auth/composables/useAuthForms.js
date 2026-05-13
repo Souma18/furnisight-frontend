@@ -4,10 +4,12 @@ import { useAuthStore } from '../store/authStore'
 import {
   loginRequest,
   registerRequest,
+} from '../api/authApi'
+import {
   forgotPasswordRequest,
   resetPasswordRequest,
   verifyResetPasswordCode
-} from '../api/authApi'
+} from '../../account/api/accountApi'
 
 export function useAuthForms({ emit, props, authViewState }) {
   const router = useRouter()
@@ -59,6 +61,7 @@ export function useAuthForms({ emit, props, authViewState }) {
         password: loginForm.password,
       })
       authStore.setSession(response.data)
+      console.log(authStore.token)
       showSuccess({
         title: 'Đăng nhập thành công!',
         message: 'Chào mừng trở lại. Bạn đang được chuyển hướng...',

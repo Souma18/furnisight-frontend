@@ -26,6 +26,30 @@
   --auth-radius-md: 10px;
   --auth-radius-lg: 14px;
   --auth-radius-xl: 18px;
+  --account-bg: #faf7f2;
+  --account-surface: #ffffff;
+  --account-border: #eadfce;
+  --account-text-muted: #6b7280;
+  --account-text-strong: #334155;
+  --account-stat-default: #0f3f5c;
+  --account-stat-delivering: #9a744f;
+  --account-stat-success: #15803d;
+  --account-stat-danger: #be123c;
+  --account-badge: #9a744f;
+  --account-ghost-bg: #eef2f7;
+  --account-toast-bg: #0f3f5c;
+  --account-toast-error: #b91c1c;
+  --color-white: #ffffff;
+
+  --account-field-bg: #ffffff;
+  --account-field-border: var(--account-border);
+  --account-field-text: var(--auth-text-primary);
+  --account-field-placeholder: color-mix(in srgb, var(--auth-text-secondary) 75%, transparent);
+  --account-field-focus: var(--auth-focus-ring);
+
+  --account-upload-bg: #0f3f5c;
+  --account-upload-text: #ffffff;
+  --account-upload-hover: #0c3148;
 
   font: 16px/1.5 var(--sans);
   color: var(--text);
@@ -54,6 +78,29 @@
     --auth-text-primary: #e2e8f0;
     --auth-text-secondary: #94a3b8;
     --auth-focus-ring: rgba(255, 177, 40, 0.4);
+    --account-bg: #0b1220;
+    --account-surface: #0f172a;
+    --account-border: #26354d;
+    --account-text-muted: #94a3b8;
+    --account-text-strong: #cbd5e1;
+    --account-stat-default: #7dd3fc;
+    --account-stat-delivering: #fbbf24;
+    --account-stat-success: #4ade80;
+    --account-stat-danger: #fb7185;
+    --account-badge: #fbbf24;
+    --account-ghost-bg: #1e293b;
+    --account-toast-bg: #0b3954;
+    --account-toast-error: #dc2626;
+    --color-white: #ffffff;
+
+    --account-field-bg: rgba(255, 255, 255, 0.08);
+    --account-field-border: rgba(255, 255, 255, 0.22);
+    --account-field-text: #e2e8f0;
+    --account-field-focus: rgba(255, 177, 40, 0.35);
+
+    --account-upload-bg: #1e293b;   /* xanh đậm dịu */
+    --account-upload-text: #cbd5e1; /* chữ sáng mềm */
+    --account-upload-hover: #334155;
   }
 }
 

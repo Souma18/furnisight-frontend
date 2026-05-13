@@ -2,12 +2,21 @@
 import { computed } from 'vue'
 import {
   Bell,
+  Box,
+  Camera,
   Check,
+  Heart,
   Lock,
+  LogOut,
   Map,
+  MapPin,
+  Settings,
+  Shield,
   ShoppingCart,
   User,
   X,
+  Eye, 
+  EyeOff,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -30,7 +39,17 @@ const iconMap = {
   cart: ShoppingCart,
   user: User,
   map: Map,
+  mapPin: MapPin,
   lock: Lock,
+  shield: Shield,
+  box: Box,
+  camera: Camera,
+  heart: Heart,
+  eye: Eye,
+  eyeOff: EyeOff,
+  settings: Settings,
+  cube: Box,
+  logout: LogOut,
   close: X,
   check: Check,
 }
