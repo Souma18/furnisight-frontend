@@ -14,13 +14,25 @@ const filter = ref('all')
 const filteredOrders = computed(() =>
   filter.value === 'all' ? props.orders : props.orders.filter((order) => order.status === filter.value),
 )
+
+const statusLabels = {
+  all: 'Tất cả',
+  pending: 'Chờ xác nhận',
+  delivering: 'Đang giao',
+  done: 'Hoàn thành',
+  cancel: 'Đã hủy',
+}
+
+function getStatusLabel(status) {
+  return statusLabels[status] ?? status
+}
 </script>
 
 <template>
   <AccountSectionCard title="Đơn hàng của tôi">
     <div class="filters">
       <button v-for="item in ['all', 'pending', 'delivering', 'done', 'cancel']" :key="item" :class="{ active: filter === item }" @click="filter = item">
-        {{ item }}
+        {{ getStatusLabel(item) }}
       </button>
     </div>
     <div class="list">
@@ -30,7 +42,7 @@ const filteredOrders = computed(() =>
           <p class="meta">{{ order.date }} · {{ order.items }} sản phẩm</p>
         </div>
         <div class="right">
-          <span class="badge">{{ order.status }}</span>
+          <span class="badge">{{ getStatusLabel(order.status) }}</span>
           <strong>{{ order.total.toLocaleString('vi-VN') }}đ</strong>
         </div>
       </article>

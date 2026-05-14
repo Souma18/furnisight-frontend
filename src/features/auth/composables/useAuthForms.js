@@ -1,10 +1,11 @@
 import { computed, reactive, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
-import {
-  loginRequest,
-  registerRequest,
-} from '../api/authApi'
+// import {
+//   loginRequest,
+//   registerRequest,
+// } from '../api/authApi'
+import { loginRequest, registerRequest } from '../api/authMockApi'
 import {
   forgotPasswordRequest,
   resetPasswordRequest,
