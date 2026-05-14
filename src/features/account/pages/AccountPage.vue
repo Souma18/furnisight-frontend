@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import AccountSidebar from '../components/AccountSidebar.vue'
 import AccountToast from '../components/AccountToast.vue'
@@ -7,6 +8,7 @@ import AddressView from '../components/views/AddressView.vue'
 import OrdersView from '../components/views/OrdersView.vue'
 import CartView from '../components/views/CartView.vue'
 import WishlistView from '../components/views/WishlistView.vue'
+import NotificationsView from '../components/views/NotificationsView.vue'
 import SecurityView from '../components/views/SecurityView.vue'
 import SettingsView from '../components/views/SettingsView.vue'
 import Projects3DView from '../components/views/Projects3DView.vue'
@@ -34,6 +36,18 @@ const {
   uploadAvatar,
   removeAvatar,
 } = useAccountPage()
+
+const notificationCategory = computed(() => {
+  const map = {
+    bell: 'all',
+    'bell-order': 'order',
+    'bell-promo': 'promo',
+    'bell-system': 'system',
+    'bell-review': 'review',
+  }
+
+  return map[activeView.value] ?? 'all'
+})
 
 function handleLogout() {
   authStore.logout()
@@ -67,6 +81,11 @@ function handleLogout() {
         v-else-if="activeView === 'address'"
         :addresses="addresses"
         @save-address="saveAddress"
+        @notify="showToast"
+      />
+      <NotificationsView
+        v-else-if="String(activeView).startsWith('bell')"
+        :notification-category="notificationCategory"
         @notify="showToast"
       />
       <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
