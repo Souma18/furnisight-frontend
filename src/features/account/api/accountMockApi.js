@@ -1,3 +1,5 @@
+import { homeProducts } from '@features/home/mock/homeMockData'
+
 function sleep(ms = 350) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -81,9 +83,13 @@ const cartItems = [
 ]
 
 const wishlist = [
-  { id: 'wish-1', name: 'Giường ngủ gỗ sồi Minimalist', price: 5200000 },
-  { id: 'wish-2', name: 'Tủ quần áo 4 cánh', price: 3800000 },
-  { id: 'wish-3', name: 'Sofa da thật nhập khẩu', price: 12500000 },
+  ...homeProducts
+    .filter((item) => item.isFavorite)
+    .map((item) => ({
+      ...item,
+      id: `wish-${item.id}`,
+      isFavorite: true,
+    })),
 ]
 
 const settings = {

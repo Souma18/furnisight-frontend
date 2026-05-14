@@ -294,7 +294,8 @@ function toggleNotificationMenu() {
   gap: 0.45rem;
   cursor: pointer;
   color: var(--account-text-strong);
-  font-size: 0.9rem;
+  font-size: 0.84rem;
+  font-weight: 500;
   text-align: left;
 }
 .nav-submenu-item:hover {
@@ -304,7 +305,7 @@ function toggleNotificationMenu() {
 .nav-submenu-item.active {
   background: color-mix(in srgb, var(--auth-brand-start) 12%, transparent);
   color: var(--auth-brand-start);
-  font-weight: 600;
+  font-weight: 500;
 }
 .logout-btn {
   margin: 0.2rem 0.7rem 0.8rem;

@@ -64,6 +64,13 @@ const { getDetailRoute } = useProductNavigation()
           </div>
         </div>
       </RouterLink>
+      <HomeProductTile
+        v-for="product in products"
+        :key="product.id"
+        :product="product"
+        :wished="wishedProductIds.includes(product.id)"
+        @toggle-wish="emit('toggle-wish', $event)"
+      />
     </div>
   </section>
 </template>
