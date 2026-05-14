@@ -16,10 +16,21 @@ import {
 import {
   homeFeatures,
   homeHero,
-  homeRoomFilters,
-  homeRooms,
   homeTestimonials,
 } from '../mock/homeMockData'
+
+const roomFallbacks = {
+  'Phòng ngủ': { image: '/home/rooms/bedroom.jpg', isBig: true },
+  'Phòng khách': { image: '/home/rooms/livingroom.jpeg', isBig: false },
+  'Phòng tắm': { image: '/home/rooms/bathroom.jpg', isBig: false },
+  'Phòng bếp': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
+  'Phòng đọc sách': { image: '/home/rooms/readingroom.jpg', isBig: false },
+  'Living Room': { image: '/home/rooms/livingroom.jpeg', isBig: false },
+  'Bedroom': { image: '/home/rooms/bedroom.jpg', isBig: true },
+  'Kitchen': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
+  'Bathroom': { image: '/home/rooms/bathroom.jpg', isBig: false },
+  'Study Room': { image: '/home/rooms/readingroom.jpg', isBig: false },
+}
 
 const categories = ref([])
 const products = ref([])
@@ -29,17 +40,15 @@ const roomFilters = computed(() => ['Tat ca', ...categories.value.map(c => c.nam
 const activeRoomFilter = ref('Tat ca')
 
 const filteredRooms = computed(() => {
-  // We'll use a mix of real data and mock images for now since BE doesn't have room images yet
   const rooms = categories.value.map(cat => {
-    // Find matching mock room to get the image
-    const mockRoom = homeRooms.find(r => r.type === cat.name) || homeRooms[0]
+    const fallback = roomFallbacks[cat.name] || { image: '/home/rooms/livingroom.jpeg', isBig: false }
     return {
       id: cat.id,
       type: cat.name,
       name: cat.name,
       count: `${cat.productCount || 0} sản phẩm`,
-      image: cat.imageUrl || mockRoom.image,
-      isBig: mockRoom.isBig || false
+      image: cat.imageUrl || fallback.image,
+      isBig: fallback.isBig
     }
   })
 
