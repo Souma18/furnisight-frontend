@@ -47,9 +47,37 @@ const orders = [
 ]
 
 const cartItems = [
-  { id: 'cart-1', name: 'Sofa Nordic 3 chỗ ngồi', qty: 1, price: 8500000 },
-  { id: 'cart-2', name: 'Ghế ergonomic ProFlex X1', qty: 2, price: 1200000 },
-  { id: 'cart-3', name: 'Đèn treo trần Rattan Boho', qty: 1, price: 920000 },
+  {
+    id: 'cart-1',
+    detailId: 'nordic-sofa',
+    name: 'Sofa Nordic 3 chỗ ngồi',
+    qty: 1,
+    price: 8500000,
+    imageFallback: '🛋️',
+    selectedColor: 'Be sáng',
+    selectedSize: '2m1 × 95cm',
+    outOfStock: true,
+  },
+  {
+    id: 'cart-2',
+    detailId: 'ergonomic-chair',
+    name: 'Ghế ergonomic ProFlex X1',
+    qty: 2,
+    price: 1200000,
+    imageFallback: '🪑',
+    selectedColor: 'Xám đá',
+    selectedSize: 'Tiêu chuẩn',
+  },
+  {
+    id: 'cart-3',
+    detailId: 'tea-table',
+    name: 'Đèn treo trần Rattan Boho',
+    qty: 1,
+    price: 920000,
+    imageFallback: '💡',
+    selectedColor: 'Nâu gỗ',
+    selectedSize: 'Ø60 × 45cm',
+  },
 ]
 
 const wishlist = [

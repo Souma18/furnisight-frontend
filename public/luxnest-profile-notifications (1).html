@@ -1,0 +1,1256 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài khoản – LUXNEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#12202e;--navy-light:#1c3148;--navy-mid:#1a2d40;
+  --gold:#c9922a;--gold-light:#e5b84a;--gold-pale:#f5e6c8;
+  --cream:#faf6f0;--cream-dark:#f0e9dd;--cream-mid:#ece2cf;
+  --text-dark:#1a1a1a;--text-mid:#555;--text-light:#888;
+  --white:#fff;--red:#e53e3e;--green:#2d9e6b;--blue:#3b82f6;
+  --r:12px;--r-lg:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+
+/* ════════════════════════════
+   HEADER
+════════════════════════════ */
+header{
+  position:sticky;top:0;z-index:500;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;height:58px;
+  box-shadow:0 2px 20px rgba(0,0,0,.35);
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:2px;color:#fff}
+nav{display:flex;align-items:center;gap:4px}
+nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;padding:6px 16px;border-radius:8px;transition:all .2s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.header-right{display:flex;align-items:center;gap:8px}
+.btn-3d-hdr{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:13px;font-weight:600;padding:8px 18px;border-radius:22px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(201,146,42,.4);transition:transform .2s}
+.btn-3d-hdr:hover{transform:translateY(-1px)}
+
+/* ── NOTIFICATION BELL WRAPPER ── */
+.notif-wrap{position:relative}
+
+.icon-btn{
+  width:38px;height:38px;border-radius:9px;
+  background:rgba(255,255,255,.08);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:rgba(255,255,255,.85);font-size:18px;
+  text-decoration:none;transition:background .2s;
+  position:relative;
+}
+.icon-btn:hover{background:rgba(255,255,255,.16)}
+
+/* Badge dot */
+.notif-badge{
+  position:absolute;top:5px;right:5px;
+  width:8px;height:8px;border-radius:50%;
+  background:var(--red);border:2px solid var(--navy);
+  animation:badgePulse 2s ease-in-out infinite;
+}
+@keyframes badgePulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.8}}
+
+/* ════════════════════════════
+   NOTIFICATION DROPDOWN (hover)
+════════════════════════════ */
+.notif-dropdown{
+  position:absolute;top:calc(100% + 10px);right:-10px;
+  width:380px;
+  background:var(--white);
+  border-radius:18px;
+  box-shadow:0 20px 60px rgba(18,32,46,.22),0 4px 16px rgba(0,0,0,.08);
+  border:1px solid var(--cream-mid);
+  opacity:0;visibility:hidden;
+  transform:translateY(-8px) scale(.97);
+  transition:all .22s cubic-bezier(.22,.68,0,1.2);
+  z-index:600;
+  overflow:hidden;
+}
+.notif-wrap:hover .notif-dropdown,
+.notif-dropdown.pinned{
+  opacity:1;visibility:visible;transform:translateY(0) scale(1);
+}
+
+/* Arrow tip */
+.notif-dropdown::before{
+  content:'';position:absolute;top:-6px;right:22px;
+  width:12px;height:12px;
+  background:var(--white);border-top:1px solid var(--cream-mid);border-left:1px solid var(--cream-mid);
+  transform:rotate(45deg);z-index:1;
+}
+
+.nd-header{
+  padding:16px 18px 12px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--cream-dark);
+  position:relative;z-index:2;background:var(--white);
+}
+.nd-title{font-size:14px;font-weight:700;color:var(--text-dark)}
+.nd-unread-count{
+  background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:10px;margin-left:6px;
+}
+.nd-mark-all{font-size:12px;color:var(--gold);cursor:pointer;text-decoration:none;font-weight:500;transition:color .2s}
+.nd-mark-all:hover{color:var(--gold-light)}
+
+/* Category tabs inside dropdown */
+.nd-tabs{
+  display:flex;padding:8px 10px 0;gap:4px;
+  border-bottom:1px solid var(--cream-dark);
+  background:var(--cream);
+}
+.nd-tab{
+  padding:6px 12px;border-radius:8px 8px 0 0;font-size:12px;font-weight:500;
+  cursor:pointer;border:none;background:transparent;color:var(--text-light);
+  transition:all .2s;position:relative;
+}
+.nd-tab.active{background:var(--white);color:var(--navy);font-weight:600}
+.nd-tab .tab-dot{
+  position:absolute;top:5px;right:5px;
+  width:6px;height:6px;border-radius:50%;background:var(--red);
+  display:none;
+}
+.nd-tab.has-new .tab-dot{display:block}
+
+/* Notification list */
+.nd-list{max-height:340px;overflow-y:auto}
+.nd-list::-webkit-scrollbar{width:4px}
+.nd-list::-webkit-scrollbar-thumb{background:var(--cream-mid);border-radius:2px}
+
+.nd-item{
+  display:flex;align-items:flex-start;gap:11px;
+  padding:13px 16px;cursor:pointer;
+  transition:background .18s;
+  border-bottom:1px solid var(--cream-dark);
+  position:relative;
+}
+.nd-item:last-child{border-bottom:none}
+.nd-item:hover{background:var(--cream)}
+.nd-item.unread{background:#fffbf4}
+.nd-item.unread::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--gold-light),var(--gold));
+  border-radius:0 2px 2px 0;
+}
+
+.nd-icon-wrap{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  margin-top:1px;
+}
+.ni-order{background:#fff3e0}
+.ni-promo{background:#fce4ec}
+.ni-system{background:#e8f5e9}
+.ni-ship{background:#e3f2fd}
+
+.nd-content{}
+.nd-item-title{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:3px;line-height:1.35}
+.nd-item.unread .nd-item-title{color:var(--navy)}
+.nd-item-body{font-size:12px;color:var(--text-mid);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.nd-item-time{font-size:11px;color:var(--text-light);margin-top:5px;display:flex;align-items:center;gap:4px}
+.nd-unread-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+
+.nd-footer{
+  padding:12px 16px;border-top:1px solid var(--cream-dark);
+  display:flex;align-items:center;justify-content:center;
+}
+.nd-see-all{
+  font-size:13px;color:var(--gold);font-weight:600;text-decoration:none;
+  display:flex;align-items:center;gap:5px;transition:gap .2s;
+}
+.nd-see-all:hover{gap:9px}
+
+/* ════════════════════════════
+   PAGE LAYOUT
+════════════════════════════ */
+.page-body{
+  max-width:1200px;margin:32px auto;padding:0 40px 80px;
+  display:grid;grid-template-columns:260px 1fr;gap:28px;
+  align-items:start;
+}
+
+/* ════════════════════════════
+   PROFILE SIDEBAR
+════════════════════════════ */
+.profile-sidebar{
+  background:var(--white);border-radius:var(--r-lg);
+  border:1.5px solid var(--cream-dark);
+  overflow:hidden;
+  position:sticky;top:80px;
+}
+
+.ps-top{
+  padding:28px 22px 22px;
+  background:linear-gradient(160deg,var(--navy) 0%,var(--navy-light) 100%);
+  position:relative;overflow:hidden;
+}
+.ps-top::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:120px;height:120px;border-radius:50%;
+  background:rgba(201,146,42,.15);filter:blur(20px);
+}
+.ps-avatar-wrap{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.ps-avatar{
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;font-weight:700;color:var(--navy);
+  border:3px solid rgba(255,255,255,.25);flex-shrink:0;
+  cursor:pointer;position:relative;
+}
+.ps-avatar-edit{
+  position:absolute;bottom:-2px;right:-2px;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--gold);border:2px solid var(--navy);
+  display:flex;align-items:center;justify-content:center;font-size:9px;
+}
+.ps-name{font-size:16px;font-weight:600;color:#fff;margin-bottom:3px}
+.ps-email{font-size:12px;color:rgba(255,255,255,.5)}
+
+.ps-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:rgba(255,255,255,.1);
+  border-radius:10px;overflow:hidden;
+}
+.ps-stat{
+  background:rgba(255,255,255,.06);
+  padding:10px 6px;text-align:center;
+}
+.ps-stat-num{font-size:20px;font-weight:700;font-family:'Cormorant Garamond',serif;line-height:1}
+.ps-stat-num.gold{color:var(--gold-light)}
+.ps-stat-num.blue{color:#60a5fa}
+.ps-stat-num.green{color:#4ade80}
+.ps-stat-label{font-size:10px;color:rgba(255,255,255,.45);margin-top:3px;letter-spacing:.3px}
+
+/* Sidebar nav */
+.ps-nav{padding:14px 0}
+.ps-nav-group{padding:0 14px;margin-bottom:4px}
+.ps-nav-group-label{
+  font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-light);padding:8px 8px 6px;
+}
+.ps-nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;border-radius:10px;
+  cursor:pointer;transition:all .2s;text-decoration:none;
+  color:var(--text-mid);font-size:14px;position:relative;
+}
+/* ═══════════════════════
+   SIDEBAR SUBMENU
+═══════════════════════ */
+
+.ps-submenu-wrap{
+  margin-bottom:6px;
+}
+
+.ps-parent{
+  justify-content:space-between;
+}
+
+.ps-arrow{
+  font-size:12px;
+  transition:transform .25s ease;
+  color:var(--text-light);
+}
+
+.ps-submenu-wrap.active .ps-arrow{
+  transform:rotate(180deg);
+}
+
+.ps-submenu{
+  display:grid;
+  gap:4px;
+  margin-top:6px;
+  padding-left:14px;
+
+  max-height:0;
+  overflow:hidden;
+  opacity:0;
+
+  transition:
+    max-height .3s ease,
+    opacity .25s ease;
+}
+
+.ps-submenu.open{
+  max-height:300px;
+  opacity:1;
+}
+
+.ps-submenu-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+
+  padding:9px 12px;
+  border-radius:10px;
+
+  text-decoration:none;
+  font-size:13px;
+  color:var(--text-mid);
+
+  transition:all .2s ease;
+}
+
+.ps-submenu-item:hover{
+  background:var(--cream);
+  color:var(--navy);
+}
+
+.ps-submenu-item.active{
+  background:var(--gold-pale);
+  color:var(--navy);
+  font-weight:600;
+}
+.ps-nav-item:hover{background:var(--cream);color:var(--text-dark)}
+.ps-nav-item.active{background:var(--gold-pale);color:var(--navy);font-weight:600}
+.ps-nav-item.active::before{
+  content:'';position:absolute;left:0;top:20%;bottom:20%;width:3px;
+  background:var(--gold);border-radius:0 3px 3px 0;
+}
+.ps-nav-icon{font-size:16px;flex-shrink:0;width:22px;text-align:center}
+.ps-nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;
+  min-width:20px;text-align:center;
+}
+.ps-nav-badge.gold-badge{background:var(--gold);color:var(--navy)}
+
+/* ════════════════════════════
+   MAIN CONTENT AREA
+════════════════════════════ */
+.main-content{display:flex;flex-direction:column;gap:0}
+
+/* Page header */
+.content-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:22px;
+}
+.ch-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:300;color:var(--text-dark)}
+.ch-title em{font-style:italic;color:var(--gold)}
+.ch-sub{font-size:13px;color:var(--text-light);margin-top:3px}
+.ch-action{
+  padding:9px 20px;background:var(--white);border:1.5px solid var(--cream-mid);
+  color:var(--text-mid);font-size:13px;font-weight:500;border-radius:10px;
+  cursor:pointer;transition:all .2s;
+}
+.ch-action:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ════════════════════════════
+   NOTIFICATION CENTER (full page)
+════════════════════════════ */
+.notif-center{
+  background:var(--white);border-radius:var(--r-lg);
+  border:1.5px solid var(--cream-dark);
+  overflow:hidden;
+}
+
+/* Big category tabs */
+.nc-tabs{
+  display:flex;border-bottom:2px solid var(--cream-dark);
+  overflow-x:auto;
+  background:var(--cream);
+  padding:0 16px;
+}
+.nc-tab{
+  display:flex;align-items:center;gap:7px;
+  padding:14px 20px;font-size:13px;font-weight:500;color:var(--text-light);
+  border:none;background:none;cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-2px;
+  white-space:nowrap;transition:all .2s;
+}
+.nc-tab:hover{color:var(--text-dark)}
+.nc-tab.active{color:var(--navy);border-bottom-color:var(--gold);font-weight:700}
+.nc-tab-icon{font-size:16px}
+.nc-tab-badge{
+  background:var(--red);color:#fff;font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:10px;min-width:20px;text-align:center;
+}
+
+/* Sub-filter bar */
+.nc-subfilter{
+  display:flex;align-items:center;gap:8px;
+  padding:12px 20px;border-bottom:1px solid var(--cream-dark);
+  background:var(--white);
+}
+.nc-sf-btn{
+  padding:5px 14px;border-radius:18px;font-size:12px;font-weight:500;
+  border:1.5px solid var(--cream-mid);background:var(--white);
+  cursor:pointer;color:var(--text-mid);transition:all .2s;
+}
+.nc-sf-btn:hover{border-color:var(--gold);color:var(--gold)}
+.nc-sf-btn.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.nc-mark-all-btn{
+  margin-left:auto;font-size:12px;color:var(--gold);font-weight:500;
+  border:none;background:none;cursor:pointer;transition:color .2s;
+  display:flex;align-items:center;gap:5px;
+}
+.nc-mark-all-btn:hover{color:var(--gold-light)}
+
+/* Notification full list */
+.nc-list{}
+.nc-date-group{}
+.nc-date-label{
+  padding:10px 20px 6px;
+  font-size:11px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:var(--text-light);background:var(--cream);
+  border-top:1px solid var(--cream-dark);
+  border-bottom:1px solid var(--cream-dark);
+  display:flex;align-items:center;gap:8px;
+}
+.nc-date-label::after{content:'';flex:1;height:1px;background:var(--cream-mid)}
+
+/* Full notification item */
+.nc-item{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:16px 20px;cursor:pointer;
+  transition:background .18s;
+  border-bottom:1px solid var(--cream-dark);
+  position:relative;
+}
+.nc-item:last-child{border-bottom:none}
+.nc-item:hover{background:var(--cream)}
+.nc-item.unread{background:#fffcf5}
+.nc-item.unread::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(180deg,var(--gold-light),var(--gold));
+  border-radius:0 2px 2px 0;
+}
+
+.nc-item-icon{
+  width:46px;height:46px;border-radius:13px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.nic-order{background:linear-gradient(135deg,#fff3e0,#ffe0b2)}
+.nic-promo{background:linear-gradient(135deg,#fce4ec,#f8bbd0)}
+.nic-system{background:linear-gradient(135deg,#e8f5e9,#c8e6c9)}
+.nic-ship{background:linear-gradient(135deg,#e3f2fd,#bbdefb)}
+.nic-review{background:linear-gradient(135deg,#ede7f6,#d1c4e9)}
+
+.nc-item-body{flex:1;min-width:0}
+.nc-item-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:5px}
+.nc-item-title{font-size:14px;font-weight:600;color:var(--text-dark);line-height:1.35}
+.nc-item.unread .nc-item-title{color:var(--navy)}
+.nc-item-time{font-size:12px;color:var(--text-light);white-space:nowrap;flex-shrink:0;margin-top:1px}
+.nc-item-desc{font-size:13px;color:var(--text-mid);line-height:1.65}
+.nc-item-desc strong{color:var(--text-dark)}
+
+/* Expandable detail */
+.nc-item-detail{
+  margin-top:12px;padding:14px;
+  background:var(--cream);border-radius:10px;
+  border:1px solid var(--cream-mid);
+  display:none;
+}
+.nc-item.expanded .nc-item-detail{display:block}
+.nc-detail-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.nc-detail-row:last-child{margin-bottom:0}
+.ndr-label{font-size:12px;color:var(--text-light)}
+.ndr-value{font-size:12px;font-weight:600;color:var(--text-dark)}
+.ndr-value.gold{color:var(--gold)}
+.ndr-value.green{color:var(--green)}
+.nc-detail-actions{display:flex;gap:8px;margin-top:12px}
+.nda-btn{
+  padding:7px 16px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s;border:none;
+}
+.nda-primary{background:var(--navy);color:#fff}
+.nda-primary:hover{background:var(--navy-light)}
+.nda-ghost{background:var(--white);border:1.5px solid var(--cream-mid);color:var(--text-mid)}
+.nda-ghost:hover{border-color:var(--navy);color:var(--navy)}
+
+.nc-item-footer{display:flex;align-items:center;gap:8px;margin-top:8px}
+.nc-item-tag{
+  font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  padding:3px 8px;border-radius:6px;
+}
+.tag-success{background:#e8f5e9;color:var(--green)}
+.tag-pending{background:#fff3e0;color:#f57c00}
+.tag-info{background:#e3f2fd;color:var(--blue)}
+.tag-promo{background:#fce4ec;color:var(--red)}
+.tag-system{background:var(--gold-pale);color:var(--gold)}
+
+.nc-expand-btn{
+  margin-left:auto;font-size:11px;color:var(--gold);font-weight:600;
+  background:none;border:none;cursor:pointer;
+  display:flex;align-items:center;gap:4px;transition:all .2s;
+}
+.nc-expand-icon{transition:transform .25s}
+.nc-item.expanded .nc-expand-icon{transform:rotate(180deg)}
+
+/* Empty state */
+.nc-empty{padding:60px 20px;text-align:center}
+.nc-empty-icon{font-size:48px;margin-bottom:14px;opacity:.3}
+.nc-empty-title{font-size:16px;font-weight:500;color:var(--text-mid);margin-bottom:6px}
+.nc-empty-sub{font-size:13px;color:var(--text-light)}
+
+/* ════════════════════════════
+   PROFILE INFO (other tab content)
+════════════════════════════ */
+.profile-form{
+  background:var(--white);border-radius:var(--r-lg);
+  border:1.5px solid var(--cream-dark);padding:36px;
+  display:none;
+}
+.profile-form.active{display:block}
+.pf-section-title{font-size:13px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:20px;padding-bottom:10px;border-bottom:1px solid var(--cream-dark)}
+.avatar-section{display:flex;align-items:center;gap:20px;margin-bottom:32px;padding:20px;background:var(--cream);border-radius:var(--r)}
+.big-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--navy);border:3px solid var(--gold-pale);flex-shrink:0}
+.avatar-info{}
+.avatar-label{font-size:14px;font-weight:600;color:var(--text-dark);margin-bottom:4px}
+.avatar-hint{font-size:12px;color:var(--text-light);margin-bottom:12px}
+.avatar-btns{display:flex;gap:8px}
+.btn-upload{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:9px;font-size:13px;font-weight:600;background:var(--navy);color:#fff;border:none;cursor:pointer;transition:all .2s}
+.btn-upload:hover{background:var(--navy-light)}
+.btn-remove{padding:8px 16px;border-radius:9px;font-size:13px;background:var(--white);border:1.5px solid var(--cream-mid);color:var(--text-mid);cursor:pointer;transition:all .2s}
+.btn-remove:hover{border-color:var(--red);color:var(--red)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.fl{font-size:12px;font-weight:600;color:var(--text-dark);letter-spacing:.3px}
+.fl span{color:var(--red);margin-left:3px}
+.fi{width:100%;padding:11px 15px;border:1.5px solid var(--cream-mid);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);outline:none;transition:all .2s}
+.fi:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,146,42,.1)}
+textarea.fi{resize:vertical;min-height:90px;line-height:1.65}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--cream-dark)}
+.btn-cancel{padding:10px 22px;border-radius:10px;border:1.5px solid var(--cream-mid);background:var(--white);color:var(--text-mid);font-size:14px;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{border-color:var(--navy);color:var(--navy)}
+.btn-save{padding:10px 26px;border-radius:10px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,146,42,.35);transition:all .2s}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(201,146,42,.5)}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:28px;right:28px;z-index:999;
+  background:var(--navy);color:#fff;
+  padding:14px 20px;border-radius:14px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);
+  border:1px solid rgba(201,146,42,.2);
+  transform:translateY(80px);opacity:0;
+  transition:all .4s cubic-bezier(.22,.68,0,1.2);
+  pointer-events:none;max-width:320px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:20px;flex-shrink:0}
+.toast-title{font-size:13px;font-weight:600;line-height:1.3}
+.toast-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+
+/* ── ANIMATIONS ── */
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.nc-item{animation:slideDown .3s ease both}
+</style>
+</head>
+<body>
+
+<!-- ════ HEADER ════ -->
+<header>
+  <a class="logo" href="#"><div class="logo-icon">🪺</div><span class="logo-text">LUXNEST</span></a>
+  <nav>
+    <a href="#">Trang Chủ</a>
+    <a href="#">Sản phẩm</a>
+    <a href="#">Trực quan 3D</a>
+    <a href="#">Dự án</a>
+    <a href="#">Liên hệ</a>
+  </nav>
+  <div class="header-right">
+    <a href="#" class="btn-3d-hdr">🏠 Trực quan hoa</a>
+
+    <!-- ── BELL + DROPDOWN ── -->
+    <div class="notif-wrap" id="notifWrap">
+      <button class="icon-btn" id="bellBtn" onclick="toggleDropdown()" title="Thông báo">
+        🔔
+        <span class="notif-badge" id="bellBadge"></span>
+      </button>
+
+      <div class="notif-dropdown" id="notifDropdown">
+        <div class="nd-header">
+          <div>
+            <span class="nd-title">Thông báo</span>
+            <span class="nd-unread-count" id="dropUnreadCount">5</span>
+          </div>
+          <a class="nd-mark-all" onclick="markAllRead()">Đánh dấu đã đọc</a>
+        </div>
+
+        <!-- Mini category tabs -->
+        <div class="nd-tabs">
+          <button class="nd-tab has-new active" onclick="filterDropdown(this,'all')">Tất cả</button>
+          <button class="nd-tab has-new" onclick="filterDropdown(this,'order')">
+            Đơn hàng<span class="tab-dot"></span>
+          </button>
+          <button class="nd-tab has-new" onclick="filterDropdown(this,'promo')">
+            Khuyến mãi<span class="tab-dot"></span>
+          </button>
+          <button class="nd-tab" onclick="filterDropdown(this,'system')">Hệ thống</button>
+        </div>
+
+        <div class="nd-list" id="dropList">
+          <!-- items injected by JS -->
+        </div>
+
+        <div class="nd-footer">
+          <a class="nd-see-all" href="#" onclick="goToNotifPage(); return false;">
+            Xem tất cả thông báo →
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- end bell -->
+
+    <button class="icon-btn" onclick="goToProfilePage()">👤</button>
+  </div>
+</header>
+
+<!-- ════ PAGE BODY ════ -->
+<div class="page-body">
+
+  <!-- SIDEBAR -->
+  <aside class="profile-sidebar">
+    <div class="ps-top">
+      <div class="ps-avatar-wrap">
+        <div class="ps-avatar">
+          NA
+          <span class="ps-avatar-edit">✏️</span>
+        </div>
+        <div>
+          <div class="ps-name">Nguyễn Văn A</div>
+          <div class="ps-email">nguyenvana@gmail.com</div>
+        </div>
+      </div>
+      <div class="ps-stats">
+        <div class="ps-stat">
+          <div class="ps-stat-num gold">3</div>
+          <div class="ps-stat-label">Đơn hàng</div>
+        </div>
+        <div class="ps-stat">
+          <div class="ps-stat-num blue">2</div>
+          <div class="ps-stat-label">Đang giao</div>
+        </div>
+        <div class="ps-stat">
+          <div class="ps-stat-num green">3</div>
+          <div class="ps-stat-label">Yêu thích</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ps-nav">
+      <div class="ps-nav-group">
+        <div class="ps-nav-group-label">Tài khoản</div>
+        <a class="ps-nav-item" href="#" onclick="showSection('profile',this)"><span class="ps-nav-icon">👤</span> Thông tin cá nhân</a>
+        <a class="ps-nav-item" href="#" onclick="showSection('address',this)"><span class="ps-nav-icon">📍</span> Địa chỉ giao hàng</a>
+        <a class="ps-nav-item" href="#" onclick="showSection('security',this)"><span class="ps-nav-icon">🔒</span> Bảo mật</a>
+        <div class="ps-submenu-wrap active" id="notifSubmenu">
+
+  <a class="ps-nav-item ps-parent active"
+     href="#"
+     onclick="toggleSubmenu(event)">
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="ps-nav-icon">🔔</span>
+      <span>Thông báo</span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:10px">
+      <span class="ps-nav-badge" id="sidebarBadge">5</span>
+      <span class="ps-arrow">⌄</span>
+    </div>
+  </a>
+
+  <div class="ps-submenu open" id="notifSubmenuContent">
+
+    <a class="ps-submenu-item active"
+       href="#"
+       onclick="showNotificationType(event,'all',this)">
+      📋 Tất cả
+    </a>
+
+    <a class="ps-submenu-item"
+       href="#"
+       onclick="showNotificationType(event,'order',this)">
+      📦 Đơn hàng
+    </a>
+
+    <a class="ps-submenu-item"
+       href="#"
+       onclick="showNotificationType(event,'promo',this)">
+      🎁 Khuyến mãi
+    </a>
+
+    <a class="ps-submenu-item"
+       href="#"
+       onclick="showNotificationType(event,'system',this)">
+      ⚙️ Hệ thống
+    </a>
+
+    <a class="ps-submenu-item"
+       href="#"
+       onclick="showNotificationType(event,'review',this)">
+      ⭐ Đánh giá
+    </a>
+
+  </div>
+</div>
+      </div>
+      <div class="ps-nav-group">
+        <div class="ps-nav-group-label">Mua sắm</div>
+        <a class="ps-nav-item" href="#" onclick="showSection('cart',this)"><span class="ps-nav-icon">🛒</span> Giỏ hàng</a>
+        <a class="ps-nav-item" href="#" onclick="showSection('orders',this)"><span class="ps-nav-icon">📦</span> Đơn hàng</a>
+        <a class="ps-nav-item" href="#" onclick="showSection('wishlist',this)"><span class="ps-nav-icon">♡</span> Yêu thích<span class="ps-nav-badge gold-badge">3</span></a>
+      </div>
+      <div class="ps-nav-group">
+        <div class="ps-nav-group-label">Khác</div>
+        <a class="ps-nav-item" href="#" onclick="showSection('settings',this)"><span class="ps-nav-icon">⚙️</span> Cài đặt</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+
+    <!-- ── PROFILE INFO ── -->
+    <div id="sec-profile" class="profile-form">
+      <div class="content-header">
+        <div>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300">Thông tin <em style="color:var(--gold);font-style:italic">cá nhân</em></h2>
+          <div style="font-size:13px;color:var(--text-light);margin-top:3px">Quản lý hồ sơ để bảo mật tài khoản</div>
+        </div>
+      </div>
+      <div class="avatar-section">
+        <div class="big-avatar">NA</div>
+        <div>
+          <div class="avatar-label">Ảnh đại diện</div>
+          <div class="avatar-hint">Định dạng JPG/PNG, kích thước tối đa 5MB.</div>
+          <div class="avatar-btns">
+            <button class="btn-upload">📷 Tải ảnh lên</button>
+            <button class="btn-remove">Xoá ảnh</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Họ <span>*</span></label><input class="fi" value="Nguyễn"></div>
+        <div class="form-group"><label class="fl">Tên <span>*</span></label><input class="fi" value="Văn A"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Email</label><input class="fi" value="nguyenvana@gmail.com"></div>
+        <div class="form-group"><label class="fl">Số điện thoại</label><input class="fi" value="0901 234 567"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="fl">Ngày sinh</label><input class="fi" type="date" value="1995-06-15"></div>
+        <div class="form-group"><label class="fl">Giới tính</label><select class="fi"><option>Nam</option><option>Nữ</option><option>Khác</option></select></div>
+      </div>
+      <div class="form-group"><label class="fl">Giới thiệu</label><textarea class="fi">Tôi yêu thích thiết kế nội thất phong cách Nordic và Japandi.</textarea></div>
+      <div class="form-actions">
+        <button class="btn-cancel">Huỷ</button>
+        <button class="btn-save" onclick="showToast('✅','Đã lưu thành công','Thông tin cá nhân đã được cập nhật.')">Lưu thay đổi</button>
+      </div>
+    </div>
+
+    <!-- ── PLACEHOLDER SECTIONS ── -->
+    <div id="sec-address" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">📍</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--text-dark);margin-bottom:8px">Địa chỉ giao hàng</h3>
+      <p style="font-size:13px;color:var(--text-light)">Quản lý địa chỉ nhận hàng của bạn</p>
+    </div>
+    <div id="sec-security" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🔒</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300;color:var(--text-dark);margin-bottom:8px">Bảo mật tài khoản</h3>
+      <p style="font-size:13px;color:var(--text-light)">Đổi mật khẩu, xác thực 2 lớp</p>
+    </div>
+    <div id="sec-cart" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">🛒</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300">Giỏ hàng</h3>
+    </div>
+    <div id="sec-orders" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">📦</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300">Đơn hàng của tôi</h3>
+    </div>
+    <div id="sec-wishlist" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">♡</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300">Sản phẩm yêu thích</h3>
+    </div>
+    <div id="sec-settings" class="profile-form" style="padding:48px;text-align:center">
+      <div style="font-size:48px;margin-bottom:16px">⚙️</div>
+      <h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:300">Cài đặt</h3>
+    </div>
+
+    <!-- ── NOTIFICATION CENTER ── -->
+    <div id="sec-notifications" class="notif-center active" style="display:block">
+      <div class="content-header" style="padding:20px 24px 0;margin-bottom:0">
+        <div>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;padding:0">Trung tâm <em style="color:var(--gold);font-style:italic">thông báo</em></h2>
+          <div style="font-size:13px;color:var(--text-light);margin-top:3px;padding-bottom:16px">Theo dõi toàn bộ hoạt động tài khoản của bạn</div>
+        </div>
+        <button class="ch-action" onclick="markAllRead()">✓ Đọc tất cả</button>
+      </div>
+
+      <!-- Big tabs -->
+      <div class="nc-tabs">
+        <button class="nc-tab active" onclick="switchNcTab(this,'all')">
+          <span class="nc-tab-icon">📋</span> Tất cả
+          <span class="nc-tab-badge" id="nc-badge-all">5</span>
+        </button>
+        <button class="nc-tab" onclick="switchNcTab(this,'order')">
+          <span class="nc-tab-icon">📦</span> Đơn hàng
+          <span class="nc-tab-badge" id="nc-badge-order">2</span>
+        </button>
+        <button class="nc-tab" onclick="switchNcTab(this,'promo')">
+          <span class="nc-tab-icon">🎁</span> Khuyến mãi
+          <span class="nc-tab-badge" id="nc-badge-promo">2</span>
+        </button>
+        <button class="nc-tab" onclick="switchNcTab(this,'system')">
+          <span class="nc-tab-icon">⚙️</span> Hệ thống
+          <span class="nc-tab-badge" id="nc-badge-system">1</span>
+        </button>
+        <button class="nc-tab" onclick="switchNcTab(this,'review')">
+          <span class="nc-tab-icon">⭐</span> Đánh giá
+        </button>
+      </div>
+
+      <!-- Sub filter -->
+      <div class="nc-subfilter">
+        <button class="nc-sf-btn active" onclick="filterRead(this,'all')">Tất cả</button>
+        <button class="nc-sf-btn" onclick="filterRead(this,'unread')">Chưa đọc</button>
+        <button class="nc-sf-btn" onclick="filterRead(this,'read')">Đã đọc</button>
+        <button class="nc-mark-all-btn" onclick="markAllRead()">✓ Đánh dấu tất cả đã đọc</button>
+      </div>
+
+      <!-- List -->
+      <div class="nc-list" id="ncList"></div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /page-body -->
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon">✅</div>
+  <div>
+    <div class="toast-title" id="toastTitle">Thành công</div>
+    <div class="toast-sub" id="toastSub"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════
+const notifications = [
+  {
+    id:1, type:'order', subtype:'ship', unread:true,
+    title:'Đơn hàng đang được giao',
+    desc:'Đơn hàng <strong>#LX-2024-0892</strong> đã rời kho và đang trên đường giao đến bạn. Dự kiến: <strong>hôm nay 15:00 – 18:00</strong>.',
+    time:'10 phút trước', date:'Hôm nay',
+    icon:'🚚', iconClass:'nic-ship', tag:'pending', tagLabel:'Đang giao',
+    detail:{
+      'Mã đơn':'#LX-2024-0892',
+      'Sản phẩm':'Giường Walnut Premium 1m6',
+      'Mã vận đơn':'SPXVN062866583164',
+      'Vị trí':'Kho Bình Dương → TP.HCM Q.7',
+      'Tổng tiền':'12.500.000 đ',
+    },
+    actions:[{label:'🗺️ Theo dõi đơn',style:'primary'},{label:'Xem chi tiết',style:'ghost'}]
+  },
+  {
+    id:2, type:'promo', subtype:'promo', unread:true,
+    title:'Flash Sale – Giảm 30% cuối tuần này!',
+    desc:'Ưu đãi đặc biệt cho bộ sưu tập <strong>Heritage Collection</strong>. Chỉ còn <strong>2 ngày</strong> – đừng bỏ lỡ!',
+    time:'1 giờ trước', date:'Hôm nay',
+    icon:'🎁', iconClass:'nic-promo', tag:'promo', tagLabel:'Khuyến mãi',
+    detail:{
+      'Mã giảm giá':'HERITAGE30',
+      'Giảm tới':'30% toàn bộ bộ sưu tập',
+      'Hết hạn':'Chủ nhật 23:59',
+      'Đơn tối thiểu':'5.000.000 đ',
+    },
+    actions:[{label:'🛍️ Mua ngay',style:'primary'},{label:'Sao chép mã',style:'ghost'}]
+  },
+  {
+    id:3, type:'order', subtype:'review', unread:true,
+    title:'Hãy đánh giá sản phẩm vừa nhận',
+    desc:'Bạn vừa nhận <strong>Sofa Nordic 3 chỗ</strong>. Chia sẻ trải nghiệm để nhận <strong>50.000 điểm</strong> thưởng nhé!',
+    time:'3 giờ trước', date:'Hôm nay',
+    icon:'⭐', iconClass:'nic-review', tag:'info', tagLabel:'Đánh giá',
+    detail:{
+      'Sản phẩm':'Sofa Nordic 3 chỗ – Màu xám',
+      'Phần thưởng':'50.000 điểm LUXNEST',
+      'Hạn đánh giá':'7 ngày kể từ hôm nay',
+    },
+    actions:[{label:'⭐ Đánh giá ngay',style:'primary'}]
+  },
+  {
+    id:4, type:'system', subtype:'system', unread:true,
+    title:'Tài khoản được xác thực thành công',
+    desc:'Email <strong>nguyenvana@gmail.com</strong> đã được xác thực. Bạn có thể sử dụng đầy đủ tính năng LUXNEST.',
+    time:'Hôm qua 14:32', date:'Hôm qua',
+    icon:'✅', iconClass:'nic-system', tag:'success', tagLabel:'Hệ thống',
+    detail:{
+      'Loại xác thực':'Email',
+      'Tài khoản':'nguyenvana@gmail.com',
+      'Thời gian':'14:32 – 13/05/2025',
+    },
+    actions:[{label:'Xem tài khoản',style:'ghost'}]
+  },
+  {
+    id:5, type:'promo', subtype:'promo', unread:true,
+    title:'Sản phẩm yêu thích đang giảm giá',
+    desc:'<strong>Ghế Ergonomic ProFlex</strong> trong danh sách yêu thích của bạn vừa giảm <strong>15%</strong>. Chỉ còn 1.020.000đ!',
+    time:'Hôm qua 09:10', date:'Hôm qua',
+    icon:'💰', iconClass:'nic-promo', tag:'promo', tagLabel:'Giá tốt',
+    detail:{
+      'Sản phẩm':'Ghế Ergonomic ProFlex',
+      'Giá gốc':'1.200.000 đ',
+      'Giá sau giảm':'1.020.000 đ',
+      'Còn lại':'8 sản phẩm',
+    },
+    actions:[{label:'🛒 Thêm vào giỏ',style:'primary'},{label:'Xem sản phẩm',style:'ghost'}]
+  },
+  {
+    id:6, type:'order', subtype:'ship', unread:false,
+    title:'Giao hàng thành công',
+    desc:'Đơn hàng <strong>#LX-2024-0875</strong> – <strong>Bàn Làm Việc Walnut 1m4</strong> đã giao thành công. Cảm ơn bạn!',
+    time:'16/04/2025 11:08', date:'16/04/2025',
+    icon:'📦', iconClass:'nic-ship', tag:'success', tagLabel:'Hoàn thành',
+    detail:{
+      'Mã đơn':'#LX-2024-0875',
+      'Sản phẩm':'Bàn Làm Việc Walnut 1m4',
+      'Ngày giao':'11:08 – 16/04/2025',
+      'Tổng tiền':'4.500.000 đ',
+    },
+    actions:[{label:'⭐ Đánh giá',style:'primary'},{label:'Mua lại',style:'ghost'}]
+  },
+];
+
+// ══════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════
+let currentDropTab = 'all';
+let currentNcTab = 'all';
+let currentReadFilter = 'all';
+
+// ══════════════════════════════════════
+//  RENDER HELPERS
+// ══════════════════════════════════════
+function getFiltered(type = 'all', readFilter = 'all') {
+  return notifications.filter(n => {
+    const typeOk = type === 'all' || n.type === type;
+    const readOk = readFilter === 'all' || (readFilter === 'unread' && n.unread) || (readFilter === 'read' && !n.unread);
+    return typeOk && readOk;
+  });
+}
+
+function unreadCount(type = 'all') {
+  return notifications.filter(n => n.unread && (type === 'all' || n.type === type)).length;
+}
+
+// ── Dropdown items ──
+function renderDropList(type = 'all') {
+  const list = document.getElementById('dropList');
+  const items = getFiltered(type).slice(0, 5);
+  if (!items.length) {
+    list.innerHTML = `<div style="padding:28px;text-align:center;font-size:13px;color:var(--text-light)">Không có thông báo nào</div>`;
+    return;
+  }
+  list.innerHTML = items.map(n => `
+    <div class="nd-item ${n.unread ? 'unread' : ''}" onclick="openNotif(${n.id})">
+      <div class="nd-icon-wrap ${
+        n.type==='order'?'ni-ship':n.type==='promo'?'ni-promo':n.type==='system'?'ni-system':'ni-order'
+      }">${n.icon}</div>
+      <div class="nd-content" style="flex:1;min-width:0">
+        <div class="nd-item-title">${n.title}</div>
+        <div class="nd-item-body">${n.desc.replace(/<[^>]*>/g,'')}</div>
+        <div class="nd-item-time">
+          ${n.unread ? '<span class="nd-unread-dot"></span>' : ''}
+          ${n.time}
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Full notification center items ──
+function renderNcList(type = 'all', readFilter = 'all') {
+  const list = document.getElementById('ncList');
+  const items = getFiltered(type, readFilter);
+  if (!items.length) {
+    list.innerHTML = `<div class="nc-empty">
+      <div class="nc-empty-icon">🔔</div>
+      <div class="nc-empty-title">Không có thông báo nào</div>
+      <div class="nc-empty-sub">Khi có hoạt động mới, chúng sẽ hiển thị ở đây</div>
+    </div>`;
+    return;
+  }
+
+  // Group by date
+  const grouped = {};
+  items.forEach(n => {
+    if (!grouped[n.date]) grouped[n.date] = [];
+    grouped[n.date].push(n);
+  });
+
+  list.innerHTML = Object.entries(grouped).map(([date, group]) => `
+    <div class="nc-date-group">
+      <div class="nc-date-label">${date}</div>
+      ${group.map((n, i) => `
+        <div class="nc-item ${n.unread ? 'unread' : ''}" id="ncitem-${n.id}" style="animation-delay:${i * 0.05}s">
+          <div class="nc-item-icon ${n.iconClass}">${n.icon}</div>
+          <div class="nc-item-body">
+            <div class="nc-item-top">
+              <div class="nc-item-title">${n.title}</div>
+              <div class="nc-item-time">${n.time}</div>
+            </div>
+            <div class="nc-item-desc">${n.desc}</div>
+            <div class="nc-item-footer">
+              <span class="nc-item-tag tag-${n.tag}">${n.tagLabel}</span>
+              <button class="nc-expand-btn" onclick="toggleExpand(event,${n.id})">
+                Xem chi tiết <span class="nc-expand-icon">▼</span>
+              </button>
+            </div>
+            <div class="nc-item-detail" id="detail-${n.id}">
+              ${Object.entries(n.detail).map(([k,v]) => `
+                <div class="nc-detail-row">
+                  <span class="ndr-label">${k}</span>
+                  <span class="ndr-value">${v}</span>
+                </div>
+              `).join('')}
+              <div class="nc-detail-actions">
+                ${n.actions.map(a => `
+                  <button class="nda-btn nda-${a.style}" onclick="handleAction('${a.label}',${n.id})">${a.label}</button>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+}
+
+// ══════════════════════════════════════
+//  INTERACTIONS
+// ══════════════════════════════════════
+
+// Dropdown toggle (click to pin)
+let dropPinned = false;
+function toggleDropdown() {
+  dropPinned = !dropPinned;
+  document.getElementById('notifDropdown').classList.toggle('pinned', dropPinned);
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', e => {
+  if (!document.getElementById('notifWrap').contains(e.target)) {
+    dropPinned = false;
+    document.getElementById('notifDropdown').classList.remove('pinned');
+  }
+});
+
+// Filter dropdown tabs
+function filterDropdown(btn, type) {
+  document.querySelectorAll('.nd-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentDropTab = type;
+  renderDropList(type);
+}
+
+// Open notification (mark read + expand in full page)
+function openNotif(id) {
+  const n = notifications.find(x => x.id === id);
+  if (n) n.unread = false;
+  updateBadges();
+  renderDropList(currentDropTab);
+  renderNcList(currentNcTab, currentReadFilter);
+  // Scroll to & expand in full page
+  goToNotifPage();
+  setTimeout(() => {
+    const el = document.getElementById(`ncitem-${id}`);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('expanded');
+      document.getElementById(`detail-${id}`).style.display = 'block';
+    }
+  }, 200);
+}
+
+// Toggle expand detail in nc-list
+function toggleExpand(e, id) {
+  e.stopPropagation();
+  const item = document.getElementById(`ncitem-${id}`);
+  const detail = document.getElementById(`detail-${id}`);
+  const isOpen = item.classList.contains('expanded');
+  // Mark as read
+  const n = notifications.find(x => x.id === id);
+  if (n) n.unread = false;
+  // Toggle
+  item.classList.toggle('expanded');
+  detail.style.display = isOpen ? 'none' : 'block';
+  updateBadges();
+  renderNcList(currentNcTab, currentReadFilter);
+}
+
+// Go to notification page
+function goToNotifPage() {
+  dropPinned = false;
+  document.getElementById('notifDropdown').classList.remove('pinned');
+  showSection('notifications', document.querySelector('.ps-nav-item:nth-child(4)'));
+}
+
+// Go to profile page
+function goToProfilePage() {
+  showSection('profile', document.querySelector('.ps-nav-item:first-child'));
+}
+
+// Switch main section
+function showSection(sec, el) {
+  // Hide all sections
+  document.querySelectorAll('.profile-form, .notif-center').forEach(s => {
+    s.style.display = 'none';
+    if(s.classList.contains('profile-form')) s.classList.remove('active');
+  });
+  // Show target
+  const target = document.getElementById('sec-' + sec);
+  if (target) {
+    target.style.display = 'block';
+    target.classList.add('active');
+  }
+  // Update sidebar
+  document.querySelectorAll('.ps-nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+// Switch full notification tab
+function switchNcTab(btn, type) {
+  document.querySelectorAll('.nc-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  currentNcTab = type;
+  renderNcList(type, currentReadFilter);
+}
+
+// Filter read/unread
+function filterRead(btn, filter) {
+  document.querySelectorAll('.nc-sf-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  currentReadFilter = filter;
+  renderNcList(currentNcTab, filter);
+}
+
+// Mark all read
+function markAllRead() {
+  notifications.forEach(n => n.unread = false);
+  updateBadges();
+  renderDropList(currentDropTab);
+  renderNcList(currentNcTab, currentReadFilter);
+  showToast('✅', 'Đã đánh dấu tất cả đã đọc', '');
+}
+
+// Update all badge counts
+function updateBadges() {
+  const total = unreadCount('all');
+  const order = unreadCount('order');
+  const promo = unreadCount('promo');
+  const system = unreadCount('system');
+
+  // Bell badge
+  document.getElementById('bellBadge').style.display = total > 0 ? 'block' : 'none';
+  // Sidebar badge
+  const sb = document.getElementById('sidebarBadge');
+  sb.textContent = total;
+  sb.style.display = total > 0 ? '' : 'none';
+  // Dropdown count
+  document.getElementById('dropUnreadCount').textContent = total;
+  document.getElementById('dropUnreadCount').style.display = total > 0 ? '' : 'none';
+  // NC tab badges
+  const badge = (id, count) => {
+    const el = document.getElementById('nc-badge-' + id);
+    if (el) { el.textContent = count; el.style.display = count > 0 ? '' : 'none'; }
+  };
+  badge('all', total); badge('order', order); badge('promo', promo); badge('system', system);
+}
+
+// Handle action buttons
+function handleAction(label, id) {
+  if (label.includes('Sao chép')) {
+    showToast('📋', 'Đã sao chép mã!', 'Dán mã khi thanh toán để được giảm giá.');
+  } else if (label.includes('Giỏ')) {
+    showToast('🛒', 'Đã thêm vào giỏ hàng', 'Xem giỏ hàng để thanh toán.');
+  } else if (label.includes('Đánh giá')) {
+    showToast('⭐', 'Mở trang đánh giá...', '');
+  } else {
+    showToast('→', label, '');
+  }
+}
+
+// Toast
+let toastTimer;
+function showToast(icon, title, sub) {
+  clearTimeout(toastTimer);
+  document.getElementById('toastIcon').textContent = icon;
+  document.getElementById('toastTitle').textContent = title;
+  document.getElementById('toastSub').textContent = sub;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function toggleSubmenu(e) {
+  e.preventDefault();
+
+  const wrap = document.getElementById('notifSubmenu');
+  const content = document.getElementById('notifSubmenuContent');
+
+  wrap.classList.toggle('active');
+  content.classList.toggle('open');
+}
+
+function showNotificationType(e, type, el) {
+  e.preventDefault();
+
+  // active submenu
+  document.querySelectorAll('.ps-submenu-item')
+    .forEach(i => i.classList.remove('active'));
+
+  el.classList.add('active');
+
+  // show notification section
+  showSection(
+    'notifications',
+    document.querySelector('.ps-parent')
+  );
+
+  // sync big tabs
+  currentNcTab = type;
+
+  document.querySelectorAll('.nc-tab')
+    .forEach(t => t.classList.remove('active'));
+
+  const targetTab = [...document.querySelectorAll('.nc-tab')]
+    .find(tab => tab.onclick.toString().includes(`'${type}'`));
+
+  if(targetTab){
+    targetTab.classList.add('active');
+  }
+
+  renderNcList(type, currentReadFilter);
+}
+
+// ══════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════
+(function init() {
+  renderDropList('all');
+  renderNcList('all', 'all');
+  updateBadges();
+  // Show notification section by default
+  showSection('notifications', document.querySelector('.ps-nav-item[onclick*="notifications"]'));
+})();
+</script>
+</body>
+</html>
