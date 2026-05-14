@@ -114,8 +114,26 @@ export function useRoom3D() {
     store.addToCart(product)
   }
 
+  function addProductToScene(payload) {
+    if (!payload) return
+    if (typeof payload === 'number') {
+      store.addToScene(payload)
+      return
+    }
+
+    if (typeof payload === 'object') {
+      store.addToScene(payload.productId ?? payload.id, {
+        initialPosition: payload.initialPosition ?? null,
+      })
+    }
+  }
+
   function removeProductFromCart(productId) {
     store.removeFromCart(productId)
+  }
+
+  function removeProductFromScene(instanceId) {
+    store.removeFromScene(instanceId)
   }
 
   function submitCheckoutMock() {
@@ -146,8 +164,12 @@ export function useRoom3D() {
     if (Number.isFinite(productId)) {
       const target = PRODUCTS_3D.find((item) => item.id === productId)
       if (target) {
-        store.addToCart(target)
-        // Ensure users can still see all cards after deep-link add.
+        // "Xem 3D" tu trang chi tiet se dua san pham vao scene, khong tu dong dua vao gio.
+        store.addToScene(target.id)
+        if (!roomType && Array.isArray(target.roomTypes) && target.roomTypes.length > 0) {
+          store.selectTemplateRoom(target.roomTypes[0])
+        }
+        // Van reset filter de user thay day du san pham sau khi dieu huong.
         store.setCategory('all')
         store.setSearchKeyword('')
         applied = true
@@ -188,7 +210,9 @@ export function useRoom3D() {
     handleUploadImage,
     selectRoomType,
     addProductToCart,
+    addProductToScene,
     removeProductFromCart,
+    removeProductFromScene,
     submitCheckoutMock,
   }
 }
