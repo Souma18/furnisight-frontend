@@ -37,7 +37,11 @@ const props = defineProps({
     type: Object,
     default: null,
   },
-  placedProductIds: {
+  sceneItems: {
+    type: Array,
+    default: () => [],
+  },
+  cartProductIds: {
     type: Array,
     default: () => [],
   },
@@ -45,7 +49,7 @@ const props = defineProps({
 
 const hasRoom = computed(() => Boolean(props.selectedRoom))
 const isRoomAvailable = computed(() => Boolean(props.selectedRoom?.modelUrl))
-const emit = defineEmits(['remove-product', 'add-product'])
+const emit = defineEmits(['remove-scene-item', 'add-scene-product', 'add-product'])
 const shellRef = ref(null)
 const rendererRef = ref(null)
 const sceneRef = ref(null)
@@ -55,7 +59,7 @@ const furnitureGroups = ref([])
 const loadedFurnitureIds = ref([])
 const floorGridRef = ref(null)
 const roomBoundsRef = ref({ minX: -3.2, maxX: 3.2, minZ: -3.2, maxZ: 3.2, floorY: 0 })
-const selectedProductId = ref(null)
+const selectedSceneItemId = ref(null)
 const selectedScale = ref({ x: 1, y: 1, z: 1 })
 const selectedColor = ref('#ffffff')
 const selectedPosition = ref({ x: 0, z: 0 })
@@ -73,21 +77,25 @@ const isDraggingProduct = ref(false)
 
 const productMap = new Map(PRODUCTS_3D.map((item) => [item.id, item]))
 const fallbackProductIds = computed(() =>
-  props.placedProductIds.filter((id) => !loadedFurnitureIds.value.includes(id)),
+  props.sceneItems.filter((item) => !loadedFurnitureIds.value.includes(item.instanceId)),
 )
 const shouldRenderRoomFallback = computed(() => hasRoom.value && !roomModelGroup.value)
 const viewMode = ref('3d')
+const selectedSceneItem = computed(
+  () => props.sceneItems.find((item) => item.instanceId === selectedSceneItemId.value) ?? null,
+)
 const selectedProduct = computed(() =>
-  PRODUCTS_3D.find((product) => product.id === selectedProductId.value) ?? null,
+  PRODUCTS_3D.find((product) => product.id === selectedSceneItem.value?.productId) ?? null,
 )
 const isFullscreen = ref(false)
 const isModelLoading = ref(false)
+const isDragOverCanvas = ref(false)
 const isCanvasBusy = computed(() => props.isAnalyzing || isModelLoading.value)
 const busyText = computed(() =>
   props.isAnalyzing ? 'Dang tao mo hinh...' : 'Dang tai mo hinh, vui long cho...',
 )
 const isSelectedInCart = computed(() =>
-  selectedProductId.value ? props.placedProductIds.includes(selectedProductId.value) : false,
+  selectedProduct.value ? props.cartProductIds.includes(selectedProduct.value.id) : false,
 )
 
 const loader = new GLTFLoader()
@@ -105,6 +113,32 @@ const LIGHTING_PRESET = {
 function focusCameraToRoom() {
   const camera = cameraRef.value?.camera
   if (!camera) return
+
+  // Frame camera theo bounding box that cua model phong de tranh bi lech xuong duoi.
+  const roomObject = roomModelGroup.value
+  if (roomObject) {
+    const box = new Box3().setFromObject(roomObject)
+    if (!box.isEmpty()) {
+      const center = box.getCenter(new Vector3())
+      const size = box.getSize(new Vector3())
+      const dominantSize = Math.max(size.x, size.z, size.y * 1.2, 4)
+      const targetY = box.min.y + size.y * 0.42
+
+      camera.position.set(
+        center.x,
+        targetY + Math.max(1.9, size.y * 0.42),
+        center.z + dominantSize * 1.15,
+      )
+      camera.lookAt(center.x, targetY, center.z)
+      camera.updateProjectionMatrix?.()
+      orbitControls?.target?.set(center.x, targetY, center.z)
+      orbitControls?.update?.()
+      viewMode.value = '3d'
+      return
+    }
+  }
+
+  // Fallback cho state chua co room box on dinh.
   camera.position.set(0, 3.4, 8)
   camera.lookAt(0, 1, 0)
   camera.updateProjectionMatrix?.()
@@ -116,6 +150,23 @@ function focusCameraToRoom() {
 function setTopView() {
   const camera = cameraRef.value?.camera
   if (!camera) return
+
+  const roomObject = roomModelGroup.value
+  if (roomObject) {
+    const box = new Box3().setFromObject(roomObject)
+    if (!box.isEmpty()) {
+      const center = box.getCenter(new Vector3())
+      const size = box.getSize(new Vector3())
+      camera.position.set(center.x, Math.max(8, size.y + Math.max(size.x, size.z) * 1.2), center.z + 0.01)
+      camera.lookAt(center.x, box.min.y, center.z)
+      camera.updateProjectionMatrix?.()
+      orbitControls?.target?.set(center.x, box.min.y, center.z)
+      orbitControls?.update?.()
+      viewMode.value = 'top'
+      return
+    }
+  }
+
   camera.position.set(0, 10, 0.01)
   camera.lookAt(0, 0, 0)
   camera.updateProjectionMatrix?.()
@@ -127,6 +178,24 @@ function setTopView() {
 function setFrontView() {
   const camera = cameraRef.value?.camera
   if (!camera) return
+
+  const roomObject = roomModelGroup.value
+  if (roomObject) {
+    const box = new Box3().setFromObject(roomObject)
+    if (!box.isEmpty()) {
+      const center = box.getCenter(new Vector3())
+      const size = box.getSize(new Vector3())
+      const targetY = box.min.y + size.y * 0.42
+      camera.position.set(center.x, targetY + Math.max(0.8, size.y * 0.18), box.max.z + Math.max(3.8, size.z * 0.9))
+      camera.lookAt(center.x, targetY, center.z)
+      camera.updateProjectionMatrix?.()
+      orbitControls?.target?.set(center.x, targetY, center.z)
+      orbitControls?.update?.()
+      viewMode.value = 'front'
+      return
+    }
+  }
+
   camera.position.set(0, 2.6, 9.5)
   camera.lookAt(0, 1, 0)
   camera.updateProjectionMatrix?.()
@@ -228,7 +297,7 @@ function clampToRoomBounds(x, z) {
 function findProductCarrier(object3D) {
   let current = object3D
   while (current) {
-    if (current.userData?.productId) return current
+    if (current.userData?.instanceId) return current
     current = current.parent
   }
   return null
@@ -308,9 +377,9 @@ function restoreOriginalModelColors(model) {
 }
 
 function applyUserOverrides(model) {
-  const productId = model?.userData?.productId
-  if (!productId) return
-  const override = productOverrides.value[productId]
+  const instanceId = model?.userData?.instanceId
+  if (!instanceId) return
+  const override = productOverrides.value[instanceId]
   const baseScale = model.userData?.baseScale
   if (baseScale && override?.scale) {
     model.scale.set(
@@ -349,10 +418,10 @@ function onCanvasPointerDown(event) {
   raycaster.setFromCamera(pointer, camera)
   const hits = raycaster.intersectObjects(scene.children, true)
   const picked = hits.map((hit) => findProductCarrier(hit.object)).find(Boolean)
-  selectedProductId.value = picked?.userData?.productId ?? null
+  selectedSceneItemId.value = picked?.userData?.instanceId ?? null
 
-  if (selectedProductId.value) {
-    const override = productOverrides.value[selectedProductId.value] ?? {}
+  if (selectedSceneItemId.value) {
+    const override = productOverrides.value[selectedSceneItemId.value] ?? {}
     selectedScale.value = {
       x: override.scale?.x ?? 1,
       y: override.scale?.y ?? 1,
@@ -379,7 +448,7 @@ function onCanvasPointerDown(event) {
 }
 
 function onCanvasPointerMove(event) {
-  if (!isDraggingProduct.value || !selectedProductId.value) return
+  if (!isDraggingProduct.value || !selectedSceneItemId.value) return
   const renderer = rendererRef.value?.renderer
   const camera = cameraRef.value?.camera
   if (!renderer?.domElement || !camera) return
@@ -395,13 +464,13 @@ function onCanvasPointerMove(event) {
 
   productOverrides.value = {
     ...productOverrides.value,
-    [selectedProductId.value]: {
-      ...(productOverrides.value[selectedProductId.value] ?? {}),
+    [selectedSceneItemId.value]: {
+      ...(productOverrides.value[selectedSceneItemId.value] ?? {}),
       position: next,
     },
   }
 
-  const model = furnitureGroups.value.find((item) => item.userData?.productId === selectedProductId.value)
+  const model = furnitureGroups.value.find((item) => item.userData?.instanceId === selectedSceneItemId.value)
   if (model) applyUserOverrides(model)
 }
 
@@ -411,7 +480,83 @@ function onCanvasPointerUp() {
   if (orbitControls) orbitControls.enabled = true
 }
 
-function normalizeFurnitureModel(model, product, index) {
+function parseDraggedProductId(event) {
+  const raw =
+    event.dataTransfer?.getData('application/x-room3d-product') ||
+    event.dataTransfer?.getData('text/plain')
+  if (!raw) return null
+
+  try {
+    const parsed = JSON.parse(raw)
+    return Number.isFinite(parsed?.productId) ? parsed.productId : null
+  } catch {
+    const asNumber = Number.parseInt(String(raw).trim(), 10)
+    return Number.isFinite(asNumber) ? asNumber : null
+  }
+}
+
+function hasDraggedProductData(event) {
+  const types = Array.from(event.dataTransfer?.types ?? [])
+  return (
+    types.includes('application/x-room3d-product') ||
+    types.includes('text/plain') ||
+    types.includes('text')
+  )
+}
+
+function onCanvasDragEnter(event) {
+  if (!hasRoom.value || !isRoomAvailable.value || !hasDraggedProductData(event)) return
+  event.preventDefault()
+  isDragOverCanvas.value = true
+}
+
+function onCanvasDragOver(event) {
+  if (!hasRoom.value || !isRoomAvailable.value || !hasDraggedProductData(event)) return
+  event.preventDefault()
+  isDragOverCanvas.value = true
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = 'copy'
+  }
+}
+
+function onCanvasDragLeave(event) {
+  const nextTarget = event.relatedTarget
+  if (nextTarget && shellRef.value?.contains?.(nextTarget)) return
+  isDragOverCanvas.value = false
+}
+
+function onCanvasDrop(event) {
+  const productId = parseDraggedProductId(event)
+  if (!productId || !hasRoom.value || !isRoomAvailable.value) return
+  event.preventDefault()
+  isDragOverCanvas.value = false
+
+  const renderer = rendererRef.value?.renderer
+  const camera = cameraRef.value?.camera
+  if (!renderer?.domElement || !camera) {
+    emit('add-scene-product', { productId })
+    return
+  }
+
+  const rect = renderer.domElement.getBoundingClientRect()
+  pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+  pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+  raycaster.setFromCamera(pointer, camera)
+
+  const floorY = roomBoundsRef.value.floorY ?? 0
+  dragPlane.constant = -floorY
+
+  if (raycaster.ray.intersectPlane(dragPlane, dragHitPoint)) {
+    const initialPosition = clampToRoomBounds(dragHitPoint.x, dragHitPoint.z)
+    emit('add-scene-product', { productId, initialPosition })
+    return
+  }
+
+  emit('add-scene-product', { productId })
+}
+
+function normalizeFurnitureModel(model, sceneItem, index) {
+  const product = productMap.get(sceneItem.productId)
   const fallback = product?.fallback ?? { width: 0.9, height: 0.9, depth: 0.9 }
   const originalBox = new Box3().setFromObject(model)
   const size = originalBox.getSize(new Vector3())
@@ -423,10 +568,11 @@ function normalizeFurnitureModel(model, product, index) {
   model.scale.setScalar(fitScale)
   model.userData.baseScale = model.scale.clone()
   model.userData.productId = product.id
+  model.userData.instanceId = sceneItem.instanceId
   captureOriginalMaterialColors(model)
   model.userData.isNeutralGray = modelLooksNeutralGray(model)
 
-  const pos = getPlacementPosition(index)
+  const pos = sceneItem.initialPosition ?? getPlacementPosition(index)
   model.position.set(pos.x, 0, pos.z)
   model.rotation.set(0, 0, 0)
 
@@ -443,8 +589,8 @@ function normalizeFurnitureModel(model, product, index) {
 
   productOverrides.value = {
     ...productOverrides.value,
-    [product.id]: {
-      ...(productOverrides.value[product.id] ?? {}),
+    [sceneItem.instanceId]: {
+      ...(productOverrides.value[sceneItem.instanceId] ?? {}),
       position: { x: pos.x, z: pos.z },
       rotationY: 0,
     },
@@ -452,70 +598,70 @@ function normalizeFurnitureModel(model, product, index) {
 }
 
 function updateSelectedScale(axis, value) {
-  if (!selectedProductId.value) return
+  if (!selectedSceneItemId.value) return
   selectedScale.value = { ...selectedScale.value, [axis]: value }
   productOverrides.value = {
     ...productOverrides.value,
-    [selectedProductId.value]: {
-      ...(productOverrides.value[selectedProductId.value] ?? {}),
+    [selectedSceneItemId.value]: {
+      ...(productOverrides.value[selectedSceneItemId.value] ?? {}),
       scale: { ...selectedScale.value, [axis]: value },
     },
   }
-  const model = furnitureGroups.value.find((item) => item.userData?.productId === selectedProductId.value)
+  const model = furnitureGroups.value.find((item) => item.userData?.instanceId === selectedSceneItemId.value)
   if (model) applyUserOverrides(model)
 }
 
 function updateSelectedColor(colorHex) {
-  if (!selectedProductId.value) return
+  if (!selectedSceneItemId.value) return
   selectedColor.value = colorHex
   productOverrides.value = {
     ...productOverrides.value,
-    [selectedProductId.value]: {
-      ...(productOverrides.value[selectedProductId.value] ?? {}),
+    [selectedSceneItemId.value]: {
+      ...(productOverrides.value[selectedSceneItemId.value] ?? {}),
       color: colorHex,
     },
   }
-  const model = furnitureGroups.value.find((item) => item.userData?.productId === selectedProductId.value)
+  const model = furnitureGroups.value.find((item) => item.userData?.instanceId === selectedSceneItemId.value)
   if (model) applyUserOverrides(model)
 }
 
 function removeSelectedProduct() {
-  if (!selectedProductId.value) return
-  emit('remove-product', selectedProductId.value)
-  selectedProductId.value = null
+  if (!selectedSceneItemId.value) return
+  emit('remove-scene-item', selectedSceneItemId.value)
+  selectedSceneItemId.value = null
   if (orbitControls) orbitControls.enabled = true
   isDraggingProduct.value = false
 }
 
 function addSelectedProductToCart() {
-  if (!selectedProductId.value || isSelectedInCart.value) return
-  emit('add-product', selectedProductId.value)
+  if (!selectedProduct.value?.id || isSelectedInCart.value) return
+  emit('add-product', selectedProduct.value.id)
 }
 
 function resetSelectedColor() {
-  if (!selectedProductId.value) return
-  const current = productOverrides.value[selectedProductId.value]
+  if (!selectedSceneItemId.value) return
+  const current = productOverrides.value[selectedSceneItemId.value]
   if (!current) return
   const { color: _removed, ...rest } = current
   productOverrides.value = {
     ...productOverrides.value,
-    [selectedProductId.value]: rest,
+    [selectedSceneItemId.value]: rest,
   }
-  const model = furnitureGroups.value.find((item) => item.userData?.productId === selectedProductId.value)
+  const model = furnitureGroups.value.find((item) => item.userData?.instanceId === selectedSceneItemId.value)
   if (model) applyUserOverrides(model)
 }
 
 function updateSelectedRotation(value) {
-  if (!selectedProductId.value) return
+  if (!selectedSceneItemId.value) return
   selectedRotationY.value = value
   productOverrides.value = {
     ...productOverrides.value,
-    [selectedProductId.value]: {
-      ...(productOverrides.value[selectedProductId.value] ?? {}),
+    [selectedSceneItemId.value]: {
+      ...(productOverrides.value[selectedSceneItemId.value] ?? {}),
       rotationY: value,
     },
   }
-  const model = furnitureGroups.value.find((item) => item.userData?.productId === selectedProductId.value)
+  const model = furnitureGroups.value.find((item) => item.userData?.instanceId === selectedSceneItemId.value)
   if (model) applyUserOverrides(model)
 }
 
@@ -624,6 +770,12 @@ async function loadRoomModel() {
     if (floorGridRef.value) {
       floorGridRef.value.position.y = floorY - 0.03
     }
+
+    // Sau khi model upload / phong mau load xong, frame lai camera theo kich thuoc that.
+    requestAnimationFrame(() => {
+      focusCameraToRoom()
+      resizeRendererToShell()
+    })
   } catch {
     console.warn('[Room3D] Failed to load room model:', props.selectedRoom.modelUrl)
     roomModelGroup.value = null
@@ -643,19 +795,19 @@ async function loadFurnitureModels() {
   const loaded = []
 
   await Promise.all(
-    props.placedProductIds.map(async (id, index) => {
-      const product = productMap.get(id)
+    props.sceneItems.map(async (sceneItem, index) => {
+      const product = productMap.get(sceneItem.productId)
       if (!product?.modelUrl) return
 
       try {
         const gltf = await loader.loadAsync(product.modelUrl)
         if (currentToken !== furnitureLoadToken) return
         const model = gltf.scene
-        normalizeFurnitureModel(model, product, index)
+        normalizeFurnitureModel(model, sceneItem, index)
         applyUserOverrides(model)
         sceneRef.value.scene.add(model)
         furnitureGroups.value.push(model)
-        loaded.push(id)
+        loaded.push(sceneItem.instanceId)
       } catch {
         console.warn('[Room3D] Failed to load furniture model:', product.modelUrl)
         // fallback box will render for this item
@@ -688,7 +840,7 @@ watch(
 )
 
 watch(
-  () => props.placedProductIds,
+  () => props.sceneItems,
   () => {
     loadFurnitureModels()
   },
@@ -725,10 +877,24 @@ onMounted(async () => {
 })
 
 watch(
+  () => props.selectedRoom?.modelUrl,
+  async () => {
+    await nextTick()
+    requestAnimationFrame(() => {
+      focusCameraToRoom()
+      resizeRendererToShell()
+    })
+  },
+)
+
+watch(
   () => props.selectedRoom?.type,
   async () => {
     await nextTick()
-    focusCameraToRoom()
+    requestAnimationFrame(() => {
+      focusCameraToRoom()
+      resizeRendererToShell()
+    })
   },
 )
 
@@ -743,10 +909,10 @@ watch(
 )
 
 watch(
-  () => props.placedProductIds,
+  () => props.sceneItems,
   (ids) => {
-    if (selectedProductId.value && !ids.includes(selectedProductId.value)) {
-      selectedProductId.value = null
+    if (selectedSceneItemId.value && !ids.some((item) => item.instanceId === selectedSceneItemId.value)) {
+      selectedSceneItemId.value = null
     }
   },
   { deep: true },
@@ -761,7 +927,15 @@ defineExpose({
 </script>
 
 <template>
-  <section ref="shellRef" class="canvas-shell">
+  <section
+    ref="shellRef"
+    class="canvas-shell"
+    :class="{ 'canvas-shell--drag-over': isDragOverCanvas }"
+    @dragenter="onCanvasDragEnter"
+    @dragover="onCanvasDragOver"
+    @dragleave="onCanvasDragLeave"
+    @drop="onCanvasDrop"
+  >
     <Renderer ref="rendererRef" antialias resize>
       <Camera ref="cameraRef" :position="{ x: 0, y: 3.4, z: 8 }" />
       <Scene ref="sceneRef">
@@ -796,12 +970,16 @@ defineExpose({
         />
 
         <Box
-          v-for="(id, index) in fallbackProductIds"
-          :key="id"
+          v-for="(sceneItem, index) in fallbackProductIds"
+          :key="sceneItem.instanceId"
           :width="0.8"
           :height="0.8"
           :depth="0.8"
-          :position="{ x: (index % 4 - 1.5) * 1.3, y: 0.4, z: Math.floor(index / 4) * 1.3 - 1.3 }"
+          :position="{
+            x: sceneItem.initialPosition?.x ?? (index % 4 - 1.5) * 1.3,
+            y: 0.4,
+            z: sceneItem.initialPosition?.z ?? Math.floor(index / 4) * 1.3 - 1.3,
+          }"
         />
       </Scene>
     </Renderer>
@@ -826,7 +1004,7 @@ defineExpose({
     <div v-if="selectedProduct" class="item-quick-panel">
       <div class="panel-head">
         <strong>{{ selectedProduct.name }}</strong>
-        <button type="button" class="close-btn" @click="selectedProductId = null">✕</button>
+        <button type="button" class="close-btn" @click="selectedSceneItemId = null">✕</button>
       </div>
 
       <div class="panel-row">
@@ -917,6 +1095,10 @@ defineExpose({
     <button v-if="isFullscreen" type="button" class="exit-fullscreen-btn" @click="toggleFullscreen">
       ✕ Thoat toan canh
     </button>
+
+    <div v-if="isDragOverCanvas" class="drop-hint">
+      Tha san pham vao day de dat trong phong
+    </div>
   </section>
 </template>
 
@@ -925,8 +1107,15 @@ defineExpose({
   position: relative;
   height: 100%;
   width: 100%;
+  min-height: 0;
+  overflow: hidden;
   background: #e9ecef;
 }
+
+.canvas-shell--drag-over {
+  box-shadow: inset 0 0 0 3px rgba(15, 63, 92, 0.34);
+}
+
 .canvas-shell:fullscreen {
   width: 100vw;
   height: 100vh;
@@ -1005,6 +1194,21 @@ defineExpose({
 
 .exit-fullscreen-btn:hover {
   background: #0f3f5c;
+}
+
+.drop-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 18;
+  border-radius: 999px;
+  background: rgba(15, 63, 92, 0.92);
+  color: #f7f9fb;
+  padding: 0.55rem 1rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  pointer-events: none;
 }
 
 @keyframes spin {
