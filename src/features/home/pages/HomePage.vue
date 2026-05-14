@@ -44,6 +44,7 @@ const filteredRooms = computed(() => {
     const fallback = roomFallbacks[cat.name] || { image: '/home/rooms/livingroom.jpeg', isBig: false }
     return {
       id: cat.id,
+      slug: cat.slug,        // slug from BE, e.g. "dining-room"
       type: cat.name,
       name: cat.name,
       count: `${cat.productCount || 0} sản phẩm`,

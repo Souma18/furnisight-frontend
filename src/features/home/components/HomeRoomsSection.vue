@@ -9,11 +9,14 @@ defineProps({
 
 const emit = defineEmits(['select-filter'])
 
-function getCategoryRoute(roomName) {
-  // Map display names to the breadcrumb format expected by ProductListPage.vue
+function getCategoryRoute(room) {
+  // room.slug comes directly from the category API response (e.g. "dining-room")
+  // room.id is the UUID which we don't want to send as category filter
+  // Use slug if available, otherwise derive it from the name
+  const slug = room.slug ?? room.name?.toLowerCase().replace(/\s+/g, '-')
   return {
     name: 'products',
-    query: { breadcrumb: roomName.toLowerCase() }
+    query: { category: slug }
   }
 }
 </script>
@@ -44,7 +47,7 @@ function getCategoryRoute(roomName) {
           :key="room.id"
           :class="['room-card', { big: room.isBig }]"
         >
-          <RouterLink :to="getCategoryRoute(room.name)" class="room-link">
+          <RouterLink :to="getCategoryRoute(room)" class="room-link">
             <img :src="room.image" :alt="room.name" @error="$event.target.style.display = 'none'" />
             <div class="room-img-placeholder">{{ room.placeholder }}</div>
             <div class="room-overlay">

@@ -1,13 +1,4 @@
 <script setup>
-/** Chip nhanh → id danh mục sidebar/API (khớp PRODUCT_SIDEBAR_CATEGORIES). */
-const CHIP_TO_CATEGORY = {
-  'giường ngủ': 'giường ngủ',
-  'tủ quần áo': 'tủ quần áo',
-  'đầu tủ': 'đầu tủ & kệ',
-  'bàn trang điểm': 'bàn trang điểm',
-  'đèn ngủ': 'đèn & phụ kiện',
-}
-
 const props = defineProps({
   modelValue: { type: String, default: '' },
   quickFilters: { type: Array, default: () => [] },
@@ -18,17 +9,13 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'toggle-category', 'update:view-mode'])
 
-function chipCategoryId(chip) {
-  const k = chip.toLowerCase()
-  if (k.includes('sale')) return null
-  return CHIP_TO_CATEGORY[k] ?? k
-}
-
 function chipIsActive(chip) {
   const k = chip.toLowerCase()
   if (k.includes('sale')) return props.saleOnly
-  const id = chipCategoryId(chip)
-  return id != null && props.selectedCategory === id
+  
+  // Basic slug comparison: "Living Room" -> "living-room"
+  const slug = k.trim().replace(/\s+/g, '-')
+  return props.selectedCategory.toLowerCase() === slug
 }
 
 function chipClass(chip) {

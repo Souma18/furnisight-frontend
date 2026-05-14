@@ -1,5 +1,4 @@
 <script setup>
-import { getProductDetailById } from '../mock/productDetailMockData'
 import { formatVnd } from '../mock/productListMockData'
 
 defineProps({
@@ -13,12 +12,8 @@ defineProps({
 
 const emit = defineEmits(['update:sortBy'])
 
-function hasDetail(item) {
-  return Boolean(item.detailId && getProductDetailById(item.detailId))
-}
-
 function detailRoute(item) {
-  return hasDetail(item) ? `/products/${item.detailId}` : null
+  return `/products/${item.slug || item.id}`
 }
 
 function stars(rating) {
@@ -51,17 +46,14 @@ function stars(rating) {
 
     <div v-else class="pl-grid" :class="{ list: viewMode === 'list' }">
       <article v-for="item in products" :key="item.id" class="pl-card">
-        <RouterLink v-if="hasDetail(item)" :to="detailRoute(item)" class="pl-card-media">
-          <span>{{ item.imageFallback }}</span>
+        <RouterLink :to="detailRoute(item)" class="pl-card-media">
+          <img v-if="item.thumbnailUrl || item.imageUrl" :src="item.thumbnailUrl || item.imageUrl" :alt="item.name" class="pl-img" />
+          <span v-else>{{ item.imageFallback || 'No Image' }}</span>
         </RouterLink>
-        <div v-else class="pl-card-media pl-card-media-disabled">
-          <span>{{ item.imageFallback }}</span>
-        </div>
 
         <div class="pl-card-body">
-          <p class="pl-cat">{{ item.category }}</p>
-          <RouterLink v-if="hasDetail(item)" :to="detailRoute(item)" class="pl-name">{{ item.name }}</RouterLink>
-          <p v-else class="pl-name pl-name-disabled">{{ item.name }}</p>
+          <p class="pl-cat">{{ item.category?.label || item.category || 'N/A' }}</p>
+          <RouterLink :to="detailRoute(item)" class="pl-name">{{ item.name }}</RouterLink>
           <p v-if="viewMode === 'list'" class="pl-desc">{{ item.description }}</p>
 
           <div class="pl-rating">

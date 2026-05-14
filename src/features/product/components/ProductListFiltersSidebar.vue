@@ -69,8 +69,9 @@ function toggleBlock(key) {
   openBlocks[key] = !openBlocks[key]
 }
 
-function selectCategory(id) {
-  emit('select-category', id)
+function selectCategory(cat) {
+  // Emit the slug for BE filtering; fallback to id if no slug
+  emit('select-category', cat.slug ?? cat.id)
 }
 
 function toggleBand(id) {
@@ -114,10 +115,11 @@ function clearAll() {
   emit('clear')
 }
 
-function categoryActive(id) {
-  const c1 = String(props.selectedCategory ?? 'all').toLowerCase()
-  const c2 = String(id).toLowerCase()
-  return c1 === c2
+function categoryActive(cat) {
+  const current = String(props.selectedCategory ?? 'all').toLowerCase()
+  // Match against slug (primary) or label (fallback)
+  return current === String(cat.slug ?? '').toLowerCase() ||
+         current === String(cat.label ?? '').toLowerCase()
 }
 </script>
 
@@ -136,8 +138,8 @@ function categoryActive(id) {
           <li
             v-for="cat in displayCategories"
             :key="cat.id"
-            :class="{ active: categoryActive(cat.id) }"
-            @click="selectCategory(cat.id)"
+            :class="{ active: categoryActive(cat) }"
+            @click="selectCategory(cat)"
           >
             <span class="pl-cl-name">{{ cat.label }}</span>
             <span class="pl-cl-count">{{ cat.count }}</span>
