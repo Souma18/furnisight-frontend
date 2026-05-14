@@ -24,10 +24,7 @@ const {
   profile,
   addresses,
   orders,
-  selectedOrder,
-  openOrderDetail,
-  backToOrders,
-  cancelOrder,
+  cartItems,
   wishlist,
   settings,
   projects,
@@ -94,19 +91,8 @@ function handleLogout() {
         :notification-category="notificationCategory"
         @notify="showToast"
       />
-      <OrderDetailView
-        v-else-if="activeView === 'order-detail'"
-        :order="selectedOrder"
-        @back="backToOrders"
-        @cancel-order="cancelOrder"
-      />
-      <OrdersView
-        v-else-if="activeView === 'orders'"
-        :orders="orders"
-        @view-detail="openOrderDetail"
-        @cancel-order="cancelOrder"
-      />
-      <CartView v-else-if="activeView === 'cart'" />
+      <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
+      <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView
         v-else-if="activeView === 'security'"

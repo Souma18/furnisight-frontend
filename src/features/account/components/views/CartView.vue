@@ -54,6 +54,10 @@ watch(
   { deep: true },
 )
 
+onMounted(() => {
+  ensureHydrated()
+})
+
 watch(
   () => activeDraft.value?.selectedColor,
   () => {
