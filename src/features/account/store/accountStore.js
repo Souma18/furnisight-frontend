@@ -13,7 +13,6 @@ export const useAccountStore = defineStore('account', () => {
   const profile = ref(null)
   const addresses = ref([])
   const orders = ref([])
-  const cartItems = ref([])
   const wishlist = ref([])
   const settings = ref({})
   const projects = ref([])
@@ -47,7 +46,6 @@ export const useAccountStore = defineStore('account', () => {
       }
       addresses.value = data.addresses
       orders.value = data.orders
-      cartItems.value = data.cartItems
       wishlist.value = data.wishlist
       settings.value = data.settings
       projects.value = data.projects
@@ -84,7 +82,6 @@ export const useAccountStore = defineStore('account', () => {
     profile,
     addresses,
     orders,
-    cartItems,
     wishlist,
     settings,
     projects,

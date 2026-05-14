@@ -22,8 +22,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
   const sceneItems = ref([])
-  const placedProductIds = ref([])
-  const cartItems = ref([])
   const isCartExpanded = ref(false)
   const isCheckoutOpen = ref(false)
   const isSuccessOpen = ref(false)
@@ -39,18 +37,10 @@ export const useRoom3DStore = defineStore('room3d', () => {
       if (typeof parsed.selectedRoomType === 'string') selectedRoomType.value = parsed.selectedRoomType
       if (typeof parsed.searchKeyword === 'string') searchKeyword.value = parsed.searchKeyword
       if (typeof parsed.selectedCategory === 'string') selectedCategory.value = parsed.selectedCategory
-      if (Array.isArray(parsed.placedProductIds)) {
-        placedProductIds.value = parsed.placedProductIds.filter((id) => Number.isFinite(id))
-      }
       if (Array.isArray(parsed.sceneItems)) {
         sceneItems.value = parsed.sceneItems.filter(
           (item) => item && typeof item.instanceId === 'string' && Number.isFinite(item.productId),
         )
-      }
-      if (Array.isArray(parsed.cartItems)) {
-        cartItems.value = parsed.cartItems
-          .filter((item) => item && Number.isFinite(item.id))
-          .map((item) => ({ ...item, qty: Number.isFinite(item.qty) ? item.qty : 1 }))
       }
     } catch {
       // Ignore corrupted local storage data.
@@ -67,8 +57,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
           searchKeyword: searchKeyword.value,
           selectedCategory: selectedCategory.value,
           sceneItems: sceneItems.value,
-          placedProductIds: placedProductIds.value,
-          cartItems: cartItems.value,
         }),
       )
     } catch {
@@ -105,11 +93,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     // Model phong mau tu tab "Phong o".
     return room
   })
-
-  const cartCount = computed(() => cartItems.value.length)
-  const cartTotal = computed(() =>
-    cartItems.value.reduce((total, item) => total + item.price * item.qty, 0),
-  )
 
   function setMode(nextMode) {
     mode.value = nextMode
@@ -170,19 +153,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedCategory.value = category
   }
 
-  function addToCart(product) {
-    if (!product || !Number.isFinite(product.id)) return
-    const existed = cartItems.value.some((item) => item.id === product.id)
-    if (existed) {
-      return
-    }
-
-    cartItems.value.push({ ...product, qty: 1 })
-    if (!placedProductIds.value.includes(product.id)) {
-      placedProductIds.value.push(product.id)
-    }
-  }
-
   function addToScene(productOrId, options = {}) {
     const productId = typeof productOrId === 'number' ? productOrId : productOrId?.id
     if (!Number.isFinite(productId)) return null
@@ -201,18 +171,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
     sceneItems.value = sceneItems.value.filter((item) => item.instanceId !== instanceId)
   }
 
-  function removeFromCart(productId) {
-    cartItems.value = cartItems.value.filter((item) => item.id !== productId)
-    placedProductIds.value = placedProductIds.value.filter((id) => id !== productId)
-  }
-
-  function clearCart() {
-    cartItems.value = []
-    placedProductIds.value = []
-  }
-
   watch(
-    [selectedRoomType, searchKeyword, selectedCategory, sceneItems, placedProductIds, cartItems],
+    [selectedRoomType, searchKeyword, selectedCategory, sceneItems],
     () => {
       persistState()
     },
@@ -253,10 +213,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     searchKeyword,
     selectedCategory,
     sceneItems,
-    placedProductIds,
-    cartItems,
-    cartCount,
-    cartTotal,
     isCartExpanded,
     isCheckoutOpen,
     isSuccessOpen,
@@ -273,10 +229,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     setSearchKeyword,
     setCategory,
     addToScene,
-    addToCart,
     removeFromScene,
-    removeFromCart,
-    clearCart,
     toggleCart,
     openCheckout,
     closeCheckout,

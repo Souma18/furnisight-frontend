@@ -11,6 +11,7 @@ import {
 } from '@features/account/api/accountNotificationsMockApi'
 import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -202,9 +203,10 @@ onMounted(() => {
           </div>
         </div>
       </div>
-      <button class="icon-btn" type="button" aria-label="Gio hang">
-        <AppIcon name="cart" :size="14" />
-      </button>
+      <AppHeaderCartDropdown
+        :is-authenticated="isAuthenticated"
+        @require-auth="isAuthModalOpen = true"
+      />
       <button
         class="icon-btn user"
         type="button"

@@ -34,11 +34,6 @@ const routes = [
     component: () => import('@features/auth/pages/OAuthCallbackPage.vue'),
   },
   {
-    path: '/cart',
-    name: 'cart',
-    component: () => import('@features/cart/pages/CartPage.vue'),
-  },
-  {
     path: '/account',
     name: 'account',
     component: () => import('@features/account/pages/AccountPage.vue'),

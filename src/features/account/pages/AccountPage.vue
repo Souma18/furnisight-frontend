@@ -23,7 +23,6 @@ const {
   profile,
   addresses,
   orders,
-  cartItems,
   wishlist,
   settings,
   projects,
@@ -89,7 +88,7 @@ function handleLogout() {
         @notify="showToast"
       />
       <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
-      <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
+      <CartView v-else-if="activeView === 'cart'" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView
         v-else-if="activeView === 'security'"

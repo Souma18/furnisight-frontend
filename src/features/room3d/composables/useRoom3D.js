@@ -4,17 +4,24 @@ import { useRoute } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
 import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
 import { PRODUCTS_3D, PRODUCT_FILTERS } from '../core/mockData'
+import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
 
 export function useRoom3D() {
   const route = useRoute()
   const store = useRoom3DStore()
+  const cartStore = useCartStore()
   const state = storeToRefs(store)
+  const cartState = storeToRefs(cartStore)
   const roomTemplates = ref([])
   const isLoadingTemplates = ref(false)
   const orderCode = ref('')
   const uploadError = ref('')
   const appliedDeepLinkKey = ref('')
+  const cartItems = computed(() => cartState.items.value)
+  const placedProductIds = computed(() => cartState.room3dProductIds.value)
+  const cartTotal = computed(() => cartState.totalAmount.value)
+  const cartCount = computed(() => cartState.lineCount.value)
 
   const QUALITY_TO_MESH_RESOLUTION = {
     '128': 128,
@@ -41,6 +48,7 @@ export function useRoom3D() {
   async function initRoomTemplates() {
     isLoadingTemplates.value = true
     try {
+      await cartStore.ensureHydrated()
       const { data } = await getRoomTemplates()
       roomTemplates.value = data
     } finally {
@@ -111,7 +119,7 @@ export function useRoom3D() {
         ? PRODUCTS_3D.find((item) => item.id === productOrId)
         : productOrId
     if (!product) return
-    store.addToCart(product)
+    cartStore.addItem(product)
   }
 
   function addProductToScene(payload) {
@@ -128,8 +136,8 @@ export function useRoom3D() {
     }
   }
 
-  function removeProductFromCart(productId) {
-    store.removeFromCart(productId)
+  function removeProductFromCart(lineId) {
+    cartStore.removeItem(lineId)
   }
 
   function removeProductFromScene(instanceId) {
@@ -140,7 +148,7 @@ export function useRoom3D() {
     orderCode.value = `LN${Date.now().toString().slice(-6)}`
     store.closeCheckout()
     store.openSuccess()
-    store.clearCart()
+    cartStore.clearCart()
   }
 
   function applyDeepLinkProduct() {
@@ -191,6 +199,10 @@ export function useRoom3D() {
 
   return {
     ...state,
+    cartItems,
+    placedProductIds,
+    cartTotal,
+    cartCount,
     roomTemplates,
     isLoadingTemplates,
     productFilters: PRODUCT_FILTERS,

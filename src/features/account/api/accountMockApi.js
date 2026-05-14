@@ -48,40 +48,6 @@ const orders = [
   { id: 'LN250418', status: 'done', date: '18/04/2025', total: 4450000, items: 2 },
 ]
 
-const cartItems = [
-  {
-    id: 'cart-1',
-    detailId: 'nordic-sofa',
-    name: 'Sofa Nordic 3 chỗ ngồi',
-    qty: 1,
-    price: 8500000,
-    imageFallback: '🛋️',
-    selectedColor: 'Be sáng',
-    selectedSize: '2m1 × 95cm',
-    outOfStock: true,
-  },
-  {
-    id: 'cart-2',
-    detailId: 'ergonomic-chair',
-    name: 'Ghế ergonomic ProFlex X1',
-    qty: 2,
-    price: 1200000,
-    imageFallback: '🪑',
-    selectedColor: 'Xám đá',
-    selectedSize: 'Tiêu chuẩn',
-  },
-  {
-    id: 'cart-3',
-    detailId: 'tea-table',
-    name: 'Đèn treo trần Rattan Boho',
-    qty: 1,
-    price: 920000,
-    imageFallback: '💡',
-    selectedColor: 'Nâu gỗ',
-    selectedSize: 'Ø60 × 45cm',
-  },
-]
-
 const wishlist = [
   ...homeProducts
     .filter((item) => item.isFavorite)
@@ -114,7 +80,6 @@ export async function fetchAccountOverviewMock() {
     profile,
     addresses,
     orders,
-    cartItems,
     wishlist,
     settings,
     projects,

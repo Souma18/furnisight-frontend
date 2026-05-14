@@ -27,7 +27,6 @@ export function useAccountPage() {
   const profile = computed(() => accountStore.profile)
   const addresses = computed(() => accountStore.addresses)
   const orders = computed(() => accountStore.orders)
-  const cartItems = computed(() => accountStore.cartItems)
   const wishlist = computed(() => accountStore.wishlist)
   const settings = computed(() => accountStore.settings)
   const projects = computed(() => accountStore.projects)
@@ -86,7 +85,6 @@ export function useAccountPage() {
     profile,
     addresses,
     orders,
-    cartItems,
     wishlist,
     settings,
     projects,
