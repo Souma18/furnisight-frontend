@@ -1,9 +1,15 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAccountStore } from '../store/accountStore'
 
 const VIEWS = [
   'profile',
   'address',
+  'bell',
+  'bell-order',
+  'bell-promo',
+  'bell-system',
+  'bell-review',
   'orders',
   'cart',
   'wishlist',
@@ -13,6 +19,7 @@ const VIEWS = [
 ]
 
 export function useAccountPage() {
+  const route = useRoute()
   const accountStore = useAccountStore()
   const activeView = ref('profile')
   const toast = ref({ open: false, message: '', type: 'success' })
@@ -28,6 +35,12 @@ export function useAccountPage() {
 
   function setView(nextView) {
     if (VIEWS.includes(nextView)) activeView.value = nextView
+  }
+
+  function syncViewFromQuery(nextView = route.query.view) {
+    if (typeof nextView === 'string' && VIEWS.includes(nextView)) {
+      activeView.value = nextView
+    }
   }
 
   let toastTimer = null
@@ -61,6 +74,11 @@ export function useAccountPage() {
 
   onMounted(() => {
     accountStore.hydrate()
+    syncViewFromQuery()
+  })
+
+  watch(() => route.query.view, (nextView) => {
+    syncViewFromQuery(nextView)
   })
 
   return {
