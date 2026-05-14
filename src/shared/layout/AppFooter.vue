@@ -41,7 +41,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
         </div>
         <div class="col">
           <h4>Ho tro</h4>
-          <a href="/">Lien he</a>
+          <a href="/contact">Lien he</a>
           <a href="/">Chinh sach giao hang</a>
           <a href="/">Doi tra va Hoan tien</a>
           <a href="/">Bao hanh san pham</a>
