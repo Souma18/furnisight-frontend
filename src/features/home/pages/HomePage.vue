@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
@@ -10,22 +10,79 @@ import HomeProductsSectionV2 from '../components/HomeProductsSectionV2.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
 import {
-  homeCategories,
+  fetchCategories,
+  fetchProducts
+} from '@features/product/api/productApi'
+import {
   homeFeatures,
   homeHero,
-  homeProducts,
   homeRoomFilters,
   homeRooms,
   homeTestimonials,
 } from '../mock/homeMockData'
 
-const activeCategoryId = ref(homeCategories[0]?.id ?? '')
-const activeRoomFilter = ref(homeRoomFilters[0] ?? 'Tat ca')
+const categories = ref([])
+const products = ref([])
+const activeCategoryId = ref('')
 const wishedProductIds = ref([])
+const roomFilters = computed(() => ['Tat ca', ...categories.value.map(c => c.name)])
+const activeRoomFilter = ref('Tat ca')
 
 const filteredRooms = computed(() => {
-  if (activeRoomFilter.value === 'Tat ca') return homeRooms
-  return homeRooms.filter((room) => room.type === activeRoomFilter.value)
+  // We'll use a mix of real data and mock images for now since BE doesn't have room images yet
+  const rooms = categories.value.map(cat => {
+    // Find matching mock room to get the image
+    const mockRoom = homeRooms.find(r => r.type === cat.name) || homeRooms[0]
+    return {
+      id: cat.id,
+      type: cat.name,
+      name: cat.name,
+      count: `${cat.productCount || 0} sản phẩm`,
+      image: cat.imageUrl || mockRoom.image,
+      isBig: mockRoom.isBig || false
+    }
+  })
+
+  if (activeRoomFilter.value === 'Tat ca') return rooms
+  return rooms.filter((room) => room.type === activeRoomFilter.value)
+})
+
+async function loadData() {
+  try {
+    const [catRes, prodRes] = await Promise.all([
+      fetchCategories(),
+      fetchProducts({ size: 8 })
+    ])
+    
+    // Map BE categories to FE format (root categories only)
+    categories.value = catRes.data
+      .filter(cat => !cat.parentId)
+      .map((cat) => ({
+        ...cat,
+        icon: cat.iconUrl || '🛋️',
+        count: `${cat.productCount || 0} sản phẩm`
+      }))
+    
+    if (categories.value.length > 0) {
+      activeCategoryId.value = categories.value[0].id
+    }
+
+    // BE returns { products: [], total: ... }
+    products.value = prodRes.data.products.map(p => ({
+      ...p,
+      category: p.categoryName,
+      // Map price to string if needed, or keep as is if component handles number
+      price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price),
+      image: p.image || '/home/products/placeholder.jpg'
+    }))
+    
+  } catch (error) {
+    console.error('Failed to load home data:', error)
+  }
+}
+
+onMounted(() => {
+  loadData()
 })
 
 function toggleWish(productId) {
@@ -44,18 +101,18 @@ useRevealOnScroll('.fade-up')
     <HomeHeroSection :hero="homeHero" />
     <HomeFeaturesStripSection :items="homeFeatures" />
     <HomeCategoriesSection
-      :categories="homeCategories"
+      :categories="categories"
       :active-category-id="activeCategoryId"
       @select-category="activeCategoryId = $event"
     />
     <HomeRoomsSection
-      :filters="homeRoomFilters"
+      :filters="roomFilters"
       :active-room-filter="activeRoomFilter"
       :rooms="filteredRooms"
       @select-filter="activeRoomFilter = $event"
     />
     <HomeProductsSectionV2
-      :products="homeProducts"
+      :products="products"
       :wished-product-ids="wishedProductIds"
       @toggle-wish="toggleWish"
     />

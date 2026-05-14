@@ -23,10 +23,21 @@ const emit = defineEmits(['select-category'])
         :class="['cat-card', { active: activeCategoryId === category.id }]"
         @click="emit('select-category', category.id)"
       >
-        <div class="cat-icon">{{ category.icon }}</div>
+        <div class="cat-icon">
+          <img v-if="category.icon && (category.icon.startsWith('http') || category.icon.startsWith('/'))" :src="category.icon" :alt="category.name" class="cat-icon-img" />
+          <span v-else>{{ category.icon }}</span>
+        </div>
         <div class="cat-name">{{ category.name }}</div>
         <div class="cat-count">{{ category.count }}</div>
       </button>
     </div>
   </section>
 </template>
+
+<style scoped>
+.cat-icon-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+</style>
