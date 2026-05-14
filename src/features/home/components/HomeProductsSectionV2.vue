@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { getProductDetailById } from '@features/product/mock/productDetailMockData'
+import { getProductDetailById } from '@features/product/mock/productDetailMockData.js'
 
 defineProps({
   products: { type: Array, default: () => [] },

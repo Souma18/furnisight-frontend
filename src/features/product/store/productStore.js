@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchProductsMock } from '../api/productApi'
+import { fetchProducts } from '../api/productApi'
 
 export const useProductStore = defineStore('product', () => {
   const items = ref([])
@@ -13,9 +13,8 @@ export const useProductStore = defineStore('product', () => {
     loading.value = true
     error.value = null
     try {
-      // TODO(BE): switch to fetchProducts(params) when backend endpoint is ready.
-      const { data } = await fetchProductsMock(params)
-      items.value = data?.items ?? data ?? []
+      const { data } = await fetchProducts(params)
+      items.value = data?.items ?? data?.products ?? []
       total.value = data?.total ?? items.value.length
       facets.value = data?.facets ?? {}
     } catch (e) {

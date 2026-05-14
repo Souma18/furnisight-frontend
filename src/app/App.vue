@@ -1,15 +1,17 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
+import router from './router'
 
-const route = useRoute()
-const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
-const isHomePage = computed(() => route.name === 'home')
-const isProductsPage = computed(() => route.name === 'products')
-const isProductDetailPage = computed(() => route.name === 'product-detail')
-const isAccountPage = computed(() => route.path.startsWith('/account'))
+// Dung router.currentRoute thay cho useRouter() de tranh loi injection o root component
+const route = computed(() => router?.currentRoute?.value)
+
+const isRoom3DPage = computed(() => route.value?.path?.startsWith('/room3d') || false)
+const isHomePage = computed(() => route.value?.name === 'home')
+const isProductsPage = computed(() => route.value?.name === 'products')
+const isProductDetailPage = computed(() => route.value?.name === 'product-detail')
+const isAccountPage = computed(() => route.value?.path?.startsWith('/account') || false)
 const mainRef = ref(null)
 let resizeObserver = null
 let mutationObserver = null
@@ -38,7 +40,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.fullPath,
+  () => route.value?.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()

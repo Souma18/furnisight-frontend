@@ -10,7 +10,7 @@ import { PRODUCT_CATEGORY_HERO, PRODUCT_QUICK_FILTERS } from '../mock/productLis
 import '../styles/productList.css'
 
 const route = useRoute()
-const { items, total, loading, loadList } = useProducts()
+const { items, total, facets, loading, loadList } = useProducts()
 const searchKeyword = ref('')
 const selectedCategory = ref('all')
 const sortBy = ref('popular')
@@ -46,7 +46,12 @@ function parseQueryPreset() {
   const qBreadcrumb = String(route.query.breadcrumb ?? '').trim().toLowerCase()
   if (!qBreadcrumb || qBreadcrumb === 'sản phẩm') return
   const map = {
-    'phòng ngủ': 'giường ngủ',
+    'phòng ngủ': 'phòng ngủ',
+    'bedroom': 'phòng ngủ',
+    'phòng khách': 'phòng khách',
+    'living room': 'phòng khách',
+    'phòng bếp': 'phòng bếp',
+    'kitchen': 'phòng bếp',
     ghế: 'ghế',
     sofa: 'sofa',
     'bàn trà': 'bàn trà',
@@ -141,6 +146,7 @@ onMounted(() => {
       <ProductListFiltersSidebar
         :selected-category="selectedCategory"
         :applied="appliedFilters"
+        :facets="facets"
         @select-category="selectSidebarCategory"
         @apply="onApplySidebar"
         @clear="onClearFilters"

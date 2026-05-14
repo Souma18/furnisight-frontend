@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { pinia } from '../plugins/pinia'
 
 const routes = [
   {
@@ -60,17 +60,12 @@ export const router = createRouter({
   },
 })
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } })
-  } else {
-    next()
-  }
-})
 
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
+router.beforeEach(async (to, from, next) => {
+  // Lazy load store to avoid circular dependency on startup
+  const { useAuthStore } = await import('@features/auth/store/authStore')
+  const authStore = useAuthStore(pinia)
+  
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })
   } else {

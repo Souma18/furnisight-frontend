@@ -2,9 +2,6 @@
 import { computed, reactive, watch } from 'vue'
 import {
   PRODUCT_PRICE_BAND_OPTIONS,
-  PRODUCT_SIDEBAR_CATEGORIES,
-  PRODUCT_SIDEBAR_COLORS,
-  PRODUCT_SIDEBAR_MATERIALS,
   PRODUCT_STAR_FILTER_OPTIONS,
 } from '../mock/productListMockData'
 
@@ -20,6 +17,10 @@ const props = defineProps({
       colors: [],
       minStar: null,
     }),
+  },
+  facets: {
+    type: Object,
+    default: () => ({}),
   },
 })
 
@@ -56,8 +57,12 @@ watch(
   { deep: true, immediate: true },
 )
 
+const displayCategories = computed(() => props.facets?.categories || [])
+const displayMaterials = computed(() => props.facets?.materials || [])
+const displayColors = computed(() => props.facets?.colors || [])
+
 const totalCategoryCount = computed(() =>
-  PRODUCT_SIDEBAR_CATEGORIES.find((c) => c.id === 'all')?.count ?? 0,
+  displayCategories.value.find((c) => c.id === 'all')?.count ?? 0,
 )
 
 function toggleBlock(key) {
@@ -129,7 +134,7 @@ function categoryActive(id) {
       <div v-show="openBlocks.cat" class="pl-filter-body">
         <ul class="pl-cat-list" role="list">
           <li
-            v-for="cat in PRODUCT_SIDEBAR_CATEGORIES"
+            v-for="cat in displayCategories"
             :key="cat.id"
             :class="{ active: categoryActive(cat.id) }"
             @click="selectCategory(cat.id)"
@@ -180,7 +185,7 @@ function categoryActive(id) {
       </div>
       <div v-show="openBlocks.mat" class="pl-filter-body">
         <div class="pl-mat-list">
-          <label v-for="m in PRODUCT_SIDEBAR_MATERIALS" :key="m.id" class="pl-mat-row">
+          <label v-for="m in displayMaterials" :key="m.id" class="pl-mat-row">
             <input
               type="checkbox"
               :checked="pending.materials.includes(m.id)"
@@ -200,7 +205,7 @@ function categoryActive(id) {
       <div v-show="openBlocks.color" class="pl-filter-body">
         <div class="pl-color-filter-row">
           <button
-            v-for="c in PRODUCT_SIDEBAR_COLORS"
+            v-for="c in displayColors"
             :key="c.id"
             type="button"
             class="pl-cf-swatch"

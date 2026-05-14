@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   filters: { type: Array, default: () => [] },
   activeRoomFilter: { type: String, default: '' },
@@ -6,6 +8,14 @@ defineProps({
 })
 
 const emit = defineEmits(['select-filter'])
+
+function getCategoryRoute(roomName) {
+  // Map display names to the breadcrumb format expected by ProductListPage.vue
+  return {
+    name: 'products',
+    query: { breadcrumb: roomName.toLowerCase() }
+  }
+}
 </script>
 
 <template>
@@ -34,17 +44,29 @@ const emit = defineEmits(['select-filter'])
           :key="room.id"
           :class="['room-card', { big: room.isBig }]"
         >
-          <img :src="room.image" :alt="room.name" @error="$event.target.style.display = 'none'" />
-          <div class="room-img-placeholder">{{ room.placeholder }}</div>
-          <div class="room-overlay">
-            <span class="room-badge">{{ room.type }}</span>
-            <div class="room-info">
-              <div class="room-name">{{ room.name }}</div>
-              <div class="room-count">{{ room.count }}</div>
+          <RouterLink :to="getCategoryRoute(room.name)" class="room-link">
+            <img :src="room.image" :alt="room.name" @error="$event.target.style.display = 'none'" />
+            <div class="room-img-placeholder">{{ room.placeholder }}</div>
+            <div class="room-overlay">
+              <span class="room-badge">{{ room.type }}</span>
+              <div class="room-info">
+                <div class="room-name">{{ room.name }}</div>
+                <div class="room-count">{{ room.count }}</div>
+              </div>
             </div>
-          </div>
+          </RouterLink>
         </article>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.room-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+</style>
