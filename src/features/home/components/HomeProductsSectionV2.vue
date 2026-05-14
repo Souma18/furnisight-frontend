@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { useProductNavigation } from '@features/product/composables/useProductNavigation'
+import { getProductDetailById } from '@features/product/mock/productDetailMockData'
 
 defineProps({
   products: { type: Array, default: () => [] },
@@ -9,7 +9,10 @@ defineProps({
 
 const emit = defineEmits(['toggle-wish'])
 
-const { getDetailRoute } = useProductNavigation()
+function getDetailRoute(productId) {
+  const detail = getProductDetailById(productId)
+  return detail ? `/products/${productId}` : null
+}
 </script>
 
 <template>
@@ -21,13 +24,7 @@ const { getDetailRoute } = useProductNavigation()
       </div>
     </div>
     <div class="products-grid">
-      <RouterLink
-        v-for="product in products"
-        :key="product.id"
-        :to="getDetailRoute(product.detailId ?? product.id) || '#'"
-        class="product-card"
-        :class="{ 'product-card-disabled': !getDetailRoute(product.detailId ?? product.id) }"
-      >
+      <article v-for="product in products" :key="product.id" class="product-card">
         <div class="product-img">
           <RouterLink v-if="getDetailRoute(product.detailId ?? product.id)" :to="getDetailRoute(product.detailId ?? product.id)">
             <img :src="product.image" :alt="product.name" @error="$event.target.style.display = 'none'" />
@@ -40,7 +37,7 @@ const { getDetailRoute } = useProductNavigation()
             @error="$event.target.style.display = 'none'"
           />
           <span :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
-          <button type="button" class="product-wish" @click.prevent.stop="emit('toggle-wish', product.id)">
+          <button type="button" class="product-wish" @click="emit('toggle-wish', product.id)">
             {{ wishedProductIds.includes(product.id) ? '♥' : '♡' }}
           </button>
           <span class="product-fallback">{{ product.placeholder }}</span>
@@ -60,17 +57,10 @@ const { getDetailRoute } = useProductNavigation()
               <span class="product-price">{{ product.price }}</span>
               <span v-if="product.oldPrice" class="product-price-old">{{ product.oldPrice }}</span>
             </div>
-            <span class="product-sold">Đã bán {{ product.soldCount ?? 0 }}</span>
+            <button type="button" class="add-btn">+</button>
           </div>
         </div>
-      </RouterLink>
-      <HomeProductTile
-        v-for="product in products"
-        :key="product.id"
-        :product="product"
-        :wished="wishedProductIds.includes(product.id)"
-        @toggle-wish="emit('toggle-wish', $event)"
-      />
+      </article>
     </div>
   </section>
 </template>
