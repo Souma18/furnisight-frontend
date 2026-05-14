@@ -1,16 +1,23 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
 import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
+const activeNav = computed(() => {
+  if (route.path.startsWith('/products')) return 'products'
+  if (route.path.startsWith('/room3d')) return 'room3d'
+  if (route.path === '/') return 'home'
+  return ''
+})
 
 function handleUserAction() {
   if (isAuthenticated.value) {
@@ -29,9 +36,9 @@ function handleUserAction() {
     </RouterLink>
 
     <nav class="nav" aria-label="Chinh">
-      <RouterLink to="/" class="nav-pill">Trang Chủ</RouterLink>
-      <RouterLink to="/products">Sản phẩm</RouterLink>
-      <RouterLink to="/room3d">Trực quan 3D</RouterLink>
+      <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
+      <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
+      <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
       <RouterLink to="/">Dự án</RouterLink>
       <RouterLink to="/">Liên hệ</RouterLink>
     </nav>
@@ -65,7 +72,7 @@ function handleUserAction() {
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  right: var(--app-main-scrollbar-width, 0px);
   z-index: 120;
   display: grid;
   grid-template-columns: auto 1fr auto;
@@ -74,6 +81,7 @@ function handleUserAction() {
   padding: 0.7rem 1rem;
   background: linear-gradient(180deg, #133f5c 0%, #0c3148 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
 }
 
 .brand {

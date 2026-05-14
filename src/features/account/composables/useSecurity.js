@@ -52,8 +52,8 @@ export function useSecurity(props, emit) {
 
   const contactTitles = computed(() =>
     contactType.value === 'email'
-      ? { trigger: 'Đổi email', old: 'Xác minh danh tính', next: 'Email mới' }
-      : { trigger: 'Đổi số điện thoại', old: 'Xác minh danh tính', next: 'Số điện thoại mới' },
+      ? { trigger: 'Đổi email', old: 'Email hiện tại', next: 'Email mới' }
+      : { trigger: 'Đổi số điện thoại', old: 'Số điện thoại hiện tại', next: 'Số điện thoại mới' },
   )
 
   const linkTitles = computed(() =>
@@ -151,9 +151,8 @@ export function useSecurity(props, emit) {
       isLoading.value = true
       await requestContactChange({
         type: contactType.value === 'email' ? 'EMAIL' : 'PHONE',
-        verificationMethod: verificationMethod.value,
       })
-      emit('notify', 'Mã xác minh đã được gửi.')
+      emit('notify', 'Mã xác minh đã được gửi đến liên hệ hiện tại.')
     } catch (error) {
       emit('notify', error.response?.data?.message || 'Không thể gửi mã xác minh.', 'error')
     } finally {
