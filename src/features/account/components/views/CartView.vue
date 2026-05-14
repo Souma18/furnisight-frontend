@@ -11,13 +11,17 @@ const props = defineProps({
   },
 })
 
-const total = computed(() =>
-  props.items.reduce((sum, item) => sum + item.price * item.qty, 0),
+const activeItem = ref(null)
+const checkedIds = ref([])
+
+const selectedItems = computed(() =>
+  props.items.filter((item) => checkedIds.value.includes(item.id) && !item.outOfStock),
 )
 
-const activeItem = ref(null)
-const checkedIds = ref(
-  props.items.filter((item) => !item.outOfStock).map((item) => item.id),
+const selectedCount = computed(() => selectedItems.value.length)
+
+const total = computed(() =>
+  selectedItems.value.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.qty || 0), 0),
 )
 
 watch(
@@ -96,6 +100,10 @@ function getVariantLabel(item) {
   if (color && size) return `${color} / ${size}`
   return color || size || 'Chọn phân loại'
 }
+
+function handleCheckout() {
+  if (!selectedCount.value) return
+}
 </script>
 
 <template>
@@ -145,7 +153,20 @@ function getVariantLabel(item) {
       </article>
     </div>
 
-    <p class="total">Tổng cộng: {{ formatPrice(total) }}</p>
+    <div class="cart-footer">
+      <button
+        type="button"
+        class="checkout-btn"
+        :disabled="!selectedCount"
+        @click="handleCheckout"
+      >
+        Thanh toán ngay
+      </button>
+
+      <p class="total">
+        Tổng cộng{{ selectedCount ? ` (${selectedCount} sản phẩm)` : '' }}: {{ formatPrice(total) }}
+      </p>
+    </div>
   </AccountSectionCard>
 
   <teleport to="body">
@@ -396,8 +417,36 @@ function getVariantLabel(item) {
   background: #f5efe6;
   color: #5f5950;
 }
+.cart-footer {
+  margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+}
+.checkout-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 0.72rem 1.15rem;
+  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+  color: var(--color-white);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 12px 24px rgba(18, 32, 46, 0.12);
+  transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.checkout-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 16px 28px rgba(18, 32, 46, 0.16);
+}
+.checkout-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
 .total {
-  margin: 1rem 0 0;
+  margin: 0;
   font-weight: 700;
   color: var(--account-badge);
   text-align: right;
@@ -546,6 +595,15 @@ function getVariantLabel(item) {
   .variant-btn { width: 100%; }
   .qty-wrap { justify-self: start; }
   .line-total { text-align: left; }
+  .cart-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .checkout-btn,
+  .total {
+    width: 100%;
+  }
+  .total { text-align: left; }
   .variant-modal-actions { flex-direction: column-reverse; }
   .ghost-btn,
   .primary-btn { width: 100%; }

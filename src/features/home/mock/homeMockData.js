@@ -90,24 +90,28 @@ export const homeRooms = [
 export const homeProducts = [
   {
     id: 'ergonomic-chair',
+    detailId: 'ergonomic-chair',
     category: 'Ghe van phong',
     name: 'Ghe Ergonomic ProFlex',
     price: '1.200.000 d',
     oldPrice: '',
     tag: 'HOT',
     tagType: 'hot',
+    isFavorite: true,
     placeholder: '🪑',
     // TODO: replace mock image path with real image.
     image: '/home/products/ergonomic-proflex.jpg',
   },
   {
     id: 'oak-bed-minimalist',
+    detailId: 'oak-bed',
     category: 'Giuong ngu',
     name: 'Giuong Go Soi Minimalist',
     price: '5.200.000 d',
     oldPrice: '',
     tag: 'NEW',
     tagType: 'new',
+    isFavorite: true,
     placeholder: '🛏️',
     // TODO: replace mock image path with real image.
     image: '/home/products/oak-bed.jpg',
@@ -121,12 +125,14 @@ export const homeProducts = [
     oldPrice: '7.100.000 d',
     tag: 'NEW',
     tagType: 'new',
+    isFavorite: true,
     placeholder: '🛏️',
     // TODO: replace mock image path with real image.
     image: '/home/products/bed-agape.jpg',
   },
   {
     id: 'tea-table',
+    detailId: 'tea-table',
     category: 'Trang tri',
     name: 'Don tra tron Minimalist',
     price: '860.000 d',

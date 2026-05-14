@@ -434,7 +434,7 @@ onMounted(() => {
   border-radius: 8px 8px 0 0;
   background: transparent;
   color: #888;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
@@ -443,7 +443,7 @@ onMounted(() => {
 .nd-tab.active {
   background: #fff;
   color: #12202e;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .tab-dot {

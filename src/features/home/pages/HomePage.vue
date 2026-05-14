@@ -21,7 +21,7 @@ import {
 
 const activeCategoryId = ref(homeCategories[0]?.id ?? '')
 const activeRoomFilter = ref(homeRoomFilters[0] ?? 'Tat ca')
-const wishedProductIds = ref([])
+const wishedProductIds = ref(homeProducts.filter((product) => product.isFavorite).map((product) => product.id))
 
 const filteredRooms = computed(() => {
   if (activeRoomFilter.value === 'Tat ca') return homeRooms
