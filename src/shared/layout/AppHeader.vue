@@ -18,15 +18,6 @@ const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
 const notifications = ref([])
-const activeNotificationTab = ref('all')
-
-const notificationTabs = [
-  { value: 'all', label: 'Tất cả', icon: 'list' },
-  { value: 'order', label: 'Đơn hàng', icon: 'box' },
-  { value: 'promo', label: 'Khuyến mãi', icon: 'gift' },
-  { value: 'system', label: 'Hệ thống', icon: 'settings' },
-  { value: 'review', label: 'Đánh giá', icon: 'star' },
-]
 
 const activeNav = computed(() => {
   const path = router?.currentRoute?.value?.path || ''
@@ -38,46 +29,20 @@ const activeNav = computed(() => {
 })
 
 const unreadNotificationCount = computed(() => notifications.value.filter((item) => item.unread).length)
-const filteredNotifications = computed(() => {
-  const items =
-    activeNotificationTab.value === 'all'
-      ? notifications.value
-      : notifications.value.filter((item) => item.type === activeNotificationTab.value)
-
-  return items.slice(0, 5)
-})
-
-function unreadCountByType(type) {
-  if (type === 'all') return unreadNotificationCount.value
-  return notifications.value.filter((item) => item.unread && item.type === type).length
-}
+const previewNotifications = computed(() => notifications.value.slice(0, 5))
 
 async function loadNotifications() {
   const response = await fetchNotificationsMock()
   notifications.value = response.data?.items ?? response.data ?? []
 }
 
-function accountViewForNotification(type = 'all') {
-  const map = {
-    all: 'bell',
-    order: 'bell-order',
-    promo: 'bell-promo',
-    system: 'bell-system',
-    review: 'bell-review',
-  }
-
-  return map[type] ?? 'bell'
-}
-
-async function openAccountNotifications(type = 'all') {
-  const targetView = accountViewForNotification(type)
-
+async function openAccountNotifications() {
   if (!isAuthenticated.value) {
     isAuthModalOpen.value = true
     return
   }
 
-  await router.push({ path: '/account', query: { view: targetView } })
+  await router.push({ path: '/account', query: { view: 'bell' } })
 }
 
 async function handleNotificationClick(item) {
@@ -88,7 +53,7 @@ async function handleNotificationClick(item) {
     )
   }
 
-  await openAccountNotifications(item.type)
+  await openAccountNotifications()
 }
 
 async function markAllNotificationsRead() {
@@ -139,7 +104,7 @@ onMounted(() => {
           class="icon-btn"
           type="button"
           aria-label="Thong bao"
-          @click="openAccountNotifications(activeNotificationTab)"
+          @click="openAccountNotifications"
         >
           <AppIcon name="bell" :size="14" />
           <span v-if="unreadNotificationCount" class="notif-badge"></span>
@@ -156,23 +121,9 @@ onMounted(() => {
             </button>
           </div>
 
-          <div class="nd-tabs">
-            <button
-              v-for="tab in notificationTabs"
-              :key="tab.value"
-              type="button"
-              class="nd-tab"
-              :class="{ active: activeNotificationTab === tab.value, 'has-new': unreadCountByType(tab.value) > 0 }"
-              @click="activeNotificationTab = tab.value"
-            >
-              {{ tab.label }}
-              <span v-if="unreadCountByType(tab.value) > 0" class="tab-dot"></span>
-            </button>
-          </div>
-
           <div class="nd-list">
             <button
-              v-for="item in filteredNotifications"
+              v-for="item in previewNotifications"
               :key="item.id"
               type="button"
               class="nd-item"
@@ -193,11 +144,11 @@ onMounted(() => {
               </div>
             </button>
 
-            <div v-if="!filteredNotifications.length" class="nd-empty">Không có thông báo nào.</div>
+            <div v-if="!previewNotifications.length" class="nd-empty">Không có thông báo nào.</div>
           </div>
 
           <div class="nd-footer">
-            <button type="button" class="nd-see-all" @click="openAccountNotifications(activeNotificationTab)">
+            <button type="button" class="nd-see-all" @click="openAccountNotifications">
               Xem tất cả
             </button>
           </div>
@@ -420,46 +371,15 @@ onMounted(() => {
   color: #e5b84a;
 }
 
-.nd-tabs {
-  display: flex;
-  gap: 4px;
-  padding: 8px 10px 0;
-  border-bottom: 1px solid #f0e9dd;
-  background: #faf6f0;
-}
-
-.nd-tab {
-  position: relative;
-  padding: 6px 12px;
-  border: none;
-  border-radius: 8px 8px 0 0;
-  background: transparent;
-  color: #888;
-  font-size: 11px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.nd-tab.active {
-  background: #fff;
-  color: #12202e;
-  font-weight: 500;
-}
-
-.tab-dot {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #e53e3e;
-}
-
 .nd-list {
   max-height: 340px;
   overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nd-list::-webkit-scrollbar {
+  display: none;
 }
 
 .nd-item {
