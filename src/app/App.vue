@@ -9,6 +9,7 @@ const isHomePage = computed(() => route.name === 'home')
 const isProductsPage = computed(() => route.name === 'products')
 const isProductDetailPage = computed(() => route.name === 'product-detail')
 const isContactPage = computed(() => route.name === 'contact')
+const isCheckoutPage = computed(() => route.name === 'checkout')
 const isAccountPage = computed(() => route.path.startsWith('/account'))
 const mainRef = ref(null)
 let resizeObserver = null
@@ -64,11 +65,17 @@ onBeforeUnmount(() => {
       :class="{
         'app-main--fluid': isRoom3DPage,
         'app-main--with-header':
-          !isRoom3DPage && !isHomePage && !isProductDetailPage && !isProductsPage && !isContactPage,
+          !isRoom3DPage &&
+          !isHomePage &&
+          !isProductDetailPage &&
+          !isProductsPage &&
+          !isContactPage &&
+          !isCheckoutPage,
         'app-main--home': isHomePage,
         'app-main--products': isProductsPage,
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
+        'app-main--checkout': isCheckoutPage,
       }"
     >
       <RouterView />
@@ -126,6 +133,13 @@ onBeforeUnmount(() => {
 }
 
 .app-main--contact {
+  max-width: none;
+  margin: 0;
+  padding: 56px 0 0;
+  background: #faf6f0;
+}
+
+.app-main--checkout {
   max-width: none;
   margin: 0;
   padding: 56px 0 0;

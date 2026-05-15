@@ -7,14 +7,14 @@ import {
   getWardsByDistrict,
 } from '@shared/lib/publicApis/vietnamAddressApi'
 
-const props = defineProps({
+defineProps({
   addresses: {
     type: Array,
     default: () => [],
   },
 })
 
-const emit = defineEmits(['save-address', 'notify'])
+const emit = defineEmits(['save-address', 'set-default-address', 'notify'])
 
 const showModal = ref(false)
 const provinces = ref([])
@@ -25,21 +25,37 @@ const loadingDistrict = ref(false)
 const loadingWard = ref(false)
 const fallbackMode = ref(false)
 
-const form = reactive({
-  fullName: '',
-  phone: '',
-  detail: '',
-  provinceCode: '',
-  districtCode: '',
-  wardCode: '',
-  provinceName: '',
-  districtName: '',
-  wardName: '',
-  type: 'home',
-  isDefault: false,
-})
+const ADDRESS_TYPE_LABELS = {
+  home: 'Nhà riêng',
+  office: 'Văn phòng',
+}
+
+const form = reactive(createEmptyForm())
+
+function createEmptyForm() {
+  return {
+    fullName: '',
+    phone: '',
+    detail: '',
+    provinceCode: '',
+    districtCode: '',
+    wardCode: '',
+    provinceName: '',
+    districtName: '',
+    wardName: '',
+    type: 'home',
+    isDefault: false,
+  }
+}
+
+function resetForm() {
+  Object.assign(form, createEmptyForm())
+  districts.value = []
+  wards.value = []
+}
 
 async function openModal() {
+  resetForm()
   showModal.value = true
   if (provinces.value.length) return
   loadingProvince.value = true
@@ -97,15 +113,49 @@ function submitAddress() {
   emit('save-address', { ...form })
   showModal.value = false
 }
+
+function setAsDefault(addressId) {
+  emit('set-default-address', addressId)
+}
+
+function getTypeLabel(type) {
+  return ADDRESS_TYPE_LABELS[type] ?? 'Khác'
+}
 </script>
 
 <template>
   <AccountSectionCard title="Địa chỉ giao hàng">
     <template #head>
-      <button class="primary" @click="openModal">Thêm địa chỉ mới</button>
+      <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
     </template>
-    <div class="list">
-      <article v-for="address in addresses" :key="address.id" class="item">
+
+    <div v-if="!addresses.length" class="empty">
+      Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
+    </div>
+
+    <div v-else class="list">
+      <article
+        v-for="address in addresses"
+        :key="address.id"
+        class="item"
+        :class="{ 'item--default': address.isDefault }"
+      >
+        <div class="item-head">
+          <div class="item-tags">
+            <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
+            <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
+          </div>
+
+          <button
+            v-if="!address.isDefault"
+            type="button"
+            class="set-default-btn"
+            @click="setAsDefault(address.id)"
+          >
+            Đặt làm mặc định
+          </button>
+        </div>
+
         <p class="name">{{ address.fullName }}</p>
         <p class="meta">{{ address.phone }}</p>
         <p class="meta">
@@ -120,7 +170,7 @@ function submitAddress() {
     <div class="modal">
       <h4>Thêm địa chỉ</h4>
       <div class="form-grid">
-        <label>Họ tên <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A"/></label>
+        <label>Họ tên <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A" /></label>
         <label>Số điện thoại <input v-model.trim="form.phone" placeholder="0123456789" /></label>
         <label>
           Tỉnh/Thành
@@ -147,36 +197,192 @@ function submitAddress() {
             <option v-for="ward in wards" :key="ward.code" :value="ward.code">{{ ward.name }}</option>
           </select>
         </label>
-          <label >Địa chỉ cụ thể <input v-model="form.detail" /></label>
+        <label class="detail-field">
+          Địa chỉ cụ thể
+          <input v-model.trim="form.detail" placeholder="Số nhà, tên đường..." />
+        </label>
+        <label>
+          Loại địa chỉ
+          <select v-model="form.type">
+            <option value="home">Nhà riêng</option>
+            <option value="office">Văn phòng</option>
+          </select>
+        </label>
+        <label class="default-check">
+          <input v-model="form.isDefault" type="checkbox" />
+          <span>Đặt làm địa chỉ mặc định</span>
+        </label>
       </div>
-      <!-- <p class="loading" v-if="loadingProvince || loadingDistrict || loadingWard">Đang tải dữ liệu địa chỉ...</p> -->
       <div class="actions">
-        <button class="ghost" @click="showModal = false">Huỷ</button>
-        <button class="primary" @click="submitAddress">Lưu địa chỉ</button>
+        <button type="button" class="ghost" @click="showModal = false">Huỷ</button>
+        <button type="button" class="primary" @click="submitAddress">Lưu địa chỉ</button>
       </div>
     </div>
-  </div> 
+  </div>
 </template>
 
 <style scoped>
-.list { display:grid; gap:0.6rem; }
-.item { border:1px solid var(--auth-border); border-radius:12px; padding:0.75rem; }
-.name { margin:0 0 0.2rem; font-weight:600; }
-.meta { margin:0; color:var(--auth-text-secondary); font-size:0.84rem; }
-.overlay { position:fixed; inset:0; background:rgba(2,7,17,.55); display:grid; place-items:center; z-index:80; padding:1rem; }
-.modal { background:var(--account-surface); width:min(680px,100%); border-radius:14px; padding:1rem; }
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
-.full { grid-column:1 / -1; }
-label { display:grid; gap:0.35rem; font-size:0.82rem; color:var(--auth-text-secondary); }
-input,select { min-height:2.45rem; border:1px solid var(--auth-border); border-radius:10px; padding:0 0.65rem; }
-.loading { color:var(--account-badge); font-size:0.78rem; margin:0.5rem 0 0; } 
-.actions { margin-top:0.8rem; display:flex; justify-content:flex-end; gap:0.5rem; }
-.ghost,.primary { border:none; border-radius:10px; min-height:2.45rem; padding:0 0.86rem; cursor:pointer; }
-.ghost { background:var(--account-ghost-bg); }
-.primary { color:var(--color-white); background:linear-gradient(135deg,var(--auth-brand-start),var(--auth-brand-end)); }
+.list {
+  display: grid;
+  gap: 0.6rem;
+}
+.empty {
+  color: var(--auth-text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.item {
+  border: 1px solid var(--auth-border);
+  border-radius: 12px;
+  padding: 0.75rem;
+  background: var(--account-surface);
+}
+.item--default {
+  border-color: rgba(201, 146, 42, 0.45);
+  background:
+    radial-gradient(circle at top, rgba(201, 146, 42, 0.08), transparent 62%),
+    var(--account-surface);
+}
+.item-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.45rem;
+}
+.item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.35rem;
+  padding: 0 0.5rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.badge-default {
+  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+  color: var(--color-white);
+}
+.badge-type {
+  background: #f5efe6;
+  color: #8b6a21;
+}
+.set-default-btn {
+  border: 1px solid rgba(201, 146, 42, 0.35);
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  background: #fff;
+  color: #c58d2f;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.set-default-btn:hover {
+  background: #faf6f0;
+}
+.name {
+  margin: 0 0 0.2rem;
+  font-weight: 600;
+}
+.meta {
+  margin: 0;
+  color: var(--auth-text-secondary);
+  font-size: 0.84rem;
+}
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 7, 17, 0.55);
+  display: grid;
+  place-items: center;
+  z-index: 80;
+  padding: 1rem;
+}
+.modal {
+  background: var(--account-surface);
+  width: min(680px, 100%);
+  border-radius: 14px;
+  padding: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+.detail-field {
+  min-width: 0;
+}
+.detail-field input {
+  width: 100%;
+  min-width: 0;
+}
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--auth-text-secondary);
+}
+.default-check {
+  display: inline-flex;
+  align-items: center;
+  align-self: end;
+  gap: 0.45rem;
+  min-height: 2.45rem;
+  cursor: pointer;
+  color: var(--auth-text-primary);
+}
+.default-check input {
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+}
+input,
+select {
+  min-height: 2.45rem;
+  border: 1px solid var(--auth-border);
+  border-radius: 10px;
+  padding: 0 0.65rem;
+}
+.actions {
+  margin-top: 0.8rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.ghost,
+.primary {
+  border: none;
+  border-radius: 10px;
+  min-height: 2.45rem;
+  padding: 0 0.86rem;
+  cursor: pointer;
+}
+.ghost {
+  background: var(--account-ghost-bg);
+}
+.primary {
+  color: var(--color-white);
+  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+}
 input::placeholder {
   color: #9ca3af;
   opacity: 1;
 }
-@media (max-width: 900px) { .form-grid { grid-template-columns:1fr; } }
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .item-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
 </style>
