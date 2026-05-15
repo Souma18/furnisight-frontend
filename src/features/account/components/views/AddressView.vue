@@ -218,7 +218,7 @@ function getTypeLabel(type) {
         <button type="button" class="primary" @click="submitAddress">Lưu địa chỉ</button>
       </div>
     </div>
-  </div> 
+  </div>
 </template>
 
 <style scoped>
