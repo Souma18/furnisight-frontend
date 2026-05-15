@@ -4,6 +4,7 @@ import {
   BadgePercent,
   Banknote,
   Bell,
+  Bot,
   Box,
   Building2,
   CreditCard,
@@ -31,6 +32,8 @@ import {
   Phone,
   Plus,
   Settings,
+  Search,
+  Send,
   Shield,
   ShoppingCart,
   Sparkles,
@@ -65,6 +68,7 @@ const props = defineProps({
 
 const iconMap = {
   bell: Bell,
+  bot: Bot,
   badgePercent: BadgePercent,
   banknote: Banknote,
   building2: Building2,
@@ -85,6 +89,8 @@ const iconMap = {
   music2: Music2,
   phone: Phone,
   plus: Plus,
+  search: Search,
+  send: Send,
   shield: Shield,
   sparkles: Sparkles,
   box: Box,
