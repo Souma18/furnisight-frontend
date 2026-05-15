@@ -40,6 +40,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/checkout',
+    name: 'checkout',
+    component: () => import('@features/checkout/pages/CheckoutPage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/room3d',
     name: 'room3d',
     component: () => import('@features/room3d/pages/Room3DPage.vue'),

@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import CartItemCard from '@features/cart/components/CartItemCard.vue'
 import CartSummaryBar from '@features/cart/components/CartSummaryBar.vue'
 import { useCart } from '@features/cart/composables/useCart'
 
+const router = useRouter()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
 
 const activeItem = ref(null)
@@ -106,6 +108,8 @@ function formatPrice(value) {
 
 function handleCheckout() {
   if (!selectedCount.value) return
+  const lineIds = selectedItems.value.map((item) => item.id).join(',')
+  router.push({ path: '/checkout', query: { lines: lineIds } })
 }
 </script>
 

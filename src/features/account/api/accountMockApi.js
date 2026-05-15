@@ -1,4 +1,5 @@
 import { homeProducts } from '@features/home/mock/homeMockData'
+import { ORDER_LIST_SEED } from '../mock/ordersMockData'
 
 function sleep(ms = 350) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -17,7 +18,7 @@ const profile = {
   avatarUrl: '',
 }
 
-const addresses = [
+let addressSeed = [
   {
     id: 'addr-1',
     fullName: 'Nguyễn Văn A',
@@ -42,11 +43,22 @@ const addresses = [
   },
 ]
 
-const orders = [
-  { id: 'LN250523', status: 'delivering', date: '23/05/2025', total: 11820000, items: 3 },
-  { id: 'LN250512', status: 'delivering', date: '12/05/2025', total: 5200000, items: 1 },
-  { id: 'LN250418', status: 'done', date: '18/04/2025', total: 4450000, items: 2 },
-]
+function sortAddressesByDefault(list) {
+  return [...list].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
+}
+
+function cloneAddresses() {
+  return sortAddressesByDefault(addressSeed.map((item) => ({ ...item })))
+}
+
+function applyDefaultFlag(targetId) {
+  addressSeed = addressSeed.map((item) => ({
+    ...item,
+    isDefault: item.id === targetId,
+  }))
+}
+
+const orders = [...ORDER_LIST_SEED]
 
 const wishlist = [
   ...homeProducts
@@ -78,7 +90,7 @@ export async function fetchAccountOverviewMock() {
   await sleep()
   return {
     profile,
-    addresses,
+    addresses: cloneAddresses(),
     orders,
     wishlist,
     settings,
@@ -93,7 +105,25 @@ export async function saveProfileMock(payload) {
 
 export async function saveAddressMock(payload) {
   await sleep()
-  return { id: `addr-${Date.now()}`, ...payload }
+
+  const shouldBeDefault = Boolean(payload.isDefault) || addressSeed.length === 0
+  if (shouldBeDefault) {
+    addressSeed = addressSeed.map((item) => ({ ...item, isDefault: false }))
+  }
+
+  const created = {
+    id: `addr-${Date.now()}`,
+    ...payload,
+    isDefault: shouldBeDefault,
+  }
+  addressSeed = sortAddressesByDefault([created, ...addressSeed])
+  return { ...created }
+}
+
+export async function setDefaultAddressMock(addressId) {
+  await sleep()
+  applyDefaultFlag(addressId)
+  return cloneAddresses()
 }
 
 export async function uploadAvatarMock(file) {

@@ -27,6 +27,10 @@ export function saveAddress(payload) {
   return apiClient.post('/account/addresses', payload)
 }
 
+export function setDefaultAddress(addressId) {
+  return apiClient.post(`/account/addresses/${addressId}/default`)
+}
+
 export function getOrders() {
   return apiClient.get('/account/orders')
 }
