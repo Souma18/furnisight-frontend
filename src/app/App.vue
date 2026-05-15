@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
+import ChatWidget from '@features/chat/components/ChatWidget.vue'
 
 const route = useRoute()
 const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
@@ -82,6 +83,7 @@ onBeforeUnmount(() => {
       <RouterView />
       <AppFooter v-if="!isRoom3DPage && !isAccountPage" />
     </main>
+    <ChatWidget v-if="!isRoom3DPage" />
   </div>
 </template>
 
