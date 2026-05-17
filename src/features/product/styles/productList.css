@@ -197,7 +197,7 @@
 
 .pl-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .pl-grid.list { grid-template-columns: 1fr; }
-.pl-card { background: #fff; border: 1px solid #ece2cf; border-radius: 18px; overflow: hidden; display: grid; }
+.pl-card { text-decoration: none; color: inherit; background: #fff; border: 1px solid #ece2cf; border-radius: 18px; overflow: hidden; display: grid; }
 .pl-grid.list .pl-card { grid-template-columns: 210px 1fr; }
 .pl-card-media { height: 210px; background: #f0e9dd; display: grid; place-items: center; font-size: 72px; text-decoration: none; }
 .pl-grid.list .pl-card-media { height: 100%; min-height: 180px; }

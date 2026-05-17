@@ -45,15 +45,20 @@ function stars(rating) {
     <div v-else-if="!products.length" class="pl-empty">Không có sản phẩm phù hợp bộ lọc hiện tại.</div>
 
     <div v-else class="pl-grid" :class="{ list: viewMode === 'list' }">
-      <article v-for="item in products" :key="item.id" class="pl-card">
-        <RouterLink :to="detailRoute(item)" class="pl-card-media">
+      <RouterLink
+        v-for="item in products"
+        :key="item.id"
+        :to="detailRoute(item)"
+        class="pl-card"
+      >
+        <div class="pl-card-media">
           <img v-if="item.thumbnailUrl || item.imageUrl" :src="item.thumbnailUrl || item.imageUrl" :alt="item.name" class="pl-img" />
           <span v-else>{{ item.imageFallback || 'No Image' }}</span>
-        </RouterLink>
+        </div>
 
         <div class="pl-card-body">
           <p class="pl-cat">{{ item.category?.label || item.category || 'N/A' }}</p>
-          <RouterLink :to="detailRoute(item)" class="pl-name">{{ item.name }}</RouterLink>
+          <div class="pl-name">{{ item.name }}</div>
           <p v-if="viewMode === 'list'" class="pl-desc">{{ item.description }}</p>
 
           <div class="pl-rating">
@@ -67,10 +72,10 @@ function stars(rating) {
               <p class="pl-price">{{ formatVnd(item.price) }}</p>
               <p v-if="item.oldPrice" class="pl-old">{{ formatVnd(item.oldPrice) }}</p>
             </div>
-            <button type="button">+</button>
+            <button type="button" @click.prevent.stop="">+</button>
           </div>
         </div>
-      </article>
+      </RouterLink>
     </div>
   </div>
 </template>

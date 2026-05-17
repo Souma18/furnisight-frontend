@@ -39,16 +39,22 @@ export function useProductListPage() {
 
   function parseQueryPreset() {
     const qCategory = String(route.query.category ?? '').trim()
+    const qBreadcrumb = String(route.query.breadcrumb ?? '').trim()
+    const qKeyword = String(route.query.q ?? '').trim()
+
     if (qCategory && qCategory !== 'all') {
       selectedCategory.value = qCategory
-      return
-    }
-    const qBreadcrumb = String(route.query.breadcrumb ?? '').trim()
-    if (qBreadcrumb && qBreadcrumb !== 'sản phẩm') {
+    } else if (qBreadcrumb && qBreadcrumb !== 'sản phẩm') {
       selectedCategory.value = qBreadcrumb || 'all'
+    } else {
+      selectedCategory.value = 'all'
     }
-    const qKeyword = String(route.query.q ?? '').trim()
-    if (qKeyword) searchKeyword.value = qKeyword
+
+    if (qKeyword) {
+      searchKeyword.value = qKeyword
+    } else {
+      searchKeyword.value = ''
+    }
   }
 
   const dynamicQuickFilters = ref([])
@@ -115,6 +121,13 @@ export function useProductListPage() {
     if (suppressListWatch.value) return
     requestList()
   })
+
+  watch(() => route.query, () => {
+    suppressListWatch.value = true
+    parseQueryPreset()
+    suppressListWatch.value = false
+    requestList()
+  }, { deep: true })
 
   const dynamicHero = computed(() => {
     if (selectedCategory.value === 'all') {

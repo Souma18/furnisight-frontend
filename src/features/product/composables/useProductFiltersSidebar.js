@@ -62,7 +62,14 @@ export function useProductFiltersSidebar(props, emit) {
     { deep: true, immediate: true },
   )
 
-  const displayCategories = computed(() => props.facets?.categories || [])
+  const displayCategories = computed(() => {
+    const list = props.facets?.categories || []
+    if (list.length > 0 && !list.some(c => c.id === 'all')) {
+      const totalCount = list.reduce((sum, c) => sum + (c.count || 0), 0)
+      return [{ id: 'all', slug: 'all', label: 'Tất cả sản phẩm', count: totalCount }, ...list]
+    }
+    return list
+  })
   const displayMaterials = computed(() => props.facets?.materials || [])
   const displayColors = computed(() => props.facets?.colors || [])
 
