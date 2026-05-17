@@ -1,13 +1,12 @@
 <script setup>
-import { computed, reactive, watch } from 'vue'
 import {
   PRODUCT_PRICE_BAND_OPTIONS,
   PRODUCT_STAR_FILTER_OPTIONS,
 } from '../mock/productListMockData'
+import { useProductFiltersSidebar } from '../composables/useProductFiltersSidebar'
 
 const props = defineProps({
   selectedCategory: { type: String, default: 'all' },
-  /** Bộ lọc đã áp dụng (đồng bộ khi bấm Áp dụng / Xóa từ cha). */
   applied: {
     type: Object,
     default: () => ({
@@ -26,101 +25,23 @@ const props = defineProps({
 
 const emit = defineEmits(['select-category', 'apply', 'clear'])
 
-const openBlocks = reactive({
-  cat: true,
-  price: true,
-  mat: true,
-  color: true,
-  rating: true,
-})
-
-const pending = reactive({
-  priceBands: [],
-  priceSliderPct: 100,
-  materials: [],
-  colors: [],
-  minStar: null,
-})
-
-function syncPendingFromApplied() {
-  const a = props.applied ?? {}
-  pending.priceBands = [...(a.priceBands ?? [])]
-  pending.priceSliderPct = Number(a.priceSliderPct ?? 100)
-  pending.materials = [...(a.materials ?? [])]
-  pending.colors = [...(a.colors ?? [])]
-  pending.minStar = a.minStar != null ? Number(a.minStar) : null
-}
-
-watch(
-  () => props.applied,
-  () => syncPendingFromApplied(),
-  { deep: true, immediate: true },
-)
-
-const displayCategories = computed(() => props.facets?.categories || [])
-const displayMaterials = computed(() => props.facets?.materials || [])
-const displayColors = computed(() => props.facets?.colors || [])
-
-const totalCategoryCount = computed(() =>
-  displayCategories.value.find((c) => c.id === 'all')?.count ?? 0,
-)
-
-function toggleBlock(key) {
-  openBlocks[key] = !openBlocks[key]
-}
-
-function selectCategory(cat) {
-  // Emit the slug for BE filtering; fallback to id if no slug
-  emit('select-category', cat.slug ?? cat.id)
-}
-
-function toggleBand(id) {
-  const i = pending.priceBands.indexOf(id)
-  if (i === -1) pending.priceBands.push(id)
-  else pending.priceBands.splice(i, 1)
-}
-
-function toggleMaterial(id) {
-  const i = pending.materials.indexOf(id)
-  if (i === -1) pending.materials.push(id)
-  else pending.materials.splice(i, 1)
-}
-
-function toggleColor(id) {
-  const i = pending.colors.indexOf(id)
-  if (i === -1) pending.colors.push(id)
-  else pending.colors.splice(i, 1)
-}
-
-function onSliderInput(e) {
-  pending.priceSliderPct = Number(e.target.value)
-}
-
-const priceMinLabel = '0đ'
-const priceMaxLabel = computed(() =>
-  pending.priceSliderPct >= 100 ? '50tr+' : `${Math.round((pending.priceSliderPct / 100) * 50)}tr`,
-)
-
-function applyFilters() {
-  emit('apply', {
-    priceBands: [...pending.priceBands],
-    priceSliderPct: pending.priceSliderPct,
-    materials: [...pending.materials],
-    colors: [...pending.colors],
-    minStar: pending.minStar,
-  })
-}
-
-function clearAll() {
-  emit('clear')
-}
-
-function categoryActive(cat) {
-  const current = String(props.selectedCategory ?? 'all').toLowerCase()
-  // Match against slug (primary) or label (fallback)
-  return current === String(cat.slug ?? '').toLowerCase() ||
-         current === String(cat.label ?? '').toLowerCase()
-}
+const {
+  openBlocks,
+  pending,
+  displayCategories,
+  displayMaterials,
+  displayColors,
+  totalCategoryCount,
+  toggleBlock,
+  selectCategory,
+  toggleArrayItem,
+  onSliderInput,
+  priceMinLabel,
+  priceMaxLabel,
+  applyFilters,
+  clearAll,
+  categoryActive,
+} = useProductFiltersSidebar(props, emit)
 </script>
 
 <template>
@@ -164,15 +85,14 @@ function categoryActive(cat) {
           type="range"
           min="0"
           max="100"
-          :value="pending.priceSliderPct"
-          @input="onSliderInput"
+          v-model.number="pending.priceSliderPct"
         />
         <div class="pl-price-checks">
           <label v-for="opt in PRODUCT_PRICE_BAND_OPTIONS" :key="opt.id" class="pl-check-row">
             <input
               type="checkbox"
-              :checked="pending.priceBands.includes(opt.id)"
-              @change="toggleBand(opt.id)"
+              :value="opt.id"
+              v-model="pending.priceBands"
             />
             <span>{{ opt.label }}</span>
           </label>
@@ -190,8 +110,8 @@ function categoryActive(cat) {
           <label v-for="m in displayMaterials" :key="m.id" class="pl-mat-row">
             <input
               type="checkbox"
-              :checked="pending.materials.includes(m.id)"
-              @change="toggleMaterial(m.id)"
+              :value="m.id"
+              v-model="pending.materials"
             />
             <span>{{ m.label }}</span>
           </label>
@@ -218,7 +138,7 @@ function categoryActive(cat) {
             }"
             :title="c.label"
             :aria-label="c.label"
-            @click="toggleColor(c.id)"
+            @click="toggleArrayItem('colors', c.id)"
           ></button>
         </div>
       </div>
@@ -235,8 +155,8 @@ function categoryActive(cat) {
             <input
               type="radio"
               name="pl-star-filter"
-              :checked="pending.minStar === opt.value"
-              @change="pending.minStar = opt.value"
+              :value="opt.value"
+              v-model="pending.minStar"
             />
             <span class="pl-star-icons">{{ opt.stars }}</span>
             <span class="pl-star-num">{{ opt.hint }}</span>
@@ -245,8 +165,8 @@ function categoryActive(cat) {
             <input
               type="radio"
               name="pl-star-filter"
-              :checked="pending.minStar === null"
-              @change="pending.minStar = null"
+              :value="null"
+              v-model="pending.minStar"
             />
             <span class="pl-star-num">Tất cả</span>
           </label>

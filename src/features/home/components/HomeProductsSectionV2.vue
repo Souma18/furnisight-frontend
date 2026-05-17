@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { getProductDetailById } from '@features/product/mock/productDetailMockData.js'
+import { useProductNavigation } from '@features/product/composables/useProductNavigation'
 
 defineProps({
   products: { type: Array, default: () => [] },
@@ -9,10 +9,7 @@ defineProps({
 
 const emit = defineEmits(['toggle-wish'])
 
-function getDetailRoute(productId) {
-  const detail = getProductDetailById(productId)
-  return detail ? `/products/${productId}` : null
-}
+const { getDetailRoute } = useProductNavigation()
 </script>
 
 <template>

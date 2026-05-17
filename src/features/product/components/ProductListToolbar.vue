@@ -10,16 +10,14 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'toggle-category', 'update:view-mode'])
 
 function chipIsActive(chip) {
-  const k = chip.toLowerCase()
-  if (k.includes('sale')) return props.saleOnly
-  
-  // Basic slug comparison: "Living Room" -> "living-room"
-  const slug = k.trim().replace(/\s+/g, '-')
-  return props.selectedCategory.toLowerCase() === slug
+  if (!chip) return false
+  if (chip.slug === 'sale') return props.saleOnly
+  return props.selectedCategory.toLowerCase() === (chip.slug ?? '').toLowerCase()
 }
 
 function chipClass(chip) {
-  return chip.toLowerCase().includes('sale') ? 'pl-chip pl-chip-sale' : 'pl-chip'
+  if (!chip) return 'pl-chip'
+  return chip.slug === 'sale' ? 'pl-chip pl-chip-sale' : 'pl-chip'
 }
 </script>
 
@@ -36,12 +34,12 @@ function chipClass(chip) {
       <div class="pl-chips">
         <button
           v-for="chip in quickFilters"
-          :key="chip"
+          :key="chip.slug ?? chip.label"
           type="button"
           :class="[chipClass(chip), { active: chipIsActive(chip) }]"
           @click="emit('toggle-category', chip)"
         >
-          {{ chip }}
+          {{ chip.label }}
         </button>
       </div>
       <div class="pl-view-toggle">
