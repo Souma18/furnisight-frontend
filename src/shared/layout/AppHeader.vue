@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
@@ -76,8 +76,25 @@ function handleUserAction() {
   isAuthModalOpen.value = true
 }
 
-onMounted(() => {
-  loadNotifications()
+const notificationsLoaded = ref(false)
+
+async function loadNotificationsOnce() {
+  if (!isAuthenticated.value || notificationsLoaded.value) return
+  try {
+    await loadNotifications()
+    notificationsLoaded.value = true
+  } catch (error) {
+    console.error('Failed to load notifications:', error)
+  }
+}
+
+watch(isAuthenticated, (newVal) => {
+  if (!newVal) {
+    notifications.value = []
+    notificationsLoaded.value = false
+  } else {
+    notificationsLoaded.value = false
+  }
 })
 </script>
 
@@ -101,7 +118,7 @@ onMounted(() => {
         <AppIcon name="map" :size="14" />
         Truc quan hoa
       </RouterLink>
-      <div class="notif-wrap">
+      <div class="notif-wrap" @mouseenter="loadNotificationsOnce" @click="loadNotificationsOnce">
         <button
           class="icon-btn"
           type="button"

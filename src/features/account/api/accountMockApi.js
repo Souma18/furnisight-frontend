@@ -1,4 +1,56 @@
-import { homeProducts } from '@features/home/mock/homeMockData'
+const homeProducts = [
+  {
+    id: 'ergonomic-chair',
+    detailId: 'ergonomic-chair',
+    category: 'Ghế văn phòng',
+    name: 'Ghế Ergonomic ProFlex',
+    price: '1.200.000 đ',
+    oldPrice: '',
+    tag: 'HOT',
+    tagType: 'hot',
+    isFavorite: true,
+    placeholder: '🪑',
+    image: '/home/products/ergonomic-proflex.jpg',
+  },
+  {
+    id: 'oak-bed-minimalist',
+    detailId: 'oak-bed',
+    category: 'Giường ngủ',
+    name: 'Giường Gỗ Sồi Minimalist',
+    price: '5.200.000 đ',
+    oldPrice: '',
+    tag: 'NEW',
+    tagType: 'new',
+    isFavorite: true,
+    placeholder: '🛏️',
+    image: '/home/products/oak-bed.jpg',
+  },
+  {
+    id: 'agape-bed',
+    detailId: 'agape-bed',
+    category: 'Giường ngủ',
+    name: 'Giường Agape Premium',
+    price: '5.900.000 đ',
+    oldPrice: '7.100.000 đ',
+    tag: 'NEW',
+    tagType: 'new',
+    isFavorite: true,
+    placeholder: '🛏️',
+    image: '/home/products/bed-agape.jpg',
+  },
+  {
+    id: 'tea-table',
+    detailId: 'tea-table',
+    category: 'Trang trí',
+    name: 'Đôn trà tròn Minimalist',
+    price: '860.000 đ',
+    oldPrice: '',
+    tag: 'AI+',
+    tagType: 'ai',
+    placeholder: '🌿',
+    image: '/home/products/tea-table.jpg',
+  },
+]
 
 function sleep(ms = 350) {
   return new Promise((resolve) => setTimeout(resolve, ms))

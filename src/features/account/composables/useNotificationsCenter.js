@@ -91,6 +91,7 @@ function getDetail(item) {
 export function mapInboxMessageToFrontend(item) {
   return {
     ...item,
+    isRead: item.read ?? item.isRead ?? false,
     type: typeMap[item.type] || 'system',
     time: formatTimeAgo(item.createdAt),
     dateLabel: getDateLabel(item.createdAt),

@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchProductsMock } from '../api/productApi'
+import { fetchProducts } from '../api/productApi'
 
 export const useProductStore = defineStore('product', () => {
   const items = ref([])
