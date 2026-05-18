@@ -40,15 +40,15 @@ export function getSavedProjects() {
 }
 
 export function getNotifications(params) {
-  return apiClient.get('/account/notifications', { params })
+  return apiClient.get('/notifications/inbox-messages', { params })
 }
 
 export function markNotificationRead(notificationId) {
-  return apiClient.post(`/account/notifications/${notificationId}/read`)
+  return apiClient.put(`/notifications/inbox-messages/${notificationId}/read`)
 }
 
 export function markAllNotificationsRead() {
-  return apiClient.post('/account/notifications/read-all')
+  return apiClient.put('/notifications/inbox-messages/read-all')
 }
 
 // ─── Account Security & Management ──────────────────────────────────────────

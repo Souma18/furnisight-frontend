@@ -5,10 +5,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
 import {
-  fetchNotificationsMock,
-  markAllNotificationsReadMock,
-  markNotificationReadMock,
-} from '@features/account/api/accountNotificationsMockApi'
+  getNotifications,
+  markAllNotificationsRead as apiMarkAllNotificationsRead,
+  markNotificationRead as apiMarkNotificationRead,
+} from '@features/account/api/accountApi'
+import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -28,12 +29,13 @@ const activeNav = computed(() => {
   return ''
 })
 
-const unreadNotificationCount = computed(() => notifications.value.filter((item) => item.unread).length)
+const unreadNotificationCount = computed(() => notifications.value.filter((item) => !item.isRead).length)
 const previewNotifications = computed(() => notifications.value.slice(0, 5))
 
 async function loadNotifications() {
-  const response = await fetchNotificationsMock()
-  notifications.value = response.data?.items ?? response.data ?? []
+  const response = await getNotifications()
+  const data = response.data?.items ?? response.data ?? []
+  notifications.value = data.map(mapInboxMessageToFrontend)
 }
 
 async function openAccountNotifications() {
@@ -46,10 +48,10 @@ async function openAccountNotifications() {
 }
 
 async function handleNotificationClick(item) {
-  if (item.unread) {
-    await markNotificationReadMock(item.id)
+  if (!item.isRead) {
+    await apiMarkNotificationRead(item.id)
     notifications.value = notifications.value.map((notification) =>
-      notification.id === item.id ? { ...notification, unread: false } : notification,
+      notification.id === item.id ? { ...notification, isRead: true } : notification,
     )
   }
 
@@ -58,8 +60,8 @@ async function handleNotificationClick(item) {
 
 async function markAllNotificationsRead() {
   if (!unreadNotificationCount.value) return
-  await markAllNotificationsReadMock()
-  notifications.value = notifications.value.map((item) => ({ ...item, unread: false }))
+  await apiMarkAllNotificationsRead()
+  notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
 }
 
 function dropdownIconClass(type) {
@@ -127,7 +129,7 @@ onMounted(() => {
               :key="item.id"
               type="button"
               class="nd-item"
-              :class="{ unread: item.unread }"
+              :class="{ unread: !item.isRead }"
               @click="handleNotificationClick(item)"
             >
               <div :class="dropdownIconClass(item.type)">
@@ -136,9 +138,9 @@ onMounted(() => {
 
               <div class="nd-content">
                 <div class="nd-item-title">{{ item.title }}</div>
-                <div class="nd-item-body">{{ item.desc }}</div>
+                <div class="nd-item-body">{{ item.body }}</div>
                 <div class="nd-item-time">
-                  <span v-if="item.unread" class="nd-unread-dot"></span>
+                  <span v-if="!item.isRead" class="nd-unread-dot"></span>
                   {{ item.time }}
                 </div>
               </div>

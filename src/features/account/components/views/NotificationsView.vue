@@ -94,7 +94,7 @@ function tagClass(tone) {
           v-for="item in group.items"
           :key="item.id"
           class="notification-item"
-          :class="{ unread: item.unread, expanded: isExpanded(item.id) }"
+          :class="{ unread: !item.isRead, expanded: isExpanded(item.id) }"
         >
           <div class="item-icon" :class="`item-icon--${item.type}`">
             <AppIcon :name="item.icon" :size="18" />
@@ -106,7 +106,7 @@ function tagClass(tone) {
               <div class="item-time">{{ item.time }}</div>
             </div>
 
-            <div class="item-desc">{{ item.desc }}</div>
+            <div class="item-desc">{{ item.body }}</div>
 
             <div class="item-footer">
               <span class="item-tag" :class="tagClass(item.tagTone)">{{ item.tagLabel }}</span>
