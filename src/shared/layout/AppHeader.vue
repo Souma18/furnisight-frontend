@@ -8,14 +8,14 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const router = useRouter()
-const route = useRoute()
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
 const activeNav = computed(() => {
-  if (route.path.startsWith('/products')) return 'products'
-  if (route.path.startsWith('/room3d')) return 'room3d'
-  if (route.path === '/') return 'home'
+  const path = router?.currentRoute?.value?.path || ''
+  if (path.startsWith('/products')) return 'products'
+  if (path.startsWith('/room3d')) return 'room3d'
+  if (path === '/') return 'home'
   return ''
 })
 

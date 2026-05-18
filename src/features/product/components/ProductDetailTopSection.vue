@@ -5,11 +5,11 @@ defineProps({
   selectedSize: { type: String, required: true },
   qty: { type: Number, required: true },
   wished: { type: Boolean, default: false },
-  activeEmoji: { type: String, required: true },
+  activeImage: { type: String, required: true },
 })
 
 const emit = defineEmits([
-  'pick-emoji',
+  'pick-image',
   'pick-color',
   'pick-size',
   'change-qty',
@@ -25,18 +25,20 @@ const emit = defineEmits([
       <div class="pd-main">
         <span class="pd-badge">Mới</span>
         <span class="pd-badge sale">-20%</span>
-        <div class="pd-emoji">{{ activeEmoji }}</div>
+        <div class="pd-emoji">
+          <img v-if="activeImage" :src="activeImage" alt="Hình ảnh sản phẩm" class="pd-main-img" />
+        </div>
         <button type="button" class="pd-btn-3d" @click="emit('open-3d')">📦 Xem mô hình 3D</button>
       </div>
       <div class="pd-thumbs">
         <button
-          v-for="emoji in product.gallery"
-          :key="emoji"
+          v-for="imgUrl in product.gallery"
+          :key="imgUrl"
           type="button"
-          :class="['thumb', { active: activeEmoji === emoji }]"
-          @click="emit('pick-emoji', emoji)"
+          :class="['thumb', { active: activeImage === imgUrl }]"
+          @click="emit('pick-image', imgUrl)"
         >
-          {{ emoji }}
+          <img :src="imgUrl" alt="Thumbnail" />
         </button>
       </div>
     </div>

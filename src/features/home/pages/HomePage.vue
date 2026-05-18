@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, computed, ref } from 'vue'
+import { onMounted, computed, ref, watch } from 'vue'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
@@ -30,6 +30,8 @@ const roomFallbacks = {
   'Kitchen': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
   'Bathroom': { image: '/home/rooms/bathroom.jpg', isBig: false },
   'Study Room': { image: '/home/rooms/readingroom.jpg', isBig: false },
+  'Dining Room': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
+  'Workspace': { image: '/home/rooms/readingroom.jpg', isBig: false },
 }
 
 const categories = ref([])
@@ -44,6 +46,7 @@ const filteredRooms = computed(() => {
     const fallback = roomFallbacks[cat.name] || { image: '/home/rooms/livingroom.jpeg', isBig: false }
     return {
       id: cat.id,
+      slug: cat.slug,        // slug from BE, e.g. "dining-room"
       type: cat.name,
       name: cat.name,
       count: `${cat.productCount || 0} sản phẩm`,
@@ -58,10 +61,7 @@ const filteredRooms = computed(() => {
 
 async function loadData() {
   try {
-    const [catRes, prodRes] = await Promise.all([
-      fetchCategories(),
-      fetchProducts({ size: 8 })
-    ])
+    const catRes = await fetchCategories()
     
     // Map BE categories to FE format (root categories only)
     categories.value = catRes.data
@@ -75,20 +75,28 @@ async function loadData() {
     if (categories.value.length > 0) {
       activeCategoryId.value = categories.value[0].id
     }
+    
+  } catch (error) {
+    console.error('Failed to load home categories:', error)
+  }
+}
 
-    // BE returns { products: [], total: ... }
+watch(activeCategoryId, async (newVal) => {
+  if (!newVal) return
+  const selectedCat = categories.value.find(c => c.id === newVal)
+  if (!selectedCat) return
+  try {
+    const prodRes = await fetchProducts({ category: selectedCat.slug || selectedCat.name, size: 8 })
     products.value = prodRes.data.products.map(p => ({
       ...p,
       category: p.categoryName,
-      // Map price to string if needed, or keep as is if component handles number
       price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price),
       image: p.image || '/home/products/placeholder.jpg'
     }))
-    
   } catch (error) {
-    console.error('Failed to load home data:', error)
+    console.error('Failed to load products for category:', error)
   }
-}
+})
 
 onMounted(() => {
   loadData()
@@ -242,7 +250,7 @@ useRevealOnScroll('.fade-up')
 .room-name { font-size: 16px; font-weight: 600; color: #fff; }
 .room-count { font-size: 12px; color: rgba(255,255,255,.65); }
 .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
-.product-card { background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
+.product-card { text-decoration: none; color: inherit; display: block; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
 .product-img { height: 200px; background: #f0e9dd; position: relative; overflow: hidden; }
 .product-img img { width: 100%; height: 100%; object-fit: cover; }
 .product-img-disabled { width: 100%; height: 100%; object-fit: cover; opacity: .92; }
