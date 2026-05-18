@@ -19,6 +19,11 @@ const routes = [
     props: true,
   },
   {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('@features/contact/pages/ContactPage.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('@features/auth/pages/LoginPage.vue'),

@@ -39,6 +39,18 @@ export function getSavedProjects() {
   return apiClient.get('/account/projects')
 }
 
+export function getNotifications(params) {
+  return apiClient.get('/notifications/inbox-messages', { params })
+}
+
+export function markNotificationRead(notificationId) {
+  return apiClient.put(`/notifications/inbox-messages/${notificationId}/read`)
+}
+
+export function markAllNotificationsRead() {
+  return apiClient.put('/notifications/inbox-messages/read-all')
+}
+
 // ─── Account Security & Management ──────────────────────────────────────────
 
 const authBaseUrl = '/users/auth'

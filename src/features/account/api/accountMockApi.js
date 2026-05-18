@@ -1,3 +1,57 @@
+const homeProducts = [
+  {
+    id: 'ergonomic-chair',
+    detailId: 'ergonomic-chair',
+    category: 'Ghế văn phòng',
+    name: 'Ghế Ergonomic ProFlex',
+    price: '1.200.000 đ',
+    oldPrice: '',
+    tag: 'HOT',
+    tagType: 'hot',
+    isFavorite: true,
+    placeholder: '🪑',
+    image: '/home/products/ergonomic-proflex.jpg',
+  },
+  {
+    id: 'oak-bed-minimalist',
+    detailId: 'oak-bed',
+    category: 'Giường ngủ',
+    name: 'Giường Gỗ Sồi Minimalist',
+    price: '5.200.000 đ',
+    oldPrice: '',
+    tag: 'NEW',
+    tagType: 'new',
+    isFavorite: true,
+    placeholder: '🛏️',
+    image: '/home/products/oak-bed.jpg',
+  },
+  {
+    id: 'agape-bed',
+    detailId: 'agape-bed',
+    category: 'Giường ngủ',
+    name: 'Giường Agape Premium',
+    price: '5.900.000 đ',
+    oldPrice: '7.100.000 đ',
+    tag: 'NEW',
+    tagType: 'new',
+    isFavorite: true,
+    placeholder: '🛏️',
+    image: '/home/products/bed-agape.jpg',
+  },
+  {
+    id: 'tea-table',
+    detailId: 'tea-table',
+    category: 'Trang trí',
+    name: 'Đôn trà tròn Minimalist',
+    price: '860.000 đ',
+    oldPrice: '',
+    tag: 'AI+',
+    tagType: 'ai',
+    placeholder: '🌿',
+    image: '/home/products/tea-table.jpg',
+  },
+]
+
 function sleep(ms = 350) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -47,15 +101,47 @@ const orders = [
 ]
 
 const cartItems = [
-  { id: 'cart-1', name: 'Sofa Nordic 3 chỗ ngồi', qty: 1, price: 8500000 },
-  { id: 'cart-2', name: 'Ghế ergonomic ProFlex X1', qty: 2, price: 1200000 },
-  { id: 'cart-3', name: 'Đèn treo trần Rattan Boho', qty: 1, price: 920000 },
+  {
+    id: 'cart-1',
+    detailId: 'nordic-sofa',
+    name: 'Sofa Nordic 3 chỗ ngồi',
+    qty: 1,
+    price: 8500000,
+    imageFallback: '🛋️',
+    selectedColor: 'Be sáng',
+    selectedSize: '2m1 × 95cm',
+    outOfStock: true,
+  },
+  {
+    id: 'cart-2',
+    detailId: 'ergonomic-chair',
+    name: 'Ghế ergonomic ProFlex X1',
+    qty: 2,
+    price: 1200000,
+    imageFallback: '🪑',
+    selectedColor: 'Xám đá',
+    selectedSize: 'Tiêu chuẩn',
+  },
+  {
+    id: 'cart-3',
+    detailId: 'tea-table',
+    name: 'Đèn treo trần Rattan Boho',
+    qty: 1,
+    price: 920000,
+    imageFallback: '💡',
+    selectedColor: 'Nâu gỗ',
+    selectedSize: 'Ø60 × 45cm',
+  },
 ]
 
 const wishlist = [
-  { id: 'wish-1', name: 'Giường ngủ gỗ sồi Minimalist', price: 5200000 },
-  { id: 'wish-2', name: 'Tủ quần áo 4 cánh', price: 3800000 },
-  { id: 'wish-3', name: 'Sofa da thật nhập khẩu', price: 12500000 },
+  ...homeProducts
+    .filter((item) => item.isFavorite)
+    .map((item) => ({
+      ...item,
+      id: `wish-${item.id}`,
+      isFavorite: true,
+    })),
 ]
 
 const settings = {

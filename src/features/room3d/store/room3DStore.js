@@ -21,6 +21,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const aiRecognitionConfidence = ref(null)
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
+  const sceneItems = ref([])
   const placedProductIds = ref([])
   const cartItems = ref([])
   const isCartExpanded = ref(false)
@@ -41,6 +42,11 @@ export const useRoom3DStore = defineStore('room3d', () => {
       if (Array.isArray(parsed.placedProductIds)) {
         placedProductIds.value = parsed.placedProductIds.filter((id) => Number.isFinite(id))
       }
+      if (Array.isArray(parsed.sceneItems)) {
+        sceneItems.value = parsed.sceneItems.filter(
+          (item) => item && typeof item.instanceId === 'string' && Number.isFinite(item.productId),
+        )
+      }
       if (Array.isArray(parsed.cartItems)) {
         cartItems.value = parsed.cartItems
           .filter((item) => item && Number.isFinite(item.id))
@@ -60,6 +66,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
           selectedRoomType: selectedRoomType.value,
           searchKeyword: searchKeyword.value,
           selectedCategory: selectedCategory.value,
+          sceneItems: sceneItems.value,
           placedProductIds: placedProductIds.value,
           cartItems: cartItems.value,
         }),
@@ -176,6 +183,24 @@ export const useRoom3DStore = defineStore('room3d', () => {
     }
   }
 
+  function addToScene(productOrId, options = {}) {
+    const productId = typeof productOrId === 'number' ? productOrId : productOrId?.id
+    if (!Number.isFinite(productId)) return null
+
+    const instanceId = `scene-${productId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const sceneItem = {
+      instanceId,
+      productId,
+      initialPosition: options.initialPosition ?? null,
+    }
+    sceneItems.value.push(sceneItem)
+    return sceneItem
+  }
+
+  function removeFromScene(instanceId) {
+    sceneItems.value = sceneItems.value.filter((item) => item.instanceId !== instanceId)
+  }
+
   function removeFromCart(productId) {
     cartItems.value = cartItems.value.filter((item) => item.id !== productId)
     placedProductIds.value = placedProductIds.value.filter((id) => id !== productId)
@@ -187,7 +212,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
   }
 
   watch(
-    [selectedRoomType, searchKeyword, selectedCategory, placedProductIds, cartItems],
+    [selectedRoomType, searchKeyword, selectedCategory, sceneItems, placedProductIds, cartItems],
     () => {
       persistState()
     },
@@ -227,6 +252,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     aiRecognitionConfidence,
     searchKeyword,
     selectedCategory,
+    sceneItems,
     placedProductIds,
     cartItems,
     cartCount,
@@ -246,7 +272,9 @@ export const useRoom3DStore = defineStore('room3d', () => {
     resetRenderSourceIfNoModel,
     setSearchKeyword,
     setCategory,
+    addToScene,
     addToCart,
+    removeFromScene,
     removeFromCart,
     clearCart,
     toggleCart,

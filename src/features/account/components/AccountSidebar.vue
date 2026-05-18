@@ -1,7 +1,8 @@
 <script setup>
+import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-defineProps({
+const props = defineProps({
   activeView: {
     type: String,
     required: true,
@@ -16,7 +17,7 @@ defineProps({
   },
 })
 
-defineEmits(['change-view', 'logout'])
+const emit = defineEmits(['change-view', 'logout'])
 
 const navGroups = [
   {
@@ -43,6 +44,35 @@ const navGroups = [
     ],
   },
 ]
+
+const notificationItems = [
+  { key: 'bell', label: 'Tất cả', icon: 'list' },
+  { key: 'bell-order', label: 'Đơn hàng', icon: 'box' },
+  { key: 'bell-promo', label: 'Khuyến mãi', icon: 'gift' },
+  { key: 'bell-system', label: 'Hệ thống', icon: 'settings' },
+  { key: 'bell-review', label: 'Đánh giá', icon: 'star' },
+]
+
+const notificationMenuOpen = ref(false)
+const isNotificationView = computed(() => String(props.activeView).startsWith('bell'))
+
+watch(
+  () => props.activeView,
+  (nextView) => {
+    if (String(nextView).startsWith('bell')) notificationMenuOpen.value = true
+  },
+  { immediate: true },
+)
+
+function toggleNotificationMenu() {
+  if (isNotificationView.value) {
+    notificationMenuOpen.value = !notificationMenuOpen.value
+    return
+  }
+
+  notificationMenuOpen.value = true
+  emit('change-view', 'bell')
+}
 </script>
 
 <template>
@@ -81,6 +111,34 @@ const navGroups = [
           <AppIcon :name="item.icon" :size="16" />
           {{ item.label }}
         </button>
+
+        <div v-if="group.title === 'Tài khoản'" class="nav-submenu-wrap" :class="{ active: isNotificationView }">
+          <button
+            type="button"
+            class="nav-btn nav-parent"
+            :class="{ active: isNotificationView }"
+            @click="toggleNotificationMenu"
+          >
+            <span class="nav-parent-main">
+              <AppIcon name="bell" :size="16" />
+              Thông báo
+            </span>
+          </button>
+
+          <div class="nav-submenu" :class="{ open: notificationMenuOpen }">
+            <button
+              v-for="item in notificationItems"
+              :key="item.key"
+              type="button"
+              class="nav-submenu-item"
+              :class="{ active: activeView === item.key }"
+              @click="$emit('change-view', item.key)"
+            >
+              <AppIcon :name="item.icon" :size="15" />
+              {{ item.label }}
+            </button>
+          </div>
+        </div>
       </section>
     </nav>
 
@@ -200,6 +258,54 @@ const navGroups = [
 .nav-btn.active {
   background: color-mix(in srgb, var(--auth-brand-start) 12%, transparent);
   color: var(--auth-brand-start);
+}
+.nav-parent {
+  width: 100%;
+}
+.nav-parent-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.nav-submenu-wrap {
+  display: grid;
+  gap: 0.28rem;
+}
+.nav-submenu {
+  display: grid;
+  gap: 0.28rem;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  padding-left: 0.55rem;
+  transition: max-height 0.3s ease, opacity 0.25s ease;
+}
+.nav-submenu.open {
+  max-height: 16rem;
+  opacity: 1;
+}
+.nav-submenu-item {
+  border: none;
+  border-radius: 10px;
+  padding: 0.52rem 0.62rem;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  cursor: pointer;
+  color: var(--account-text-strong);
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-align: left;
+}
+.nav-submenu-item:hover {
+  background: color-mix(in srgb, var(--auth-brand-start) 6%, transparent);
+  color: var(--auth-brand-start);
+}
+.nav-submenu-item.active {
+  background: color-mix(in srgb, var(--auth-brand-start) 12%, transparent);
+  color: var(--auth-brand-start);
+  font-weight: 500;
 }
 .logout-btn {
   margin: 0.2rem 0.7rem 0.8rem;
