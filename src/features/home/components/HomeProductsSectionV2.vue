@@ -60,7 +60,7 @@ const { getDetailRoute } = useProductNavigation()
               <span class="product-price">{{ product.price }}</span>
               <span v-if="product.oldPrice" class="product-price-old">{{ product.oldPrice }}</span>
             </div>
-            <button type="button" class="add-btn" @click.prevent.stop="">+</button>
+            <span class="product-sold">Đã bán {{ product.soldCount ?? 0 }}</span>
           </div>
         </div>
       </RouterLink>

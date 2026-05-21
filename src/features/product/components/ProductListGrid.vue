@@ -72,7 +72,7 @@ function stars(rating) {
               <p class="pl-price">{{ item.formattedPrice }}</p>
               <p v-if="item.hasDiscount" class="pl-old">{{ item.formattedOldPrice }}</p>
             </div>
-            <button type="button" @click.prevent.stop="">+</button>
+            <span class="pl-sold">Đã bán {{ item.soldCount }}</span>
           </div>
         </div>
       </RouterLink>

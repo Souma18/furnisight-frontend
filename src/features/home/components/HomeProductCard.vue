@@ -30,7 +30,7 @@ const emit = defineEmits(['toggle-wish'])
           <span class="hn-product-price">{{ product.price }}</span>
           <span v-if="product.oldPrice" class="hn-product-old">{{ product.oldPrice }}</span>
         </div>
-        <button type="button" class="hn-add-btn">+</button>
+        <span class="hn-product-sold">Đã bán {{ product.soldCount ?? 0 }}</span>
       </div>
     </div>
   </article>
