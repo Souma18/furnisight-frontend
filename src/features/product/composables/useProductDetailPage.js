@@ -2,6 +2,7 @@ import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchProductById } from '../api/productApi'
 
+
 export function useProductDetailPage(props) {
   const router = useRouter()
   const product = ref(null)
@@ -21,72 +22,12 @@ export function useProductDetailPage(props) {
     product.value = null
     try {
       const res = await fetchProductById(id)
-      const raw = res.data
-      if (!raw) throw new Error('not_found')
+      if (!res.data) throw new Error('not_found')
 
-      const currentPriceStr = new Intl.NumberFormat('vi-VN').format(raw.price || 0)
-      const oldPriceStr = raw.oldPrice ? new Intl.NumberFormat('vi-VN').format(raw.oldPrice) : ''
-      const saveStr = raw.oldPrice && raw.oldPrice > raw.price ? `Tiết kiệm ${new Intl.NumberFormat('vi-VN').format(raw.oldPrice - raw.price)}đ` : ''
-
-      const ratingScore = raw.rating ? Number(raw.rating).toFixed(1) : '5.0'
-      const ratingStars = ratingScore >= 4.5 ? '★★★★★' : '★★★★☆'
-      const ratingCount = raw.ratingCount ?? 0
-      const ratingSold = raw.stock ? Math.max(0, raw.stock * 3) : 0
-
-      const descArray = Array.isArray(raw.description)
-        ? raw.description
-        : raw.description
-          ? [raw.description]
-          : []
-
-      let specsObj = {
-        summaryTitle: 'Thông số cơ bản',
-        summaryRows: [],
-        detailTitle: 'Chi tiết kỹ thuật',
-        detailRows: [],
-      }
-
-      if (raw.specs) {
-        if (Array.isArray(raw.specs)) {
-          specsObj.detailRows = raw.specs
-          specsObj.summaryRows = raw.specs.slice(0, 4)
-        } else if (raw.specs.detailRows || raw.specs.summaryRows) {
-          specsObj = { ...specsObj, ...raw.specs }
-        } else if (typeof raw.specs === 'object') {
-          const rows = Object.entries(raw.specs).map(([key, value]) => ({ key, value }))
-          specsObj.detailRows = rows
-          specsObj.summaryRows = rows.slice(0, 4)
-        }
-      }
-
-      const reviewsObj = raw.reviews ?? { bars: [], items: [] }
-      const galleryArr = raw.gallery?.length ? raw.gallery : raw.thumbnailUrl ? [raw.thumbnailUrl] : []
-
-      product.value = {
-        ...raw,
-        price: {
-          current: currentPriceStr,
-          old: oldPriceStr,
-          save: saveStr,
-          rawValue: raw.price,
-        },
-        rating: {
-          stars: ratingStars,
-          score: ratingScore,
-          count: ratingCount,
-          sold: ratingSold,
-        },
-        descriptionTitle: raw.name,
-        description: descArray,
-        specs: specsObj,
-        reviews: reviewsObj,
-        gallery: galleryArr,
-        colors: raw.colors?.length ? raw.colors : [],
-        sizes: raw.sizes?.length ? raw.sizes : [],
-      }
+      product.value = res.data
 
       selectedColor.value = product.value.colors?.[0] ?? ''
-      selectedSize.value = product.value.sizes?.[1] ?? product.value.sizes?.[0] ?? ''
+      selectedSize.value = product.value.sizes?.[0] ?? ''
       activeImage.value = product.value.gallery?.[0] ?? ''
       qty.value = 1
       activeTab.value = 'desc'

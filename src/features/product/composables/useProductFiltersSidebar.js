@@ -72,6 +72,19 @@ export function useProductFiltersSidebar(props, emit) {
   })
   const displayMaterials = computed(() => props.facets?.materials || [])
   const displayColors = computed(() => props.facets?.colors || [])
+  const displayRatings = computed(() => {
+    const apiRatings = props.facets?.ratings || {}
+    
+    return [5, 4, 3, 2, 1].map(star => {
+      const count = apiRatings[star] || 0
+      return {
+        value: star,
+        stars: '★'.repeat(star) + '☆'.repeat(5 - star),
+        hint: star === 5 ? `(${count})` : `${star} sao+ (${count})`,
+        count: count,
+      }
+    })
+  })
 
   const totalCategoryCount = computed(() =>
     displayCategories.value.find((c) => c.id === 'all')?.count ?? 0,
@@ -123,6 +136,7 @@ export function useProductFiltersSidebar(props, emit) {
     displayCategories,
     displayMaterials,
     displayColors,
+    displayRatings,
     totalCategoryCount,
     toggleBlock,
     selectCategory,

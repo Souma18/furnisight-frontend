@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { toRef } from 'vue'
+import { useProductTabs } from '../composables/useProductTabs'
 
 const emit = defineEmits(['switch-tab'])
 const props = defineProps({
@@ -7,8 +8,13 @@ const props = defineProps({
   activeTab: { type: String, required: true },
 })
 
-const reviewCountLabel = computed(() => props.product?.rating?.count ?? 0)
-const qaCountLabel = computed(() => props.product?.qa?.length ?? 0)
+const {
+  reviewCountLabel,
+  qaCountLabel,
+  specsRows,
+  reviewBars,
+  getStars,
+} = useProductTabs(toRef(props, 'product'))
 </script>
 
 <template>
@@ -29,15 +35,15 @@ const qaCountLabel = computed(() => props.product?.qa?.length ?? 0)
     </div>
     <div v-if="activeTab === 'desc'" class="desc-grid">
       <div class="content">
-        <h2>{{ product.descriptionTitle }}</h2>
-        <p v-for="text in product.description" :key="text">{{ text }}</p>
+        <h2>Mô tả sản phẩm</h2>
+        <p style="white-space: pre-line;">{{ product.description }}</p>
         <ul>
           <li v-for="item in product.features" :key="item">{{ item }}</li>
         </ul>
       </div>
       <div class="spec-table">
-        <div class="spec-head">{{ product.specs?.summaryTitle || 'Thông số cơ bản' }}</div>
-        <div v-for="row in product.specs?.summaryRows || []" :key="`sum-desc-${row.key}`" class="spec-row">
+        <div class="spec-head">Thông số cơ bản</div>
+        <div v-for="row in specsRows.slice(0, 4)" :key="`sum-desc-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>
         </div>
@@ -45,8 +51,8 @@ const qaCountLabel = computed(() => props.product?.qa?.length ?? 0)
     </div>
     <div v-else-if="activeTab === 'spec'" class="pd-spec">
       <div class="spec-table">
-        <div class="spec-head">{{ product.specs?.detailTitle || 'Chi tiết kỹ thuật đầy đủ' }}</div>
-        <div v-for="row in product.specs?.detailRows || []" :key="`det-${row.key}`" class="spec-row">
+        <div class="spec-head">Chi tiết kỹ thuật đầy đủ</div>
+        <div v-for="row in specsRows" :key="`det-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>
         </div>
@@ -55,28 +61,29 @@ const qaCountLabel = computed(() => props.product?.qa?.length ?? 0)
     <div v-else-if="activeTab === 'review'" class="pd-review">
       <div class="review-summary">
         <div class="review-score">
-          <p class="score">{{ product.rating?.score || '0.0' }}</p>
-          <p class="stars">{{ product.rating?.stars || '☆☆☆☆☆' }}</p>
+          <p class="score">{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</p>
+          <p class="stars">{{ getStars(product.rating) }}</p>
           <p class="count">{{ reviewCountLabel }} đánh giá</p>
         </div>
         <div class="review-bars">
-          <div v-for="bar in product.reviews?.bars || []" :key="`bar-${bar.star}`" class="bar-row">
+          <div v-for="bar in reviewBars" :key="`bar-${bar.star}`" class="bar-row">
             <span class="bar-label">{{ bar.star }}★</span>
             <span class="bar-track"><span class="bar-fill" :style="{ width: `${bar.percent}%` }"></span></span>
             <span class="bar-count">{{ bar.count }}</span>
           </div>
         </div>
       </div>
-      <div v-for="item in product.reviews?.items || []" :key="item.id" class="review-card">
+      <div v-for="item in product.reviews || []" :key="item.id" class="review-card">
         <div class="review-head">
-          <span class="avatar">{{ item.avatar }}</span>
+          <img v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img" />
+          <span v-else class="avatar">U</span>
           <div>
-            <p class="name">{{ item.name }}</p>
-            <p class="date">{{ item.date }}</p>
+            <p class="name">{{ item.user }}</p>
+            <p class="date">{{ item.createdAt }}</p>
           </div>
-          <span class="stars">{{ item.stars }}</span>
+          <span class="stars">{{ getStars(item.rating) }}</span>
         </div>
-        <p class="text">{{ item.text }}</p>
+        <p class="text">{{ item.comment }}</p>
         <div v-if="item.images?.length" class="review-images">
           <span v-for="img in item.images" :key="`${item.id}-${img}`" class="review-image">{{ img }}</span>
         </div>

@@ -14,8 +14,8 @@ export const useProductStore = defineStore('product', () => {
     error.value = null
     try {
       const { data } = await fetchProducts(params)
-      items.value = data?.items ?? data?.products ?? []
-      total.value = data?.total ?? items.value.length
+      items.value = data?.products ?? data?.content ?? []
+      total.value = data?.total ?? data?.page?.totalElements ?? items.value.length
       facets.value = data?.facets ?? {}
     } catch (e) {
       error.value = e

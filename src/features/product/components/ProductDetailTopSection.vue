@@ -1,8 +1,8 @@
 <script setup>
 defineProps({
   product: { type: Object, required: true },
-  selectedColor: { type: String, required: true },
-  selectedSize: { type: String, required: true },
+  selectedColor: { type: String, required: false },
+  selectedSize: { type: String, required: false },
   qty: { type: Number, required: true },
   wished: { type: Boolean, default: false },
   activeImage: { type: String, required: true },
@@ -25,7 +25,7 @@ const emit = defineEmits([
       <div class="pd-main">
         <span class="pd-badge">Mới</span>
         <span class="pd-badge sale">-20%</span>
-        <div class="pd-emoji">
+        <div class="pd-img-wrap">
           <img v-if="activeImage" :src="activeImage" alt="Hình ảnh sản phẩm" class="pd-main-img" />
         </div>
         <button type="button" class="pd-btn-3d" @click="emit('open-3d')">📦 Xem mô hình 3D</button>
@@ -47,17 +47,17 @@ const emit = defineEmits([
       <p class="collection">{{ product.collection }}</p>
       <h1 class="name">{{ product.name }}</h1>
       <div class="rating">
-        <span>{{ product.rating.stars }}</span>
-        <strong>{{ product.rating.score }}</strong>
-        <small>({{ product.rating.count }} đánh giá)</small>
-        <small>Đã bán {{ product.rating.sold }}</small>
+        <span>{{ '★'.repeat(Math.round(product.rating || 5)).padEnd(5, '☆') }}</span>
+        <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
+        <small>({{ product.ratingCount || 0 }} đánh giá)</small>
+        <small>Đã bán {{ (product.stock || 0) * 3 }}</small>
       </div>
       <div class="price-box">
         <div>
-          <p class="price">₫ {{ product.price.current }}</p>
-          <p class="old">{{ product.price.old }} đ</p>
+          <p class="price">₫ {{ product.formattedPrice }}</p>
+          <p v-if="product.hasDiscount" class="old">{{ product.formattedOldPrice }} đ</p>
         </div>
-        <span class="save">{{ product.price.save }}</span>
+        <span v-if="product.hasDiscount" class="save">{{ product.formattedSave }}</span>
       </div>
       <p class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>
       <div class="colors">
@@ -71,18 +71,22 @@ const emit = defineEmits([
           {{ color }}
         </button>
       </div>
-      <p class="opt-label">Kích thước:</p>
-      <div class="sizes">
-        <button
-          v-for="size in product.sizes"
-          :key="size"
-          type="button"
-          :class="['size-btn', { active: selectedSize === size }]"
-          @click="emit('pick-size', size)"
-        >
-          {{ size }}
-        </button>
+      
+      <div v-if="product.sizes?.length">
+        <p class="opt-label">Kích thước: <span>{{ selectedSize }}</span></p>
+        <div class="sizes">
+          <button
+            v-for="size in product.sizes"
+            :key="size"
+            type="button"
+            :class="['size-btn', { active: selectedSize === size }]"
+            @click="emit('pick-size', size)"
+          >
+            {{ size }}
+          </button>
+        </div>
       </div>
+
       <div class="qty-row">
         <div class="qty-ctrl">
           <button type="button" @click="emit('change-qty', -1)">−</button>
