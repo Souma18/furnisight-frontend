@@ -1,13 +1,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProducts } from './useProducts'
-import { fetchCategories } from '../api/productApi'
+import { fetchRootCategories, fetchSubcategories, fetchCategories } from '../api/productApi'
 
 export function useProductListPage() {
   const route = useRoute()
   const { items, total, facets, loading, loadList } = useProducts()
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
+  const selectedSubcategory = ref('all')
   const sortBy = ref('popular')
   const viewMode = ref('grid')
   const saleOnly = ref(false)
@@ -27,6 +28,7 @@ export function useProductListPage() {
   const activeTags = computed(() => {
     const tags = []
     if (selectedCategory.value !== 'all') tags.push(selectedCategory.value)
+    if (selectedSubcategory.value !== 'all') tags.push(selectedSubcategory.value)
     if (searchKeyword.value.trim()) tags.push(`"${searchKeyword.value.trim()}"`)
     if (saleOnly.value) tags.push('Sale')
     const f = appliedFilters.value
@@ -58,12 +60,12 @@ export function useProductListPage() {
   }
 
   const dynamicQuickFilters = ref([])
+  const sidebarCategories = ref([])
 
   async function loadQuickFilters() {
     try {
-      const { data } = await fetchCategories()
-      const topLevel = data.filter(c => !c.parentId)
-      const chips = topLevel.map(c => ({ label: c.name, slug: c.slug ?? c.id }))
+      const { data } = await fetchRootCategories()
+      const chips = data.map(c => ({ label: c.name, slug: c.slug ?? c.id }))
       chips.push({ label: 'Sale -30%', slug: 'sale' })
       dynamicQuickFilters.value = chips
     } catch (e) {
@@ -72,6 +74,35 @@ export function useProductListPage() {
     }
   }
 
+  async function loadSidebarCategories(rootSlug) {
+    try {
+      let data
+      if (!rootSlug || rootSlug === 'all') {
+        // Load all subcategories (leaf categories) for "all" view
+        const res = await fetchCategories()
+        data = res.data.filter(c => c.parentId)
+      } else {
+        const res = await fetchSubcategories(rootSlug)
+        data = res.data
+      }
+      sidebarCategories.value = data.map(c => ({
+        id: c.slug ?? c.id,
+        slug: c.slug ?? c.id,
+        label: c.name,
+        count: c.productCount || 0,
+      }))
+    } catch (e) {
+      console.error('Failed to load subcategories', e)
+      sidebarCategories.value = []
+    }
+  }
+
+  // Always use API-loaded sidebar categories, never change them based on search results
+  const enrichedFacets = computed(() => {
+    const base = facets.value || {}
+    return { ...base, categories: sidebarCategories.value }
+  })
+
   function toggleCategory(chip) {
     if (chip.slug === 'sale') {
       saleOnly.value = !saleOnly.value
@@ -79,11 +110,18 @@ export function useProductListPage() {
       return
     }
     selectedCategory.value = selectedCategory.value === chip.slug ? 'all' : chip.slug
+    selectedSubcategory.value = 'all'
     requestList()
   }
 
   function selectSidebarCategory(id) {
-    selectedCategory.value = String(id).toLowerCase()
+    const slug = String(id).toLowerCase()
+    if (slug === 'all') {
+      selectedSubcategory.value = 'all'
+    } else {
+      selectedSubcategory.value = slug
+    }
+    requestList()
   }
 
   function onApplySidebar(payload) {
@@ -95,13 +133,22 @@ export function useProductListPage() {
     appliedFilters.value = defaultAppliedFilters()
     saleOnly.value = false
     selectedCategory.value = 'all'
+    selectedSubcategory.value = 'all'
     searchKeyword.value = ''
     requestList()
   }
 
   function requestList() {
     const f = appliedFilters.value
-    const categorySlug = selectedCategory.value === 'all' ? '' : selectedCategory.value
+
+    // Determine which category slug to send to the API
+    let categorySlug = ''
+    if (selectedSubcategory.value !== 'all') {
+      categorySlug = selectedSubcategory.value
+    } else if (selectedCategory.value !== 'all') {
+      categorySlug = selectedCategory.value
+    }
+
     loadList({
       ...(searchKeyword.value ? { q: searchKeyword.value } : {}),
       ...(categorySlug ? { category: categorySlug } : {}),
@@ -117,7 +164,13 @@ export function useProductListPage() {
 
   const suppressListWatch = ref(false)
 
-  watch([searchKeyword, selectedCategory, sortBy, saleOnly], () => {
+  // Watch root category changes to load subcategories
+  watch(selectedCategory, (newCat) => {
+    selectedSubcategory.value = 'all'
+    loadSidebarCategories(newCat)
+  })
+
+  watch([searchKeyword, sortBy, saleOnly], () => {
     if (suppressListWatch.value) return
     requestList()
   })
@@ -144,16 +197,14 @@ export function useProductListPage() {
       }
     }
     
-    const catFromFacets = facets.value.categories?.find(c => c.slug === selectedCategory.value || c.id === selectedCategory.value)
     const catFromQuick = dynamicQuickFilters.value.find(c => c.slug === selectedCategory.value)
-    
-    const label = catFromFacets?.label ?? catFromFacets?.name ?? catFromQuick?.label ?? selectedCategory.value
+    const label = catFromQuick?.label ?? selectedCategory.value
     
     return {
       breadcrumb: ['Trang chủ', 'Sản phẩm', label],
       title: label,
-      subtitle: catFromFacets?.description ?? `Bộ sưu tập ${label} tinh tế và hiện đại`,
-      collection: catFromFacets?.collection ?? 'Interior Design',
+      subtitle: `Bộ sưu tập ${label} tinh tế và hiện đại`,
+      collection: 'Interior Design',
       stats: [
         { label: 'Sản phẩm', value: total.value },
         { label: 'Màu sắc', value: facets.value.colors?.length || 0 },
@@ -166,6 +217,7 @@ export function useProductListPage() {
     suppressListWatch.value = true
     parseQueryPreset()
     loadQuickFilters()
+    loadSidebarCategories(selectedCategory.value)
     suppressListWatch.value = false
     requestList()
   })
@@ -173,10 +225,12 @@ export function useProductListPage() {
   return {
     items,
     total,
-    facets,
+    facets: enrichedFacets,
     loading,
     searchKeyword,
-    selectedCategory,
+    selectedCategory: computed(() =>
+      selectedSubcategory.value !== 'all' ? selectedSubcategory.value : selectedCategory.value
+    ),
     sortBy,
     viewMode,
     saleOnly,

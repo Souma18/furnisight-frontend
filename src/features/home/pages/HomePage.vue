@@ -10,7 +10,7 @@ import HomeProductsSectionV2 from '../components/HomeProductsSectionV2.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
 import {
-  fetchCategories,
+  fetchRootCategories,
   fetchProducts
 } from '@features/product/api/productApi'
 import {
@@ -61,16 +61,13 @@ const filteredRooms = computed(() => {
 
 async function loadData() {
   try {
-    const catRes = await fetchCategories()
+    const catRes = await fetchRootCategories()
     
-    // Map BE categories to FE format (root categories only)
-    categories.value = catRes.data
-      .filter(cat => !cat.parentId)
-      .map((cat) => ({
-        ...cat,
-        icon: cat.iconUrl || '🛋️',
-        count: `${cat.productCount || 0} sản phẩm`
-      }))
+    categories.value = catRes.data.map((cat) => ({
+      ...cat,
+      icon: cat.iconUrl || '🛋️',
+      count: `${cat.productCount || 0} sản phẩm`
+    }))
     
     if (categories.value.length > 0) {
       activeCategoryId.value = categories.value[0].id

@@ -1,7 +1,6 @@
 <script setup>
 import {
   PRODUCT_PRICE_BAND_OPTIONS,
-  PRODUCT_STAR_FILTER_OPTIONS,
 } from '../mock/productListMockData'
 import { useProductFiltersSidebar } from '../composables/useProductFiltersSidebar'
 
@@ -31,6 +30,7 @@ const {
   displayCategories,
   displayMaterials,
   displayColors,
+  displayRatings,
   totalCategoryCount,
   toggleBlock,
   selectCategory,
@@ -151,7 +151,7 @@ const {
       </div>
       <div v-show="openBlocks.rating" class="pl-filter-body">
         <div class="pl-star-rows">
-          <label v-for="opt in PRODUCT_STAR_FILTER_OPTIONS" :key="opt.value" class="pl-star-row">
+          <label v-for="opt in displayRatings" :key="opt.value" class="pl-star-row">
             <input
               type="radio"
               name="pl-star-filter"

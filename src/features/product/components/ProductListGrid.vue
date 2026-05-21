@@ -1,5 +1,5 @@
 <script setup>
-import { formatVnd } from '../mock/productListMockData'
+
 
 defineProps({
   products: { type: Array, default: () => [] },
@@ -52,14 +52,14 @@ function stars(rating) {
         class="pl-card"
       >
         <div class="pl-card-media">
-          <img v-if="item.thumbnailUrl || item.imageUrl" :src="item.thumbnailUrl || item.imageUrl" :alt="item.name" class="pl-img" />
-          <span v-else>{{ item.imageFallback || 'No Image' }}</span>
+          <img v-if="item.image" :src="item.image" :alt="item.name" class="pl-img" />
+          <span v-else>No Image</span>
         </div>
 
         <div class="pl-card-body">
-          <p class="pl-cat">{{ item.category?.label || item.category || 'N/A' }}</p>
+          <p class="pl-cat">{{ item.categoryName || 'N/A' }}</p>
           <div class="pl-name">{{ item.name }}</div>
-          <p v-if="viewMode === 'list'" class="pl-desc">{{ item.description }}</p>
+          <p v-if="viewMode === 'list'" class="pl-desc">{{ item.description || '' }}</p>
 
           <div class="pl-rating">
             <span>{{ stars(item.rating) }}</span>
@@ -69,8 +69,8 @@ function stars(rating) {
 
           <div class="pl-price-row">
             <div>
-              <p class="pl-price">{{ formatVnd(item.price) }}</p>
-              <p v-if="item.oldPrice" class="pl-old">{{ formatVnd(item.oldPrice) }}</p>
+              <p class="pl-price">{{ item.formattedPrice }}</p>
+              <p v-if="item.hasDiscount" class="pl-old">{{ item.formattedOldPrice }}</p>
             </div>
             <button type="button" @click.prevent.stop="">+</button>
           </div>

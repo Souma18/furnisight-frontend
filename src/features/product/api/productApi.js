@@ -1,17 +1,33 @@
 import { apiClient } from '@shared/lib/api'
-// Real API only
+import { ProductSummaryModel } from '../models/productSummary'
+import { ProductDetailModel } from '../models/productDetail'
 
 const baseUrl = '/catalog'
 
-export function fetchProducts(params) {
-  return apiClient.get(`${baseUrl}/products`, { params })
+export async function fetchProducts(params) {
+  const response = await apiClient.get(`${baseUrl}/products`, { params })
+  if (response.data && Array.isArray(response.data.content)) {
+    response.data.content = response.data.content.map(item => new ProductSummaryModel(item))
+  }
+  return response
 }
 
-export function fetchProductById(id) {
-  return apiClient.get(`${baseUrl}/products/${id}`)
+export async function fetchProductById(id) {
+  const response = await apiClient.get(`${baseUrl}/products/${id}`)
+  if (response.data) {
+    response.data = new ProductDetailModel(response.data)
+  }
+  return response
 }
 
 export function fetchCategories() {
   return apiClient.get(`${baseUrl}/categories`)
 }
 
+export function fetchRootCategories() {
+  return apiClient.get(`${baseUrl}/categories/roots`)
+}
+
+export function fetchSubcategories(slug) {
+  return apiClient.get(`${baseUrl}/categories/${slug}/subcategories`)
+}
