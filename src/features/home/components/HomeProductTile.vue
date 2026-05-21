@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { getProductDetailById } from '@features/product/mock/productDetailMockData'
+import { useProductNavigation } from '@features/product/composables/useProductNavigation'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -11,10 +11,7 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-wish'])
 
-function getDetailRoute(productId) {
-  const detail = getProductDetailById(productId)
-  return detail ? `/products/${productId}` : null
-}
+const { getDetailRoute } = useProductNavigation()
 
 function handleToggleWish() {
   if (props.wishReadonly) return
@@ -35,7 +32,7 @@ function handleToggleWish() {
         class="product-img-disabled"
         @error="$event.target.style.display = 'none'"
       />
-      <span :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
+      <span v-if="product.tag" :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
       <button
         type="button"
         class="product-wish"

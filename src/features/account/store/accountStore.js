@@ -11,6 +11,8 @@ import {
   buildOrderDetailFromCheckout,
   buildOrderListItemFromCheckout,
 } from '../mock/ordersMockData'
+import { favoriteProduct, unfavoriteProduct, getWishlist } from '../api/accountApi'
+import { FavoriteProductModel } from '../models/favoriteProduct'
 import { getProfile, updateProfile } from '../api/profileApi'
 // TODO(BE): replace mock imports with accountApi calls in production
 
@@ -25,8 +27,10 @@ export const useAccountStore = defineStore('account', () => {
   const orders = ref([])
   const orderDetails = ref({ ...ORDER_DETAIL_SEED })
   const wishlist = ref([])
+  const wishlistHydrated = ref(false)
   const settings = ref({})
   const projects = ref([])
+  let wishlistPromise = null
 
   const stats = computed(() => ({
     totalOrders: orders.value.length,
@@ -56,12 +60,96 @@ export const useAccountStore = defineStore('account', () => {
       }
       addresses.value = sortAddressesByDefault(data.addresses)
       orders.value = data.orders
-      wishlist.value = data.wishlist
+      await loadWishlist().catch(() => {
+        wishlist.value = []
+      })
       settings.value = data.settings
       projects.value = data.projects
     } finally {
       loading.value = false
     }
+  }
+
+  const wishlistProductIds = computed(() =>
+    wishlist.value
+      .map((item) => item.productId || item.id)
+      .filter(Boolean),
+  )
+
+  function hasFavoriteProduct(productId) {
+    if (!productId) return false
+    return wishlistProductIds.value.includes(productId)
+  }
+
+  function upsertFavorite(rawFavorite) {
+    const favorite = rawFavorite instanceof FavoriteProductModel
+      ? rawFavorite
+      : new FavoriteProductModel(rawFavorite)
+
+    if (!favorite.productId) return favorite
+
+    const existingIndex = wishlist.value.findIndex((item) =>
+      (item.productId || item.id) === favorite.productId,
+    )
+
+    if (existingIndex >= 0) {
+      wishlist.value = wishlist.value.map((item, index) =>
+        index === existingIndex ? favorite : item,
+      )
+      return favorite
+    }
+
+    wishlist.value = [favorite, ...wishlist.value]
+    return favorite
+  }
+
+  async function loadWishlist(options = {}) {
+    const { force = false } = options
+
+    if (wishlistHydrated.value && !force) return wishlist.value
+    if (wishlistPromise && !force) return wishlistPromise
+
+    wishlistPromise = (async () => {
+      const { data } = await getWishlist()
+      wishlist.value = Array.isArray(data)
+        ? data.map((item) => new FavoriteProductModel(item))
+        : []
+      wishlistHydrated.value = true
+      return wishlist.value
+    })()
+
+    try {
+      return await wishlistPromise
+    } finally {
+      wishlistPromise = null
+    }
+  }
+
+  async function addFavorite(productId) {
+    if (!productId) return null
+
+    const existing = wishlist.value.find((item) =>
+      (item.productId || item.id) === productId,
+    )
+    if (existing) return existing
+
+    const { data } = await favoriteProduct(productId)
+    return upsertFavorite(data)
+  }
+
+  async function removeFavorite(productId) {
+    if (!productId) return null
+
+    const existingIndex = wishlist.value.findIndex((item) =>
+      (item.productId || item.id) === productId,
+    )
+    if (existingIndex < 0) return true
+
+    await unfavoriteProduct(productId)
+    wishlist.value = wishlist.value.filter((item) =>
+      (item.productId || item.id) !== productId,
+    )
+    return true
   }
 
   async function saveProfile(payload) {
@@ -155,6 +243,8 @@ export const useAccountStore = defineStore('account', () => {
     orders,
     orderDetails,
     wishlist,
+    wishlistHydrated,
+    wishlistProductIds,
     settings,
     projects,
     stats,
@@ -168,5 +258,9 @@ export const useAccountStore = defineStore('account', () => {
     addOrderFromCheckout,
     getOrderDetail,
     cancelOrder,
+    loadWishlist,
+    addFavorite,
+    removeFavorite,
+    hasFavoriteProduct,
   }
 })

@@ -56,7 +56,7 @@ const emit = defineEmits([
         <span>{{ '★'.repeat(Math.round(product.rating || 5)).padEnd(5, '☆') }}</span>
         <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
         <small>({{ product.ratingCount || 0 }} đánh giá)</small>
-        <small>Đã bán {{ (product.stock || 0) * 3 }}</small>
+        <small>Đã bán {{ product.soldCount || 0 }}</small>
       </div>
       <div class="price-box">
         <div>

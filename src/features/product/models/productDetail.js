@@ -18,6 +18,7 @@ export class ProductDetailModel {
 
     this.rating = raw.rating ?? 0
     this.ratingCount = raw.ratingCount ?? 0
+    this.soldCount = raw.soldCount ?? raw.soldQuantity ?? raw.sold ?? 0
 
     this.tags = Array.isArray(raw.tags) ? raw.tags : []
 

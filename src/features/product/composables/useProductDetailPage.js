@@ -3,6 +3,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { fetchProductById } from '../api/productApi'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useAccountStore } from '@features/account/store/accountStore'
 
 
 export function useProductDetailPage(props) {
@@ -10,6 +11,7 @@ export function useProductDetailPage(props) {
   const route = useRoute()
   const cartStore = useCartStore()
   const authStore = useAuthStore()
+  const accountStore = useAccountStore()
   const product = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -35,8 +37,14 @@ export function useProductDetailPage(props) {
       selectedSize.value = product.value.sizes?.[0] ?? ''
       activeImage.value = product.value.gallery?.[0] ?? product.value.image ?? ''
       qty.value = 1
+      wished.value = false
       activeTab.value = 'desc'
       show3DModal.value = false
+
+      if (authStore.isAuthenticated) {
+        await accountStore.loadWishlist().catch(() => [])
+        wished.value = accountStore.hasFavoriteProduct(product.value.id)
+      }
     } catch (e) {
       if (e.message === 'not_found' || e.response?.status === 404) {
         error.value = 'not_found'
@@ -110,6 +118,32 @@ export function useProductDetailPage(props) {
     })
   }
 
+  async function addToWishlist() {
+    if (!product.value) return
+
+    if (!authStore.isAuthenticated) {
+      router.push({
+        name: 'login',
+        query: {
+          redirect: route.fullPath,
+        },
+      })
+      return
+    }
+
+    try {
+      if (accountStore.hasFavoriteProduct(product.value.id)) {
+        await accountStore.removeFavorite(product.value.id)
+        wished.value = false
+      } else {
+        await accountStore.addFavorite(product.value.id)
+        wished.value = true
+      }
+    } catch (e) {
+      console.error('Failed to toggle favorite product:', e)
+    }
+  }
+
   const breadcrumbLinks = ref([])
   watch(product, (p) => {
     if (!p) { breadcrumbLinks.value = []; return }
@@ -140,5 +174,6 @@ export function useProductDetailPage(props) {
     changeQty,
     openRoom3D,
     addToCart,
+    addToWishlist,
   }
 }

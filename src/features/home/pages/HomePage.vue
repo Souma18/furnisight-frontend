@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
@@ -18,6 +19,8 @@ import {
   homeHero,
   homeTestimonials,
 } from '../mock/homeMockData'
+import { useAccountStore } from '@features/account/store/accountStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const roomFallbacks = {
   'Phòng ngủ': { image: '/home/rooms/bedroom.jpg', isBig: true },
@@ -37,7 +40,11 @@ const roomFallbacks = {
 const categories = ref([])
 const products = ref([])
 const activeCategoryId = ref('')
-const wishedProductIds = ref([])
+const route = useRoute()
+const router = useRouter()
+const accountStore = useAccountStore()
+const authStore = useAuthStore()
+const wishedProductIds = computed(() => accountStore.wishlistProductIds)
 const roomFilters = computed(() => ['Tat ca', ...categories.value.map(c => c.name)])
 const activeRoomFilter = ref('Tat ca')
 
@@ -98,14 +105,34 @@ watch(activeCategoryId, async (newVal) => {
 
 onMounted(() => {
   loadData()
+
+  if (authStore.isAuthenticated) {
+    accountStore.loadWishlist().catch(() => [])
+  }
 })
 
-function toggleWish(productId) {
-  if (wishedProductIds.value.includes(productId)) {
-    wishedProductIds.value = wishedProductIds.value.filter((id) => id !== productId)
+async function toggleWish(productId) {
+  if (!productId) return
+
+  if (!authStore.isAuthenticated) {
+    router.push({
+      name: 'login',
+      query: {
+        redirect: route.fullPath,
+      },
+    })
     return
   }
-  wishedProductIds.value = [...wishedProductIds.value, productId]
+
+  try {
+    if (accountStore.hasFavoriteProduct(productId)) {
+      await accountStore.removeFavorite(productId)
+    } else {
+      await accountStore.addFavorite(productId)
+    }
+  } catch (error) {
+    console.error('Failed to toggle favorite home product:', error)
+  }
 }
 
 useRevealOnScroll('.fade-up')

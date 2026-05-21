@@ -36,7 +36,15 @@ export function getOrders() {
 }
 
 export function getWishlist() {
-  return apiClient.get('/account/wishlist')
+  return apiClient.get('/users/favorites/products')
+}
+
+export function favoriteProduct(productId) {
+  return apiClient.post(`/users/favorites/products/${productId}`)
+}
+
+export function unfavoriteProduct(productId) {
+  return apiClient.delete(`/users/favorites/products/${productId}`)
 }
 
 export function getSavedProjects() {
