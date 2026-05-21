@@ -9,14 +9,21 @@ import {
   updateCartItem,
 } from '../api/cartApi'
 
-const STORAGE_KEY = 'luxnest-cart-store-v2'
-const LEGACY_STORAGE_KEYS = ['luxnest-cart-store-v1']
+const STORAGE_KEY = 'luxnest-cart-store-v4'
+const LEGACY_STORAGE_KEYS = [
+  'luxnest-cart-store-v1',
+  'luxnest-cart-store-v2',
+  'luxnest-cart-store-v3',
+]
 
 function cloneItems(items = []) {
   return items.map((item) => ({
     ...item,
     colors: Array.isArray(item.colors) ? [...item.colors] : [],
     sizes: Array.isArray(item.sizes) ? [...item.sizes] : [],
+    variants: Array.isArray(item.variants)
+      ? item.variants.map((variant) => ({ ...variant }))
+      : [],
   }))
 }
 
@@ -43,8 +50,8 @@ export const useCartStore = defineStore('cart', () => {
     if (typeof window === 'undefined') return false
 
     try {
-      for (const legacyKey of LEGACY_STORAGE_KEYS) {
-        window.localStorage.removeItem(legacyKey)
+      for (const storageKey of LEGACY_STORAGE_KEYS) {
+        window.localStorage.removeItem(storageKey)
       }
 
       const raw = window.localStorage.getItem(STORAGE_KEY)
@@ -128,6 +135,8 @@ export const useCartStore = defineStore('cart', () => {
           authStore.logout()
           return items.value
         }
+
+        hydrated.value = items.value.length > 0
         throw error
       } finally {
         loading.value = false
@@ -138,8 +147,8 @@ export const useCartStore = defineStore('cart', () => {
     return hydratePromise
   }
 
-  async function ensureHydrated() {
-    return hydrate()
+  async function ensureHydrated(options = {}) {
+    return hydrate(options)
   }
 
   async function addItem(productOrLine, options = {}) {

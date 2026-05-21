@@ -5,12 +5,14 @@ import AccountSectionCard from '../AccountSectionCard.vue'
 import CartItemCard from '@features/cart/components/CartItemCard.vue'
 import CartSummaryBar from '@features/cart/components/CartSummaryBar.vue'
 import { useCart } from '@features/cart/composables/useCart'
+import { fetchProductById } from '@features/product/api/productApi'
 
 const router = useRouter()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
 
 const activeItem = ref(null)
 const activeDraft = ref(null)
+const editorLoading = ref(false)
 const checkedIds = ref([])
 
 const selectedItems = computed(() =>
@@ -34,42 +36,169 @@ watch(
       if (!latestItem) {
         closeItemEditor()
       } else {
-        activeItem.value = latestItem
+        activeItem.value = {
+          ...latestItem,
+          variants: Array.isArray(latestItem.variants) && latestItem.variants.length
+            ? latestItem.variants
+            : (activeItem.value.variants ?? []),
+          colors: Array.isArray(latestItem.colors) && latestItem.colors.length
+            ? latestItem.colors
+            : (activeItem.value.colors ?? []),
+          sizes: Array.isArray(latestItem.sizes) && latestItem.sizes.length
+            ? latestItem.sizes
+            : (activeItem.value.sizes ?? []),
+        }
       }
     }
   },
   { deep: true },
 )
 
-onMounted(() => {
-  ensureHydrated()
+watch(
+  () => activeDraft.value?.selectedColor,
+  () => {
+    if (!activeItem.value || !activeDraft.value) return
+
+    const nextSizes = getVariantOptions(activeItem.value, 'sizes')
+    if (!nextSizes.length) return
+
+    if (!nextSizes.includes(activeDraft.value.selectedSize)) {
+      activeDraft.value.selectedSize = nextSizes[0]
+    }
+  },
+)
+
+onMounted(async () => {
+  try {
+    await ensureHydrated({ force: true })
+  } catch (error) {
+    console.error('Failed to hydrate cart view:', error)
+  }
 })
 
-function openItemEditor(item) {
-  activeItem.value = item
-  activeDraft.value = {
-    selectedColor: item.selectedColor ?? item.colors?.[0] ?? '',
-    selectedSize: item.selectedSize ?? item.sizes?.[0] ?? '',
-    qty: Math.max(1, Number(item.qty || 1)),
+function variantSizeLabel(variant) {
+  if (!variant) return ''
+  if (variant.size) return variant.size
+  if (variant.dimensionText) return variant.dimensionText
+
+  const dims = [variant.length, variant.width, variant.height]
+    .filter((value) => value != null && value !== '')
+
+  return dims.length === 3 ? `${dims.join(' × ')} cm` : ''
+}
+
+function normalizeEditorVariants(variants = []) {
+  return variants
+    .map((variant) => ({
+      ...variant,
+      color: variant?.color || '',
+      size: variantSizeLabel(variant),
+    }))
+    .filter((variant) => variant.color || variant.size)
+}
+
+async function buildEditorItem(item) {
+  const normalizedExistingVariants = normalizeEditorVariants(item?.variants ?? [])
+  if (normalizedExistingVariants.length) {
+    return {
+      ...item,
+      variants: normalizedExistingVariants,
+    }
+  }
+
+  const lookupId = item?.detailId || item?.slug || item?.productId
+  if (!lookupId) return item
+
+  try {
+    const response = await fetchProductById(lookupId)
+    const product = response?.data
+    const fetchedVariants = normalizeEditorVariants(product?.variants ?? [])
+
+    if (!fetchedVariants.length) {
+      return item
+    }
+
+    return {
+      ...item,
+      variants: fetchedVariants,
+      colors: Array.isArray(product?.colors) ? product.colors : [],
+      sizes: Array.isArray(product?.sizes) ? product.sizes : [],
+      selectedColor: item.selectedColor || product?.colors?.[0] || '',
+      selectedSize: item.selectedSize || product?.sizes?.[0] || '',
+    }
+  } catch (error) {
+    console.error('Failed to load product variants for cart item:', error)
+    return item
+  }
+}
+
+async function openItemEditor(item) {
+  editorLoading.value = true
+  try {
+    const editorItem = await buildEditorItem(item)
+    const colorOptions = getVariantOptions(editorItem, 'colors')
+    const nextColor = editorItem.selectedColor || colorOptions[0] || ''
+    const sizeOptions = getVariantOptions(editorItem, 'sizes')
+
+    activeItem.value = editorItem
+    activeDraft.value = {
+      selectedColor: nextColor,
+      selectedSize: editorItem.selectedSize || sizeOptions[0] || '',
+      qty: Math.max(1, Number(editorItem.qty || 1)),
+    }
+  } finally {
+    editorLoading.value = false
   }
 }
 
 function closeItemEditor() {
   activeItem.value = null
   activeDraft.value = null
+  editorLoading.value = false
 }
 
 function getVariantOptions(item, field) {
   if (!item) return []
-  if (field === 'colors') return item.colors ?? []
-  if (field === 'sizes') return item.sizes ?? []
+
+  const variants = Array.isArray(item.variants) ? item.variants : []
+  if (variants.length) {
+    if (field === 'colors') {
+      return [...new Set(variants.map((variant) => variant.color).filter(Boolean))]
+    }
+
+    if (field === 'sizes') {
+      return [...new Set(variants.map((variant) => variantSizeLabel(variant)).filter(Boolean))]
+    }
+  }
+
+  if (field === 'colors') return (item.colors ?? []).filter(Boolean)
+  if (field === 'sizes') return (item.sizes ?? []).filter(Boolean)
   return []
+}
+
+function resolveDraftVariantId(item, draft) {
+  const variants = Array.isArray(item?.variants) ? item.variants : []
+  if (!variants.length) return item?.variantId ?? null
+
+  const selectedColor = draft?.selectedColor || ''
+  const selectedSize = draft?.selectedSize || ''
+
+  const matched = variants.find((variant) => {
+    const variantColor = variant?.color || ''
+    const variantSize = variantSizeLabel(variant)
+    const colorMatches = !selectedColor || variantColor === selectedColor
+    const sizeMatches = !selectedSize || variantSize === selectedSize
+    return colorMatches && sizeMatches
+  })
+
+  return matched?.id ?? item?.variantId ?? null
 }
 
 async function applyActiveItemChanges() {
   if (!activeItem.value || !activeDraft.value) return
 
   await updateItem(activeItem.value.id, {
+    variantId: resolveDraftVariantId(activeItem.value, activeDraft.value),
     selectedColor: activeDraft.value.selectedColor,
     selectedSize: activeDraft.value.selectedSize,
     qty: Math.max(1, Number(activeDraft.value.qty || 1)),
@@ -158,7 +287,10 @@ function handleCheckout() {
         <div class="variant-modal-body">
           <label>
             <span>Màu</span>
-            <select v-model="activeDraft.selectedColor">
+            <select v-model="activeDraft.selectedColor" :disabled="editorLoading || !getVariantOptions(activeItem, 'colors').length">
+              <option v-if="!getVariantOptions(activeItem, 'colors').length" value="">
+                Không có dữ liệu màu
+              </option>
               <option v-for="color in getVariantOptions(activeItem, 'colors')" :key="color" :value="color">
                 {{ color }}
               </option>
@@ -167,8 +299,15 @@ function handleCheckout() {
 
           <label>
             <span>Kích thước</span>
-            <select v-model="activeDraft.selectedSize">
-              <option v-for="size in getVariantOptions(activeItem, 'sizes')" :key="size" :value="size">
+            <select v-model="activeDraft.selectedSize" :disabled="editorLoading || !getVariantOptions(activeItem, 'sizes').length">
+              <option v-if="!getVariantOptions(activeItem, 'sizes').length" value="">
+                Không có dữ liệu kích thước
+              </option>
+              <option
+                v-for="size in getVariantOptions(activeItem, 'sizes')"
+                :key="size"
+                :value="size"
+              >
                 {{ size }}
               </option>
             </select>
@@ -177,16 +316,16 @@ function handleCheckout() {
           <label>
             <span>Số lượng</span>
             <div class="modal-qty">
-              <button type="button" @click="changeDraftQty(-1)">−</button>
+              <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
               <input :value="activeDraft.qty" readonly />
-              <button type="button" @click="changeDraftQty(1)">+</button>
+              <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
             </div>
           </label>
         </div>
 
         <div class="variant-modal-actions">
-          <button type="button" class="ghost-btn" @click="closeItemEditor">Hủy</button>
-          <button type="button" class="primary-btn" @click="applyActiveItemChanges">Lưu</button>
+          <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">Hủy</button>
+          <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">Lưu</button>
         </div>
       </div>
     </div>

@@ -14,6 +14,61 @@ function buildDimensionLabel(raw = {}) {
   return `${dims.join(' × ')} cm`
 }
 
+function unique(values = []) {
+  return [...new Set(values.filter(Boolean))]
+}
+
+function normalizeVariant(raw = {}) {
+  return {
+    id: raw.id || null,
+    color: raw.color || '',
+    size: buildDimensionLabel(raw),
+    price: raw.price ?? null,
+    oldPrice: raw.oldPrice ?? null,
+    stockQuantity: raw.stockQuantity ?? null,
+    length: raw.length ?? null,
+    width: raw.width ?? null,
+    height: raw.height ?? null,
+    weight: raw.weight ?? null,
+    material: raw.material || '',
+    warranty: raw.warranty || '',
+  }
+}
+
+function resolveActiveVariant(raw = {}, variants = []) {
+  if (!variants.length) return null
+
+  const currentVariantId = raw.variantId || raw.selectedVariantId || null
+  if (currentVariantId != null && currentVariantId !== '') {
+    const matched = variants.find((variant) => variant.id === currentVariantId)
+    if (matched) return matched
+  }
+
+  const currentColor = raw.selectedColor || raw.color || ''
+  const currentSize = raw.selectedSize || buildDimensionLabel(raw)
+  const matchedByOption = variants.find((variant) =>
+    (!currentColor || variant.color === currentColor) &&
+    (!currentSize || variant.size === currentSize),
+  )
+
+  return matchedByOption || variants[0]
+}
+
+function normalizeTopLevel(raw = {}, activeVariant = null) {
+  return {
+    price: raw.price ?? activeVariant?.price ?? 0,
+    oldPrice: raw.oldPrice ?? activeVariant?.oldPrice ?? null,
+    stockQuantity: raw.stockQuantity ?? activeVariant?.stockQuantity ?? null,
+    length: raw.length ?? activeVariant?.length ?? null,
+    width: raw.width ?? activeVariant?.width ?? null,
+    height: raw.height ?? activeVariant?.height ?? null,
+    weight: raw.weight ?? activeVariant?.weight ?? null,
+    color: raw.color || activeVariant?.color || '',
+    material: raw.material || activeVariant?.material || '',
+    warranty: raw.warranty || activeVariant?.warranty || '',
+  }
+}
+
 export class CartModel {
   constructor(raw = {}) {
     this.id = raw.id || null
@@ -33,6 +88,13 @@ export class CartModel {
 
 export class CartItemModel {
   constructor(raw = {}) {
+    this.variants = Array.isArray(raw.variants)
+      ? raw.variants.map((variant) => normalizeVariant(variant))
+      : []
+
+    const activeVariant = resolveActiveVariant(raw, this.variants)
+    const normalized = normalizeTopLevel(raw, activeVariant)
+
     this.id = raw.id || buildCartLineId(raw)
     this.productKey = raw.productKey || this.id || ''
     this.productId = raw.productId ?? null
@@ -47,24 +109,34 @@ export class CartItemModel {
     this.imageFallback = raw.imageFallback || ''
     this.emoji = raw.emoji || ''
 
-    this.price = raw.price ?? 0
-    this.oldPrice = raw.oldPrice ?? null
-    this.qty = raw.qty ?? raw.quantity ?? 1
+    this.price = normalized.price
+    this.oldPrice = normalized.oldPrice
+    this.quantity = raw.quantity ?? raw.qty ?? 1
+    this.qty = this.quantity
 
-    this.stockQuantity = raw.stockQuantity ?? null
-    this.length = raw.length ?? null
-    this.width = raw.width ?? null
-    this.height = raw.height ?? null
-    this.weight = raw.weight ?? null
+    this.stockQuantity = normalized.stockQuantity
+    this.length = normalized.length
+    this.width = normalized.width
+    this.height = normalized.height
+    this.weight = normalized.weight
+    this.color = normalized.color
+    this.material = normalized.material
+    this.warranty = normalized.warranty
 
-    this.selectedColor = raw.selectedColor || raw.color || ''
-    this.selectedSize = raw.selectedSize || buildDimensionLabel(raw)
-    this.colors = Array.isArray(raw.colors)
-      ? raw.colors
-      : (this.selectedColor ? [this.selectedColor] : [])
-    this.sizes = Array.isArray(raw.sizes)
-      ? raw.sizes
-      : (this.selectedSize ? [this.selectedSize] : [])
+    this.selectedColor = raw.selectedColor || normalized.color || ''
+    this.selectedSize = raw.selectedSize || buildDimensionLabel(normalized)
+    this.colors = Array.isArray(raw.colors) && raw.colors.length
+      ? unique(raw.colors)
+      : unique([
+        ...this.variants.map((variant) => variant.color),
+        this.selectedColor,
+      ])
+    this.sizes = Array.isArray(raw.sizes) && raw.sizes.length
+      ? unique(raw.sizes)
+      : unique([
+        ...this.variants.map((variant) => variant.size),
+        this.selectedSize,
+      ])
 
     this.outOfStock = raw.outOfStock != null
       ? Boolean(raw.outOfStock)
