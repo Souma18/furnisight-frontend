@@ -6,8 +6,14 @@ const baseUrl = '/catalog'
 
 export async function fetchProducts(params) {
   const response = await apiClient.get(`${baseUrl}/products`, { params })
-  if (response.data && Array.isArray(response.data.content)) {
-    response.data.content = response.data.content.map(item => new ProductSummaryModel(item))
+  if (response.data) {
+    if (Array.isArray(response.data.products)) {
+      response.data.products = response.data.products.map(item => new ProductSummaryModel(item))
+    }
+
+    if (Array.isArray(response.data.content)) {
+      response.data.content = response.data.content.map(item => new ProductSummaryModel(item))
+    }
   }
   return response
 }
