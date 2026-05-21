@@ -77,9 +77,13 @@ async function applyActiveItemChanges() {
   closeItemEditor()
 }
 
-function changeQty(item, delta) {
+async function changeQty(item, delta) {
   if (!item || item.outOfStock) return
-  updateQty(item.id, Number(item.qty || 1) + delta)
+  try {
+    await updateQty(item.id, Number(item.qty || 1) + delta)
+  } catch (error) {
+    console.error('Failed to update cart quantity:', error)
+  }
 }
 
 function changeDraftQty(delta) {
@@ -96,10 +100,14 @@ function toggleChecked(itemId) {
   checkedIds.value = [...checkedIds.value, itemId]
 }
 
-function removeLine(itemId) {
-  removeItem(itemId)
-  checkedIds.value = checkedIds.value.filter((id) => id !== itemId)
-  if (activeItem.value?.id === itemId) closeItemEditor()
+async function removeLine(itemId) {
+  try {
+    await removeItem(itemId)
+    checkedIds.value = checkedIds.value.filter((id) => id !== itemId)
+    if (activeItem.value?.id === itemId) closeItemEditor()
+  } catch (error) {
+    console.error('Failed to remove cart line:', error)
+  }
 }
 
 function formatPrice(value) {

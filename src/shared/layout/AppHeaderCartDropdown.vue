@@ -15,7 +15,7 @@ const props = defineProps({
 const emit = defineEmits(['require-auth'])
 
 const router = useRouter()
-const { items, itemCount, totalAmount, ensureHydrated } = useCart()
+const { items, itemCount, totalAmount, ensureHydrated, updateQty, removeItem } = useCart()
 
 function ensureCartLoaded() {
   if (!props.isAuthenticated) return
@@ -29,6 +29,32 @@ function openCart() {
   }
 
   router.push({ path: '/account', query: { view: 'cart' } })
+}
+
+async function handleUpdateQty(lineId, nextQty) {
+  if (!props.isAuthenticated) {
+    emit('require-auth')
+    return
+  }
+
+  try {
+    await updateQty(lineId, nextQty)
+  } catch (error) {
+    console.error('Failed to update cart quantity from header:', error)
+  }
+}
+
+async function handleRemove(lineId) {
+  if (!props.isAuthenticated) {
+    emit('require-auth')
+    return
+  }
+
+  try {
+    await removeItem(lineId)
+  } catch (error) {
+    console.error('Failed to remove cart item from header:', error)
+  }
 }
 
 onMounted(() => {
@@ -64,6 +90,8 @@ watch(
         :total-count="itemCount"
         :total-amount="totalAmount"
         @open-cart="openCart"
+        @update-qty="handleUpdateQty"
+        @remove="handleRemove"
       />
     </div>
   </div>

@@ -1,14 +1,16 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { useAuthStore } from '@features/auth/store/authStore'
 import {
-  addCartItemMock,
-  clearCartMock,
-  fetchCartMock,
-  removeCartItemMock,
-  updateCartItemMock,
-} from '../api/cartMockApi'
+  addCartItem,
+  clearCart as clearCartRequest,
+  getCart,
+  removeCartItem,
+  updateCartItem,
+} from '../api/cartApi'
 
-const STORAGE_KEY = 'luxnest-cart-store-v1'
+const STORAGE_KEY = 'luxnest-cart-store-v2'
+const LEGACY_STORAGE_KEYS = ['luxnest-cart-store-v1']
 
 function cloneItems(items = []) {
   return items.map((item) => ({
@@ -18,7 +20,20 @@ function cloneItems(items = []) {
   }))
 }
 
+function isApiBackedCartLine(item = {}) {
+  if (!item || typeof item !== 'object') return false
+
+  const lineId = String(item.id ?? '')
+  const productId = String(item.productId ?? '')
+
+  if (!lineId.includes('::')) return false
+  if (!productId || productId.startsWith('cart-')) return false
+
+  return true
+}
+
 export const useCartStore = defineStore('cart', () => {
+  const authStore = useAuthStore()
   const items = ref([])
   const loading = ref(false)
   const hydrated = ref(false)
@@ -28,11 +43,19 @@ export const useCartStore = defineStore('cart', () => {
     if (typeof window === 'undefined') return false
 
     try {
+      for (const legacyKey of LEGACY_STORAGE_KEYS) {
+        window.localStorage.removeItem(legacyKey)
+      }
+
       const raw = window.localStorage.getItem(STORAGE_KEY)
       if (!raw) return false
 
       const parsed = JSON.parse(raw)
       if (!Array.isArray(parsed?.items)) return false
+      if (!parsed.items.every(isApiBackedCartLine)) {
+        window.localStorage.removeItem(STORAGE_KEY)
+        return false
+      }
 
       items.value = cloneItems(parsed.items)
       hydrated.value = true
@@ -93,11 +116,19 @@ export const useCartStore = defineStore('cart', () => {
       loading.value = true
 
       try {
-        // TODO(BE): swap mock API with cartApi when backend cart endpoints are ready.
-        const response = await fetchCartMock()
+        const response = await getCart()
         items.value = cloneItems(response?.data?.items ?? [])
         hydrated.value = true
         return items.value
+      } catch (error) {
+        if (typeof window !== 'undefined' && error?.response?.status === 401) {
+          items.value = []
+          hydrated.value = false
+          window.localStorage.removeItem(STORAGE_KEY)
+          authStore.logout()
+          return items.value
+        }
+        throw error
       } finally {
         loading.value = false
         hydratePromise = null
@@ -115,7 +146,11 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await addCartItemMock(productOrLine, options)
+      const payload = {
+        ...(productOrLine ?? {}),
+        ...(options ?? {}),
+      }
+      const response = await addCartItem(payload)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value
@@ -128,7 +163,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await updateCartItemMock(lineId, patch)
+      const response = await updateCartItem(lineId, patch)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return response?.data?.item ?? null
@@ -145,7 +180,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await removeCartItemMock(lineId)
+      const response = await removeCartItem(lineId)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value
@@ -158,7 +193,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await clearCartMock()
+      const response = await clearCartRequest()
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value

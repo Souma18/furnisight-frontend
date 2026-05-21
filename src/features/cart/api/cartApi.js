@@ -1,21 +1,68 @@
 import { apiClient } from '@shared/lib/api'
+import { CartModel } from '../models/cart'
 
-export function getCart(params) {
-  return apiClient.get('/cart', { params })
+function parseCartItemId(cartItemId) {
+  const [productId = '', variantId = ''] = String(cartItemId ?? '').split('::')
+
+  return {
+    productId,
+    variantId: variantId || null,
+  }
 }
 
-export function addCartItem(payload) {
-  return apiClient.post('/cart/items', payload)
+function toAddCartPayload(payload = {}) {
+  return {
+    productId: payload.productId ?? payload.detailId ?? payload.id ?? '',
+    variantId: payload.variantId ?? null,
+    name: payload.name ?? '',
+    price: payload.price ?? 0,
+    imageUrl: payload.imageUrl ?? '',
+    quantity: Math.max(1, Number(payload.quantity ?? payload.qty ?? 1) || 1),
+  }
 }
 
-export function updateCartItem(cartItemId, payload) {
-  return apiClient.put(`/cart/items/${cartItemId}`, payload)
+function toUpdateCartPayload(payload = {}) {
+  return {
+    quantity: Math.max(1, Number(payload.quantity ?? payload.qty ?? 1) || 1),
+  }
 }
 
-export function removeCartItem(cartItemId) {
-  return apiClient.delete(`/cart/items/${cartItemId}`)
+function toCartResponse(response) {
+  if (response.data) {
+    response.data = new CartModel(response.data)
+  }
+
+  return response
+}
+const baseUrl = '/cart'
+
+export async function getCart(params) {
+  const response = await apiClient.get(`${baseUrl}/carts`, { params })
+  return toCartResponse(response)
 }
 
-export function clearCart() {
-  return apiClient.delete('/cart/items')
+export async function addCartItem(payload) {
+  const response = await apiClient.post(`${baseUrl}/carts/items`, toAddCartPayload(payload))
+  return toCartResponse(response)
+}
+
+export async function updateCartItem(cartItemId, payload) {
+  const { productId, variantId } = parseCartItemId(cartItemId)
+  const response = await apiClient.put(`${baseUrl}/carts/items/${productId}`, toUpdateCartPayload(payload), {
+    params: variantId ? { variantId } : undefined,
+  })
+  return toCartResponse(response)
+}
+
+export async function removeCartItem(cartItemId) {
+  const { productId, variantId } = parseCartItemId(cartItemId)
+  const response = await apiClient.delete(`${baseUrl}/carts/items/${productId}`, {
+    params: variantId ? { variantId } : undefined,
+  })
+  return toCartResponse(response)
+}
+
+export async function clearCart() {
+  const response = await apiClient.delete(`${baseUrl}/carts`)
+  return toCartResponse(response)
 }

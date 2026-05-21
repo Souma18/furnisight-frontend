@@ -86,6 +86,7 @@ watch(activeCategoryId, async (newVal) => {
     const prodRes = await fetchProducts({ category: selectedCat.slug || selectedCat.name, size: 8 })
     products.value = prodRes.data.products.map(p => ({
       ...p,
+      detailId: p.slug || p.id,
       category: p.categoryName,
       price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price),
       image: p.image || '/home/products/placeholder.jpg'

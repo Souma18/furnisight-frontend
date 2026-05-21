@@ -18,7 +18,7 @@ const props = defineProps({
   },
 })
 
-defineEmits(['open-cart'])
+defineEmits(['open-cart', 'update-qty', 'remove'])
 
 const visibleLines = computed(() => props.items.slice(0, 3))
 
@@ -47,12 +47,22 @@ function lineMeta(line) {
         class="cart-item"
         @click="$emit('open-cart')"
       >
-        <div class="cart-thumb">{{ line.imageFallback ?? line.emoji ?? '🛍️' }}</div>
+        <div class="cart-thumb">
+          <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="cart-thumb-image">
+          <template v-else>{{ line.imageFallback ?? line.emoji ?? '🛍️' }}</template>
+        </div>
 
         <div class="cart-content">
           <div class="cart-item-name">{{ line.name }}</div>
           <div class="cart-item-meta">{{ lineMeta(line) }}</div>
-          <div class="cart-item-qty">SL: {{ line.qty }}</div>
+          <div class="cart-item-controls" @click.stop>
+            <div class="cart-item-qty-stepper">
+              <button type="button" aria-label="Giảm số lượng" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
+              <span>{{ line.qty }}</span>
+              <button type="button" aria-label="Tăng số lượng" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
+            </div>
+            <button type="button" class="cart-item-remove" @click="$emit('remove', line.id)">Xóa</button>
+          </div>
         </div>
 
         <div class="cart-item-price">{{ formatVnd((Number(line.price) || 0) * (Number(line.qty) || 0)) }}</div>
@@ -149,6 +159,13 @@ function lineMeta(line) {
   background: linear-gradient(135deg, #f7f1e8, #ffffff);
   border: 1px solid rgba(201, 146, 42, 0.15);
   font-size: 24px;
+  overflow: hidden;
+}
+
+.cart-thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .cart-content {
@@ -166,8 +183,7 @@ function lineMeta(line) {
   overflow: hidden;
 }
 
-.cart-item-meta,
-.cart-item-qty {
+.cart-item-meta {
   color: #7a7a7a;
   font-size: 11px;
 }
@@ -176,8 +192,48 @@ function lineMeta(line) {
   margin-top: 4px;
 }
 
-.cart-item-qty {
-  margin-top: 3px;
+.cart-item-controls {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cart-item-qty-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e5dcca;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #f7f1e8;
+  min-width: 72px;
+}
+
+.cart-item-qty-stepper button {
+  width: 28px;
+  height: 26px;
+  border: none;
+  background: transparent;
+  color: #7a6a55;
+  cursor: pointer;
+}
+
+.cart-item-qty-stepper span {
+  min-width: 28px;
+  text-align: center;
+  color: #5f5243;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.cart-item-remove {
+  border: none;
+  background: transparent;
+  color: #a16e2a;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .cart-item-price {

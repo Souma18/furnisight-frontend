@@ -49,7 +49,10 @@ function formatPrice(value) {
       <span v-else class="stock-badge">Hết hàng</span>
     </div>
 
-    <div class="thumb">{{ item.imageFallback ?? item.emoji ?? '🛍️' }}</div>
+    <div class="thumb">
+      <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
+      <template v-else>{{ item.imageFallback ?? item.emoji ?? '🛍️' }}</template>
+    </div>
 
     <div class="name-wrap">
       <p class="category">{{ item.categoryLabel || 'Sản phẩm' }}</p>
@@ -170,6 +173,12 @@ function formatPrice(value) {
   place-items: center;
   font-size: 22px;
   border: 1px solid rgba(201, 146, 42, 0.15);
+  overflow: hidden;
+}
+.thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .name-wrap { min-width: 0; }
 .category {

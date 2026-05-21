@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
 
@@ -39,7 +40,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.value?.fullPath,
+  () => route.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()
