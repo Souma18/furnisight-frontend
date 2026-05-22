@@ -1,10 +1,15 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useAccountStore } from '@features/account/store/accountStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { useProducts } from './useProducts'
 import { fetchRootCategories, fetchSubcategories, fetchCategories } from '../api/productApi'
 
 export function useProductListPage() {
   const route = useRoute()
+  const router = useRouter()
+  const accountStore = useAccountStore()
+  const authStore = useAuthStore()
   const { items, total, facets, loading, loadList } = useProducts()
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
@@ -12,6 +17,7 @@ export function useProductListPage() {
   const sortBy = ref('popular')
   const viewMode = ref('grid')
   const saleOnly = ref(false)
+  const wishedProductIds = computed(() => accountStore.wishlistProductIds)
 
   function defaultAppliedFilters() {
     return {
@@ -162,6 +168,30 @@ export function useProductListPage() {
     })
   }
 
+  async function favoriteProduct(productId) {
+    if (!productId) return
+
+    if (!authStore.isAuthenticated) {
+      router.push({
+        name: 'login',
+        query: {
+          redirect: route.fullPath,
+        },
+      })
+      return
+    }
+
+    try {
+      if (accountStore.hasFavoriteProduct(productId)) {
+        await accountStore.removeFavorite(productId)
+      } else {
+        await accountStore.addFavorite(productId)
+      }
+    } catch (e) {
+      console.error('Failed to toggle favorite list product:', e)
+    }
+  }
+
   const suppressListWatch = ref(false)
 
   // Watch root category changes to load subcategories
@@ -220,6 +250,10 @@ export function useProductListPage() {
     loadSidebarCategories(selectedCategory.value)
     suppressListWatch.value = false
     requestList()
+
+    if (authStore.isAuthenticated) {
+      accountStore.loadWishlist().catch(() => [])
+    }
   })
 
   return {
@@ -238,9 +272,11 @@ export function useProductListPage() {
     activeTags,
     dynamicQuickFilters,
     dynamicHero,
+    wishedProductIds,
     toggleCategory,
     selectSidebarCategory,
     onApplySidebar,
     onClearFilters,
+    favoriteProduct,
   }
 }

@@ -5,14 +5,30 @@ export function useProductTabs(productRef) {
   const qaCountLabel = computed(() => productRef.value?.qa?.length ?? 0)
 
   const specsRows = computed(() => {
-    if (!productRef.value?.variants?.length) return [];
-    const v = productRef.value.variants[0];
-    const rows = [];
+    const product = productRef.value
+    if (!product) return []
+
+    const v = product.variants?.[0] ?? null
+    const rows = []
+
     if (v.material) rows.push({ key: 'Chất liệu chính', value: v.material });
-    if (productRef.value?.colors?.length) rows.push({ key: 'Màu sắc', value: productRef.value.colors.join(', ') });
+    if (product.colors?.length) rows.push({ key: 'Màu sắc', value: product.colors.join(', ') });
     if (v.dimensionText) rows.push({ key: 'Kích thước', value: v.dimensionText });
     if (v.weight) rows.push({ key: 'Khối lượng', value: `${v.weight} kg` });
     if (v.warranty) rows.push({ key: 'Bảo hành', value: v.warranty });
+
+    if (!rows.length && product.category?.label) {
+      rows.push({ key: 'Danh mục', value: product.category.label })
+    }
+
+    if (!rows.length && product.collection) {
+      rows.push({ key: 'Bộ sưu tập', value: product.collection })
+    }
+
+    if (!rows.length && typeof product.stock === 'number') {
+      rows.push({ key: 'Tồn kho', value: `${product.stock} sản phẩm` })
+    }
+
     return rows;
   })
 

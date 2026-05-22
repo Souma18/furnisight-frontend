@@ -20,10 +20,12 @@ const {
   activeTags,
   dynamicQuickFilters,
   dynamicHero,
+  wishedProductIds,
   toggleCategory,
   selectSidebarCategory,
   onApplySidebar,
   onClearFilters,
+  favoriteProduct,
 } = useProductListPage()
 </script>
 
@@ -64,7 +66,9 @@ const {
           :sort-by="sortBy"
           :view-mode="viewMode"
           :loading="loading"
+          :wished-product-ids="wishedProductIds"
           @update:sort-by="sortBy = $event"
+          @toggle-wish="favoriteProduct"
         />
       </div>
     </div>

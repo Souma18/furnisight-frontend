@@ -13,6 +13,7 @@ const emit = defineEmits([
   'pick-color',
   'pick-size',
   'change-qty',
+  'add-cart',
   'toggle-wish',
   'open-3d',
   'go-room3d',
@@ -26,7 +27,12 @@ const emit = defineEmits([
         <span class="pd-badge">Mới</span>
         <span class="pd-badge sale">-20%</span>
         <div class="pd-img-wrap">
-          <img v-if="activeImage" :src="activeImage" alt="Hình ảnh sản phẩm" class="pd-main-img" />
+          <img
+            v-if="activeImage || product.image"
+            :src="activeImage || product.image"
+            alt="Hình ảnh sản phẩm"
+            class="pd-main-img"
+          />
         </div>
         <button type="button" class="pd-btn-3d" @click="emit('open-3d')">📦 Xem mô hình 3D</button>
       </div>
@@ -50,7 +56,7 @@ const emit = defineEmits([
         <span>{{ '★'.repeat(Math.round(product.rating || 5)).padEnd(5, '☆') }}</span>
         <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
         <small>({{ product.ratingCount || 0 }} đánh giá)</small>
-        <small>Đã bán {{ (product.stock || 0) * 3 }}</small>
+        <small>Đã bán {{ product.soldCount || 0 }}</small>
       </div>
       <div class="price-box">
         <div>
@@ -59,8 +65,8 @@ const emit = defineEmits([
         </div>
         <span v-if="product.hasDiscount" class="save">{{ product.formattedSave }}</span>
       </div>
-      <p class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>
-      <div class="colors">
+      <p v-if="product.colors?.length" class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>
+      <div v-if="product.colors?.length" class="colors">
         <button
           v-for="color in product.colors"
           :key="color"
@@ -93,10 +99,10 @@ const emit = defineEmits([
           <input :value="qty" readonly />
           <button type="button" @click="emit('change-qty', 1)">+</button>
         </div>
-        <span>Còn hàng ({{ product.stock }} sản phẩm)</span>
+        <span>{{ product.stock > 0 ? `Còn hàng (${product.stock} sản phẩm)` : 'Tạm hết hàng' }}</span>
       </div>
       <div class="actions">
-        <button type="button" class="outline">🛒 Thêm vào giỏ</button>
+        <button type="button" class="outline" @click="emit('add-cart')">🛒 Thêm vào giỏ</button>
         <button type="button" class="solid">✦ Mua ngay</button>
         <button type="button" class="wish" :class="{ active: wished }" @click="emit('toggle-wish')">
           {{ wished ? '♥' : '♡' }}

@@ -25,6 +25,8 @@ const {
   retry,
   changeQty,
   openRoom3D,
+  addToCart,
+  addToWishlist,
 } = useProductDetailPage(props)
 </script>
 
@@ -72,7 +74,8 @@ const {
         @pick-color="selectedColor = $event"
         @pick-size="selectedSize = $event"
         @change-qty="changeQty"
-        @toggle-wish="wished = !wished"
+        @add-cart="addToCart"
+        @toggle-wish="addToWishlist"
         @open-3d="show3DModal = true"
         @go-room3d="openRoom3D"
       />

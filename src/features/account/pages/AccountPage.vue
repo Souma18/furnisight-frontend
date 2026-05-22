@@ -6,6 +6,7 @@ import AccountToast from '../components/AccountToast.vue'
 import ProfileView from '../components/views/ProfileView.vue'
 import AddressView from '../components/views/AddressView.vue'
 import OrdersView from '../components/views/OrdersView.vue'
+import OrderDetailView from '../components/views/OrderDetailView.vue'
 import CartView from '../components/views/CartView.vue'
 import WishlistView from '../components/views/WishlistView.vue'
 import NotificationsView from '../components/views/NotificationsView.vue'
@@ -23,7 +24,10 @@ const {
   profile,
   addresses,
   orders,
-  cartItems,
+  selectedOrder,
+  openOrderDetail,
+  backToOrders,
+  cancelOrder,
   wishlist,
   settings,
   projects,
@@ -33,6 +37,7 @@ const {
   showToast,
   saveProfile,
   saveAddress,
+  setDefaultAddress,
   uploadAvatar,
   removeAvatar,
 } = useAccountPage()
@@ -81,6 +86,7 @@ function handleLogout() {
         v-else-if="activeView === 'address'"
         :addresses="addresses"
         @save-address="saveAddress"
+        @set-default-address="setDefaultAddress"
         @notify="showToast"
       />
       <NotificationsView
@@ -88,8 +94,19 @@ function handleLogout() {
         :notification-category="notificationCategory"
         @notify="showToast"
       />
-      <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
-      <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
+      <OrderDetailView
+        v-else-if="activeView === 'order-detail'"
+        :order="selectedOrder"
+        @back="backToOrders"
+        @cancel-order="cancelOrder"
+      />
+      <OrdersView
+        v-else-if="activeView === 'orders'"
+        :orders="orders"
+        @view-detail="openOrderDetail"
+        @cancel-order="cancelOrder"
+      />
+      <CartView v-else-if="activeView === 'cart'" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView
         v-else-if="activeView === 'security'"

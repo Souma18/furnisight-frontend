@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted, computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
@@ -18,6 +19,8 @@ import {
   homeHero,
   homeTestimonials,
 } from '../mock/homeMockData'
+import { useAccountStore } from '@features/account/store/accountStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const roomFallbacks = {
   'Phòng ngủ': { image: '/home/rooms/bedroom.jpg', isBig: true },
@@ -37,7 +40,11 @@ const roomFallbacks = {
 const categories = ref([])
 const products = ref([])
 const activeCategoryId = ref('')
-const wishedProductIds = ref([])
+const route = useRoute()
+const router = useRouter()
+const accountStore = useAccountStore()
+const authStore = useAuthStore()
+const wishedProductIds = computed(() => accountStore.wishlistProductIds)
 const roomFilters = computed(() => ['Tat ca', ...categories.value.map(c => c.name)])
 const activeRoomFilter = ref('Tat ca')
 
@@ -86,6 +93,7 @@ watch(activeCategoryId, async (newVal) => {
     const prodRes = await fetchProducts({ category: selectedCat.slug || selectedCat.name, size: 8 })
     products.value = prodRes.data.products.map(p => ({
       ...p,
+      detailId: p.slug || p.id,
       category: p.categoryName,
       price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price),
       image: p.image || '/home/products/placeholder.jpg'
@@ -97,14 +105,34 @@ watch(activeCategoryId, async (newVal) => {
 
 onMounted(() => {
   loadData()
+
+  if (authStore.isAuthenticated) {
+    accountStore.loadWishlist().catch(() => [])
+  }
 })
 
-function toggleWish(productId) {
-  if (wishedProductIds.value.includes(productId)) {
-    wishedProductIds.value = wishedProductIds.value.filter((id) => id !== productId)
+async function toggleWish(productId) {
+  if (!productId) return
+
+  if (!authStore.isAuthenticated) {
+    router.push({
+      name: 'login',
+      query: {
+        redirect: route.fullPath,
+      },
+    })
     return
   }
-  wishedProductIds.value = [...wishedProductIds.value, productId]
+
+  try {
+    if (accountStore.hasFavoriteProduct(productId)) {
+      await accountStore.removeFavorite(productId)
+    } else {
+      await accountStore.addFavorite(productId)
+    }
+  } catch (error) {
+    console.error('Failed to toggle favorite home product:', error)
+  }
 }
 
 useRevealOnScroll('.fade-up')
@@ -263,7 +291,7 @@ useRevealOnScroll('.fade-up')
 .product-footer { display: flex; align-items: center; justify-content: space-between; }
 .product-price { font-size: 16px; font-weight: 600; color: #c9922a; }
 .product-price-old { font-size: 12px; color: #888; text-decoration: line-through; margin-left: 6px; }
-.add-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #e5b84a, #c9922a); border: none; cursor: pointer; font-size: 18px; color: #12202e; font-weight: 700; }
+.product-sold { color: #7e7c77; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .testi-card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,.06); }
 .testi-text { font-size: 14px; color: #555; line-height: 1.75; margin-bottom: 22px; }

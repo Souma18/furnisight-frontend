@@ -1,10 +1,17 @@
 import { ref, watch, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { fetchProductById } from '../api/productApi'
+import { useCartStore } from '@features/cart/store/cartStore'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { useAccountStore } from '@features/account/store/accountStore'
 
 
 export function useProductDetailPage(props) {
   const router = useRouter()
+  const route = useRoute()
+  const cartStore = useCartStore()
+  const authStore = useAuthStore()
+  const accountStore = useAccountStore()
   const product = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -28,10 +35,16 @@ export function useProductDetailPage(props) {
 
       selectedColor.value = product.value.colors?.[0] ?? ''
       selectedSize.value = product.value.sizes?.[0] ?? ''
-      activeImage.value = product.value.gallery?.[0] ?? ''
+      activeImage.value = product.value.gallery?.[0] ?? product.value.image ?? ''
       qty.value = 1
+      wished.value = false
       activeTab.value = 'desc'
       show3DModal.value = false
+
+      if (authStore.isAuthenticated) {
+        await accountStore.loadWishlist().catch(() => [])
+        wished.value = accountStore.hasFavoriteProduct(product.value.id)
+      }
     } catch (e) {
       if (e.message === 'not_found' || e.response?.status === 404) {
         error.value = 'not_found'
@@ -59,6 +72,76 @@ export function useProductDetailPage(props) {
         roomType: product.value?.roomTypeHint ?? '',
       },
     })
+  }
+
+  function resolveSelectedVariant() {
+    const variants = product.value?.variants ?? []
+    if (!variants.length) return null
+
+    return (
+      variants.find((variant) => {
+        const matchesColor = !selectedColor.value || variant.color === selectedColor.value
+        const matchesSize = !selectedSize.value || variant.dimensionText === selectedSize.value
+        return matchesColor && matchesSize
+      }) ??
+      variants.find((variant) => !selectedColor.value || variant.color === selectedColor.value) ??
+      variants[0]
+    )
+  }
+
+  async function addToCart() {
+    if (!product.value) return
+
+    if (!authStore.isAuthenticated) {
+      router.push({
+        name: 'login',
+        query: {
+          redirect: route.fullPath,
+        },
+      })
+      return
+    }
+
+    const selectedVariant = resolveSelectedVariant()
+
+    await cartStore.addItem({
+      productId: product.value.id,
+      detailId: product.value.slug || product.value.id,
+      variantId: selectedVariant?.id ?? null,
+      name: product.value.name,
+      price: selectedVariant?.price ?? product.value.price ?? 0,
+      imageUrl: activeImage.value || product.value.image || product.value.gallery?.[0] || '',
+      quantity: qty.value,
+      selectedColor: selectedColor.value,
+      selectedSize: selectedSize.value,
+      room3dProductId: product.value.room3dProductId ?? null,
+    })
+  }
+
+  async function addToWishlist() {
+    if (!product.value) return
+
+    if (!authStore.isAuthenticated) {
+      router.push({
+        name: 'login',
+        query: {
+          redirect: route.fullPath,
+        },
+      })
+      return
+    }
+
+    try {
+      if (accountStore.hasFavoriteProduct(product.value.id)) {
+        await accountStore.removeFavorite(product.value.id)
+        wished.value = false
+      } else {
+        await accountStore.addFavorite(product.value.id)
+        wished.value = true
+      }
+    } catch (e) {
+      console.error('Failed to toggle favorite product:', e)
+    }
   }
 
   const breadcrumbLinks = ref([])
@@ -90,5 +173,7 @@ export function useProductDetailPage(props) {
     retry,
     changeQty,
     openRoom3D,
+    addToCart,
+    addToWishlist,
   }
 }

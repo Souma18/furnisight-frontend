@@ -27,12 +27,24 @@ export function saveAddress(payload) {
   return apiClient.post('/account/addresses', payload)
 }
 
+export function setDefaultAddress(addressId) {
+  return apiClient.post(`/account/addresses/${addressId}/default`)
+}
+
 export function getOrders() {
   return apiClient.get('/account/orders')
 }
 
 export function getWishlist() {
-  return apiClient.get('/account/wishlist')
+  return apiClient.get('/users/favorites/products')
+}
+
+export function favoriteProduct(productId) {
+  return apiClient.post(`/users/favorites/products/${productId}`)
+}
+
+export function unfavoriteProduct(productId) {
+  return apiClient.delete(`/users/favorites/products/${productId}`)
 }
 
 export function getSavedProjects() {

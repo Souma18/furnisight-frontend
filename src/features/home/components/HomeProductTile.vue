@@ -1,6 +1,6 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { getProductDetailById } from '@features/product/mock/productDetailMockData'
+import { useProductNavigation } from '@features/product/composables/useProductNavigation'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -11,10 +11,7 @@ const props = defineProps({
 
 const emit = defineEmits(['toggle-wish'])
 
-function getDetailRoute(productId) {
-  const detail = getProductDetailById(productId)
-  return detail ? `/products/${productId}` : null
-}
+const { getDetailRoute } = useProductNavigation()
 
 function handleToggleWish() {
   if (props.wishReadonly) return
@@ -35,7 +32,7 @@ function handleToggleWish() {
         class="product-img-disabled"
         @error="$event.target.style.display = 'none'"
       />
-      <span :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
+      <span v-if="product.tag" :class="['product-tag', `tag-${product.tagType}`]">{{ product.tag }}</span>
       <button
         type="button"
         class="product-wish"
@@ -63,7 +60,7 @@ function handleToggleWish() {
           <span class="product-price">{{ product.price }}</span>
           <span v-if="product.oldPrice" class="product-price-old">{{ product.oldPrice }}</span>
         </div>
-        <button type="button" class="add-btn">+</button>
+        <span class="product-sold">Đã bán {{ product.soldCount ?? 0 }}</span>
       </div>
     </div>
   </article>
@@ -121,5 +118,5 @@ function handleToggleWish() {
 .product-footer { display: flex; align-items: center; justify-content: space-between; }
 .product-price { font-size: 16px; font-weight: 600; color: #c9922a; }
 .product-price-old { font-size: 12px; color: #888; text-decoration: line-through; margin-left: 6px; }
-.add-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, #e5b84a, #c9922a); border: none; cursor: pointer; font-size: 18px; color: #12202e; font-weight: 700; }
+.product-sold { color: #7e7c77; font-size: 12px; font-weight: 500; white-space: nowrap; }
 </style>

@@ -1,17 +1,17 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
-import router from './router'
 
-// Dung router.currentRoute thay cho useRouter() de tranh loi injection o root component
-const route = computed(() => router?.currentRoute?.value)
-
-const isRoom3DPage = computed(() => route.value?.path?.startsWith('/room3d') || false)
-const isHomePage = computed(() => route.value?.name === 'home')
-const isProductsPage = computed(() => route.value?.name === 'products')
-const isProductDetailPage = computed(() => route.value?.name === 'product-detail')
-const isAccountPage = computed(() => route.value?.path?.startsWith('/account') || false)
+const route = useRoute()
+const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
+const isHomePage = computed(() => route.name === 'home')
+const isProductsPage = computed(() => route.name === 'products')
+const isProductDetailPage = computed(() => route.name === 'product-detail')
+const isContactPage = computed(() => route.name === 'contact')
+const isCheckoutPage = computed(() => route.name === 'checkout')
+const isAccountPage = computed(() => route.path.startsWith('/account'))
 const mainRef = ref(null)
 let resizeObserver = null
 let mutationObserver = null
@@ -40,7 +40,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.value?.fullPath,
+  () => route.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()
@@ -66,11 +66,17 @@ onBeforeUnmount(() => {
       :class="{
         'app-main--fluid': isRoom3DPage,
         'app-main--with-header':
-          !isRoom3DPage && !isHomePage && !isProductDetailPage && !isProductsPage && !isContactPage,
+          !isRoom3DPage &&
+          !isHomePage &&
+          !isProductDetailPage &&
+          !isProductsPage &&
+          !isContactPage &&
+          !isCheckoutPage,
         'app-main--home': isHomePage,
         'app-main--products': isProductsPage,
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
+        'app-main--checkout': isCheckoutPage,
       }"
     >
       <RouterView />
@@ -128,6 +134,13 @@ onBeforeUnmount(() => {
 }
 
 .app-main--contact {
+  max-width: none;
+  margin: 0;
+  padding: 56px 0 0;
+  background: #faf6f0;
+}
+
+.app-main--checkout {
   max-width: none;
   margin: 0;
   padding: 56px 0 0;

@@ -605,10 +605,11 @@
   justify-content: space-between;
 }
 
-.hn-add-btn {
-  border: 0;
-  border-radius: 999px;
-  width: 1.9rem;
+.hn-product-sold {
+  color: #7e7c77;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .hn-cta {
