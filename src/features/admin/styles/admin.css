@@ -154,14 +154,22 @@
 .tb-btn:hover{background:var(--cream2);color:var(--text);border-color:var(--border2)}
 .tb-notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--white)}
 
-/* user sim */
-.sim-select{
-  padding:6px 10px;border-radius:8px;font-size:11px;font-family:'DM Sans',sans-serif;
-  border:1.5px dashed rgba(201,146,42,.5);background:var(--gold-pale);color:var(--text);
-  font-weight:500;cursor:pointer;outline:none;transition:all .2s;
+/* current admin chip (read-only) */
+.tb-admin-chip{
+  display:flex;align-items:center;gap:8px;
+  padding:4px 10px 4px 4px;border-radius:999px;
+  background:var(--gold-pale);border:1px solid rgba(201,146,42,.35);
+  max-width:200px;
 }
-.sim-select:hover{border-color:var(--gold);background:#fff}
-.sim-label{font-size:11px;font-weight:500;color:var(--text3);white-space:nowrap}
+.tb-admin-av{
+  width:26px;height:26px;border-radius:50%;
+  background:linear-gradient(135deg,#e5b84a,#c9922a);
+  color:var(--navy);font-weight:700;font-size:11px;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.tb-admin-meta{display:flex;flex-direction:column;line-height:1.15;min-width:0}
+.tb-admin-name{font-size:12px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tb-admin-role{font-size:10px;color:var(--gold-dim);font-weight:500}
 
 /* ── CONTENT ── */
 .content{flex:1;overflow-y:auto;padding:24px 28px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}

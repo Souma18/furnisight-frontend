@@ -97,3 +97,21 @@ export function updateAdminProfile(payload) {
 export function changeAdminPassword(payload) {
   return apiClient.post('/admin/account/password', payload)
 }
+
+// ==== Message Templates ====
+// TODO(BE): Wire pages/composables to these endpoints when backend ready.
+export function fetchMessageTemplates(params) {
+  return apiClient.get('/message-templates', { params })
+}
+
+export function createMessageTemplate(payload) {
+  return apiClient.post('/message-templates', payload)
+}
+
+export function updateMessageTemplate(id, payload) {
+  return apiClient.patch(`/message-templates/${id}`, payload)
+}
+
+export function deleteMessageTemplate(id) {
+  return apiClient.delete(`/message-templates/${id}`)
+}
