@@ -15,6 +15,7 @@ export const ADMIN_NAV_SECTIONS = [
       { name: 'admin-orders', label: 'Đơn hàng', icon: 'box', badge: 'orders', badgeTone: 'red' },
       { name: 'admin-inventory', label: 'Kho hàng', icon: 'warehouse' },
       { name: 'admin-revenue', label: 'Doanh thu', icon: 'banknote' },
+      { name: 'admin-conversations', label: 'Hỗ trợ Chat', icon: 'messageSquare', badge: 'conversations', badgeTone: 'red' },
     ],
   },
   {
@@ -39,4 +40,5 @@ export const ADMIN_PAGE_TITLES = {
   'admin-roles': 'Vai trò <em>& Quyền hạn</em>',
   'admin-audit-logs': 'Nhật ký <em>thao tác</em>',
   'admin-my-account': 'Trang <em>của tôi</em>',
+  'admin-conversations': 'Hỗ trợ <em>Hội thoại</em>',
 }

@@ -77,6 +77,7 @@ const routes = [
       { path: 'roles', name: 'admin-roles', component: () => import('@features/admin/pages/views/AdminRolesPage.vue') },
       { path: 'audit-logs', name: 'admin-audit-logs', component: () => import('@features/admin/pages/views/AdminAuditLogsPage.vue') },
       { path: 'my-account', name: 'admin-my-account', component: () => import('@features/admin/pages/views/AdminMyAccountPage.vue') },
+      { path: 'conversations', name: 'admin-conversations', component: () => import('@features/admin/pages/views/AdminConversationsPage.vue') },
     ],
   },
 ]

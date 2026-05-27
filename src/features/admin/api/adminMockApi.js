@@ -10,6 +10,7 @@ import {
   ADMIN_ROLES_MOCK,
   ADMIN_USERS_MOCK,
 } from '../mock/adminSeedMock'
+import { TEMPLATES as MESSAGE_TEMPLATES_SEED } from '../mock/adminConversationMock'
 
 function sleep(ms = 280) {
   return new Promise((resolve) => setTimeout(resolve, ms))
@@ -29,6 +30,7 @@ let categories = [...ADMIN_CATEGORIES_MOCK]
 let products = [...ADMIN_PRODUCTS_MOCK]
 let users = [...ADMIN_USERS_MOCK]
 let orders = [...ADMIN_ORDERS_MOCK]
+let messageTemplates = MESSAGE_TEMPLATES_SEED.map((t) => ({ ...t }))
 
 export async function fetchDashboardMock() {
   await sleep()
@@ -211,5 +213,47 @@ export async function changeAdminPasswordMock({ currentPassword, newPassword, co
   if (newPassword.length < 8) fail('Mật khẩu mới tối thiểu 8 ký tự.')
   if (newPassword !== confirmPassword) fail('Xác nhận mật khẩu không khớp.')
   if (currentPassword !== 'Admin@123') fail('Mật khẩu hiện tại không đúng.')
+  return ok({ success: true })
+}
+
+// ==== Message Templates (mock /api/message-templates) ====
+// TODO(BE): Replace these with real /api/message-templates endpoints when backend ready.
+export async function fetchMessageTemplatesMock() {
+  await sleep(150)
+  return ok({ items: messageTemplates.map((t) => ({ ...t })) })
+}
+
+export async function createMessageTemplateMock(payload) {
+  await sleep(150)
+  const title = String(payload?.title || '').trim()
+  const content = String(payload?.content || '').trim()
+  if (!title) fail('Tiêu đề template không được trống.')
+  if (!content) fail('Nội dung template không được trống.')
+
+  const created = {
+    id: Date.now(),
+    title,
+    content,
+    category: payload?.category || 'GREETING',
+    active: payload?.active !== false,
+  }
+  messageTemplates = [created, ...messageTemplates]
+  return ok({ ...created })
+}
+
+export async function updateMessageTemplateMock(id, payload) {
+  await sleep(150)
+  const idx = messageTemplates.findIndex((t) => t.id === id)
+  if (idx === -1) fail('Không tìm thấy template.')
+  const merged = { ...messageTemplates[idx], ...payload, id }
+  messageTemplates[idx] = merged
+  return ok({ ...merged })
+}
+
+export async function deleteMessageTemplateMock(id) {
+  await sleep(150)
+  const before = messageTemplates.length
+  messageTemplates = messageTemplates.filter((t) => t.id !== id)
+  if (messageTemplates.length === before) fail('Không tìm thấy template để xóa.')
   return ok({ success: true })
 }
