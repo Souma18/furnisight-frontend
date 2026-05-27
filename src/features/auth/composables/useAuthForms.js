@@ -49,6 +49,17 @@ export function useAuthForms({ emit, props, authViewState }) {
     return score
   })
 
+  function resolvePostLoginTarget() {
+    const queryRedirect = route.query.redirect
+    if (typeof queryRedirect === 'string' && queryRedirect) {
+      return queryRedirect
+    }
+    if (authStore.isAdmin) {
+      return { name: 'admin-dashboard' }
+    }
+    return { name: 'home' }
+  }
+
   async function submitLogin() {
     errorMessage.value = ''
     loading.value = true
@@ -57,7 +68,7 @@ export function useAuthForms({ emit, props, authViewState }) {
         identifier: loginForm.email,
         password: loginForm.password,
       })
-      authStore.setSession(response.data)
+      authStore.setSession(normalizeAuthSession(response))
       showSuccess({
         title: 'Đăng nhập thành công!',
         message: 'Chào mừng trở lại. Bạn đang được chuyển hướng...',
@@ -65,12 +76,17 @@ export function useAuthForms({ emit, props, authViewState }) {
       })
       setTimeout(async () => {
         emit('authenticated')
+        const target = resolvePostLoginTarget()
+        const shouldNavigate =
+          !props.embedded || authStore.isAdmin || Boolean(route.query.redirect)
+
         if (props.embedded) {
           emit('close')
-          return
         }
-        const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
-        await router.push(redirect)
+
+        if (shouldNavigate) {
+          await router.push(target)
+        }
       }, 900)
     } catch (error) {
       errorMessage.value = error.response?.data?.message || error.message || 'Đăng nhập thất bại.'
