@@ -1,9 +1,11 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useChatStore } from '../store/chatStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 export function useChat() {
   const chatStore = useChatStore()
+  const authStore = useAuthStore()
   const { isOpen, isTyping, unreadCount, messages, draft, hasUnread, loading, error, connectionStatus } =
     storeToRefs(chatStore)
 
@@ -62,6 +64,12 @@ export function useChat() {
 
   watch(messages, () => scrollToBottom(), { deep: true })
   watch(isTyping, () => scrollToBottom())
+  watch(
+    () => authStore.user?.id ?? null,
+    async () => {
+      await chatStore.hydrateSession(true)
+    },
+  )
 
   onMounted(async () => {
     await chatStore.hydrateSession()

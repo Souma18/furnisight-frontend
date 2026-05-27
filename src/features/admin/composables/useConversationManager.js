@@ -320,16 +320,6 @@ export function useConversationManager() {
       return
     }
 
-    const optimistic = {
-      id: `temp-${Date.now()}`,
-      type: 'admin',
-      text: trimmed,
-      time: 'Bây giờ',
-      senderName: currentAdmin.value.name,
-      senderRole: currentAdmin.value.av,
-    }
-    timelineMessages.value.push(optimistic)
-
     const dto = {
       conversationId: currentConvId.value,
       senderId: staffId,
