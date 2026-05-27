@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import {
+  createVnpayPaymentMock,
   fetchCheckoutSessionMock,
   placeCheckoutOrderMock,
   validateCheckoutVoucherMock,
@@ -20,7 +21,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const codNote = ref('')
 
   const selectedShippingId = ref('')
-  const selectedPaymentId = ref('cod')
+  const selectedPaymentId = ref('vnpay')
   const sellerNote = ref('')
   const hasInsurance = ref(false)
   const agreedTerms = ref(true)
@@ -56,7 +57,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       codNote.value = data.codNote ?? ''
 
       selectedShippingId.value = data.defaultShippingId ?? shippingOptions.value[0]?.id ?? ''
-      selectedPaymentId.value = data.defaultPaymentId ?? 'cod'
+      selectedPaymentId.value = data.defaultPaymentId ?? 'vnpay'
 
       const defaultShipVoucher = shippingVouchers.value.find(
         (item) => item.code === data.defaultShippingVoucherCode,
@@ -121,6 +122,29 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
+  async function createVnpayPayment(payload) {
+    try {
+      // TODO(BE): replace with checkoutApi.createVnpayPayment(payload)
+      const response = await createVnpayPaymentMock(payload)
+      const ok = response?.status === 200
+      return {
+        ok,
+        status: response?.status ?? 500,
+        paymentUrl: response?.data?.paymentUrl ?? '',
+        transactionRef: response?.data?.transactionRef ?? '',
+        message: response?.data?.message ?? '',
+      }
+    } catch (error) {
+      return {
+        ok: false,
+        status: error?.response?.status ?? 500,
+        paymentUrl: '',
+        transactionRef: '',
+        message: error?.response?.data?.message || error.message || 'Không thể khởi tạo VNPAY.',
+      }
+    }
+  }
+
   function resetCheckoutState() {
     shopVoucher.value = null
     shippingVoucher.value = null
@@ -156,6 +180,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     applyVoucher,
     removeVoucher,
     placeOrder,
+    createVnpayPayment,
     resetCheckoutState,
   }
 })

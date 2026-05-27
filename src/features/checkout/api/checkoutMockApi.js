@@ -28,7 +28,7 @@ export async function fetchCheckoutSessionMock() {
       insurance: CHECKOUT_INSURANCE,
       codNote: CHECKOUT_COD_NOTE,
       defaultShippingId: CHECKOUT_SHIPPING_OPTIONS[0]?.id ?? '',
-      defaultPaymentId: 'cod',
+      defaultPaymentId: 'vnpay',
       defaultShippingVoucherCode: 'FREESHIP50K',
     },
   }
@@ -80,6 +80,29 @@ export async function placeCheckoutOrderMock(payload) {
       orderCode,
       status: 'pending',
       payload,
+    },
+  }
+}
+
+export async function createVnpayPaymentMock(payload) {
+  await sleep(450)
+
+  if (!payload?.orderId || !payload?.amount || Number(payload.amount) <= 0) {
+    return {
+      status: 400,
+      data: {
+        success: false,
+        message: 'Dữ liệu thanh toán VNPAY không hợp lệ.',
+      },
+    }
+  }
+
+  return {
+    status: 200,
+    data: {
+      success: true,
+      paymentUrl: `https://sandbox.vnpayment.vn/mock-pay?orderId=${encodeURIComponent(payload.orderId)}`,
+      transactionRef: `VNP-${Date.now()}`,
     },
   }
 }
