@@ -50,6 +50,25 @@ const routes = [
     name: 'room3d',
     component: () => import('@features/room3d/pages/Room3DPage.vue'),
   },
+  {
+    path: '/admin',
+    component: () => import('@features/admin/pages/AdminLayoutPage.vue'),
+    meta: { requiresAuth: true, requiresAdmin: true },
+    children: [
+      { path: '', redirect: { name: 'admin-dashboard' } },
+      { path: 'dashboard', name: 'admin-dashboard', component: () => import('@features/admin/pages/views/AdminDashboardPage.vue') },
+      { path: 'stats', name: 'admin-stats', component: () => import('@features/admin/pages/views/AdminStatsPage.vue') },
+      { path: 'users', name: 'admin-users', component: () => import('@features/admin/pages/views/AdminUsersPage.vue') },
+      { path: 'categories', name: 'admin-categories', component: () => import('@features/admin/pages/views/AdminCategoriesPage.vue') },
+      { path: 'products', name: 'admin-products', component: () => import('@features/admin/pages/views/AdminProductsPage.vue') },
+      { path: 'orders', name: 'admin-orders', component: () => import('@features/admin/pages/views/AdminOrdersPage.vue') },
+      { path: 'inventory', name: 'admin-inventory', component: () => import('@features/admin/pages/views/AdminInventoryPage.vue') },
+      { path: 'revenue', name: 'admin-revenue', component: () => import('@features/admin/pages/views/AdminRevenuePage.vue') },
+      { path: 'roles', name: 'admin-roles', component: () => import('@features/admin/pages/views/AdminRolesPage.vue') },
+      { path: 'audit-logs', name: 'admin-audit-logs', component: () => import('@features/admin/pages/views/AdminAuditLogsPage.vue') },
+      { path: 'my-account', name: 'admin-my-account', component: () => import('@features/admin/pages/views/AdminMyAccountPage.vue') },
+    ],
+  },
 ]
 
 export const router = createRouter({
@@ -63,11 +82,25 @@ export const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const requiresAdmin = to.matched.some((record) => record.meta.requiresAdmin)
+
+  if (requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login', query: { redirect: to.fullPath } })
-  } else {
-    next()
+    return
   }
+
+  if (requiresAdmin && !authStore.isAdmin) {
+    next({ name: 'home' })
+    return
+  }
+
+  if (to.name === 'login' && authStore.isAuthenticated) {
+    next(authStore.isAdmin ? { name: 'admin-dashboard' } : { name: 'home' })
+    return
+  }
+
+  next()
 })
 
 export default router

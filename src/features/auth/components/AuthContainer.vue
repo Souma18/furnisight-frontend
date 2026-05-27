@@ -100,13 +100,16 @@ const {
 
 <style scoped>
 .auth-shell {
-  min-height: 580px;
-  border-radius: var(--auth-radius-lg);
+  flex: 1;
+  width: 100%;
+  min-height: calc(100svh - 56px);
+  border-radius: 0;
   background: var(--auth-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .auth-shell--embedded {

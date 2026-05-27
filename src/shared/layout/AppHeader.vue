@@ -16,7 +16,7 @@ import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
-const { isAuthenticated } = storeToRefs(authStore)
+const { isAuthenticated, isAdmin } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
 const notifications = ref([])
 const activeNotificationTab = ref('all')
@@ -103,6 +103,10 @@ function dropdownIconClass(type) {
 
 function handleUserAction() {
   if (isAuthenticated.value) {
+    if (isAdmin.value) {
+      router.push({ name: 'admin-dashboard' })
+      return
+    }
     router.push('/account')
     return
   }
@@ -217,7 +221,11 @@ onMounted(() => {
       </button>
     </div>
   </header>
-  <AuthModal :open="isAuthModalOpen" @close="isAuthModalOpen = false" />
+  <AuthModal
+    :open="isAuthModalOpen"
+    @close="isAuthModalOpen = false"
+    @authenticated="isAuthModalOpen = false"
+  />
 </template>
 
 <style scoped>
