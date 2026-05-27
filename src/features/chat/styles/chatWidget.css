@@ -27,6 +27,12 @@
   border-left-color: #12202e;
 }
 
+.chat-error-banner {
+  color: #f87171;
+  font-size: 11px;
+  text-align: center;
+}
+
 .chat-fab-tooltip.show {
   opacity: 1;
 }

@@ -9,6 +9,30 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     proxy: {
+      '/conversation': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/message': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/notification': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/promotion': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/subscribe': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
+      '/ws': {
+        target: 'http://localhost:8085',
+        changeOrigin: true,
+      },
       '/api/v1/notifications': {
         target: 'http://localhost:8082',
         changeOrigin: true,
@@ -16,8 +40,11 @@ export default defineConfig({
       '/api/v1': {
         target: 'http://localhost:8081',
         changeOrigin: true,
-      }
-    }
+      },
+    },
+  },
+  define: {
+    global: 'globalThis',
   },
   resolve: {
     alias: {

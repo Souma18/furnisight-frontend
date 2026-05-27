@@ -24,6 +24,9 @@ const {
   handleInputKeydown,
   resizeTextarea,
   closeChat,
+  loading,
+  error,
+  connectionStatus,
 } = useChat()
 
 function handleAddToCart(product) {
@@ -35,7 +38,7 @@ function handleAddToCart(product) {
 <template>
   <div class="chat-widget">
     <div class="chat-fab-tooltip" :class="{ show: showFabTooltip && !isOpen }">
-      💬 LUXNEST AI đang trực tuyến!
+      💬 LUXNEST Support đang trực tuyến!
     </div>
 
     <button
@@ -100,6 +103,11 @@ function handleAddToCart(product) {
       </div>
 
       <div ref="messagesRef" class="chat-messages">
+        <div v-if="error" class="chat-date-sep chat-error-banner">{{ error }}</div>
+        <div v-else-if="connectionStatus === 'error'" class="chat-date-sep chat-error-banner">
+          Mất kết nối realtime. Tin nhắn có thể trễ.
+        </div>
+        <div v-if="loading && !messages.length" class="chat-date-sep">Đang tải hội thoại...</div>
         <div class="chat-date-sep">{{ todayLabel }}</div>
 
         <ChatMessageBubble

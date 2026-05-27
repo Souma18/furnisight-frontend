@@ -1,16 +1,25 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { createChatSocket } from '../api/chatSocket'
-import { fetchChatSessionMock, sendChatMessageMock } from '../api/chatMockApi'
+import { createMessageServiceSocket } from '../api/messageServiceSocket'
+import {
+  createConversation,
+  getConversationsByUser,
+  getMessages,
+  markMessageRead,
+} from '../api/messageServiceApi'
+import { getBuyerId } from '../lib/chatUserIds'
+import {
+  formatTimeLabel,
+  mapMessageToCustomer,
+  normalizeMessagePage,
+  pickLatestConversation,
+} from '../lib/chatMappers'
 import { CHAT_AGENT, CHAT_QUICK_CHIPS } from '../mock/chatMockData'
+
+const CHAT_CHANNEL = 'SUPPORT'
 
 function createMessageId(prefix = 'msg') {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-}
-
-function formatTimeLabel(iso) {
-  const date = iso ? new Date(iso) : new Date()
-  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 export const useChatStore = defineStore('chat', () => {
@@ -20,7 +29,12 @@ export const useChatStore = defineStore('chat', () => {
   const unreadCount = ref(0)
   const messages = ref([])
   const draft = ref('')
-  const connectionStatus = ref('idle') // idle | connecting | open | closed | error
+  const connectionStatus = ref('idle')
+  const conversationId = ref(null)
+  const staffId = ref(null)
+  const buyerId = ref(getBuyerId())
+  const loading = ref(false)
+  const error = ref(null)
 
   const agent = CHAT_AGENT
   const quickChips = CHAT_QUICK_CHIPS
@@ -28,6 +42,7 @@ export const useChatStore = defineStore('chat', () => {
   const hasUnread = computed(() => unreadCount.value > 0)
 
   let socketClient = null
+  let subscribedConvId = null
 
   function appendMessage(message) {
     messages.value.push({
@@ -36,66 +51,139 @@ export const useChatStore = defineStore('chat', () => {
       content: message.content ?? '',
       products: message.products ?? [],
       createdAt: message.createdAt ?? new Date().toISOString(),
+      clientTempId: message.clientTempId,
     })
   }
 
-  function handleSocketMessage(payload) {
-    if (!payload || typeof payload !== 'object') return
-
-    if (payload.type === 'typing') {
-      isTyping.value = Boolean(payload.active)
+  function upsertMessage(mapped) {
+    const byId = messages.value.findIndex((m) => m.id === mapped.id)
+    if (byId !== -1) {
+      messages.value[byId] = mapped
       return
     }
 
-    if (payload.type === 'message' && payload.message) {
-      isTyping.value = false
-      appendMessage(payload.message)
-      if (!isOpen.value) unreadCount.value += 1
+    if (mapped.clientTempId) {
+      const byTemp = messages.value.findIndex((m) => m.clientTempId === mapped.clientTempId)
+      if (byTemp !== -1) {
+        messages.value[byTemp] = mapped
+        return
+      }
+    }
+
+    if (mapped.role === 'user') {
+      const byContent = messages.value.findIndex(
+        (m) => m.role === 'user' && m.clientTempId && m.content === mapped.content,
+      )
+      if (byContent !== -1) {
+        messages.value[byContent] = mapped
+        return
+      }
+    }
+
+    appendMessage(mapped)
+  }
+
+  function handleIncomingMessage(payload) {
+    if (!payload || typeof payload !== 'object' || payload.isInternal) return
+
+    isTyping.value = false
+    const mapped = mapMessageToCustomer(payload, buyerId.value)
+    upsertMessage(mapped)
+
+    if (mapped.role !== 'user' && !isOpen.value) {
+      unreadCount.value += 1
     }
   }
 
+  function subscribeCurrentConversation() {
+    if (!socketClient?.isConnected?.() || !conversationId.value) return
+
+    if (subscribedConvId && subscribedConvId !== conversationId.value) {
+      socketClient.unsubscribe(`/topic/conversation/${subscribedConvId}`)
+    }
+
+    subscribedConvId = conversationId.value
+    socketClient.subscribeConversation(conversationId.value, handleIncomingMessage)
+  }
+
   function connectSocket() {
-    const url = import.meta.env.VITE_CHAT_WS_URL
-    if (!url) return
+    if (!conversationId.value) return
 
     socketClient?.disconnect()
 
     connectionStatus.value = 'connecting'
-    socketClient = createChatSocket({
-      url,
-      onOpen: () => {
+    socketClient = createMessageServiceSocket({
+      onConnect: () => {
         connectionStatus.value = 'open'
+        subscribeCurrentConversation()
       },
-      onClose: () => {
+      onDisconnect: () => {
         connectionStatus.value = 'closed'
       },
       onError: () => {
         connectionStatus.value = 'error'
       },
-      onMessage: handleSocketMessage,
     })
 
     socketClient.connect()
   }
 
+  async function loadMessages() {
+    if (!conversationId.value) {
+      messages.value = []
+      return
+    }
+
+    const page = await getMessages({ conversationId: conversationId.value, size: 50 })
+    const items = normalizeMessagePage(page)
+    messages.value = items
+      .filter((m) => !m.isInternal)
+      .map((m) => mapMessageToCustomer(m, buyerId.value))
+      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+  }
+
+  async function markIncomingAsRead() {
+    if (!conversationId.value || !isOpen.value) return
+
+    const unreadFromOthers = messages.value.filter(
+      (m) => m.role === 'assistant' && typeof m.id === 'number',
+    )
+
+    await Promise.allSettled(unreadFromOthers.map((m) => markMessageRead(m.id)))
+  }
+
   async function hydrateSession() {
     if (hydrated.value) return
 
-    // TODO(BE): thay bằng chatApi.fetchChatHistory() hoặc event init từ WebSocket
-    const response = await fetchChatSessionMock()
-    const data = response?.data ?? {}
+    loading.value = true
+    error.value = null
 
-    messages.value = data.messages ?? []
-    unreadCount.value = Number(data.unreadCount) || 0
-    hydrated.value = true
+    try {
+      buyerId.value = getBuyerId()
+      const list = await getConversationsByUser(buyerId.value)
+      const existing = pickLatestConversation(list, CHAT_CHANNEL)
 
-    connectSocket()
+      if (existing?.id) {
+        conversationId.value = existing.id
+        staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+        await loadMessages()
+        connectSocket()
+      }
+
+      hydrated.value = true
+    } catch (err) {
+      error.value = err.message || 'Không thể tải hội thoại'
+      console.error('[chatStore] hydrateSession', err)
+    } finally {
+      loading.value = false
+    }
   }
 
   function toggleOpen() {
     isOpen.value = !isOpen.value
     if (isOpen.value) {
       unreadCount.value = 0
+      markIncomingAsRead()
     }
   }
 
@@ -105,45 +193,73 @@ export const useChatStore = defineStore('chat', () => {
 
   async function sendMessage(text) {
     const content = String(text ?? draft.value).trim()
-    if (!content || isTyping.value) return
+    if (!content) return
 
     draft.value = ''
-
-    const userMessage = {
-      id: createMessageId('user'),
-      role: 'user',
-      content,
-      products: [],
-      createdAt: new Date().toISOString(),
-    }
-
-    appendMessage(userMessage)
-
-    const wsUrl = import.meta.env.VITE_CHAT_WS_URL
-    if (wsUrl && socketClient?.getReadyState() === WebSocket.OPEN) {
-      socketClient.send({
-        type: 'message',
-        content,
-        clientMessageId: userMessage.id,
-      })
-      return
-    }
-
-    isTyping.value = true
+    error.value = null
 
     try {
-      // TODO(BE): thay bằng chatApi.sendChatMessage() khi không dùng WebSocket
-      const response = await sendChatMessageMock(content)
-      const botMessage = response?.data?.message
-      if (botMessage) appendMessage(botMessage)
+      if (!conversationId.value) {
+        loading.value = true
+        const created = await createConversation({
+          buyerId: buyerId.value,
+          staffId: null,
+          message: content,
+          messageType: 'TEXT',
+          channel: CHAT_CHANNEL,
+          fileId: null,
+        })
+
+        conversationId.value = created.id
+        staffId.value = created.staffId ?? created.assignedAdminId ?? null
+        await loadMessages()
+        connectSocket()
+        hydrated.value = true
+        return
+      }
+
+      const clientTempId = createMessageId('user')
+      appendMessage({
+        id: clientTempId,
+        clientTempId,
+        role: 'user',
+        content,
+        products: [],
+        createdAt: new Date().toISOString(),
+      })
+
+      const sent = socketClient?.sendChatMessage({
+        conversationId: conversationId.value,
+        senderId: buyerId.value,
+        receiverId: staffId.value,
+        content,
+        messageType: 'TEXT',
+        isInternal: false,
+      })
+
+      if (!sent) {
+        connectSocket()
+        socketClient?.sendChatMessage({
+          conversationId: conversationId.value,
+          senderId: buyerId.value,
+          receiverId: staffId.value,
+          content,
+          messageType: 'TEXT',
+          isInternal: false,
+        })
+      }
+    } catch (err) {
+      error.value = err.message || 'Gửi tin nhắn thất bại'
+      console.error('[chatStore] sendMessage', err)
     } finally {
-      isTyping.value = false
+      loading.value = false
     }
   }
 
   function disconnectSocket() {
     socketClient?.disconnect()
     socketClient = null
+    subscribedConvId = null
     connectionStatus.value = 'idle'
   }
 
@@ -155,6 +271,9 @@ export const useChatStore = defineStore('chat', () => {
     messages,
     draft,
     connectionStatus,
+    conversationId,
+    loading,
+    error,
     agent,
     quickChips,
     hasUnread,
@@ -163,7 +282,6 @@ export const useChatStore = defineStore('chat', () => {
     toggleOpen,
     close,
     sendMessage,
-    handleSocketMessage,
     disconnectSocket,
   }
 })

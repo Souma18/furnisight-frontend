@@ -1,19 +1,37 @@
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useAdminUiStore } from '../store/adminUiStore'
 import { useAdminLayout } from './useAdminLayout'
-import { CONV_DATA, PRODUCTS_DATA, TEMPLATE_CATEGORIES } from '../mock/adminConversationMock'
+import { PRODUCTS_DATA, TEMPLATE_CATEGORIES } from '../mock/adminConversationMock'
 import {
   fetchMessageTemplatesMock,
   createMessageTemplateMock,
   updateMessageTemplateMock,
   deleteMessageTemplateMock,
 } from '../api/adminMockApi'
+import {
+  getAdminInbox,
+  getMessages,
+  postInternalNote,
+  patchStatus,
+  closeConversation,
+} from '@features/chat/api/messageServiceApi'
+import { createMessageServiceSocket } from '@features/chat/api/messageServiceSocket'
+import { getStaffId } from '@features/chat/lib/chatUserIds'
+import {
+  mapConversationToAdminList,
+  mapMessageToAdminTimeline,
+  mapStatusToApi,
+  normalizeConversationList,
+  normalizeMessagePage,
+} from '@features/chat/lib/chatMappers'
+
+const INBOX_CHANNEL = 'SUPPORT'
 
 export function useConversationManager() {
   const uiStore = useAdminUiStore()
   const { currentAdmin } = useAdminLayout()
 
-  const currentConvId = ref(1)
+  const currentConvId = ref(null)
   const detailPanelVisible = ref(true)
   const currentMsgType = ref('reply')
   const searchQuery = ref('')
@@ -24,13 +42,21 @@ export function useConversationManager() {
   const selectedProdId = ref(null)
   const pendingInsertText = ref('')
 
-  const conversations = ref(Object.keys(CONV_DATA).map((id) => ({ id: Number(id), ...CONV_DATA[id] })))
+  const conversations = ref([])
+  const inboxLoading = ref(false)
+  const timelineMessages = ref([])
+  const messagesLoading = ref(false)
+  const socketConnected = ref(false)
+
   const templates = ref([])
   const templatesLoading = ref(false)
   const products = ref([...PRODUCTS_DATA])
 
+  let socketClient = null
+  let subscribedConvId = null
+
   const currentConv = computed(
-    () => conversations.value.find((c) => c.id === currentConvId.value) || conversations.value[0],
+    () => conversations.value.find((c) => c.id === currentConvId.value) || null,
   )
 
   const filteredConversations = computed(() => {
@@ -64,6 +90,135 @@ export function useConversationManager() {
     return filtered
   })
 
+  function buildInboxParams() {
+    const params = { channel: INBOX_CHANNEL }
+    if (activeFilter.value === 'unread') params.unreadOnly = true
+    if (activeFilter.value === 'urgent') params.priority = 'URGENT'
+    if (activeFilter.value === 'waiting') params.status = 'WAITING_CUSTOMER'
+    return params
+  }
+
+  async function loadInbox() {
+    inboxLoading.value = true
+    try {
+      const data = await getAdminInbox(buildInboxParams())
+      conversations.value = normalizeConversationList(data).map(mapConversationToAdminList)
+
+      if (conversations.value.length && !currentConvId.value) {
+        currentConvId.value = conversations.value[0].id
+        await loadMessages(currentConvId.value)
+      } else if (currentConvId.value && !conversations.value.some((c) => c.id === currentConvId.value)) {
+        currentConvId.value = conversations.value[0]?.id ?? null
+        if (currentConvId.value) await loadMessages(currentConvId.value)
+        else timelineMessages.value = []
+      }
+    } catch (error) {
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Không tải được inbox',
+        subtitle: error.message || '',
+      })
+    } finally {
+      inboxLoading.value = false
+    }
+  }
+
+  function subscribeAdminTopics(id) {
+    if (!socketClient?.isConnected?.() || !id) return
+
+    if (subscribedConvId && subscribedConvId !== id) {
+      socketClient.unsubscribe(`/topic/conversation/${subscribedConvId}`)
+      socketClient.unsubscribe(`/topic/conversation/${subscribedConvId}/internal`)
+    }
+
+    subscribedConvId = id
+    const conv = conversations.value.find((c) => c.id === id)
+
+    socketClient.subscribeConversation(id, (payload) => {
+      if (!payload || payload.isInternal) return
+      const mapped = mapMessageToAdminTimeline(payload, {
+        buyerId: conv?.buyerId,
+        staffId: getStaffId(),
+        staffName: currentAdmin.value.name,
+      })
+      if (!timelineMessages.value.some((m) => m.id === mapped.id)) {
+        timelineMessages.value.push(mapped)
+      }
+    })
+
+    socketClient.subscribeInternal(id, (payload) => {
+      if (!payload) return
+      const mapped = mapMessageToAdminTimeline(
+        { ...payload, isInternal: true },
+        {
+          buyerId: conv?.buyerId,
+          staffId: getStaffId(),
+          staffName: currentAdmin.value.name,
+        },
+      )
+      if (!timelineMessages.value.some((m) => m.id === mapped.id)) {
+        timelineMessages.value.push(mapped)
+      }
+    })
+  }
+
+  function connectSocketForConversation(id) {
+    if (!id) return
+
+    socketClient?.disconnect()
+    socketConnected.value = false
+
+    socketClient = createMessageServiceSocket({
+      onConnect: () => {
+        socketConnected.value = true
+        subscribeAdminTopics(id)
+      },
+      onDisconnect: () => {
+        socketConnected.value = false
+      },
+      onError: () => {
+        socketConnected.value = false
+      },
+    })
+
+    socketClient.connect()
+  }
+
+  async function loadMessages(id = currentConvId.value) {
+    if (!id) {
+      timelineMessages.value = []
+      return
+    }
+
+    messagesLoading.value = true
+    try {
+      const page = await getMessages({ conversationId: id, includeInternal: true, size: 50 })
+      const items = normalizeMessagePage(page)
+      const conv = conversations.value.find((c) => c.id === id)
+
+      const sorted = [...items].sort(
+        (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
+      )
+      timelineMessages.value = sorted.map((m) =>
+        mapMessageToAdminTimeline(m, {
+          buyerId: conv?.buyerId,
+          staffId: getStaffId(),
+          staffName: currentAdmin.value.name,
+        }),
+      )
+
+      connectSocketForConversation(id)
+    } catch (error) {
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Không tải được tin nhắn',
+        subtitle: error.message || '',
+      })
+    } finally {
+      messagesLoading.value = false
+    }
+  }
+
   async function loadTemplates() {
     templatesLoading.value = true
     try {
@@ -74,13 +229,13 @@ export function useConversationManager() {
     }
   }
 
-  function loadConversation(id) {
+  async function loadConversation(id) {
     currentConvId.value = id
     const conv = conversations.value.find((c) => c.id === id)
     if (conv) {
       conv.unread = false
     }
-    uiStore.showToast({ icon: 'messages', title: 'Hội thoại: ' + (conv?.name || ''), subtitle: 'Đang tải lịch sử...' })
+    await loadMessages(id)
   }
 
   function setMsgType(type) {
@@ -91,22 +246,103 @@ export function useConversationManager() {
     detailPanelVisible.value = !detailPanelVisible.value
   }
 
-  function updateStatus(status) {
-    uiStore.showToast({ icon: 'info', title: 'Cập nhật trạng thái', subtitle: '→ ' + status })
+  async function updateStatus(statusKey) {
+    if (!currentConvId.value) return
+
+    try {
+      await patchStatus(currentConvId.value, mapStatusToApi(statusKey))
+      const conv = conversations.value.find((c) => c.id === currentConvId.value)
+      if (conv) {
+        conv.statusKey = statusKey
+      }
+      uiStore.showToast({ icon: 'info', title: 'Cập nhật trạng thái', subtitle: '→ ' + statusKey })
+    } catch (error) {
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Cập nhật trạng thái thất bại',
+        subtitle: error.message || '',
+      })
+    }
   }
 
-  function resolveConversation() {
-    updateStatus('resolved')
-    uiStore.showToast({ icon: 'check', title: 'Hội thoại đã giải quyết', subtitle: 'Đã lưu và đóng hội thoại này.' })
+  async function resolveConversation() {
+    if (!currentConvId.value) return
+
+    try {
+      await patchStatus(currentConvId.value, 'RESOLVED')
+      await closeConversation(currentConvId.value)
+      const conv = conversations.value.find((c) => c.id === currentConvId.value)
+      if (conv) {
+        conv.statusKey = 'resolved'
+      }
+      uiStore.showToast({ icon: 'check', title: 'Hội thoại đã giải quyết', subtitle: 'Đã lưu và đóng hội thoại này.' })
+    } catch (error) {
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Không thể đóng hội thoại',
+        subtitle: error.message || '',
+      })
+    }
   }
 
-  function sendMessage(text, type) {
-    if (!text) return
-    uiStore.showToast({
-      icon: type === 'note' ? 'lock' : 'send',
-      title: type === 'note' ? 'Ghi chú đã lưu' : 'Tin nhắn đã gửi',
-      subtitle: `Người trả lời: ${currentAdmin.value.name}`,
-    })
+  async function sendMessage(text, type) {
+    const trimmed = String(text ?? '').trim()
+    if (!trimmed || !currentConvId.value) return
+
+    const conv = currentConv.value
+    const staffId = getStaffId()
+
+    if (type === 'note') {
+      try {
+        const note = await postInternalNote(currentConvId.value, {
+          senderId: staffId,
+          content: trimmed,
+          messageType: 'TEXT',
+        })
+        timelineMessages.value.push(
+          mapMessageToAdminTimeline(
+            { ...note, isInternal: true },
+            { buyerId: conv?.buyerId, staffId, staffName: currentAdmin.value.name },
+          ),
+        )
+        uiStore.showToast({
+          icon: 'lock',
+          title: 'Ghi chú đã lưu',
+          subtitle: currentAdmin.value.name,
+        })
+      } catch (error) {
+        uiStore.showToast({
+          icon: 'alert',
+          title: 'Lưu ghi chú thất bại',
+          subtitle: error.message || '',
+        })
+      }
+      return
+    }
+
+    const optimistic = {
+      id: `temp-${Date.now()}`,
+      type: 'admin',
+      text: trimmed,
+      time: 'Bây giờ',
+      senderName: currentAdmin.value.name,
+      senderRole: currentAdmin.value.av,
+    }
+    timelineMessages.value.push(optimistic)
+
+    const dto = {
+      conversationId: currentConvId.value,
+      senderId: staffId,
+      receiverId: conv?.buyerId ?? null,
+      content: trimmed,
+      messageType: 'TEXT',
+      isInternal: false,
+    }
+
+    if (!socketClient?.sendChatMessage(dto)) {
+      connectSocketForConversation(currentConvId.value)
+      setTimeout(() => socketClient?.sendChatMessage(dto), 800)
+    }
   }
 
   function insertSuggestion(text, msgRef) {
@@ -163,8 +399,24 @@ export function useConversationManager() {
     selectedProdId.value = null
   }
 
+  function disconnectSocket() {
+    socketClient?.disconnect()
+    socketClient = null
+    subscribedConvId = null
+    socketConnected.value = false
+  }
+
+  watch([activeFilter], () => {
+    loadInbox()
+  })
+
   onMounted(() => {
     loadTemplates()
+    loadInbox()
+  })
+
+  onBeforeUnmount(() => {
+    disconnectSocket()
   })
 
   return {
@@ -181,12 +433,18 @@ export function useConversationManager() {
     conversations,
     filteredConversations,
     currentConv,
+    inboxLoading,
+    timelineMessages,
+    messagesLoading,
+    socketConnected,
     templates,
     templatesLoading,
     templateCategories: TEMPLATE_CATEGORIES,
     products,
+    loadInbox,
     loadTemplates,
     loadConversation,
+    loadMessages,
     setMsgType,
     toggleDetailPanel,
     updateStatus,
@@ -197,5 +455,6 @@ export function useConversationManager() {
     deleteTemplate,
     selectProduct,
     sendProductToChat,
+    disconnectSocket,
   }
 }

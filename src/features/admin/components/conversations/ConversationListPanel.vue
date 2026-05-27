@@ -34,8 +34,10 @@ function switchTab(tab) {
   mgr.activeTab.value = tab
 }
 
-function formatTime() {
-  return '14:30'
+function formatTime(conv) {
+  const iso = conv?.updatedAt || conv?.createdAt
+  if (!iso) return ''
+  return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
 }
 
 function priorityClass(priority) {
@@ -116,7 +118,7 @@ function priorityLabel(priority) {
         <div class="cm-ci-body">
           <div class="cm-ci-top">
             <div class="cm-ci-name">{{ conv.name }}</div>
-            <div class="cm-ci-time">{{ formatTime() }}</div>
+            <div class="cm-ci-time">{{ formatTime(conv) }}</div>
           </div>
           <div class="cm-ci-preview">
             <template v-if="conv.lastSender === 'admin'">Bạn: </template>
