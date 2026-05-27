@@ -5,8 +5,8 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 const props = defineProps({
   manager: {
     type: Object,
-    required: true
-  }
+    required: true,
+  },
 })
 
 const mgr = props.manager
@@ -21,14 +21,11 @@ const inputWrapClasses = ref('')
 const cannedFilter = ref('')
 const filteredCanned = ref([])
 
-const messages = ref([
-  { id: 1, type: 'customer', text: 'Chào shop, cho mình hỏi về ghế xoay văn phòng có loại nào ngồi đỡ đau lưng không ạ?', time: '14:20' },
-  { id: 2, type: 'system', text: 'Khách hàng vừa xem sản phẩm "Ghế Ergonomic ProFlex X1"', time: '14:21', icon: 'info' },
-  { id: 3, type: 'admin', text: 'Dạ chào bạn, với nhu cầu ngồi lâu và đỡ đau lưng, mình gợi ý bạn các dòng ghế Công thái học (Ergonomic) bên mình ạ.', time: '14:22', senderName: currentAdmin.value.name, senderRole: currentAdmin.value.av }
-])
+const messages = computed(() => mgr.timelineMessages.value)
 
 function updateInputMode() {
-  inputWrapClasses.value = mgr.currentMsgType.value === 'note' ? 'note-mode' : (mgr.currentMsgType.value === 'ai' ? 'ai-mode' : '')
+  inputWrapClasses.value =
+    mgr.currentMsgType.value === 'note' ? 'note-mode' : mgr.currentMsgType.value === 'ai' ? 'ai-mode' : ''
 }
 
 watch(() => mgr.currentMsgType.value, updateInputMode)
@@ -47,6 +44,14 @@ watch(() => mgr.currentConvId.value, () => {
 })
 
 watch(
+  messages,
+  () => {
+    scrollToBottom()
+  },
+  { deep: true },
+)
+
+watch(
   () => mgr.pendingInsertText.value,
   (text) => {
     if (text) {
@@ -57,24 +62,13 @@ watch(
   },
 )
 
-function sendMsg() {
+async function sendMsg() {
   if (!messageText.value.trim()) return
 
-  if (mgr.currentMsgType.value === 'note') {
-    messages.value.push({ id: Date.now(), type: 'note', text: messageText.value, time: 'Bây giờ', senderName: currentAdmin.value.name })
-  } else {
-    messages.value.push({
-      id: Date.now(),
-      type: 'admin',
-      text: messageText.value,
-      time: 'Bây giờ',
-      senderName: currentAdmin.value.name,
-      senderRole: currentAdmin.value.av,
-    })
-  }
-
-  mgr.sendMessage(messageText.value, mgr.currentMsgType.value)
+  const text = messageText.value
+  const type = mgr.currentMsgType.value
   messageText.value = ''
+  await mgr.sendMessage(text, type)
   scrollToBottom()
 }
 
@@ -83,17 +77,11 @@ function handleKeydown(e) {
     e.preventDefault()
     sendMsg()
   } else if (e.key === '/' && messageText.value === '') {
-    // Open canned picker
     mgr.cannedPickerOpen.value = true
     filterCanned()
   } else if (e.key === 'Escape') {
     mgr.cannedPickerOpen.value = false
   }
-}
-
-function useAiSuggestion(text) {
-  mgr.insertSuggestion(text, messageText)
-  mgr.currentMsgType.value = 'reply'
 }
 
 function filterCanned() {
@@ -110,8 +98,9 @@ function selectCanned(content) {
   cannedFilter.value = ''
 }
 
-function formatTime(d) {
-  return 'Bây giờ'
+function toggleCannedPicker() {
+  mgr.cannedPickerOpen.value = !mgr.cannedPickerOpen.value
+  if (mgr.cannedPickerOpen.value) filterCanned()
 }
 </script>
 
@@ -119,21 +108,29 @@ function formatTime(d) {
   <div class="cm-workspace">
     <!-- Header -->
     <div class="cw-header" v-if="mgr.currentConv.value">
-      <div class="cw-hdr-av" :class="mgr.currentConv.value.avClass" :style="{ background: mgr.currentConv.value.avColor, color: mgr.currentConv.value.textColor }">
+      <div
+        class="cw-hdr-av"
+        :class="mgr.currentConv.value.avClass"
+        :style="{ background: mgr.currentConv.value.avColor, color: mgr.currentConv.value.textColor }"
+      >
         {{ mgr.currentConv.value.av }}
         <div class="cm-ci-online" :class="mgr.currentConv.value.online"></div>
       </div>
       <div class="cw-hdr-info">
         <div class="cw-hdr-name">{{ mgr.currentConv.value.name }}</div>
         <div class="cw-hdr-meta">
-          <span><AppIcon name="clock" :size="12" /> Đang chờ: 5m</span>
+          <span><AppIcon name="clock" :size="12" /> Kênh {{ mgr.currentConv.value.channel || 'SUPPORT' }}</span>
           <span class="sep-dot"></span>
-          <span><AppIcon name="monitor" :size="12" /> Web (Windows)</span>
+          <span v-if="mgr.socketConnected.value"><AppIcon name="wifi" :size="12" /> Đang kết nối</span>
         </div>
       </div>
-      
+
       <div class="cw-hdr-actions">
-        <select class="cw-status-select" :value="mgr.currentConv.value.statusKey" @change="e => mgr.updateStatus(e.target.value)">
+        <select
+          class="cw-status-select"
+          :value="mgr.currentConv.value.statusKey"
+          @change="(e) => mgr.updateStatus(e.target.value)"
+        >
           <option value="new">Mới</option>
           <option value="pending">Đang xử lý</option>
           <option value="waiting">Chờ khách</option>
@@ -155,24 +152,29 @@ function formatTime(d) {
       </div>
     </div>
 
+    <div v-else-if="mgr.inboxLoading.value" class="cw-empty-state">Đang tải hội thoại...</div>
+    <div v-else class="cw-empty-state">Chưa có hội thoại nào</div>
+
     <!-- Timeline -->
-    <div class="cw-timeline" ref="timelineRef">
-      <div class="tl-date-sep">Hôm nay</div>
-      
-      <div 
-        v-for="msg in messages" 
-        :key="msg.id"
-        class="tl-msg-row"
-        :class="`msg-${msg.type}`"
-      >
+    <div v-if="mgr.currentConv.value" class="cw-timeline" ref="timelineRef">
+      <div v-if="mgr.messagesLoading.value" class="tl-date-sep">Đang tải tin nhắn...</div>
+      <div v-else class="tl-date-sep">Hôm nay</div>
+
+      <div v-for="msg in messages" :key="msg.id" class="tl-msg-row" :class="`msg-${msg.type}`">
         <template v-if="msg.type === 'customer'">
-          <div class="tl-av" :class="mgr.currentConv.value.avClass" :style="{ background: mgr.currentConv.value.avColor, color: mgr.currentConv.value.textColor }">{{ mgr.currentConv.value.av }}</div>
+          <div
+            class="tl-av"
+            :class="mgr.currentConv.value.avClass"
+            :style="{ background: mgr.currentConv.value.avColor, color: mgr.currentConv.value.textColor }"
+          >
+            {{ mgr.currentConv.value.av }}
+          </div>
           <div class="tl-msg-group">
             <div class="tl-bubble customer">{{ msg.text }}</div>
             <div class="tl-msg-meta">{{ msg.time }}</div>
           </div>
         </template>
-        
+
         <template v-if="msg.type === 'admin'">
           <div class="tl-msg-group">
             <div class="tl-bubble admin">{{ msg.text }}</div>
@@ -182,16 +184,16 @@ function formatTime(d) {
           </div>
           <div class="tl-av" style="background: var(--navy); color: var(--gold3)">{{ msg.senderRole }}</div>
         </template>
-        
+
         <template v-if="msg.type === 'system'">
-          <div class="tl-system-pill">
-            <AppIcon name="info" /> {{ msg.text }} · {{ msg.time }}
-          </div>
+          <div class="tl-system-pill"><AppIcon name="info" /> {{ msg.text }} · {{ msg.time }}</div>
         </template>
-        
+
         <template v-if="msg.type === 'note'">
           <div class="tl-note-wrap">
-            <div class="tl-note-header"><AppIcon name="lock" /> Ghi chú nội bộ - {{ msg.senderName || currentAdmin.name }}</div>
+            <div class="tl-note-header">
+              <AppIcon name="lock" /> Ghi chú nội bộ - {{ msg.senderName || currentAdmin.name }}
+            </div>
             {{ msg.text }}
           </div>
         </template>
@@ -199,7 +201,7 @@ function formatTime(d) {
     </div>
 
     <!-- Quick replies -->
-    <div class="cw-quick-replies">
+    <div v-if="mgr.currentConv.value" class="cw-quick-replies">
       <button class="cw-qr-chip">Xin chào 👋</button>
       <button class="cw-qr-chip">Cần hỗ trợ thêm?</button>
       <button class="cw-qr-chip">Kiểm tra đơn hàng</button>
@@ -208,18 +210,24 @@ function formatTime(d) {
     </div>
 
     <!-- Input Area -->
-    <div class="cw-input-area">
-      <!-- Message Type Switcher -->
+    <div v-if="mgr.currentConv.value" class="cw-input-area">
       <div class="cw-msg-type-row">
-        <button class="cw-msg-type-btn" :class="{ active: mgr.currentMsgType.value === 'reply' }" @click="mgr.setMsgType('reply')">
+        <button
+          class="cw-msg-type-btn"
+          :class="{ active: mgr.currentMsgType.value === 'reply' }"
+          @click="mgr.setMsgType('reply')"
+        >
           <AppIcon name="messageSquare" /> Trả lời
         </button>
-        <button class="cw-msg-type-btn note-type" :class="{ active: mgr.currentMsgType.value === 'note' }" @click="mgr.setMsgType('note')">
+        <button
+          class="cw-msg-type-btn note-type"
+          :class="{ active: mgr.currentMsgType.value === 'note' }"
+          @click="mgr.setMsgType('note')"
+        >
           <AppIcon name="lock" /> Ghi chú nội bộ
         </button>
       </div>
-      
-      <!-- Toolbar -->
+
       <div class="cw-toolbar">
         <button class="cw-tool-btn" title="Đính kèm file"><AppIcon name="paperclip" /></button>
         <button class="cw-tool-btn" title="Gửi ảnh"><AppIcon name="image" /></button>
@@ -230,24 +238,23 @@ function formatTime(d) {
         <button class="cw-tool-btn" title="Chọn template (mở danh sách)" @click="emit('open-templates')">
           <AppIcon name="fileText" />
         </button>
-        <button
-          class="cw-tool-btn"
-          title="Template nhanh (phím /)"
-          @click="mgr.cannedPickerOpen.value = !mgr.cannedPickerOpen.value; if (mgr.cannedPickerOpen.value) filterCanned()"
-        >
+        <button class="cw-tool-btn" title="Template nhanh (phím /)" @click="toggleCannedPicker">
           <AppIcon name="alignLeft" />
           <div class="cw-tool-tag">/</div>
         </button>
         <button class="cw-tool-btn" title="Chèn Emoji"><AppIcon name="smile" /></button>
       </div>
-      
-      <!-- Text input -->
+
       <div class="cw-input-area-wrap">
         <div class="cw-input-row">
           <div class="cw-input-wrap" :class="inputWrapClasses">
-            <textarea 
+            <textarea
               v-model="messageText"
-              :placeholder="mgr.currentMsgType.value === 'note' ? 'Nhập ghi chú nội bộ (chỉ admin xem được)...' : 'Nhập tin nhắn trả lời... (Nhấn / để dùng template nhanh)'"
+              :placeholder="
+                mgr.currentMsgType.value === 'note'
+                  ? 'Nhập ghi chú nội bộ (chỉ admin xem được)...'
+                  : 'Nhập tin nhắn trả lời... (Nhấn / để dùng template nhanh)'
+              "
               @keydown="handleKeydown"
               rows="1"
             ></textarea>
@@ -257,8 +264,7 @@ function formatTime(d) {
             <AppIcon name="send" />
           </button>
         </div>
-        
-        <!-- Canned Picker Popover -->
+
         <div class="cw-canned-picker" v-if="mgr.cannedPickerOpen.value">
           <div class="canned-search">
             <AppIcon name="search" />
@@ -269,12 +275,13 @@ function formatTime(d) {
               <div class="canned-item-title">{{ t.title }}</div>
               <div class="canned-item-preview">{{ t.content }}</div>
             </div>
-            <div v-if="filteredCanned.length === 0" style="padding: 10px; text-align: center; font-size: 11px; color: var(--text4);">Không tìm thấy.</div>
+            <div v-if="filteredCanned.length === 0" style="padding: 10px; text-align: center; font-size: 11px; color: var(--text4)">
+              Không tìm thấy.
+            </div>
           </div>
         </div>
       </div>
-      
-      <!-- Footer Info -->
+
       <div class="cw-footer-bar">
         <div class="cw-footer-info">
           <AppIcon name="checkCheck" /> Đang trả lời với tư cách: <strong>{{ currentAdmin.name }}</strong>

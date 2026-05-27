@@ -4,7 +4,8 @@ import { useChatStore } from '../store/chatStore'
 
 export function useChat() {
   const chatStore = useChatStore()
-  const { isOpen, isTyping, unreadCount, messages, draft, hasUnread } = storeToRefs(chatStore)
+  const { isOpen, isTyping, unreadCount, messages, draft, hasUnread, loading, error, connectionStatus } =
+    storeToRefs(chatStore)
 
   // Static config — không phải ref nên không dùng storeToRefs
   const agent = chatStore.agent
@@ -88,6 +89,9 @@ export function useChat() {
     agent,
     quickChips,
     hasUnread,
+    loading,
+    error,
+    connectionStatus,
     messagesRef,
     inputRef,
     showFabTooltip,

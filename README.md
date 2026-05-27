@@ -87,9 +87,16 @@ Tạo file `.env` (không commit secret) nếu cần đổi API:
 
 ```env
 VITE_API_BASE_URL=https://api.example.com
+
+# MessageService (test mode, no gateway)
+VITE_MESSAGE_SERVICE_PREFIX=
+VITE_MESSAGE_SERVICE_BASE_URL=
+VITE_MESSAGE_WS_URL=http://localhost:5173/ws
+VITE_CHAT_BUYER_ID=1001
+VITE_CHAT_STAFF_ID=5001
 ```
 
-Mặc định trong code: `/api` (thường dùng cùng `vite` proxy dev).
+Mặc định trong code: `/api` (thường dùng cùng `vite` proxy dev). MessageService ở chế độ test hiện gọi trực tiếp các path nội bộ qua Vite proxy tới `localhost:8085` (xem `vite.config.js`). Mock user ID dùng cho đến khi gateway decode JWT — xem `.env.example`.
 
 ## Setup
 
