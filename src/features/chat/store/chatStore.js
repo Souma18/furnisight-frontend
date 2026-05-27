@@ -44,6 +44,16 @@ export const useChatStore = defineStore('chat', () => {
   let socketClient = null
   let subscribedConvId = null
 
+  function resetSessionState() {
+    disconnectSocket()
+    conversationId.value = null
+    staffId.value = null
+    messages.value = []
+    unreadCount.value = 0
+    hydrated.value = false
+    error.value = null
+  }
+
   function appendMessage(message) {
     messages.value.push({
       id: message.id ?? createMessageId(),
@@ -152,14 +162,24 @@ export const useChatStore = defineStore('chat', () => {
     await Promise.allSettled(unreadFromOthers.map((m) => markMessageRead(m.id)))
   }
 
-  async function hydrateSession() {
-    if (hydrated.value) return
+  async function hydrateSession(force = false) {
+    const nextBuyerId = getBuyerId()
+    const userChanged = buyerId.value !== nextBuyerId
+
+    if (userChanged) {
+      resetSessionState()
+      buyerId.value = nextBuyerId
+    } else if (force) {
+      resetSessionState()
+      buyerId.value = nextBuyerId
+    } else if (hydrated.value) {
+      return
+    }
 
     loading.value = true
     error.value = null
 
     try {
-      buyerId.value = getBuyerId()
       const list = await getConversationsByUser(buyerId.value)
       const existing = pickLatestConversation(list, CHAT_CHANNEL)
 
@@ -177,6 +197,39 @@ export const useChatStore = defineStore('chat', () => {
     } finally {
       loading.value = false
     }
+  }
+
+  async function ensureConversationForFirstMessage(firstMessage) {
+    if (conversationId.value) return { createdWithFirstMessage: false }
+
+    const list = await getConversationsByUser(buyerId.value)
+    const existing = pickLatestConversation(list, CHAT_CHANNEL)
+    if (existing?.id) {
+      conversationId.value = existing.id
+      staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+      await loadMessages()
+      connectSocket()
+      hydrated.value = true
+      return { createdWithFirstMessage: false }
+    }
+
+    const created = await createConversation({
+      buyerId: buyerId.value,
+      staffId: null,
+      message: firstMessage,
+      messageType: 'TEXT',
+      channel: CHAT_CHANNEL,
+      fileId: null,
+    })
+
+    conversationId.value = created.id
+    staffId.value = created.staffId ?? created.assignedAdminId ?? null
+    await loadMessages()
+    connectSocket()
+    hydrated.value = true
+
+    // Theo API design, message đầu tiên đã được lưu ngay trong createConversation.
+    return { createdWithFirstMessage: true }
   }
 
   function toggleOpen() {
@@ -201,20 +254,13 @@ export const useChatStore = defineStore('chat', () => {
     try {
       if (!conversationId.value) {
         loading.value = true
-        const created = await createConversation({
-          buyerId: buyerId.value,
-          staffId: null,
-          message: content,
-          messageType: 'TEXT',
-          channel: CHAT_CHANNEL,
-          fileId: null,
-        })
+        const { createdWithFirstMessage } = await ensureConversationForFirstMessage(content)
+        if (createdWithFirstMessage) {
+          return
+        }
+      }
 
-        conversationId.value = created.id
-        staffId.value = created.staffId ?? created.assignedAdminId ?? null
-        await loadMessages()
-        connectSocket()
-        hydrated.value = true
+      if (!conversationId.value) {
         return
       }
 
@@ -274,6 +320,7 @@ export const useChatStore = defineStore('chat', () => {
     conversationId,
     loading,
     error,
+      buyerId,
     agent,
     quickChips,
     hasUnread,

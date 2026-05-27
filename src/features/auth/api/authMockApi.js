@@ -119,6 +119,18 @@ const MOCK_USERS = [
       role: 'CUSTOMER',
     },
   },
+   {
+    id: 'u-004',
+    identifier: 'user2@gmail.com',
+    password: 'User@1234',
+    profile: {
+      id: 1002,
+      firstName: 'Hồng',
+      lastName: 'Trần',
+      email: 'user2@gmail.com',
+      role: 'CUSTOMER',
+    },
+  },
   {
     id: 'u-003',
     identifier: 'staff@gmail.com',
