@@ -109,17 +109,40 @@ export function useCheckout() {
       address: defaultAddress.value,
     })
 
-    if (order) {
-      accountStore.addOrderFromCheckout({
-        order,
-        lines: linesSnapshot,
-        summary: summary.value,
-        address: defaultAddress.value,
+    if (!order) return null
+
+    if (checkoutState.selectedPaymentId.value === 'vnpay') {
+      const paymentRes = await checkoutStore.createVnpayPayment({
+        orderId: order.orderId,
+        orderCode: order.orderCode,
+        amount: summary.value.total,
+        returnUrl: `${window.location.origin}/checkout?vnpay=success`,
+        cancelUrl: `${window.location.origin}/checkout?vnpay=cancel`,
       })
-      showSuccess.value = true
-      for (const line of linesSnapshot) {
-        await cartStore.removeItem(line.id)
+
+      if (!paymentRes.ok) {
+        showToast({
+          icon: 'alert',
+          title: 'Thanh toán VNPAY thất bại',
+          subtitle: paymentRes.message || `Mã phản hồi: ${paymentRes.status}`,
+        })
+        return null
       }
+
+      // TODO(BE): Bật redirect thật khi API VNPAY sẵn sàng.
+      // Khi backend trả 200 + paymentUrl hợp lệ, bỏ comment dòng dưới để điều hướng:
+      // window.location.href = paymentRes.paymentUrl
+    }
+
+    accountStore.addOrderFromCheckout({
+      order,
+      lines: linesSnapshot,
+      summary: summary.value,
+      address: defaultAddress.value,
+    })
+    showSuccess.value = true
+    for (const line of linesSnapshot) {
+      await cartStore.removeItem(line.id)
     }
 
     return order
