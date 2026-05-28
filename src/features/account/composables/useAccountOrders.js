@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '../store/orderStore'
 
@@ -42,6 +42,22 @@ export function useAccountOrders(emitNotify) {
     return true
   }
 
+  async function retryPayment(order) {
+    const result = await orderStore.retryPayment(order)
+    if (!result.ok) {
+      if (emitNotify) emitNotify(result.message ?? 'Không thể thanh toán lại.', 'error')
+      return false
+    }
+    if (emitNotify) emitNotify('Đang chuyển sang cổng thanh toán.', 'success')
+    return true
+  }
+
+  watch(selectedOrderId, (orderId) => {
+    if (!orderId) return
+    const order = orderStore.getOrderDetail(orderId)
+    orderStore.fetchOrderDetail(order?.orderCode || orderId)
+  }, { immediate: true })
+
   return {
     orders,
     filter,
@@ -51,5 +67,6 @@ export function useAccountOrders(emitNotify) {
     openOrderDetail,
     backToOrders,
     cancelOrder,
+    retryPayment,
   }
 }

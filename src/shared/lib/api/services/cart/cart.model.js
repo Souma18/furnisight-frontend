@@ -14,6 +14,33 @@ function unique(values = []) {
   return [...new Set(values.filter(Boolean))]
 }
 
+export function resolveCartImageUrl(raw = {}) {
+  const imageCandidates = [
+    raw.imageUrl,
+    raw.productImageUrl,
+    raw.image,
+    raw.thumbnail,
+    raw.thumbnailUrl,
+    raw.coverImage,
+    raw.coverImageUrl,
+    raw.product?.imageUrl,
+    raw.product?.image,
+  ]
+
+  if (Array.isArray(raw.gallery)) {
+    imageCandidates.push(...raw.gallery)
+  }
+
+  if (Array.isArray(raw.images)) {
+    imageCandidates.push(...raw.images.map((item) => {
+      if (typeof item === 'string') return item
+      return item?.url || item?.imageUrl || item?.src || ''
+    }))
+  }
+
+  return imageCandidates.find(Boolean) || ''
+}
+
 function normalizeVariant(raw = {}) {
   return {
     id: raw.id || null,
@@ -94,7 +121,7 @@ export class CartItemResponse {
     this.name = raw.name || raw.productName || ''
     this.slug = raw.slug || ''
     this.categoryLabel = raw.categoryLabel || 'Sản phẩm'
-    this.imageUrl = raw.imageUrl || raw.productImageUrl || ''
+    this.imageUrl = resolveCartImageUrl(raw)
     this.imageFallback = raw.imageFallback || ''
     this.emoji = raw.emoji || ''
     this.price = normalized.price

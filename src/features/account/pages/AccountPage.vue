@@ -74,8 +74,8 @@ async function handleLogout() {
         :notification-category="notificationCategory"
         @notify="showToast"
       />
-      <OrdersView v-else-if="activeView === 'orders'" />
-      <OrderDetailView v-else-if="activeView === 'order-detail'" />
+      <OrdersView v-else-if="activeView === 'orders'" @notify="showToast" />
+      <OrderDetailView v-else-if="activeView === 'order-detail'" @notify="showToast" />
       <CartView v-else-if="activeView === 'cart'" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView

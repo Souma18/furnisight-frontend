@@ -7,7 +7,8 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./orders.model').OrderResponse[], totalElements: number}>>}
    */
   getOrders(params) {
-    return apiClient.get('/orders', { params })
+    // Gateway: /orders/user -> OrderService: /api/v1/user
+    return apiClient.get('/orders/user', { params })
   }
 
   /**
@@ -25,11 +26,11 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./orders.model').OrderResponse>>}
    */
   createOrder(payload) {
-    return apiClient.post('/orders', payload)
+    return apiClient.post('/orders/initiate', payload)
   }
 
   getCheckoutSession(params) {
-    return apiClient.get('/checkout/session', { params })
+    return apiClient.get('/orders/checkout/session', { params })
   }
 
   /**
@@ -38,7 +39,8 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./orders.model').OrderResponse>>}
    */
   cancelOrder(orderCode) {
-    return apiClient.put(`/orders/${orderCode}/cancel`)
+    // Backend uses @PostMapping for cancel
+    return apiClient.post(`/orders/${orderCode}/cancel`)
   }
 
   // ─── PAYMENTS ────────────────────────────────────────────────────────
@@ -50,7 +52,7 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<{paymentUrl: string}>>}
    */
   processPayment(orderCode, payload) {
-    return apiClient.post(`/payments/${orderCode}`, payload)
+    return apiClient.post(`/orders/payment/${orderCode}`, payload)
   }
 
   createVnpayPayment(payload) {
@@ -58,18 +60,22 @@ class OrdersApi {
     return apiClient.post(`/orders/payment/vnpay/create?orderCode=${orderCode}`, payload)
   }
 
-  getPaymentCallback(params) {
-    return apiClient.get('/payments/callback', { params })
+  getPaymentCallback(paymentMethod, params) {
+    return apiClient.get(`/orders/payment/${paymentMethod}/callback`, {
+      params,
+      headers: { Accept: 'application/json' },
+    })
   }
 
   // ─── VOUCHERS ────────────────────────────────────────────────────────
 
   getVouchers(params) {
-    return apiClient.get('/vouchers', { params })
+    // Backend uses @GetMapping("/user") on VoucherController
+    return apiClient.get('/orders/vouchers/user', { params })
   }
 
   applyVoucher(code, orderAmount) {
-    return apiClient.post('/vouchers/apply', { code, orderAmount })
+    return apiClient.post('/orders/vouchers/apply', { code, orderAmount })
   }
 
   validateCheckoutVoucher(payload) {

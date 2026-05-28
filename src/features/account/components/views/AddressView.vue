@@ -12,55 +12,66 @@ const props = defineProps({
 
 const emit = defineEmits(['notify'])
 
-const {
-  showModal,
-  provinces,
-  districts,
-  wards,
-  fallbackMode,
-  form,
-  openModal,
-  onProvinceChange,
-  onDistrictChange,
-  onWardChange,
-  submitAddress,
-  setAsDefault,
-  getTypeLabel,
-} = useAddressForm(props, emit)
-</script>
-
-<template>
-  <AccountSectionCard title="Địa chỉ giao hàng">
-    <template #head>
-      <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
-    </template>
-
-    <div v-if="!addresses.length" class="empty">
-      Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
-    </div>
-
-    <div v-else class="list">
-      <article
-        v-for="address in addresses"
-        :key="address.id"
-        class="item"
-        :class="{ 'item--default': address.isDefault }"
-      >
-        <div class="item-head">
-          <div class="item-tags">
-            <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
-            <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
+  const {
+    showModal,
+    provinces,
+    districts,
+    wards,
+    fallbackMode,
+    form,
+    openModal,
+    onProvinceChange,
+    onDistrictChange,
+    onWardChange,
+    submitAddress,
+    setAsDefault,
+    deleteAddress,
+    getTypeLabel,
+  } = useAddressForm(props, emit)
+  </script>
+  
+  <template>
+    <AccountSectionCard title="Địa chỉ giao hàng">
+      <template #head>
+        <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
+      </template>
+  
+      <div v-if="!addresses.length" class="empty">
+        Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
+      </div>
+  
+      <div v-else class="list">
+        <article
+          v-for="address in addresses"
+          :key="address.id"
+          class="item"
+          :class="{ 'item--default': address.isDefault }"
+        >
+          <div class="item-head">
+            <div class="item-tags">
+              <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
+              <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
+            </div>
+  
+            <div class="item-actions">
+              <button
+                v-if="!address.isDefault"
+                type="button"
+                class="set-default-btn"
+                @click="setAsDefault(address.id)"
+              >
+                Đặt làm mặc định
+              </button>
+              <button
+                type="button"
+                class="delete-btn"
+                @click="deleteAddress(address.id)"
+                title="Xóa địa chỉ"
+              >
+                Xóa
+              </button>
+            </div>
           </div>
-
-          <button
-            v-if="!address.isDefault"
-            type="button"
-            class="set-default-btn"
-            @click="setAsDefault(address.id)"
-          >
-            Đặt làm mặc định
-          </button>
-        </div>
 
         <p class="name">{{ address.fullName }}</p>
         <p class="meta">{{ address.phone }}</p>
@@ -180,6 +191,11 @@ const {
   background: #f5efe6;
   color: #8b6a21;
 }
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .set-default-btn {
   border: 1px solid rgba(201, 146, 42, 0.35);
   border-radius: 999px;
@@ -193,6 +209,20 @@ const {
 }
 .set-default-btn:hover {
   background: #faf6f0;
+}
+.delete-btn {
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  background: #fff;
+  color: #dc3545;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.delete-btn:hover {
+  background: #fdf2f2;
 }
 .name {
   margin: 0 0 0.2rem;

@@ -29,12 +29,18 @@ export const useAddressStore = defineStore('accountAddress', () => {
     return await fetchAddresses()
   }
 
+  async function deleteAddress(addressId) {
+    await usersApi.deleteAddress(addressId)
+    return await fetchAddresses()
+  }
+
   return {
     addresses,
     defaultAddress,
     sortAddressesByDefault,
     fetchAddresses,
     addAddress,
-    setDefaultAddress
+    setDefaultAddress,
+    deleteAddress
   }
 })

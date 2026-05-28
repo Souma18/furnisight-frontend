@@ -56,6 +56,22 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/orders/payment/callback',
+    alias: ['/payment/callback'],
+    name: 'payment-callback',
+    component: () => import('@features/checkout/pages/PaymentCallbackPage.vue'),
+  },
+  {
+    path: '/payment/success',
+    name: 'payment-success',
+    component: () => import('@features/checkout/pages/PaymentCallbackPage.vue'),
+  },
+  {
+    path: '/payment/failure',
+    name: 'payment-failure',
+    component: () => import('@features/checkout/pages/PaymentCallbackPage.vue'),
+  },
+  {
     path: '/room3d',
     name: 'room3d',
     component: () => import('@features/room3d/pages/Room3DPage.vue'),

@@ -26,6 +26,10 @@ function lineThumb(line) {
   return line.imageFallback ?? line.emoji ?? '🛍️'
 }
 
+function hideBrokenImage(event) {
+  event.target.style.display = 'none'
+}
+
 function changeQty(line, delta) {
   const next = Math.max(1, Number(line.qty || 1) + delta)
   emit('update-qty', line.id, next)
@@ -55,7 +59,10 @@ const merchandiseSubtotal = () =>
       :key="line.id"
       class="co-prod-row"
     >
-      <div class="co-prod-thumb">{{ lineThumb(line) }}</div>
+      <div class="co-prod-thumb">
+        <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-prod-thumb-img" @error="hideBrokenImage">
+        <span>{{ lineThumb(line) }}</span>
+      </div>
       <div>
         <p class="co-prod-name">{{ line.name }}</p>
         <p v-if="variantTags(line).length" class="co-prod-variant">

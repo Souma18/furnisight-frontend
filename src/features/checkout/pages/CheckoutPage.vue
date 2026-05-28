@@ -138,6 +138,7 @@ function handleContinueShopping() {
           <CheckoutVoucherCard
             :shop-voucher="shopVoucher"
             :shipping-voucher="shippingVoucher"
+            :shop-discount="summary.shopDiscount"
             :shipping-discount="summary.shippingDiscount"
             :format-money="formatMoney"
             @open-voucher="openVoucherModal"

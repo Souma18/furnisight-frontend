@@ -5,6 +5,7 @@ defineProps({
   shopVoucher: { type: Object, default: null },
   shippingVoucher: { type: Object, default: null },
   formatMoney: { type: Function, required: true },
+  shopDiscount: { type: Number, default: 0 },
   shippingDiscount: { type: Number, default: 0 },
 })
 
@@ -26,6 +27,7 @@ defineEmits(['open-voucher', 'remove-voucher'])
         <span class="co-voucher-label">Voucher của Shop</span>
         <div v-if="shopVoucher" class="co-voucher-applied">
           <span class="co-voucher-code">{{ shopVoucher.code }}</span>
+          <span v-if="shopDiscount">−{{ formatMoney(shopDiscount) }} ✓</span>
           <button type="button" class="co-voucher-remove" @click="$emit('remove-voucher', 'shop')">✕</button>
         </div>
         <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'shop')">

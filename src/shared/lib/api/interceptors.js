@@ -16,10 +16,29 @@ const processQueue = (error, token = null) => {
   failedQueue = []
 }
 
+const removeAuthHeader = (headers = {}) => {
+  if (typeof headers.delete === 'function') {
+    headers.delete('Authorization')
+    headers.delete('authorization')
+    return headers
+  }
+
+  delete headers.Authorization
+  delete headers.authorization
+
+  if (headers.common) {
+    delete headers.common.Authorization
+    delete headers.common.authorization
+  }
+
+  return headers
+}
+
 export function registerApiInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
       if (config.skipAuth) {
+        config.headers = removeAuthHeader(config.headers)
         return config
       }
 

@@ -1,5 +1,5 @@
 import { apiClient } from '../../client'
-import { CartResponse } from './cart.model'
+import { CartResponse, resolveCartImageUrl } from './cart.model'
 
 const baseUrl = '/cart/carts'
 
@@ -17,7 +17,7 @@ function toAddCartPayload(payload = {}) {
     variantId: payload.variantId ?? null,
     name: payload.name ?? '',
     price: payload.price ?? 0,
-    imageUrl: payload.imageUrl ?? '',
+    imageUrl: resolveCartImageUrl(payload),
     quantity: Math.max(1, Number(payload.quantity ?? payload.qty ?? 1) || 1),
   }
 }

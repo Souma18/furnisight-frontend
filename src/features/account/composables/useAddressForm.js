@@ -113,6 +113,12 @@ export function useAddressForm(props, emit) {
     emit('notify', 'Đã cập nhật địa chỉ mặc định.')
   }
 
+  async function deleteAddress(addressId) {
+    if (!confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return
+    await addressStore.deleteAddress(addressId)
+    emit('notify', 'Đã xóa địa chỉ.')
+  }
+
   function getTypeLabel(type) {
     return ADDRESS_TYPE_LABELS[type] ?? 'Khác'
   }
@@ -133,6 +139,7 @@ export function useAddressForm(props, emit) {
     onWardChange,
     submitAddress,
     setAsDefault,
+    deleteAddress,
     getTypeLabel,
   }
 }

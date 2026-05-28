@@ -35,15 +35,19 @@ class UsersApi {
   }
 
   getAddresses() {
-    return apiClient.get('/account/addresses')
+    return apiClient.get('/users/profile/addresses')
   }
 
   saveAddress(payload) {
-    return apiClient.post('/account/addresses', payload)
+    return apiClient.post('/users/profile/addresses', payload)
   }
 
   setDefaultAddress(addressId) {
-    return apiClient.post(`/account/addresses/${addressId}/default`)
+    return apiClient.post(`/users/profile/addresses/${addressId}/default`)
+  }
+
+  deleteAddress(addressId) {
+    return apiClient.delete(`/users/profile/addresses/${addressId}`)
   }
 
   getSavedProjects() {
