@@ -12,7 +12,7 @@ export class FavoriteProductModel {
     this.detailId = product.slug || this.productId
     this.slug = product.slug || ''
     this.name = product.name || ''
-    this.category = product.categoryName || 'San pham'
+    this.category = product.categoryName || 'Sản phẩm'
     this.categoryName = this.category
     this.image = product.image || '/home/products/placeholder.jpg'
     this.placeholder = product.placeholder || ''
