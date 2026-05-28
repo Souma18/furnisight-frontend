@@ -22,23 +22,45 @@ function writeStoredProfile(profile) {
   }
 }
 
+const ROLES_STORAGE_KEY = 'auth_roles'
+
+function readStoredRoles() {
+  try {
+    const raw = localStorage.getItem(ROLES_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function writeStoredRoles(roles) {
+  if (roles && roles.length) {
+    localStorage.setItem(ROLES_STORAGE_KEY, JSON.stringify(roles))
+  } else {
+    localStorage.removeItem(ROLES_STORAGE_KEY)
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const initialAccessToken = normalizeJwtToken(localStorage.getItem('access_token'))
   const initialRefreshToken = normalizeStoredToken(localStorage.getItem('refresh_token'))
   const initialProfile = initialAccessToken ? normalizeStoredProfile(readStoredProfile()) : null
+  const initialRoles = initialAccessToken ? readStoredRoles() : []
 
   if (!initialAccessToken) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
     writeStoredProfile(null)
+    writeStoredRoles([])
   }
 
   const user = ref(initialProfile)
   const token = ref(initialAccessToken)
   const refreshToken = ref(initialRefreshToken)
+  const roles = ref(initialRoles)
 
   const isAuthenticated = computed(() => Boolean(token.value))
-  const isAdmin = computed(() => isAdminRole(user.value?.role))
+  const isAdmin = computed(() => isAdminRole(roles.value.length ? roles.value : user.value?.role))
 
   function setSession(sessionPayload = {}) {
     const session = sessionPayload instanceof AuthSessionResponse
@@ -51,6 +73,7 @@ export const useAuthStore = defineStore('auth', () => {
     token.value = normalizedAccessToken
     refreshToken.value = normalizedRefreshToken
     user.value = normalizedProfile
+    roles.value = session.roles || []
     
     if (normalizedAccessToken) {
       localStorage.setItem('access_token', normalizedAccessToken)
@@ -65,14 +88,15 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     writeStoredProfile(normalizedProfile)
+    writeStoredRoles(roles.value)
   }
 
   function logout() {
-    setSession({ accessToken: null, refreshToken: null, profile: null })
+    setSession({ accessToken: null, refreshToken: null, profile: null, roles: [] })
     document.documentElement.classList.remove('admin-route-active')
   }
 
-  return { user, token, refreshToken, isAuthenticated, isAdmin, setSession, logout }
+  return { user, token, refreshToken, roles, isAuthenticated, isAdmin, setSession, logout }
 })
 
 function normalizeJwtToken(value) {

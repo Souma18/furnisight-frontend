@@ -5,6 +5,9 @@ export function normalizeRole(role) {
   return String(role).toUpperCase().replace(/^ROLE_/, '')
 }
 
-export function isAdminRole(role) {
-  return normalizeRole(role) === 'ADMIN'
+export function isAdminRole(roleOrRoles) {
+  if (Array.isArray(roleOrRoles)) {
+    return roleOrRoles.some(role => normalizeRole(role) === 'ADMIN')
+  }
+  return normalizeRole(roleOrRoles) === 'ADMIN'
 }

@@ -31,6 +31,7 @@ export class AuthSessionResponse {
     this.accessToken = payload.accessToken ?? payload.access_token ?? ''
     this.refreshToken = payload.refreshToken ?? payload.refresh_token ?? ''
     this.expiresIn = payload.expiresIn ?? payload.expires_in ?? 0
+    this.roles = payload.roles ?? []
     this.profile = profile && typeof profile === 'object' ? new AuthProfileResponse(profile) : null
   }
 }
