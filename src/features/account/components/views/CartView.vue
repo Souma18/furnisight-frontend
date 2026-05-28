@@ -5,7 +5,7 @@ import AccountSectionCard from '../AccountSectionCard.vue'
 import CartItemCard from '@features/cart/components/CartItemCard.vue'
 import CartSummaryBar from '@features/cart/components/CartSummaryBar.vue'
 import { useCart } from '@features/cart/composables/useCart'
-import { fetchProductById } from '@features/product/api/productApi'
+import { productsApi, ProductResponse } from '@shared/lib/api/services'
 
 const router = useRouter()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
@@ -114,8 +114,8 @@ async function buildEditorItem(item) {
   if (!lookupId) return item
 
   try {
-    const response = await fetchProductById(lookupId)
-    const product = response?.data
+    const response = await productsApi.getProductDetail(lookupId)
+    const product = new ProductResponse(response?.data)
     const fetchedVariants = normalizeEditorVariants(product?.variants ?? [])
 
     if (!fetchedVariants.length) {

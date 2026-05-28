@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useAuth } from '@features/auth/composables/useAuth'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { ADMIN_NAV_SECTIONS, ADMIN_PAGE_TITLES } from '../config/adminNav'
-import { ADMIN_NAV_BADGES, ADMIN_SIM_USERS } from '../mock/adminSeedMock'
+import { ADMIN_NAV_BADGES, ADMIN_SIM_USERS } from '../config/adminLayoutContent'
 
 const ROLE_PRESETS = {
   ADMIN: { role: 'Super Administrator', roleTag: 'Super Admin', rtClass: 'rt-super', roleIcon: 'crown' },

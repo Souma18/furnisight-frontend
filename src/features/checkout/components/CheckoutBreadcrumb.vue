@@ -1,5 +1,5 @@
 <script setup>
-import { CHECKOUT_BREADCRUMB } from '../mock/checkoutPageMockData'
+import { CHECKOUT_BREADCRUMB } from '../composables/checkoutContent'
 </script>
 
 <template>

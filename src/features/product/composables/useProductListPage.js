@@ -1,14 +1,14 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useAccountStore } from '@features/account/store/accountStore'
+import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { productsApi, CategoryResponse } from '@shared/lib/api/services'
 import { useProducts } from './useProducts'
-import { fetchRootCategories, fetchSubcategories, fetchCategories } from '../api/productApi'
 
 export function useProductListPage() {
   const route = useRoute()
   const router = useRouter()
-  const accountStore = useAccountStore()
+  const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
   const { items, total, facets, loading, loadList } = useProducts()
   const searchKeyword = ref('')
@@ -17,7 +17,7 @@ export function useProductListPage() {
   const sortBy = ref('popular')
   const viewMode = ref('grid')
   const saleOnly = ref(false)
-  const wishedProductIds = computed(() => accountStore.wishlistProductIds)
+  const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
 
   function defaultAppliedFilters() {
     return {
@@ -70,8 +70,11 @@ export function useProductListPage() {
 
   async function loadQuickFilters() {
     try {
-      const { data } = await fetchRootCategories()
-      const chips = data.map(c => ({ label: c.name, slug: c.slug ?? c.id }))
+      const { data } = await productsApi.getRootCategories()
+      const chips = data.map((item) => {
+        const category = new CategoryResponse(item)
+        return { label: category.name, slug: category.slug ?? category.id }
+      })
       chips.push({ label: 'Sale -30%', slug: 'sale' })
       dynamicQuickFilters.value = chips
     } catch (e) {
@@ -84,19 +87,21 @@ export function useProductListPage() {
     try {
       let data
       if (!rootSlug || rootSlug === 'all') {
-        // Load all subcategories (leaf categories) for "all" view
-        const res = await fetchCategories()
+        const res = await productsApi.getCategories()
         data = res.data.filter(c => c.parentId)
       } else {
-        const res = await fetchSubcategories(rootSlug)
+        const res = await productsApi.getSubcategories(rootSlug)
         data = res.data
       }
-      sidebarCategories.value = data.map(c => ({
-        id: c.slug ?? c.id,
-        slug: c.slug ?? c.id,
-        label: c.name,
-        count: c.productCount || 0,
-      }))
+      sidebarCategories.value = data.map((item) => {
+        const category = new CategoryResponse(item)
+        return {
+          id: category.slug ?? category.id,
+          slug: category.slug ?? category.id,
+          label: category.name,
+          count: category.productCount || 0,
+        }
+      })
     } catch (e) {
       console.error('Failed to load subcategories', e)
       sidebarCategories.value = []
@@ -182,10 +187,10 @@ export function useProductListPage() {
     }
 
     try {
-      if (accountStore.hasFavoriteProduct(productId)) {
-        await accountStore.removeFavorite(productId)
+      if (wishlistStore.hasFavoriteProduct(productId)) {
+        await wishlistStore.removeFavorite(productId)
       } else {
-        await accountStore.addFavorite(productId)
+        await wishlistStore.addFavorite(productId)
       }
     } catch (e) {
       console.error('Failed to toggle favorite list product:', e)
@@ -252,7 +257,7 @@ export function useProductListPage() {
     requestList()
 
     if (authStore.isAuthenticated) {
-      accountStore.loadWishlist().catch(() => [])
+      wishlistStore.loadWishlist().catch(() => [])
     }
   })
 

@@ -21,8 +21,6 @@ const {
   activeView,
   profile,
   addresses,
-  orders,
-  cartItems,
   wishlist,
   settings,
   projects,
@@ -30,11 +28,6 @@ const {
   toast,
   setView,
   showToast,
-  saveProfile,
-  saveAddress,
-  setDefaultAddress,
-  uploadAvatar,
-  removeAvatar,
 } = useAccountPage()
 
 const notificationCategory = computed(() => {
@@ -69,16 +62,11 @@ async function handleLogout() {
       <ProfileView
         v-if="activeView === 'profile'"
         :profile="profile"
-        @save="saveProfile"
-        @upload-avatar="uploadAvatar"
-        @remove-avatar="removeAvatar"
         @notify="showToast"
       />
       <AddressView
         v-else-if="activeView === 'address'"
         :addresses="addresses"
-        @save-address="saveAddress"
-        @set-default-address="setDefaultAddress"
         @notify="showToast"
       />
       <NotificationsView
@@ -86,14 +74,14 @@ async function handleLogout() {
         :notification-category="notificationCategory"
         @notify="showToast"
       />
-      <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
-      <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
+      <OrdersView v-else-if="activeView === 'orders'" />
+      <OrderDetailView v-else-if="activeView === 'order-detail'" />
+      <CartView v-else-if="activeView === 'cart'" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView
         v-else-if="activeView === 'security'"
         :profile="profile"
         @notify="showToast"
-        @save-contact="saveProfile"
       />
       <SettingsView v-else-if="activeView === 'settings'" :settings="settings" />
       <Projects3DView v-else :projects="projects" />

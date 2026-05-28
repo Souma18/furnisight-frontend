@@ -1,13 +1,8 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminUiStore } from '../store/adminUiStore'
 import { useAdminLayout } from './useAdminLayout'
-import { PRODUCTS_DATA, TEMPLATE_CATEGORIES } from '../mock/adminConversationMock'
-import {
-  fetchMessageTemplatesMock,
-  createMessageTemplateMock,
-  updateMessageTemplateMock,
-  deleteMessageTemplateMock,
-} from '../api/adminMockApi'
+import { PRODUCTS_DATA, TEMPLATE_CATEGORIES } from '../config/adminConversationContent'
 import {
   getAdminInbox,
   getMessages,
@@ -222,8 +217,8 @@ export function useConversationManager() {
   async function loadTemplates() {
     templatesLoading.value = true
     try {
-      const res = await fetchMessageTemplatesMock()
-      templates.value = res.data.items || []
+      const res = await adminApi.fetchMessageTemplates()
+      templates.value = res.data?.items ?? res.data?.content ?? res.data ?? []
     } finally {
       templatesLoading.value = false
     }
@@ -347,11 +342,11 @@ export function useConversationManager() {
   async function saveTemplate(tpl) {
     try {
       if (tpl.id) {
-        const res = await updateMessageTemplateMock(tpl.id, tpl)
+        const res = await adminApi.updateMessageTemplate(tpl.id, tpl)
         const idx = templates.value.findIndex((t) => t.id === res.data.id)
         if (idx !== -1) templates.value[idx] = res.data
       } else {
-        const res = await createMessageTemplateMock(tpl)
+        const res = await adminApi.createMessageTemplate(tpl)
         templates.value = [res.data, ...templates.value]
       }
       uiStore.showToast({ icon: 'check', title: 'Template đã lưu', subtitle: 'Sẵn sàng sử dụng trong các hội thoại.' })
@@ -368,7 +363,7 @@ export function useConversationManager() {
 
   async function deleteTemplate(id) {
     try {
-      await deleteMessageTemplateMock(id)
+      await adminApi.deleteMessageTemplate(id)
       templates.value = templates.value.filter((t) => t.id !== id)
       uiStore.showToast({ icon: 'trash', title: 'Đã xóa template', subtitle: '' })
     } catch (error) {

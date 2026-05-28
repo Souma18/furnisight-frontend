@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { pinia } from '../../../app/plugins/pinia'
 
 
 let isRefreshing = false
@@ -73,7 +74,7 @@ export function registerApiInterceptors() {
         try {
           // Import useAuth để tránh lỗi circular dependency với Pinia
           const { useAuth } = await import('../../../features/auth/composables/useAuth')
-          const { renewToken } = useAuth()
+          const { renewToken } = useAuth(pinia)
           // Tạo token mới
           const data = await renewToken()
           const accessToken = data.accessToken
@@ -87,7 +88,7 @@ export function registerApiInterceptors() {
           processQueue(refreshError, null)
           // Thoát phiên đăng nhập nếu refresh hết hạn
           import('../../../features/auth/composables/useAuth').then(({ useAuth }) => {
-            const { logout } = useAuth()
+            const { logout } = useAuth(pinia)
             logout()
           }).catch(e => console.error("Could not load authStore", e))
           

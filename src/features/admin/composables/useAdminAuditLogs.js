@@ -1,5 +1,5 @@
 import { computed, ref, watch } from 'vue'
-import { fetchAuditLogsMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 
 const PAGE_SIZE = 20
 
@@ -16,11 +16,11 @@ export function useAdminAuditLogs() {
   async function load() {
     loading.value = true
     try {
-      // TODO(BE): adminApi.fetchAuditLogs({ search, type, result, period, page })
-      const res = await fetchAuditLogsMock({
+      const res = await adminApi.fetchAuditLogs({
         search: search.value,
         type: type.value,
         result: result.value,
+        period: period.value,
         page: page.value,
         pageSize: PAGE_SIZE,
       })

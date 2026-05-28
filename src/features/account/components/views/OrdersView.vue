@@ -1,30 +1,31 @@
 <script setup>
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { ORDER_STATUS_LABELS } from '../../mock/ordersMockData'
+import { useAccountOrders } from '../../composables/useAccountOrders'
+import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
 
-const props = defineProps({
-  orders: {
-    type: Array,
-    default: () => [],
-  },
-})
+const emit = defineEmits(['notify'])
 
-const emit = defineEmits(['view-detail', 'cancel-order'])
+const {
+  filter,
+  filteredOrders,
+  openOrderDetail,
+  cancelOrder,
+} = useAccountOrders((msg, type) => emit('notify', msg, type))
 
 function handleCancel(order, event) {
   event?.stopPropagation?.()
   if (!confirm(`Huỷ đơn ${displayCode(order)}?`)) return
-  emit('cancel-order', order.id)
+  cancelOrder(order.id)
 }
 
-const filter = ref('all')
-
-const filteredOrders = computed(() =>
-  filter.value === 'all' ? props.orders : props.orders.filter((order) => order.status === filter.value),
-)
-
 const filterOptions = ['all', 'pending', 'delivering', 'done', 'cancel']
+
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? dateStr : new Intl.DateTimeFormat('vi-VN').format(date)
+}
 
 function formatMoney(value) {
   return `${Number(value || 0).toLocaleString('vi-VN')}đ`
@@ -66,21 +67,22 @@ function displayCode(order) {
         <div class="order-card-head">
           <div>
             <p class="order-code">{{ displayCode(order) }}</p>
-            <p class="order-meta">{{ order.date }} · {{ order.items }} sản phẩm</p>
+            <p class="order-meta">{{ formatDate(order.createdAt) }}</p>
           </div>
           <div class="order-card-right">
             <span class="status-badge" :class="statusClass(order.status)">
               <AppIcon v-if="order.status === 'delivering'" name="truck" :size="14" />
               {{ ORDER_STATUS_LABELS[order.status] ?? order.status }}
             </span>
-            <strong class="order-total">{{ formatMoney(order.total) }}</strong>
+            <strong class="order-total">{{ formatMoney(order.totalAmount) }}</strong>
           </div>
         </div>
 
         <div class="order-card-foot">
           <div class="order-thumbs">
-            <span v-for="(thumb, index) in order.thumbs ?? []" :key="`${order.id}-${index}`" class="order-thumb">
-              {{ thumb }}
+            <img v-if="order.firstProductImage" :src="order.firstProductImage" class="order-thumb-img" alt="product" />
+            <span v-else class="order-thumb">
+              <AppIcon name="image" :size="16" />
             </span>
           </div>
           <div class="order-card-actions">
@@ -92,7 +94,7 @@ function displayCode(order) {
             >
               Huỷ đơn
             </button>
-            <button type="button" class="order-detail-btn" @click="emit('view-detail', order.id)">
+            <button type="button" class="order-detail-btn" @click="openOrderDetail(order.id)">
               <AppIcon name="eye" :size="15" />
               Xem chi tiết
             </button>
@@ -229,7 +231,7 @@ function displayCode(order) {
   gap: 0.45rem;
 }
 
-.order-thumb {
+.order-thumb, .order-thumb-img, .order-thumb-more {
   width: 2.75rem;
   height: 2.75rem;
   border-radius: 8px;
@@ -237,6 +239,12 @@ function displayCode(order) {
   display: grid;
   place-items: center;
   font-size: 1.25rem;
+  object-fit: cover;
+}
+.order-thumb-more {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--auth-brand-start, #c9922a);
 }
 
 .order-card-actions {
@@ -285,4 +293,3 @@ function displayCode(order) {
   font-size: 0.84rem;
 }
 </style>
-

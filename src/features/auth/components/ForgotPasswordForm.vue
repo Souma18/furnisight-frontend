@@ -1,24 +1,11 @@
 <script setup>
-defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: '',
-  },
-})
+import { useForgotPasswordForm } from '../composables/useForgotPasswordForm'
 
-defineEmits(['submit', 'back', 'send-code'])
+const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = useForgotPasswordForm()
 </script>
 
 <template>
-  <form class="form" @submit.prevent="$emit('submit')">
+  <form class="form" @submit.prevent="submitForgot">
     <div class="intro">
       <p class="title">Đặt lại mật khẩu</p>
       <p class="desc" v-if="form.step === 1">Chọn phương thức và nhận mã xác nhận.</p>
@@ -39,7 +26,7 @@ defineEmits(['submit', 'back', 'send-code'])
           :placeholder="form.method === 'EMAIL' ? 'hello@email.com' : '0901 234 567'" 
           required 
         />
-        <button type="button" class="send-btn" @click="$emit('send-code')" :disabled="loading || !form.destination">
+        <button type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
           {{ (loading && !form.code) ? 'Đang gửi...' : 'Gửi mã' }}
         </button>
       </div>
@@ -53,12 +40,12 @@ defineEmits(['submit', 'back', 'send-code'])
       <input v-model="form.newPassword" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
     </template>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     
     <button class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
       {{ loading ? 'Đang xử lý...' : (form.step === 1 ? 'Xác nhận mã' : 'Đổi mật khẩu') }}
     </button>
-    <button class="outline-btn" type="button" @click="$emit('back')">
+    <button class="outline-btn" type="button" @click="goBackToLogin">
       ← Quay lại {{ form.step === 1 ? 'đăng nhập' : '' }}
     </button>
   </form>

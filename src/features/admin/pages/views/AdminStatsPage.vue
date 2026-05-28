@@ -4,14 +4,14 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
 import AdminKpiGrid from '../../components/shared/AdminKpiGrid.vue'
-import { fetchStatsMock } from '../../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminChartPage } from '../../composables/useAdminChartPage'
 import { useAdminUiStore } from '../../store/adminUiStore'
 
 const ui = useAdminUiStore()
 const userCanvas = ref(null)
 const catCanvas = ref(null)
-const { data, bindCharts } = useAdminChartPage(fetchStatsMock)
+const { data, bindCharts } = useAdminChartPage(adminApi.fetchStats.bind(adminApi))
 
 bindCharts((charts, d) => {
   charts.renderBar(userCanvas.value, d.userLabels, d.userData)

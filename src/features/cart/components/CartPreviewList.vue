@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { formatVnd } from '@features/product/mock/productListMockData'
+import { formatVnd } from '@shared/lib/api/services/products/products.model'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({

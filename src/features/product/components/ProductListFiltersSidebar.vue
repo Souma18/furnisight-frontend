@@ -1,7 +1,7 @@
 <script setup>
 import {
   PRODUCT_PRICE_BAND_OPTIONS,
-} from '../mock/productListMockData'
+} from '../composables/productFilterOptions'
 import { useProductFiltersSidebar } from '../composables/useProductFiltersSidebar'
 
 const props = defineProps({

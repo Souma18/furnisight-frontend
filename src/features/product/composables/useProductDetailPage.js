@@ -1,17 +1,17 @@
 import { ref, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { fetchProductById } from '../api/productApi'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
-import { useAccountStore } from '@features/account/store/accountStore'
-
+import { useWishlistStore } from '@features/account/store/wishlistStore'
+import { useProducts } from './useProducts'
 
 export function useProductDetailPage(props) {
   const router = useRouter()
   const route = useRoute()
   const cartStore = useCartStore()
   const authStore = useAuthStore()
-  const accountStore = useAccountStore()
+  const wishlistStore = useWishlistStore()
+  const { loadDetail } = useProducts()
   const product = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -28,10 +28,8 @@ export function useProductDetailPage(props) {
     error.value = null
     product.value = null
     try {
-      const res = await fetchProductById(id)
-      if (!res.data) throw new Error('not_found')
-
-      product.value = res.data
+      product.value = await loadDetail(id)
+      if (!product.value) throw new Error('not_found')
 
       selectedColor.value = product.value.colors?.[0] ?? ''
       selectedSize.value = product.value.sizes?.[0] ?? ''
@@ -42,8 +40,8 @@ export function useProductDetailPage(props) {
       show3DModal.value = false
 
       if (authStore.isAuthenticated) {
-        await accountStore.loadWishlist().catch(() => [])
-        wished.value = accountStore.hasFavoriteProduct(product.value.id)
+        await wishlistStore.loadWishlist().catch(() => [])
+        wished.value = wishlistStore.hasFavoriteProduct(product.value.id)
       }
     } catch (e) {
       if (e.message === 'not_found' || e.response?.status === 404) {
@@ -132,11 +130,11 @@ export function useProductDetailPage(props) {
     }
 
     try {
-      if (accountStore.hasFavoriteProduct(product.value.id)) {
-        await accountStore.removeFavorite(product.value.id)
+      if (wishlistStore.hasFavoriteProduct(product.value.id)) {
+        await wishlistStore.removeFavorite(product.value.id)
         wished.value = false
       } else {
-        await accountStore.addFavorite(product.value.id)
+        await wishlistStore.addFavorite(product.value.id)
         wished.value = true
       }
     } catch (e) {

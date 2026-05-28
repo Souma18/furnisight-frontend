@@ -1,11 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  createVnpayPaymentMock,
-  fetchCheckoutSessionMock,
-  placeCheckoutOrderMock,
-  validateCheckoutVoucherMock,
-} from '../api/checkoutMockApi'
+import { ordersApi } from '@shared/lib/api/services'
 import { buildCheckoutSummary } from '../utils/checkoutPricing'
 
 export const useCheckoutStore = defineStore('checkout', () => {
@@ -45,8 +40,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     loading.value = true
 
     try {
-      // TODO(BE): replace with checkoutApi.getCheckoutSession()
-      const response = await fetchCheckoutSessionMock()
+      const response = await ordersApi.getCheckoutSession()
       const data = response?.data ?? {}
 
       shippingOptions.value = data.shippingOptions ?? []
@@ -82,8 +76,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function applyVoucherByCode(code, type, subtotal) {
-    // TODO(BE): replace with checkoutApi.validateCheckoutVoucher()
-    const response = await validateCheckoutVoucherMock({ code, type, subtotal })
+    const response = await ordersApi.validateCheckoutVoucher({ code, type, subtotal })
     const data = response?.data ?? {}
 
     if (!data.valid) {
@@ -113,8 +106,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   async function placeOrder(payload) {
     placing.value = true
     try {
-      // TODO(BE): replace with checkoutApi.placeCheckoutOrder(payload)
-      const response = await placeCheckoutOrderMock(payload)
+      const response = await ordersApi.createOrder(payload)
       lastOrder.value = response?.data ?? null
       return lastOrder.value
     } finally {
@@ -122,17 +114,17 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
-  async function createVnpayPayment(payload) {
+  async function createVnpayPaymentAction(payload) {
     try {
-      // TODO(BE): replace with checkoutApi.createVnpayPayment(payload)
-      const response = await createVnpayPaymentMock(payload)
+      const response = await ordersApi.createVnpayPayment(payload)
       const ok = response?.status === 200
+      const data = response?.data
       return {
         ok,
         status: response?.status ?? 500,
-        paymentUrl: response?.data?.paymentUrl ?? '',
-        transactionRef: response?.data?.transactionRef ?? '',
-        message: response?.data?.message ?? '',
+        paymentUrl: typeof data === 'string' ? data : data?.paymentUrl ?? '',
+        transactionRef: data?.transactionRef ?? '',
+        message: data?.message ?? '',
       }
     } catch (error) {
       return {
@@ -180,7 +172,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     applyVoucher,
     removeVoucher,
     placeOrder,
-    createVnpayPayment,
+    createVnpayPayment: createVnpayPaymentAction,
     resetCheckoutState,
   }
 })

@@ -10,6 +10,9 @@ export default defineConfig({
     host: true,
     allowedHosts: ["furnisight.store"]
   },
+  define: {
+    global: 'window',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

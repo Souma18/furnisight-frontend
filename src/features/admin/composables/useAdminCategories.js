@@ -1,6 +1,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { fetchCategoriesMock, fetchCategoryIconOptionsMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminUiStore } from '../store/adminUiStore'
 
 export function useAdminCategories() {
@@ -28,9 +28,12 @@ export function useAdminCategories() {
   })
 
   async function load() {
-    const [catRes, iconRes] = await Promise.all([fetchCategoriesMock(), fetchCategoryIconOptionsMock()])
-    items.value = catRes.data?.items ?? []
-    iconOptions.value = iconRes.data?.items ?? []
+    const [catRes, iconRes] = await Promise.all([
+      adminApi.fetchCategories(),
+      adminApi.fetchCategoryIconOptions(),
+    ])
+    items.value = catRes.data?.items ?? catRes.data?.content ?? catRes.data ?? []
+    iconOptions.value = iconRes.data?.items ?? iconRes.data ?? []
   }
 
   function openAdd() {

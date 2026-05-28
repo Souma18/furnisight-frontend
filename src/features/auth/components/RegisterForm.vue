@@ -1,28 +1,11 @@
 <script setup>
-defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: '',
-  },
-  passwordStrength: {
-    type: Number,
-    default: 0,
-  },
-})
+import { useRegisterForm } from '../composables/useRegisterForm'
 
-defineEmits(['submit'])
+const { form, loading, errorMessage, passwordStrength, submitRegister } = useRegisterForm()
 </script>
 
 <template>
-  <form class="form" @submit.prevent="$emit('submit')">
+  <form class="form" @submit.prevent="submitRegister">
     <div class="two-cols">
       <div>
         <label>Họ</label>
@@ -44,11 +27,11 @@ defineEmits(['submit'])
     </div>
 
     <label class="checkbox">
-      <input v-model="form.agree" type="checkbox" />
+      <input v-model="form.agree" type="checkbox" required />
       <span>Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</span>
     </label>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <button class="submit-btn" type="submit" :disabled="loading">
       {{ loading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
     </button>

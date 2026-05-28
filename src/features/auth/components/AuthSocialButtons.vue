@@ -1,10 +1,15 @@
 <script setup>
-import { loginGoogleRequest } from '../api/authApi'
+import { authApi } from '@shared/lib/api/services'
+
+const beURL = import.meta.env.VITE_API_BASE_URL ?? ''
 
 const loginGoogle = async () => {
   try {
-    const response = await loginGoogleRequest()
-    console.log(response)
+    const response = await authApi.loginGoogle()
+    const redirectUrl = response.data?.data?.redirectUrl || response.data?.redirectUrl
+    if (redirectUrl) {
+      window.location.href = `${beURL}/users${redirectUrl}`
+    }
   } catch (error) {
     console.log(error)
   }

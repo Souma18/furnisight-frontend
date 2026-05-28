@@ -10,7 +10,7 @@ export function useAdminListPage(fetcher) {
 
   async function load() {
     const res = await fetcher()
-    items.value = res.data?.items ?? res.data ?? []
+    items.value = res.data?.items ?? res.data?.content ?? res.data ?? []
   }
 
   onMounted(load)

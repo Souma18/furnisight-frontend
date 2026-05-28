@@ -102,7 +102,7 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  if (requiresAdmin && !authStore.isAdmin) {
+  if (to.meta.requiresAdmin && !authStore.isAdmin) {
     next({ name: 'home' })
     return
   }

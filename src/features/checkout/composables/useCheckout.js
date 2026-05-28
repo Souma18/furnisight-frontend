@@ -1,7 +1,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useAccountStore } from '@features/account/store/accountStore'
+import { useAddressStore } from '@features/account/store/addressStore'
+import { useOrderStore } from '@features/account/store/orderStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
@@ -10,7 +11,8 @@ export function useCheckout() {
   const route = useRoute()
   const router = useRouter()
   const cartStore = useCartStore()
-  const accountStore = useAccountStore()
+  const addressStore = useAddressStore()
+  const orderStore = useOrderStore()
   const checkoutStore = useCheckoutStore()
 
   const checkoutState = storeToRefs(checkoutStore)
@@ -29,7 +31,7 @@ export function useCheckout() {
     return available.filter((item) => lineIdsFromQuery.value.includes(item.id))
   })
 
-  const defaultAddress = computed(() => accountStore.defaultAddress)
+  const defaultAddress = computed(() => addressStore.defaultAddress)
   const summary = computed(() => checkoutStore.buildSummary(checkoutLines.value))
 
   const isEmpty = computed(() => checkoutLines.value.length === 0)
@@ -50,7 +52,7 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
-    await Promise.all([cartStore.ensureHydrated(), accountStore.hydrate(), checkoutStore.hydrateSession()])
+    await Promise.all([cartStore.ensureHydrated(), addressStore.fetchAddresses(), checkoutStore.hydrateSession()])
   }
 
   function goBackToCart() {
@@ -95,19 +97,32 @@ export function useCheckout() {
 
     const linesSnapshot = [...checkoutLines.value]
 
-    const order = await checkoutStore.placeOrder({
-      addressId: defaultAddress.value.id,
-      lineIds: linesSnapshot.map((item) => item.id),
-      shippingId: checkoutState.selectedShippingId.value,
-      paymentId: checkoutState.selectedPaymentId.value,
-      shopVoucherCode: checkoutState.shopVoucher.value?.code ?? null,
-      shippingVoucherCode: checkoutState.shippingVoucher.value?.code ?? null,
-      hasInsurance: checkoutState.hasInsurance.value,
-      sellerNote: checkoutState.sellerNote.value,
-      summary: summary.value,
-      lines: linesSnapshot,
-      address: defaultAddress.value,
-    })
+    const orderPayload = {
+      shippingAddressName: defaultAddress.value.name,
+      shippingAddressPhone: defaultAddress.value.phone,
+      shippingAddressDetail: `${defaultAddress.value.street}, ${defaultAddress.value.ward}, ${defaultAddress.value.district}, ${defaultAddress.value.city}`,
+      shippingMethod: checkoutState.selectedShipping.value?.name || checkoutState.selectedShippingId.value,
+      customerNote: checkoutState.sellerNote.value,
+      paymentMethod: checkoutState.selectedPaymentId.value,
+      shopVoucherCode: checkoutState.shopVoucher.value?.code || null,
+      shippingVoucherCode: checkoutState.shippingVoucher.value?.code || null,
+      discountAmount: summary.value.shopDiscount,
+      shippingDiscount: summary.value.shippingDiscount,
+      shippingFee: summary.value.shipFee,
+      insuranceFee: summary.value.insuranceAmount,
+      items: linesSnapshot.map(item => ({
+        productId: item.productId || item.id,
+        variantId: item.variantId || null,
+        categoryName: item.categoryName || '',
+        productName: item.productName || item.name,
+        price: item.price,
+        oldPrice: item.originalPrice || item.price,
+        quantity: item.qty,
+        imageUrl: item.imageUrl || item.image || ''
+      }))
+    }
+
+    const order = await checkoutStore.placeOrder(orderPayload)
 
     if (!order) return null
 
@@ -129,12 +144,11 @@ export function useCheckout() {
         return null
       }
 
-      // TODO(BE): Bật redirect thật khi API VNPAY sẵn sàng.
-      // Khi backend trả 200 + paymentUrl hợp lệ, bỏ comment dòng dưới để điều hướng:
-      // window.location.href = paymentRes.paymentUrl
+      // Redirect to VNPAY
+      window.location.href = paymentRes.paymentUrl
     }
 
-    accountStore.addOrderFromCheckout({
+    orderStore.addOrderFromCheckout({
       order,
       lines: linesSnapshot,
       summary: summary.value,

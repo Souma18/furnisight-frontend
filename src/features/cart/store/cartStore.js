@@ -1,13 +1,7 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
-import {
-  addCartItem,
-  clearCart as clearCartRequest,
-  getCart,
-  removeCartItem,
-  updateCartItem,
-} from '../api/cartApi'
+import { cartApi } from '@shared/lib/api/services'
 
 const STORAGE_KEY = 'luxnest-cart-store-v4'
 const LEGACY_STORAGE_KEYS = [
@@ -123,7 +117,7 @@ export const useCartStore = defineStore('cart', () => {
       loading.value = true
 
       try {
-        const response = await getCart()
+        const response = await cartApi.getCart()
         items.value = cloneItems(response?.data?.items ?? [])
         hydrated.value = true
         return items.value
@@ -159,7 +153,7 @@ export const useCartStore = defineStore('cart', () => {
         ...(productOrLine ?? {}),
         ...(options ?? {}),
       }
-      const response = await addCartItem(payload)
+      const response = await cartApi.addToCart(payload)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value
@@ -172,7 +166,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await updateCartItem(lineId, patch)
+      const response = await cartApi.updateCartItem(lineId, patch)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return response?.data?.item ?? null
@@ -189,7 +183,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await removeCartItem(lineId)
+      const response = await cartApi.removeCartItem(lineId)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value
@@ -202,7 +196,7 @@ export const useCartStore = defineStore('cart', () => {
     loading.value = true
 
     try {
-      const response = await clearCartRequest()
+      const response = await cartApi.clearCart()
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
       return items.value

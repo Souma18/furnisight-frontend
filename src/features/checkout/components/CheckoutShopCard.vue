@@ -1,6 +1,6 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { CHECKOUT_SHOP } from '../mock/checkoutPageMockData'
+import { CHECKOUT_SHOP } from '../composables/checkoutContent'
 import { calcLineTotal } from '../utils/checkoutPricing'
 
 const props = defineProps({

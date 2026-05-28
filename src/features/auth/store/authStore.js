@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { isAdminRole } from '../utils/normalizeAuthSession'
+import { AuthProfileResponse, AuthSessionResponse } from '@shared/lib/api/services/auth/auth.model'
 
 const PROFILE_STORAGE_KEY = 'auth_profile'
 
@@ -24,26 +25,32 @@ function writeStoredProfile(profile) {
 export const useAuthStore = defineStore('auth', () => {
   const initialAccessToken = normalizeJwtToken(localStorage.getItem('access_token'))
   const initialRefreshToken = normalizeStoredToken(localStorage.getItem('refresh_token'))
+  const initialProfile = initialAccessToken ? normalizeStoredProfile(readStoredProfile()) : null
 
   if (!initialAccessToken) {
     localStorage.removeItem('access_token')
     localStorage.removeItem('refresh_token')
+    writeStoredProfile(null)
   }
 
-  const user = ref(null)
+  const user = ref(initialProfile)
   const token = ref(initialAccessToken)
   const refreshToken = ref(initialRefreshToken)
 
   const isAuthenticated = computed(() => Boolean(token.value))
   const isAdmin = computed(() => isAdminRole(user.value?.role))
 
-  function setSession({ accessToken, refreshToken: newRefreshToken, profile }) {
-    const normalizedAccessToken = normalizeJwtToken(accessToken)
-    const normalizedRefreshToken = normalizeStoredToken(newRefreshToken)
+  function setSession(sessionPayload = {}) {
+    const session = sessionPayload instanceof AuthSessionResponse
+      ? sessionPayload
+      : new AuthSessionResponse(sessionPayload)
+    const normalizedAccessToken = normalizeJwtToken(session.accessToken)
+    const normalizedRefreshToken = normalizeStoredToken(session.refreshToken)
+    const normalizedProfile = normalizeStoredProfile(session.profile)
 
     token.value = normalizedAccessToken
     refreshToken.value = normalizedRefreshToken
-    user.value = profile ?? null
+    user.value = normalizedProfile
     
     if (normalizedAccessToken) {
       localStorage.setItem('access_token', normalizedAccessToken)
@@ -56,6 +63,8 @@ export const useAuthStore = defineStore('auth', () => {
     } else {
       localStorage.removeItem('refresh_token')
     }
+
+    writeStoredProfile(normalizedProfile)
   }
 
   function logout() {
@@ -85,4 +94,9 @@ function normalizeStoredToken(value) {
 
   const token = value.trim()
   return token || null
+}
+
+function normalizeStoredProfile(value) {
+  if (!value || typeof value !== 'object') return null
+  return new AuthProfileResponse(value)
 }

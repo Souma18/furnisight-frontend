@@ -1,31 +1,29 @@
 <script setup>
+import { useLoginForm } from '../composables/useLoginForm'
 import AuthSocialButtons from './AuthSocialButtons.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: '',
-  },
-  showPassword: {
+const props = defineProps({
+  embedded: {
     type: Boolean,
     default: false,
   },
 })
 
-defineEmits(['submit', 'forgot', 'toggle-password'])
+const emit = defineEmits(['authenticated', 'close'])
+const {
+  form,
+  loading,
+  errorMessage,
+  showPassword,
+  openForgotPassword,
+  submitLogin,
+  togglePassword,
+} = useLoginForm({ embedded: props.embedded, emit })
 </script>
 
 <template>
-  <form class="form" @submit.prevent="$emit('submit')">
+  <form class="form" @submit.prevent="submitLogin">
     <label>Email</label>
     <input v-model="form.email" type="email" placeholder="hello@email.com" required />
 
@@ -42,17 +40,17 @@ defineEmits(['submit', 'forgot', 'toggle-password'])
         type="button"
         class="ghost-btn"
         :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-        @click="$emit('toggle-password')"
+        @click="togglePassword"
       >
         <AppIcon :name="showPassword ? 'eyeOff' : 'eye'" :size="16" />
       </button>
     </div>
 
     <div class="right-link">
-      <button type="button" class="text-btn" @click="$emit('forgot')">Quên mật khẩu?</button>
+      <button type="button" class="text-btn" @click="openForgotPassword">Quên mật khẩu?</button>
     </div>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <button class="submit-btn" type="submit" :disabled="loading">
       {{ loading ? 'Đang xử lý...' : 'Đăng nhập' }}
     </button>
