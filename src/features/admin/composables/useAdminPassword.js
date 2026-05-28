@@ -1,5 +1,5 @@
 import { reactive, ref } from 'vue'
-import { changeAdminPasswordMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminUiStore } from '../store/adminUiStore'
 
 export function useAdminPassword() {
@@ -14,8 +14,7 @@ export function useAdminPassword() {
   async function submit() {
     saving.value = true
     try {
-      // TODO(BE): adminApi.changeAdminPassword(form)
-      await changeAdminPasswordMock({ ...form })
+      await adminApi.changeAdminPassword({ ...form })
       ui.showToast({ title: 'Đã cập nhật mật khẩu', subtitle: 'Mật khẩu mới đã được lưu.' })
       form.currentPassword = ''
       form.newPassword = ''

@@ -1,9 +1,5 @@
 import { computed, onMounted, ref, unref } from 'vue'
-import {
-  getNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-} from '../api/accountApi'
+import { notificationsApi } from '@shared/lib/api/services'
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Tất cả' },
@@ -141,7 +137,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
     loading.value = true
 
     try {
-      const response = await getNotifications()
+      const response = await notificationsApi.getInboxMessages()
       const data = response.data?.items ?? response.data ?? []
       notifications.value = data.map(mapInboxMessageToFrontend)
     } catch (error) {
@@ -170,7 +166,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
 
   async function markAsRead(notificationId, notify = true) {
     try {
-      await markNotificationRead(notificationId)
+      await notificationsApi.markAsRead(notificationId)
       notifications.value = notifications.value.map((item) =>
         item.id === notificationId ? { ...item, isRead: true } : item,
       )
@@ -184,7 +180,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
     if (!unreadCount.value) return
 
     try {
-      await markAllNotificationsRead()
+      await notificationsApi.markAllAsRead()
       notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
       emit('notify', 'Đã đánh dấu tất cả thông báo là đã đọc.')
     } catch (error) {

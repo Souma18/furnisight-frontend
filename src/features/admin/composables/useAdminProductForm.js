@@ -1,4 +1,4 @@
-import { uploadProductModelMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 
 /** Product form defaults & 3D model upload for admin modals. */
 
@@ -35,8 +35,7 @@ export async function applyProductModelFile(form, file) {
   form.modelFile = file
   form.model3dFileName = file.name
   form.model3dSize = file.size
-  // TODO(BE): adminApi.uploadProductModel(formData)
-  const res = await uploadProductModelMock(file)
+  const res = await adminApi.uploadProductModel(file)
   form.model3dUrl = res.data?.model3dUrl ?? ''
 }
 

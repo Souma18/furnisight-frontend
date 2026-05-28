@@ -1,7 +1,4 @@
 <script setup>
-import { onMounted, computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { useRevealOnScroll } from '../composables/useRevealOnScroll'
 import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
 import HomeFeaturesStripSection from '../components/HomeFeaturesStripSection.vue'
@@ -10,132 +7,23 @@ import HomeRoomsSection from '../components/HomeRoomsSection.vue'
 import HomeProductsSectionV2 from '../components/HomeProductsSectionV2.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
-import {
-  fetchRootCategories,
-  fetchProducts
-} from '@features/product/api/productApi'
+import { useHomePage } from '../composables/useHomePage'
 import {
   homeFeatures,
   homeHero,
   homeTestimonials,
-} from '../mock/homeMockData'
-import { useAccountStore } from '@features/account/store/accountStore'
-import { useAuthStore } from '@features/auth/store/authStore'
+} from '../composables/homeContent'
 
-const roomFallbacks = {
-  'Phòng ngủ': { image: '/home/rooms/bedroom.jpg', isBig: true },
-  'Phòng khách': { image: '/home/rooms/livingroom.jpeg', isBig: false },
-  'Phòng tắm': { image: '/home/rooms/bathroom.jpg', isBig: false },
-  'Phòng bếp': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  'Phòng đọc sách': { image: '/home/rooms/readingroom.jpg', isBig: false },
-  'Living Room': { image: '/home/rooms/livingroom.jpeg', isBig: false },
-  'Bedroom': { image: '/home/rooms/bedroom.jpg', isBig: true },
-  'Kitchen': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  'Bathroom': { image: '/home/rooms/bathroom.jpg', isBig: false },
-  'Study Room': { image: '/home/rooms/readingroom.jpg', isBig: false },
-  'Dining Room': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  'Workspace': { image: '/home/rooms/readingroom.jpg', isBig: false },
-}
-
-const categories = ref([])
-const products = ref([])
-const activeCategoryId = ref('')
-const route = useRoute()
-const router = useRouter()
-const accountStore = useAccountStore()
-const authStore = useAuthStore()
-const wishedProductIds = computed(() => accountStore.wishlistProductIds)
-const roomFilters = computed(() => ['Tat ca', ...categories.value.map(c => c.name)])
-const activeRoomFilter = ref('Tat ca')
-
-const filteredRooms = computed(() => {
-  const rooms = categories.value.map(cat => {
-    const fallback = roomFallbacks[cat.name] || { image: '/home/rooms/livingroom.jpeg', isBig: false }
-    return {
-      id: cat.id,
-      slug: cat.slug,        // slug from BE, e.g. "dining-room"
-      type: cat.name,
-      name: cat.name,
-      count: `${cat.productCount || 0} sản phẩm`,
-      image: cat.imageUrl || fallback.image,
-      isBig: fallback.isBig
-    }
-  })
-
-  if (activeRoomFilter.value === 'Tat ca') return rooms
-  return rooms.filter((room) => room.type === activeRoomFilter.value)
-})
-
-async function loadData() {
-  try {
-    const catRes = await fetchRootCategories()
-    
-    categories.value = catRes.data.map((cat) => ({
-      ...cat,
-      icon: cat.iconUrl || '🛋️',
-      count: `${cat.productCount || 0} sản phẩm`
-    }))
-    
-    if (categories.value.length > 0) {
-      activeCategoryId.value = categories.value[0].id
-    }
-    
-  } catch (error) {
-    console.error('Failed to load home categories:', error)
-  }
-}
-
-watch(activeCategoryId, async (newVal) => {
-  if (!newVal) return
-  const selectedCat = categories.value.find(c => c.id === newVal)
-  if (!selectedCat) return
-  try {
-    const prodRes = await fetchProducts({ category: selectedCat.slug || selectedCat.name, size: 8 })
-    products.value = prodRes.data.products.map(p => ({
-      ...p,
-      detailId: p.slug || p.id,
-      category: p.categoryName,
-      price: new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price),
-      image: p.image || '/home/products/placeholder.jpg'
-    }))
-  } catch (error) {
-    console.error('Failed to load products for category:', error)
-  }
-})
-
-onMounted(() => {
-  loadData()
-
-  if (authStore.isAuthenticated) {
-    accountStore.loadWishlist().catch(() => [])
-  }
-})
-
-async function toggleWish(productId) {
-  if (!productId) return
-
-  if (!authStore.isAuthenticated) {
-    router.push({
-      name: 'login',
-      query: {
-        redirect: route.fullPath,
-      },
-    })
-    return
-  }
-
-  try {
-    if (accountStore.hasFavoriteProduct(productId)) {
-      await accountStore.removeFavorite(productId)
-    } else {
-      await accountStore.addFavorite(productId)
-    }
-  } catch (error) {
-    console.error('Failed to toggle favorite home product:', error)
-  }
-}
-
-useRevealOnScroll('.fade-up')
+const {
+  categories,
+  products,
+  activeCategoryId,
+  activeRoomFilter,
+  wishedProductIds,
+  roomFilters,
+  filteredRooms,
+  toggleWish,
+} = useHomePage()
 </script>
 
 <template>

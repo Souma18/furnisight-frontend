@@ -1,12 +1,74 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import {
-  createVnpayPaymentMock,
-  fetchCheckoutSessionMock,
-  placeCheckoutOrderMock,
-  validateCheckoutVoucherMock,
-} from '../api/checkoutMockApi'
+import { ordersApi } from '@shared/lib/api/services'
 import { buildCheckoutSummary } from '../utils/checkoutPricing'
+
+const PENDING_PAYMENT_KEY = 'luxnest-pending-payment'
+
+function readPendingPayment() {
+  if (typeof window === 'undefined') return null
+
+  try {
+    const raw = window.sessionStorage.getItem(PENDING_PAYMENT_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function writePendingPayment(payload) {
+  if (typeof window === 'undefined') return
+
+  if (!payload) {
+    window.sessionStorage.removeItem(PENDING_PAYMENT_KEY)
+    return
+  }
+
+  window.sessionStorage.setItem(PENDING_PAYMENT_KEY, JSON.stringify(payload))
+}
+
+function formatVoucherExpire(dateValue) {
+  if (!dateValue) return ''
+  const date = new Date(dateValue)
+  if (Number.isNaN(date.getTime())) return ''
+  return `HSD: ${new Intl.DateTimeFormat('vi-VN').format(date)}`
+}
+
+function normalizeDiscountType(type) {
+  const normalized = String(type || '').trim().toUpperCase()
+  const map = {
+    PERCENT: 'percent',
+    FIXED: 'fixed',
+    SHIPPING_CAP: 'shipping_cap',
+  }
+
+  return map[normalized] || String(type || '').toLowerCase()
+}
+
+function normalizeVoucher(raw = {}) {
+  const discountType = normalizeDiscountType(raw.discountType)
+  const iconMap = {
+    percent: 'badgePercent',
+    ticket: 'badgePercent',
+    truck: 'truck',
+    star: 'star',
+    gift: 'gift',
+  }
+
+  return {
+    ...raw,
+    id: raw.id || raw.code,
+    code: raw.code || '',
+    name: raw.name || raw.code || 'Voucher',
+    desc: raw.desc || raw.description || '',
+    expire: raw.expire || formatVoucherExpire(raw.endDate),
+    discountType,
+    discountValue: Number(raw.discountValue) || 0,
+    maxDiscount: raw.maxDiscount ?? null,
+    minOrder: raw.minOrder ?? null,
+    icon: iconMap[raw.icon] || (discountType === 'shipping_cap' ? 'truck' : 'badgePercent'),
+  }
+}
 
 export const useCheckoutStore = defineStore('checkout', () => {
   const loading = ref(false)
@@ -30,6 +92,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const shippingVoucher = ref(null)
 
   const lastOrder = ref(null)
+  const pendingPayment = ref(readPendingPayment())
 
   const selectedShipping = computed(
     () => shippingOptions.value.find((item) => item.id === selectedShippingId.value) ?? null,
@@ -45,24 +108,28 @@ export const useCheckoutStore = defineStore('checkout', () => {
     loading.value = true
 
     try {
-      // TODO(BE): replace with checkoutApi.getCheckoutSession()
-      const response = await fetchCheckoutSessionMock()
-      const data = response?.data ?? {}
+      // The backend currently does not implement /checkout/session, so we mock it.
+      shippingOptions.value = [
+        { id: 'standard', name: 'Giao hàng tiêu chuẩn', fee: 30000, estimatedDays: '3-5 ngày', isFree: false },
+        { id: 'express', name: 'Giao hàng hỏa tốc', fee: 50000, estimatedDays: '1-2 ngày', isFree: false }
+      ]
+      paymentMethods.value = [
+        { id: 'vnpay', name: 'Thanh toán qua VNPAY', description: 'Thanh toán an toàn qua ví VNPAY', icon: 'vnpay' },
+        { id: 'cod', name: 'Thanh toán khi nhận hàng (COD)', description: 'Thanh toán tiền mặt khi nhận hàng', icon: 'cash' }
+      ]
+      const voucherResponse = await ordersApi.getVouchers().catch(() => ({ data: [] }))
+      const vouchers = Array.isArray(voucherResponse?.data)
+        ? voucherResponse.data.map(normalizeVoucher).filter((voucher) => voucher.active !== false)
+        : []
 
-      shippingOptions.value = data.shippingOptions ?? []
-      paymentMethods.value = data.paymentMethods ?? []
-      shopVouchers.value = data.shopVouchers ?? []
-      shippingVouchers.value = data.shippingVouchers ?? []
-      insuranceOption.value = data.insurance ?? null
-      codNote.value = data.codNote ?? ''
+      shopVouchers.value = vouchers.filter((voucher) => voucher.discountType !== 'shipping_cap')
+      shippingVouchers.value = vouchers.filter((voucher) => voucher.discountType === 'shipping_cap')
+      insuranceOption.value = { price: 20000, label: 'Bảo hiểm hàng hóa (Bồi thường 100% nếu thất lạc/hư hỏng)' }
+      codNote.value = 'Quý khách vui lòng chuẩn bị số tiền tương ứng khi nhận hàng.'
 
-      selectedShippingId.value = data.defaultShippingId ?? shippingOptions.value[0]?.id ?? ''
-      selectedPaymentId.value = data.defaultPaymentId ?? 'vnpay'
-
-      const defaultShipVoucher = shippingVouchers.value.find(
-        (item) => item.code === data.defaultShippingVoucherCode,
-      )
-      shippingVoucher.value = defaultShipVoucher ?? null
+      selectedShippingId.value = 'standard'
+      selectedPaymentId.value = 'vnpay'
+      shippingVoucher.value = null
 
       hydrated.value = true
     } finally {
@@ -82,8 +149,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function applyVoucherByCode(code, type, subtotal) {
-    // TODO(BE): replace with checkoutApi.validateCheckoutVoucher()
-    const response = await validateCheckoutVoucherMock({ code, type, subtotal })
+    const response = await ordersApi.validateCheckoutVoucher({ code, type, subtotal })
     const data = response?.data ?? {}
 
     if (!data.valid) {
@@ -91,18 +157,19 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
 
     if (type === 'ship') {
-      shippingVoucher.value = data.voucher
+      shippingVoucher.value = normalizeVoucher(data.voucher)
     } else {
-      shopVoucher.value = data.voucher
+      shopVoucher.value = normalizeVoucher(data.voucher)
     }
 
-    return { ok: true, voucher: data.voucher, discount: data.discount ?? 0 }
+    return { ok: true, voucher: normalizeVoucher(data.voucher), discount: data.discount ?? 0 }
   }
 
   function applyVoucher(voucher, type = 'shop') {
     if (!voucher) return
-    if (type === 'ship') shippingVoucher.value = voucher
-    else shopVoucher.value = voucher
+    const normalizedVoucher = normalizeVoucher(voucher)
+    if (type === 'ship') shippingVoucher.value = normalizedVoucher
+    else shopVoucher.value = normalizedVoucher
   }
 
   function removeVoucher(type = 'shop') {
@@ -113,8 +180,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   async function placeOrder(payload) {
     placing.value = true
     try {
-      // TODO(BE): replace with checkoutApi.placeCheckoutOrder(payload)
-      const response = await placeCheckoutOrderMock(payload)
+      const response = await ordersApi.createOrder(payload)
       lastOrder.value = response?.data ?? null
       return lastOrder.value
     } finally {
@@ -122,17 +188,17 @@ export const useCheckoutStore = defineStore('checkout', () => {
     }
   }
 
-  async function createVnpayPayment(payload) {
+  async function createVnpayPaymentAction(payload) {
     try {
-      // TODO(BE): replace with checkoutApi.createVnpayPayment(payload)
-      const response = await createVnpayPaymentMock(payload)
+      const response = await ordersApi.createVnpayPayment(payload)
       const ok = response?.status === 200
+      const data = response?.data
       return {
         ok,
         status: response?.status ?? 500,
-        paymentUrl: response?.data?.paymentUrl ?? '',
-        transactionRef: response?.data?.transactionRef ?? '',
-        message: response?.data?.message ?? '',
+        paymentUrl: typeof data === 'string' ? data : data?.paymentUrl ?? '',
+        transactionRef: data?.transactionRef ?? '',
+        message: data?.message ?? '',
       }
     } catch (error) {
       return {
@@ -154,6 +220,25 @@ export const useCheckoutStore = defineStore('checkout', () => {
     lastOrder.value = null
   }
 
+  function rememberPendingPayment(payload = {}) {
+    const next = {
+      paymentMethod: payload.paymentMethod || selectedPaymentId.value,
+      orderCode: payload.orderCode || '',
+      orderId: payload.orderId || '',
+      lineIds: Array.isArray(payload.lineIds) ? payload.lineIds : [],
+      createdAt: Date.now(),
+    }
+
+    pendingPayment.value = next
+    writePendingPayment(next)
+    return next
+  }
+
+  function clearPendingPayment() {
+    pendingPayment.value = null
+    writePendingPayment(null)
+  }
+
   return {
     loading,
     placing,
@@ -172,6 +257,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     shopVoucher,
     shippingVoucher,
     lastOrder,
+    pendingPayment,
     selectedShipping,
     shipFee,
     hydrateSession,
@@ -180,7 +266,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
     applyVoucher,
     removeVoucher,
     placeOrder,
-    createVnpayPayment,
+    createVnpayPayment: createVnpayPaymentAction,
+    rememberPendingPayment,
+    clearPendingPayment,
     resetCheckoutState,
   }
 })

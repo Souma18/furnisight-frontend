@@ -1,19 +1,18 @@
 <script setup>
-import { watch } from 'vue'
-import { ref, onMounted } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { adminApi } from '@shared/lib/api/services'
 import AdminModal from './AdminModal.vue'
 import AdminIconPicker from '../forms/AdminIconPicker.vue'
 import AdminModel3dUpload from '../forms/AdminModel3dUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
-import { fetchCategoryIconOptionsMock } from '../../api/adminMockApi'
 
 const iconOptions = ref([])
 const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile } = useAdminModal()
 
 onMounted(async () => {
-  const res = await fetchCategoryIconOptionsMock()
-  iconOptions.value = res.data?.items ?? []
+  const res = await adminApi.fetchCategoryIconOptions()
+  iconOptions.value = res.data?.items ?? res.data ?? []
 })
 
 watch(() => modal.value.open, (open) => {

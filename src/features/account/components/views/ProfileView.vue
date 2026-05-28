@@ -3,6 +3,8 @@ import { computed, reactive, ref, watch } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
+import { useProfileForm } from '../../composables/useProfileForm'
+
 const props = defineProps({
   profile: {
     type: Object,
@@ -10,46 +12,17 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['save', 'notify', 'upload-avatar', 'remove-avatar'])
+const emit = defineEmits(['notify'])
 
-const avatarInput = ref(null)
-
-const form = reactive({
-  firstName: '',
-  lastName: '',
-  birthday: '',
-  gender: 'MALE',
-  bio: '',
-})
-
-watch(
-  () => props.profile,
-  (value) => {
-    if (!value) return
-    Object.assign(form, value)
-  },
-  { immediate: true },
-)
-
-function submit() {
-  emit('save', { ...form })
-}
-
-const avatarLabel = computed(() => {
-  if (props.profile?.avatarUrl) return ''
-  return props.profile?.initials ?? 'NA'
-})
-
-function pickAvatar() {
-  avatarInput.value?.click()
-}
-
-function onAvatarSelected(event) {
-  const file = event.target.files?.[0]
-  if (!file) return
-  emit('upload-avatar', file)
-  event.target.value = ''
-}
+const {
+  form,
+  avatarInput,
+  avatarLabel,
+  submit,
+  pickAvatar,
+  onAvatarSelected,
+  removeAvatar,
+} = useProfileForm(props, emit)
 </script>
 
 <template>
@@ -67,7 +40,7 @@ function onAvatarSelected(event) {
             <AppIcon name="camera" :size="14" />
             Tải ảnh lên
           </button>
-          <button type="button" class="ghost" @click="$emit('remove-avatar')">Xoá ảnh</button>
+          <button type="button" class="ghost" @click="removeAvatar">Xoá ảnh</button>
         </div>
       </div>
       <input ref="avatarInput" type="file" accept="image/*" class="hidden-input" @change="onAvatarSelected" />

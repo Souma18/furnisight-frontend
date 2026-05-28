@@ -1,6 +1,6 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { CHECKOUT_SHOP } from '../mock/checkoutPageMockData'
+import { CHECKOUT_SHOP } from '../composables/checkoutContent'
 import { calcLineTotal } from '../utils/checkoutPricing'
 
 const props = defineProps({
@@ -24,6 +24,10 @@ function variantTags(line) {
 
 function lineThumb(line) {
   return line.imageFallback ?? line.emoji ?? '🛍️'
+}
+
+function hideBrokenImage(event) {
+  event.target.style.display = 'none'
 }
 
 function changeQty(line, delta) {
@@ -55,7 +59,10 @@ const merchandiseSubtotal = () =>
       :key="line.id"
       class="co-prod-row"
     >
-      <div class="co-prod-thumb">{{ lineThumb(line) }}</div>
+      <div class="co-prod-thumb">
+        <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-prod-thumb-img" @error="hideBrokenImage">
+        <span>{{ lineThumb(line) }}</span>
+      </div>
       <div>
         <p class="co-prod-name">{{ line.name }}</p>
         <p v-if="variantTags(line).length" class="co-prod-variant">

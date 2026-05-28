@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
-import { fetchAdminProfileMock } from '../../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminLayout } from '../../composables/useAdminLayout'
 import { useAdminPassword } from '../../composables/useAdminPassword'
 import { useAdminUiStore } from '../../store/adminUiStore'
@@ -14,7 +14,7 @@ const activeTab = ref('profile')
 const { form: pwdForm, saving: pwdSaving, submit: submitPassword } = useAdminPassword()
 
 onMounted(async () => {
-  const res = await fetchAdminProfileMock()
+  const res = await adminApi.fetchAdminProfile()
   profile.value = res.data
 })
 

@@ -1,33 +1,62 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { ORDER_STATUS_LABELS } from '../../mock/ordersMockData'
+import { useAccountOrders } from '../../composables/useAccountOrders'
+import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
+import { canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
 
-const props = defineProps({
-  order: {
-    type: Object,
-    default: null,
-  },
-})
+const emit = defineEmits(['notify'])
 
-const emit = defineEmits(['back', 'cancel-order'])
+const {
+  selectedOrder: order,
+  backToOrders,
+  cancelOrder,
+  retryPayment,
+} = useAccountOrders((msg, type) => emit('notify', msg, type))
 
 function handleCancel() {
-  if (!props.order || props.order.status !== 'pending') return
-  if (!confirm(`Huỷ đơn ${props.order.orderCode}?`)) return
-  emit('cancel-order', props.order.id)
+  if (!order.value || !['unpaid', 'payment_failed'].includes(order.value.status)) return
+  if (!confirm(`Huỷ đơn ${order.value.orderCode}?`)) return
+  cancelOrder(order.value.orderCode || order.value.id)
+}
+
+function handleRetryPayment() {
+  if (!order.value) return
+  retryPayment(order.value)
 }
 
 function formatMoney(value) {
   return `${Number(value || 0).toLocaleString('vi-VN')}đ`
 }
 
-const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? props.order?.status ?? '')
+function formatDate(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return isNaN(date.getTime()) ? dateStr : new Intl.DateTimeFormat('vi-VN').format(date)
+}
+
+function orderItemImage(item = {}) {
+  return item.imageUrl || item.productSnapshot?.imageUrl || ''
+}
+
+function hideBrokenImage(event) {
+  event.target.style.display = 'none'
+}
+
+const statusLabel = computed(() => ORDER_STATUS_LABELS[order.value?.status] ?? order.value?.status ?? '')
+
+const paymentDeadline = computed(() => {
+  if (!order.value || !canRetryOrderPayment(order.value) || !order.value.paymentExpiresAt) return ''
+  const ms = new Date(order.value.paymentExpiresAt).getTime() - Date.now()
+  if (ms <= 0) return ''
+  const minutes = Math.max(1, Math.ceil(ms / 60000))
+  return `Còn ${minutes} phút để hoàn tất thanh toán`
+})
 </script>
 
 <template>
   <section v-if="order" class="order-detail">
-    <button type="button" class="order-detail-back" @click="$emit('back')">
+    <button type="button" class="order-detail-back" @click="backToOrders">
       ← Quay lại đơn hàng
     </button>
 
@@ -36,12 +65,16 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
         <h1 class="order-detail-title">Đơn hàng {{ order.orderCode }}</h1>
         <p class="order-detail-meta">
           <AppIcon name="calendar" :size="14" />
-          Đặt ngày {{ order.placedAt }}
+          Đặt ngày {{ formatDate(order.createdAt) }}
         </p>
       </div>
       <div class="order-detail-head-actions">
         <span class="status-badge" :class="order.status">{{ statusLabel }}</span>
-        <button v-if="order.status === 'pending'" type="button" class="order-cancel-btn" @click="handleCancel">
+        <button v-if="canRetryOrderPayment(order)" type="button" class="order-pay-btn" @click="handleRetryPayment">
+          <AppIcon name="creditCard" :size="14" />
+          Thanh toán lại
+        </button>
+        <button v-if="order.status === 'unpaid' || order.status === 'payment_failed'" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
           Huỷ đơn
         </button>
@@ -50,7 +83,7 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
 
     <div class="order-detail-grid">
       <div class="order-detail-main">
-        <article class="detail-card">
+        <article v-if="order.timeline && order.timeline.length" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
             Trạng thái vận chuyển
@@ -78,15 +111,19 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
             Sản phẩm đặt mua
           </h2>
           <div class="order-lines">
-            <div v-for="(line, index) in order.lines" :key="index" class="order-line">
-              <span class="order-line-thumb">{{ line.thumb }}</span>
+            <div v-for="(item, index) in order.items" :key="index" class="order-line">
+              <span class="order-line-thumb">
+                <img v-if="orderItemImage(item)" :src="orderItemImage(item)" alt="product" class="line-thumb-img" @error="hideBrokenImage" />
+                <AppIcon name="image" :size="16" />
+              </span>
               <div class="order-line-info">
-                <p class="order-line-cat">{{ line.categoryLabel }}</p>
-                <p class="order-line-name">{{ line.name }}</p>
-                <p class="order-line-var">{{ line.variant }}</p>
+                <p class="order-line-name">{{ item.productSnapshot?.productName || 'Sản phẩm' }}</p>
+                <p v-if="item.productSnapshot?.color || item.productSnapshot?.material" class="order-line-var">
+                  {{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}
+                </p>
               </div>
-              <span class="order-line-qty">SL: {{ line.qty }}</span>
-              <span class="order-line-price">{{ formatMoney(line.price * line.qty) }}</span>
+              <span class="order-line-qty">SL: {{ item.quantity }}</span>
+              <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
             </div>
           </div>
         </article>
@@ -99,49 +136,48 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
             Tóm tắt thanh toán
           </h2>
           <div class="summary-rows">
-            <div class="summary-row"><span>Tạm tính</span><span>{{ formatMoney(order.summary?.subtotal) }}</span></div>
+            <div class="summary-row"><span>Tạm tính</span><span>{{ formatMoney(order.subTotal) }}</span></div>
             <div class="summary-row">
-              <span>Vận chuyển</span>
-              <span>{{ order.summary?.shipFee ? formatMoney(order.summary.shipFee) : 'Miễn phí' }}</span>
+              <span>Phí vận chuyển</span>
+              <span>{{ order.fee?.shippingFee ? formatMoney(order.fee.shippingFee) : 'Miễn phí' }}</span>
             </div>
-            <div v-if="order.summary?.discount" class="summary-row">
+            <div v-if="order.fee?.shippingDiscount" class="summary-row">
+              <span>Giảm giá vận chuyển</span>
+              <span>−{{ formatMoney(order.fee.shippingDiscount) }}</span>
+            </div>
+            <div v-if="order.fee?.discountAmount" class="summary-row">
               <span>Giảm giá</span>
-              <span>−{{ formatMoney(order.summary.discount) }}</span>
+              <span>−{{ formatMoney(order.fee.discountAmount) }}</span>
             </div>
             <div class="summary-row total">
               <span>Tổng cộng</span>
-              <span>{{ formatMoney(order.summary?.total) }}</span>
+              <span>{{ formatMoney(order.totalAmount) }}</span>
             </div>
           </div>
           <p class="payment-label">Phương thức thanh toán</p>
-          <p class="payment-value">{{ order.paymentLabel }}</p>
+          <p class="payment-value">{{ order.paymentDetail?.paymentMethod || 'Chưa rõ' }}</p>
+          <p v-if="paymentDeadline" class="payment-deadline">{{ paymentDeadline }}</p>
         </article>
 
-        <article v-if="order.address" class="detail-card">
+        <article v-if="order.shippingDetail" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
             Địa chỉ giao hàng
           </h2>
           <p class="address-block">
-            <strong>{{ order.address.fullName }}</strong>
-            {{ order.address.phone }}<br>
-            {{ order.address.detail }}, {{ order.address.wardName }}<br>
-            {{ order.address.districtName }}, {{ order.address.provinceName }}
+            <strong>{{ order.shippingDetail.shippingAddressName }}</strong>
+            {{ order.shippingDetail.shippingAddressPhone }}<br>
+            {{ order.shippingDetail.shippingAddressDetail }}
           </p>
         </article>
 
-        <article class="detail-card">
+        <article v-if="order.shippingDetail?.shippingMethod" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="truck" :size="16" />
             Thông tin vận chuyển
           </h2>
           <div class="summary-rows">
-            <div class="summary-row"><span>Đơn vị</span><span>{{ order.carrier }}</span></div>
-            <div v-if="order.trackingCode" class="summary-row">
-              <span>Mã vận đơn</span>
-              <span>{{ order.trackingCode }}</span>
-            </div>
-            <div class="summary-row"><span>Dự kiến</span><span>{{ order.eta }}</span></div>
+            <div class="summary-row"><span>Đơn vị</span><span>{{ order.shippingDetail.shippingMethod }}</span></div>
           </div>
         </article>
       </aside>
@@ -184,6 +220,21 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
   color: #c9922a;
 }
 
+.status-badge.unpaid {
+  background: #fdf6e8;
+  color: #c9922a;
+}
+
+.status-badge.payment_failed {
+  background: #fff0df;
+  color: #b95e00;
+}
+
+.status-badge.paid {
+  background: #eef5ff;
+  color: #2364a8;
+}
+
 .status-badge.delivering {
   background: #eaf5ef;
   color: #2a7a50;
@@ -214,6 +265,23 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
 
 .order-cancel-btn:hover {
   background: #fdf0ee;
+}
+
+.order-pay-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.45rem 0.75rem;
+  background: #c9922a;
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.order-pay-btn:hover {
+  background: #a9781e;
 }
 .order-detail-grid {
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1rem; align-items: start;
@@ -251,7 +319,11 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
 .order-line:last-child { border-bottom: none; }
 .order-line-thumb {
   width: 64px; height: 64px; border-radius: 9px; background: #f5f0e8;
-  display: grid; place-items: center; font-size: 1.6rem;
+  display: grid; place-items: center; font-size: 1.6rem; overflow: hidden;
+  position: relative;
+}
+.line-thumb-img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;
 }
 .order-line-cat { margin: 0; font-size: 0.65rem; color: #c9922a; font-weight: 600; text-transform: uppercase; }
 .order-line-name { margin: 0.15rem 0 0; font-size: 0.84rem; font-weight: 500; }
@@ -263,6 +335,7 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
 .summary-row.total { font-weight: 600; color: var(--account-field-text); border-top: 1px solid var(--auth-border); padding-top: 0.5rem; margin-top: 0.25rem; }
 .payment-label { margin: 0.85rem 0 0.25rem; font-size: 0.72rem; color: var(--auth-text-secondary); }
 .payment-value { margin: 0; font-size: 0.82rem; font-weight: 500; }
+.payment-deadline { margin: 0.5rem 0 0; font-size: 0.74rem; color: #c9922a; font-weight: 500; }
 .address-block { margin: 0; font-size: 0.8rem; line-height: 1.6; color: var(--auth-text-secondary); }
 .order-detail-missing { color: var(--auth-text-secondary); }
 @media (max-width: 980px) {
@@ -270,4 +343,3 @@ const statusLabel = computed(() => ORDER_STATUS_LABELS[props.order?.status] ?? p
   .order-line { grid-template-columns: 64px minmax(0, 1fr); }
 }
 </style>
-

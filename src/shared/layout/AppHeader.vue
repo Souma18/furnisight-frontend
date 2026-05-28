@@ -4,13 +4,9 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
-import {
-  getNotifications,
-  markAllNotificationsRead as apiMarkAllNotificationsRead,
-  markNotificationRead as apiMarkNotificationRead,
-} from '@features/account/api/accountApi'
 import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 
@@ -34,7 +30,7 @@ const unreadNotificationCount = computed(() => notifications.value.filter((item)
 const previewNotifications = computed(() => notifications.value.slice(0, 5))
 
 async function loadNotifications() {
-  const response = await getNotifications()
+  const response = await notificationsApi.getInboxMessages()
   const data = response.data?.items ?? response.data ?? []
   notifications.value = data.map(mapInboxMessageToFrontend)
 }
@@ -50,7 +46,7 @@ async function openAccountNotifications() {
 
 async function handleNotificationClick(item) {
   if (!item.isRead) {
-    await apiMarkNotificationRead(item.id)
+    await notificationsApi.markAsRead(item.id)
     notifications.value = notifications.value.map((notification) =>
       notification.id === item.id ? { ...notification, isRead: true } : notification,
     )
@@ -61,7 +57,7 @@ async function handleNotificationClick(item) {
 
 async function markAllNotificationsRead() {
   if (!unreadNotificationCount.value) return
-  await apiMarkAllNotificationsRead()
+  await notificationsApi.markAllAsRead()
   notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
 }
 

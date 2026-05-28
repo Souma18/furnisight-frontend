@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { ADMIN_ICON_OPTIONS } from '../../mock/adminIconMock'
+import { ADMIN_ICON_OPTIONS } from '../../config/adminIconOptions'
 
 const props = defineProps({
   modelValue: { type: String, default: 'house' },

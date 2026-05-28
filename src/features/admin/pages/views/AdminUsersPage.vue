@@ -3,10 +3,10 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
-import { fetchAdminUsersMock } from '../../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 
-const { items, search, ui } = useAdminListPage(fetchAdminUsersMock)
+const { items, search, ui } = useAdminListPage(adminApi.fetchAdminUsers.bind(adminApi))
 const columns = [
   { key: 'id', label: '#' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
   { key: 'phone', label: 'SĐT' }, { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },

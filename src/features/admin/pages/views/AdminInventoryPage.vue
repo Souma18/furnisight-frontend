@@ -4,7 +4,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import AdminKpiGrid from '../../components/shared/AdminKpiGrid.vue'
-import { fetchInventoryMock } from '../../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminUiStore } from '../../store/adminUiStore'
 
 const ui = useAdminUiStore()
@@ -12,7 +12,7 @@ const data = ref(null)
 const page = ref(1)
 
 onMounted(async () => {
-  const res = await fetchInventoryMock()
+  const res = await adminApi.fetchInventory()
   data.value = res.data
 })
 

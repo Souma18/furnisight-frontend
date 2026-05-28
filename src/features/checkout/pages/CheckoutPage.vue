@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import CheckoutAddressCard from '../components/CheckoutAddressCard.vue'
 import CheckoutBreadcrumb from '../components/CheckoutBreadcrumb.vue'
@@ -13,6 +13,7 @@ import CheckoutToolbar from '../components/CheckoutToolbar.vue'
 import CheckoutVoucherCard from '../components/CheckoutVoucherCard.vue'
 import CheckoutVoucherModal from '../components/CheckoutVoucherModal.vue'
 import { useCheckout } from '../composables/useCheckout'
+import { useCheckoutVoucherModal } from '../composables/useCheckoutVoucherModal'
 import { useCheckoutStore } from '../store/checkoutStore'
 import '../styles/checkoutPage.css'
 
@@ -53,13 +54,25 @@ const {
 
 const { applyVoucherByCode, applyVoucher, removeVoucher } = checkoutStore
 
-const voucherModalOpen = ref(false)
-const voucherModalType = ref('shop')
-const voucherApplying = ref(false)
-
-const modalVouchers = computed(() =>
-  voucherModalType.value === 'ship' ? shippingVouchers.value : shopVouchers.value,
-)
+const {
+  voucherModalOpen,
+  voucherModalType,
+  voucherApplying,
+  modalVouchers,
+  openVoucherModal,
+  closeVoucherModal,
+  handleApplyVoucherCode,
+  handleConfirmVoucher,
+  handleRemoveVoucher,
+} = useCheckoutVoucherModal({
+  shopVouchers,
+  shippingVouchers,
+  summary,
+  applyVoucherByCode,
+  applyVoucher,
+  removeVoucher,
+  showToast,
+})
 
 onMounted(async () => {
   await initCheckout()
@@ -73,40 +86,6 @@ watch(isEmpty, (empty) => {
     router.replace({ path: '/account', query: { view: 'cart' } })
   }
 })
-
-function openVoucherModal(type) {
-  voucherModalType.value = type
-  voucherModalOpen.value = true
-}
-
-function closeVoucherModal() {
-  voucherModalOpen.value = false
-}
-
-async function handleApplyVoucherCode(code) {
-  voucherApplying.value = true
-  try {
-    const result = await applyVoucherByCode(code, voucherModalType.value, summary.value.subtotal)
-    if (!result.ok) {
-      showToast({ icon: 'badgePercent', title: 'Không áp dụng được', subtitle: result.message })
-      return
-    }
-    showToast({ icon: 'check', title: 'Đã áp dụng voucher', subtitle: code })
-    closeVoucherModal()
-  } finally {
-    voucherApplying.value = false
-  }
-}
-
-function handleConfirmVoucher(voucher) {
-  applyVoucher(voucher, voucherModalType.value)
-  showToast({ icon: 'check', title: 'Đã chọn voucher', subtitle: voucher.code })
-  closeVoucherModal()
-}
-
-function handleRemoveVoucher(type) {
-  removeVoucher(type)
-}
 
 async function handlePlaceOrder() {
   await placeOrder()
@@ -159,6 +138,7 @@ function handleContinueShopping() {
           <CheckoutVoucherCard
             :shop-voucher="shopVoucher"
             :shipping-voucher="shippingVoucher"
+            :shop-discount="summary.shopDiscount"
             :shipping-discount="summary.shippingDiscount"
             :format-money="formatMoney"
             @open-voucher="openVoucherModal"

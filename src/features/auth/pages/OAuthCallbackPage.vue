@@ -1,24 +1,7 @@
 <script setup>
-import { onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useOAuthCallback } from '../composables/useOAuthCallback'
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-
-onMounted(() => {
-  const accessToken = route.query.access_token
-  const refreshToken = route.query.refresh_token
-
-  if (accessToken && refreshToken) {
-    authStore.setSession({ accessToken, refreshToken })
-    const redirect = route.query.redirect || '/account'
-    router.replace(redirect)
-  } else {
-    router.replace({ name: 'login' })
-  }
-})
+useOAuthCallback()
 </script>
 
 <template>

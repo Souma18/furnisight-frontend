@@ -1,5 +1,5 @@
 <script setup>
-import { CHECKOUT_STEPS } from '../mock/checkoutPageMockData'
+import { CHECKOUT_STEPS } from '../composables/checkoutContent'
 import { RouterLink } from 'vue-router'
 </script>
 

@@ -1,6 +1,7 @@
 <script setup>
 import AccountSectionCard from '../AccountSectionCard.vue'
-import { useSecurity } from '../../composables/useSecurity'
+import { usePasswordManager } from '../../composables/usePasswordManager'
+import { useContactManager } from '../../composables/useContactManager'
 
 const props = defineProps({
   profile: {
@@ -9,10 +10,15 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['notify', 'save-contact'])
+const emit = defineEmits(['notify'])
 
 const {
-  form,
+  form: passwordForm,
+  isLoading: isPasswordLoading,
+  submit: submitPassword,
+} = usePasswordManager((msg, type) => emit('notify', msg, type))
+
+const {
   contactModalOpen,
   linkModalOpen,
   contactType,
@@ -27,8 +33,7 @@ const {
   maskedPhone,
   contactTitles,
   linkTitles,
-  isLoading,
-  submit,
+  isLoading: isContactLoading,
   openContactModal,
   openLinkModal,
   sendOldContactCode,
@@ -38,7 +43,7 @@ const {
   sendLinkCode,
   submitLink,
   removeOldContact,
-} = useSecurity(props, emit)
+} = useContactManager(props, (msg, type) => emit('notify', msg, type))
 </script>
 
 <template>
@@ -46,11 +51,11 @@ const {
     <section class="security-layout">
       <article class="security-card">
         <header class="security-card-head">Thay đổi mật khẩu</header>
-        <form class="security-card-body" @submit.prevent="submit">
-          <label>Mật khẩu hiện tại <input v-model="form.currentPassword" type="password" required /></label>
-          <label>Mật khẩu mới <input v-model="form.newPassword" type="password" required /></label>
-          <label>Xác nhận mật khẩu <input v-model="form.confirmPassword" type="password" required /></label>
-          <button class="primary" type="submit">Cập nhật mật khẩu</button>
+        <form class="security-card-body" @submit.prevent="submitPassword">
+          <label>Mật khẩu hiện tại <input v-model="passwordForm.currentPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <label>Mật khẩu mới <input v-model="passwordForm.newPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <label>Xác nhận mật khẩu <input v-model="passwordForm.confirmPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <button class="primary" type="submit" :disabled="isPasswordLoading">Cập nhật mật khẩu</button>
         </form>
       </article>
 
@@ -104,12 +109,12 @@ const {
         <label>Mã xác minh
           <div class="input-with-btn">
             <input v-model="newContactCode" placeholder="Nhập mã OTP" />
-            <button class="send-btn" type="button" :disabled="isLoading" @click="sendLinkCode">
+            <button class="send-btn" type="button" :disabled="isContactLoading" @click="sendLinkCode">
               Gửi mã
             </button>
           </div>
         </label>
-        <button class="primary" type="button" :disabled="isLoading" @click="submitLink">
+        <button class="primary" type="button" :disabled="isContactLoading" @click="submitLink">
           Xác nhận liên kết
         </button>
       </div>
@@ -140,7 +145,7 @@ const {
 
       <div v-if="activeContactTab === 'old'" class="panel">
         <label>Phương thức xác minh
-          <select v-model="verificationMethod" class="method-select" :disabled="isLoading">
+          <select v-model="verificationMethod" class="method-select" :disabled="isContactLoading">
             <option value="EMAIL" :disabled="!maskedEmail">Qua Email</option>
             <option value="PHONE" :disabled="!maskedPhone">Qua Số điện thoại</option>
           </select>
@@ -151,10 +156,10 @@ const {
         <label>Mã xác minh
           <div class="input-with-btn">
             <input v-model="verifyCode" placeholder="Nhập mã từ liên hệ cũ" />
-            <button class="send-btn" type="button" :disabled="isLoading" @click="sendOldContactCode">Gửi mã</button>
+            <button class="send-btn" type="button" :disabled="isContactLoading" @click="sendOldContactCode">Gửi mã</button>
           </div>
         </label>
-        <button class="secondary" type="button" :disabled="isLoading" @click="verifyCurrentContact">
+        <button class="secondary" type="button" :disabled="isContactLoading" @click="verifyCurrentContact">
           Xác nhận
         </button>
       </div>
@@ -175,10 +180,10 @@ const {
               placeholder="Nhập mã từ liên hệ mới"
               :disabled="!verifiedOldContact"
             />
-            <button class="send-btn" type="button" :disabled="!verifiedOldContact || isLoading" @click="sendNewContactCode">Gửi mã</button>
+            <button class="send-btn" type="button" :disabled="!verifiedOldContact || isContactLoading" @click="sendNewContactCode">Gửi mã</button>
           </div>
         </label>
-        <button class="primary" type="button" :disabled="!verifiedOldContact || isLoading" @click="submitContactChange">
+        <button class="primary" type="button" :disabled="!verifiedOldContact || isContactLoading" @click="submitContactChange">
           Cập nhật
         </button>
       </div>

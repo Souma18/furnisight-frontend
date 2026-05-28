@@ -2,10 +2,10 @@
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
-import { fetchOrdersMock } from '../../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 
-const { items, ui } = useAdminListPage(fetchOrdersMock)
+const { items, ui } = useAdminListPage(adminApi.fetchOrders.bind(adminApi))
 const columns = [
   { key: 'id', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },

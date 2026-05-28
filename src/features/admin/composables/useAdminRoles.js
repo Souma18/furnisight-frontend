@@ -1,5 +1,5 @@
 import { onMounted, ref } from 'vue'
-import { fetchRolesMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 
 export function useAdminRoles() {
   const data = ref(null)
@@ -8,8 +8,7 @@ export function useAdminRoles() {
   async function load() {
     loading.value = true
     try {
-      // TODO(BE): adminApi.fetchRoles()
-      const res = await fetchRolesMock()
+      const res = await adminApi.fetchRoles()
       data.value = res.data
     } finally {
       loading.value = false

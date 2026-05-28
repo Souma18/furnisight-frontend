@@ -1,13 +1,6 @@
 import { computed, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import {
-  createAdminUserMock,
-  createCategoryMock,
-  createProductMock,
-  updateCategoryMock,
-  updateOrderMock,
-  updateProductMock,
-} from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
 import { applyProductModelFile, buildProductPayload, mapProductToForm } from './useAdminProductForm'
 import { useAdminUiStore } from '../store/adminUiStore'
@@ -115,17 +108,17 @@ export function useAdminModal() {
     saving.value = true
     try {
       const type = modal.value.type
-      // TODO(BE): switch to adminApi.*
-      if (type === 'addUser') await createAdminUserMock({ ...form })
-      if (type === 'addCat') await createCategoryMock(buildCategoryPayload(form))
-      if (type === 'editCat' && modal.value.payload?.id) await updateCategoryMock(modal.value.payload.id, buildCategoryPayload(form))
+      if (type === 'addUser') await adminApi.createAdminUser({ ...form })
+      if (type === 'editUser' && modal.value.payload?.id) await adminApi.updateAdminUser(modal.value.payload.id, { ...form })
+      if (type === 'addCat') await adminApi.createCategory(buildCategoryPayload(form))
+      if (type === 'editCat' && modal.value.payload?.id) await adminApi.updateCategory(modal.value.payload.id, buildCategoryPayload(form))
       if (type === 'addProd' || type === 'editProd') {
         const payload = buildProductPayload(form)
-        if (type === 'addProd') await createProductMock(payload)
-        else if (modal.value.payload?.id) await updateProductMock(modal.value.payload.id, payload)
+        if (type === 'addProd') await adminApi.createProduct(payload)
+        else if (modal.value.payload?.id) await adminApi.updateProduct(modal.value.payload.id, payload)
       }
       if (type === 'editOrder' && modal.value.payload?.id) {
-        await updateOrderMock(modal.value.payload.id, { statusLabel: form.orderStatus, trackingCode: form.trackingCode, note: form.note })
+        await adminApi.updateOrder(modal.value.payload.id, { statusLabel: form.orderStatus, trackingCode: form.trackingCode, note: form.note })
       }
       if (type === 'addRole' || type === 'editRole' || type === 'addAdmin' || type === 'stockIn') {
         await sleepMock()

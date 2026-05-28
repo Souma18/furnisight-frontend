@@ -18,8 +18,8 @@ defineProps({
       <HomeProductTile
         v-for="item in items"
         :key="item.id"
-        :product="item"
-        :wished="item.isFavorite !== false"
+        :product="item.product || item"
+        :wished="true"
         :wish-readonly="true"
       />
     </div>

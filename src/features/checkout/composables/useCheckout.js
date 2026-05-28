@@ -1,7 +1,8 @@
 import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useAccountStore } from '@features/account/store/accountStore'
+import { useAddressStore } from '@features/account/store/addressStore'
+import { useOrderStore } from '@features/account/store/orderStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
@@ -10,7 +11,8 @@ export function useCheckout() {
   const route = useRoute()
   const router = useRouter()
   const cartStore = useCartStore()
-  const accountStore = useAccountStore()
+  const addressStore = useAddressStore()
+  const orderStore = useOrderStore()
   const checkoutStore = useCheckoutStore()
 
   const checkoutState = storeToRefs(checkoutStore)
@@ -29,7 +31,7 @@ export function useCheckout() {
     return available.filter((item) => lineIdsFromQuery.value.includes(item.id))
   })
 
-  const defaultAddress = computed(() => accountStore.defaultAddress)
+  const defaultAddress = computed(() => addressStore.defaultAddress)
   const summary = computed(() => checkoutStore.buildSummary(checkoutLines.value))
 
   const isEmpty = computed(() => checkoutLines.value.length === 0)
@@ -50,7 +52,7 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
-    await Promise.all([cartStore.ensureHydrated(), accountStore.hydrate(), checkoutStore.hydrateSession()])
+    await Promise.all([cartStore.ensureHydrated(), addressStore.fetchAddresses(), checkoutStore.hydrateSession()])
   }
 
   function goBackToCart() {
@@ -63,6 +65,56 @@ export function useCheckout() {
 
   async function updateLineQty(lineId, nextQty) {
     await cartStore.updateQty(lineId, nextQty)
+  }
+
+  function buildShippingAddressDetail(address = {}) {
+    return [
+      address.detail || address.street,
+      address.wardName || address.ward,
+      address.districtName || address.district,
+      address.provinceName || address.city,
+    ].filter(Boolean).join(', ')
+  }
+
+  function resolveLineImageUrl(item = {}) {
+    const imageCandidates = [
+      item.imageUrl,
+      item.productImageUrl,
+      item.image,
+      item.thumbnail,
+      item.thumbnailUrl,
+      item.coverImage,
+      item.coverImageUrl,
+      item.productSnapshot?.imageUrl,
+      item.product?.imageUrl,
+      item.product?.image,
+    ]
+
+    if (Array.isArray(item.gallery)) {
+      imageCandidates.push(...item.gallery)
+    }
+
+    if (Array.isArray(item.images)) {
+      imageCandidates.push(...item.images.map((image) => {
+        if (typeof image === 'string') return image
+        return image?.url || image?.imageUrl || image?.src || ''
+      }))
+    }
+
+    return imageCandidates.find(Boolean) || ''
+  }
+
+  function buildOrderItemPayload(item = {}) {
+    return {
+      productId: item.productId || item.id,
+      variantId: item.variantId || null,
+      categoryName: item.categoryName || item.categoryLabel || '',
+      productName: item.productName || item.name,
+      price: Number(item.price) || 0,
+      oldPrice: item.oldPrice ?? item.originalPrice ?? item.price ?? 0,
+      quantity: Math.max(1, Number(item.qty ?? item.quantity) || 1),
+      imageUrl: resolveLineImageUrl(item),
+    }
   }
 
   async function placeOrder() {
@@ -94,20 +146,46 @@ export function useCheckout() {
     }
 
     const linesSnapshot = [...checkoutLines.value]
+    const address = defaultAddress.value
+    const shippingAddressDetail = buildShippingAddressDetail(address)
+    const shippingAddressName = address.fullName || address.name || ''
 
-    const order = await checkoutStore.placeOrder({
-      addressId: defaultAddress.value.id,
-      lineIds: linesSnapshot.map((item) => item.id),
-      shippingId: checkoutState.selectedShippingId.value,
-      paymentId: checkoutState.selectedPaymentId.value,
-      shopVoucherCode: checkoutState.shopVoucher.value?.code ?? null,
-      shippingVoucherCode: checkoutState.shippingVoucher.value?.code ?? null,
-      hasInsurance: checkoutState.hasInsurance.value,
-      sellerNote: checkoutState.sellerNote.value,
-      summary: summary.value,
-      lines: linesSnapshot,
-      address: defaultAddress.value,
-    })
+    if (!shippingAddressName || !address.phone || !shippingAddressDetail) {
+      showToast({
+        icon: 'mapPin',
+        title: 'Địa chỉ giao hàng chưa đủ',
+        subtitle: 'Vui lòng cập nhật họ tên, số điện thoại và địa chỉ chi tiết.',
+      })
+      return null
+    }
+
+    const orderPayload = {
+      shippingAddressName,
+      shippingAddressPhone: address.phone,
+      shippingAddressDetail,
+      shippingMethod: checkoutState.selectedShipping.value?.name || checkoutState.selectedShippingId.value,
+      customerNote: checkoutState.sellerNote.value,
+      paymentMethod: checkoutState.selectedPaymentId.value,
+      shopVoucherCode: checkoutState.shopVoucher.value?.code || null,
+      shippingVoucherCode: checkoutState.shippingVoucher.value?.code || null,
+      discountAmount: summary.value.shopDiscount,
+      shippingDiscount: summary.value.shippingDiscount,
+      shippingFee: summary.value.shipFee,
+      insuranceFee: summary.value.insuranceAmount,
+      items: linesSnapshot.map(buildOrderItemPayload),
+    }
+
+    let order = null
+    try {
+      order = await checkoutStore.placeOrder(orderPayload)
+    } catch (error) {
+      showToast({
+        icon: 'alert',
+        title: 'Không thể tạo đơn hàng',
+        subtitle: error?.response?.data?.message || error.message || 'Vui lòng kiểm tra lại thông tin thanh toán.',
+      })
+      return null
+    }
 
     if (!order) return null
 
@@ -116,8 +194,8 @@ export function useCheckout() {
         orderId: order.orderId,
         orderCode: order.orderCode,
         amount: summary.value.total,
-        returnUrl: `${window.location.origin}/checkout?vnpay=success`,
-        cancelUrl: `${window.location.origin}/checkout?vnpay=cancel`,
+        returnUrl: `${window.location.origin}/orders/payment/callback`,
+        cancelUrl: `${window.location.origin}/orders/payment/callback`,
       })
 
       if (!paymentRes.ok) {
@@ -129,12 +207,18 @@ export function useCheckout() {
         return null
       }
 
-      // TODO(BE): Bật redirect thật khi API VNPAY sẵn sàng.
-      // Khi backend trả 200 + paymentUrl hợp lệ, bỏ comment dòng dưới để điều hướng:
-      // window.location.href = paymentRes.paymentUrl
+      checkoutStore.rememberPendingPayment({
+        paymentMethod: checkoutState.selectedPaymentId.value,
+        orderId: order.orderId,
+        orderCode: order.orderCode,
+        lineIds: linesSnapshot.map((line) => line.id),
+      })
+
+      window.location.href = paymentRes.paymentUrl
+      return order
     }
 
-    accountStore.addOrderFromCheckout({
+    orderStore.addOrderFromCheckout({
       order,
       lines: linesSnapshot,
       summary: summary.value,

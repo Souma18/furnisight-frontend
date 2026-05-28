@@ -82,7 +82,7 @@ function handleApplyCode() {
 
       <div class="co-modal-foot">
         <button type="button" class="co-voucher-btn" @click="$emit('close')">Huỷ</button>
-        <button type="button" class="co-btn-order" style="width: auto; padding-inline: 1rem" @click="handleConfirm">
+        <button type="button" class="co-btn-order" style="width: auto; padding-inline: 1rem" :disabled="applying" @click="handleConfirm">
           Xác nhận
         </button>
       </div>

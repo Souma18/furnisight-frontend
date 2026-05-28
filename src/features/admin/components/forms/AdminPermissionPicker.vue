@@ -1,5 +1,5 @@
 <script setup>
-import { ADMIN_PERMISSION_OPTIONS } from '../../mock/adminSeedMock'
+import { ADMIN_PERMISSION_OPTIONS } from '../../config/adminPermissions'
 
 const model = defineModel({ type: Array, default: () => [] })
 

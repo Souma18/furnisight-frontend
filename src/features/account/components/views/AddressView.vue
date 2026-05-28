@@ -1,160 +1,77 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
-import {
-  getProvinces,
-  getDistrictsByProvince,
-  getWardsByDistrict,
-} from '@shared/lib/publicApis/vietnamAddressApi'
+import { useAddressForm } from '../../composables/useAddressForm'
 
-defineProps({
+const props = defineProps({
   addresses: {
     type: Array,
     default: () => [],
   },
 })
 
-const emit = defineEmits(['save-address', 'set-default-address', 'notify'])
+const emit = defineEmits(['notify'])
 
-const showModal = ref(false)
-const provinces = ref([])
-const districts = ref([])
-const wards = ref([])
-const loadingProvince = ref(false)
-const loadingDistrict = ref(false)
-const loadingWard = ref(false)
-const fallbackMode = ref(false)
-
-const ADDRESS_TYPE_LABELS = {
-  home: 'Nhà riêng',
-  office: 'Văn phòng',
-}
-
-const form = reactive(createEmptyForm())
-
-function createEmptyForm() {
-  return {
-    fullName: '',
-    phone: '',
-    detail: '',
-    provinceCode: '',
-    districtCode: '',
-    wardCode: '',
-    provinceName: '',
-    districtName: '',
-    wardName: '',
-    type: 'home',
-    isDefault: false,
-  }
-}
-
-function resetForm() {
-  Object.assign(form, createEmptyForm())
-  districts.value = []
-  wards.value = []
-}
-
-async function openModal() {
-  resetForm()
-  showModal.value = true
-  if (provinces.value.length) return
-  loadingProvince.value = true
-  try {
-    provinces.value = await getProvinces()
-    fallbackMode.value = false
-  } catch (_error) {
-    fallbackMode.value = true
-    emit('notify', 'API địa chỉ công khai lỗi, đang dùng nhập tay.', 'error')
-  } finally {
-    loadingProvince.value = false
-  }
-}
-
-async function onProvinceChange() {
-  const selected = provinces.value.find((item) => String(item.code) === String(form.provinceCode))
-  form.provinceName = selected?.name ?? ''
-  form.districtCode = ''
-  form.wardCode = ''
-  districts.value = []
-  wards.value = []
-  if (!form.provinceCode) return
-  loadingDistrict.value = true
-  try {
-    districts.value = await getDistrictsByProvince(form.provinceCode)
-  } finally {
-    loadingDistrict.value = false
-  }
-}
-
-async function onDistrictChange() {
-  const selected = districts.value.find((item) => String(item.code) === String(form.districtCode))
-  form.districtName = selected?.name ?? ''
-  form.wardCode = ''
-  wards.value = []
-  if (!form.districtCode) return
-  loadingWard.value = true
-  try {
-    wards.value = await getWardsByDistrict(form.districtCode)
-  } finally {
-    loadingWard.value = false
-  }
-}
-
-function onWardChange() {
-  const selected = wards.value.find((item) => String(item.code) === String(form.wardCode))
-  form.wardName = selected?.name ?? ''
-}
-
-function submitAddress() {
-  if (!form.fullName || !form.phone || !form.detail) {
-    emit('notify', 'Vui lòng điền thông tin bắt buộc.', 'error')
-    return
-  }
-  emit('save-address', { ...form })
-  showModal.value = false
-}
-
-function setAsDefault(addressId) {
-  emit('set-default-address', addressId)
-}
-
-function getTypeLabel(type) {
-  return ADDRESS_TYPE_LABELS[type] ?? 'Khác'
-}
-</script>
-
-<template>
-  <AccountSectionCard title="Địa chỉ giao hàng">
-    <template #head>
-      <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
-    </template>
-
-    <div v-if="!addresses.length" class="empty">
-      Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
-    </div>
-
-    <div v-else class="list">
-      <article
-        v-for="address in addresses"
-        :key="address.id"
-        class="item"
-        :class="{ 'item--default': address.isDefault }"
-      >
-        <div class="item-head">
-          <div class="item-tags">
-            <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
-            <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
+  const {
+    showModal,
+    provinces,
+    districts,
+    wards,
+    fallbackMode,
+    form,
+    openModal,
+    onProvinceChange,
+    onDistrictChange,
+    onWardChange,
+    submitAddress,
+    setAsDefault,
+    deleteAddress,
+    getTypeLabel,
+  } = useAddressForm(props, emit)
+  </script>
+  
+  <template>
+    <AccountSectionCard title="Địa chỉ giao hàng">
+      <template #head>
+        <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
+      </template>
+  
+      <div v-if="!addresses.length" class="empty">
+        Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
+      </div>
+  
+      <div v-else class="list">
+        <article
+          v-for="address in addresses"
+          :key="address.id"
+          class="item"
+          :class="{ 'item--default': address.isDefault }"
+        >
+          <div class="item-head">
+            <div class="item-tags">
+              <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
+              <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
+            </div>
+  
+            <div class="item-actions">
+              <button
+                v-if="!address.isDefault"
+                type="button"
+                class="set-default-btn"
+                @click="setAsDefault(address.id)"
+              >
+                Đặt làm mặc định
+              </button>
+              <button
+                type="button"
+                class="delete-btn"
+                @click="deleteAddress(address.id)"
+                title="Xóa địa chỉ"
+              >
+                Xóa
+              </button>
+            </div>
           </div>
-
-          <button
-            v-if="!address.isDefault"
-            type="button"
-            class="set-default-btn"
-            @click="setAsDefault(address.id)"
-          >
-            Đặt làm mặc định
-          </button>
-        </div>
 
         <p class="name">{{ address.fullName }}</p>
         <p class="meta">{{ address.phone }}</p>
@@ -274,6 +191,11 @@ function getTypeLabel(type) {
   background: #f5efe6;
   color: #8b6a21;
 }
+.item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 .set-default-btn {
   border: 1px solid rgba(201, 146, 42, 0.35);
   border-radius: 999px;
@@ -287,6 +209,20 @@ function getTypeLabel(type) {
 }
 .set-default-btn:hover {
   background: #faf6f0;
+}
+.delete-btn {
+  border: 1px solid rgba(220, 53, 69, 0.35);
+  border-radius: 999px;
+  padding: 0.28rem 0.62rem;
+  background: #fff;
+  color: #dc3545;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.delete-btn:hover {
+  background: #fdf2f2;
 }
 .name {
   margin: 0 0 0.2rem;

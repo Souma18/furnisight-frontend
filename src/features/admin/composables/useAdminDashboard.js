@@ -1,11 +1,11 @@
 import { ref } from 'vue'
-import { fetchDashboardMock } from '../api/adminMockApi'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminChartPage } from './useAdminChartPage'
 
 export function useAdminDashboard() {
   const revenueCanvas = ref(null)
   const orderCanvas = ref(null)
-  const { data, loading, bindCharts } = useAdminChartPage(fetchDashboardMock)
+  const { data, loading, bindCharts } = useAdminChartPage(adminApi.fetchDashboard.bind(adminApi))
 
   bindCharts((charts, d) => {
     if (d.revenueChart) {
