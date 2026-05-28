@@ -5,6 +5,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
+import CheckoutSuccessOverlay from '../components/CheckoutSuccessOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -121,6 +122,10 @@ function goOrders() {
   router.push({ path: '/account', query: { view: 'orders' } })
 }
 
+function goProducts() {
+  router.push('/products')
+}
+
 function retryCheckout() {
   router.push('/checkout')
 }
@@ -130,19 +135,20 @@ onMounted(processCallback)
 
 <template>
   <main class="payment-callback-page">
-    <section class="payment-result">
-      <div class="payment-icon" :class="{ success: isSuccess, failure: isFailure }">
+    <CheckoutSuccessOverlay
+      :open="isSuccess"
+      :order-code="orderCode"
+      @view-order="goOrders"
+      @continue-shopping="goProducts"
+    />
+
+    <section v-if="!isSuccess" class="payment-result">
+      <div class="payment-icon" :class="{ failure: isFailure }">
         <AppIcon
           v-if="status === 'processing'"
           name="refresh"
           :size="34"
           :stroke-width="2"
-        />
-        <AppIcon
-          v-else-if="isSuccess"
-          name="check"
-          :size="34"
-          :stroke-width="2.4"
         />
         <AppIcon
           v-else
@@ -155,7 +161,6 @@ onMounted(processCallback)
       <p class="payment-eyebrow">Kết quả thanh toán</p>
       <h1>
         <span v-if="status === 'processing'">Đang xác nhận</span>
-        <span v-else-if="isSuccess">Thanh toán thành công</span>
         <span v-else>Thanh toán thất bại</span>
       </h1>
       <p class="payment-message">{{ message }}</p>
@@ -169,9 +174,6 @@ onMounted(processCallback)
         <button v-if="isFailure" type="button" class="ghost" @click="retryCheckout">
           Thử thanh toán lại
         </button>
-        <RouterLink v-else class="ghost" to="/products">
-          Tiếp tục mua sắm
-        </RouterLink>
       </div>
     </section>
   </main>
