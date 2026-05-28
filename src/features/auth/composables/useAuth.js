@@ -1,10 +1,12 @@
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
 import { renewAccessTokenRequest } from '../api/authApi'
 
 export function useAuth() {
   const store = useAuthStore()
-  const { user, isAuthenticated } = storeToRefs(store)
+  const router = useRouter()
+  const { user, isAuthenticated, isAdmin } = storeToRefs(store)
 
   async function renewToken() {
     const refreshToken = store.refreshToken || localStorage.getItem('refresh_token')
@@ -18,11 +20,18 @@ export function useAuth() {
     return data
   }
 
+  /** @param {{ name: string } | string} [redirectTo] */
+  async function logout(redirectTo = { name: 'home' }) {
+    store.logout()
+    await router.push(redirectTo)
+  }
+
   return {
     user,
     isAuthenticated,
+    isAdmin,
     setSession: store.setSession,
-    logout: store.logout,
+    logout,
     renewToken,
   }
 }

@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
+import ChatWidget from '@features/chat/components/ChatWidget.vue'
 
 const route = useRoute()
 const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
@@ -12,6 +13,8 @@ const isProductDetailPage = computed(() => route.name === 'product-detail')
 const isContactPage = computed(() => route.name === 'contact')
 const isCheckoutPage = computed(() => route.name === 'checkout')
 const isAccountPage = computed(() => route.path.startsWith('/account'))
+const isAdminPage = computed(() => route.path.startsWith('/admin'))
+const isLoginPage = computed(() => route.name === 'login')
 const mainRef = ref(null)
 let resizeObserver = null
 let mutationObserver = null
@@ -59,14 +62,15 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <AppHeader v-if="!isRoom3DPage" />
+    <AppHeader v-if="!isRoom3DPage && !isAdminPage" />
     <main
       ref="mainRef"
       class="app-main"
       :class="{
-        'app-main--fluid': isRoom3DPage,
+        'app-main--fluid': isRoom3DPage || isAdminPage,
         'app-main--with-header':
           !isRoom3DPage &&
+          !isAdminPage &&
           !isHomePage &&
           !isProductDetailPage &&
           !isProductsPage &&
@@ -77,11 +81,13 @@ onBeforeUnmount(() => {
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
         'app-main--checkout': isCheckoutPage,
+        'app-main--login': isLoginPage,
       }"
     >
       <RouterView />
-      <AppFooter v-if="!isRoom3DPage && !isAccountPage" />
+      <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage && !isLoginPage" />
     </main>
+    <ChatWidget v-if="!isRoom3DPage && !isAdminPage && !isLoginPage" />
   </div>
 </template>
 
@@ -145,5 +151,14 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 56px 0 0;
   background: #faf6f0;
+}
+
+.app-main--login {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 </style>

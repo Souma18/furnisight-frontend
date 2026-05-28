@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>LUXNEST – AI-Powered 3D Interior Design</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d1b2a;--navy2:#162636;--navy3:#1e3145;
+  --gold:#c9922a;--gold2:#d4a030;--gold3:#e8b84b;--gold-pale:#fdf6e8;
+  --cream:#f5f0e8;--cream2:#ede8de;--cream3:#e4ddd0;
+  --white:#ffffff;--border:#e0d9ce;--border2:#d4cdc0;
+  --text:#1a1812;--text2:#4a4540;--text3:#6b6560;
+  --green:#2a7a50;--green-bg:#eaf5ef;
+  --red:#c0392b;--red-bg:#fdf0ee;
+  --font-display:'Cormorant Garamond',Georgia,serif;
+  --font-body:'DM Sans',system-ui,sans-serif;
+  --r:12px;--r-sm:8px;--r-lg:16px;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);min-width:1440px;overflow-x:hidden}
+
+/* ─── UTILS ─── */
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.gold{color:var(--gold)}
+.muted{color:var(--text3)}
+
+/* ─── NAVBAR ─── */
+nav{background:var(--navy);height:60px;display:flex;align-items:center;padding:0 40px;position:sticky;top:0;z-index:500;gap:0}
+.nav-logo{display:flex;align-items:center;gap:10px;color:#fff;font-family:var(--font-display);font-size:20px;font-weight:500;letter-spacing:0.05em;text-decoration:none;margin-right:48px}
+.nav-logo-dot{width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:4px;flex:1}
+.nav-link{color:rgba(255,255,255,0.65);font-size:14px;font-weight:400;padding:6px 14px;border-radius:6px;cursor:pointer;transition:all 0.2s;border:none;background:none;text-decoration:none}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,0.07)}
+.nav-link.active{color:#fff;background:rgba(255,255,255,0.12)}
+.nav-cta{background:var(--gold2);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;font-family:var(--font-body);transition:background 0.2s;margin-left:auto}
+.nav-cta:hover{background:var(--gold)}
+.nav-cta i{font-size:16px}
+.nav-icons{display:flex;align-items:center;gap:6px;margin-left:16px}
+.nav-icon-btn{width:36px;height:36px;border-radius:8px;border:none;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.7);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;position:relative}
+.nav-icon-btn:hover{background:rgba(255,255,255,0.12);color:#fff}
+.nav-icon-btn i{font-size:18px}
+.nav-badge{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#e74c3c;border:2px solid var(--navy)}
+.nav-cart-count{position:absolute;top:-4px;right:-4px;background:var(--gold);color:#fff;font-size:10px;font-weight:600;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+/* ─── PAGES ─── */
+.page{display:none;min-height:calc(100vh - 60px)}
+.page.active{display:block}
+
+/* ─────────────────────────────────────────
+   PAGE: HOME
+───────────────────────────────────────── */
+.hero{background:linear-gradient(135deg,#0d1b2a 0%,#162636 50%,#1a2e42 100%);min-height:580px;display:flex;align-items:center;padding:60px 80px;position:relative;overflow:hidden}
+.hero-bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(201,146,42,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,146,42,0.04) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+.hero-content{flex:1;max-width:620px;position:relative;z-index:2}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(201,146,42,0.12);border:1px solid rgba(201,146,42,0.3);border-radius:20px;padding:5px 14px;font-size:11px;letter-spacing:0.08em;color:var(--gold3);margin-bottom:28px;font-weight:500}
+.hero-title{font-family:var(--font-display);font-size:64px;line-height:1.1;color:#fff;font-weight:500;margin-bottom:8px}
+.hero-title em{color:var(--gold3);font-style:italic}
+.hero-sub{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:36px;max-width:480px}
+.hero-btns{display:flex;gap:12px;align-items:center}
+.btn-gold{background:var(--gold2);color:#fff;border:none;border-radius:10px;padding:14px 28px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body);transition:background 0.2s}
+.btn-gold:hover{background:var(--gold)}
+.btn-outline-white{background:none;border:1.5px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.8);border-radius:10px;padding:13px 24px;font-size:14px;cursor:pointer;font-family:var(--font-body);transition:all 0.2s}
+.btn-outline-white:hover{border-color:rgba(255,255,255,0.5);color:#fff}
+.hero-stats{display:flex;gap:48px;margin-top:52px;padding-top:36px;border-top:1px solid rgba(255,255,255,0.08)}
+.hero-stat-val{font-family:var(--font-display);font-size:36px;font-weight:600;color:var(--gold3)}
+.hero-stat-label{font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px}
+.hero-visual{flex:1;display:flex;justify-content:center;align-items:center;position:relative;z-index:2}
+.hero-window{background:#111c28;border-radius:14px;border:1px solid rgba(255,255,255,0.08);width:480px;overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,0.4)}
+.hero-win-bar{background:#0d1520;padding:12px 16px;display:flex;align-items:center;gap:8px}
+.win-dot{width:10px;height:10px;border-radius:50%}
+.win-url{flex:1;background:rgba(255,255,255,0.06);border-radius:5px;padding:5px 10px;font-size:11px;color:rgba(255,255,255,0.35);margin:0 10px}
+.win-ai{background:var(--gold);color:#fff;font-size:11px;font-weight:600;padding:3px 10px;border-radius:5px}
+.hero-win-body{height:280px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hero-grid-bg{position:absolute;inset:0;background-image:linear-gradient(rgba(201,146,42,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(201,146,42,0.06) 1px,transparent 1px);background-size:30px 30px}
+.cube-wrap{position:relative;z-index:2}
+.cube-svg{width:120px;height:120px}
+.hero-win-footer{background:#0d1520;padding:12px 16px;display:flex;align-items:center;justify-content:space-between}
+.hero-win-footer span{font-size:12px;color:rgba(255,255,255,0.4)}
+.hero-win-btn{background:var(--gold2);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer}
+
+/* HOME sections */
+.home-section{padding:80px 80px}
+.section-label{font-size:11px;letter-spacing:0.1em;color:var(--gold);font-weight:500;margin-bottom:10px}
+.section-title{font-family:var(--font-display);font-size:40px;font-weight:500;color:var(--text);line-height:1.2;margin-bottom:6px}
+.section-sub{font-size:15px;color:var(--text3);margin-bottom:48px;max-width:520px}
+
+.category-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.cat-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:24px 20px;text-align:center;cursor:pointer;transition:all 0.2s}
+.cat-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,0.07)}
+.cat-icon{width:60px;height:60px;border-radius:12px;background:var(--cream2);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px}
+.cat-name{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px}
+.cat-count{font-size:12px;color:var(--text3)}
+
+.featured-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.feat-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.2s}
+.feat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,0.1);border-color:var(--border2)}
+.feat-img{height:200px;background:var(--cream2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.feat-img img{width:100px;height:100px;object-fit:contain;transition:transform 0.3s}
+.feat-card:hover .feat-img img{transform:scale(1.08)}
+.feat-badge{position:absolute;top:12px;left:12px;background:var(--navy);color:#fff;font-size:10px;font-weight:500;padding:3px 9px;border-radius:20px}
+.feat-badge.sale{background:#c0392b}
+.feat-body{padding:16px}
+.feat-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.feat-name{font-family:var(--font-display);font-size:17px;font-weight:500;color:var(--text);margin-bottom:8px;line-height:1.3}
+.feat-stars{display:flex;align-items:center;gap:4px;margin-bottom:10px}
+.feat-stars i{font-size:13px;color:var(--gold)}
+.feat-stars span{font-size:12px;color:var(--text3)}
+.feat-price-row{display:flex;align-items:center;justify-content:space-between}
+.feat-price{font-size:16px;font-weight:500;color:var(--gold)}
+.feat-price-old{font-size:12px;color:var(--text3);text-decoration:line-through;margin-left:6px}
+.feat-add{background:var(--navy);color:#fff;border:none;border-radius:7px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.feat-add:hover{background:var(--gold2)}
+.feat-add i{font-size:16px}
+
+/* ─────────────────────────────────────────
+   PAGE: PRODUCTS
+───────────────────────────────────────── */
+.product-hero{background:var(--navy);padding:48px 80px;display:flex;align-items:center;justify-content:space-between}
+.product-hero-left{}
+.product-hero-eyebrow{font-size:11px;letter-spacing:0.1em;color:var(--gold);font-weight:500;margin-bottom:10px}
+.product-hero-title{font-family:var(--font-display);font-size:52px;font-weight:500;color:#fff;line-height:1.1;margin-bottom:10px}
+.product-hero-sub{font-size:14px;color:rgba(255,255,255,0.5);max-width:500px}
+.product-hero-stats{display:flex;gap:0}
+.phs{padding:0 32px;text-align:center;border-right:1px solid rgba(255,255,255,0.1)}
+.phs:first-child{padding-left:0}
+.phs:last-child{border-right:none}
+.phs-val{font-family:var(--font-display);font-size:32px;font-weight:600;color:var(--gold3)}
+.phs-label{font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px}
+
+.product-toolbar{background:var(--white);border-bottom:1px solid var(--border);padding:14px 80px;display:flex;align-items:center;gap:12px}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:8px 14px;flex:0 0 280px}
+.search-box i{color:var(--text3);font-size:16px}
+.search-box input{background:none;border:none;outline:none;font-size:13px;color:var(--text);font-family:var(--font-body);width:100%}
+.search-box input::placeholder{color:var(--text3)}
+.filter-chips{display:flex;gap:8px;flex:1}
+.chip{padding:7px 14px;border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text2);cursor:pointer;transition:all 0.2s;white-space:nowrap;background:var(--white)}
+.chip:hover{border-color:var(--gold);color:var(--gold)}
+.chip.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.chip.sale{background:#fdf0ee;color:#c0392b;border-color:#e8c5c0}
+.view-toggle{display:flex;gap:4px;margin-left:auto}
+.view-btn{width:34px;height:34px;border-radius:6px;border:1px solid var(--border);background:var(--white);color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.view-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.view-btn i{font-size:16px}
+
+.product-layout{display:flex;gap:0;min-height:600px}
+.product-sidebar{width:260px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);padding:24px 20px}
+.sidebar-section{margin-bottom:24px}
+.sidebar-section-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;cursor:pointer}
+.sidebar-section-head span{font-size:12px;font-weight:500;color:var(--text);text-transform:uppercase;letter-spacing:0.06em}
+.sidebar-section-head i{font-size:16px;color:var(--text3)}
+.sidebar-cat-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;border-radius:7px;cursor:pointer;transition:background 0.15s;font-size:13px}
+.sidebar-cat-row:hover{background:var(--cream)}
+.sidebar-cat-row.active{background:var(--gold-pale);color:var(--gold)}
+.sidebar-cat-row .cnt{font-size:11px;color:var(--text3);background:var(--cream2);padding:2px 7px;border-radius:10px}
+.sidebar-cat-row.active .cnt{background:rgba(201,146,42,0.15);color:var(--gold)}
+.sidebar-folder{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sidebar-folder i{color:var(--gold);font-size:18px}
+.sidebar-folder span{font-size:13px;font-weight:500}
+.sidebar-badge{background:var(--gold);color:#fff;font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px;margin-left:auto}
+
+.product-main{flex:1;padding:24px 40px}
+.product-result-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.product-result-bar span{font-size:13px;color:var(--text3)}
+.sort-select{border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;background:var(--white);color:var(--text);outline:none;cursor:pointer;font-family:var(--font-body)}
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.p-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;cursor:pointer;transition:all 0.2s}
+.p-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,0.09);border-color:var(--border2)}
+.p-card-img{height:200px;background:var(--cream2);display:flex;align-items:center;justify-content:center;position:relative}
+.p-card-img img{width:90px;height:90px;object-fit:contain}
+.p-card-actions{position:absolute;bottom:10px;right:10px;display:flex;gap:6px;opacity:0;transition:opacity 0.2s}
+.p-card:hover .p-card-actions{opacity:1}
+.p-card-act-btn{width:32px;height:32px;border-radius:7px;background:var(--white);border:1px solid var(--border);color:var(--text2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:all 0.15s}
+.p-card-act-btn:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.p-card-body{padding:14px 16px}
+.p-card-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.p-card-name{font-family:var(--font-display);font-size:16px;font-weight:500;color:var(--text);margin-bottom:10px;line-height:1.3}
+.p-card-footer{display:flex;align-items:center;justify-content:space-between}
+.p-card-price{font-size:15px;font-weight:500;color:var(--gold)}
+.p-card-add{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:5px;transition:background 0.2s;font-family:var(--font-body)}
+.p-card-add:hover{background:var(--gold2)}
+.p-card-add i{font-size:13px}
+
+/* ─────────────────────────────────────────
+   PAGE: ORDER DETAIL
+───────────────────────────────────────── */
+.order-page{padding:40px 80px}
+.breadcrumb{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);margin-bottom:24px}
+.breadcrumb a{color:var(--text3);text-decoration:none;cursor:pointer}
+.breadcrumb a:hover{color:var(--gold)}
+.breadcrumb i{font-size:13px}
+.order-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px}
+.order-title{font-family:var(--font-display);font-size:36px;font-weight:500;color:var(--text);margin-bottom:6px}
+.order-meta{display:flex;align-items:center;gap:16px}
+.order-date{font-size:13px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.order-date i{font-size:14px}
+.status-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500}
+.status-badge.shipping{background:#e8f4ff;color:#1a6bb5}
+.status-badge.delivered{background:var(--green-bg);color:var(--green)}
+.status-badge.pending{background:#fff8e8;color:#a06010}
+.status-badge i{font-size:14px}
+.order-grid{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+
+/* Timeline */
+.timeline-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:24px;margin-bottom:20px}
+.card-title{font-size:15px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:20px}
+.card-title i{color:var(--gold);font-size:18px}
+.timeline{position:relative;padding-left:24px}
+.timeline::before{content:'';position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--border)}
+.tl-item{position:relative;padding-bottom:24px}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot{position:absolute;left:-24px;top:4px;width:14px;height:14px;border-radius:50%;background:var(--border);border:2px solid var(--white);z-index:1}
+.tl-dot.done{background:var(--green)}
+.tl-dot.active{background:var(--gold);box-shadow:0 0 0 4px rgba(201,146,42,0.15)}
+.tl-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.tl-title.active{color:var(--gold)}
+.tl-sub{font-size:12px;color:var(--text3)}
+.tl-time{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* items card */
+.order-items{display:flex;flex-direction:column;gap:0}
+.oi-row{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)}
+.oi-row:last-child{border-bottom:none}
+.oi-img{width:64px;height:64px;border-radius:9px;background:var(--cream2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.oi-img img{width:44px;height:44px;object-fit:contain}
+.oi-info{flex:1}
+.oi-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px}
+.oi-name{font-family:var(--font-display);font-size:15px;font-weight:500;color:var(--text);margin-bottom:3px}
+.oi-var{font-size:12px;color:var(--text3)}
+.oi-qty{font-size:12px;color:var(--text3);white-space:nowrap}
+.oi-price{font-size:15px;font-weight:500;color:var(--gold);white-space:nowrap}
+.oi-actions{display:flex;gap:8px}
+.oi-action-btn{background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;color:var(--text2);font-family:var(--font-body);transition:all 0.2s;display:flex;align-items:center;gap:5px}
+.oi-action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.oi-action-btn i{font-size:13px}
+
+/* summary sidebar */
+.summary-sidebar{display:flex;flex-direction:column;gap:16px}
+.sidebar-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+.sidebar-card-head{background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:8px}
+.sidebar-card-head i{color:var(--gold);font-size:17px}
+.sidebar-card-head span{color:#fff;font-size:13px;font-weight:500}
+.sidebar-card-body{padding:16px 18px}
+.sc-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text3);padding:5px 0}
+.sc-row.total{font-size:15px;font-weight:500;color:var(--text);border-top:1px solid var(--border);padding-top:12px;margin-top:6px}
+.sc-row.total span:last-child{color:var(--gold)}
+.addr-line{font-size:13px;color:var(--text2);line-height:1.7}
+.addr-line strong{color:var(--text);display:block;margin-bottom:4px;font-weight:500}
+
+/* action btns */
+.order-actions{display:flex;gap:10px;margin-top:0}
+.btn-navy{background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 20px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:6px;transition:background 0.2s}
+.btn-navy:hover{background:var(--gold2)}
+.btn-navy i{font-size:14px}
+.btn-ghost{background:none;border:1px solid var(--border);border-radius:9px;padding:10px 18px;font-size:13px;cursor:pointer;color:var(--text2);font-family:var(--font-body);display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+.btn-ghost i{font-size:14px}
+.btn-danger{background:none;border:1px solid #e8c5c0;border-radius:9px;padding:10px 18px;font-size:13px;cursor:pointer;color:var(--red);font-family:var(--font-body);display:flex;align-items:center;gap:6px;transition:all 0.2s}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-danger i{font-size:14px}
+
+/* ─────────────────────────────────────────
+   PROFILE SIDEBAR LAYOUT
+───────────────────────────────────────── */
+.account-layout{display:flex;min-height:calc(100vh - 60px)}
+.account-sidebar{width:280px;flex-shrink:0;background:var(--white);border-right:1px solid var(--border);padding:32px 24px}
+.acct-avatar{width:64px;height:64px;border-radius:50%;background:var(--gold2);color:#fff;font-size:22px;font-weight:500;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.acct-name{font-family:var(--font-display);font-size:24px;font-weight:500;color:var(--text);margin-bottom:4px}
+.acct-email{font-size:13px;color:var(--text3);margin-bottom:20px}
+.acct-stats{display:flex;gap:0;margin-bottom:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.acct-stat{flex:1;padding:12px 10px;text-align:center;border-right:1px solid var(--border)}
+.acct-stat:last-child{border-right:none}
+.acct-stat-val{font-size:18px;font-weight:500;color:var(--text)}
+.acct-stat-val.gold{color:var(--gold)}
+.acct-stat-val.green{color:var(--green)}
+.acct-stat-label{font-size:11px;color:var(--text3);margin-top:2px}
+.acct-menu-label{font-size:10px;letter-spacing:0.08em;color:var(--text3);font-weight:500;margin-bottom:8px;margin-top:20px}
+.acct-menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all 0.15s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-body)}
+.acct-menu-item:hover{background:var(--cream);color:var(--text)}
+.acct-menu-item.active{background:var(--gold-pale);color:var(--gold)}
+.acct-menu-item i{font-size:16px;flex-shrink:0}
+.acct-menu-item.active i{color:var(--gold)}
+
+.account-content{flex:1;padding:32px 40px;background:var(--cream)}
+
+/* ─── CART PAGE (profile) ─── */
+.cart-page-title{font-size:18px;font-weight:500;margin-bottom:20px;color:var(--text);display:flex;align-items:center;gap:10px}
+.cart-page-title i{color:var(--gold);font-size:20px}
+.cart-full-item{background:var(--white);border-radius:var(--r);border:1px solid var(--border);display:flex;align-items:center;gap:20px;padding:18px 20px;margin-bottom:12px;transition:border 0.2s}
+.cart-full-item:hover{border-color:var(--border2)}
+.cfi-img{width:80px;height:80px;border-radius:10px;background:var(--cream2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cfi-img img{width:56px;height:56px;object-fit:contain}
+.cfi-info{flex:1}
+.cfi-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:3px}
+.cfi-name{font-family:var(--font-display);font-size:18px;font-weight:500;color:var(--text);margin-bottom:4px}
+.cfi-var{font-size:12px;color:var(--text3)}
+.cfi-qty-row{display:flex;align-items:center;gap:12px;margin-top:10px}
+.qty-ctrl{display:flex;align-items:center;background:var(--cream);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.qty-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;font-size:16px;color:var(--text);display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.qty-btn:hover{background:var(--cream2)}
+.qty-num{width:36px;text-align:center;font-size:13px;font-weight:500;color:var(--text)}
+.cfi-price{font-size:20px;font-weight:500;color:var(--gold);margin-left:auto;white-space:nowrap}
+.cfi-remove{background:none;border:none;color:var(--text3);cursor:pointer;padding:6px;border-radius:7px;transition:all 0.15s;margin-left:12px}
+.cfi-remove:hover{background:var(--red-bg);color:var(--red)}
+.cfi-remove i{font-size:18px}
+
+.cart-summary-row{background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:20px;margin-top:8px;display:flex;align-items:center;justify-content:space-between}
+.cart-total-label{font-size:14px;color:var(--text3)}
+.cart-total-val{font-family:var(--font-display);font-size:28px;font-weight:600;color:var(--gold)}
+.cart-checkout-btn{background:var(--gold2);color:#fff;border:none;border-radius:10px;padding:13px 32px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;gap:8px;transition:background 0.2s}
+.cart-checkout-btn:hover{background:var(--gold)}
+.cart-checkout-btn i{font-size:16px}
+
+/* ─────────────────────────────────────────
+   CART DRAWER (overlay)
+───────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:800;opacity:0;pointer-events:none;transition:opacity 0.3s}
+.overlay.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:420px;background:var(--white);z-index:801;transform:translateX(105%);transition:transform 0.38s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer-head{background:var(--navy);padding:18px 22px;display:flex;align-items:center;justify-content:space-between}
+.drawer-title-wrap{display:flex;align-items:center;gap:10px}
+.drawer-title-wrap i{color:var(--gold);font-size:20px}
+.drawer-title{color:#fff;font-size:16px;font-weight:500}
+.drawer-cnt{background:var(--gold);color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px}
+.drawer-close{background:rgba(255,255,255,0.1);border:none;color:#fff;width:32px;height:32px;border-radius:7px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+.drawer-close:hover{background:rgba(255,255,255,0.2)}
+.drawer-close i{font-size:17px}
+.ship-bar{background:var(--cream2);padding:11px 20px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text3)}
+.ship-bar span{color:var(--gold);font-weight:500}
+.ship-progress{height:3px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+.ship-fill{height:100%;background:var(--gold3);border-radius:3px;transition:width 0.5s}
+.drawer-body{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+.drawer-body::-webkit-scrollbar{width:3px}
+.drawer-body::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.d-item{display:flex;gap:13px;background:var(--cream);border-radius:10px;padding:13px;border:1px solid var(--border);animation:fadeUp 0.25s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.d-item-img{width:64px;height:64px;border-radius:8px;background:var(--white);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.d-item-img img{width:44px;height:44px;object-fit:contain}
+.d-item-info{flex:1;min-width:0}
+.d-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.d-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0 3px}
+.d-var{font-size:11px;color:var(--text3)}
+.d-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.d-price{font-size:14px;font-weight:500;color:var(--gold)}
+.d-qty-ctrl{display:flex;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.d-qty-btn{width:26px;height:26px;border:none;background:transparent;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:background 0.15s}
+.d-qty-btn:hover{background:var(--cream2)}
+.d-qty-num{width:26px;text-align:center;font-size:12px;font-weight:500}
+.d-remove{background:none;border:none;color:var(--text3);cursor:pointer;padding:3px;border-radius:5px;transition:color 0.15s;margin-left:6px}
+.d-remove:hover{color:var(--red)}
+.d-remove i{font-size:14px}
+.drawer-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;text-align:center;padding:40px}
+.drawer-empty i{font-size:44px;color:var(--cream3)}
+.drawer-empty p:first-of-type{font-size:14px;font-weight:500}
+.drawer-empty p:last-of-type{font-size:13px;color:var(--text3)}
+.drawer-foot{padding:18px 20px;border-top:1px solid var(--border)}
+.coupon-row{display:flex;gap:8px;margin-bottom:14px}
+.coupon-row input{flex:1;border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px;outline:none;font-family:var(--font-body);color:var(--text);transition:border 0.2s}
+.coupon-row input:focus{border-color:var(--gold)}
+.coupon-row button{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.2s;font-family:var(--font-body)}
+.coupon-row button:hover{background:var(--gold2)}
+.price-summary{margin-bottom:14px}
+.ps-row{display:flex;justify-content:space-between;font-size:13px;color:var(--text3);padding:4px 0}
+.ps-row.total{font-size:16px;font-weight:500;color:var(--text);border-top:1px solid var(--border);padding-top:10px;margin-top:4px}
+.ps-row.total span:last-child{color:var(--gold)}
+.drawer-checkout-btn{width:100%;background:var(--gold2);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.2s}
+.drawer-checkout-btn:hover{background:var(--gold)}
+.drawer-checkout-btn i{font-size:16px}
+.secure-line{display:flex;justify-content:center;align-items:center;gap:5px;margin-top:8px;font-size:11px;color:var(--text3)}
+.secure-line i{font-size:13px;color:var(--gold)}
+
+/* ─── TOAST ─── */
+.toast{position:fixed;top:76px;right:24px;background:var(--navy);border-left:3px solid var(--gold);border-radius:10px;padding:13px 16px;display:flex;align-items:center;gap:12px;z-index:900;transform:translateX(130%);transition:transform 0.32s cubic-bezier(.34,1.56,.64,1);max-width:320px}
+.toast.show{transform:translateX(0)}
+.toast-icon{width:34px;height:34px;border-radius:8px;background:rgba(201,146,42,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast-icon i{color:var(--gold);font-size:17px}
+.toast-text p:first-child{font-size:13px;font-weight:500;color:#fff;margin-bottom:2px}
+.toast-text p:last-child{font-size:11px;color:rgba(255,255,255,0.5)}
+.toast-x{background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:17px;margin-left:auto;padding:0 0 0 8px;line-height:1}
+
+/* ─────────────────────────────────────────
+   NOTIFICATION DROPDOWN
+───────────────────────────────────────── */
+.notif-dropdown{position:fixed;top:68px;right:100px;width:360px;background:var(--white);border-radius:var(--r);border:1px solid var(--border);z-index:700;display:none;box-shadow:0 12px 40px rgba(0,0,0,0.12)}
+.notif-dropdown.open{display:block}
+.notif-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.notif-head-left{display:flex;align-items:center;gap:8px}
+.notif-head-left span{font-size:15px;font-weight:500;color:var(--text)}
+.notif-head-left .n-cnt{background:var(--gold);color:#fff;font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px}
+.notif-read-all{font-size:12px;color:var(--gold);cursor:pointer}
+.notif-tabs{display:flex;padding:10px 18px;gap:4px;border-bottom:1px solid var(--border)}
+.n-tab{padding:5px 12px;border-radius:15px;font-size:12px;color:var(--text3);cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:4px}
+.n-tab.active{background:var(--navy);color:#fff}
+.n-tab .dot{width:6px;height:6px;border-radius:50%;background:#e74c3c}
+.notif-list{max-height:300px;overflow-y:auto}
+.n-item{display:flex;gap:12px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.15s}
+.n-item:hover{background:var(--cream)}
+.n-item:last-child{border-bottom:none}
+.n-item-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.n-item-icon.blue{background:#e8f4ff;color:#1a6bb5}
+.n-item-icon.gold{background:var(--gold-pale);color:var(--gold)}
+.n-item-icon.purple{background:#f0ecff;color:#6941c6}
+.n-item-icon.green{background:var(--green-bg);color:var(--green)}
+.n-item-icon i{font-size:17px}
+.n-item-body{flex:1}
+.n-item-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.n-item-sub{font-size:12px;color:var(--text3);line-height:1.4}
+.n-item-time{font-size:11px;color:var(--text3);margin-top:4px;display:flex;align-items:center;gap:4px}
+.n-item-time .dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.notif-footer{padding:10px 18px;text-align:center;border-top:1px solid var(--border)}
+.notif-footer a{font-size:13px;color:var(--gold);cursor:pointer}
+
+/* ─── FOOTER ─── */
+footer{background:var(--navy);padding:48px 80px 28px;margin-top:auto}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:36px}
+.footer-brand-logo{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.footer-brand-logo span{color:#fff;font-family:var(--font-display);font-size:18px;font-weight:500}
+.footer-brand-desc{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:280px;margin-bottom:20px}
+.footer-social{display:flex;gap:8px}
+.soc-btn{width:34px;height:34px;border-radius:8px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+.soc-btn:hover{background:var(--gold2);color:#fff}
+.soc-btn i{font-size:16px}
+.footer-col-title{font-size:12px;letter-spacing:0.08em;color:rgba(255,255,255,0.35);font-weight:500;margin-bottom:16px;text-transform:uppercase}
+.footer-link{display:block;font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:10px;cursor:pointer;transition:color 0.2s;text-decoration:none}
+.footer-link:hover{color:var(--gold3)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding-top:20px;display:flex;align-items:center;justify-content:space-between}
+.footer-bottom span{font-size:12px;color:rgba(255,255,255,0.3)}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon"><i class="ti ti-shopping-cart-plus" aria-hidden="true"></i></div>
+  <div class="toast-text">
+    <p id="toastName">Sản phẩm</p>
+    <p>Đã thêm vào giỏ hàng</p>
+  </div>
+  <button class="toast-x" onclick="closeToast()">×</button>
+</div>
+
+<!-- NOTIFICATION DROPDOWN -->
+<div class="notif-dropdown" id="notifDropdown">
+  <div class="notif-head">
+    <div class="notif-head-left">
+      <span>Thông báo</span>
+      <span class="n-cnt">4</span>
+    </div>
+    <span class="notif-read-all">Đọc tất cả</span>
+  </div>
+  <div class="notif-tabs">
+    <div class="n-tab active">Tất cả <span class="dot"></span></div>
+    <div class="n-tab">Đơn hàng <span class="dot"></span></div>
+    <div class="n-tab">Khuyến mãi <span class="dot"></span></div>
+    <div class="n-tab">Hệ thống <span class="dot"></span></div>
+    <div class="n-tab">Đánh giá <span class="dot"></span></div>
+  </div>
+  <div class="notif-list">
+    <div class="n-item" onclick="navigate('order')">
+      <div class="n-item-icon blue"><i class="ti ti-truck-delivery" aria-hidden="true"></i></div>
+      <div class="n-item-body">
+        <div class="n-item-title">Đơn hàng đang được giao</div>
+        <div class="n-item-sub">Đơn hàng #LX-2026-0948 đã rời kho và đang trên đường giao đến bạn.</div>
+        <div class="n-item-time"><span class="dot"></span>10 phút trước</div>
+      </div>
+    </div>
+    <div class="n-item">
+      <div class="n-item-icon gold"><i class="ti ti-gift" aria-hidden="true"></i></div>
+      <div class="n-item-body">
+        <div class="n-item-title">Flash Sale cuối tuần giảm 30%</div>
+        <div class="n-item-sub">Ưu đãi đặc biệt cho bộ sưu tập Heritage Collection, chỉ còn 2 ngày.</div>
+        <div class="n-item-time"><span class="dot"></span>1 giờ trước</div>
+      </div>
+    </div>
+    <div class="n-item">
+      <div class="n-item-icon purple"><i class="ti ti-star" aria-hidden="true"></i></div>
+      <div class="n-item-body">
+        <div class="n-item-title">Hãy đánh giá sản phẩm vừa nhận</div>
+        <div class="n-item-sub">Bạn vừa nhận Sofa Nordic 3 chỗ. Chia sẻ để nhận 50.000 điểm thưởng.</div>
+        <div class="n-item-time"><span class="dot"></span>3 giờ trước</div>
+      </div>
+    </div>
+    <div class="n-item">
+      <div class="n-item-icon green"><i class="ti ti-circle-check" aria-hidden="true"></i></div>
+      <div class="n-item-body">
+        <div class="n-item-title">Tài khoản được xác thực thành công</div>
+        <div class="n-item-sub">Tài khoản của bạn đã được xác minh danh tính.</div>
+        <div class="n-item-time">5 giờ trước</div>
+      </div>
+    </div>
+  </div>
+  <div class="notif-footer"><a>Xem tất cả</a></div>
+</div>
+
+<!-- OVERLAY + DRAWER -->
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer" role="dialog" aria-label="Giỏ hàng">
+  <div class="drawer-head">
+    <div class="drawer-title-wrap">
+      <i class="ti ti-shopping-bag" aria-hidden="true"></i>
+      <span class="drawer-title">Giỏ hàng</span>
+      <span class="drawer-cnt" id="drawerCnt">0</span>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()" aria-label="Đóng"><i class="ti ti-x" aria-hidden="true"></i></button>
+  </div>
+  <div class="ship-bar">
+    <span id="shipMsg">Thêm <span>1.500.000₫</span> để được <strong>miễn phí vận chuyển</strong> 🚚</span>
+    <div class="ship-progress"><div class="ship-fill" id="shipFill" style="width:0%"></div></div>
+  </div>
+  <div class="drawer-body" id="drawerBody">
+    <div class="drawer-empty" id="drawerEmpty">
+      <i class="ti ti-shopping-cart-off" aria-hidden="true"></i>
+      <p>Giỏ hàng trống</p>
+      <p>Hãy thêm sản phẩm yêu thích</p>
+    </div>
+  </div>
+  <div class="drawer-foot">
+    <div class="coupon-row"><input type="text" placeholder="Nhập mã giảm giá..."><button>Áp dụng</button></div>
+    <div class="price-summary">
+      <div class="ps-row"><span>Tạm tính</span><span id="dSubtotal">0₫</span></div>
+      <div class="ps-row"><span>Vận chuyển</span><span id="dShip">Tính sau</span></div>
+      <div class="ps-row total"><span>Tổng cộng</span><span id="dTotal">0₫</span></div>
+    </div>
+    <button class="drawer-checkout-btn" onclick="navigate('checkout')">
+      <i class="ti ti-lock" aria-hidden="true"></i> Tiến hành thanh toán
+    </button>
+    <div class="secure-line"><i class="ti ti-shield-check" aria-hidden="true"></i> Thanh toán an toàn · SSL 256-bit</div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" onclick="navigate('home')"><div class="nav-logo-dot"></div>LUXNEST</a>
+  <div class="nav-links">
+    <a class="nav-link active" id="nl-home" onclick="navigate('home')">Trang Chủ</a>
+    <a class="nav-link" id="nl-products" onclick="navigate('products')">Sản phẩm</a>
+    <a class="nav-link">Trực quan 3D</a>
+    <a class="nav-link" id="nl-order" onclick="navigate('order')">Dự án</a>
+    <a class="nav-link">Liên hệ</a>
+  </div>
+  <button class="nav-cta" onclick="navigate('products')"><i class="ti ti-box-model-2" aria-hidden="true"></i> Trực quan hoa</button>
+  <div class="nav-icons">
+    <button class="nav-icon-btn" onclick="toggleNotif()" aria-label="Thông báo">
+      <i class="ti ti-bell" aria-hidden="true"></i>
+      <span class="nav-badge"></span>
+    </button>
+    <button class="nav-icon-btn" onclick="openDrawer()" aria-label="Giỏ hàng" style="position:relative">
+      <i class="ti ti-shopping-cart" aria-hidden="true"></i>
+      <span class="nav-cart-count" id="navCartCnt" style="display:none">0</span>
+    </button>
+    <button class="nav-icon-btn" onclick="navigate('profile')" aria-label="Tài khoản"><i class="ti ti-user" aria-hidden="true"></i></button>
+  </div>
+</nav>
+
+<!-- ═══════════════ PAGE: HOME ═══════════════ -->
+<div class="page active" id="page-home">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge"><i class="ti ti-sparkles" style="font-size:13px" aria-hidden="true"></i> AI-POWERED 3D INTERIOR DESIGN</div>
+      <h1 class="hero-title">Trang trí nhà với<br><em>trí tuệ</em><br>nhân tạo trực quan</h1>
+      <p class="hero-sub">Tải ảnh phòng của bạn – AI phân tích không gian, gợi ý nội thất phù hợp và trực quan hóa ngay dạng mô hình 3D tương tác.</p>
+      <div class="hero-btns">
+        <button class="btn-gold" onclick="navigate('products')">Thử trực quan 3D</button>
+        <button class="btn-outline-white" onclick="navigate('products')">Khám phá sản phẩm</button>
+      </div>
+      <div class="hero-stats">
+        <div><div class="hero-stat-val">300+</div><div class="hero-stat-label">Sản phẩm 3D</div></div>
+        <div><div class="hero-stat-val">12K</div><div class="hero-stat-label">Dự án hoàn thành</div></div>
+        <div><div class="hero-stat-val">1 Năm</div><div class="hero-stat-label">Đồng hành</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-window">
+        <div class="hero-win-bar">
+          <div class="win-dot" style="background:#ff5f57"></div>
+          <div class="win-dot" style="background:#febc2e"></div>
+          <div class="win-dot" style="background:#28c840"></div>
+          <div class="win-url">luxnest://room-visualizer</div>
+          <div class="win-ai">AI</div>
+        </div>
+        <div class="hero-win-body">
+          <div class="hero-grid-bg"></div>
+          <div class="cube-wrap">
+            <svg class="cube-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="20" y1="90" x2="120" y2="90" stroke="#c9922a" stroke-width="1.5" opacity="0.4"/>
+              <polygon points="60,20 100,42 100,85 60,63" fill="none" stroke="#c9922a" stroke-width="1.5" opacity="0.9"/>
+              <polygon points="60,20 20,42 20,85 60,63" fill="none" stroke="#c9922a" stroke-width="1.5" opacity="0.7"/>
+              <polygon points="60,63 100,85 60,107 20,85" fill="none" stroke="#c9922a" stroke-width="1.5" opacity="0.6"/>
+              <line x1="60" y1="20" x2="60" y2="63" stroke="#e8b84b" stroke-width="1" stroke-dasharray="4 3" opacity="0.5"/>
+            </svg>
+          </div>
+        </div>
+        <div class="hero-win-footer">
+          <span>Tải ảnh phòng hoặc chọn phòng có sẵn để bắt đầu.</span>
+          <button class="hero-win-btn">Bắt đầu</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories -->
+  <div class="home-section">
+    <div class="section-label">DANH MỤC SẢN PHẨM</div>
+    <h2 class="section-title">Khám phá từng không gian</h2>
+    <p class="section-sub">Từ phòng ngủ đến phòng bếp, chúng tôi có tất cả.</p>
+    <div class="category-grid">
+      <div class="cat-card" onclick="navigate('products')">
+        <div class="cat-icon">🛏️</div>
+        <div class="cat-name">Phòng ngủ</div>
+        <div class="cat-count">248 sản phẩm</div>
+      </div>
+      <div class="cat-card" onclick="navigate('products')">
+        <div class="cat-icon">🛋️</div>
+        <div class="cat-name">Phòng khách</div>
+        <div class="cat-count">183 sản phẩm</div>
+      </div>
+      <div class="cat-card" onclick="navigate('products')">
+        <div class="cat-icon">🍳</div>
+        <div class="cat-name">Phòng bếp</div>
+        <div class="cat-count">120 sản phẩm</div>
+      </div>
+      <div class="cat-card" onclick="navigate('products')">
+        <div class="cat-icon">💼</div>
+        <div class="cat-name">Văn phòng</div>
+        <div class="cat-count">96 sản phẩm</div>
+      </div>
+      <div class="cat-card" onclick="navigate('products')">
+        <div class="cat-icon">🪴</div>
+        <div class="cat-name">Phụ kiện</div>
+        <div class="cat-count">312 sản phẩm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Featured -->
+  <div class="home-section" style="padding-top:0">
+    <div class="section-label">NỔI BẬT · HERITAGE COLLECTION</div>
+    <h2 class="section-title">Sản phẩm được yêu thích</h2>
+    <p class="section-sub">Tinh tuyển từ các thương hiệu nội thất hàng đầu.</p>
+    <div class="featured-grid">
+      <div class="feat-card">
+        <div class="feat-img">
+          <img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" alt="bed">
+          <span class="feat-badge">Mới</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-cat">Giường ngủ</div>
+          <div class="feat-name">Giường Walnut Premium</div>
+          <div class="feat-stars"><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-half-filled" aria-hidden="true"></i><span>4.8 (124)</span></div>
+          <div class="feat-price-row">
+            <div><span class="feat-price">12.500.000₫</span></div>
+            <button class="feat-add" onclick="addToCart('Giường Walnut Premium','Giường ngủ','12500000','https://cdn-icons-png.flaticon.com/128/2649/2649615.png','Walnut / King 180cm')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-img">
+          <img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" alt="sofa">
+          <span class="feat-badge sale">-30%</span>
+        </div>
+        <div class="feat-body">
+          <div class="feat-cat">Ghế sofa</div>
+          <div class="feat-name">Sofa Nordic 3 chỗ</div>
+          <div class="feat-stars"><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><span>5.0 (89)</span></div>
+          <div class="feat-price-row">
+            <div><span class="feat-price">8.500.000₫</span><span class="feat-price-old">12.100.000₫</span></div>
+            <button class="feat-add" onclick="addToCart('Sofa Nordic 3 chỗ','Ghế sofa','8500000','https://cdn-icons-png.flaticon.com/128/3669/3669880.png','Xám nhạt / 3 chỗ')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-img">
+          <img src="https://cdn-icons-png.flaticon.com/128/2704/2704015.png" alt="lamp">
+        </div>
+        <div class="feat-body">
+          <div class="feat-cat">Đèn ngủ</div>
+          <div class="feat-name">Đèn sàn Japandi Oak</div>
+          <div class="feat-stars"><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star" aria-hidden="true"></i><span>4.2 (56)</span></div>
+          <div class="feat-price-row">
+            <div><span class="feat-price">2.200.000₫</span></div>
+            <button class="feat-add" onclick="addToCart('Đèn sàn Japandi Oak','Đèn ngủ','2200000','https://cdn-icons-png.flaticon.com/128/2704/2704015.png','Gỗ tự nhiên / E27')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="feat-card">
+        <div class="feat-img">
+          <img src="https://cdn-icons-png.flaticon.com/128/1374/1374064.png" alt="chair">
+        </div>
+        <div class="feat-body">
+          <div class="feat-cat">Ghế</div>
+          <div class="feat-name">Ghế ergonomic ProFlex X1</div>
+          <div class="feat-stars"><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-filled" aria-hidden="true"></i><i class="ti ti-star-half-filled" aria-hidden="true"></i><span>4.6 (201)</span></div>
+          <div class="feat-price-row">
+            <div><span class="feat-price">2.400.000₫</span></div>
+            <button class="feat-add" onclick="addToCart('Ghế ergonomic ProFlex X1','Ghế','2400000','https://cdn-icons-png.flaticon.com/128/1374/1374064.png','Đen / Lưới thoáng khí')"><i class="ti ti-plus" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-logo"><div style="width:10px;height:10px;border-radius:50%;background:var(--gold);margin-right:2px"></div><span>LUXNEST</span></div>
+        <p class="footer-brand-desc">Nền tảng thiết kế nội thất thông minh kết hợp AI và mô hình 3D tương tác cho không gian sống hoàn hảo.</p>
+        <div class="footer-social">
+          <button class="soc-btn"><i class="ti ti-brand-facebook" aria-hidden="true"></i></button>
+          <button class="soc-btn"><i class="ti ti-brand-instagram" aria-hidden="true"></i></button>
+          <button class="soc-btn"><i class="ti ti-brand-youtube" aria-hidden="true"></i></button>
+          <button class="soc-btn"><i class="ti ti-brand-tiktok" aria-hidden="true"></i></button>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Sản phẩm</div>
+        <a class="footer-link">Phòng ngủ</a>
+        <a class="footer-link">Phòng khách</a>
+        <a class="footer-link">Phòng bếp</a>
+        <a class="footer-link">Văn phòng</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Hỗ trợ</div>
+        <a class="footer-link">Trung tâm hỗ trợ</a>
+        <a class="footer-link">Chính sách đổi trả</a>
+        <a class="footer-link">Vận chuyển</a>
+        <a class="footer-link">Liên hệ</a>
+      </div>
+      <div>
+        <div class="footer-col-title">Công ty</div>
+        <a class="footer-link">Về chúng tôi</a>
+        <a class="footer-link">Tuyển dụng</a>
+        <a class="footer-link">Blog</a>
+        <a class="footer-link">Đối tác</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 LUXNEST. All rights reserved.</span>
+      <span>Thiết kế với ❤️ cho không gian sống Việt</span>
+    </div>
+  </footer>
+</div>
+
+<!-- ═══════════════ PAGE: PRODUCTS ═══════════════ -->
+<div class="page" id="page-products">
+  <div class="product-hero">
+    <div class="product-hero-left">
+      <div class="product-hero-eyebrow">DANH MỤC · HERITAGE COLLECTION</div>
+      <h1 class="product-hero-title">Nội thất Phòng ngủ</h1>
+      <p class="product-hero-sub">Khám phá sản phẩm tinh tuyển cho không gian thư giãn hoàn hảo.</p>
+    </div>
+    <div class="product-hero-stats">
+      <div class="phs"><div class="phs-val">248</div><div class="phs-label">Sản phẩm</div></div>
+      <div class="phs"><div class="phs-val" style="font-style:italic">12</div><div class="phs-label">Thương hiệu</div></div>
+      <div class="phs"><div class="phs-val">4.9★</div><div class="phs-label">Đánh giá TB</div></div>
+    </div>
+  </div>
+
+  <!-- breadcrumb -->
+  <div style="padding:12px 80px;background:var(--white);border-bottom:1px solid var(--border);font-size:13px;color:var(--text3);display:flex;align-items:center;gap:6px">
+    <span style="cursor:pointer;color:var(--text3)" onclick="navigate('products')">Sản phẩm</span>
+    <i class="ti ti-chevron-right" style="font-size:13px" aria-hidden="true"></i>
+    <span style="color:var(--text)">Phòng ngủ</span>
+  </div>
+
+  <div class="product-toolbar">
+    <div class="search-box"><i class="ti ti-search" aria-hidden="true"></i><input type="text" placeholder="Tìm kiếm sản phẩm..."></div>
+    <div class="filter-chips">
+      <div class="chip active">Giường ngủ</div>
+      <div class="chip">Tủ quần áo</div>
+      <div class="chip">Đầu tủ</div>
+      <div class="chip">Bàn trang điểm</div>
+      <div class="chip">Đèn ngủ</div>
+      <div class="chip sale">Sale -30%</div>
+    </div>
+    <div class="view-toggle">
+      <button class="view-btn active"><i class="ti ti-layout-grid" aria-hidden="true"></i></button>
+      <button class="view-btn"><i class="ti ti-list" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+  <div class="product-layout">
+    <div class="product-sidebar">
+      <div class="sidebar-folder">
+        <i class="ti ti-folder" aria-hidden="true"></i>
+        <span>Danh mục</span>
+        <span class="sidebar-badge">248</span>
+        <i class="ti ti-chevron-up" style="font-size:14px;color:var(--text3);margin-left:auto" aria-hidden="true"></i>
+      </div>
+      <div class="sidebar-cat-row active"><span>Tất cả phòng ngủ</span><span class="cnt">248</span></div>
+      <div class="sidebar-cat-row"><span>Giường ngủ</span><span class="cnt">87</span></div>
+      <div class="sidebar-cat-row"><span>Tủ quần áo</span><span class="cnt">54</span></div>
+      <div class="sidebar-cat-row"><span>Đầu tủ & kệ</span><span class="cnt">38</span></div>
+      <div class="sidebar-cat-row"><span>Bàn trang điểm</span><span class="cnt">29</span></div>
+      <div class="sidebar-cat-row"><span>Đèn & phụ kiện</span><span class="cnt">40</span></div>
+
+      <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+      <div class="sidebar-section-head">
+        <span>Mức giá</span><i class="ti ti-chevron-up" style="font-size:14px" aria-hidden="true"></i>
+      </div>
+      <div style="padding:8px 0">
+        <input type="range" min="0" max="50000000" value="25000000" style="width:100%;accent-color:var(--gold)">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);margin-top:4px">
+          <span>0₫</span><span>25.000.000₫</span>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+      <div class="sidebar-section-head">
+        <span>Thương hiệu</span><i class="ti ti-chevron-up" style="font-size:14px" aria-hidden="true"></i>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" checked style="accent-color:var(--gold)"> LUXNEST Original</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"> Heritage & Co.</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"> Nordic House</label>
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer"><input type="checkbox" style="accent-color:var(--gold)"> Japandi Living</label>
+      </div>
+    </div>
+
+    <div class="product-main">
+      <div class="product-result-bar">
+        <span>Tìm thấy <strong>6 sản phẩm</strong></span>
+        <select class="sort-select"><option>Phổ biến nhất</option><option>Giá thấp đến cao</option><option>Giá cao đến thấp</option><option>Mới nhất</option></select>
+      </div>
+      <div class="product-grid">
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" alt="bed">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Giường ngủ</div>
+            <div class="p-card-name">Giường Walnut Premium</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">12.500.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Giường Walnut Premium','Giường ngủ','12500000','https://cdn-icons-png.flaticon.com/128/2649/2649615.png','Walnut / King 180cm')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" alt="bed2">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Giường ngủ</div>
+            <div class="p-card-name">Giường Nordic Oak</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">9.800.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Giường Nordic Oak','Giường ngủ','9800000','https://cdn-icons-png.flaticon.com/128/2649/2649615.png','Oak / Queen 160cm')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/1374/1374064.png" alt="chair">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Ghế</div>
+            <div class="p-card-name">Ghế ergonomic ProFlex X1</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">2.400.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Ghế ergonomic ProFlex X1','Ghế','2400000','https://cdn-icons-png.flaticon.com/128/1374/1374064.png','Đen / Lưới thoáng khí')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" alt="sofa">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Ghế sofa</div>
+            <div class="p-card-name">Sofa Nordic 3 chỗ</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">8.500.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Sofa Nordic 3 chỗ','Ghế sofa','8500000','https://cdn-icons-png.flaticon.com/128/3669/3669880.png','Xám nhạt / 3 chỗ')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/2704/2704015.png" alt="lamp">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Đèn ngủ</div>
+            <div class="p-card-name">Đèn treo trần Rattan Boho</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">920.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Đèn treo trần Rattan Boho','Đèn ngủ','920000','https://cdn-icons-png.flaticon.com/128/2704/2704015.png','Tự nhiên / E27')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-card">
+          <div class="p-card-img">
+            <img src="https://cdn-icons-png.flaticon.com/128/2704/2704015.png" alt="lamp2">
+            <div class="p-card-actions">
+              <button class="p-card-act-btn"><i class="ti ti-heart" aria-hidden="true"></i></button>
+              <button class="p-card-act-btn"><i class="ti ti-eye" aria-hidden="true"></i></button>
+            </div>
+          </div>
+          <div class="p-card-body">
+            <div class="p-card-cat">Đèn ngủ</div>
+            <div class="p-card-name">Đèn sàn Japandi Oak</div>
+            <div class="p-card-footer">
+              <span class="p-card-price">2.200.000₫</span>
+              <button class="p-card-add" onclick="addToCart('Đèn sàn Japandi Oak','Đèn ngủ','2200000','https://cdn-icons-png.flaticon.com/128/2704/2704015.png','Gỗ tự nhiên / E27')"><i class="ti ti-plus" aria-hidden="true"></i> Thêm vào giỏ</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: ORDER ═══════════════ -->
+<div class="page" id="page-order">
+  <div class="order-page">
+    <div class="breadcrumb">
+      <a onclick="navigate('profile')">Tài khoản</a>
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
+      <a onclick="navigate('profile')">Đơn hàng</a>
+      <i class="ti ti-chevron-right" aria-hidden="true"></i>
+      <span style="color:var(--text)">#LX-2026-0948</span>
+    </div>
+
+    <div class="order-header">
+      <div>
+        <h1 class="order-title">Đơn hàng #LX-2026-0948</h1>
+        <div class="order-meta">
+          <div class="order-date"><i class="ti ti-calendar" aria-hidden="true"></i> Đặt ngày 14 tháng 5, 2026 · 15:27</div>
+          <div class="status-badge shipping"><i class="ti ti-truck" aria-hidden="true"></i> Đang giao hàng</div>
+        </div>
+      </div>
+      <div class="order-actions">
+        <button class="btn-ghost"><i class="ti ti-printer" aria-hidden="true"></i> In hóa đơn</button>
+        <button class="btn-navy"><i class="ti ti-headset" aria-hidden="true"></i> Liên hệ hỗ trợ</button>
+        <button class="btn-danger"><i class="ti ti-x" aria-hidden="true"></i> Huỷ đơn</button>
+      </div>
+    </div>
+
+    <div class="order-grid">
+      <div>
+        <!-- Timeline -->
+        <div class="timeline-card">
+          <div class="card-title"><i class="ti ti-map-pin" aria-hidden="true"></i> Trạng thái vận chuyển</div>
+          <div class="timeline">
+            <div class="tl-item">
+              <div class="tl-dot done"></div>
+              <div class="tl-title">Đơn hàng đã được xác nhận</div>
+              <div class="tl-sub">LUXNEST đã xác nhận và đang chuẩn bị đơn hàng của bạn</div>
+              <div class="tl-time">14/05/2026 · 15:30</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot done"></div>
+              <div class="tl-title">Đơn hàng đã đóng gói</div>
+              <div class="tl-sub">Sản phẩm đã được đóng gói cẩn thận tại kho LUXNEST HCM</div>
+              <div class="tl-time">14/05/2026 · 18:15</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot active"></div>
+              <div class="tl-title active">Đang vận chuyển</div>
+              <div class="tl-sub">GHN Express · Mã vận đơn: <strong>GHNVN112233445</strong></div>
+              <div class="tl-time">Hôm nay · 09:22 — Đã rời kho phân loại Q.7</div>
+            </div>
+            <div class="tl-item">
+              <div class="tl-dot"></div>
+              <div class="tl-title" style="color:var(--text3)">Giao hàng thành công</div>
+              <div class="tl-sub" style="color:var(--text3)">Dự kiến: 19–21 tháng 5, 2026</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="timeline-card">
+          <div class="card-title"><i class="ti ti-package" aria-hidden="true"></i> Sản phẩm đặt mua</div>
+          <div class="order-items">
+            <div class="oi-row">
+              <div class="oi-img"><img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" alt="bed"></div>
+              <div class="oi-info">
+                <div class="oi-cat">Giường ngủ</div>
+                <div class="oi-name">Giường Walnut Premium</div>
+                <div class="oi-var">Walnut / King 180cm</div>
+              </div>
+              <div class="oi-qty">SL: 1</div>
+              <div class="oi-price">12.500.000₫</div>
+              <div class="oi-actions">
+                <button class="oi-action-btn"><i class="ti ti-eye" aria-hidden="true"></i> Xem</button>
+                <button class="oi-action-btn"><i class="ti ti-star" aria-hidden="true"></i> Đánh giá</button>
+              </div>
+            </div>
+            <div class="oi-row">
+              <div class="oi-img"><img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" alt="sofa"></div>
+              <div class="oi-info">
+                <div class="oi-cat">Ghế sofa</div>
+                <div class="oi-name">Sofa Nordic 3 chỗ</div>
+                <div class="oi-var">Xám nhạt / 3 chỗ</div>
+              </div>
+              <div class="oi-qty">SL: 1</div>
+              <div class="oi-price">8.900.000₫</div>
+              <div class="oi-actions">
+                <button class="oi-action-btn"><i class="ti ti-eye" aria-hidden="true"></i> Xem</button>
+                <button class="oi-action-btn"><i class="ti ti-star" aria-hidden="true"></i> Đánh giá</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Summary sidebar -->
+      <div class="summary-sidebar">
+        <div class="sidebar-card">
+          <div class="sidebar-card-head"><i class="ti ti-receipt" aria-hidden="true"></i><span>Tóm tắt thanh toán</span></div>
+          <div class="sidebar-card-body">
+            <div class="sc-row"><span>Tạm tính</span><span>21.400.000₫</span></div>
+            <div class="sc-row"><span>Vận chuyển</span><span style="color:var(--green)">Miễn phí</span></div>
+            <div class="sc-row"><span>Giảm giá</span><span>–0₫</span></div>
+            <div class="sc-row total"><span>Tổng cộng</span><span>21.400.000₫</span></div>
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+              <div style="font-size:12px;color:var(--text3);margin-bottom:4px">Phương thức thanh toán</div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500"><i class="ti ti-credit-card" style="color:var(--gold);font-size:16px" aria-hidden="true"></i> Thẻ tín dụng ****1234</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-card-head"><i class="ti ti-map-pin" aria-hidden="true"></i><span>Địa chỉ giao hàng</span></div>
+          <div class="sidebar-card-body">
+            <div class="addr-line">
+              <strong>Nguyễn Văn A</strong>
+              0901 234 567<br>
+              123 Nguyễn Trãi, Phường 3<br>
+              Quận 5, TP. Hồ Chí Minh
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-card">
+          <div class="sidebar-card-head"><i class="ti ti-truck" aria-hidden="true"></i><span>Thông tin vận chuyển</span></div>
+          <div class="sidebar-card-body">
+            <div class="sc-row"><span>Đơn vị</span><span style="font-weight:500">GHN Express</span></div>
+            <div class="sc-row"><span>Mã vận đơn</span><span style="font-weight:500;color:var(--navy)">GHNVN112233445</span></div>
+            <div class="sc-row"><span>Dự kiến</span><span style="color:var(--green);font-weight:500">19–21/05/2026</span></div>
+            <button style="width:100%;margin-top:12px;background:var(--cream);border:1px solid var(--border);border-radius:8px;padding:9px;font-size:12px;cursor:pointer;font-family:var(--font-body);display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text2);transition:all 0.2s" onmouseover="this.style.borderColor='var(--gold)'" onmouseout="this.style.borderColor='var(--border)'">
+              <i class="ti ti-external-link" style="font-size:14px" aria-hidden="true"></i> Theo dõi vận đơn
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: PROFILE (Cart + Account) ═══════════════ -->
+<div class="page" id="page-profile">
+  <div class="account-layout">
+    <!-- sidebar -->
+    <div class="account-sidebar">
+      <div class="acct-avatar">NA</div>
+      <div class="acct-name">Nguyễn Văn A</div>
+      <div class="acct-email">nguyenvana@gmail.com</div>
+      <div class="acct-stats">
+        <div class="acct-stat"><div class="acct-stat-val">3</div><div class="acct-stat-label">Đơn hàng</div></div>
+        <div class="acct-stat"><div class="acct-stat-val green">2</div><div class="acct-stat-label">Đang giao</div></div>
+        <div class="acct-stat"><div class="acct-stat-val gold">3</div><div class="acct-stat-label">Yêu thích</div></div>
+      </div>
+      <div class="acct-menu-label">TÀI KHOẢN</div>
+      <button class="acct-menu-item" onclick="showTab('info')"><i class="ti ti-user" aria-hidden="true"></i> Thông tin cá nhân</button>
+      <button class="acct-menu-item"><i class="ti ti-map-pin" aria-hidden="true"></i> Địa chỉ giao hàng</button>
+      <button class="acct-menu-item"><i class="ti ti-shield-lock" aria-hidden="true"></i> Bảo mật</button>
+      <button class="acct-menu-item"><i class="ti ti-bell" aria-hidden="true"></i> Thông báo</button>
+      <div class="acct-menu-label">MUA SẮM</div>
+      <button class="acct-menu-item active" id="tab-cart" onclick="showTab('cart')"><i class="ti ti-shopping-cart" aria-hidden="true"></i> Giỏ hàng</button>
+      <button class="acct-menu-item" id="tab-orders" onclick="showTab('orders')"><i class="ti ti-package" aria-hidden="true"></i> Đơn hàng</button>
+      <button class="acct-menu-item"><i class="ti ti-heart" aria-hidden="true"></i> Yêu thích</button>
+      <div class="acct-menu-label">KHÁC</div>
+      <button class="acct-menu-item"><i class="ti ti-settings" aria-hidden="true"></i> Cài đặt</button>
+    </div>
+
+    <!-- content -->
+    <div class="account-content">
+      <!-- Cart tab -->
+      <div id="acct-cart">
+        <div class="cart-page-title"><i class="ti ti-shopping-cart" aria-hidden="true"></i> Giỏ hàng</div>
+        <div id="cartPageItems">
+          <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:48px;text-align:center;color:var(--text3)">
+            <i class="ti ti-shopping-cart-off" style="font-size:40px;color:var(--cream3);display:block;margin-bottom:12px" aria-hidden="true"></i>
+            <p style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Giỏ hàng trống</p>
+            <p style="font-size:13px">Hãy thêm sản phẩm từ trang sản phẩm</p>
+            <button onclick="navigate('products')" style="margin-top:16px;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 24px;font-size:13px;cursor:pointer;font-family:var(--font-body)">Khám phá sản phẩm</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders tab -->
+      <div id="acct-orders" style="display:none">
+        <div class="cart-page-title"><i class="ti ti-package" aria-hidden="true"></i> Đơn hàng của tôi</div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <!-- order row 1 -->
+          <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:18px 20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px">#LX-2026-0948</div>
+                <div style="font-size:12px;color:var(--text3)">14/05/2026 · 2 sản phẩm</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="status-badge shipping"><i class="ti ti-truck" aria-hidden="true"></i> Đang giao</div>
+                <div style="font-size:16px;font-weight:500;color:var(--gold)">21.400.000₫</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--cream2);display:flex;align-items:center;justify-content:center"><img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" style="width:30px;height:30px;object-fit:contain" alt="bed"></div>
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--cream2);display:flex;align-items:center;justify-content:center"><img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" style="width:30px;height:30px;object-fit:contain" alt="sofa"></div>
+              <div style="flex:1"></div>
+              <button class="btn-navy" onclick="navigate('order')"><i class="ti ti-eye" aria-hidden="true"></i> Xem chi tiết</button>
+            </div>
+          </div>
+          <!-- order row 2 -->
+          <div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:18px 20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div>
+                <div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px">#LX-2024-0892</div>
+                <div style="font-size:12px;color:var(--text3)">02/03/2024 · 1 sản phẩm</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div class="status-badge delivered"><i class="ti ti-circle-check" aria-hidden="true"></i> Đã giao</div>
+                <div style="font-size:16px;font-weight:500;color:var(--gold)">8.500.000₫</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px">
+              <div style="width:44px;height:44px;border-radius:8px;background:var(--cream2);display:flex;align-items:center;justify-content:center"><img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" style="width:30px;height:30px;object-fit:contain" alt="sofa2"></div>
+              <div style="flex:1"></div>
+              <button class="btn-ghost"><i class="ti ti-star" aria-hidden="true"></i> Đánh giá</button>
+              <button class="btn-navy"><i class="ti ti-eye" aria-hidden="true"></i> Xem chi tiết</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ───
+let cart=[];
+let toastTimer=null;
+
+// ─── NAVIGATION ───
+function navigate(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  const nl=document.getElementById('nl-'+page);
+  if(nl)nl.classList.add('active');
+  window.scrollTo(0,0);
+  closeNotif();
+  if(page==='profile'){renderCartPage();}
+}
+
+// ─── TABS ───
+function showTab(tab){
+  document.getElementById('acct-cart').style.display=(tab==='cart'?'block':'none');
+  document.getElementById('acct-orders').style.display=(tab==='orders'?'block':'none');
+  document.querySelectorAll('.acct-menu-item').forEach(i=>i.classList.remove('active'));
+  const el=document.getElementById('tab-'+tab);
+  if(el)el.classList.add('active');
+}
+
+// ─── CART ───
+function fmtVnd(n){return Number(n).toLocaleString('vi-VN')+'₫';}
+
+function addToCart(name,cat,price,img,variant){
+  const existing=cart.find(i=>i.name===name);
+  if(existing){existing.qty++;}
+  else{cart.push({id:Date.now(),name,cat,price:Number(price),img,variant,qty:1});}
+  showToast(name);
+  renderDrawer();
+  updateNavBadge();
+  openDrawer();
+}
+
+function renderDrawer(){
+  const body=document.getElementById('drawerBody');
+  const empty=document.getElementById('drawerEmpty');
+  const cnt=cart.reduce((a,i)=>a+i.qty,0);
+  document.getElementById('drawerCnt').textContent=cnt;
+
+  if(cart.length===0){
+    body.innerHTML='';body.appendChild(empty);empty.style.display='flex';
+    updateDrawerTotals();return;
+  }
+  empty.style.display='none';
+  let html='';
+  cart.forEach(item=>{
+    html+=`<div class="d-item">
+      <div class="d-item-img"><img src="${item.img}" alt="${item.name}"></div>
+      <div class="d-item-info">
+        <div class="d-cat">${item.cat}</div>
+        <div class="d-name">${item.name}</div>
+        <div class="d-var">${item.variant}</div>
+        <div class="d-bottom">
+          <span class="d-price">${fmtVnd(item.price*item.qty)}</span>
+          <div style="display:flex;align-items:center;gap:0">
+            <div class="d-qty-ctrl">
+              <button class="d-qty-btn" onclick="changeQty(${item.id},-1)">−</button>
+              <span class="d-qty-num">${item.qty}</span>
+              <button class="d-qty-btn" onclick="changeQty(${item.id},1)">+</button>
+            </div>
+            <button class="d-remove" onclick="removeItem(${item.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  body.innerHTML=html;
+  updateDrawerTotals();
+}
+
+function changeQty(id,delta){
+  const item=cart.find(i=>i.id===id);
+  if(!item)return;
+  item.qty+=delta;
+  if(item.qty<=0){removeItem(id);return;}
+  renderDrawer();updateNavBadge();
+}
+function removeItem(id){
+  cart=cart.filter(i=>i.id!==id);
+  renderDrawer();updateNavBadge();
+}
+function updateDrawerTotals(){
+  const sub=cart.reduce((a,i)=>a+i.price*i.qty,0);
+  document.getElementById('dSubtotal').textContent=sub>0?fmtVnd(sub):'0₫';
+  document.getElementById('dTotal').textContent=sub>0?fmtVnd(sub):'0₫';
+  const thresh=1500000;
+  const pct=Math.min(sub/thresh*100,100);
+  document.getElementById('shipFill').style.width=pct+'%';
+  if(sub>=thresh){
+    document.getElementById('dShip').textContent='Miễn phí 🎉';
+    document.getElementById('shipMsg').innerHTML='<span style="color:var(--gold);font-weight:600">🎉 Bạn được miễn phí vận chuyển!</span>';
+  } else {
+    const need=fmtVnd(thresh-sub);
+    document.getElementById('shipMsg').innerHTML=`Thêm <span>${need}</span> để được <strong>miễn phí vận chuyển</strong> 🚚`;
+    document.getElementById('dShip').textContent='Tính sau';
+  }
+}
+function updateNavBadge(){
+  const cnt=cart.reduce((a,i)=>a+i.qty,0);
+  const el=document.getElementById('navCartCnt');
+  el.textContent=cnt;
+  el.style.display=cnt>0?'flex':'none';
+}
+
+function renderCartPage(){
+  const el=document.getElementById('cartPageItems');
+  if(cart.length===0){
+    el.innerHTML=`<div style="background:var(--white);border-radius:var(--r);border:1px solid var(--border);padding:48px;text-align:center;color:var(--text3)">
+      <i class="ti ti-shopping-cart-off" style="font-size:40px;color:var(--cream3);display:block;margin-bottom:12px" aria-hidden="true"></i>
+      <p style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px">Giỏ hàng trống</p>
+      <p style="font-size:13px">Hãy thêm sản phẩm từ trang sản phẩm</p>
+      <button onclick="navigate('products')" style="margin-top:16px;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:11px 24px;font-size:13px;cursor:pointer;font-family:var(--font-body)">Khám phá sản phẩm</button>
+    </div>`;return;
+  }
+  const sub=cart.reduce((a,i)=>a+i.price*i.qty,0);
+  let html='';
+  cart.forEach(item=>{
+    html+=`<div class="cart-full-item">
+      <div class="cfi-img"><img src="${item.img}" alt="${item.name}"></div>
+      <div class="cfi-info">
+        <div class="cfi-cat">${item.cat}</div>
+        <div class="cfi-name">${item.name}</div>
+        <div class="cfi-var">${item.variant}</div>
+        <div class="cfi-qty-row">
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQtyPage(${item.id},-1)">−</button>
+            <span class="qty-num">${item.qty}</span>
+            <button class="qty-btn" onclick="changeQtyPage(${item.id},1)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="cfi-price">${fmtVnd(item.price*item.qty)}</div>
+      <button class="cfi-remove" onclick="removeItemPage(${item.id})"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`;
+  });
+  html+=`<div class="cart-summary-row">
+    <div><div class="cart-total-label">Tổng cộng (${cart.reduce((a,i)=>a+i.qty,0)} sản phẩm)</div><div class="cart-total-val">${fmtVnd(sub)}</div></div>
+    <button class="cart-checkout-btn" onclick="navigate('checkout')"><i class="ti ti-lock" aria-hidden="true"></i> Tiến hành thanh toán</button>
+  </div>`;
+  el.innerHTML=html;
+}
+function changeQtyPage(id,delta){changeQty(id,delta);renderCartPage();}
+function removeItemPage(id){removeItem(id);renderCartPage();}
+
+// ─── DRAWER OPEN/CLOSE ───
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ─── TOAST ───
+function showToast(name){
+  const t=document.getElementById('toast');
+  document.getElementById('toastName').textContent=name;
+  t.classList.add('show');
+  if(toastTimer)clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+function closeToast(){document.getElementById('toast').classList.remove('show');}
+
+// ─── NOTIF ───
+function toggleNotif(){
+  document.getElementById('notifDropdown').classList.toggle('open');
+}
+function closeNotif(){document.getElementById('notifDropdown').classList.remove('open');}
+document.addEventListener('click',function(e){
+  const nd=document.getElementById('notifDropdown');
+  if(!nd.contains(e.target)&&!e.target.closest('.nav-icon-btn')){closeNotif();}
+});
+
+// ─── CHECKOUT (redirect to checkout page) ───
+const _origNavigate=navigate;
+window.navigate=function(page){
+  if(page==='checkout'){
+    alert('Chuyển đến trang thanh toán!\n\n(Trong luồng đầy đủ, trang checkout sẽ load tại đây với giỏ hàng hiện tại.)');
+    return;
+  }
+  _origNavigate(page);
+};
+</script>
+
+<!-- ═══════════════════════════════════════════
+     LUXNEST CHAT WIDGET
+═══════════════════════════════════════════ -->
+<style>
+/* ── FAB BUTTON ── */
+.chat-fab{
+  position:fixed;bottom:32px;right:32px;z-index:1200;
+  width:56px;height:56px;border-radius:50%;
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);
+  border:2px solid rgba(201,146,42,0.35);
+  box-shadow:0 8px 28px rgba(0,0,0,0.22),0 0 0 0 rgba(201,146,42,0.4);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform 0.2s,box-shadow 0.2s;
+  animation:fabPulse 3s ease-in-out infinite;
+}
+@keyframes fabPulse{
+  0%,100%{box-shadow:0 8px 28px rgba(0,0,0,0.22),0 0 0 0 rgba(201,146,42,0.35)}
+  50%{box-shadow:0 8px 28px rgba(0,0,0,0.22),0 0 0 8px rgba(201,146,42,0)}
+}
+.chat-fab:hover{transform:scale(1.08);box-shadow:0 12px 36px rgba(0,0,0,0.28);}
+.chat-fab i{font-size:24px;color:var(--gold3);transition:opacity 0.2s}
+.chat-fab .fab-close{display:none}
+.chat-fab.open .fab-chat{display:none}
+.chat-fab.open .fab-close{display:flex}
+.chat-fab-badge{
+  position:absolute;top:-4px;right:-4px;
+  background:#e74c3c;color:#fff;
+  width:20px;height:20px;border-radius:50%;
+  font-size:11px;font-weight:600;
+  display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--cream);
+  animation:badgeBounce 0.4s ease;
+}
+@keyframes badgeBounce{from{transform:scale(0)}to{transform:scale(1)}}
+
+/* ── CHAT MODAL ── */
+.chat-modal{
+  position:fixed;bottom:104px;right:32px;z-index:1199;
+  width:380px;height:580px;
+  background:var(--white);
+  border-radius:20px;
+  border:1px solid var(--border);
+  box-shadow:0 24px 64px rgba(0,0,0,0.16),0 4px 16px rgba(0,0,0,0.08);
+  display:flex;flex-direction:column;overflow:hidden;
+  transform:scale(0.88) translateY(20px);
+  transform-origin:bottom right;
+  opacity:0;pointer-events:none;
+  transition:transform 0.28s cubic-bezier(.34,1.56,.64,1),opacity 0.22s ease;
+}
+.chat-modal.open{
+  transform:scale(1) translateY(0);
+  opacity:1;pointer-events:all;
+}
+
+/* ── HEADER ── */
+.chat-header{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);
+  padding:16px 18px 14px;
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+.chat-header::after{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9922a' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.chat-agent-avatar{
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold) 0%,var(--gold3) 100%);
+  color:var(--navy);font-weight:600;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;position:relative;z-index:1;
+}
+.chat-agent-online{
+  position:absolute;bottom:1px;right:1px;
+  width:11px;height:11px;border-radius:50%;
+  background:#2ecc71;border:2px solid var(--navy);
+}
+.chat-agent-info{flex:1;position:relative;z-index:1}
+.chat-agent-name{color:#fff;font-size:14px;font-weight:500;margin-bottom:2px;display:flex;align-items:center;gap:7px}
+.chat-agent-badge{background:var(--gold);color:var(--navy);font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:0.04em}
+.chat-agent-status{font-size:11px;color:rgba(255,255,255,0.5);display:flex;align-items:center;gap:5px}
+.chat-agent-status span{width:6px;height:6px;border-radius:50%;background:#2ecc71;display:inline-block}
+.chat-header-actions{display:flex;gap:4px;position:relative;z-index:1}
+.chat-hdr-btn{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,0.08);border:none;color:rgba(255,255,255,0.6);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.chat-hdr-btn:hover{background:rgba(255,255,255,0.15);color:#fff}
+.chat-hdr-btn i{font-size:15px}
+
+/* ── QUICK CHIPS ── */
+.chat-chips{
+  padding:10px 14px 0;
+  display:flex;gap:6px;flex-wrap:wrap;
+  flex-shrink:0;border-bottom:1px solid var(--border);
+  padding-bottom:10px;background:var(--cream);
+}
+.chat-chip{
+  padding:5px 11px;border:1px solid var(--border);
+  border-radius:16px;font-size:11px;color:var(--text2);
+  cursor:pointer;background:var(--white);
+  transition:all 0.15s;white-space:nowrap;
+  font-family:var(--font-body);
+}
+.chat-chip:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+
+/* ── MESSAGES ── */
+.chat-messages{
+  flex:1;overflow-y:auto;
+  padding:16px 14px;
+  display:flex;flex-direction:column;gap:12px;
+  background:var(--cream);
+}
+.chat-messages::-webkit-scrollbar{width:3px}
+.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* date separator */
+.chat-date-sep{text-align:center;font-size:11px;color:var(--text3);margin:4px 0;position:relative}
+.chat-date-sep::before,.chat-date-sep::after{content:'';position:absolute;top:50%;width:30%;height:1px;background:var(--border)}
+.chat-date-sep::before{left:0}.chat-date-sep::after{right:0}
+
+/* bubble */
+.chat-msg{display:flex;align-items:flex-end;gap:8px;animation:msgIn 0.25s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.chat-msg.user{flex-direction:row-reverse}
+.msg-avatar{width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.msg-avatar.bot{background:var(--navy)}
+.msg-avatar.bot i{color:var(--gold);font-size:14px}
+.bubble{
+  max-width:76%;padding:10px 13px;border-radius:16px;
+  font-size:13px;line-height:1.55;position:relative;
+}
+.bubble.bot{
+  background:var(--white);color:var(--text);
+  border-bottom-left-radius:4px;
+  border:1px solid var(--border);
+  box-shadow:0 1px 4px rgba(0,0,0,0.05);
+}
+.bubble.user{
+  background:var(--navy);color:#fff;
+  border-bottom-right-radius:4px;
+}
+.bubble-time{font-size:10px;color:var(--text3);margin-top:4px;display:block}
+.chat-msg.user .bubble-time{text-align:right;color:rgba(255,255,255,0.45)}
+
+/* product card in chat */
+.chat-product-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-top:6px;
+  cursor:pointer;transition:border 0.2s;
+}
+.chat-product-card:hover{border-color:var(--gold)}
+.cpc-img{height:80px;background:var(--cream2);display:flex;align-items:center;justify-content:center}
+.cpc-img img{width:56px;height:56px;object-fit:contain}
+.cpc-body{padding:10px 12px}
+.cpc-cat{font-size:10px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.05em}
+.cpc-name{font-size:12px;font-weight:500;color:var(--text);margin:2px 0 6px}
+.cpc-row{display:flex;align-items:center;justify-content:space-between}
+.cpc-price{font-size:13px;font-weight:500;color:var(--gold)}
+.cpc-add{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:var(--font-body);transition:background 0.15s}
+.cpc-add:hover{background:var(--gold2)}
+
+/* typing indicator */
+.typing-bubble{display:flex;align-items:center;gap:5px;padding:12px 14px}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:typingBounce 1.2s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:0.2s}
+.typing-dot:nth-child(3){animation-delay:0.4s}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+
+/* ── INPUT BAR ── */
+.chat-input-bar{
+  padding:12px 14px;border-top:1px solid var(--border);
+  background:var(--white);flex-shrink:0;
+}
+.chat-input-row{display:flex;align-items:flex-end;gap:8px}
+.chat-input-wrap{
+  flex:1;background:var(--cream);border:1px solid var(--border);
+  border-radius:12px;padding:8px 12px;
+  display:flex;align-items:flex-end;gap:6px;
+  transition:border 0.2s;
+}
+.chat-input-wrap:focus-within{border-color:var(--gold);background:var(--white)}
+.chat-input-wrap textarea{
+  flex:1;border:none;background:transparent;outline:none;
+  font-size:13px;font-family:var(--font-body);color:var(--text);
+  resize:none;max-height:80px;line-height:1.5;
+  scrollbar-width:none;
+}
+.chat-input-wrap textarea::placeholder{color:var(--text3)}
+.chat-input-attach{background:none;border:none;color:var(--text3);cursor:pointer;padding:2px;transition:color 0.15s}
+.chat-input-attach:hover{color:var(--gold)}
+.chat-input-attach i{font-size:17px}
+.chat-send-btn{
+  width:40px;height:40px;border-radius:11px;flex-shrink:0;
+  background:var(--navy);border:none;color:var(--gold3);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:background 0.2s,transform 0.15s;
+}
+.chat-send-btn:hover{background:var(--gold2);color:#fff}
+.chat-send-btn:active{transform:scale(0.93)}
+.chat-send-btn i{font-size:18px}
+.chat-input-hint{font-size:11px;color:var(--text3);margin-top:7px;display:flex;align-items:center;justify-content:space-between}
+.chat-input-hint i{font-size:12px;color:var(--gold)}
+
+/* ── UNREAD TOOLTIP ── */
+.chat-fab-tooltip{
+  position:fixed;bottom:34px;right:100px;
+  background:var(--navy);color:#fff;
+  font-size:12px;padding:8px 14px;
+  border-radius:8px;white-space:nowrap;
+  opacity:0;pointer-events:none;
+  transition:opacity 0.2s;z-index:1198;
+  border-left:2px solid var(--gold);
+}
+.chat-fab-tooltip::after{
+  content:'';position:absolute;right:-6px;top:50%;
+  transform:translateY(-50%);
+  border:6px solid transparent;
+  border-right:none;border-left-color:var(--navy);
+}
+.chat-fab-tooltip.show{opacity:1}
+</style>
+
+<!-- FAB tooltip -->
+<div class="chat-fab-tooltip" id="chatTooltip">💬 LUXNEST AI đang trực tuyến!</div>
+
+<!-- FAB button -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Mở chat hỗ trợ">
+  <i class="ti ti-message-chatbot fab-chat" aria-hidden="true" style="position:relative;z-index:1"></i>
+  <i class="ti ti-x fab-close" aria-hidden="true" style="position:relative;z-index:1;display:none"></i>
+  <span class="chat-fab-badge" id="chatBadge">1</span>
+</button>
+
+<!-- CHAT MODAL -->
+<div class="chat-modal" id="chatModal" role="dialog" aria-label="Chat hỗ trợ LUXNEST">
+  <!-- Header -->
+  <div class="chat-header">
+    <div class="chat-agent-avatar">
+      LX
+      <div class="chat-agent-online"></div>
+    </div>
+    <div class="chat-agent-info">
+      <div class="chat-agent-name">LUXNEST Assistant <span class="chat-agent-badge">AI</span></div>
+      <div class="chat-agent-status"><span></span> Đang hoạt động · phản hồi ngay</div>
+    </div>
+    <div class="chat-header-actions">
+      <button class="chat-hdr-btn" title="Tìm kiếm" aria-label="Tìm kiếm"><i class="ti ti-search" aria-hidden="true"></i></button>
+      <button class="chat-hdr-btn" title="Thu nhỏ" aria-label="Thu nhỏ" onclick="toggleChat()"><i class="ti ti-minus" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+  <!-- Quick chips -->
+  <div class="chat-chips">
+    <button class="chat-chip" onclick="quickSend('Tôi muốn tư vấn nội thất phòng ngủ')">🛏️ Tư vấn phòng ngủ</button>
+    <button class="chat-chip" onclick="quickSend('Theo dõi đơn hàng của tôi')">📦 Theo dõi đơn hàng</button>
+    <button class="chat-chip" onclick="quickSend('Chính sách đổi trả là gì?')">🔄 Đổi trả</button>
+    <button class="chat-chip" onclick="quickSend('Có khuyến mãi gì không?')">🎁 Khuyến mãi</button>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-date-sep">Hôm nay</div>
+
+    <!-- Bot welcome -->
+    <div class="chat-msg">
+      <div class="msg-avatar bot"><i class="ti ti-robot" aria-hidden="true"></i></div>
+      <div>
+        <div class="bubble bot">
+          Xin chào! 👋 Tôi là <strong>LUXNEST AI Assistant</strong>, sẵn sàng giúp bạn tìm nội thất hoàn hảo cho không gian sống.<br><br>
+          Bạn cần hỗ trợ gì hôm nay?
+          <span class="bubble-time">15:24</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Suggestion products -->
+    <div class="chat-msg">
+      <div class="msg-avatar bot"><i class="ti ti-robot" aria-hidden="true"></i></div>
+      <div>
+        <div class="bubble bot">
+          ✨ Một số sản phẩm nổi bật tuần này:
+          <span class="bubble-time">15:24</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:6px;max-width:300px">
+          <div class="chat-product-card" style="flex:1" onclick="addToCart('Sofa Nordic 3 chỗ','Ghế sofa','8500000','https://cdn-icons-png.flaticon.com/128/3669/3669880.png','Xám nhạt / 3 chỗ')">
+            <div class="cpc-img"><img src="https://cdn-icons-png.flaticon.com/128/3669/3669880.png" alt="sofa"></div>
+            <div class="cpc-body">
+              <div class="cpc-cat">Sofa</div>
+              <div class="cpc-name">Nordic 3 chỗ</div>
+              <div class="cpc-row"><span class="cpc-price">8.5M₫</span><button class="cpc-add">+ Giỏ</button></div>
+            </div>
+          </div>
+          <div class="chat-product-card" style="flex:1" onclick="addToCart('Giường Walnut Premium','Giường ngủ','12500000','https://cdn-icons-png.flaticon.com/128/2649/2649615.png','Walnut / King 180cm')">
+            <div class="cpc-img"><img src="https://cdn-icons-png.flaticon.com/128/2649/2649615.png" alt="bed"></div>
+            <div class="cpc-body">
+              <div class="cpc-cat">Giường</div>
+              <div class="cpc-name">Walnut Premium</div>
+              <div class="cpc-row"><span class="cpc-price">12.5M₫</span><button class="cpc-add">+ Giỏ</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input -->
+  <div class="chat-input-bar">
+    <div class="chat-input-row">
+      <div class="chat-input-wrap">
+        <textarea id="chatInput" placeholder="Nhập tin nhắn..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMsg();}"
+          oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,80)+'px'"></textarea>
+        <button class="chat-input-attach" title="Đính kèm ảnh" aria-label="Đính kèm"><i class="ti ti-photo" aria-hidden="true"></i></button>
+      </div>
+      <button class="chat-send-btn" onclick="sendChatMsg()" aria-label="Gửi">
+        <i class="ti ti-send" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="chat-input-hint">
+      <span><i class="ti ti-shield-check" aria-hidden="true"></i> Hỗ trợ 24/7 · Phản hồi &lt; 1 phút</span>
+      <span>Enter để gửi · Shift+Enter xuống dòng</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── CHAT STATE ───
+let chatOpen=false;
+let isTyping=false;
+
+// Show tooltip after 2s then hide
+setTimeout(()=>{
+  const t=document.getElementById('chatTooltip');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),4000);
+},2000);
+
+function toggleChat(){
+  chatOpen=!chatOpen;
+  const modal=document.getElementById('chatModal');
+  const fab=document.getElementById('chatFab');
+  const badge=document.getElementById('chatBadge');
+  modal.classList.toggle('open',chatOpen);
+  fab.classList.toggle('open',chatOpen);
+  if(chatOpen){
+    badge.style.display='none';
+    document.getElementById('chatInput').focus();
+    scrollChat();
+  }
+}
+
+function scrollChat(){
+  const el=document.getElementById('chatMessages');
+  setTimeout(()=>el.scrollTop=el.scrollHeight,60);
+}
+
+function getNow(){
+  const d=new Date();
+  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+
+function appendMsg(text,role,extraHTML=''){
+  const el=document.getElementById('chatMessages');
+  const isUser=(role==='user');
+  const div=document.createElement('div');
+  div.className='chat-msg'+(isUser?' user':'');
+  div.innerHTML=`
+    <div class="msg-avatar ${isUser?'user':'bot'}">
+      ${isUser?'NA':'<i class="ti ti-robot" aria-hidden="true"></i>'}
+    </div>
+    <div>
+      <div class="bubble ${isUser?'user':'bot'}">
+        ${text}
+        <span class="bubble-time">${getNow()}</span>
+      </div>
+      ${extraHTML}
+    </div>`;
+  el.appendChild(div);
+  scrollChat();
+}
+
+function showTyping(){
+  const el=document.getElementById('chatMessages');
+  const div=document.createElement('div');
+  div.className='chat-msg';div.id='typingIndicator';
+  div.innerHTML=`
+    <div class="msg-avatar bot"><i class="ti ti-robot" aria-hidden="true"></i></div>
+    <div class="bubble bot" style="padding:10px 14px">
+      <div class="typing-bubble">
+        <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+      </div>
+    </div>`;
+  el.appendChild(div);
+  scrollChat();
+}
+function hideTyping(){
+  const el=document.getElementById('typingIndicator');
+  if(el)el.remove();
+}
+
+// ─── AI RESPONSE LOGIC ───
+const responses=[
+  {
+    keys:['phòng ngủ','giường','ngủ'],
+    reply:'🛏️ Tuyệt vời! Phong cách phòng ngủ yêu thích của bạn là gì? <strong>Japandi</strong> (tối giản), <strong>Nordic</strong> (ấm áp) hay <strong>Classic</strong> (cổ điển)?',
+    product:null
+  },
+  {
+    keys:['sofa','phòng khách','ghế'],
+    reply:'🛋️ Chúng tôi có bộ sưu tập sofa cao cấp! <strong>Sofa Nordic 3 chỗ</strong> đang được khuyến mãi 30% — rất phù hợp cho không gian Scandinavian.',
+    product:{name:'Sofa Nordic 3 chỗ',cat:'Ghế sofa',price:'8500000',img:'https://cdn-icons-png.flaticon.com/128/3669/3669880.png',variant:'Xám nhạt / 3 chỗ'}
+  },
+  {
+    keys:['đơn hàng','theo dõi','giao hàng','vận chuyển'],
+    reply:'📦 Tôi thấy đơn hàng <strong>#LX-2026-0948</strong> của bạn đang được vận chuyển bởi GHN Express. Dự kiến giao <strong>19–21/05/2026</strong>. Bạn có muốn xem chi tiết không?',
+    product:null
+  },
+  {
+    keys:['đổi','trả','hoàn','chính sách'],
+    reply:'🔄 LUXNEST hỗ trợ <strong>đổi trả miễn phí trong 30 ngày</strong> kể từ ngày nhận hàng. Sản phẩm cần còn nguyên vẹn, đầy đủ phụ kiện. Bạn cần hỗ trợ đổi trả cụ thể không?',
+    product:null
+  },
+  {
+    keys:['khuyến mãi','giảm giá','sale','ưu đãi'],
+    reply:'🎁 Hiện có <strong>Flash Sale cuối tuần giảm 30%</strong> cho bộ sưu tập Heritage Collection! Chỉ còn <strong>2 ngày</strong>. Dùng mã <strong style="color:var(--gold)">HERITAGE30</strong> khi thanh toán.',
+    product:null
+  },
+  {
+    keys:['giá','bao nhiêu','chi phí'],
+    reply:'💰 Sản phẩm LUXNEST có mức giá từ <strong>500.000₫</strong> (phụ kiện) đến <strong>50.000.000₫</strong> (bộ nội thất cao cấp). Bạn có ngân sách dự kiến cho không gian nào không? Tôi sẽ tư vấn chính xác hơn!',
+    product:null
+  },
+  {
+    keys:['3d','trực quan','thiết kế','phòng'],
+    reply:'🏠 Tính năng <strong>Trực quan 3D</strong> cho phép bạn tải ảnh phòng lên, AI sẽ phân tích không gian và gợi ý nội thất phù hợp rồi render mô hình 3D ngay lập tức. Bạn muốn thử không?',
+    product:null
+  },
+];
+
+const fallbacks=[
+  'Cảm ơn bạn đã nhắn tin! Bạn có thể cho tôi biết thêm để tôi tư vấn chính xác hơn không? 😊',
+  'Tôi hiểu rồi! Để hỗ trợ tốt nhất, bạn có thể mô tả không gian bạn muốn trang trí không?',
+  'Thông tin thú vị đấy! 🌟 Bạn muốn tôi gợi ý sản phẩm cụ thể hay tư vấn về phong cách thiết kế?',
+  'Tôi sẽ chuyển câu hỏi này đến chuyên viên tư vấn nội thất của LUXNEST nhé! ⏱️ Thường phản hồi trong 5 phút.',
+];
+let fallbackIdx=0;
+
+function getBotReply(text){
+  const lower=text.toLowerCase();
+  for(const r of responses){
+    if(r.keys.some(k=>lower.includes(k))) return r;
+  }
+  return {reply:fallbacks[fallbackIdx++%fallbacks.length],product:null};
+}
+
+function sendChatMsg(){
+  const input=document.getElementById('chatInput');
+  const text=input.value.trim();
+  if(!text||isTyping)return;
+  input.value='';input.style.height='auto';
+  appendMsg(text,'user');
+  isTyping=true;
+  const delay=900+Math.random()*600;
+  setTimeout(()=>showTyping(),300);
+  setTimeout(()=>{
+    hideTyping();
+    const {reply,product}=getBotReply(text);
+    let extraHTML='';
+    if(product){
+      extraHTML=`<div class="chat-product-card" style="max-width:180px;margin-top:6px" onclick="addToCart('${product.name}','${product.cat}','${product.price}','${product.img}','${product.variant}')">
+        <div class="cpc-img"><img src="${product.img}" alt="${product.name}"></div>
+        <div class="cpc-body">
+          <div class="cpc-cat">${product.cat}</div>
+          <div class="cpc-name">${product.name}</div>
+          <div class="cpc-row"><span class="cpc-price">${Number(product.price).toLocaleString('vi-VN')}₫</span><button class="cpc-add">+ Giỏ</button></div>
+        </div>
+      </div>`;
+    }
+    appendMsg(reply,'bot',extraHTML);
+    isTyping=false;
+  },delay+300);
+}
+
+function quickSend(text){
+  document.getElementById('chatInput').value=text;
+  sendChatMsg();
+}
+</script>
+</body>
+</html>

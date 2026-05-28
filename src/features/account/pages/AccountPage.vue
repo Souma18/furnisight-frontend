@@ -1,6 +1,5 @@
 <script setup>
 import { computed } from 'vue'
-import { useRouter } from 'vue-router'
 import AccountSidebar from '../components/AccountSidebar.vue'
 import AccountToast from '../components/AccountToast.vue'
 import ProfileView from '../components/views/ProfileView.vue'
@@ -14,20 +13,16 @@ import SecurityView from '../components/views/SecurityView.vue'
 import SettingsView from '../components/views/SettingsView.vue'
 import Projects3DView from '../components/views/Projects3DView.vue'
 import { useAccountPage } from '../composables/useAccountPage'
-import { useAuthStore } from '@features/auth/store/authStore'
+import { useAuth } from '@features/auth/composables/useAuth'
 
-const router = useRouter()
-const authStore = useAuthStore()
+const { logout: authLogout } = useAuth()
 
 const {
   activeView,
   profile,
   addresses,
   orders,
-  selectedOrder,
-  openOrderDetail,
-  backToOrders,
-  cancelOrder,
+  cartItems,
   wishlist,
   settings,
   projects,
@@ -54,12 +49,9 @@ const notificationCategory = computed(() => {
   return map[activeView.value] ?? 'all'
 })
 
-function handleLogout() {
-  authStore.logout()
+async function handleLogout() {
   showToast('Đăng xuất thành công.')
-  setTimeout(() => {
-    router.push('/login')
-  }, 500)
+  await authLogout({ name: 'home' })
 }
 </script>
 
@@ -94,19 +86,8 @@ function handleLogout() {
         :notification-category="notificationCategory"
         @notify="showToast"
       />
-      <OrderDetailView
-        v-else-if="activeView === 'order-detail'"
-        :order="selectedOrder"
-        @back="backToOrders"
-        @cancel-order="cancelOrder"
-      />
-      <OrdersView
-        v-else-if="activeView === 'orders'"
-        :orders="orders"
-        @view-detail="openOrderDetail"
-        @cancel-order="cancelOrder"
-      />
-      <CartView v-else-if="activeView === 'cart'" />
+      <OrdersView v-else-if="activeView === 'orders'" :orders="orders" />
+      <CartView v-else-if="activeView === 'cart'" :items="cartItems" />
       <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
       <SecurityView
         v-else-if="activeView === 'security'"

@@ -53,9 +53,12 @@ export const CHECKOUT_SHIPPING_OPTIONS = [
 ]
 
 export const CHECKOUT_PAYMENT_METHODS = [
-  { id: 'card', name: 'Thẻ tín dụng/Ghi nợ', sub: 'Visa, Mastercard, JCB', icon: 'creditCard' },
-  { id: 'banking', name: 'Thẻ nội địa NAPAS', sub: 'Internet Banking', icon: 'building2' },
-  { id: 'momo', name: 'Ví MoMo', sub: 'Thanh toán nhanh', icon: 'wallet' },
+  {
+    id: 'vnpay',
+    name: 'VNPAY',
+    sub: 'QR, Visa/Mastercard, NAPAS, Internet Banking',
+    icon: 'wallet',
+  },
   { id: 'cod', name: 'Thanh toán khi nhận hàng', sub: 'COD – Tiền mặt / QR', icon: 'banknote' },
 ]
 

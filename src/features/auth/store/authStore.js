@@ -1,5 +1,25 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
+import { isAdminRole } from '../utils/normalizeAuthSession'
+
+const PROFILE_STORAGE_KEY = 'auth_profile'
+
+function readStoredProfile() {
+  try {
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY)
+    return raw ? JSON.parse(raw) : null
+  } catch {
+    return null
+  }
+}
+
+function writeStoredProfile(profile) {
+  if (profile) {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
+  } else {
+    localStorage.removeItem(PROFILE_STORAGE_KEY)
+  }
+}
 
 export const useAuthStore = defineStore('auth', () => {
   const initialAccessToken = normalizeJwtToken(localStorage.getItem('access_token'))
@@ -15,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
   const refreshToken = ref(initialRefreshToken)
 
   const isAuthenticated = computed(() => Boolean(token.value))
+  const isAdmin = computed(() => isAdminRole(user.value?.role))
 
   function setSession({ accessToken, refreshToken: newRefreshToken, profile }) {
     const normalizedAccessToken = normalizeJwtToken(accessToken)
@@ -39,9 +60,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     setSession({ accessToken: null, refreshToken: null, profile: null })
+    document.documentElement.classList.remove('admin-route-active')
   }
 
-  return { user, token, refreshToken, isAuthenticated, setSession, logout }
+  return { user, token, refreshToken, isAuthenticated, isAdmin, setSession, logout }
 })
 
 function normalizeJwtToken(value) {

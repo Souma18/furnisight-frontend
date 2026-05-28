@@ -150,8 +150,8 @@
 }
 
 .checkout-summary {
-  position: sticky;
-  top: 4.5rem;
+  /* Không dùng sticky để 2 cột (Shop vs Summary) cùng scroll đồng bộ */
+  position: static;
 }
 
 .co-addr-wrap { padding: 0.9rem 1rem; }

@@ -100,6 +100,7 @@ const MOCK_USERS = [
     identifier: 'admin@gmail.com',
     password: 'Admin@123',
     profile: {
+      id: 5001,
       firstName: 'Admin',
       lastName: 'Luxnest',
       email: 'admin@gmail.com',
@@ -111,9 +112,22 @@ const MOCK_USERS = [
     identifier: 'user1@gmail.com',
     password: 'User@1234',
     profile: {
+      id: 1001,
       firstName: 'Văn',
       lastName: 'Nguyễn',
       email: 'user1@gmail.com',
+      role: 'CUSTOMER',
+    },
+  },
+   {
+    id: 'u-004',
+    identifier: 'user2@gmail.com',
+    password: 'User@1234',
+    profile: {
+      id: 1002,
+      firstName: 'Hồng',
+      lastName: 'Trần',
+      email: 'user2@gmail.com',
       role: 'CUSTOMER',
     },
   },
@@ -122,6 +136,7 @@ const MOCK_USERS = [
     identifier: 'staff@gmail.com',
     password: 'Staff@123',
     profile: {
+      id: 5002,
       firstName: 'Nhân',
       lastName: 'Viên',
       email: 'staff@gmail.com',
