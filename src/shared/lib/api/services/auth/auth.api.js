@@ -13,15 +13,15 @@ class AuthApi {
     return apiClient.get(`${authBaseUrl}/verify`, { params: { otpCode }, skipAuth: true })
   }
 
-  verify(payload) { return apiClient.post('/auth/verify', payload) }
-  requestVerification(payload) { return apiClient.post('/auth/verify/request', payload) }
+  verify(payload) { return apiClient.post(`${authBaseUrl}/verify`, payload, { skipAuth: true }) }
+  requestVerification(payload) { return apiClient.post(`${authBaseUrl}/verify/request`, payload, { skipAuth: true }) }
   
-  changePassword(payload) { return apiClient.post('/auth/password/change', payload) }
-  forgotPassword(payload) { return apiClient.post('/auth/password/forgot', payload, { skipAuth: true }) }
-  resetPassword(payload) { return apiClient.post('/auth/password/reset', payload, { skipAuth: true }) }
-  verifyResetPasswordCode(payload) { return apiClient.post('/auth/password/verify', payload, { skipAuth: true }) }
+  changePassword(payload) { return apiClient.post(`${authBaseUrl}/password/change`, payload) }
+  forgotPassword(payload) { return apiClient.post(`${authBaseUrl}/password/forgot`, payload, { skipAuth: true }) }
+  resetPassword(payload) { return apiClient.post(`${authBaseUrl}/password/reset`, payload, { skipAuth: true }) }
+  verifyResetPasswordCode(payload) { return apiClient.post(`${authBaseUrl}/password/verify`, payload, { skipAuth: true }) }
   
-  deleteAccount() { return apiClient.delete('/auth') }
+  deleteAccount() { return apiClient.delete(`${authBaseUrl}`) }
 }
 
 export const authApi = new AuthApi()

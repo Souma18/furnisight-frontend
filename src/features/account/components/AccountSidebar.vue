@@ -78,7 +78,10 @@ function toggleNotificationMenu() {
 <template>
   <aside class="sidebar">
     <div class="user-box">
-      <div class="avatar">{{ profile?.initials ?? 'NA' }}</div>
+      <div class="avatar">
+        <img v-if="profile?.avatarUrl" :src="profile.avatarUrl" alt="Avatar" />
+        <span v-else>{{ profile?.initials ?? 'NA' }}</span>
+      </div>
       <p class="name">{{ profile?.lastName }} {{ profile?.firstName }}</p>
       <p class="email">{{ profile?.email }}</p>
     </div>
@@ -172,11 +175,17 @@ function toggleNotificationMenu() {
   width: 52px;
   height: 52px;
   border-radius: 999px;
+  overflow: hidden;
   display: grid;
   place-items: center;
   color: var(--color-white);
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
   font-weight: 600;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .name {
   margin: 0.7rem 0 0.2rem;

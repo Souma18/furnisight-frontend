@@ -2,9 +2,12 @@ import { reactive, watch, ref, computed } from 'vue'
 
 import { useProfileStore } from '../store/profileStore'
 
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024
+
 export function useProfileForm(props, emit) {
   const profileStore = useProfileStore()
   const avatarInput = ref(null)
+  const avatarUploading = ref(false)
 
   const form = reactive({
     firstName: '',
@@ -40,20 +43,43 @@ export function useProfileForm(props, emit) {
   async function onAvatarSelected(event) {
     const file = event.target.files?.[0]
     if (!file) return
-    await profileStore.uploadAvatar(file)
-    emit('notify', 'Đã cập nhật ảnh đại diện.')
-    event.target.value = ''
+
+    try {
+      if (!file.type?.startsWith('image/')) {
+        emit('notify', 'Vui lòng chọn file ảnh.', 'error')
+        return
+      }
+
+      if (file.size > MAX_AVATAR_SIZE) {
+        emit('notify', 'Ảnh đại diện không được vượt quá 5MB.', 'error')
+        return
+      }
+
+      avatarUploading.value = true
+      const avatarUrl = await profileStore.uploadAvatar(file)
+      emit('notify', avatarUrl ? 'Đã cập nhật ảnh đại diện.' : 'Không lấy được URL ảnh sau khi upload.', avatarUrl ? 'success' : 'error')
+    } catch (error) {
+      emit('notify', error?.response?.data?.message || 'Không thể cập nhật ảnh đại diện.', 'error')
+    } finally {
+      avatarUploading.value = false
+      event.target.value = ''
+    }
   }
 
-  function removeAvatar() {
-    profileStore.removeAvatar()
-    emit('notify', 'Đã xoá ảnh đại diện.')
+  async function removeAvatar() {
+    try {
+      await profileStore.removeAvatar()
+      emit('notify', 'Đã xoá ảnh đại diện.')
+    } catch (error) {
+      emit('notify', error?.response?.data?.message || 'Không thể xoá ảnh đại diện.', 'error')
+    }
   }
 
   return {
     form,
     avatarInput,
     avatarLabel,
+    avatarUploading,
     submit,
     pickAvatar,
     onAvatarSelected,

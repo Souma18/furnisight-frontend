@@ -31,17 +31,7 @@ const {
         </form>
       </article>
 
-      <article class="security-card">
-        <header class="security-card-head">Email đăng nhập</header>
-        <div class="security-card-body">
-          <div class="link-row">
-            <div class="link-info">
-              <p class="link-label">Email</p>
-              <p class="link-value">{{ profile?.email || 'Chưa có email' }}</p>
-            </div>
-          </div>
-        </div>
-      </article>
+
     </section>
   </AccountSectionCard>
 </template>
@@ -49,7 +39,7 @@ const {
 <style scoped>
 .security-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 0.8rem;
   align-items: stretch;
 }
@@ -249,9 +239,5 @@ input:disabled { opacity:0.7; cursor:not-allowed; }
 .panel-next.locked {
   opacity: 0.58;
 }
-@media (max-width: 980px) {
-  .security-layout {
-    grid-template-columns: 1fr;
-  }
-}
+
 </style>

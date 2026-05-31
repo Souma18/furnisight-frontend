@@ -7,6 +7,7 @@ export const AUTH_VIEWS = {
   REGISTER: 'register',
   FORGOT: 'forgot',
   SUCCESS: 'success',
+  VERIFY: 'verify',
 }
 
 export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {

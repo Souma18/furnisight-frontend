@@ -1,5 +1,4 @@
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -18,6 +17,7 @@ const {
   form,
   avatarInput,
   avatarLabel,
+  avatarUploading,
   submit,
   pickAvatar,
   onAvatarSelected,
@@ -36,11 +36,11 @@ const {
         <h4>Ảnh đại diện</h4>
         <p>Định dạng JPG/PNG, kích thước tối đa 5MB.</p>
         <div class="avatar-actions">
-          <button type="button" class="upload-btn" @click="pickAvatar">
+          <button type="button" class="upload-btn" :disabled="avatarUploading" @click="pickAvatar">
             <AppIcon name="camera" :size="14" />
-            Tải ảnh lên
+            {{ avatarUploading ? 'Đang tải...' : 'Tải ảnh lên' }}
           </button>
-          <button type="button" class="ghost" @click="removeAvatar">Xoá ảnh</button>
+          <button type="button" class="ghost" :disabled="avatarUploading || !profile?.avatarUrl" @click="removeAvatar">Xoá ảnh</button>
         </div>
       </div>
       <input ref="avatarInput" type="file" accept="image/*" class="hidden-input" @change="onAvatarSelected" />
@@ -128,8 +128,13 @@ const {
   font-size: 0.82rem;
   font-weight: 500;
 }
-.upload-btn:hover {
+.upload-btn:hover:not(:disabled) {
   background: color-mix(in srgb, var(--account-upload-hover) 84%, black);
+}
+.upload-btn:disabled,
+.ghost:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 .hidden-input {
   display: none;

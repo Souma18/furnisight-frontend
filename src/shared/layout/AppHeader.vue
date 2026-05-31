@@ -15,6 +15,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
+const initialAuthView = ref('login')
 const notifications = ref([])
 
 const activeNav = computed(() => {
@@ -95,6 +96,26 @@ watch(isAuthenticated, (newVal) => {
     notificationsLoaded.value = false
   } else {
     notificationsLoaded.value = false
+  }
+})
+
+watch(() => route.query.otpCode, (newVal) => {
+  if (newVal) {
+    initialAuthView.value = 'verify'
+    isAuthModalOpen.value = true
+  }
+}, { immediate: true })
+
+watch(isAuthModalOpen, (newVal) => {
+  if (!newVal) {
+    initialAuthView.value = 'login'
+    
+    // Nếu đóng modal mà url vẫn còn otpCode thì xoá nó đi để tránh mở lại khi render
+    if (route.query.otpCode) {
+      const query = { ...route.query }
+      delete query.otpCode
+      router.replace({ query })
+    }
   }
 })
 </script>
@@ -190,6 +211,7 @@ watch(isAuthenticated, (newVal) => {
   </header>
   <AuthModal
     :open="isAuthModalOpen"
+    :initial-view="initialAuthView"
     @close="isAuthModalOpen = false"
     @authenticated="isAuthModalOpen = false"
   />

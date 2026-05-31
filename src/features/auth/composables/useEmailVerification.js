@@ -1,10 +1,9 @@
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { authApi } from '@shared/lib/api/services'
 
-export function useEmailVerification() {
+export function useEmailVerification(onSuccessCallback) {
   const route = useRoute()
-  const router = useRouter()
 
   const status = ref('verifying')
   const message = ref('Đang xác thực email của bạn...')
@@ -24,7 +23,7 @@ export function useEmailVerification() {
         status.value = 'success'
         message.value = 'Chúc mừng! Email của bạn đã được xác thực thành công.'
         setTimeout(() => {
-          router.push({ name: 'login' })
+          if (onSuccessCallback) onSuccessCallback()
         }, 3000)
         return
       }

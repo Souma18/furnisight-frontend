@@ -5,18 +5,23 @@ import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
 import ForgotPasswordForm from './ForgotPasswordForm.vue'
 import AuthSuccessState from './AuthSuccessState.vue'
+import VerifyEmailForm from './VerifyEmailForm.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-defineProps({
+const props = defineProps({
   embedded: {
     type: Boolean,
     default: false,
+  },
+  initialView: {
+    type: String,
+    default: 'login',
   },
 })
 
 defineEmits(['close', 'authenticated'])
 
-const authViewState = useAuthViewState()
+const authViewState = useAuthViewState(props.initialView)
 provideAuthViewState(authViewState)
 const { AUTH_VIEWS, activeView, successState, showTabs, setView } = authViewState
 
@@ -56,6 +61,7 @@ function handleTabChange(tab) {
           />
           <RegisterForm v-else-if="activeView === AUTH_VIEWS.REGISTER" />
           <ForgotPasswordForm v-else-if="activeView === AUTH_VIEWS.FORGOT" />
+          <VerifyEmailForm v-else-if="activeView === AUTH_VIEWS.VERIFY" />
           <AuthSuccessState
             v-else
             :title="successState.title"

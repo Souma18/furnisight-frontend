@@ -36,7 +36,7 @@ const routes = [
   {
     path: '/auth/verify',
     name: 'auth-verify',
-    component: () => import('@features/auth/pages/VerifyEmailPage.vue'),
+    redirect: to => ({ path: '/', query: to.query })
   },
   {
     path: '/cart',

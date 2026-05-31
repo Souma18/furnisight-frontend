@@ -32,7 +32,7 @@ const { form, loading, errorMessage, passwordStrength, submitRegister } = useReg
     </label>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    <button class="submit-btn" type="submit" :disabled="loading">
+    <button class="submit-btn" type="submit" :disabled="loading || !form.agree">
       {{ loading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
     </button>
   </form>

@@ -34,9 +34,42 @@ const removeAuthHeader = (headers = {}) => {
   return headers
 }
 
+const createIdempotencyKey = () => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID()
+  }
+
+  return `req-${Date.now()}-${Math.random().toString(36).slice(2)}`
+}
+
+const hasHeader = (headers = {}, name) => {
+  if (typeof headers.has === 'function') {
+    return headers.has(name)
+  }
+
+  const normalizedName = name.toLowerCase()
+  return Object.keys(headers).some((key) => key.toLowerCase() === normalizedName)
+}
+
+const setHeader = (headers = {}, name, value) => {
+  if (typeof headers.set === 'function') {
+    headers.set(name, value)
+    return headers
+  }
+
+  headers[name] = value
+  return headers
+}
+
 export function registerApiInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
+      config.headers = config.headers || {}
+
+      if (config.useIdempotencyKey && !hasHeader(config.headers, 'Idempotency-Key')) {
+        config.headers = setHeader(config.headers, 'Idempotency-Key', createIdempotencyKey())
+      }
+
       if (config.skipAuth) {
         config.headers = removeAuthHeader(config.headers)
         return config
@@ -44,7 +77,7 @@ export function registerApiInterceptors() {
 
       const token = localStorage.getItem('access_token')
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`
+        config.headers = setHeader(config.headers, 'Authorization', `Bearer ${token}`)
       }
       return config
     },
