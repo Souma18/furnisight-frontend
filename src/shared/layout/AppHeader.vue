@@ -110,7 +110,6 @@ watch(isAuthModalOpen, (newVal) => {
   if (!newVal) {
     initialAuthView.value = 'login'
     
-    // Nếu đóng modal mà url vẫn còn otpCode thì xoá nó đi để tránh mở lại khi render
     if (route.query.otpCode) {
       const query = { ...route.query }
       delete query.otpCode
