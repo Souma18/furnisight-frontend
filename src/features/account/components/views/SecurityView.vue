@@ -1,7 +1,6 @@
 <script setup>
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { usePasswordManager } from '../../composables/usePasswordManager'
-import { useContactManager } from '../../composables/useContactManager'
 
 const props = defineProps({
   profile: {
@@ -17,33 +16,6 @@ const {
   isLoading: isPasswordLoading,
   submit: submitPassword,
 } = usePasswordManager((msg, type) => emit('notify', msg, type))
-
-const {
-  contactModalOpen,
-  linkModalOpen,
-  contactType,
-  verificationMethod,
-  activeContactTab,
-  verifyCode,
-  verifiedOldContact,
-  newValue,
-  newContactCode,
-  currentContactLabel,
-  maskedEmail,
-  maskedPhone,
-  contactTitles,
-  linkTitles,
-  isLoading: isContactLoading,
-  openContactModal,
-  openLinkModal,
-  sendOldContactCode,
-  verifyCurrentContact,
-  sendNewContactCode,
-  submitContactChange,
-  sendLinkCode,
-  submitLink,
-  removeOldContact,
-} = useContactManager(props, (msg, type) => emit('notify', msg, type))
 </script>
 
 <template>
@@ -60,135 +32,18 @@ const {
       </article>
 
       <article class="security-card">
-        <header class="security-card-head">Thông tin liên kết</header>
+        <header class="security-card-head">Email đăng nhập</header>
         <div class="security-card-body">
           <div class="link-row">
             <div class="link-info">
               <p class="link-label">Email</p>
-              <p class="link-value">{{ maskedEmail || 'Chưa liên kết' }}</p>
+              <p class="link-value">{{ profile?.email || 'Chưa có email' }}</p>
             </div>
-            <div class="action-buttons" v-if="maskedEmail">
-              <button class="secondary" type="button" @click="openContactModal('email')">Thay đổi</button>
-              <button class="danger" type="button" @click="removeOldContact('email')">Xoá</button>
-            </div>
-            <button v-else class="link-btn" type="button" @click="openLinkModal('email')">
-              Liên kết
-            </button>
-          </div>
-
-          <div class="link-row">
-            <div class="link-info">
-              <p class="link-label">Số điện thoại</p>
-              <p class="link-value">{{ maskedPhone || 'Chưa liên kết' }}</p>
-            </div>
-            <div class="action-buttons" v-if="maskedPhone">
-              <button class="secondary" type="button" @click="openContactModal('phone')">Thay đổi</button>
-              <button class="danger" type="button" @click="removeOldContact('phone')">Xoá</button>
-            </div>
-            <button v-else class="link-btn" type="button" @click="openLinkModal('phone')">
-              Liên kết
-            </button>
           </div>
         </div>
       </article>
     </section>
   </AccountSectionCard>
-
-  <!-- Modal: Liên kết mới (1 bước) -->
-  <div v-if="linkModalOpen" class="overlay" @click.self="linkModalOpen = false">
-    <section class="modal">
-      <h4>{{ linkTitles.trigger }}</h4>
-      <div class="panel">
-        <label>{{ linkTitles.label }}
-          <input
-            v-model="newValue"
-            :type="contactType === 'email' ? 'email' : 'tel'"
-            :placeholder="contactType === 'email' ? 'email@example.com' : '0901 234 567'"
-          />
-        </label>
-        <label>Mã xác minh
-          <div class="input-with-btn">
-            <input v-model="newContactCode" placeholder="Nhập mã OTP" />
-            <button class="send-btn" type="button" :disabled="isContactLoading" @click="sendLinkCode">
-              Gửi mã
-            </button>
-          </div>
-        </label>
-        <button class="primary" type="button" :disabled="isContactLoading" @click="submitLink">
-          Xác nhận liên kết
-        </button>
-      </div>
-    </section>
-  </div>
-
-  <!-- Modal: Thay đổi (2 bước) -->
-  <div v-if="contactModalOpen" class="overlay" @click.self="contactModalOpen = false">
-    <section class="modal">
-      <h4>{{ contactTitles.trigger }}</h4>
-      <div class="method-toggle">
-        <button
-          type="button"
-          :class="{ active: activeContactTab === 'old' }"
-          @click="activeContactTab = 'old'"
-        >
-          {{ contactTitles.old }}
-        </button>
-        <button
-          type="button"
-          :class="{ active: activeContactTab === 'new' }"
-          :disabled="!verifiedOldContact"
-          @click="activeContactTab = 'new'"
-        >
-          {{ contactTitles.next }}
-        </button>
-      </div>
-
-      <div v-if="activeContactTab === 'old'" class="panel">
-        <label>Phương thức xác minh
-          <select v-model="verificationMethod" class="method-select" :disabled="isContactLoading">
-            <option value="EMAIL" :disabled="!maskedEmail">Qua Email</option>
-            <option value="PHONE" :disabled="!maskedPhone">Qua Số điện thoại</option>
-          </select>
-        </label>
-        <label>{{ contactTitles.old }}
-          <input :value="currentContactLabel" disabled />
-        </label>
-        <label>Mã xác minh
-          <div class="input-with-btn">
-            <input v-model="verifyCode" placeholder="Nhập mã từ liên hệ cũ" />
-            <button class="send-btn" type="button" :disabled="isContactLoading" @click="sendOldContactCode">Gửi mã</button>
-          </div>
-        </label>
-        <button class="secondary" type="button" :disabled="isContactLoading" @click="verifyCurrentContact">
-          Xác nhận
-        </button>
-      </div>
-
-      <div v-else class="panel" :class="{ locked: !verifiedOldContact }">
-        <label>{{ contactTitles.next }}
-          <input
-            v-model="newValue"
-            :type="contactType === 'email' ? 'email' : 'tel'"
-            :placeholder="contactType === 'email' ? 'emailmoi@example.com' : '0901 234 567'"
-            :disabled="!verifiedOldContact"
-          />
-        </label>
-        <label>Mã xác minh
-          <div class="input-with-btn">
-            <input
-              v-model="newContactCode"
-              placeholder="Nhập mã từ liên hệ mới"
-              :disabled="!verifiedOldContact"
-            />
-            <button class="send-btn" type="button" :disabled="!verifiedOldContact || isContactLoading" @click="sendNewContactCode">Gửi mã</button>
-          </div>
-        </label>
-        <button class="primary" type="button" :disabled="!verifiedOldContact || isContactLoading" @click="submitContactChange">
-          Cập nhật
-        </button>
-      </div>
-    </section>
-  </div>
 </template>
 
 <style scoped>

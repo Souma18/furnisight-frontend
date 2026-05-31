@@ -55,12 +55,6 @@ const {
           {{ profile?.email || 'Chưa liên kết' }}
         </div>
       </label>
-      <label>
-        Số điện thoại
-        <div class="readonly-field">
-          {{ profile?.phone || 'Chưa liên kết' }}
-        </div>
-      </label>
       <label>Ngày sinh <input v-model="form.birthday" type="date" /></label>
       <label>
         Giới tính

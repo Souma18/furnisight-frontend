@@ -13,7 +13,6 @@ export class AuthProfileResponse {
     this.firstName = data.firstName || ''
     this.lastName = data.lastName || ''
     this.avatarUrl = data.avatarUrl || ''
-    this.phone = data.phone || data.phoneNumber || ''
     this.role = data.role || ''
     this.status = data.status || ''
     this.createdAt = data.createdAt ?? null

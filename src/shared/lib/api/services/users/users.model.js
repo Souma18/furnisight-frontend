@@ -8,9 +8,8 @@ export class ProfileResponse {
     this.firstName = data.firstName || ''
     this.lastName = data.lastName || ''
     this.avatarUrl = data.avatarUrl || ''
-    this.phone = data.phone || ''
     this.role = data.role || ''
-    this.birthday = data.birthday || ''
+    this.birthday = data.birthday || data.dateOfBirth || ''
     this.gender = data.gender || 'MALE'
     this.bio = data.bio || ''
     this.createdAt = data.createdAt || null
@@ -72,4 +71,3 @@ export class FavoriteResponse {
     this.product = data.product ? new FavoriteProductDto(data.product) : null
   }
 }
-

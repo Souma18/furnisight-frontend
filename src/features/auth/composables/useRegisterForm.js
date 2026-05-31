@@ -11,7 +11,6 @@ export function useRegisterForm() {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     password: '',
     agree: false,
   })
@@ -39,7 +38,6 @@ export function useRegisterForm() {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
-        phoneNumber: form.phone,
         password: form.password,
         username: form.email.split('@')[0],
       })

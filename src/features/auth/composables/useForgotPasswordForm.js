@@ -8,7 +8,6 @@ export function useForgotPasswordForm() {
   const loading = ref(false)
   const errorMessage = ref('')
   const form = reactive({
-    method: 'EMAIL',
     destination: '',
     code: '',
     newPassword: '',
@@ -25,7 +24,7 @@ export function useForgotPasswordForm() {
     loading.value = true
     try {
       await authApi.forgotPassword({
-        channel: form.method,
+        channel: 'EMAIL',
         destination: form.destination,
       })
     } catch (error) {
@@ -44,7 +43,7 @@ export function useForgotPasswordForm() {
     errorMessage.value = ''
     loading.value = true
     try {
-      await authApi.verifyResetPasswordCode({ code: form.code })
+      await authApi.verifyResetPasswordCode({ email: form.destination, code: form.code })
       form.step = 2
     } catch (error) {
       errorMessage.value = error.response?.data?.message || error.message || 'Mã xác nhận không hợp lệ.'
@@ -58,6 +57,7 @@ export function useForgotPasswordForm() {
     loading.value = true
     try {
       await authApi.resetPassword({
+        email: form.destination,
         token: form.code,
         newPassword: form.newPassword,
       })

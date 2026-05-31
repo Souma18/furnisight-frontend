@@ -13,17 +13,12 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
     </div>
 
     <template v-if="form.step === 1">
-      <div class="method-toggle">
-        <button type="button" :class="{ active: form.method === 'EMAIL' }" @click="form.method = 'EMAIL'">Email</button>
-        <button type="button" :class="{ active: form.method === 'PHONE' }" @click="form.method = 'PHONE'">Số điện thoại</button>
-      </div>
-
-      <label>{{ form.method === 'EMAIL' ? 'Địa chỉ email' : 'Số điện thoại' }}</label>
+      <label>Địa chỉ email</label>
       <div class="input-with-btn">
         <input 
           v-model="form.destination" 
-          :type="form.method === 'EMAIL' ? 'email' : 'tel'" 
-          :placeholder="form.method === 'EMAIL' ? 'hello@email.com' : '0901 234 567'" 
+          type="email"
+          placeholder="hello@email.com"
           required 
         />
         <button type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
@@ -84,30 +79,6 @@ input {
 input:focus {
   outline: none;
   box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
-
-.method-toggle {
-  display: flex;
-  background: var(--auth-surface-secondary);
-  border-radius: var(--auth-radius-md);
-  padding: 0.2rem;
-  margin-bottom: 0.2rem;
-}
-.method-toggle button {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 0.45rem;
-  color: var(--auth-text-secondary);
-  border-radius: var(--auth-radius-sm);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.85rem;
-}
-.method-toggle button.active {
-  background: var(--auth-surface);
-  color: var(--auth-text-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .input-with-btn {

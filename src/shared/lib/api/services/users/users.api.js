@@ -54,34 +54,6 @@ class UsersApi {
     return apiClient.get('/account/projects')
   }
 
-  requestContactChange(payload) {
-    return apiClient.post('/users/profile/contact/change/request', payload)
-  }
-
-  verifyCurrentContact(payload) {
-    return apiClient.post('/users/profile/contact/change/verify-current', payload)
-  }
-
-  requestNewContact(payload) {
-    return apiClient.post('/users/profile/contact/change/request-new', payload)
-  }
-
-  confirmContactChange(payload) {
-    return apiClient.post('/users/profile/contact/change/confirm', payload)
-  }
-
-  requestLinkContact(payload) {
-    return apiClient.post('/users/profile/contact/link/request', payload)
-  }
-
-  confirmLinkContact(payload) {
-    return apiClient.post('/users/profile/contact/link/confirm', payload)
-  }
-
-  removeContact(payload) {
-    return apiClient.post('/users/profile/contact/remove', payload)
-  }
-
   // ─── FAVORITES (WISHLIST) ────────────────────────────────────────────────────────
 
   /**
