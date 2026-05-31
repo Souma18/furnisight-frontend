@@ -11,7 +11,6 @@ import { useHomePage } from '../composables/useHomePage'
 import {
   homeFeatures,
   homeHero,
-  homeTestimonials,
 } from '../composables/homeContent'
 
 const {
@@ -22,6 +21,7 @@ const {
   wishedProductIds,
   roomFilters,
   filteredRooms,
+  topReviews,
   toggleWish,
 } = useHomePage()
 </script>
@@ -48,7 +48,7 @@ const {
     />
     <HomeProcess3DSection />
     <HomeNewsletterSection />
-    <HomeTestimonialsSection :testimonials="homeTestimonials" />
+    <HomeTestimonialsSection :testimonials="topReviews" />
   </div>
 </template>
 

@@ -16,6 +16,7 @@ export function useHomePage() {
   const products = ref([])
   const activeCategoryId = ref('')
   const activeRoomFilter = ref('Tat ca')
+  const topReviews = ref([])
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
 
   const roomFilters = computed(() => ['Tat ca', ...categories.value.map((category) => category.name)])
@@ -85,6 +86,22 @@ export function useHomePage() {
     }
   }
 
+  async function loadTopReviews() {
+    try {
+      const { data } = await productsApi.getTopRandomReviews(3)
+      topReviews.value = (data || []).map((review) => ({
+        id: review.id,
+        name: review.userName || 'Khach hang an danh',
+        role: '',
+        avatar: review.userAvatarUrl || null,
+        text: review.content,
+        stars: '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)
+      }))
+    } catch (error) {
+      console.error('Failed to load top reviews:', error)
+    }
+  }
+
   async function toggleWish(productId) {
     if (!productId) return
 
@@ -113,6 +130,7 @@ export function useHomePage() {
 
   onMounted(() => {
     loadCategories()
+    loadTopReviews()
 
     if (authStore.isAuthenticated) {
       wishlistStore.loadWishlist().catch(() => [])
@@ -127,6 +145,7 @@ export function useHomePage() {
     wishedProductIds,
     roomFilters,
     filteredRooms,
+    topReviews,
     toggleWish,
   }
 }

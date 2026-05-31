@@ -18,7 +18,7 @@ defineProps({
         <div class="testi-footer">
           <div>
             <div class="testi-name">{{ item.name }}</div>
-            <div class="testi-role">{{ item.role }}</div>
+            <div v-if="item.role" class="testi-role">{{ item.role }}</div>
           </div>
           <div class="testi-stars">{{ item.stars }}</div>
         </div>

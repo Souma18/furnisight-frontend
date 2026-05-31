@@ -92,6 +92,15 @@ class ProductsApi {
   submitReview(productId, payload) {
     return apiClient.post(`/products/${productId}/reviews`, payload)
   }
+
+  /**
+   * Retrieves top random reviews across all products
+   * @param {number} limit 
+   * @returns {Promise<import('axios').AxiosResponse<import('./products.model').ReviewResponse[]>>}
+   */
+  getTopRandomReviews(limit = 3) {
+    return apiClient.get(`${catalogBaseUrl}/reviews/top-random`, { params: { limit } })
+  }
 }
 
 export const productsApi = new ProductsApi()
