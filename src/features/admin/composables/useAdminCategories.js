@@ -10,7 +10,6 @@ export function useAdminCategories() {
   const search = ref('')
 
   const columns = [
-    { key: 'id', label: 'ID' },
     { key: 'name', label: 'Danh mục' },
     { key: 'slug', label: 'Slug' },
     { key: 'productCount', label: 'Số SP' },

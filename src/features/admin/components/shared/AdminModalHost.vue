@@ -4,11 +4,12 @@ import { adminApi } from '@shared/lib/api/services'
 import AdminModal from './AdminModal.vue'
 import AdminIconPicker from '../forms/AdminIconPicker.vue'
 import AdminModel3dUpload from '../forms/AdminModel3dUpload.vue'
+import AdminProductImagesUpload from '../forms/AdminProductImagesUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
 
 const iconOptions = ref([])
-const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile } = useAdminModal()
+const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile, onProductImages, removeImage } = useAdminModal()
 
 onMounted(async () => {
   const res = await adminApi.fetchCategoryIconOptions()
@@ -69,6 +70,7 @@ watch(() => modal.value.open, (open) => {
         <div class="mform-group"><label class="mfl">Tồn kho</label><input v-model="form.stock" class="mfi" type="number" /></div>
       </div>
       <div class="mform-group"><label class="mfl">SKU</label><input v-model="form.sku" class="mfi" /></div>
+      <AdminProductImagesUpload :images="form.imageUrls" :uploading="saving" @select="onProductImages" @remove="removeImage" />
       <AdminModel3dUpload :file-name="form.model3dFileName" :file-size="form.model3dSize" @select="onModelFile" />
       <div class="mform-group"><label class="mfl">Trạng thái</label><select v-model="form.status" class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>
     </template>

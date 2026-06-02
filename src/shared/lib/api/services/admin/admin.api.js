@@ -17,6 +17,10 @@ class AdminApi {
     return apiClient.put(`/admin/users/${id}`, payload)
   }
 
+  deleteAdminUser(id) {
+    return apiClient.delete(`/admin/users/${id}`)
+  }
+
   fetchCategories(params) {
     return apiClient.get('/admin/categories', { params })
   }

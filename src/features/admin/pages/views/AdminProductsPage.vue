@@ -23,7 +23,15 @@ const badgeMap = { success: 'b-success', low: 'b-low', cancel: 'b-cancel' }
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" />
   <AdminDataTable :columns="columns" :rows="items">
-    <template #cell-name="{ row }"><div class="flex-cell"><div class="cell-img"><AppIcon name="box" :size="16" /></div><span class="cell-name">{{ row.name }}</span></div></template>
+    <template #cell-name="{ row }">
+      <div class="flex-cell">
+        <div class="cell-img">
+          <img v-if="row.imageUrls?.[0]" :src="row.imageUrls[0]" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:6px" />
+          <AppIcon v-else name="box" :size="16" />
+        </div>
+        <span class="cell-name">{{ row.name }}</span>
+      </div>
+    </template>
     <template #cell-price="{ row }"><span style="font-weight:600;color:var(--gold)">{{ formatPrice(row.price) }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span></template>
     <template #cell-actions="{ row }">

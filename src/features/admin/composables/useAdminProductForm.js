@@ -1,4 +1,4 @@
-import { adminApi } from '@shared/lib/api/services'
+import { adminApi, mediaApi } from '@shared/lib/api/services'
 
 /** Product form defaults & 3D model upload for admin modals. */
 
@@ -13,6 +13,7 @@ export const PRODUCT_FORM_DEFAULTS = {
   model3dSize: 0,
   model3dUrl: '',
   modelFile: null,
+  imageUrls: [],
 }
 
 export function mapProductToForm(row) {
@@ -28,6 +29,7 @@ export function mapProductToForm(row) {
     model3dFileName: row.model3dFileName ?? '',
     model3dSize: row.model3dSize ?? 0,
     model3dUrl: row.model3dUrl ?? '',
+    imageUrls: Array.isArray(row.imageUrls) ? [...row.imageUrls] : [],
   }
 }
 
@@ -37,6 +39,22 @@ export async function applyProductModelFile(form, file) {
   form.model3dSize = file.size
   const res = await adminApi.uploadProductModel(file)
   form.model3dUrl = res.data?.model3dUrl ?? ''
+}
+
+export async function applyProductImageFiles(form, files) {
+  const ownerId = crypto.randomUUID()
+  const uploads = await Promise.all(files.map((file) => mediaApi.uploadDirect(file, {
+    ownerType: 'PRODUCT',
+    ownerId,
+  })))
+  const nextUrls = uploads
+    .map((item) => item.secureUrl || item.secure_url || item.url)
+    .filter(Boolean)
+  form.imageUrls = [...new Set([...(form.imageUrls ?? []), ...nextUrls])]
+}
+
+export function removeProductImage(form, url) {
+  form.imageUrls = (form.imageUrls ?? []).filter((item) => item !== url)
 }
 
 export function buildProductPayload(form) {
@@ -50,5 +68,6 @@ export function buildProductPayload(form) {
     model3dUrl: form.model3dUrl,
     model3dFileName: form.model3dFileName,
     model3dSize: form.model3dSize,
+    imageUrls: form.imageUrls ?? [],
   }
 }

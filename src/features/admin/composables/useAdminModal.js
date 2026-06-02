@@ -2,7 +2,7 @@ import { computed, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { adminApi } from '@shared/lib/api/services'
 import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
-import { applyProductModelFile, buildProductPayload, mapProductToForm } from './useAdminProductForm'
+import { applyProductImageFiles, applyProductModelFile, buildProductPayload, mapProductToForm, removeProductImage } from './useAdminProductForm'
 import { useAdminUiStore } from '../store/adminUiStore'
 
 async function sleepMock() {
@@ -53,6 +53,7 @@ export function useAdminModal() {
     model3dSize: 0,
     model3dUrl: '',
     modelFile: null,
+    imageUrls: [],
     roleDescription: '',
     permissions: ['dashboard'],
     adminRole: 'Manager',
@@ -104,12 +105,30 @@ export function useAdminModal() {
     await applyProductModelFile(form, file)
   }
 
+  async function onProductImages(files) {
+    saving.value = true
+    try {
+      await applyProductImageFiles(form, files)
+    } catch (e) {
+      ui.showToast({ icon: 'x', title: 'Lỗi tải ảnh', subtitle: e?.response?.data?.message ?? e.message })
+    } finally {
+      saving.value = false
+    }
+  }
+
+  function removeImage(url) {
+    removeProductImage(form, url)
+  }
+
   async function save() {
     saving.value = true
     try {
       const type = modal.value.type
       if (type === 'addUser') await adminApi.createAdminUser({ ...form })
-      if (type === 'editUser' && modal.value.payload?.id) await adminApi.updateAdminUser(modal.value.payload.id, { ...form })
+      if (type === 'editUser') {
+        if (!modal.value.payload?.id) throw new Error('Thiếu người dùng cần cập nhật.')
+        await adminApi.updateAdminUser(modal.value.payload.id, { ...form })
+      }
       if (type === 'addCat') await adminApi.createCategory(buildCategoryPayload(form))
       if (type === 'editCat' && modal.value.payload?.id) await adminApi.updateCategory(modal.value.payload.id, buildCategoryPayload(form))
       if (type === 'addProd' || type === 'editProd') {
@@ -144,5 +163,7 @@ export function useAdminModal() {
     close: ui.closeModal,
     save,
     onModelFile,
+    onProductImages,
+    removeImage,
   }
 }
