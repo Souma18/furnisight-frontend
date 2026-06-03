@@ -653,7 +653,20 @@ textarea.mfi{resize:vertical}
 .admin-shell .model-upload-box { border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; background: var(--cream); text-align: center; }
 .admin-shell .model-upload-box.has-file { border-color: var(--gold); background: var(--gold-pale); }
 .admin-shell .product-image-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
-.admin-shell .product-image-thumb { position: relative; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--cream); }
+.admin-shell .product-image-thumb { position: relative; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--cream); cursor: grab; }
+.admin-shell .product-image-thumb:active { cursor: grabbing; }
 .admin-shell .product-image-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .admin-shell .product-image-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(0,0,0,.62); color: white; cursor: pointer; }
+.admin-shell .product-image-order { position: absolute; left: 4px; right: 4px; bottom: 4px; height: 24px; display: grid; grid-template-columns: 22px 1fr 22px; align-items: center; gap: 3px; padding: 0 3px; border-radius: 6px; background: rgba(0,0,0,.58); color: white; font-size: 11px; font-weight: 600; }
+.admin-shell .product-image-order button { width: 22px; height: 20px; border: 0; border-radius: 4px; display: grid; place-items: center; background: rgba(255,255,255,.18); color: white; cursor: pointer; }
+.admin-shell .product-image-order button:disabled { opacity: .35; cursor: not-allowed; }
+.admin-shell .product-image-order span { text-align: center; }
+.admin-shell .variant-head { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px; }
+.admin-shell .variant-add-btn,
+.admin-shell .variant-remove-btn { height:30px; border:1px solid var(--border); border-radius:6px; background:white; color:var(--text2); display:inline-flex; align-items:center; gap:6px; padding:0 10px; font-size:12px; font-weight:600; cursor:pointer; }
+.admin-shell .variant-list { display:grid; gap:10px; }
+.admin-shell .variant-row { border:1px solid var(--border); border-radius:8px; padding:10px; background:var(--cream); }
+.admin-shell .variant-remove-btn { margin-top:4px; color:#b91c1c; }
+.admin-shell .variant-remove-btn:disabled { opacity:.45; cursor:not-allowed; }
+.admin-shell .toggle-line { display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--text2); }
 @media (max-width: 1100px) { .admin-shell .roles-grid { grid-template-columns: 1fr; } }

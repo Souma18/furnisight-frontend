@@ -19,6 +19,7 @@ onMounted(async () => {
 const columns = [
   { key: 'sku', label: 'SKU' },
   { key: 'name', label: 'Sản phẩm' },
+  { key: 'variantLabel', label: 'Variant' },
   { key: 'category', label: 'Danh mục' },
   { key: 'stock', label: 'Tồn hiện tại' },
   { key: 'threshold', label: 'Ngưỡng cảnh báo' },
@@ -81,7 +82,7 @@ const pagination = computed(() => ({
           <button
             type="button"
             class="ra-btn ra-edit"
-            @click="ui.showToast({ icon: 'box', title: 'Nhập thêm hàng', subtitle: row.name })"
+            @click="ui.openModal('stockIn', row)"
           >
             <AppIcon name="warehouse" :size="14" />
           </button>

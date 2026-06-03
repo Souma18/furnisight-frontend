@@ -81,6 +81,38 @@ class MediaApi {
     return apiClient.put(`/media/${mediaId}/complete-upload`, payload)
   }
 
+  cancelUpload(mediaId) {
+    return apiClient.post(`/media/${mediaId}/cancel-upload`)
+  }
+
+  async uploadStaged(file, options = {}) {
+    const initResponse = await this.initUpload(file, options)
+    const uploadSession = unwrapData(initResponse)
+    const mediaId = pickMediaId(uploadSession)
+    const cloudinaryResponse = await this.uploadToCloudinary(file, uploadSession)
+    const cloudinaryData = unwrapData(cloudinaryResponse)
+
+    return {
+      ...cloudinaryData,
+      mediaId,
+      uploadSession,
+      cloudinaryData,
+      completed: false,
+      persisted: false,
+      url: cloudinaryData.secure_url || cloudinaryData.url || pickUploadUrl(uploadSession),
+    }
+  }
+
+  async completeStagedUpload(upload) {
+    if (!upload?.mediaId || upload.completed) return upload
+    const completeResponse = await this.completeUpload(upload.mediaId, upload.cloudinaryData ?? upload)
+    return {
+      ...upload,
+      ...unwrapData(completeResponse),
+      completed: true,
+    }
+  }
+
   /**
    * Full direct-upload flow: init with BE, upload file to Cloudinary, complete with BE.
    * @param {File} file

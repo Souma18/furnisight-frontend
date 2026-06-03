@@ -20,7 +20,10 @@ const ui = useAdminUiStore()
   <AdminDataTable :columns="columns" :rows="filtered">
     <template #cell-name="{ row }">
       <div class="flex-cell">
-        <AppIcon :name="row.iconId" :size="20" />
+        <span class="category-thumb">
+          <img v-if="row.imageUrl" :src="row.imageUrl" alt="" />
+          <AppIcon v-else :name="row.iconId" :size="18" />
+        </span>
         <span class="cell-name">{{ row.name }}</span>
       </div>
     </template>
@@ -38,3 +41,22 @@ const ui = useAdminUiStore()
     </template>
   </AdminDataTable>
 </template>
+
+<style scoped>
+.category-thumb {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--cream);
+  overflow: hidden;
+  color: var(--gold);
+  flex: 0 0 auto;
+}
+.category-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+</style>

@@ -6,12 +6,23 @@ defineProps({
   uploading: { type: Boolean, default: false },
 })
 
-const emit = defineEmits(['select', 'remove'])
+const emit = defineEmits(['select', 'remove', 'move'])
+let dragIndex = null
 
 function onChange(event) {
   const files = Array.from(event.target.files ?? [])
   if (files.length) emit('select', files)
   event.target.value = ''
+}
+
+function onDragStart(index) {
+  dragIndex = index
+}
+
+function onDrop(index) {
+  if (dragIndex === null || dragIndex === index) return
+  emit('move', dragIndex, index)
+  dragIndex = null
 }
 </script>
 
@@ -26,8 +37,25 @@ function onChange(event) {
       </div>
     </label>
     <div v-if="images.length" class="product-image-grid">
-      <div v-for="url in images" :key="url" class="product-image-thumb">
+      <div
+        v-for="(url, index) in images"
+        :key="url"
+        class="product-image-thumb"
+        draggable="true"
+        @dragstart="onDragStart(index)"
+        @dragover.prevent
+        @drop.prevent="onDrop(index)"
+      >
         <img :src="url" alt="" />
+        <div class="product-image-order">
+          <button type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
+            <AppIcon name="chevron-left" :size="12" />
+          </button>
+          <span>{{ index + 1 }}</span>
+          <button type="button" :disabled="index === images.length - 1" @click="emit('move', index, index + 1)">
+            <AppIcon name="chevron-right" :size="12" />
+          </button>
+        </div>
         <button type="button" class="product-image-remove" @click="emit('remove', url)">
           <AppIcon name="x" :size="12" />
         </button>

@@ -6,6 +6,7 @@ export const CATEGORY_FORM_DEFAULTS = {
   iconId: 'house',
   visible: true,
   description: '',
+  imageUrl: '',
 }
 
 export function mapCategoryToForm(row) {
@@ -16,6 +17,7 @@ export function mapCategoryToForm(row) {
     iconId: row.iconId ?? 'house',
     visible: row.visible !== false,
     description: row.description ?? '',
+    imageUrl: row.imageUrl ?? '',
   }
 }
 
@@ -26,5 +28,6 @@ export function buildCategoryPayload(form) {
     iconId: form.iconId,
     visible: form.visible,
     description: form.description,
+    imageUrl: form.imageUrl,
   }
 }

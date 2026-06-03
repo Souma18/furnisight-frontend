@@ -45,6 +45,10 @@ class AdminApi {
     return apiClient.get('/admin/products', { params })
   }
 
+  fetchProduct(id) {
+    return apiClient.get(`/admin/products/${id}`)
+  }
+
   createProduct(payload) {
     return apiClient.post('/admin/products', payload)
   }
@@ -78,6 +82,26 @@ class AdminApi {
 
   fetchInventory(params) {
     return apiClient.get('/admin/inventory', { params })
+  }
+
+  stockInVariant(payload) {
+    return apiClient.post('/admin/inventory/stock-in', payload)
+  }
+
+  fetchVouchers(params) {
+    return apiClient.get('/admin/vouchers', { params })
+  }
+
+  createVoucher(payload) {
+    return apiClient.post('/admin/vouchers', payload)
+  }
+
+  updateVoucher(id, payload) {
+    return apiClient.put(`/admin/vouchers/${id}`, payload)
+  }
+
+  deleteVoucher(id) {
+    return apiClient.delete(`/admin/vouchers/${id}`)
   }
 
   fetchRevenue(params) {
