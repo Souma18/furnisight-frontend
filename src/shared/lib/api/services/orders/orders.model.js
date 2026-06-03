@@ -111,6 +111,7 @@ export class OrderDetailResponse {
     this.fee = data.fee || {}
     this.shippingDetail = data.shippingDetail || {}
     this.paymentDetail = data.paymentDetail || {}
+    this.paymentTimeline = data.paymentTimeline || {}
     this.items = Array.isArray(data.items) 
       ? data.items.map(item => new OrderItemResponse(item)) 
       : []

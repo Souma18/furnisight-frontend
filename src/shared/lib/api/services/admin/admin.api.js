@@ -88,6 +88,14 @@ class AdminApi {
     return apiClient.post('/admin/inventory/stock-in', payload)
   }
 
+  fetchInventoryWarningSettings() {
+    return apiClient.get('/admin/inventory/warning-settings')
+  }
+
+  updateInventoryWarningSettings(payload) {
+    return apiClient.put('/admin/inventory/warning-settings', payload)
+  }
+
   fetchVouchers(params) {
     return apiClient.get('/admin/vouchers', { params })
   }
@@ -114,6 +122,18 @@ class AdminApi {
 
   fetchRoles() {
     return apiClient.get('/admin/roles')
+  }
+
+  createRole(payload) {
+    return apiClient.post('/admin/roles', payload)
+  }
+
+  updateRole(id, payload) {
+    return apiClient.put(`/admin/roles/${id}`, payload)
+  }
+
+  deleteRole(id) {
+    return apiClient.delete(`/admin/roles/${id}`)
   }
 
   fetchAuditLogs(params) {

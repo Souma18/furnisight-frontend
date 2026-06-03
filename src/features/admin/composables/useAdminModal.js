@@ -5,10 +5,6 @@ import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
 import { applyProductImageFiles, applyProductModelFile, buildProductPayload, cancelUnpersistedProductImages, completePendingProductImages, createEmptyVariant, mapProductToForm, markProductImagesPersisted, moveProductImage, removeProductImage } from './useAdminProductForm'
 import { useAdminUiStore } from '../store/adminUiStore'
 
-async function sleepMock() {
-  await new Promise((r) => setTimeout(r, 200))
-}
-
 const MODAL_TITLES = {
   addUser: 'Thêm <em>người dùng</em>',
   editUser: 'Chỉnh sửa <em>người dùng</em>',
@@ -38,6 +34,20 @@ function buildUserPayload(form) {
     email: form.email?.trim(),
     roleId: form.roleId || null,
     status: form.accountStatus || null,
+  }
+}
+
+function buildRolePayload(form) {
+  return {
+    name: form.name?.trim(),
+    description: form.roleDescription?.trim(),
+    permissions: form.permissions ?? [],
+  }
+}
+
+function assertActionResult(response) {
+  if (response?.data && response.data.success === false) {
+    throw new Error(response.data.message || 'Thao tác không thành công.')
   }
 }
 
@@ -83,6 +93,7 @@ export function useAdminModal() {
     stockQty: '',
     stockNote: '',
     variants: [],
+    activeVariantIndex: 0,
     voucherCode: '',
     voucherName: '',
     voucherDescription: '',
@@ -122,6 +133,7 @@ export function useAdminModal() {
       stockVariantId: payload?.variantId ?? '',
       stockQty: '',
       stockNote: '',
+      activeVariantIndex: 0,
       voucherCode: payload?.code ?? '',
       voucherName: payload?.name ?? '',
       voucherDescription: payload?.description ?? '',
@@ -183,6 +195,7 @@ export function useAdminModal() {
 
   function addVariant() {
     form.variants = [...(form.variants ?? []), createEmptyVariant({ sku: form.sku })]
+    form.activeVariantIndex = form.variants.length - 1
   }
 
   function removeVariant(index) {
@@ -190,6 +203,11 @@ export function useAdminModal() {
     if (variants.length <= 1) return
     variants.splice(index, 1)
     form.variants = variants
+    form.activeVariantIndex = Math.max(0, Math.min(form.activeVariantIndex, variants.length - 1))
+  }
+
+  function selectVariant(index) {
+    form.activeVariantIndex = form.activeVariantIndex === index ? -1 : index
   }
 
   async function onCategoryImage(file) {
@@ -296,8 +314,20 @@ export function useAdminModal() {
         if (type === 'addVoucher') await adminApi.createVoucher(payload)
         else if (modal.value.payload?.id) await adminApi.updateVoucher(modal.value.payload.id, payload)
       }
-      if (type === 'addRole' || type === 'editRole' || type === 'addAdmin') {
-        await sleepMock()
+      if (type === 'addRole') {
+        assertActionResult(await adminApi.createRole(buildRolePayload(form)))
+      }
+      if (type === 'editRole') {
+        if (!modal.value.payload?.id) throw new Error('Thiếu vai trò cần cập nhật.')
+        assertActionResult(await adminApi.updateRole(modal.value.payload.id, buildRolePayload(form)))
+      }
+      if (type === 'addAdmin') {
+        await adminApi.createAdminUser({
+          name: form.name?.trim(),
+          email: form.email?.trim(),
+          role: form.adminRole,
+          password: form.password,
+        })
       }
       ui.closeModal()
       ui.showToast({ title: 'Đã lưu thành công', subtitle: 'Dữ liệu đã được cập nhật.' })
@@ -325,6 +355,7 @@ export function useAdminModal() {
     moveImage,
     addVariant,
     removeVariant,
+    selectVariant,
     onCategoryImage,
     removeCategoryImage,
   }

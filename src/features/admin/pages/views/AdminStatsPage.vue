@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
@@ -13,9 +13,67 @@ const userCanvas = ref(null)
 const catCanvas = ref(null)
 const { data, bindCharts } = useAdminChartPage(adminApi.fetchStats.bind(adminApi))
 
+const formatCurrency = (value) => `${new Intl.NumberFormat('vi-VN').format(Number(value || 0))}đ`
+
+const kpis = computed(() => {
+  const user = data.value?.user || {}
+  const orders = data.value?.orders || {}
+  const products = data.value?.products || {}
+
+  return [
+    {
+      key: 'users',
+      label: 'Người dùng',
+      value: String(user.total || 0),
+      change: `${user.newThisMonth || 0} mới tháng này`,
+      up: true,
+      tone: 'blue',
+      icon: 'users',
+    },
+    {
+      key: 'orders',
+      label: 'Đơn hàng',
+      value: String(orders.total || 0),
+      change: `${orders.today || 0} hôm nay`,
+      up: true,
+      tone: 'red',
+      icon: 'box',
+    },
+    {
+      key: 'revenue',
+      label: 'Doanh thu',
+      value: formatCurrency(orders.totalRevenue),
+      change: `${formatCurrency(orders.revenueThisMonth)} tháng này`,
+      up: true,
+      tone: 'gold',
+      icon: 'trendingUp',
+    },
+    {
+      key: 'products',
+      label: 'Sản phẩm',
+      value: String(products.total || 0),
+      change: `${products.lowStock || 0} sắp hết`,
+      up: Number(products.lowStock || 0) === 0,
+      tone: 'green',
+      icon: 'armchair',
+    },
+  ]
+})
+
 bindCharts((charts, d) => {
-  charts.renderBar(userCanvas.value, d.userLabels, d.userData)
-  charts.renderDoughnut(catCanvas.value, d.categoryLabels, d.categoryData)
+  const user = d.user || {}
+  const categories = Array.isArray(d.topCategories) ? d.topCategories : []
+
+  charts.renderBar(
+    userCanvas.value,
+    ['Tổng', 'Hoạt động', 'Bị khóa', 'Mới tháng'],
+    [user.total || 0, user.active || 0, user.banned || 0, user.newThisMonth || 0],
+  )
+  charts.renderDoughnut(
+    catCanvas.value,
+    categories.map((category) => category.name),
+    categories.map((category) => category.productCount || 0),
+  )
 })
 </script>
 
@@ -29,7 +87,7 @@ bindCharts((charts, d) => {
   </AdminPageHeader>
 
   <template v-if="data">
-    <AdminKpiGrid :kpis="data.kpis" />
+    <AdminKpiGrid :kpis="kpis" />
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px">
       <AdminChartCard title="Người dùng mới theo tháng" subtitle="2026">
         <canvas ref="userCanvas" />

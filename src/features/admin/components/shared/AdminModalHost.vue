@@ -13,7 +13,7 @@ const iconOptions = ref([])
 const roleOptions = ref([])
 const categoryOptions = ref([])
 const productOptions = ref([])
-const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile, onProductImages, removeImage, moveImage, addVariant, removeVariant, onCategoryImage, removeCategoryImage } = useAdminModal()
+const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile, onProductImages, removeImage, moveImage, addVariant, removeVariant, selectVariant, onCategoryImage, removeCategoryImage } = useAdminModal()
 
 const stockVariantOptions = computed(() => {
   const product = productOptions.value.find((item) => item.id === form.stockProductId)
@@ -30,6 +30,19 @@ function onStockProductChange() {
   const firstVariant = stockVariantOptions.value[0]
   form.stockVariantId = firstVariant?.id ?? ''
   form.stockSku = firstVariant?.sku || firstVariant?.id || ''
+}
+
+function variantSummary(variant, index) {
+  const parts = [variant.color, variant.material].filter(Boolean)
+  return parts.length ? parts.join(' / ') : `Variant ${index + 1}`
+}
+
+function variantDisplayCode(variant) {
+  return variant.sku || 'Chưa có mã SKU'
+}
+
+function formatVariantPrice(value) {
+  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
 }
 
 onMounted(async () => {
@@ -159,25 +172,38 @@ watch(() => modal.value.open, (open) => {
         </div>
         <div class="variant-list">
           <div v-for="(variant, index) in form.variants" :key="variant.id || index" class="variant-row">
-            <div class="mform-row">
-              <div class="mform-group"><label class="mfl">Màu</label><input v-model="variant.color" class="mfi" placeholder="Nâu" /></div>
-              <div class="mform-group"><label class="mfl">Chất liệu</label><input v-model="variant.material" class="mfi" placeholder="Gỗ / Da / Vải" /></div>
-              <div class="mform-group"><label class="mfl">Bảo hành</label><input v-model="variant.warranty" class="mfi" placeholder="12 tháng" /></div>
-            </div>
-            <div class="mform-row">
-              <div class="mform-group"><label class="mfl">Giá</label><input v-model="variant.price" class="mfi" type="number" min="0" /></div>
-              <div class="mform-group"><label class="mfl">Tồn</label><input v-model="variant.stock" class="mfi" type="number" min="0" /></div>
-              <div class="mform-group"><label class="mfl">SKU variant</label><input v-model="variant.sku" class="mfi" placeholder="Tự dùng id nếu bỏ trống" /></div>
-            </div>
-            <div class="mform-row">
-              <div class="mform-group"><label class="mfl">Nặng</label><input v-model="variant.weight" class="mfi" type="number" min="1" /></div>
-              <div class="mform-group"><label class="mfl">Dài</label><input v-model="variant.length" class="mfi" type="number" min="1" /></div>
-              <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
-              <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
-            </div>
-            <button type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
-              <AppIcon name="trash2" :size="13" />Xóa variant
+            <button type="button" class="variant-summary" :class="{ active: form.activeVariantIndex === index }" @click="selectVariant(index)">
+              <span class="variant-summary-main">
+                <strong>{{ variantSummary(variant, index) }}</strong>
+                <small>{{ variantDisplayCode(variant) }}</small>
+              </span>
+              <span class="variant-summary-meta">
+                <b>{{ formatVariantPrice(variant.price) }}</b>
+                <small>Tồn {{ Number(variant.stock || 0) }}</small>
+              </span>
+              <AppIcon :name="form.activeVariantIndex === index ? 'chevronDown' : 'chevronRight'" :size="14" />
             </button>
+            <div v-if="form.activeVariantIndex === index" class="variant-detail">
+              <div class="mform-row">
+                <div class="mform-group"><label class="mfl">Màu</label><input v-model="variant.color" class="mfi" placeholder="Nâu" /></div>
+                <div class="mform-group"><label class="mfl">Chất liệu</label><input v-model="variant.material" class="mfi" placeholder="Gỗ / Da / Vải" /></div>
+                <div class="mform-group"><label class="mfl">Bảo hành</label><input v-model="variant.warranty" class="mfi" placeholder="12 tháng" /></div>
+              </div>
+              <div class="mform-row">
+                <div class="mform-group"><label class="mfl">Giá</label><input v-model="variant.price" class="mfi" type="number" min="0" /></div>
+                <div class="mform-group"><label class="mfl">Tồn</label><input v-model="variant.stock" class="mfi" type="number" min="0" /></div>
+                <div class="mform-group"><label class="mfl">SKU variant</label><input v-model="variant.sku" class="mfi" placeholder="Nhập mã SKU nếu có" /></div>
+              </div>
+              <div class="mform-row">
+                <div class="mform-group"><label class="mfl">Nặng</label><input v-model="variant.weight" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Dài</label><input v-model="variant.length" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
+              </div>
+              <button type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
+                <AppIcon name="trash2" :size="13" />Xóa variant
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -207,8 +233,8 @@ watch(() => modal.value.open, (open) => {
         <div class="mform-group">
           <label class="mfl">Vai trò</label>
           <select v-model="form.adminRole" class="mfi">
-            <option>Manager</option>
-            <option>Staff</option>
+            <option value="">Chọn vai trò</option>
+            <option v-for="role in roleOptions" :key="role.id" :value="role.id">{{ role.name }}</option>
           </select>
         </div>
         <div class="mform-group"><label class="mfl">Mật khẩu tạm</label><input v-model="form.password" class="mfi" type="password" placeholder="••••••••" /></div>
@@ -227,8 +253,8 @@ watch(() => modal.value.open, (open) => {
         <label class="mfl">Variant / mã</label>
         <select v-model="form.stockVariantId" class="mfi">
           <option value="">Chọn variant</option>
-          <option v-for="variant in stockVariantOptions" :key="variant.id" :value="variant.id">
-            {{ variant.label || variant.sku || variant.id }} · tồn {{ variant.stock }}
+          <option v-for="(variant, index) in stockVariantOptions" :key="variant.id" :value="variant.id">
+            {{ variant.label || variant.sku || variantSummary(variant, index) }} · tồn {{ variant.stock }}
           </option>
         </select>
       </div>

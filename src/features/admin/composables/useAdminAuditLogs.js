@@ -6,6 +6,7 @@ const PAGE_SIZE = 20
 export function useAdminAuditLogs() {
   const items = ref([])
   const total = ref(0)
+  const totalPages = ref(1)
   const page = ref(1)
   const loading = ref(false)
   const search = ref('')
@@ -26,6 +27,7 @@ export function useAdminAuditLogs() {
       })
       items.value = res.data?.items ?? []
       total.value = res.data?.total ?? 0
+      totalPages.value = Math.max(1, res.data?.totalPages ?? Math.ceil(total.value / PAGE_SIZE) ?? 1)
     } finally {
       loading.value = false
     }
@@ -45,10 +47,13 @@ export function useAdminAuditLogs() {
       info: `Hiển thị <strong>${start}–${end}</strong> / ${total.value.toLocaleString('vi-VN')} bản ghi`,
       buttons: [
         { icon: 'chevronLeft', page: Math.max(1, page.value - 1), disabled: page.value <= 1 },
-        { label: '1', page: 1, active: page.value === 1 },
-        { label: '2', page: 2, active: page.value === 2 },
-        { label: '3', page: 3, active: page.value === 3 },
-        { icon: 'chevronRight', page: page.value + 1, disabled: page.value >= 3 },
+        ...Array.from({ length: Math.min(totalPages.value, 5) }, (_, index) => {
+          const half = 2
+          const startPage = Math.min(Math.max(1, page.value - half), Math.max(1, totalPages.value - 4))
+          const targetPage = startPage + index
+          return { label: String(targetPage), page: targetPage, active: page.value === targetPage }
+        }).filter((button) => button.page <= totalPages.value),
+        { icon: 'chevronRight', page: Math.min(totalPages.value, page.value + 1), disabled: page.value >= totalPages.value },
       ],
     }
   })
@@ -58,6 +63,7 @@ export function useAdminAuditLogs() {
   return {
     items,
     total,
+    totalPages,
     page,
     loading,
     search,

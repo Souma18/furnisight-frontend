@@ -6,7 +6,7 @@ import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 
-const { items, search, ui } = useAdminListPage(adminApi.fetchVouchers.bind(adminApi))
+const { items, search, load, ui } = useAdminListPage(adminApi.fetchVouchers.bind(adminApi))
 
 const columns = [
   { key: 'code', label: 'Mã' },
@@ -31,6 +31,22 @@ function formatDate(value) {
   if (!value) return ''
   return String(value).slice(0, 10)
 }
+
+function statusClass(row) {
+  if (row.statusLabel === 'Hết hạn') return 'b-pending'
+  return row.active ? 'b-success' : 'b-cancel'
+}
+
+async function deleteVoucher(row) {
+  if (!row?.id) return
+  try {
+    await adminApi.deleteVoucher(row.id)
+    ui.showToast({ icon: 'check', title: 'Đã xóa voucher', subtitle: row.code })
+    await load()
+  } catch (e) {
+    ui.showToast({ icon: 'x', title: 'Lỗi xóa voucher', subtitle: e?.response?.data?.message || e.message })
+  }
+}
 </script>
 
 <template>
@@ -53,12 +69,15 @@ function formatDate(value) {
     <template #cell-minOrder="{ row }">{{ formatMoney(row.minOrder) }}</template>
     <template #cell-endDate="{ row }">{{ formatDate(row.endDate) }}</template>
     <template #cell-statusLabel="{ row }">
-      <span class="badge" :class="row.active ? 'b-success' : 'b-cancel'">{{ row.statusLabel }}</span>
+      <span class="badge" :class="statusClass(row)">{{ row.statusLabel }}</span>
     </template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
         <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editVoucher', row)">
           <AppIcon name="edit" :size="14" />
+        </button>
+        <button type="button" class="ra-btn ra-del" @click="deleteVoucher(row)">
+          <AppIcon name="trash" :size="14" />
         </button>
       </div>
     </template>

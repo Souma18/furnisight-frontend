@@ -2,14 +2,41 @@
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
+import { adminApi } from '@shared/lib/api/services'
 import { useAdminRoles } from '../../composables/useAdminRoles'
 import { useAdminUiStore } from '../../store/adminUiStore'
 
-const { data } = useAdminRoles()
+const { data, loading, error, load } = useAdminRoles()
 const ui = useAdminUiStore()
 
-const permClass = { view: 'p-view', create: 'p-create', edit: 'p-edit', delete: 'p-delete', config: 'p-edit' }
-const permLabels = { view: 'Xem', create: 'Tạo', edit: 'Sửa', delete: 'Xóa', config: 'Cấu hình' }
+const permClass = {
+  dashboard: 'p-view',
+  role_manage: 'p-edit',
+  ban_manage: 'p-delete',
+  product_create: 'p-create',
+  product_edit: 'p-edit',
+  product_delete: 'p-delete',
+  order_view: 'p-view',
+  order_update: 'p-edit',
+  user_view: 'p-view',
+  inventory: 'p-edit',
+  reports: 'p-view',
+}
+const permLabels = {
+  dashboard: 'Dashboard',
+  role_manage: 'Vai trò',
+  ban_manage: 'Khóa TK',
+  product_create: 'Tạo SP',
+  product_edit: 'Sửa SP',
+  product_delete: 'Xóa SP',
+  order_view: 'Xem đơn',
+  order_update: 'Cập nhật đơn',
+  user_view: 'Người dùng',
+  inventory: 'Kho',
+  reports: 'Báo cáo',
+}
+const fallbackRoleIcon = 'shield'
+const fallbackAccountRoleIcon = 'user'
 const adminColumns = [
   { key: 'account', label: 'Tài khoản', thClass: 'col-account', tdClass: 'col-account' },
   { key: 'role', label: 'Vai trò', thClass: 'col-role', tdClass: 'col-role' },
@@ -18,6 +45,25 @@ const adminColumns = [
   { key: 'statusLabel', label: 'Trạng thái', thClass: 'col-status', tdClass: 'col-status' },
   { key: 'actions', label: '', thClass: 'col-actions', tdClass: 'col-actions' },
 ]
+
+function iconName(value, fallback) {
+  return typeof value === 'string' && value.trim() ? value : fallback
+}
+
+async function deleteRole(role) {
+  if (!role?.id) return
+  if (role.system) {
+    ui.showToast({ icon: 'x', title: 'Không thể xóa', subtitle: 'Vai trò hệ thống không thể xóa.' })
+    return
+  }
+  try {
+    await adminApi.deleteRole(role.id)
+    ui.showToast({ icon: 'check', title: 'Đã xóa vai trò', subtitle: role.name })
+    await load()
+  } catch (e) {
+    ui.showToast({ icon: 'x', title: 'Lỗi xóa vai trò', subtitle: e?.response?.data?.message || e.message })
+  }
+}
 </script>
 
 <template>
@@ -27,20 +73,23 @@ const adminColumns = [
     </template>
   </AdminPageHeader>
 
+  <div v-if="loading && !data" class="admin-detail-state">Đang tải vai trò...</div>
+  <div v-else-if="error" class="admin-detail-state admin-detail-state--error">{{ error }}</div>
+
   <div v-if="data" class="roles-grid">
     <div class="tcard">
       <div class="tcard-header"><div class="tcard-title"><AppIcon name="lock" :size="17" />Nhóm vai trò (Role Groups)</div></div>
       <div class="role-card-list">
         <div v-for="role in data.roles" :key="role.id" class="role-card">
           <div class="role-card-head">
-            <span class="role-tag" :class="role.tagClass"><AppIcon :name="role.icon" :size="14" />{{ role.name }}</span>
+            <span class="role-tag" :class="role.tagClass"><AppIcon :name="iconName(role.icon, fallbackRoleIcon)" :size="14" />{{ role.name }}</span>
             <div class="row-actions">
               <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editRole', role)"><AppIcon name="edit" :size="14" /></button>
               <button
                 v-if="!role.system"
                 type="button"
                 class="ra-btn ra-del"
-                @click="ui.showToast({ icon: 'x', title: 'Đã xóa vai trò' })"
+                @click="deleteRole(role)"
               >
                 <AppIcon name="trash2" :size="14" />
               </button>
@@ -84,7 +133,7 @@ const adminColumns = [
           </div>
         </template>
         <template #cell-role="{ row }">
-          <span class="role-tag role-tag--sm" :class="row.tagClass"><AppIcon :name="row.roleIcon" :size="11" />{{ row.role }}</span>
+          <span class="role-tag role-tag--sm" :class="row.tagClass"><AppIcon :name="iconName(row.roleIcon, fallbackAccountRoleIcon)" :size="11" />{{ row.role }}</span>
         </template>
         <template #cell-perms="{ row }">
           <div class="admin-perms-cell admin-perms-cell--compact" :title="row.perms.map((p) => permLabels[p] || p).join(', ')">
@@ -130,6 +179,16 @@ const adminColumns = [
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+}
+.admin-detail-state {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text2);
+}
+.admin-detail-state--error {
+  color: var(--red2);
 }
 .perm-matrix-wrap {
   padding: 16px 20px;
