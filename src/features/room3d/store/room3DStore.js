@@ -7,7 +7,11 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const isAnalyzing = ref(false)
   const selectedRoomType = ref(null)
   const projectName = ref('')
-  // Gia tri gui API mesh_resolution: 128 | 256 | 512 | 1024
+  // Loai anh upload: 'normal' | '360'
+  const imageType = ref('normal')
+  // Chat luong luoi cho anh thuong: 'low' | 'medium' | 'high'
+  const meshQuality = ref('medium')
+  // Gia tri gui API mesh_resolution cho anh 360: 128 | 256 | 512 | 1024
   const quality = ref('512')
   const uploadedModelUrl = ref('')
   // Nguon model dang hien thi giua canvas:
@@ -69,6 +73,14 @@ export const useRoom3DStore = defineStore('room3d', () => {
 
   function setSelectedRoomType(roomType) {
     selectedRoomType.value = roomType
+  }
+
+  function setImageType(type) {
+    imageType.value = type
+  }
+
+  function setMeshQuality(qualityValue) {
+    meshQuality.value = qualityValue
   }
 
   function setQuality(nextQuality) {
@@ -164,6 +176,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedRoomType,
     selectedRoom,
     projectName,
+    imageType,
+    meshQuality,
     quality,
     uploadedModelUrl,
     roomRenderSource,
@@ -181,6 +195,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
     setMode,
     setAnalyzing,
     setSelectedRoomType,
+    setImageType,
+    setMeshQuality,
     setQuality,
     setUploadedModelUrl,
     applyAiGeneratedModel,

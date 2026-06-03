@@ -15,6 +15,8 @@ const {
   roomTemplates,
   selectedRoomType,
   selectedRoom,
+  imageType,
+  meshQuality,
   quality,
   isAnalyzing,
   isLoadingTemplates,
@@ -54,6 +56,8 @@ onMounted(() => {
           :room-templates="roomTemplates"
           :selected-room-type="selectedRoomType"
           :selected-room="selectedRoom"
+          :image-type="imageType"
+          :mesh-quality="meshQuality"
           :quality="quality"
           :is-analyzing="isAnalyzing"
           :is-loading-templates="isLoadingTemplatesValue"
@@ -62,6 +66,8 @@ onMounted(() => {
           @switch-mode="vm.setMode"
           @upload-image="vm.handleUploadImage"
           @select-room-type="vm.selectRoomType"
+          @image-type-change="vm.setImageType"
+          @mesh-quality-change="vm.setMeshQuality"
           @quality-change="vm.setQuality"
           @project-name-change="projectName = $event"
         />

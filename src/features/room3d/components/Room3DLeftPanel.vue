@@ -16,6 +16,8 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  imageType: String,
+  meshQuality: String,
   quality: String,
   isAnalyzing: Boolean,
   isLoadingTemplates: Boolean,
@@ -30,6 +32,8 @@ const emit = defineEmits([
   'switch-mode',
   'upload-image',
   'select-room-type',
+  'image-type-change',
+  'mesh-quality-change',
   'quality-change',
   'project-name-change',
 ])
@@ -78,6 +82,28 @@ function runAiGenerate() {
 
     <div v-if="mode === 'upload'" class="upload-section">
       <p class="label">TAI ANH PHONG LEN</p>
+      
+      <div class="image-type-section">
+        <div class="quality-row" style="grid-template-columns: 1fr 1fr;">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: imageType === 'normal' }"
+            @click="emit('image-type-change', 'normal')"
+          >
+            Anh thuong
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: imageType === '360' }"
+            @click="emit('image-type-change', '360')"
+          >
+            Anh 360
+          </button>
+        </div>
+      </div>
+
       <label class="upload-zone">
         <input class="file-input" type="file" accept="image/*" @change="onFileChange" />
         <span class="upload-icon">📤</span>
@@ -151,42 +177,74 @@ function runAiGenerate() {
     </div>
 
     <div v-if="mode === 'upload'" class="quality">
-      <p class="label">MESH RESOLUTION</p>
-      <div class="quality-row">
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '128' }"
-          @click="emit('quality-change', '128')"
-        >
-          128
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '256' }"
-          @click="emit('quality-change', '256')"
-        >
-          256
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '512' }"
-          @click="emit('quality-change', '512')"
-        >
-          512
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '1024' }"
-          @click="emit('quality-change', '1024')"
-        >
-          1024
-        </button>
-      </div>
-      <small class="quality-hint">Khuyen nghi 256 hoac 512 de can bang toc do va chat luong.</small>
+      <template v-if="imageType === 'normal'">
+        <p class="label">CHAT LUONG LUOI</p>
+        <div class="quality-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'low' }"
+            @click="emit('mesh-quality-change', 'low')"
+          >
+            Thap
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'medium' }"
+            @click="emit('mesh-quality-change', 'medium')"
+          >
+            T.Binh
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'high' }"
+            @click="emit('mesh-quality-change', 'high')"
+          >
+            Cao
+          </button>
+        </div>
+        <small class="quality-hint">Chat luong "T.Binh" (Medium) duoc khuyen nghi de co thoi gian phan hoi tot nhat.</small>
+      </template>
+      <template v-else>
+        <p class="label">MESH RESOLUTION</p>
+        <div class="quality-row">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '128' }"
+            @click="emit('quality-change', '128')"
+          >
+            128
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '256' }"
+            @click="emit('quality-change', '256')"
+          >
+            256
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '512' }"
+            @click="emit('quality-change', '512')"
+          >
+            512
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '1024' }"
+            @click="emit('quality-change', '1024')"
+          >
+            1024
+          </button>
+        </div>
+        <small class="quality-hint">Khuyen nghi 256 hoac 512 de can bang toc do va chat luong.</small>
+      </template>
     </div>
   </aside>
 </template>
@@ -262,7 +320,8 @@ function runAiGenerate() {
 .room-templates,
 .room-info,
 .project-name,
-.quality {
+.quality,
+.image-type-section {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;

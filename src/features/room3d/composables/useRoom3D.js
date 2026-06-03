@@ -55,12 +55,12 @@ export function useRoom3D() {
     store.setAnalyzing(true)
 
     try {
-      // 1) Nhan dien loai phong: file + image_type=normal -> label, confidence
+      // 1) Nhan dien loai phong: file + image_type -> label, confidence
       let detectedRoomType = state.selectedRoomType.value ?? 'bedroom'
       let detectedLabel = ''
       let detectedConfidence = null
       try {
-        const cls = await classifyRoomImage(file, 'normal')
+        const cls = await classifyRoomImage(file, state.imageType.value)
         const label = cls?.label
         const confidence = cls?.confidence
         store.setAiRecognition(label, confidence)
@@ -72,9 +72,13 @@ export function useRoom3D() {
         store.clearAiRecognition()
       }
 
-      // 2) Sinh mesh 3D: file + mesh_resolution -> model_url (endpoint khac, xem roomApi)
+      // 2) Sinh mesh 3D: file + options (tuong ung image_type) -> model_url
       const meshResolution = QUALITY_TO_MESH_RESOLUTION[state.quality.value] ?? 512
-      const meshData = await predictRoomModel(file, meshResolution)
+      const meshData = await predictRoomModel(file, {
+        imageType: state.imageType.value,
+        meshResolution,
+        meshQuality: state.meshQuality.value,
+      })
       const modelUrl = meshData?.model_url
 
       if (!modelUrl) {
@@ -126,6 +130,8 @@ export function useRoom3D() {
     orderCode,
     uploadError,
     formatCurrency,
+    setImageType: store.setImageType,
+    setMeshQuality: store.setMeshQuality,
     setMode: store.setMode,
     setQuality: store.setQuality,
     setSearchKeyword: store.setSearchKeyword,

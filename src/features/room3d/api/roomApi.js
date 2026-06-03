@@ -1,4 +1,4 @@
-import axios from 'axios'
+import { apiClient } from '@shared/lib/api/client'
 import { PRODUCTS_3D, ROOM_TEMPLATES } from '../core/mockData'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
@@ -36,20 +36,19 @@ export async function analyzeRoomImage() {
 }
 
 // API nhan dien loai phong tu anh (label + confidence).
-// Sau nay co the doi qua env VITE_ROOM3D_CLASSIFY_URL; hien dung URL truc tiep theo yeu cau.
-const CLASSIFY_ENDPOINT =
-  import.meta.env.VITE_ROOM3D_CLASSIFY_URL ?? 'http://10.96.157.6:8000/predict'
+// Goi qua microservices gateway cua apiClient, url='/ai-classifier/predict'
+const CLASSIFY_ENDPOINT = import.meta.env.VITE_ROOM3D_CLASSIFY_URL ?? '/ai-classifier/predict'
 
 /**
  * Goi backend nhan dien: multipart file + image_type.
  * Response: { label: "bedroom", confidence: 0.9231 }
  */
-export async function classifyRoomImage(file, imageType = '360') {
+export async function classifyRoomImage(file, imageType = 'normal') {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('image_type', imageType)
 
-  const response = await axios.post(CLASSIFY_ENDPOINT, formData, {
+  const response = await apiClient.post(CLASSIFY_ENDPOINT, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -60,16 +59,23 @@ export async function classifyRoomImage(file, imageType = '360') {
 }
 
 // API sinh mesh 3D tu anh (model_url).
-// Co the doi URL qua env VITE_ROOM3D_PREDICT_URL neu can.
-const PREDICT_ENDPOINT = import.meta.env.VITE_ROOM3D_PREDICT_URL ?? 'http://localhost:8000/predict'
+// Goi qua microservices gateway cua apiClient, url='/ai-reconstruction/predict'
+const PREDICT_ENDPOINT = import.meta.env.VITE_ROOM3D_PREDICT_URL ?? '/ai-reconstruction/predict'
 
-export async function predictRoomModel(file, meshResolution = 512) {
+export async function predictRoomModel(file, options = {}) {
+  const { imageType = 'normal', meshResolution = 512, meshQuality = 'medium' } = options
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('mesh_resolution', String(meshResolution))
+  formData.append('image_type', imageType)
+  
+  if (imageType === '360') {
+    formData.append('mesh_resolution', String(meshResolution))
+  } else {
+    formData.append('mesh_quality', String(meshQuality))
+  }
 
-  // Dung axios direct de tranh xung dot default JSON header.
-  const response = await axios.post(PREDICT_ENDPOINT, formData, {
+  // Thay the axios direct bang apiClient, uu tien timeout lon (2 phut) vi sinh 3D lau
+  const response = await apiClient.post(PREDICT_ENDPOINT, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
