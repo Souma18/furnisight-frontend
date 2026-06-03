@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
   product: {
     type: Object,
     required: true,
@@ -23,10 +23,25 @@ defineProps({
 })
 
 defineEmits(['add'])
+
+function onDragStart(event) {
+  if (!event.dataTransfer) return
+  const payload = JSON.stringify({ productId: props.product.id })
+  event.dataTransfer.effectAllowed = 'copy'
+  event.dataTransfer.setData('application/x-room3d-product', payload)
+  // text/plain dang so thuan de browser nao cung doc duoc.
+  event.dataTransfer.setData('text/plain', String(props.product.id))
+}
 </script>
 
 <template>
-  <article class="card" :class="{ added }" :style="{ '--pc-step': shapeStep }">
+  <article
+    class="card"
+    :class="{ added }"
+    :style="{ '--pc-step': shapeStep }"
+    draggable="true"
+    @dragstart="onDragStart"
+  >
     <div class="preview">
       <span class="new-badge">AI ✦</span>
       <div class="emoji">{{ product.emoji }}</div>
@@ -54,6 +69,9 @@ defineEmits(['add'])
   border-radius: 1rem;
   overflow: hidden;
   background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(10.15rem + (var(--pc-step) * 0.38rem));
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -82,6 +100,7 @@ defineEmits(['add'])
 .preview {
   position: relative;
   min-height: calc(5.25rem + (var(--pc-step) * 0.3rem));
+  flex: 0 0 auto;
   background: #ede9e2;
   display: grid;
   place-items: center;
@@ -120,8 +139,12 @@ defineEmits(['add'])
 
 .content {
   background: #ffffff;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  flex: 1 1 auto;
+  min-height: calc(4.9rem * var(--pc-content-scale));
   padding: calc(0.45rem * var(--pc-content-scale)) calc(0.5rem * var(--pc-content-scale))
-    calc(0.45rem * var(--pc-content-scale));
+    calc(0.55rem * var(--pc-content-scale));
 }
 
 .name {
@@ -137,29 +160,40 @@ defineEmits(['add'])
 }
 
 .bottom {
-  margin-top: calc(0.26rem * var(--pc-content-scale));
+  margin-top: calc(0.28rem * var(--pc-content-scale));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: calc(0.25rem * var(--pc-content-scale));
+  min-height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
 }
 
 .prices {
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  max-width: calc(100% - (2rem + (0.5rem * var(--pc-content-scale))));
 }
 
 .price-current {
   margin: 0;
+  display: block;
   color: #9a744f;
   font-size: calc(0.62rem + (0.26rem * var(--pc-content-scale)));
   font-weight: 700;
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .add-btn {
   width: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
   height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: none;
   border-radius: 999px;
   background: linear-gradient(180deg, #d8aa56 0%, #c58d2f 100%);

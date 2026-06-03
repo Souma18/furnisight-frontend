@@ -1,0 +1,326 @@
+<script setup>
+import { computed } from 'vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
+
+const props = defineProps({
+  item: {
+    type: Object,
+    required: true,
+  },
+  checked: {
+    type: Boolean,
+    default: false,
+  },
+})
+
+defineEmits(['toggle-check', 'open-variant', 'change-qty', 'remove'])
+
+const variantLabel = computed(() => {
+  const color = props.item.selectedColor ?? ''
+  const size = props.item.selectedSize ?? ''
+  if (color && size) return `${color} / ${size}`
+  return color || size || 'Chọn phân loại'
+})
+
+const summaryLabel = computed(() => {
+  const color = props.item.selectedColor ?? ''
+  const size = props.item.selectedSize ?? ''
+  if (color && size) return `${color} / ${size}`
+  return color || size || 'Phân loại mặc định'
+})
+
+function formatPrice(value) {
+  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
+}
+</script>
+
+<template>
+  <article class="item">
+    <div class="item-selection">
+      <label v-if="!item.outOfStock" class="select-box" :aria-label="`Chọn ${item.name}`">
+        <input
+          class="select-box-input"
+          type="checkbox"
+          :checked="checked"
+          @change="$emit('toggle-check', item.id)"
+        >
+        <span class="select-box-ui"></span>
+      </label>
+      <span v-else class="stock-badge">Hết hàng</span>
+    </div>
+
+    <div class="thumb">
+      <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
+      <template v-else>{{ item.imageFallback ?? item.emoji ?? '🛍️' }}</template>
+    </div>
+
+    <div class="name-wrap">
+      <p class="category">{{ item.categoryLabel || 'Sản phẩm' }}</p>
+      <p class="name">{{ item.name }}</p>
+      <p class="summary">{{ summaryLabel }}</p>
+    </div>
+
+    <button type="button" class="variant-btn" @click="$emit('open-variant', item)">
+      <span class="variant-btn-label">Phân loại: {{ variantLabel }}</span>
+      <AppIcon name="chevronDown" :size="15" />
+    </button>
+
+    <div class="qty-wrap">
+      <button type="button" aria-label="Giảm số lượng" @click="$emit('change-qty', item, -1)">
+        <AppIcon name="minus" :size="15" />
+      </button>
+      <span>{{ item.qty }}</span>
+      <button type="button" aria-label="Tăng số lượng" @click="$emit('change-qty', item, 1)">
+        <AppIcon name="plus" :size="15" />
+      </button>
+    </div>
+
+    <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
+
+    <button type="button" class="delete-btn" aria-label="Xóa sản phẩm" @click="$emit('remove', item.id)">
+      <AppIcon name="trash2" :size="22" />
+    </button>
+  </article>
+</template>
+
+<style scoped>
+.item {
+  display: grid;
+  grid-template-columns: 64px 60px minmax(0, 1.7fr) minmax(110px, 142px) 88px minmax(92px, 104px) 38px;
+  gap: 10px;
+  align-items: center;
+  border: 1px solid var(--auth-border);
+  border-radius: 20px;
+  padding: 1rem 0.95rem;
+  background:
+    radial-gradient(circle at top, rgba(201, 146, 42, 0.08), transparent 60%),
+    var(--account-surface);
+  box-shadow: 0 10px 30px rgba(18, 32, 46, 0.06);
+}
+.item-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.select-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+.select-box-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.select-box-ui {
+  position: relative;
+  display: inline-block;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 1px solid #ccb993;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.85);
+}
+.select-box-ui::after {
+  content: '';
+  position: absolute;
+  left: 0.3rem;
+  top: 0.08rem;
+  width: 0.26rem;
+  height: 0.56rem;
+  border-right: 2px solid #8b6a21;
+  border-bottom: 2px solid #8b6a21;
+  transform: rotate(45deg) scale(0.7);
+  opacity: 0;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+}
+.select-box-input:checked + .select-box-ui {
+  background: rgba(229, 184, 74, 0.18);
+  border-color: #c9922a;
+}
+.select-box-input:checked + .select-box-ui::after {
+  opacity: 1;
+  transform: rotate(45deg) scale(1);
+}
+.stock-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.7rem;
+  min-width: 56px;
+  padding: 0 0.55rem;
+  border-radius: 999px;
+  background: #a3a3a3;
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 1.05;
+  text-align: center;
+}
+.thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f7f1e8, #ffffff);
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  border: 1px solid rgba(201, 146, 42, 0.15);
+  overflow: hidden;
+}
+.thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.name-wrap { min-width: 0; }
+.category {
+  margin: 0 0 0.2rem;
+  color: var(--account-badge);
+  font-size: 0.64rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.name {
+  margin: 0;
+  font-weight: 500;
+  line-height: 1.3;
+  font-size: 0.84rem;
+  color: #1a1a1a;
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.summary {
+  margin: 0.3rem 0 0;
+  color: var(--auth-text-secondary);
+  font-size: 0.67rem;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.variant-btn {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  border: 1px solid var(--auth-border);
+  border-radius: 999px;
+  padding: 0.54rem 0.68rem;
+  background: linear-gradient(180deg, #f2f2f2, #e9e9e9);
+  color: #8b8b8b;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+}
+.variant-btn-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.line-total {
+  margin: 0;
+  text-align: right;
+  font-weight: 600;
+  font-size: 0.84rem;
+  min-width: 0;
+  color: var(--account-badge);
+}
+.qty-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-self: center;
+  border: 1px solid #e5dcca;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f5efe6;
+}
+.qty-wrap button {
+  width: 28px;
+  height: 30px;
+  border: none;
+  background: transparent;
+  color: #9a8d7a;
+  cursor: pointer;
+}
+.qty-wrap span {
+  width: 32px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  border-inline: 1px solid #e5dcca;
+  background: rgba(255,255,255,0.45);
+  color: #8b7d68;
+}
+.delete-btn {
+  justify-self: center;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 1px solid #d7d0c4;
+  background: transparent;
+  color: #7d776d;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.delete-btn:hover {
+  background: #f5efe6;
+  color: #5f5950;
+}
+
+@media (max-width: 1280px) {
+  .item {
+    grid-template-columns: 84px minmax(0, 1fr);
+    grid-template-areas:
+      'select select'
+      'thumb name'
+      'thumb variant'
+      'qty total'
+      'delete delete';
+  }
+  .item-selection { grid-area: select; justify-content: flex-start; }
+  .thumb { grid-area: thumb; width: 72px; height: 64px; }
+  .name-wrap { grid-area: name; }
+  .variant-btn { grid-area: variant; justify-self: start; }
+  .qty-wrap { grid-area: qty; }
+  .line-total { grid-area: total; text-align: right; align-self: center; }
+  .delete-btn { grid-area: delete; justify-self: start; }
+}
+
+@media (max-width: 720px) {
+  .item {
+    grid-template-columns: 74px minmax(0, 1fr);
+    gap: 10px;
+    padding: 0.75rem;
+  }
+  .thumb { width: 70px; height: 62px; font-size: 26px; }
+  .item {
+    grid-template-areas:
+      'select select'
+      'thumb name'
+      'variant variant'
+      'qty qty'
+      'total delete';
+  }
+  .variant-btn { width: 100%; }
+  .qty-wrap { justify-self: start; }
+  .line-total { text-align: left; }
+}
+</style>

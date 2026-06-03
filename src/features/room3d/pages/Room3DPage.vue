@@ -25,6 +25,7 @@ const {
   searchKeyword,
   filteredProducts,
   cartItems,
+  sceneItems,
   placedProductIds,
   cartTotal,
   cartCount,
@@ -76,9 +77,11 @@ onMounted(() => {
           :mode="mode"
           :is-analyzing="isAnalyzing"
           :selected-room="selectedRoom"
-          :placed-product-ids="placedProductIds"
+          :scene-items="sceneItems"
+          :cart-product-ids="placedProductIds"
           @add-product="vm.addProductToCart"
-          @remove-product="vm.removeProductFromCart"
+          @add-scene-product="vm.addProductToScene"
+          @remove-scene-item="vm.removeProductFromScene"
         />
 
         <Room3DRightPanel

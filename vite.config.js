@@ -6,6 +6,13 @@ import { fileURLToPath, URL } from 'node:url'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  server: {
+    host: true,
+    allowedHosts: ["furnisight.store"]
+  },
+  define: {
+    global: 'window',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -15,3 +22,4 @@ export default defineConfig({
     },
   },
 })
+

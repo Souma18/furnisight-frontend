@@ -1,11 +1,11 @@
 <script setup>
-import { useAuthViewState } from '../composables/useAuthViewState'
-import { useAuthForms } from '../composables/useAuthForms'
+import { provideAuthViewState, useAuthViewState } from '../composables/useAuthViewState'
 import AuthTabs from './AuthTabs.vue'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
 import ForgotPasswordForm from './ForgotPasswordForm.vue'
 import AuthSuccessState from './AuthSuccessState.vue'
+import VerifyEmailForm from './VerifyEmailForm.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -13,27 +13,21 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  initialView: {
+    type: String,
+    default: 'login',
+  },
 })
 
-const emit = defineEmits(['close', 'authenticated'])
+defineEmits(['close', 'authenticated'])
 
-const authViewState = useAuthViewState()
+const authViewState = useAuthViewState(props.initialView)
+provideAuthViewState(authViewState)
 const { AUTH_VIEWS, activeView, successState, showTabs, setView } = authViewState
 
-const {
-  loading,
-  errorMessage,
-  showPassword,
-  loginForm,
-  registerForm,
-  forgotForm,
-  passwordStrength,
-  submitLogin,
-  submitRegister,
-  submitForgot,
-  handleSendCode,
-  handleTabChange,
-} = useAuthForms({ emit, props, authViewState })
+function handleTabChange(tab) {
+  setView(tab)
+}
 </script>
 
 <template>
@@ -61,36 +55,18 @@ const {
         <Transition name="form-fade" mode="out-in">
           <LoginForm
             v-if="activeView === AUTH_VIEWS.LOGIN"
-            :form="loginForm"
-            :loading="loading"
-            :error="errorMessage"
-            :show-password="showPassword"
-            @submit="submitLogin"
-            @forgot="setView(AUTH_VIEWS.FORGOT)"
-            @toggle-password="showPassword = !showPassword"
+            :embedded="embedded"
+            @authenticated="$emit('authenticated')"
+            @close="$emit('close')"
           />
-          <RegisterForm
-            v-else-if="activeView === AUTH_VIEWS.REGISTER"
-            :form="registerForm"
-            :loading="loading"
-            :error="errorMessage"
-            :password-strength="passwordStrength"
-            @submit="submitRegister"
-          />
-          <ForgotPasswordForm
-            v-else-if="activeView === AUTH_VIEWS.FORGOT"
-            :form="forgotForm"
-            :loading="loading"
-            :error="errorMessage"
-            @submit="submitForgot"
-            @send-code="handleSendCode"
-            @back="setView(AUTH_VIEWS.LOGIN)"
-          />
+          <RegisterForm v-else-if="activeView === AUTH_VIEWS.REGISTER" />
+          <ForgotPasswordForm v-else-if="activeView === AUTH_VIEWS.FORGOT" />
+          <VerifyEmailForm v-else-if="activeView === AUTH_VIEWS.VERIFY" />
           <AuthSuccessState
             v-else
             :title="successState.title"
             :message="successState.message"
-            :loading="loading || successState.mode === AUTH_VIEWS.LOGIN"
+            :loading="successState.mode === AUTH_VIEWS.LOGIN"
           />
         </Transition>
       </div>
@@ -100,13 +76,16 @@ const {
 
 <style scoped>
 .auth-shell {
-  min-height: 580px;
-  border-radius: var(--auth-radius-lg);
+  flex: 1;
+  width: 100%;
+  min-height: calc(100svh - 56px);
+  border-radius: 0;
   background: var(--auth-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .auth-shell--embedded {

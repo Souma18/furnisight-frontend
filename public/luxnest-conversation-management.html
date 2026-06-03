@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>Conversation Management – LUXNEST Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+/* ════════════════════════════════════════
+   DESIGN TOKENS — inherited from LUXNEST admin system
+════════════════════════════════════════ */
+:root{
+  --navy:#12202e;--navy-light:#1c3148;--navy-mid:#243650;--navy-dark:#0c1820;
+  --gold:#c9922a;--gold-light:#e5b84a;--gold-pale:#fdf6e8;--gold-dim:#a07320;
+  --cream:#faf6f0;--cream-dark:#f0e9dd;--cream-mid:#ece2cf;--cream-3:#e4ddd0;
+  --white:#fff;
+  --text:#1a1a1a;--text-mid:#555;--text-light:#888;--text-4:#aaa;
+  --green:#2d9e6b;--green-bg:#eaf5ef;
+  --blue:#3b82f6;--blue-bg:#eff6ff;--blue-mid:#1d4ed8;
+  --red:#e53e3e;--red-bg:#fdf0ee;
+  --orange:#ea7c1e;--orange-bg:#fff7ed;
+  --purple:#7c3aed;--purple-bg:#f5f3ff;
+  --border:#e8e0d4;
+  --r:10px;--r-lg:14px;--r-xl:18px;
+  --topbar-h:54px;
+  /* Feature-scoped layout vars */
+  --cm-list-w:300px;
+  --cm-detail-w:284px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);display:flex;flex-direction:column}
+
+/* ════════════════════════════════════════
+   TOPBAR (shared component pattern)
+════════════════════════════════════════ */
+.topbar{
+  height:var(--topbar-h);flex-shrink:0;
+  background:var(--navy-dark);
+  display:flex;align-items:center;gap:12px;padding:0 20px;
+  box-shadow:0 2px 16px rgba(0,0,0,.35);z-index:300;
+}
+.tb-logo{display:flex;align-items:center;gap:9px;text-decoration:none;flex-shrink:0}
+.tb-logo-icon{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--navy)}
+.tb-logo-text{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;letter-spacing:2px;color:#fff}
+.tb-badge{font-size:9px;font-weight:700;background:rgba(201,146,42,.22);color:var(--gold-light);padding:2px 7px;border-radius:4px;letter-spacing:.5px;flex-shrink:0}
+.tb-div{width:1px;height:18px;background:rgba(255,255,255,.12);flex-shrink:0}
+.tb-bc{display:flex;align-items:center;gap:6px;font-size:12px}
+.tb-bc a{color:rgba(255,255,255,.42);text-decoration:none;cursor:pointer;transition:color .18s}
+.tb-bc a:hover{color:var(--gold-light)}
+.tb-bc .sep{color:rgba(255,255,255,.18)}
+.tb-bc .cur{color:rgba(255,255,255,.88);font-weight:500}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:7px}
+.tb-icon-btn{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.07);border:none;color:rgba(255,255,255,.58);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s;position:relative}
+.tb-icon-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+.tb-icon-btn i{font-size:17px}
+.tb-dot{position:absolute;top:5px;right:5px;width:6px;height:6px;border-radius:50%;background:var(--red);border:2px solid var(--navy-dark)}
+.tb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--navy);cursor:pointer;flex-shrink:0}
+/* Quick stats in topbar */
+.tb-stat-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.06);color:rgba(255,255,255,.65)}
+.tb-stat-pill i{font-size:13px}
+.tb-stat-pill.urgent{border-color:rgba(229,62,62,.4);background:rgba(229,62,62,.1);color:#fca5a5}
+
+/* ════════════════════════════════════════
+   FEATURE ROOT LAYOUT
+   features/conversation-management/
+════════════════════════════════════════ */
+.cm-root{display:flex;flex:1;overflow:hidden;min-height:0}
+
+/* ════════════════════════════════════════
+   A. LEFT — ConversationListPanel
+════════════════════════════════════════ */
+.cm-list-panel{
+  width:var(--cm-list-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* List Header */
+.clp-header{padding:13px 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0}
+.clp-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.clp-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.clp-title i{font-size:16px;color:var(--gold)}
+.clp-hdr-actions{display:flex;gap:5px}
+.clp-hdr-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.clp-hdr-btn:hover{border-color:var(--gold);color:var(--gold)}
+.clp-hdr-btn i{font-size:14px}
+.clp-search{display:flex;align-items:center;gap:7px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;transition:border-color .18s;margin-bottom:9px}
+.clp-search:focus-within{border-color:var(--gold)}
+.clp-search i{font-size:13px;color:var(--text-light);flex-shrink:0}
+.clp-search input{border:none;background:none;outline:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.clp-search input::placeholder{color:var(--text-4)}
+/* Filter chips row */
+.clp-filter-row{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;padding-bottom:1px}
+.clp-filter-row::-webkit-scrollbar{display:none}
+.clf-chip{flex-shrink:0;padding:4px 10px;border-radius:14px;font-size:10px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text-light);cursor:pointer;transition:all .15s;white-space:nowrap}
+.clf-chip:hover{border-color:var(--gold);color:var(--gold)}
+.clf-chip.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+/* Tabs */
+.clp-tabs{display:flex;padding:0 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.clp-tab{flex:1;padding:8px 4px;font-size:11px;font-weight:500;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;text-align:center;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:4px}
+.clp-tab:hover:not(.active){color:var(--text)}
+.clp-tab.active{color:var(--gold);border-bottom-color:var(--gold);font-weight:700}
+.clp-tab-badge{width:16px;height:16px;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+
+/* Sort/group bar */
+.clp-sort-bar{display:flex;align-items:center;justify-content:space-between;padding:7px 14px;border-bottom:1px solid var(--border);background:var(--cream);flex-shrink:0}
+.csb-label{font-size:10px;color:var(--text-light);font-weight:600;letter-spacing:.4px;text-transform:uppercase}
+.csb-sort{font-size:10px;color:var(--text-mid);cursor:pointer;display:flex;align-items:center;gap:3px;background:none;border:none;font-family:'DM Sans',sans-serif;transition:color .15s}
+.csb-sort:hover{color:var(--gold)}
+.csb-sort i{font-size:12px}
+
+/* Conversation items */
+.clp-list{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.clp-list::-webkit-scrollbar{width:3px}
+.clp-list::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+.cm-conv-item{
+  display:flex;align-items:flex-start;gap:9px;padding:11px 14px;
+  cursor:pointer;transition:background .14s;border-bottom:1px solid var(--cream-dark);
+  position:relative;
+}
+.cm-conv-item:hover{background:var(--cream)}
+.cm-conv-item.active{background:var(--gold-pale);border-left:3px solid var(--gold)}
+.cm-conv-item.active .cm-ci-av-wrap{margin-left:-3px}
+.cm-conv-item.unread .cm-ci-name{font-weight:700}
+.cm-conv-item.unread .cm-ci-preview{font-weight:500;color:var(--text-mid)}
+
+.cm-ci-av-wrap{position:relative;flex-shrink:0}
+.cm-ci-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.av-gold{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy)}
+.av-blue{background:linear-gradient(135deg,#60a5fa,#2563eb);color:#fff}
+.av-green{background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff}
+.av-purple{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff}
+.av-red{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff}
+.av-teal{background:linear-gradient(135deg,#2dd4bf,#0d9488);color:#fff}
+.cm-ci-online{position:absolute;bottom:0;right:0;width:9px;height:9px;border-radius:50%;border:2px solid var(--white)}
+.online-active{background:var(--green)}
+.online-away{background:var(--orange)}
+.online-offline{background:var(--text-4)}
+
+.cm-ci-body{flex:1;min-width:0}
+.cm-ci-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+.cm-ci-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:130px}
+.cm-ci-time{font-size:10px;color:var(--text-4);flex-shrink:0;white-space:nowrap}
+.cm-ci-preview{font-size:11px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
+.cm-ci-footer{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+/* Priority + status badges scoped to feature */
+.cm-priority{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;white-space:nowrap}
+.p-urgent{background:rgba(229,62,62,.12);color:#b91c1c}
+.p-high{background:rgba(234,124,30,.12);color:#c2410c}
+.p-medium{background:rgba(59,130,246,.1);color:#1d4ed8}
+.p-low{background:var(--cream-dark);color:var(--text-light)}
+.cm-status-badge{display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:8px;white-space:nowrap}
+.s-new{background:rgba(59,130,246,.1);color:#1d4ed8}
+.s-pending{background:rgba(234,124,30,.1);color:#c2410c}
+.s-waiting{background:rgba(124,58,237,.1);color:#6d28d9}
+.s-resolved{background:var(--green-bg);color:#166534}
+.s-closed{background:var(--cream-dark);color:var(--text-light)}
+.cm-conv-unread-dot{position:absolute;top:13px;right:13px;width:7px;height:7px;border-radius:50%;background:var(--red)}
+/* AI label */
+.cm-ai-label{display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:700;padding:2px 5px;border-radius:6px;background:rgba(109,40,217,.1);color:#5b21b6}
+
+/* ════════════════════════════════════════
+   B. CENTER — ConversationWorkspace
+════════════════════════════════════════ */
+.cm-workspace{
+  flex:1;display:flex;flex-direction:column;overflow:hidden;
+  background:var(--cream);min-width:0;
+}
+
+/* Workspace Header */
+.cw-header{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:11px 18px;display:flex;align-items:center;gap:11px;
+  flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.04);
+}
+.cw-hdr-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;position:relative}
+.cw-hdr-info{flex:1;min-width:0}
+.cw-hdr-name{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:7px}
+.cw-hdr-meta{font-size:10px;color:var(--text-light);display:flex;align-items:center;gap:7px;margin-top:2px;flex-wrap:wrap}
+.cw-hdr-meta i{font-size:12px}
+.cw-hdr-meta .sep-dot{width:3px;height:3px;border-radius:50%;background:var(--border)}
+.cw-hdr-actions{display:flex;gap:5px;align-items:center}
+.cw-action-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);color:var(--text-mid);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.cw-action-btn:hover{border-color:var(--gold);color:var(--gold)}
+.cw-action-btn.active-btn{background:var(--navy);border-color:var(--navy);color:#fff}
+.cw-action-btn i{font-size:15px}
+/* Status selector */
+.cw-status-select{padding:5px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:11px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);cursor:pointer;outline:none;transition:border-color .15s}
+.cw-status-select:focus{border-color:var(--gold)}
+.cw-resolve-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;background:var(--green);border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s}
+.cw-resolve-btn:hover{background:#248a5c;box-shadow:0 3px 10px rgba(45,158,107,.3)}
+.cw-resolve-btn i{font-size:13px}
+
+/* AI Suggestion Banner */
+.cw-ai-banner{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 18px;
+  background:linear-gradient(90deg,rgba(109,40,217,.06) 0%,rgba(109,40,217,.03) 100%);
+  border-bottom:1px solid rgba(109,40,217,.1);
+  flex-shrink:0;
+}
+.cw-ai-icon{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,rgba(124,58,237,.2),rgba(168,85,247,.15));display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cw-ai-icon i{font-size:14px;color:var(--purple)}
+.cw-ai-text{flex:1;min-width:0;font-size:11px;color:var(--purple);font-weight:500}
+.cw-ai-text strong{font-weight:700}
+.cw-ai-actions{display:flex;gap:5px}
+.cw-ai-act-btn{padding:4px 10px;border-radius:7px;font-size:10px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:'DM Sans',sans-serif}
+.cw-ai-use-btn{background:var(--purple);color:#fff}
+.cw-ai-use-btn:hover{background:#6d28d9}
+.cw-ai-dis-btn{background:rgba(0,0,0,.05);color:var(--text-mid)}
+.cw-ai-dis-btn:hover{background:rgba(0,0,0,.09)}
+
+/* Timeline / Messages */
+.cw-timeline{
+  flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+}
+.cw-timeline::-webkit-scrollbar{width:4px}
+.cw-timeline::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* Date separator */
+.tl-date-sep{text-align:center;font-size:10px;color:var(--text-4);position:relative;display:flex;align-items:center;gap:8px;margin:4px 0}
+.tl-date-sep::before,.tl-date-sep::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* Message row types */
+.tl-msg-row{display:flex;align-items:flex-end;gap:8px;animation:msgIn .2s ease}
+@keyframes msgIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.tl-msg-row.msg-customer{flex-direction:row}
+.tl-msg-row.msg-admin{flex-direction:row-reverse}
+.tl-msg-row.msg-system{justify-content:center}
+.tl-msg-row.msg-note{justify-content:center}
+.tl-msg-row.msg-ai{justify-content:center}
+
+.tl-av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+
+.tl-msg-group{display:flex;flex-direction:column;gap:3px;max-width:65%}
+.tl-msg-row.msg-admin .tl-msg-group{align-items:flex-end}
+.tl-msg-row.msg-customer .tl-msg-group{align-items:flex-start}
+
+/* Bubbles */
+.tl-bubble{padding:9px 12px;border-radius:13px;font-size:12px;line-height:1.55;position:relative;word-break:break-word}
+.tl-bubble.customer{background:var(--white);color:var(--text);border-bottom-left-radius:3px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.tl-bubble.admin{background:var(--navy);color:#fff;border-bottom-right-radius:3px}
+.tl-bubble.admin strong{color:var(--gold-light)}
+/* System event bubble */
+.tl-system-pill{background:rgba(59,130,246,.07);color:var(--blue-mid);font-size:10px;padding:5px 12px;border-radius:20px;border:1px solid rgba(59,130,246,.15);display:flex;align-items:center;gap:5px}
+.tl-system-pill i{font-size:12px}
+/* Internal note bubble */
+.tl-note-wrap{max-width:70%;background:rgba(234,124,30,.07);border:1px solid rgba(234,124,30,.2);border-radius:10px;padding:10px 13px;font-size:11px;color:#92400e;line-height:1.6}
+.tl-note-header{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--orange);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.tl-note-header i{font-size:12px}
+/* AI suggestion bubble */
+.tl-ai-wrap{max-width:72%;background:var(--purple-bg);border:1px solid rgba(124,58,237,.15);border-radius:10px;padding:10px 13px}
+.tl-ai-header{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px}
+.tl-ai-header i{font-size:13px}
+.tl-ai-text{font-size:12px;color:var(--text-mid);line-height:1.6;margin-bottom:8px}
+.tl-ai-actions{display:flex;gap:6px}
+.tl-ai-use{padding:4px 10px;border-radius:7px;background:var(--purple);color:#fff;font-size:10px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.tl-ai-dismiss{padding:4px 10px;border-radius:7px;background:rgba(0,0,0,.05);color:var(--text-mid);font-size:10px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+/* Product card in chat */
+.tl-prod-card{background:var(--white);border:1.5px solid var(--border);border-radius:10px;overflow:hidden;width:200px;cursor:pointer;transition:all .18s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.tl-prod-card:hover{border-color:var(--gold);box-shadow:0 4px 12px rgba(201,146,42,.15)}
+.tpc-img{height:80px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:30px}
+.tpc-body{padding:8px 10px}
+.tpc-cat{font-size:9px;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+.tpc-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.tpc-price{font-size:13px;font-weight:700;color:var(--gold)}
+.tpc-footer{padding:5px 10px;border-top:1px solid var(--border);background:var(--cream);font-size:10px;color:var(--text-light);display:flex;justify-content:space-between}
+.tl-prod-card.admin-variant{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.12)}
+.tl-prod-card.admin-variant .tpc-img{background:rgba(255,255,255,.06)}
+.tl-prod-card.admin-variant .tpc-name{color:#fff}
+.tl-prod-card.admin-variant .tpc-footer{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.08);color:rgba(255,255,255,.45)}
+/* Message meta */
+.tl-msg-meta{font-size:10px;color:var(--text-4);display:flex;align-items:center;gap:4px;padding:0 2px}
+.tl-msg-row.msg-admin .tl-msg-meta{justify-content:flex-end}
+.tl-msg-meta i{font-size:11px}
+.tl-msg-meta .read{color:var(--blue)}
+/* Typing */
+.tl-typing-row{display:flex;align-items:flex-end;gap:8px}
+.tl-typing-bubble{background:var(--white);border:1px solid var(--border);border-radius:13px;border-bottom-left-radius:3px;padding:10px 14px;display:flex;gap:4px;align-items:center}
+.td{width:5px;height:5px;border-radius:50%;background:var(--text-4);animation:tdot 1.2s ease-in-out infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-4px);opacity:1}}
+
+/* AI Suggested Replies section */
+.cw-ai-suggestions{
+  flex-shrink:0;border-top:1px solid rgba(124,58,237,.12);
+  background:linear-gradient(90deg,rgba(109,40,217,.04),rgba(109,40,217,.01));
+  padding:9px 18px;
+}
+.cw-ai-sug-label{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;color:var(--purple);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.cw-ai-sug-label i{font-size:13px}
+.cw-ai-chips{display:flex;gap:6px;flex-wrap:wrap}
+.cw-ai-chip{
+  padding:5px 11px;border-radius:16px;font-size:11px;font-weight:500;
+  border:1.5px solid rgba(124,58,237,.2);background:rgba(124,58,237,.06);
+  color:var(--purple);cursor:pointer;transition:all .15s;line-height:1.3;text-align:left;
+  font-family:'DM Sans',sans-serif;
+}
+.cw-ai-chip:hover{background:rgba(124,58,237,.12);border-color:rgba(124,58,237,.35);box-shadow:0 2px 8px rgba(124,58,237,.15)}
+
+/* Quick replies row */
+.cw-quick-replies{padding:8px 18px;border-top:1px solid var(--border);display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;background:var(--white)}
+.cw-qr-chip{padding:5px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--white);font-size:11px;color:var(--text-mid);cursor:pointer;transition:all .14s;font-family:'DM Sans',sans-serif}
+.cw-qr-chip:hover{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+
+/* Input Area */
+.cw-input-area{background:var(--white);border-top:1px solid var(--border);padding:10px 14px;flex-shrink:0}
+/* Message type switcher */
+.cw-msg-type-row{display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.cw-msg-type-btn{
+  display:flex;align-items:center;gap:4px;padding:4px 10px;border-radius:7px;
+  font-size:11px;font-weight:500;border:1.5px solid var(--border);background:var(--white);
+  color:var(--text-light);cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;
+}
+.cw-msg-type-btn:hover{border-color:var(--navy);color:var(--navy)}
+.cw-msg-type-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+.cw-msg-type-btn.note-type.active{background:var(--orange);border-color:var(--orange)}
+.cw-msg-type-btn.ai-type.active{background:var(--purple);border-color:var(--purple)}
+.cw-msg-type-btn i{font-size:13px}
+.cw-msg-type-sep{width:1px;height:16px;background:var(--border);margin:0 2px}
+.assign-select{padding:4px 8px;border-radius:6px;border:1px solid var(--border);font-size:11px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;cursor:pointer;margin-left:auto}
+.assign-select:focus{border-color:var(--gold)}
+
+/* Toolbar */
+.cw-toolbar{display:flex;align-items:center;gap:5px;margin-bottom:8px}
+.cw-tool-btn{width:28px;height:28px;border-radius:7px;border:none;background:var(--cream);color:var(--text-mid);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s;position:relative}
+.cw-tool-btn:hover{background:var(--cream-dark);color:var(--text)}
+.cw-tool-btn i{font-size:15px}
+.cw-tool-sep{width:1px;height:18px;background:var(--border);margin:0 2px}
+.cw-tool-tag{position:absolute;top:-3px;right:-3px;background:var(--gold);color:#fff;width:13px;height:13px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+/* Input wrap */
+.cw-input-row{display:flex;align-items:flex-end;gap:8px}
+.cw-input-wrap{flex:1;background:var(--cream);border:1.5px solid var(--border);border-radius:11px;padding:8px 11px;display:flex;align-items:flex-end;gap:7px;transition:border-color .18s}
+.cw-input-wrap:focus-within{border-color:var(--gold);background:var(--white)}
+.cw-input-wrap.note-mode{border-color:rgba(234,124,30,.35);background:rgba(234,124,30,.04)}
+.cw-input-wrap.ai-mode{border-color:rgba(124,58,237,.3);background:rgba(124,58,237,.03)}
+.cw-input-wrap textarea{flex:1;border:none;background:none;outline:none;resize:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.55;max-height:100px;overflow-y:auto;scrollbar-width:none}
+.cw-input-wrap textarea::placeholder{color:var(--text-4)}
+.cw-char-count{font-size:9px;color:var(--text-4);flex-shrink:0;align-self:flex-end;padding-bottom:1px}
+.cw-send-btn{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--gold-light),var(--gold));border:none;color:var(--navy);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;box-shadow:0 3px 10px rgba(201,146,42,.3)}
+.cw-send-btn:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(201,146,42,.45)}
+.cw-send-btn:active{transform:scale(.93)}
+.cw-send-btn i{font-size:17px}
+/* Footer bar */
+.cw-footer-bar{display:flex;align-items:center;justify-content:space-between;margin-top:7px;padding:0 2px}
+.cw-footer-info{font-size:10px;color:var(--text-4);display:flex;align-items:center;gap:5px}
+.cw-footer-info i{font-size:12px;color:var(--gold)}
+.cw-footer-hint{font-size:10px;color:var(--text-4)}
+
+/* Canned response picker */
+.cw-canned-picker{
+  position:absolute;bottom:calc(100% + 4px);left:0;right:0;z-index:50;
+  background:var(--white);border:1.5px solid var(--border);border-radius:10px;
+  box-shadow:0 8px 28px rgba(0,0,0,.12);overflow:hidden;
+  display:none;
+}
+.cw-canned-picker.open{display:block;animation:fadeSlideUp .18s ease}
+@keyframes fadeSlideUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.canned-search{display:flex;align-items:center;gap:7px;padding:8px 11px;border-bottom:1px solid var(--border)}
+.canned-search input{border:none;background:none;outline:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.canned-list{max-height:200px;overflow-y:auto}
+.canned-item{padding:9px 13px;cursor:pointer;transition:background .12s;border-bottom:1px solid var(--cream-dark)}
+.canned-item:last-child{border-bottom:none}
+.canned-item:hover{background:var(--gold-pale)}
+.canned-item-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.canned-item-preview{font-size:10px;color:var(--text-light);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.canned-item-tags{display:flex;gap:4px;margin-top:4px}
+.ci-tag{font-size:9px;padding:1px 5px;border-radius:5px;background:var(--cream);color:var(--text-light)}
+.cw-input-area-wrap{position:relative}
+
+/* ════════════════════════════════════════
+   C. RIGHT — ConversationDetailPanel
+════════════════════════════════════════ */
+.cm-detail-panel{
+  width:var(--cm-detail-w);flex-shrink:0;
+  background:var(--white);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;overflow:hidden;
+  transition:width .25s ease;
+}
+.cm-detail-panel.collapsed{width:0;border-left:none}
+
+.cdp-scroll{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.cdp-scroll::-webkit-scrollbar{width:3px}
+.cdp-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+/* Customer card */
+.cdp-cust-card{padding:18px 16px 14px;text-align:center;border-bottom:1px solid var(--cream-dark)}
+.cdp-cust-av{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:700;margin:0 auto 9px;box-shadow:0 3px 10px rgba(0,0,0,.1)}
+.cdp-cust-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.cdp-cust-email{font-size:11px;color:var(--text-light);margin-bottom:8px}
+.cdp-cust-pills{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:11px}
+.cdp-stat-row{display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden}
+.cdp-stat{flex:1;padding:8px 5px;text-align:center;border-right:1px solid var(--border)}
+.cdp-stat:last-child{border-right:none}
+.cdp-stat-val{font-size:15px;font-weight:700;color:var(--text);line-height:1}
+.cdp-stat-val.gd{color:var(--gold)}
+.cdp-stat-val.gr{color:var(--green)}
+.cdp-stat-label{font-size:9px;color:var(--text-4);margin-top:2px}
+
+/* Detail section */
+.cdp-section{padding:13px 15px;border-bottom:1px solid var(--cream-dark)}
+.cdp-sec-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-light);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.cdp-sec-title i{font-size:13px;color:var(--gold)}
+.cdp-sec-title::after{content:'';flex:1;height:1px;background:var(--cream-dark);margin-left:5px}
+.cdp-sec-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cdp-sec-title-row .cdp-sec-title{margin-bottom:0}
+.cdp-sec-link{font-size:10px;color:var(--gold);font-weight:600;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:2px;transition:color .15s}
+.cdp-sec-link:hover{color:var(--gold-dim)}
+.cdp-sec-link i{font-size:11px}
+/* Info rows in detail panel */
+.cdp-info-row{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px}
+.cdp-info-row:last-child{margin-bottom:0}
+.cdp-info-row i{font-size:14px;color:var(--text-light);flex-shrink:0;margin-top:1px}
+.cdp-info-val{font-size:11px;font-weight:500;color:var(--text)}
+.cdp-info-label{font-size:10px;color:var(--text-4);margin-bottom:1px}
+/* Priority selector */
+.cdp-priority-select{width:100%;padding:6px 9px;border-radius:8px;border:1.5px solid var(--border);font-size:11px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);cursor:pointer;outline:none}
+.cdp-priority-select:focus{border-color:var(--gold)}
+/* Assigned staff */
+.cdp-assigned-row{display:flex;align-items:center;gap:8px}
+.cdp-assigned-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.cdp-assigned-name{font-size:11px;font-weight:600;color:var(--text)}
+.cdp-assigned-role{font-size:10px;color:var(--text-light)}
+.cdp-reassign-btn{margin-left:auto;font-size:10px;color:var(--gold);font-weight:600;background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 7px;border-radius:6px;border:1px solid rgba(201,146,42,.25);transition:all .15s}
+.cdp-reassign-btn:hover{background:var(--gold-pale)}
+/* Tags */
+.cdp-tags-wrap{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.cdp-tag{font-size:10px;font-weight:600;padding:3px 8px;border-radius:9px;cursor:pointer;transition:all .15s}
+.cdp-tag:hover{opacity:.75}
+.cdp-tag-add{border:1.5px dashed var(--border);background:transparent;color:var(--text-light);font-size:10px;padding:3px 8px;border-radius:9px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;font-weight:600}
+.cdp-tag-add:hover{border-color:var(--gold);color:var(--gold)}
+/* Order mini in panel */
+.cdp-order-mini{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:all .18s}
+.cdp-order-mini:hover{border-color:var(--gold);background:var(--gold-pale)}
+.cdp-order-mini:last-child{margin-bottom:0}
+.cdp-order-icon{width:28px;height:28px;border-radius:7px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.cdp-order-name{font-size:11px;font-weight:700;color:var(--text)}
+.cdp-order-meta{font-size:10px;color:var(--text-light);margin-top:1px}
+.cdp-order-price{font-size:11px;font-weight:700;color:var(--gold);margin-left:auto;white-space:nowrap}
+/* History pills */
+.cdp-hist-item{display:flex;align-items:flex-start;gap:7px;padding:6px 0;border-bottom:1px solid var(--cream-dark)}
+.cdp-hist-item:last-child{border-bottom:none}
+.cdp-hist-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.cdp-hist-text{font-size:11px;color:var(--text-mid);line-height:1.5}
+.cdp-hist-time{font-size:10px;color:var(--text-4);margin-top:1px}
+/* Note box */
+.cdp-note-box{width:100%;min-height:72px;border:1.5px solid var(--border);border-radius:9px;padding:9px 10px;font-size:11px;font-family:'DM Sans',sans-serif;resize:none;outline:none;background:var(--cream);color:var(--text);transition:border-color .18s;line-height:1.6}
+.cdp-note-box:focus{border-color:var(--gold);background:var(--white)}
+.cdp-note-save-btn{margin-top:6px;width:100%;padding:7px;border-radius:8px;background:var(--navy);border:none;color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .18s}
+.cdp-note-save-btn:hover{background:var(--gold-dim)}
+.cdp-note-save-btn i{font-size:12px}
+
+/* ════════════════════════════════════════
+   TEMPLATE MANAGEMENT MODAL
+   ConversationTemplateManagement
+════════════════════════════════════════ */
+.cm-modal-overlay{
+  position:fixed;inset:0;z-index:400;background:rgba(8,16,26,.52);
+  backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:16px;
+}
+.cm-modal-overlay.open{display:flex;animation:cmFadeIn .2s ease}
+@keyframes cmFadeIn{from{opacity:0}to{opacity:1}}
+.cm-modal{
+  background:var(--white);border-radius:var(--r-xl);
+  box-shadow:0 20px 60px rgba(0,0,0,.18);border:1px solid var(--border);
+  display:flex;flex-direction:column;animation:cmSlideUp .22s ease;
+}
+@keyframes cmSlideUp{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}
+.cm-modal.size-lg{width:100%;max-width:820px;max-height:88vh}
+.cm-modal.size-md{width:100%;max-width:520px;max-height:80vh}
+.cm-modal-head{
+  padding:15px 20px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;flex-shrink:0;
+}
+.cm-modal-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;color:var(--text)}
+.cm-modal-title em{font-style:italic;color:var(--gold)}
+.cm-modal-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-mid);transition:all .14s}
+.cm-modal-close:hover{background:var(--cream-dark)}
+.cm-modal-close i{font-size:14px}
+.cm-modal-body{padding:18px 20px;overflow-y:auto;flex:1}
+.cm-modal-foot{padding:13px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;background:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl)}
+
+/* Template table */
+.tpl-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.tpl-search{display:flex;align-items:center;gap:7px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;flex:1;transition:border-color .18s}
+.tpl-search:focus-within{border-color:var(--gold)}
+.tpl-search i{font-size:13px;color:var(--text-light)}
+.tpl-search input{border:none;background:none;outline:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.tpl-cat-select{padding:7px 10px;border-radius:8px;border:1.5px solid var(--border);font-size:12px;font-family:'DM Sans',sans-serif;background:var(--white);color:var(--text);cursor:pointer;outline:none}
+.tpl-add-btn{display:flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 2px 8px rgba(201,146,42,.3);transition:all .18s}
+.tpl-add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,146,42,.45)}
+.tpl-add-btn i{font-size:14px}
+
+.tpl-table{width:100%;border-collapse:collapse}
+.tpl-table thead tr{background:linear-gradient(90deg,var(--navy),var(--navy-light))}
+.tpl-table thead th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.6);padding:10px 13px;text-align:left;white-space:nowrap}
+.tpl-table tbody tr{border-bottom:1px solid var(--border);transition:background .14s}
+.tpl-table tbody tr:last-child{border-bottom:none}
+.tpl-table tbody tr:hover{background:var(--cream)}
+.tpl-table td{font-size:12px;padding:11px 13px;color:var(--text);vertical-align:middle}
+.tpl-row-actions{display:flex;gap:5px}
+.tra-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .13s}
+.tra-edit{background:rgba(59,130,246,.08);color:var(--blue)}.tra-edit:hover{background:rgba(59,130,246,.16)}
+.tra-del{background:rgba(229,62,62,.08);color:var(--red)}.tra-del:hover{background:rgba(229,62,62,.16)}
+.tra-use{background:rgba(45,158,107,.08);color:var(--green)}.tra-use:hover{background:rgba(45,158,107,.16)}
+
+/* Template form */
+.tpl-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:13px}
+.tfg{display:flex;flex-direction:column;gap:5px}
+.tfg.full{grid-column:1/-1}
+.tfl{font-size:11px;font-weight:700;color:var(--text)}
+.tfi{padding:8px 11px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;transition:all .18s;width:100%}
+.tfi:focus{border-color:var(--gold);background:var(--white)}
+textarea.tfi{resize:vertical;min-height:90px;line-height:1.6}
+select.tfi{cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.tfi-toggle{display:flex;gap:6px}
+.tfi-tog-opt{flex:1;padding:7px;border-radius:7px;border:1.5px solid var(--border);background:var(--white);font-size:11px;font-weight:500;text-align:center;cursor:pointer;transition:all .15s;color:var(--text-light)}
+.tfi-tog-opt.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:700}
+
+/* Shared button styles */
+.btn-primary{padding:8px 18px;border-radius:9px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(201,146,42,.3);transition:all .18s;display:flex;align-items:center;gap:6px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(201,146,42,.45)}
+.btn-primary i{font-size:14px}
+.btn-ghost{padding:8px 16px;border-radius:9px;background:var(--white);border:1.5px solid var(--border);color:var(--text-mid);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s}
+.btn-ghost:hover{border-color:var(--navy);color:var(--navy)}
+
+/* Send product modal */
+.sp-overlay{position:fixed;inset:0;z-index:500;background:rgba(8,16,26,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center}
+.sp-overlay.open{display:flex;animation:cmFadeIn .18s ease}
+.sp-modal{background:var(--white);border-radius:var(--r-xl);width:560px;max-height:80vh;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.18);display:flex;flex-direction:column;animation:cmSlideUp .22s ease}
+.sp-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sp-head-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--text)}
+.sp-head-title em{font-style:italic;color:var(--gold)}
+.sp-close{width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-mid);transition:all .14s}
+.sp-close:hover{background:var(--cream-dark)}
+.sp-close i{font-size:14px}
+.sp-body{padding:14px 18px;overflow-y:auto;flex:1}
+.sp-search-wrap{display:flex;align-items:center;gap:7px;background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:11px;transition:border-color .18s}
+.sp-search-wrap:focus-within{border-color:var(--gold)}
+.sp-search-wrap i{font-size:13px;color:var(--text-light)}
+.sp-search-wrap input{border:none;background:none;outline:none;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.sp-cats{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px}
+.sp-cat-chip{padding:4px 10px;border-radius:12px;font-size:10px;font-weight:600;border:1.5px solid var(--border);background:var(--white);color:var(--text-light);cursor:pointer;transition:all .14s}
+.sp-cat-chip:hover,.sp-cat-chip.active{border-color:var(--gold);color:var(--gold);background:var(--gold-pale)}
+.sp-prod-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sp-prod-item{border:1.5px solid var(--border);border-radius:9px;overflow:hidden;cursor:pointer;transition:all .14s}
+.sp-prod-item:hover{border-color:var(--gold)}
+.sp-prod-item.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,146,42,.15)}
+.sp-prod-img{height:72px;background:var(--cream);display:flex;align-items:center;justify-content:center;font-size:26px;position:relative}
+.sp-prod-check{position:absolute;top:6px;right:6px;width:18px;height:18px;border-radius:50%;background:var(--gold);color:var(--navy);display:none;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+.sp-prod-item.selected .sp-prod-check{display:flex}
+.sp-prod-body{padding:7px 9px}
+.sp-prod-cat{font-size:9px;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:1px}
+.sp-prod-name{font-size:11px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.3}
+.sp-prod-price{font-size:11px;font-weight:700;color:var(--gold)}
+.sp-prod-sku{font-size:9px;color:var(--text-4);font-family:monospace}
+.sp-foot{padding:12px 18px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--cream);border-radius:0 0 var(--r-xl) var(--r-xl)}
+.sp-sel-info{font-size:11px;color:var(--text-mid)}
+.sp-sel-info strong{color:var(--text);font-weight:700}
+.sp-send-btn{padding:8px 18px;border-radius:8px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:0 3px 10px rgba(201,146,42,.3);display:flex;align-items:center;gap:6px;transition:all .18s}
+.sp-send-btn:hover{transform:translateY(-1px)}
+.sp-send-btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.sp-send-btn i{font-size:14px}
+
+/* ════════════════════════════════════════
+   STATUS/PRIORITY PILLS — shared
+════════════════════════════════════════ */
+.pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.pill-online{background:var(--green-bg);color:#166534}.pill-online::before{background:var(--green)}
+.pill-away{background:var(--orange-bg);color:#92400e}.pill-away::before{background:var(--orange)}
+.pill-offline{background:var(--cream-dark);color:var(--text-4)}.pill-offline::before{background:var(--text-4)}
+.pill-vip{background:rgba(201,146,42,.12);color:var(--gold-dim)}
+.pill-navy{background:rgba(18,32,46,.08);color:var(--navy-light)}
+
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+.cm-toast{
+  position:fixed;bottom:20px;right:20px;z-index:700;
+  background:var(--navy);color:#fff;padding:10px 14px;border-radius:10px;
+  display:flex;align-items:center;gap:9px;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);border:1px solid rgba(201,146,42,.2);border-left:3px solid var(--gold);
+  transform:translateY(70px);opacity:0;transition:all .28s cubic-bezier(.22,.68,0,1.2);pointer-events:none;max-width:280px;
+}
+.cm-toast.show{transform:translateY(0);opacity:1}
+.ct-icon{width:28px;height:28px;border-radius:7px;background:rgba(201,146,42,.12);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ct-icon i{font-size:14px;color:var(--gold-light)}
+.ct-title{font-size:12px;font-weight:600}
+.ct-sub{font-size:10px;color:rgba(255,255,255,.42);margin-top:1px}
+
+/* ════════════════════════════════════════
+   EMPTY STATE
+════════════════════════════════════════ */
+.cm-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--text-light)}
+.cm-empty-icon{font-size:48px;opacity:.18}
+.cm-empty h3{font-size:15px;font-weight:700;color:var(--text);text-align:center}
+.cm-empty p{font-size:12px;text-align:center;max-width:260px;line-height:1.65;color:var(--text-light)}
+.cm-empty-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:8px;background:var(--navy);color:#fff;font-size:12px;font-weight:600;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .18s;margin-top:4px}
+.cm-empty-btn:hover{background:var(--gold-dim)}
+
+/* Misc */
+.lbadge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:9px;font-size:10px;font-weight:600}
+.lb-ship{background:var(--blue-bg);color:#1e3a8a}
+.lb-success{background:var(--green-bg);color:#166534}
+.lb-pending{background:var(--orange-bg);color:#92400e}
+.lb-navy{background:rgba(18,32,46,.08);color:var(--navy-light)}
+</style>
+</head>
+<body>
+
+<!-- ═════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════= -->
+<div class="topbar">
+  <a class="tb-logo" href="#">
+    <div class="tb-logo-icon">LX</div>
+    <span class="tb-logo-text">LUXNEST</span>
+    <span class="tb-badge">ADMIN</span>
+  </a>
+  <div class="tb-div"></div>
+  <div class="tb-bc">
+    <a onclick="showToast('home','Dashboard','Điều hướng trang chủ.')">Dashboard</a>
+    <span class="sep">›</span>
+    <span class="cur">💬 Conversation Management</span>
+  </div>
+  <!-- Quick stats -->
+  <div class="tb-div"></div>
+  <div class="tb-stat-pill urgent"><i class="ti ti-flame"></i> 3 Khẩn</div>
+  <div class="tb-stat-pill"><i class="ti ti-clock"></i> 8 Chờ xử lý</div>
+  <div class="tb-stat-pill"><i class="ti ti-users"></i> 5 Online</div>
+
+  <div class="tb-right">
+    <button class="tb-icon-btn" onclick="openTemplateModal()" title="Quản lý template">
+      <i class="ti ti-template"></i>
+    </button>
+    <button class="tb-icon-btn" onclick="showToast('settings','Cài đặt chat','Cấu hình workflow hỗ trợ.')" title="Cài đặt">
+      <i class="ti ti-settings"></i>
+    </button>
+    <button class="tb-icon-btn" onclick="showToast('bell','3 thông báo mới','')" title="Thông báo">
+      <i class="ti ti-bell"></i><span class="tb-dot"></span>
+    </button>
+    <div class="tb-av" title="Admin Chính">AD</div>
+  </div>
+</div>
+
+<!-- ═════════════════════════════════════════
+     CONVERSATION MANAGEMENT ROOT
+════════════════════════════════════════= -->
+<div class="cm-root">
+
+  <!-- ══ A. LEFT: ConversationListPanel ══ -->
+  <div class="cm-list-panel">
+
+    <!-- Header -->
+    <div class="clp-header">
+      <div class="clp-title-row">
+        <div class="clp-title">
+          <i class="ti ti-messages"></i> Hội thoại
+          <span style="background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:9px">8</span>
+        </div>
+        <div class="clp-hdr-actions">
+          <button class="clp-hdr-btn" onclick="showToast('filter','Bộ lọc nâng cao','')" title="Lọc nâng cao"><i class="ti ti-adjustments-horizontal"></i></button>
+          <button class="clp-hdr-btn" onclick="showToast('plus','Hội thoại mới','')" title="Tạo hội thoại mới"><i class="ti ti-plus"></i></button>
+        </div>
+      </div>
+      <div class="clp-search">
+        <i class="ti ti-search"></i>
+        <input type="text" id="convSearchInput" placeholder="Tìm tên, email, #đơn hàng..." oninput="filterConversations(this.value)">
+      </div>
+      <!-- Quick filter chips -->
+      <div class="clp-filter-row">
+        <div class="clf-chip active" onclick="filterChip(this,'all')">Tất cả</div>
+        <div class="clf-chip" onclick="filterChip(this,'urgent')">🔴 Khẩn</div>
+        <div class="clf-chip" onclick="filterChip(this,'ai')">🤖 AI</div>
+        <div class="clf-chip" onclick="filterChip(this,'unread')">● Chưa đọc</div>
+        <div class="clf-chip" onclick="filterChip(this,'waiting')">⏳ Chờ</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="clp-tabs">
+      <div class="clp-tab active" onclick="switchConvTab(this,'all')">
+        Tất cả <span class="clp-tab-badge">8</span>
+      </div>
+      <div class="clp-tab" onclick="switchConvTab(this,'open')">
+        Mở <span class="clp-tab-badge">5</span>
+      </div>
+      <div class="clp-tab" onclick="switchConvTab(this,'pending')">Đang xử lý</div>
+      <div class="clp-tab" onclick="switchConvTab(this,'resolved')">Xong</div>
+    </div>
+
+    <!-- Sort bar -->
+    <div class="clp-sort-bar">
+      <span class="csb-label">8 hội thoại</span>
+      <button class="csb-sort" onclick="showToast('sort','Sắp xếp theo','Mới nhất · Ưu tiên · Chưa đọc')">
+        <i class="ti ti-arrows-sort"></i> Mới nhất
+      </button>
+    </div>
+
+    <!-- Conversation list -->
+    <div class="clp-list" id="convList">
+
+      <!-- Conv 1 — Active, Urgent, AI -->
+      <div class="cm-conv-item active" id="ci-1" onclick="loadConversation(1)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-gold">NA</div>
+          <div class="cm-ci-online online-active"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Nguyễn Văn A</span>
+            <span class="cm-ci-time">2 ph</span>
+          </div>
+          <div class="cm-ci-preview">Ghế ergonomic có màu trắng không anh?</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-high"><i class="ti ti-flame" style="font-size:9px"></i> Cao</span>
+            <span class="cm-status-badge s-pending">Đang xử lý</span>
+            <span class="cm-ai-label"><i class="ti ti-robot" style="font-size:9px"></i> AI</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conv 2 — Unread, Urgent -->
+      <div class="cm-conv-item unread" id="ci-2" onclick="loadConversation(2)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-red">HV</div>
+          <div class="cm-ci-online online-away"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Hoàng Văn E</span>
+            <span class="cm-ci-time">8 ph</span>
+          </div>
+          <div class="cm-ci-preview">Sản phẩm bị lỗi sơn, muốn đổi gấp!</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-urgent"><i class="ti ti-alert-triangle" style="font-size:9px"></i> Khẩn</span>
+            <span class="cm-status-badge s-new">Mới</span>
+          </div>
+        </div>
+        <div class="cm-conv-unread-dot"></div>
+      </div>
+
+      <!-- Conv 3 — Unread -->
+      <div class="cm-conv-item unread" id="ci-3" onclick="loadConversation(3)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-blue">TT</div>
+          <div class="cm-ci-online online-away"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Trần Thị B</span>
+            <span class="cm-ci-time">15 ph</span>
+          </div>
+          <div class="cm-ci-preview">Đơn hàng #LX-0891 khi nào giao ạ?</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-high"><i class="ti ti-flame" style="font-size:9px"></i> Cao</span>
+            <span class="cm-status-badge s-waiting">Chờ KH</span>
+          </div>
+        </div>
+        <div class="cm-conv-unread-dot"></div>
+      </div>
+
+      <!-- Conv 4 -->
+      <div class="cm-conv-item" id="ci-4" onclick="loadConversation(4)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-purple">LM</div>
+          <div class="cm-ci-online online-active"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Lê Minh C</span>
+            <span class="cm-ci-time">1 giờ</span>
+          </div>
+          <div class="cm-ci-preview">Sofa Nordic giao Hà Nội được không?</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-medium">● Trung bình</span>
+            <span class="cm-status-badge s-pending">Đang xử lý</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conv 5 -->
+      <div class="cm-conv-item" id="ci-5" onclick="loadConversation(5)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-green">PT</div>
+          <div class="cm-ci-online online-offline"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Phạm Thu D</span>
+            <span class="cm-ci-time">3 giờ</span>
+          </div>
+          <div class="cm-ci-preview">Cảm ơn shop đã hỗ trợ nhanh 🙏</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-low">● Thấp</span>
+            <span class="cm-status-badge s-resolved">Đã giải quyết</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conv 6 — Unread, AI -->
+      <div class="cm-conv-item unread" id="ci-6" onclick="loadConversation(6)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-teal">NK</div>
+          <div class="cm-ci-online online-active"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Nguyễn Kim K</span>
+            <span class="cm-ci-time">4 giờ</span>
+          </div>
+          <div class="cm-ci-preview">Mô hình 3D của giường có xem được không?</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-medium">● Trung bình</span>
+            <span class="cm-status-badge s-new">Mới</span>
+            <span class="cm-ai-label"><i class="ti ti-robot" style="font-size:9px"></i> AI</span>
+          </div>
+        </div>
+        <div class="cm-conv-unread-dot"></div>
+      </div>
+
+      <!-- Conv 7 -->
+      <div class="cm-conv-item" id="ci-7" onclick="loadConversation(7)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-blue">NX</div>
+          <div class="cm-ci-online online-offline"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Nguyễn Xuân F</span>
+            <span class="cm-ci-time">Hôm qua</span>
+          </div>
+          <div class="cm-ci-preview">Giường có bảo hành mấy năm không?</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-low">● Thấp</span>
+            <span class="cm-status-badge s-resolved">Đã giải quyết</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conv 8 -->
+      <div class="cm-conv-item" id="ci-8" onclick="loadConversation(8)">
+        <div class="cm-ci-av-wrap">
+          <div class="cm-ci-av av-purple">MH</div>
+          <div class="cm-ci-online online-offline"></div>
+        </div>
+        <div class="cm-ci-body">
+          <div class="cm-ci-top">
+            <span class="cm-ci-name">Minh Hoàng</span>
+            <span class="cm-ci-time">2 ngày</span>
+          </div>
+          <div class="cm-ci-preview">Tôi muốn thiết kế phòng ngủ hoàn chỉnh</div>
+          <div class="cm-ci-footer">
+            <span class="cm-priority p-medium">● Trung bình</span>
+            <span class="cm-status-badge s-closed">Đã đóng</span>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /clp-list -->
+  </div><!-- /cm-list-panel -->
+
+  <!-- ══ B. CENTER: ConversationWorkspace ══ -->
+  <div class="cm-workspace">
+
+    <!-- Workspace Header -->
+    <div class="cw-header" id="cwHeader">
+      <div class="cm-ci-av av-gold cw-hdr-av" id="cwHdrAv">NA</div>
+      <div class="cw-hdr-info">
+        <div class="cw-hdr-name" id="cwHdrName">
+          Nguyễn Văn A
+          <span class="pill pill-online">Trực tuyến</span>
+          <span class="cm-priority p-high" style="margin-left:2px"><i class="ti ti-flame" style="font-size:9px"></i> Cao</span>
+        </div>
+        <div class="cw-hdr-meta">
+          <i class="ti ti-clock"></i><span>Lần nhắn đầu: 09:14</span>
+          <span class="cw-hdr-meta sep-dot"></span>
+          <i class="ti ti-package"></i><span class="lbadge lb-navy">#LX-0892</span>
+          <span class="cw-hdr-meta sep-dot"></span>
+          <i class="ti ti-user-check"></i><span>Phân công: Bạn</span>
+          <span class="cw-hdr-meta sep-dot"></span>
+          <i class="ti ti-robot"></i><span style="color:var(--purple);font-weight:600">AI đang hỗ trợ</span>
+        </div>
+      </div>
+      <div class="cw-hdr-actions">
+        <select class="cw-status-select" id="cwStatusSelect" onchange="updateConvStatus(this.value)">
+          <option value="new">🔵 Mới</option>
+          <option value="pending" selected>🟡 Đang xử lý</option>
+          <option value="waiting">🟣 Chờ khách</option>
+          <option value="resolved">🟢 Đã giải quyết</option>
+          <option value="closed">⚫ Đóng</option>
+        </select>
+        <button class="cw-action-btn" onclick="showToast('search','Tìm trong hội thoại','')" title="Tìm kiếm"><i class="ti ti-search"></i></button>
+        <button class="cw-action-btn" onclick="openTemplateModal()" title="Template"><i class="ti ti-template"></i></button>
+        <button class="cw-action-btn active-btn" id="cwDetailBtn" onclick="toggleDetailPanel()" title="Thông tin chi tiết"><i class="ti ti-layout-sidebar-right"></i></button>
+        <button class="cw-action-btn" onclick="showToast('archive','Đã lưu trữ','')" title="Lưu trữ"><i class="ti ti-archive"></i></button>
+        <button class="cw-action-btn" onclick="showToast('dots','Thêm tùy chọn','')" title="Thêm"><i class="ti ti-dots-vertical"></i></button>
+        <button class="cw-resolve-btn" onclick="resolveConversation()" id="cwResolveBtn">
+          <i class="ti ti-check"></i> Xong
+        </button>
+      </div>
+    </div>
+
+    <!-- AI Analysis Banner -->
+    <div class="cw-ai-banner" id="cwAiBanner">
+      <div class="cw-ai-icon"><i class="ti ti-robot"></i></div>
+      <div class="cw-ai-text">
+        <strong>AI phân tích:</strong> Khách quan tâm ghế ergonomic màu trắng · Có ý định mua cao (87%) · Đã xem 3 lần trong 10 phút · Gợi ý thêm bàn matching.
+      </div>
+      <div class="cw-ai-actions">
+        <button class="cw-ai-act-btn cw-ai-use-btn" onclick="insertSuggestion('Dạ bạn Văn A! Ghế ProFlex X1 có màu Trắng Pearl đang còn 12 chiếc ạ. Mình gửi ảnh thực tế và thông tin kỹ thuật cho bạn xem nhé! 🤍')">Dùng gợi ý</button>
+        <button class="cw-ai-act-btn cw-ai-dis-btn" onclick="document.getElementById('cwAiBanner').style.display='none'">Bỏ qua</button>
+      </div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="cw-timeline" id="cwTimeline">
+
+      <div class="tl-date-sep">Hôm nay · 27/05/2026</div>
+
+      <!-- Customer message -->
+      <div class="tl-msg-row msg-customer">
+        <div class="tl-av av-gold" style="color:var(--navy)">NA</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble customer">Chào shop! Mình đang tìm ghế văn phòng, shop có ghế ergonomic không ạ? 😊</div>
+          <div class="tl-msg-meta"><span>09:14</span></div>
+        </div>
+      </div>
+
+      <!-- System event -->
+      <div class="tl-msg-row msg-system">
+        <div class="tl-system-pill"><i class="ti ti-robot"></i> AI tự động gửi danh sách sản phẩm đề xuất · 09:14</div>
+      </div>
+
+      <!-- Admin message -->
+      <div class="tl-msg-row msg-admin">
+        <div class="tl-av" style="background:var(--navy);color:var(--gold-light)">AD</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble admin">Chào bạn Văn A! 👋 LUXNEST có bộ ghế ergonomic cao cấp. Để mình giới thiệu model phù hợp nhé!</div>
+          <div class="tl-msg-meta"><span>09:15</span><i class="ti ti-checks read"></i></div>
+        </div>
+      </div>
+
+      <!-- Admin sends product card -->
+      <div class="tl-msg-row msg-admin">
+        <div class="tl-av" style="background:var(--navy);color:var(--gold-light)">AD</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble admin" style="padding:5px">
+            <div class="tl-prod-card admin-variant" onclick="showToast('product','Ghế Ergonomic ProFlex X1','LX-CHR-003 · 1.200.000₫')">
+              <div class="tpc-img">🪑</div>
+              <div class="tpc-body"><div class="tpc-cat">Văn phòng</div><div class="tpc-name">Ghế Ergonomic ProFlex X1</div><div class="tpc-price">1.200.000₫</div></div>
+              <div class="tpc-footer"><span>Còn 47 sp</span><span>★ 4.8</span></div>
+            </div>
+          </div>
+          <div class="tl-msg-meta"><span>09:15</span><i class="ti ti-checks read"></i></div>
+        </div>
+      </div>
+
+      <!-- Customer reply -->
+      <div class="tl-msg-row msg-customer">
+        <div class="tl-av av-gold" style="color:var(--navy)">NA</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble customer">Ồ cái ghế này đẹp đấy! Ghế có màu trắng không anh? Mình muốn phối với bàn màu sáng 🤍</div>
+          <div class="tl-msg-meta"><span>09:17</span></div>
+        </div>
+      </div>
+
+      <!-- Internal note (only admin sees) -->
+      <div class="tl-msg-row msg-note">
+        <div class="tl-note-wrap">
+          <div class="tl-note-header"><i class="ti ti-lock"></i> Ghi chú nội bộ — Admin Chính · 09:18</div>
+          Khách VIP — thích phong cách Japandi. Đã mua Sofa Nordic T3/2025. Nên tư vấn thêm bàn matching để upsell.
+        </div>
+      </div>
+
+      <!-- Admin reply -->
+      <div class="tl-msg-row msg-admin">
+        <div class="tl-av" style="background:var(--navy);color:var(--gold-light)">AD</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble admin">Có bạn nhé! ProFlex X1 có <strong>2 màu: Đen tiêu chuẩn</strong> và <strong>Trắng pearl</strong>. Màu trắng còn 12 chiếc, giá 1.200.000₫. Mình gửi thêm thông tin nhé 👇</div>
+          <div class="tl-msg-meta"><span>09:18</span><i class="ti ti-checks read"></i></div>
+        </div>
+      </div>
+
+      <!-- AI suggestion bubble -->
+      <div class="tl-msg-row msg-ai">
+        <div class="tl-ai-wrap">
+          <div class="tl-ai-header"><i class="ti ti-sparkles"></i> AI Suggested Reply · 09:19</div>
+          <div class="tl-ai-text">Dạ bạn ơi! Ngoài ghế trắng, mình cũng có <em>Bàn Làm Việc Walnut 1m4</em> rất hợp phối — gam sáng ấm tương tự. Bạn muốn mình gửi combo không ạ? 🌿</div>
+          <div class="tl-ai-actions">
+            <button class="tl-ai-use" onclick="insertSuggestion('Dạ bạn ơi! Ngoài ghế trắng, mình cũng có Bàn Làm Việc Walnut 1m4 rất hợp phối — gam sáng ấm tương tự. Bạn muốn mình gửi combo không ạ? 🌿')">Dùng</button>
+            <button class="tl-ai-dismiss" onclick="this.closest('.tl-msg-row').remove()">Bỏ qua</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customer last -->
+      <div class="tl-msg-row msg-customer">
+        <div class="tl-av av-gold" style="color:var(--navy)">NA</div>
+        <div class="tl-msg-group">
+          <div class="tl-bubble customer">Anh ơi ghế ergonomic có màu trắng không ạ? Mình muốn đặt 1 cái 😊</div>
+          <div class="tl-msg-meta"><span>09:28</span></div>
+        </div>
+      </div>
+
+      <!-- Typing indicator -->
+      <div class="tl-typing-row" id="cwTyping" style="display:none">
+        <div class="tl-av av-gold" style="color:var(--navy)">NA</div>
+        <div class="tl-typing-bubble"><div class="td"></div><div class="td"></div><div class="td"></div></div>
+      </div>
+
+    </div><!-- /cw-timeline -->
+
+    <!-- AI Suggested Replies section -->
+    <div class="cw-ai-suggestions" id="cwAiSuggestions">
+      <div class="cw-ai-sug-label"><i class="ti ti-sparkles"></i> Gợi ý AI – nhấn để điền vào ô soạn thảo</div>
+      <div class="cw-ai-chips">
+        <button class="cw-ai-chip" onclick="insertSuggestion(this.textContent.trim())">Dạ bạn Văn A! Ghế ProFlex X1 có màu Trắng Pearl đang còn 12 chiếc ạ 🤍</button>
+        <button class="cw-ai-chip" onclick="insertSuggestion(this.textContent.trim())">Giá cả hai màu như nhau — 1.200.000₫. Bạn muốn đặt ngay không ạ?</button>
+        <button class="cw-ai-chip" onclick="insertSuggestion(this.textContent.trim())">Mình cũng có Bàn Làm Việc Walnut 1m4 rất hợp phối với ghế trắng — bạn thích xem combo không?</button>
+        <button class="cw-ai-chip" onclick="insertSuggestion(this.textContent.trim())">Bạn muốn mình kiểm tra tồn kho màu trắng và giữ hàng không ạ?</button>
+      </div>
+    </div>
+
+    <!-- Quick replies -->
+    <div class="cw-quick-replies">
+      <button class="cw-qr-chip" onclick="insertSuggestion('Chào bạn! Mình có thể hỗ trợ gì cho bạn hôm nay? 😊')">👋 Chào hỏi</button>
+      <button class="cw-qr-chip" onclick="insertSuggestion('Bạn vui lòng chờ mình kiểm tra, khoảng 1–2 phút ạ.')">⏳ Chờ xíu</button>
+      <button class="cw-qr-chip" onclick="insertSuggestion('Sản phẩm được bảo hành 5 năm kết cấu, 1 năm bề mặt sơn.')">🛡️ Bảo hành</button>
+      <button class="cw-qr-chip" onclick="insertSuggestion('Cảm ơn bạn đã liên hệ LUXNEST! Vấn đề đã được ghi nhận 🙏')">✅ Cảm ơn</button>
+      <button class="cw-qr-chip" onclick="openSendProduct()">🛋️ Gửi sản phẩm</button>
+      <button class="cw-qr-chip" onclick="openTemplateModal()">📋 Template</button>
+    </div>
+
+    <!-- Input Area -->
+    <div class="cw-input-area">
+      <!-- Message type row -->
+      <div class="cw-msg-type-row">
+        <button class="cw-msg-type-btn active" id="typeReply" onclick="setMsgType('reply',this)"><i class="ti ti-send"></i> Trả lời</button>
+        <div class="cw-msg-type-sep"></div>
+        <button class="cw-msg-type-btn note-type" id="typeNote" onclick="setMsgType('note',this)"><i class="ti ti-lock"></i> Ghi chú nội bộ</button>
+        <div class="cw-msg-type-sep"></div>
+        <button class="cw-msg-type-btn ai-type" id="typeAi" onclick="setMsgType('ai',this)"><i class="ti ti-sparkles"></i> Yêu cầu AI</button>
+        <select class="assign-select" onchange="showToast('user','Phân công','Đã gán cho: ' + this.options[this.selectedIndex].text)">
+          <option>Admin Chính (Bạn)</option>
+          <option>Trần Minh Hoàng</option>
+          <option>Nguyễn Thu Hà</option>
+          <option>LUXNEST AI Bot</option>
+        </select>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="cw-toolbar">
+        <button class="cw-tool-btn" onclick="openSendProduct()" title="Gửi sản phẩm tư vấn">
+          <i class="ti ti-armchair"></i><span class="cw-tool-tag">+</span>
+        </button>
+        <button class="cw-tool-btn" onclick="triggerFile()" title="Đính kèm file"><i class="ti ti-paperclip"></i></button>
+        <button class="cw-tool-btn" onclick="triggerImg()" title="Gửi ảnh"><i class="ti ti-photo"></i></button>
+        <div class="cw-tool-sep"></div>
+        <button class="cw-tool-btn" onclick="showCannedPicker()" title="Mẫu câu trả lời nhanh"><i class="ti ti-template"></i></button>
+        <button class="cw-tool-btn" onclick="showToast('bold','Định dạng văn bản','')" title="Bold"><i class="ti ti-bold"></i></button>
+        <button class="cw-tool-btn" onclick="showToast('emoji','Emoji','')" title="Emoji"><i class="ti ti-mood-smile"></i></button>
+        <div class="cw-tool-sep"></div>
+        <button class="cw-tool-btn" onclick="showToast('ai','AI soạn thảo','Đang tạo tin nhắn phù hợp...')" title="AI soạn nhanh" style="color:var(--purple)"><i class="ti ti-wand"></i></button>
+        <input type="file" id="cwFileInput" style="display:none" accept="image/*,.pdf">
+        <input type="file" id="cwImgInput" style="display:none" accept="image/*">
+      </div>
+
+      <!-- Input row with canned picker -->
+      <div class="cw-input-area-wrap">
+        <div class="cw-canned-picker" id="cannedPicker">
+          <div class="canned-search"><i class="ti ti-search" style="font-size:13px;color:var(--text-light)"></i><input type="text" placeholder="Tìm mẫu trả lời..." id="cannedSearchInput" oninput="filterCanned(this.value)"></div>
+          <div class="canned-list" id="cannedList"></div>
+        </div>
+        <div class="cw-input-row">
+          <div class="cw-input-wrap" id="cwInputWrap">
+            <textarea id="cwMsgInput" rows="1" placeholder="Nhập tin nhắn tư vấn… (Enter gửi, Shift+Enter xuống dòng)"
+              oninput="autoResize(this);updateCharCount(this)"
+              onkeydown="handleKeyDown(event)"></textarea>
+            <span class="cw-char-count" id="cwCharCount">0</span>
+          </div>
+          <button class="cw-send-btn" onclick="sendMessage()" id="cwSendBtn" title="Gửi (Enter)">
+            <i class="ti ti-send-2"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="cw-footer-bar">
+        <div class="cw-footer-info"><i class="ti ti-user-check"></i> Đang xử lý bởi: <strong style="color:var(--text);margin-left:2px">Admin Chính</strong></div>
+        <div class="cw-footer-hint">Enter gửi · Shift+Enter xuống dòng · / gọi mẫu</div>
+      </div>
+    </div>
+
+  </div><!-- /cm-workspace -->
+
+  <!-- ══ C. RIGHT: ConversationDetailPanel ══ -->
+  <div class="cm-detail-panel" id="cmDetailPanel">
+    <div class="cdp-scroll">
+
+      <!-- Customer card -->
+      <div class="cdp-cust-card">
+        <div class="cdp-cust-av av-gold" id="cdpCustAv" style="color:var(--navy)">NA</div>
+        <div class="cdp-cust-name" id="cdpCustName">Nguyễn Văn A</div>
+        <div class="cdp-cust-email" id="cdpCustEmail">nguyenvana@gmail.com</div>
+        <div class="cdp-cust-pills">
+          <span class="pill pill-online" id="cdpOnlinePill">Trực tuyến</span>
+          <span class="pill pill-vip">Khách VIP</span>
+          <span class="pill pill-navy">TP.HCM</span>
+        </div>
+        <div class="cdp-stat-row">
+          <div class="cdp-stat"><div class="cdp-stat-val gd">8</div><div class="cdp-stat-label">Đơn hàng</div></div>
+          <div class="cdp-stat"><div class="cdp-stat-val gd">3.2tr</div><div class="cdp-stat-label">AOV</div></div>
+          <div class="cdp-stat"><div class="cdp-stat-val gr">4.9★</div><div class="cdp-stat-label">Rating</div></div>
+        </div>
+      </div>
+
+      <!-- Contact info -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title"><i class="ti ti-user"></i>Thông tin</div>
+        <div class="cdp-info-row"><i class="ti ti-phone"></i><div><div class="cdp-info-label">Điện thoại</div><div class="cdp-info-val">0901 234 567</div></div></div>
+        <div class="cdp-info-row"><i class="ti ti-map-pin"></i><div><div class="cdp-info-label">Khu vực</div><div class="cdp-info-val">Quận 1, TP.HCM</div></div></div>
+        <div class="cdp-info-row"><i class="ti ti-calendar"></i><div><div class="cdp-info-label">Thành viên từ</div><div class="cdp-info-val">01/01/2025</div></div></div>
+        <div class="cdp-info-row"><i class="ti ti-device-mobile"></i><div><div class="cdp-info-label">Thiết bị</div><div class="cdp-info-val">iOS · Safari</div></div></div>
+      </div>
+
+      <!-- Conversation metadata -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title"><i class="ti ti-info-circle"></i>Hội thoại</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div>
+            <div class="cdp-info-label">Ưu tiên</div>
+            <select class="cdp-priority-select" style="margin-top:5px" onchange="showToast('priority','Cập nhật ưu tiên','Đã đổi sang: ' + this.options[this.selectedIndex].text)">
+              <option value="urgent">🔴 Khẩn cấp</option>
+              <option value="high" selected>🟠 Cao</option>
+              <option value="medium">🔵 Trung bình</option>
+              <option value="low">⚪ Thấp</option>
+            </select>
+          </div>
+          <div>
+            <div class="cdp-info-label">Phân công</div>
+            <div class="cdp-assigned-row" style="margin-top:5px">
+              <div class="cdp-assigned-av av-gold" style="color:var(--navy)">AD</div>
+              <div><div class="cdp-assigned-name">Admin Chính</div><div class="cdp-assigned-role">Super Admin</div></div>
+              <button class="cdp-reassign-btn" onclick="showToast('user','Phân công lại','Chọn nhân viên hỗ trợ.')">Đổi</button>
+            </div>
+          </div>
+          <div>
+            <div class="cdp-info-label" style="margin-bottom:5px">Kênh liên hệ</div>
+            <span class="pill pill-navy"><i class="ti ti-message" style="font-size:10px;margin-right:3px"></i>Website Chat</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title"><i class="ti ti-tag"></i>Nhãn</div>
+        <div class="cdp-tags-wrap" id="cdpTagsWrap">
+          <span class="cdp-tag" style="background:rgba(201,146,42,.1);color:var(--gold-dim)" onclick="showToast('tag','Xóa nhãn','Tư vấn')">Tư vấn ✕</span>
+          <span class="cdp-tag" style="background:rgba(109,40,217,.1);color:#5b21b6" onclick="showToast('tag','Xóa nhãn','AI hỗ trợ')">AI hỗ trợ ✕</span>
+          <span class="cdp-tag" style="background:rgba(59,130,246,.1);color:var(--blue-mid)" onclick="showToast('tag','Xóa nhãn','VIP')">VIP ✕</span>
+          <button class="cdp-tag-add" onclick="addTag()">+ Tag</button>
+        </div>
+      </div>
+
+      <!-- Recent orders -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title-row">
+          <div class="cdp-sec-title" style="margin-bottom:0"><i class="ti ti-package"></i>Đơn hàng gần đây</div>
+          <button class="cdp-sec-link" onclick="showToast('orders','Tất cả đơn hàng','8 đơn hàng')"><i class="ti ti-arrow-right"></i></button>
+        </div>
+        <div style="margin-top:10px">
+          <div class="cdp-order-mini" onclick="showToast('order','#LX-0892','12.500.000đ · Đang giao')">
+            <div class="cdp-order-icon">🛏️</div>
+            <div><div class="cdp-order-name">#LX-0892</div><div class="cdp-order-meta">18/05 · <span class="lbadge lb-ship" style="font-size:9px;padding:1px 4px">Đang giao</span></div></div>
+            <div class="cdp-order-price">12.5tr</div>
+          </div>
+          <div class="cdp-order-mini" onclick="showToast('order','#LX-0814','8.900.000đ · Hoàn thành')">
+            <div class="cdp-order-icon">🛋️</div>
+            <div><div class="cdp-order-name">#LX-0814</div><div class="cdp-order-meta">02/03 · <span class="lbadge lb-success" style="font-size:9px;padding:1px 4px">Xong</span></div></div>
+            <div class="cdp-order-price">8.9tr</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Support history -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title"><i class="ti ti-history"></i>Lịch sử hỗ trợ</div>
+        <div class="cdp-hist-item">
+          <div class="cdp-hist-dot" style="background:var(--green)"></div>
+          <div><div class="cdp-hist-text">Tư vấn sofa Nordic · Đã chốt đơn</div><div class="cdp-hist-time">02/03/2025 · Admin Hà</div></div>
+        </div>
+        <div class="cdp-hist-item">
+          <div class="cdp-hist-dot" style="background:var(--blue)"></div>
+          <div><div class="cdp-hist-text">Hỏi về chính sách bảo hành giường</div><div class="cdp-hist-time">15/01/2025 · AI Bot</div></div>
+        </div>
+        <div class="cdp-hist-item">
+          <div class="cdp-hist-dot" style="background:var(--orange)"></div>
+          <div><div class="cdp-hist-text">Phàn nàn giao hàng chậm → Giải quyết</div><div class="cdp-hist-time">10/12/2024 · Admin Hoàng</div></div>
+        </div>
+      </div>
+
+      <!-- Admin note -->
+      <div class="cdp-section">
+        <div class="cdp-sec-title"><i class="ti ti-note"></i>Ghi chú nội bộ</div>
+        <textarea class="cdp-note-box" id="adminNoteBox" placeholder="Ghi chú về khách này (chỉ admin thấy)…">Khách VIP, thích phong cách Japandi. Đã mua Sofa Nordic T3/2025. Cần tư vấn kỹ trước khi chốt. Tiềm năng upsell bàn + đèn matching.</textarea>
+        <button class="cdp-note-save-btn" onclick="saveNote()"><i class="ti ti-device-floppy"></i> Lưu ghi chú</button>
+      </div>
+
+    </div><!-- /cdp-scroll -->
+  </div><!-- /cm-detail-panel -->
+
+</div><!-- /cm-root -->
+
+<!-- ════════════════════════════════════════
+   TEMPLATE MANAGEMENT MODAL
+   ConversationTemplateManagement component
+════════════════════════════════════════ -->
+<div class="cm-modal-overlay" id="templateModal" onclick="closeModalOutside(event,'templateModal')">
+  <div class="cm-modal size-lg">
+    <div class="cm-modal-head">
+      <div class="cm-modal-title">Quản lý <em>Template hỗ trợ</em></div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="font-size:11px;color:var(--text-light)">18 template</span>
+        <button class="cm-modal-close" onclick="closeModal('templateModal')"><i class="ti ti-x"></i></button>
+      </div>
+    </div>
+    <div class="cm-modal-body">
+      <!-- Toolbar -->
+      <div class="tpl-toolbar">
+        <div class="tpl-search">
+          <i class="ti ti-search"></i>
+          <input type="text" placeholder="Tìm tên, nội dung template..." oninput="filterTemplates(this.value)">
+        </div>
+        <select class="tpl-cat-select">
+          <option>Tất cả danh mục</option>
+          <option>Chào hỏi</option>
+          <option>Tư vấn sản phẩm</option>
+          <option>Đơn hàng</option>
+          <option>Bảo hành</option>
+          <option>Xử lý khiếu nại</option>
+          <option>Kết thúc</option>
+        </select>
+        <button class="tpl-add-btn" onclick="openAddTemplate()"><i class="ti ti-plus"></i> Thêm template</button>
+      </div>
+      <!-- Table -->
+      <div style="overflow-x:auto;border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden">
+        <table class="tpl-table">
+          <thead><tr><th>Tên template</th><th>Danh mục</th><th>Nội dung (xem trước)</th><th>Tags</th><th>AI</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+          <tbody id="templateTableBody">
+            <!-- filled by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="cm-modal-foot">
+      <button class="btn-ghost" onclick="closeModal('templateModal')">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD/EDIT TEMPLATE MODAL -->
+<div class="cm-modal-overlay" id="addTemplateModal" onclick="closeModalOutside(event,'addTemplateModal')">
+  <div class="cm-modal size-md">
+    <div class="cm-modal-head">
+      <div class="cm-modal-title" id="addTplTitle">Thêm <em>template mới</em></div>
+      <button class="cm-modal-close" onclick="closeModal('addTemplateModal')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="cm-modal-body">
+      <div class="tpl-form-grid">
+        <div class="tfg"><label class="tfl">Tên template *</label><input class="tfi" placeholder="VD: Chào hỏi khách mới" id="tplName"></div>
+        <div class="tfg"><label class="tfl">Danh mục</label>
+          <select class="tfi" id="tplCat">
+            <option>Chào hỏi</option><option>Tư vấn sản phẩm</option><option>Đơn hàng</option><option>Bảo hành</option><option>Xử lý khiếu nại</option><option>Kết thúc</option>
+          </select>
+        </div>
+        <div class="tfg full"><label class="tfl">Nội dung template *</label>
+          <textarea class="tfi" rows="5" placeholder="Nội dung tin nhắn mẫu. Dùng {{tên}} để chèn tên khách..." id="tplContent"></textarea>
+        </div>
+        <div class="tfg"><label class="tfl">Tags (cách nhau bởi dấu phẩy)</label><input class="tfi" placeholder="vd: tư vấn, mua hàng" id="tplTags"></div>
+        <div class="tfg"><label class="tfl">Kích hoạt AI gợi ý</label>
+          <div class="tfi-toggle" id="tplAiToggle">
+            <div class="tfi-tog-opt active" onclick="selectToggle(this,0,'tplAiToggle')">Có</div>
+            <div class="tfi-tog-opt" onclick="selectToggle(this,1,'tplAiToggle')">Không</div>
+          </div>
+        </div>
+        <div class="tfg"><label class="tfl">Trạng thái</label>
+          <div class="tfi-toggle" id="tplStatusToggle">
+            <div class="tfi-tog-opt active" onclick="selectToggle(this,0,'tplStatusToggle')">Bật</div>
+            <div class="tfi-tog-opt" onclick="selectToggle(this,1,'tplStatusToggle')">Tắt</div>
+          </div>
+        </div>
+        <div class="tfg full"><label class="tfl">Loại trigger</label>
+          <select class="tfi" id="tplTrigger">
+            <option>Thủ công</option><option>Tin nhắn đầu tiên</option><option>Hỏi về giá</option><option>Hỏi về giao hàng</option><option>Khiếu nại</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="cm-modal-foot">
+      <button class="btn-ghost" onclick="closeModal('addTemplateModal')">Huỷ</button>
+      <button class="btn-primary" onclick="saveTemplate()"><i class="ti ti-check"></i> Lưu template</button>
+    </div>
+  </div>
+</div>
+
+<!-- SEND PRODUCT MODAL -->
+<div class="sp-overlay" id="spOverlay" onclick="closeModalOutside(event,'spOverlay')">
+  <div class="sp-modal">
+    <div class="sp-head">
+      <div class="sp-head-title">Gửi <em>sản phẩm tư vấn</em></div>
+      <button class="sp-close" onclick="closeModal('spOverlay')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="sp-body">
+      <div class="sp-search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Tìm theo tên, SKU, danh mục..." oninput="filterSPProds(this.value)">
+      </div>
+      <div class="sp-cats">
+        <div class="sp-cat-chip active" onclick="spFilterCat('all',this)">Tất cả</div>
+        <div class="sp-cat-chip" onclick="spFilterCat('phong-ngu',this)">🛏️ Phòng ngủ</div>
+        <div class="sp-cat-chip" onclick="spFilterCat('phong-khach',this)">🛋️ Phòng khách</div>
+        <div class="sp-cat-chip" onclick="spFilterCat('van-phong',this)">🪑 Văn phòng</div>
+        <div class="sp-cat-chip" onclick="spFilterCat('den',this)">💡 Đèn</div>
+      </div>
+      <div class="sp-prod-grid" id="spProdGrid"></div>
+    </div>
+    <div class="sp-foot">
+      <div class="sp-sel-info" id="spSelInfo">Chưa chọn sản phẩm</div>
+      <div style="display:flex;gap:7px">
+        <button style="padding:7px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);font-size:11px;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="closeModal('spOverlay')">Huỷ</button>
+        <button class="sp-send-btn" id="spSendBtn" onclick="sendProductToChat()" disabled><i class="ti ti-send"></i> Gửi sản phẩm</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="cm-toast" id="cmToast">
+  <div class="ct-icon"><i class="ti ti-check" id="ctIcon"></i></div>
+  <div><div class="ct-title" id="ctTitle"></div><div class="ct-sub" id="ctSub"></div></div>
+</div>
+
+<!-- ══════════════════════════════════════
+   JAVASCRIPT — Scoped to conversation-management feature
+══════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ═══════════════════════════════════
+   MOCK DATA
+═══════════════════════════════════ */
+const CONV_DATA = {
+  1:{name:'Nguyễn Văn A',av:'NA',avClass:'av-gold',avColor:'linear-gradient(135deg,#e5b84a,#c9922a)',textColor:'var(--navy)',status:'Trực tuyến',online:'online-active',onlinePill:'pill-online',pillText:'Trực tuyến',email:'nguyenvana@gmail.com',phone:'0901 234 567',area:'Quận 1, TP.HCM',orders:8,aov:'3.2tr',rating:'4.9★',priority:'high',vip:true},
+  2:{name:'Hoàng Văn E',av:'HV',avClass:'av-red',avColor:'linear-gradient(135deg,#f87171,#dc2626)',textColor:'#fff',status:'Vừa hoạt động',online:'online-away',onlinePill:'pill-away',pillText:'Vừa online',email:'hoangsanpham@gmail.com',phone:'0934 567 890',area:'Quận 3, TP.HCM',orders:3,aov:'1.8tr',rating:'3.5★',priority:'urgent',vip:false},
+  3:{name:'Trần Thị B',av:'TT',avClass:'av-blue',avColor:'linear-gradient(135deg,#60a5fa,#2563eb)',textColor:'#fff',status:'Vừa hoạt động',online:'online-away',onlinePill:'pill-away',pillText:'Vừa online',email:'tranthib@gmail.com',phone:'0912 345 678',area:'Quận 7, TP.HCM',orders:14,aov:'2.4tr',rating:'4.7★',priority:'high',vip:true},
+  4:{name:'Lê Minh C',av:'LM',avClass:'av-purple',avColor:'linear-gradient(135deg,#a78bfa,#7c3aed)',textColor:'#fff',status:'Đang trực tuyến',online:'online-active',onlinePill:'pill-online',pillText:'Trực tuyến',email:'leminhc@gmail.com',phone:'0923 456 789',area:'Hà Nội',orders:2,aov:'5.1tr',rating:'5.0★',priority:'medium',vip:false},
+  5:{name:'Phạm Thu D',av:'PT',avClass:'av-green',avColor:'linear-gradient(135deg,#4ade80,#16a34a)',textColor:'#fff',status:'Offline',online:'online-offline',onlinePill:'pill-offline',pillText:'Offline',email:'phamthud@gmail.com',phone:'0934 111 222',area:'Đà Nẵng',orders:5,aov:'2.0tr',rating:'4.8★',priority:'low',vip:false},
+  6:{name:'Nguyễn Kim K',av:'NK',avClass:'av-teal',avColor:'linear-gradient(135deg,#2dd4bf,#0d9488)',textColor:'#fff',status:'Đang trực tuyến',online:'online-active',onlinePill:'pill-online',pillText:'Trực tuyến',email:'kimkhanh@gmail.com',phone:'0911 222 333',area:'Quận 2, TP.HCM',orders:1,aov:'12tr',rating:'—',priority:'medium',vip:false},
+  7:{name:'Nguyễn Xuân F',av:'NX',avClass:'av-blue',avColor:'linear-gradient(135deg,#60a5fa,#2563eb)',textColor:'#fff',status:'Offline',online:'online-offline',onlinePill:'pill-offline',pillText:'Offline',email:'nguyenxuanf@gmail.com',phone:'0901 999 888',area:'Bình Dương',orders:4,aov:'1.5tr',rating:'4.2★',priority:'low',vip:false},
+  8:{name:'Minh Hoàng',av:'MH',avClass:'av-purple',avColor:'linear-gradient(135deg,#a78bfa,#7c3aed)',textColor:'#fff',status:'Offline',online:'online-offline',onlinePill:'pill-offline',pillText:'Offline',email:'minhhoang@gmail.com',phone:'0977 654 321',area:'Hà Nội',orders:6,aov:'4.3tr',rating:'4.5★',priority:'medium',vip:true},
+};
+
+const TEMPLATES = [
+  {id:1,name:'Chào khách mới',cat:'Chào hỏi',content:'Chào bạn! Mình là nhân viên hỗ trợ LUXNEST. Mình có thể giúp gì cho bạn hôm nay? 😊',tags:['chào hỏi','mới'],ai:true,active:true},
+  {id:2,name:'Xác nhận tư vấn sản phẩm',cat:'Tư vấn sản phẩm',content:'Dạ, mình đã ghi nhận yêu cầu tư vấn của bạn về {{sản_phẩm}}. Mình sẽ gửi thông tin chi tiết trong 1–2 phút nhé!',tags:['tư vấn','sản phẩm'],ai:true,active:true},
+  {id:3,name:'Kiểm tra tình trạng đơn hàng',cat:'Đơn hàng',content:'Mình đang kiểm tra đơn hàng {{mã_đơn}} cho bạn. Bạn vui lòng chờ khoảng 2 phút nhé!',tags:['đơn hàng','kiểm tra'],ai:false,active:true},
+  {id:4,name:'Thông tin bảo hành chuẩn',cat:'Bảo hành',content:'Sản phẩm LUXNEST được bảo hành 5 năm kết cấu và 1 năm bề mặt sơn. Liên hệ 1800-LUXNEST để được hỗ trợ bảo hành miễn phí.',tags:['bảo hành'],ai:true,active:true},
+  {id:5,name:'Xử lý khiếu nại nhanh',cat:'Xử lý khiếu nại',content:'Mình thành thật xin lỗi về trải nghiệm không tốt của bạn. Mình đã ghi nhận và sẽ chuyển ngay đến bộ phận kỹ thuật xử lý trong 24h.',tags:['khiếu nại','xin lỗi'],ai:false,active:true},
+  {id:6,name:'Kết thúc hội thoại',cat:'Kết thúc',content:'Cảm ơn bạn đã liên hệ LUXNEST! Nếu cần hỗ trợ thêm, bạn cứ nhắn tin hoặc gọi 1800-LUXNEST nhé. Chúc bạn một ngày tốt lành! 🌟',tags:['kết thúc','cảm ơn'],ai:true,active:true},
+  {id:7,name:'Giao hàng toàn quốc',cat:'Đơn hàng',content:'LUXNEST giao hàng toàn quốc trong 3–7 ngày làm việc. Đơn từ 5tr được miễn phí giao hàng. Bạn muốn đặt hàng ngay không ạ?',tags:['giao hàng','toàn quốc'],ai:true,active:true},
+  {id:8,name:'Combo sản phẩm matching',cat:'Tư vấn sản phẩm',content:'Mình thấy bạn đang quan tâm đến {{sản_phẩm}}. Mình có thể gợi ý thêm một số sản phẩm phối hợp rất đẹp! Bạn có muốn xem không ạ?',tags:['upsell','combo'],ai:true,active:false},
+];
+
+const PRODUCTS_DATA = [
+  {id:'LX-BED-001',name:'Giường Walnut Premium',cat:'Phòng ngủ',catKey:'phong-ngu',icon:'🛏️',price:'12.500.000₫',priceOld:'15.600.000₫',stock:3},
+  {id:'LX-BED-002',name:'Giường Nordic Oak',cat:'Phòng ngủ',catKey:'phong-ngu',icon:'🛏️',price:'9.800.000₫',priceOld:'',stock:12},
+  {id:'LX-SFA-002',name:'Sofa Nordic 3 chỗ',cat:'Phòng khách',catKey:'phong-khach',icon:'🛋️',price:'8.500.000₫',priceOld:'10.200.000₫',stock:0},
+  {id:'LX-SFA-003',name:'Sofa L-shape Japandi',cat:'Phòng khách',catKey:'phong-khach',icon:'🛋️',price:'16.900.000₫',priceOld:'',stock:5},
+  {id:'LX-CHR-003',name:'Ghế Ergonomic ProFlex X1',cat:'Văn phòng',catKey:'van-phong',icon:'🪑',price:'1.200.000₫',priceOld:'',stock:47},
+  {id:'LX-CHR-004',name:'Ghế ProFlex X2 Premium',cat:'Văn phòng',catKey:'van-phong',icon:'🪑',price:'2.400.000₫',priceOld:'',stock:18},
+  {id:'LX-LMP-004',name:'Đèn Nordic Brass Edition',cat:'Đèn',catKey:'den',icon:'💡',price:'1.260.000₫',priceOld:'1.800.000₫',stock:24},
+  {id:'LX-TBL-001',name:'Bàn làm việc Walnut 1m4',cat:'Văn phòng',catKey:'van-phong',icon:'🪵',price:'4.500.000₫',priceOld:'',stock:9},
+];
+
+/* ═══════════════════════════════════
+   STATE (feature-scoped)
+═══════════════════════════════════ */
+let currentConvId = 1;
+let detailPanelVisible = true;
+let currentMsgType = 'reply';
+let selectedProdId = null;
+let toastTimer = null;
+let cannedPickerOpen = false;
+
+/* ═══════════════════════════════════
+   INIT
+═══════════════════════════════════ */
+window.onload = function() {
+  renderTemplateTable(TEMPLATES);
+  renderSPGrid(PRODUCTS_DATA);
+  renderCannedList(TEMPLATES);
+  scrollToBottom();
+  // Simulate typing after 2s
+  setTimeout(() => { showTyping(); setTimeout(hideTyping, 3000); }, 2000);
+};
+
+/* ═══════════════════════════════════
+   CONVERSATION LOADING
+═══════════════════════════════════ */
+function loadConversation(id) {
+  currentConvId = id;
+  const c = CONV_DATA[id]; if (!c) return;
+
+  // Update list active state
+  document.querySelectorAll('.cm-conv-item').forEach(el => el.classList.remove('active'));
+  const ci = document.getElementById('ci-' + id);
+  if (ci) {
+    ci.classList.add('active');
+    ci.classList.remove('unread');
+    const dot = ci.querySelector('.cm-conv-unread-dot');
+    if (dot) dot.remove();
+  }
+
+  // Update workspace header
+  const av = document.getElementById('cwHdrAv');
+  av.className = 'cw-hdr-av ' + c.avClass;
+  av.style.background = c.avColor;
+  av.style.color = c.textColor;
+  av.textContent = c.av;
+
+  const priorityMap = {urgent:'<span class="cm-priority p-urgent"><i class="ti ti-alert-triangle" style="font-size:9px"></i> Khẩn</span>',high:'<span class="cm-priority p-high"><i class="ti ti-flame" style="font-size:9px"></i> Cao</span>',medium:'<span class="cm-priority p-medium">● Trung bình</span>',low:'<span class="cm-priority p-low">● Thấp</span>'};
+  document.getElementById('cwHdrName').innerHTML = c.name + ' <span class="pill '+c.onlinePill+'">' + c.pillText + '</span> ' + (priorityMap[c.priority]||'');
+
+  // Update detail panel
+  const dav = document.getElementById('cdpCustAv');
+  dav.className = 'cdp-cust-av ' + c.avClass;
+  dav.style.background = c.avColor;
+  dav.style.color = c.textColor;
+  dav.textContent = c.av;
+  document.getElementById('cdpCustName').textContent = c.name;
+  document.getElementById('cdpCustEmail').textContent = c.email;
+
+  const onlinePillEl = document.getElementById('cdpOnlinePill');
+  onlinePillEl.className = 'pill ' + c.onlinePill;
+  onlinePillEl.textContent = c.pillText;
+
+  showToast('messages', 'Hội thoại: ' + c.name, 'Đang tải lịch sử...');
+  scrollToBottom();
+}
+
+/* ═══════════════════════════════════
+   MESSAGE TYPE
+═══════════════════════════════════ */
+function setMsgType(type, btn) {
+  currentMsgType = type;
+  document.querySelectorAll('.cw-msg-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const inp = document.getElementById('cwInputWrap');
+  const ta = document.getElementById('cwMsgInput');
+  inp.className = 'cw-input-wrap';
+  const placeholders = {
+    reply:'Nhập tin nhắn tư vấn… (Enter gửi, Shift+Enter xuống dòng)',
+    note:'Ghi chú nội bộ — chỉ admin thấy, khách không nhận được…',
+    ai:'Yêu cầu AI soạn thảo: mô tả nội dung bạn cần…'
+  };
+  const modes = {reply:'',note:' note-mode',ai:' ai-mode'};
+  inp.className = 'cw-input-wrap' + (modes[type]||'');
+  ta.placeholder = placeholders[type] || '';
+  ta.focus();
+}
+
+/* ═══════════════════════════════════
+   SEND MESSAGE
+═══════════════════════════════════ */
+function sendMessage() {
+  const ta = document.getElementById('cwMsgInput');
+  const text = ta.value.trim();
+  if (!text) return;
+
+  const timeline = document.getElementById('cwTimeline');
+  const typeConfig = {
+    reply: {rowClass:'msg-admin', bubbleClass:'admin', avBg:null},
+    note:  {rowClass:'msg-note', bubbleClass:null, avBg:null},
+    ai:    {rowClass:'msg-system', bubbleClass:'system-note', avBg:null},
+  };
+  const cfg = typeConfig[currentMsgType] || typeConfig.reply;
+
+  let msgHtml = '';
+  if (currentMsgType === 'note') {
+    msgHtml = `<div class="tl-msg-row msg-note" style="animation:msgIn .2s ease"><div class="tl-note-wrap"><div class="tl-note-header"><i class="ti ti-lock"></i> Ghi chú nội bộ — Bạn · ${getTime()}</div>${escHtml(text)}</div></div>`;
+  } else if (currentMsgType === 'ai') {
+    msgHtml = `<div class="tl-msg-row msg-system" style="animation:msgIn .2s ease"><div class="tl-system-pill"><i class="ti ti-wand"></i> AI đang soạn thảo theo yêu cầu: "${escHtml(text)}" · ${getTime()}</div></div>`;
+    setTimeout(() => {
+      const aiReply = document.createElement('div');
+      aiReply.className = 'tl-msg-row msg-ai';
+      aiReply.innerHTML = `<div class="tl-ai-wrap"><div class="tl-ai-header"><i class="ti ti-sparkles"></i> AI soạn sẵn · ${getTime()}</div><div class="tl-ai-text">Dạ bạn Văn A! Chúng tôi rất vui được hỗ trợ bạn về ${escHtml(text)}. Mình sẽ tư vấn chi tiết ngay ạ!</div><div class="tl-ai-actions"><button class="tl-ai-use" onclick="useAiDraft(this)">Dùng</button><button class="tl-ai-dismiss" onclick="this.closest('.tl-msg-row').remove()">Bỏ qua</button></div></div>`;
+      timeline.insertBefore(aiReply, document.getElementById('cwTyping'));
+      scrollToBottom();
+    }, 1200);
+  } else {
+    msgHtml = `<div class="tl-msg-row msg-admin" style="animation:msgIn .2s ease"><div class="tl-av" style="background:var(--navy);color:var(--gold-light)">AD</div><div class="tl-msg-group"><div class="tl-bubble admin">${escHtml(text)}</div><div class="tl-msg-meta"><span>${getTime()}</span><i class="ti ti-check"></i></div></div></div>`;
+  }
+
+  const typingRow = document.getElementById('cwTyping');
+  typingRow.insertAdjacentHTML('beforebegin', msgHtml);
+  ta.value = '';
+  ta.style.height = 'auto';
+  document.getElementById('cwCharCount').textContent = '0';
+  scrollToBottom();
+
+  // Simulate customer reply
+  if (currentMsgType === 'reply') {
+    setTimeout(() => { showTyping(); setTimeout(() => { hideTyping(); addCustomerReply(); }, 2500); }, 1500);
+  }
+  showToast(currentMsgType === 'note' ? 'lock' : 'send', currentMsgType === 'note' ? 'Ghi chú đã lưu' : 'Tin nhắn đã gửi', '');
+}
+
+function addCustomerReply() {
+  const c = CONV_DATA[currentConvId];
+  const replies = ['Cảm ơn anh chị! Vậy mình đặt hàng như thế nào ạ? 😊','Mình hiểu rồi! Bạn có thể cho mình xem thêm ảnh thực tế không?','Ok shop ơi, mình sẽ suy nghĩ thêm nhé. Cảm ơn bạn đã tư vấn!','Wow, thông tin này rất hữu ích! Mình muốn đặt ngay 🛒'];
+  const text = replies[Math.floor(Math.random()*replies.length)];
+  const timeline = document.getElementById('cwTimeline');
+  const row = document.createElement('div');
+  row.className = 'tl-msg-row msg-customer';
+  row.style.animation = 'msgIn .2s ease';
+  row.innerHTML = `<div class="tl-av ${c.avClass}" style="background:${c.avColor};color:${c.textColor}">${c.av}</div><div class="tl-msg-group"><div class="tl-bubble customer">${escHtml(text)}</div><div class="tl-msg-meta"><span>${getTime()}</span></div></div>`;
+  timeline.insertBefore(row, document.getElementById('cwTyping'));
+  scrollToBottom();
+}
+
+function useAiDraft(btn) {
+  const aiText = btn.closest('.tl-ai-wrap').querySelector('.tl-ai-text').textContent;
+  document.getElementById('cwMsgInput').value = aiText;
+  document.getElementById('cwMsgInput').focus();
+  btn.closest('.tl-msg-row').remove();
+}
+
+/* ═══════════════════════════════════
+   AI SUGGESTIONS
+═══════════════════════════════════ */
+function insertSuggestion(text) {
+  const ta = document.getElementById('cwMsgInput');
+  ta.value = text;
+  ta.focus();
+  updateCharCount(ta);
+  autoResize(ta);
+  showToast('sparkles','Gợi ý đã được điền','Chỉnh sửa nếu cần trước khi gửi.');
+}
+
+/* ═══════════════════════════════════
+   CANNED RESPONSE PICKER
+═══════════════════════════════════ */
+function showCannedPicker() {
+  cannedPickerOpen = !cannedPickerOpen;
+  document.getElementById('cannedPicker').classList.toggle('open', cannedPickerOpen);
+  if (cannedPickerOpen) document.getElementById('cannedSearchInput').focus();
+}
+
+function renderCannedList(list) {
+  const el = document.getElementById('cannedList');
+  if (!list.filter(t=>t.active).length) { el.innerHTML = '<div style="padding:14px 13px;font-size:12px;color:var(--text-light)">Không có template nào.</div>'; return; }
+  el.innerHTML = list.filter(t=>t.active).map(t => `
+    <div class="canned-item" onclick="useCanned('${escAttr(t.content)}')">
+      <div class="canned-item-title"><i class="ti ti-template" style="font-size:13px;color:var(--gold)"></i> ${escHtml(t.name)}${t.ai?'<span class="cm-ai-label" style="font-size:9px"><i class="ti ti-robot" style="font-size:8px"></i>AI</span>':''}</div>
+      <div class="canned-item-preview">${escHtml(t.content.substring(0,65))}${t.content.length>65?'...':''}</div>
+      <div class="canned-item-tags">${t.tags.map(tag=>`<span class="ci-tag">${tag}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function filterCanned(q) {
+  const filtered = TEMPLATES.filter(t => t.active && (t.name.toLowerCase().includes(q.toLowerCase()) || t.content.toLowerCase().includes(q.toLowerCase())));
+  renderCannedList(filtered);
+}
+
+function useCanned(content) {
+  insertSuggestion(content);
+  cannedPickerOpen = false;
+  document.getElementById('cannedPicker').classList.remove('open');
+}
+
+/* ═══════════════════════════════════
+   TEMPLATE MANAGEMENT
+═══════════════════════════════════ */
+function openTemplateModal() { openModal('templateModal'); }
+function openAddTemplate() {
+  document.getElementById('addTplTitle').innerHTML = 'Thêm <em>template mới</em>';
+  document.getElementById('tplName').value = '';
+  document.getElementById('tplContent').value = '';
+  document.getElementById('tplTags').value = '';
+  openModal('addTemplateModal');
+}
+function saveTemplate() {
+  const name = document.getElementById('tplName').value.trim();
+  const content = document.getElementById('tplContent').value.trim();
+  if (!name || !content) { showToast('alert','Thiếu thông tin','Vui lòng nhập tên và nội dung template.'); return; }
+  closeModal('addTemplateModal');
+  showToast('check','Template đã lưu','Sẵn sàng sử dụng trong các hội thoại.');
+  renderCannedList(TEMPLATES);
+}
+
+function renderTemplateTable(list) {
+  const el = document.getElementById('templateTableBody');
+  el.innerHTML = list.map(t => `
+    <tr>
+      <td><strong>${escHtml(t.name)}</strong></td>
+      <td><span class="pill pill-navy">${escHtml(t.cat)}</span></td>
+      <td style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-mid)">${escHtml(t.content.substring(0,60))}${t.content.length>60?'…':''}</td>
+      <td>${t.tags.map(tag=>`<span class="ci-tag">${tag}</span>`).join(' ')}</td>
+      <td>${t.ai?'<span style="color:var(--purple);font-weight:700;font-size:11px">✓ AI</span>':'<span style="color:var(--text-4);font-size:11px">—</span>'}</td>
+      <td>${t.active?'<span class="cm-status-badge s-resolved">Bật</span>':'<span class="cm-status-badge s-closed">Tắt</span>'}</td>
+      <td><div class="tpl-row-actions">
+        <button class="tra-btn tra-use" title="Dùng ngay" onclick="useCanned('${escAttr(t.content)}');closeModal('templateModal')"><i class="ti ti-send"></i></button>
+        <button class="tra-btn tra-edit" title="Sửa" onclick="editTemplate(${t.id})"><i class="ti ti-pencil"></i></button>
+        <button class="tra-btn tra-del" title="Xóa" onclick="deleteTemplate(${t.id})"><i class="ti ti-trash"></i></button>
+      </div></td>
+    </tr>`).join('');
+}
+
+function filterTemplates(q) {
+  const filtered = TEMPLATES.filter(t => t.name.toLowerCase().includes(q.toLowerCase()) || t.content.toLowerCase().includes(q.toLowerCase()) || t.cat.toLowerCase().includes(q.toLowerCase()));
+  renderTemplateTable(filtered);
+}
+
+function editTemplate(id) {
+  const t = TEMPLATES.find(x=>x.id===id); if (!t) return;
+  document.getElementById('addTplTitle').innerHTML = 'Sửa <em>template</em>';
+  document.getElementById('tplName').value = t.name;
+  document.getElementById('tplContent').value = t.content;
+  document.getElementById('tplTags').value = t.tags.join(', ');
+  openModal('addTemplateModal');
+}
+
+function deleteTemplate(id) {
+  const idx = TEMPLATES.findIndex(x=>x.id===id);
+  if (idx !== -1) TEMPLATES.splice(idx, 1);
+  renderTemplateTable(TEMPLATES);
+  showToast('trash','Đã xóa template','');
+}
+
+/* ═══════════════════════════════════
+   SEND PRODUCT MODAL
+═══════════════════════════════════ */
+function openSendProduct() { renderSPGrid(PRODUCTS_DATA); openModal('spOverlay'); }
+
+function renderSPGrid(list) {
+  const el = document.getElementById('spProdGrid');
+  el.innerHTML = list.map(p => `
+    <div class="sp-prod-item ${selectedProdId===p.id?'selected':''}" id="sp-${p.id}" onclick="selectProd('${p.id}')">
+      <div class="sp-prod-img">${p.icon}<div class="sp-prod-check">✓</div></div>
+      <div class="sp-prod-body">
+        <div class="sp-prod-cat">${p.cat}</div>
+        <div class="sp-prod-name">${p.name}</div>
+        <div class="sp-prod-price">${p.price}</div>
+        <div class="sp-prod-sku">${p.id} · ${p.stock>0?'Còn '+p.stock+' sp':'Hết hàng'}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectProd(id) {
+  selectedProdId = id;
+  document.querySelectorAll('.sp-prod-item').forEach(el => el.classList.remove('selected'));
+  const el = document.getElementById('sp-'+id);
+  if (el) el.classList.add('selected');
+  const p = PRODUCTS_DATA.find(x=>x.id===id);
+  document.getElementById('spSelInfo').innerHTML = p ? `Đã chọn: <strong>${p.name}</strong>` : 'Chưa chọn';
+  document.getElementById('spSendBtn').disabled = !id;
+}
+
+function spFilterCat(cat, btn) {
+  document.querySelectorAll('.sp-cat-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const filtered = cat === 'all' ? PRODUCTS_DATA : PRODUCTS_DATA.filter(p=>p.catKey===cat);
+  renderSPGrid(filtered);
+}
+
+function filterSPProds(q) {
+  const filtered = PRODUCTS_DATA.filter(p => p.name.toLowerCase().includes(q.toLowerCase()) || p.id.toLowerCase().includes(q.toLowerCase()));
+  renderSPGrid(filtered);
+}
+
+function sendProductToChat() {
+  const p = PRODUCTS_DATA.find(x=>x.id===selectedProdId); if (!p) return;
+  const timeline = document.getElementById('cwTimeline');
+  const row = document.createElement('div');
+  row.className = 'tl-msg-row msg-admin';
+  row.style.animation = 'msgIn .2s ease';
+  row.innerHTML = `<div class="tl-av" style="background:var(--navy);color:var(--gold-light)">AD</div><div class="tl-msg-group"><div class="tl-bubble admin" style="padding:5px"><div class="tl-prod-card admin-variant" onclick="showToast('product','${escAttr(p.name)}','${p.id} · ${p.price}')"><div class="tpc-img">${p.icon}</div><div class="tpc-body"><div class="tpc-cat">${p.cat}</div><div class="tpc-name">${escHtml(p.name)}</div><div class="tpc-price">${p.price}</div></div><div class="tpc-footer"><span>${p.stock>0?'Còn '+p.stock+' sp':'Hết hàng'}</span><span>${p.id}</span></div></div></div><div class="tl-msg-meta"><span>${getTime()}</span><i class="ti ti-check"></i></div></div>`;
+  timeline.insertBefore(row, document.getElementById('cwTyping'));
+  closeModal('spOverlay');
+  scrollToBottom();
+  selectedProdId = null;
+  showToast('armchair','Đã gửi sản phẩm',p.name);
+  setTimeout(()=>{ showTyping(); setTimeout(()=>{ hideTyping(); addCustomerReply(); },2000); },1200);
+}
+
+/* ═══════════════════════════════════
+   CONVERSATION CONTROLS
+═══════════════════════════════════ */
+function updateConvStatus(val) {
+  const labels = {new:'Mới',pending:'Đang xử lý',waiting:'Chờ khách',resolved:'Đã giải quyết',closed:'Đã đóng'};
+  showToast('info','Cập nhật trạng thái','→ ' + (labels[val]||val));
+  const timeline = document.getElementById('cwTimeline');
+  const pill = document.createElement('div');
+  pill.className = 'tl-msg-row msg-system';
+  pill.innerHTML = `<div class="tl-system-pill"><i class="ti ti-info-circle"></i> Trạng thái đổi sang: <strong>${labels[val]}</strong> · ${getTime()} · Admin Chính</div>`;
+  timeline.insertBefore(pill, document.getElementById('cwTyping'));
+  scrollToBottom();
+}
+
+function resolveConversation() {
+  document.getElementById('cwStatusSelect').value = 'resolved';
+  updateConvStatus('resolved');
+  document.getElementById('cwResolveBtn').innerHTML = '<i class="ti ti-check"></i> Đã xong';
+  document.getElementById('cwResolveBtn').style.background = 'var(--text-light)';
+  showToast('check','Hội thoại đã giải quyết','Đã lưu và đóng hội thoại này.');
+}
+
+function toggleDetailPanel() {
+  detailPanelVisible = !detailPanelVisible;
+  document.getElementById('cmDetailPanel').classList.toggle('collapsed', !detailPanelVisible);
+  document.getElementById('cwDetailBtn').classList.toggle('active-btn', detailPanelVisible);
+}
+
+function saveNote() {
+  const note = document.getElementById('adminNoteBox').value;
+  showToast('note','Ghi chú đã lưu','Chỉ admin thấy ghi chú này.');
+}
+
+function addTag() {
+  const tags = ['Kỹ thuật','Upsell','Follow-up','Bảo hành','Mua lại','VIP'];
+  const colors = ['rgba(201,146,42,.12)#a07320','rgba(59,130,246,.1)#1d4ed8','rgba(45,158,107,.12)#166534','rgba(124,58,237,.1)#5b21b6','rgba(234,124,30,.1)#c2410c','rgba(229,62,62,.1)#b91c1c'];
+  const tag = tags[Math.floor(Math.random()*tags.length)];
+  const [bg, color] = colors[Math.floor(Math.random()*colors.length)].split('#');
+  const wrap = document.getElementById('cdpTagsWrap');
+  const btn = wrap.querySelector('.cdp-tag-add');
+  const newTag = document.createElement('span');
+  newTag.className = 'cdp-tag';
+  newTag.style.cssText = `background:${bg};color:#${color}`;
+  newTag.textContent = tag + ' ✕';
+  newTag.onclick = () => { newTag.remove(); showToast('tag','Đã xóa nhãn',tag); };
+  wrap.insertBefore(newTag, btn);
+  showToast('tag','Thêm nhãn',''+tag);
+}
+
+/* ═══════════════════════════════════
+   FILTERS
+═══════════════════════════════════ */
+function switchConvTab(btn, tab) {
+  document.querySelectorAll('.clp-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  showToast('filter','Lọc hội thoại','Tab: ' + btn.textContent.trim().split(' ')[0]);
+}
+
+function filterChip(btn, type) {
+  document.querySelectorAll('.clf-chip').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  showToast('adjustments','Bộ lọc','Đang hiển thị: ' + btn.textContent.trim());
+}
+
+function filterConversations(q) {
+  const items = document.querySelectorAll('.cm-conv-item');
+  items.forEach(item => {
+    const name = item.querySelector('.cm-ci-name')?.textContent.toLowerCase() || '';
+    const preview = item.querySelector('.cm-ci-preview')?.textContent.toLowerCase() || '';
+    item.style.display = (!q || name.includes(q.toLowerCase()) || preview.includes(q.toLowerCase())) ? '' : 'none';
+  });
+}
+
+/* ═══════════════════════════════════
+   HELPERS
+═══════════════════════════════════ */
+function showTyping() { document.getElementById('cwTyping').style.display = 'flex'; scrollToBottom(); }
+function hideTyping() { document.getElementById('cwTyping').style.display = 'none'; }
+function scrollToBottom() {
+  const el = document.getElementById('cwTimeline');
+  if (el) el.scrollTop = el.scrollHeight;
+}
+function autoResize(ta) {
+  ta.style.height = 'auto';
+  ta.style.height = Math.min(ta.scrollHeight, 100) + 'px';
+}
+function updateCharCount(ta) {
+  document.getElementById('cwCharCount').textContent = ta.value.length;
+}
+function handleKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  if (e.key === '/' && document.getElementById('cwMsgInput').value === '') { showCannedPicker(); }
+  if (e.key === 'Escape') { cannedPickerOpen = false; document.getElementById('cannedPicker').classList.remove('open'); }
+}
+function triggerFile() { document.getElementById('cwFileInput').click(); }
+function triggerImg() { document.getElementById('cwImgInput').click(); }
+function getTime() { const d = new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s).replace(/'/g,'&#39;').replace(/"/g,'&quot;'); }
+
+// Modal helpers
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// Toggle option
+function selectToggle(btn, idx, wrapperId) {
+  const wrap = document.getElementById(wrapperId);
+  wrap.querySelectorAll('.tfi-tog-opt').forEach((o,i) => { o.classList.toggle('active', i === idx); });
+}
+
+// Toast
+function showToast(icon, title, sub) {
+  clearTimeout(toastTimer);
+  const iconMap = {check:'ti-check',send:'ti-send',lock:'ti-lock',messages:'ti-messages',home:'ti-home',settings:'ti-settings',bell:'ti-bell',filter:'ti-filter',adjustments:'ti-adjustments-horizontal',alert:'ti-alert-circle',note:'ti-note',user:'ti-user',priority:'ti-flag',trash:'ti-trash',armchair:'ti-armchair',product:'ti-armchair',sparkles:'ti-sparkles',tag:'ti-tag',orders:'ti-package',order:'ti-package',info:'ti-info-circle'};
+  document.getElementById('ctIcon').className = 'ti ' + (iconMap[icon]||'ti-info-circle');
+  document.getElementById('ctTitle').textContent = title;
+  document.getElementById('ctSub').textContent = sub;
+  const el = document.getElementById('cmToast');
+  el.classList.add('show');
+  toastTimer = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+// Close canned picker when clicking outside
+document.addEventListener('click', e => {
+  const picker = document.getElementById('cannedPicker');
+  if (cannedPickerOpen && !picker.contains(e.target) && !e.target.closest('.cw-tool-btn')) {
+    cannedPickerOpen = false;
+    picker.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

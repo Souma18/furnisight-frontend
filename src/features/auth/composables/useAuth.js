@@ -1,10 +1,13 @@
 import { storeToRefs } from 'pinia'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
-import { renewAccessTokenRequest } from '../api/authApi'
+import { authApi } from '@shared/lib/api/services'
+import { normalizeAuthSession } from '../utils/normalizeAuthSession'
 
-export function useAuth() {
-  const store = useAuthStore()
-  const { user, isAuthenticated } = storeToRefs(store)
+export function useAuth(pinia) {
+  const store = useAuthStore(pinia)
+  const router = useRouter()
+  const { user, isAuthenticated, isAdmin } = storeToRefs(store)
 
   async function renewToken() {
     const refreshToken = store.refreshToken || localStorage.getItem('refresh_token')
@@ -12,17 +15,26 @@ export function useAuth() {
       throw new Error('No refresh token available')
     }
     
-    const response = await renewAccessTokenRequest({ refreshToken })
-    const data = response.data?.data || response.data
-    store.setSession(data)
-    return data
+    const response = await authApi.renewAccessToken({ refreshToken })
+    const session = normalizeAuthSession(response)
+    store.setSession(session)
+    return session
+  }
+
+  /** @param {{ name: string } | string} [redirectTo] */
+  async function logout(redirectTo = { name: 'home' }) {
+    store.logout()
+    if (router) {
+      await router.push(redirectTo)
+    }
   }
 
   return {
     user,
     isAuthenticated,
+    isAdmin,
     setSession: store.setSession,
-    logout: store.logout,
+    logout,
     renewToken,
   }
 }

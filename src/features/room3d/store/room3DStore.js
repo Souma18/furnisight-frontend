@@ -1,11 +1,12 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { ROOM_TEMPLATES } from '../core/mockData'
 
 export const useRoom3DStore = defineStore('room3d', () => {
+  const STORAGE_KEY = 'room3d-store-v1'
   const mode = ref('upload')
   const isAnalyzing = ref(false)
-  const selectedRoomType = ref(null)
+  const selectedRoomType = ref('bedroom')
   const projectName = ref('')
   // Loai anh upload: 'normal' | '360'
   const imageType = ref('normal')
@@ -18,17 +19,56 @@ export const useRoom3DStore = defineStore('room3d', () => {
   // - 'none': chua chon/tao model
   // - 'uploaded': model sinh tu AI upload
   // - 'template': model phong mau trong tab "Phong o"
-  const roomRenderSource = ref('none')
+  const roomRenderSource = ref('template')
   /** Ket qua API nhan dien: label goc + confidence 0..1 (de hien thi %) */
   const aiRecognitionLabel = ref('')
   const aiRecognitionConfidence = ref(null)
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
-  const placedProductIds = ref([])
-  const cartItems = ref([])
+  const sceneItems = ref([])
   const isCartExpanded = ref(false)
   const isCheckoutOpen = ref(false)
   const isSuccessOpen = ref(false)
+
+  function restorePersistedState() {
+    if (typeof window === 'undefined') return
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      if (!raw) return
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed !== 'object') return
+
+      if (typeof parsed.selectedRoomType === 'string') selectedRoomType.value = parsed.selectedRoomType
+      if (typeof parsed.searchKeyword === 'string') searchKeyword.value = parsed.searchKeyword
+      if (typeof parsed.selectedCategory === 'string') selectedCategory.value = parsed.selectedCategory
+      if (Array.isArray(parsed.sceneItems)) {
+        sceneItems.value = parsed.sceneItems.filter(
+          (item) => item && typeof item.instanceId === 'string' && Number.isFinite(item.productId),
+        )
+      }
+    } catch {
+      // Ignore corrupted local storage data.
+    }
+  }
+
+  function persistState() {
+    if (typeof window === 'undefined') return
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          selectedRoomType: selectedRoomType.value,
+          searchKeyword: searchKeyword.value,
+          selectedCategory: selectedCategory.value,
+          sceneItems: sceneItems.value,
+        }),
+      )
+    } catch {
+      // Ignore storage write errors.
+    }
+  }
+
+  restorePersistedState()
 
   const selectedRoom = computed(() => {
     if (roomRenderSource.value === 'none') return null
@@ -57,11 +97,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     // Model phong mau tu tab "Phong o".
     return room
   })
-
-  const cartCount = computed(() => cartItems.value.length)
-  const cartTotal = computed(() =>
-    cartItems.value.reduce((total, item) => total + item.price * item.qty, 0),
-  )
 
   function setMode(nextMode) {
     mode.value = nextMode
@@ -130,25 +165,31 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedCategory.value = category
   }
 
-  function addToCart(product) {
-    const existed = cartItems.value.some((item) => item.id === product.id)
-    if (existed) {
-      return
+  function addToScene(productOrId, options = {}) {
+    const productId = typeof productOrId === 'number' ? productOrId : productOrId?.id
+    if (!Number.isFinite(productId)) return null
+
+    const instanceId = `scene-${productId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const sceneItem = {
+      instanceId,
+      productId,
+      initialPosition: options.initialPosition ?? null,
     }
-
-    cartItems.value.push({ ...product, qty: 1 })
-    placedProductIds.value.push(product.id)
+    sceneItems.value.push(sceneItem)
+    return sceneItem
   }
 
-  function removeFromCart(productId) {
-    cartItems.value = cartItems.value.filter((item) => item.id !== productId)
-    placedProductIds.value = placedProductIds.value.filter((id) => id !== productId)
+  function removeFromScene(instanceId) {
+    sceneItems.value = sceneItems.value.filter((item) => item.instanceId !== instanceId)
   }
 
-  function clearCart() {
-    cartItems.value = []
-    placedProductIds.value = []
-  }
+  watch(
+    [selectedRoomType, searchKeyword, selectedCategory, sceneItems],
+    () => {
+      persistState()
+    },
+    { deep: true },
+  )
 
   function toggleCart() {
     isCartExpanded.value = !isCartExpanded.value
@@ -185,10 +226,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     aiRecognitionConfidence,
     searchKeyword,
     selectedCategory,
-    placedProductIds,
-    cartItems,
-    cartCount,
-    cartTotal,
+    sceneItems,
     isCartExpanded,
     isCheckoutOpen,
     isSuccessOpen,
@@ -206,9 +244,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
     resetRenderSourceIfNoModel,
     setSearchKeyword,
     setCategory,
-    addToCart,
-    removeFromCart,
-    clearCart,
+    addToScene,
+    removeFromScene,
     toggleCart,
     openCheckout,
     closeCheckout,

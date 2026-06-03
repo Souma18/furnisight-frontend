@@ -1,30 +1,76 @@
+<script setup>
+import ProductListFiltersSidebar from '../components/ProductListFiltersSidebar.vue'
+import ProductListGrid from '../components/ProductListGrid.vue'
+import ProductListHeroSection from '../components/ProductListHeroSection.vue'
+import ProductListToolbar from '../components/ProductListToolbar.vue'
+import { useProductListPage } from '../composables/useProductListPage'
+import '../styles/productList.css'
+
+const {
+  items,
+  total,
+  facets,
+  loading,
+  searchKeyword,
+  selectedCategory,
+  sortBy,
+  viewMode,
+  saleOnly,
+  appliedFilters,
+  activeTags,
+  dynamicQuickFilters,
+  dynamicHero,
+  wishedProductIds,
+  toggleCategory,
+  selectSidebarCategory,
+  onApplySidebar,
+  onClearFilters,
+  favoriteProduct,
+} = useProductListPage()
+</script>
+
 <template>
-  <section class="home-blank">
-    <div class="placeholder">
-      <h1>Trang chu</h1>
-      <p>Noi dung homepage se duoc cap nhat theo giao dien ban thiet ke.</p>
+  <section class="products-page">
+    <ProductListHeroSection
+      :breadcrumb="dynamicHero.breadcrumb"
+      :collection="dynamicHero.collection"
+      :title="dynamicHero.title"
+      :subtitle="dynamicHero.subtitle"
+      :stats="dynamicHero.stats"
+    />
+
+    <ProductListToolbar
+      v-model="searchKeyword"
+      :quick-filters="dynamicQuickFilters"
+      :selected-category="selectedCategory"
+      :sale-only="saleOnly"
+      :view-mode="viewMode"
+      @toggle-category="toggleCategory"
+      @update:view-mode="viewMode = $event"
+    />
+
+    <div class="pl-inner pl-page-body">
+      <ProductListFiltersSidebar
+        :selected-category="selectedCategory"
+        :applied="appliedFilters"
+        :facets="facets"
+        @select-category="selectSidebarCategory"
+        @apply="onApplySidebar"
+        @clear="onClearFilters"
+      />
+      <div class="pl-products-panel">
+        <ProductListGrid
+          :products="items"
+          :total="total"
+          :active-tags="activeTags"
+          :sort-by="sortBy"
+          :view-mode="viewMode"
+          :loading="loading"
+          :wished-product-ids="wishedProductIds"
+          @update:sort-by="sortBy = $event"
+          @toggle-wish="favoriteProduct"
+        />
+      </div>
     </div>
   </section>
 </template>
-
-<style scoped>
-.home-blank {
-  background: #ffffff;
-  border: 1px solid var(--border);
-  border-radius: 0.75rem;
-  min-height: 64svh;
-  padding: 1.25rem;
-}
-
-.placeholder {
-  color: #6b7280;
-}
-
-.placeholder h1 {
-  margin: 0 0 0.5rem;
-}
-
-.placeholder p {
-  margin: 0;
-}
-</style>

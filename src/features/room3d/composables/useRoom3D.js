@@ -1,17 +1,27 @@
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
 import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
 import { PRODUCTS_3D, PRODUCT_FILTERS } from '../core/mockData'
+import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
 
 export function useRoom3D() {
+  const route = useRoute()
   const store = useRoom3DStore()
+  const cartStore = useCartStore()
   const state = storeToRefs(store)
+  const cartState = storeToRefs(cartStore)
   const roomTemplates = ref([])
   const isLoadingTemplates = ref(false)
   const orderCode = ref('')
   const uploadError = ref('')
+  const appliedDeepLinkKey = ref('')
+  const cartItems = computed(() => cartState.items.value)
+  const placedProductIds = computed(() => cartState.room3dProductIds.value)
+  const cartTotal = computed(() => cartState.totalAmount.value)
+  const cartCount = computed(() => cartState.lineCount.value)
 
   const QUALITY_TO_MESH_RESOLUTION = {
     '128': 128,
@@ -38,6 +48,7 @@ export function useRoom3D() {
   async function initRoomTemplates() {
     isLoadingTemplates.value = true
     try {
+      await cartStore.ensureHydrated()
       const { data } = await getRoomTemplates()
       roomTemplates.value = data
     } finally {
@@ -106,23 +117,96 @@ export function useRoom3D() {
     store.selectTemplateRoom(type)
   }
 
-  function addProductToCart(product) {
-    store.addToCart(product)
+  function addProductToCart(productOrId) {
+    const product =
+      typeof productOrId === 'number'
+        ? PRODUCTS_3D.find((item) => item.id === productOrId)
+        : productOrId
+    if (!product) return
+    cartStore.addItem(product)
   }
 
-  function removeProductFromCart(productId) {
-    store.removeFromCart(productId)
+  function addProductToScene(payload) {
+    if (!payload) return
+    if (typeof payload === 'number') {
+      store.addToScene(payload)
+      return
+    }
+
+    if (typeof payload === 'object') {
+      store.addToScene(payload.productId ?? payload.id, {
+        initialPosition: payload.initialPosition ?? null,
+      })
+    }
+  }
+
+  function removeProductFromCart(lineId) {
+    cartStore.removeItem(lineId)
+  }
+
+  function removeProductFromScene(instanceId) {
+    store.removeFromScene(instanceId)
   }
 
   function submitCheckoutMock() {
     orderCode.value = `LN${Date.now().toString().slice(-6)}`
     store.closeCheckout()
     store.openSuccess()
-    store.clearCart()
+    cartStore.clearCart()
   }
+
+  function applyDeepLinkProduct() {
+    const roomTypeRaw = route.query.roomType
+    const productIdRaw = route.query.productId
+    const roomType = typeof roomTypeRaw === 'string' ? roomTypeRaw.trim() : ''
+    const productId = Number.parseInt(String(productIdRaw ?? ''), 10)
+    const deepLinkKey = `${roomType || 'none'}:${Number.isFinite(productId) ? productId : 'none'}`
+    if (appliedDeepLinkKey.value === deepLinkKey) return
+
+    let applied = false
+
+    if (roomType) {
+      const templateExists = roomTemplates.value.some((item) => item.type === roomType)
+      if (templateExists) {
+        store.selectTemplateRoom(roomType)
+        applied = true
+      }
+    }
+
+    if (Number.isFinite(productId)) {
+      const target = PRODUCTS_3D.find((item) => item.id === productId)
+      if (target) {
+        // "Xem 3D" tu trang chi tiet se dua san pham vao scene, khong tu dong dua vao gio.
+        store.addToScene(target.id)
+        if (!roomType && Array.isArray(target.roomTypes) && target.roomTypes.length > 0) {
+          store.selectTemplateRoom(target.roomTypes[0])
+        }
+        // Van reset filter de user thay day du san pham sau khi dieu huong.
+        store.setCategory('all')
+        store.setSearchKeyword('')
+        applied = true
+      }
+    }
+
+    if (applied) {
+      appliedDeepLinkKey.value = deepLinkKey
+    }
+  }
+
+  watch(
+    () => [route.query.roomType, route.query.productId, roomTemplates.value.length],
+    () => {
+      applyDeepLinkProduct()
+    },
+    { immediate: true },
+  )
 
   return {
     ...state,
+    cartItems,
+    placedProductIds,
+    cartTotal,
+    cartCount,
     roomTemplates,
     isLoadingTemplates,
     productFilters: PRODUCT_FILTERS,
@@ -144,7 +228,9 @@ export function useRoom3D() {
     handleUploadImage,
     selectRoomType,
     addProductToCart,
+    addProductToScene,
     removeProductFromCart,
+    removeProductFromScene,
     submitCheckoutMock,
   }
 }

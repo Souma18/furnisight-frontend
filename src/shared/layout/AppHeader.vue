@@ -1,14 +1,122 @@
 <script setup>
 import { RouterLink } from 'vue-router'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AuthModal from '@features/auth/components/AuthModal.vue'
+import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 
+const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
-const { isAuthenticated } = storeToRefs(authStore)
+const { isAuthenticated, isAdmin } = storeToRefs(authStore)
 const isAuthModalOpen = ref(false)
+const initialAuthView = ref('login')
+const notifications = ref([])
+
+const activeNav = computed(() => {
+  const path = router?.currentRoute?.value?.path || ''
+  if (path.startsWith('/products')) return 'products'
+  if (route.path.startsWith('/contact')) return 'contact'
+  if (path.startsWith('/room3d')) return 'room3d'
+  if (path === '/') return 'home'
+  return ''
+})
+
+const unreadNotificationCount = computed(() => notifications.value.filter((item) => !item.isRead).length)
+const previewNotifications = computed(() => notifications.value.slice(0, 5))
+
+async function loadNotifications() {
+  const response = await notificationsApi.getInboxMessages()
+  const data = response.data?.items ?? response.data ?? []
+  notifications.value = data.map(mapInboxMessageToFrontend)
+}
+
+async function openAccountNotifications() {
+  if (!isAuthenticated.value) {
+    isAuthModalOpen.value = true
+    return
+  }
+
+  await router.push({ path: '/account', query: { view: 'bell' } })
+}
+
+async function handleNotificationClick(item) {
+  if (!item.isRead) {
+    await notificationsApi.markAsRead(item.id)
+    notifications.value = notifications.value.map((notification) =>
+      notification.id === item.id ? { ...notification, isRead: true } : notification,
+    )
+  }
+
+  await openAccountNotifications()
+}
+
+async function markAllNotificationsRead() {
+  if (!unreadNotificationCount.value) return
+  await notificationsApi.markAllAsRead()
+  notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
+}
+
+function dropdownIconClass(type) {
+  return `nd-icon-wrap nd-icon-wrap--${type}`
+}
+
+function handleUserAction() {
+  if (isAuthenticated.value) {
+    if (isAdmin.value) {
+      router.push({ name: 'admin-dashboard' })
+      return
+    }
+    router.push('/account')
+    return
+  }
+  isAuthModalOpen.value = true
+}
+
+const notificationsLoaded = ref(false)
+
+async function loadNotificationsOnce() {
+  if (!isAuthenticated.value || notificationsLoaded.value) return
+  try {
+    await loadNotifications()
+    notificationsLoaded.value = true
+  } catch (error) {
+    console.error('Failed to load notifications:', error)
+  }
+}
+
+watch(isAuthenticated, (newVal) => {
+  if (!newVal) {
+    notifications.value = []
+    notificationsLoaded.value = false
+  } else {
+    notificationsLoaded.value = false
+  }
+})
+
+watch(() => route.query.otpCode, (newVal) => {
+  if (newVal) {
+    initialAuthView.value = 'verify'
+    isAuthModalOpen.value = true
+  }
+}, { immediate: true })
+
+watch(isAuthModalOpen, (newVal) => {
+  if (!newVal) {
+    initialAuthView.value = 'login'
+    
+    if (route.query.otpCode) {
+      const query = { ...route.query }
+      delete query.otpCode
+      router.replace({ query })
+    }
+  }
+})
 </script>
 
 <template>
@@ -19,11 +127,11 @@ const isAuthModalOpen = ref(false)
     </RouterLink>
 
     <nav class="nav" aria-label="Chinh">
-      <RouterLink to="/" class="nav-pill">Trang Chủ</RouterLink>
-      <RouterLink to="/products">Sản phẩm</RouterLink>
-      <RouterLink to="/room3d">Trực quan 3D</RouterLink>
+      <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
+      <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
+      <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
       <RouterLink to="/">Dự án</RouterLink>
-      <RouterLink to="/">Liên hệ</RouterLink>
+      <RouterLink to="/contact" :class="{ 'nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
     </nav>
 
     <div class="actions">
@@ -31,27 +139,90 @@ const isAuthModalOpen = ref(false)
         <AppIcon name="map" :size="14" />
         Truc quan hoa
       </RouterLink>
-      <button class="icon-btn" type="button" aria-label="Thong bao">
-        <AppIcon name="bell" :size="14" />
-      </button>
-      <button class="icon-btn" type="button" aria-label="Gio hang">
-        <AppIcon name="cart" :size="14" />
-      </button>
+      <div class="notif-wrap" @mouseenter="loadNotificationsOnce" @click="loadNotificationsOnce">
+        <button
+          class="icon-btn"
+          type="button"
+          aria-label="Thong bao"
+          @click="openAccountNotifications"
+        >
+          <AppIcon name="bell" :size="14" />
+          <span v-if="unreadNotificationCount" class="notif-badge"></span>
+        </button>
+
+        <div class="notif-dropdown">
+          <div class="nd-header">
+            <div class="nd-title">
+              Thông báo
+              <span v-if="unreadNotificationCount" class="nd-unread-count">{{ unreadNotificationCount }}</span>
+            </div>
+            <button type="button" class="nd-mark-all" @click="markAllNotificationsRead">
+              Đọc tất cả
+            </button>
+          </div>
+
+          <div class="nd-list">
+            <button
+              v-for="item in previewNotifications"
+              :key="item.id"
+              type="button"
+              class="nd-item"
+              :class="{ unread: !item.isRead }"
+              @click="handleNotificationClick(item)"
+            >
+              <div :class="dropdownIconClass(item.type)">
+                <AppIcon :name="item.icon" :size="18" />
+              </div>
+
+              <div class="nd-content">
+                <div class="nd-item-title">{{ item.title }}</div>
+                <div class="nd-item-body">{{ item.body }}</div>
+                <div class="nd-item-time">
+                  <span v-if="!item.isRead" class="nd-unread-dot"></span>
+                  {{ item.time }}
+                </div>
+              </div>
+            </button>
+
+            <div v-if="!previewNotifications.length" class="nd-empty">Không có thông báo nào.</div>
+          </div>
+
+          <div class="nd-footer">
+            <button type="button" class="nd-see-all" @click="openAccountNotifications">
+              Xem tất cả
+            </button>
+          </div>
+        </div>
+      </div>
+      <AppHeaderCartDropdown
+        :is-authenticated="isAuthenticated"
+        @require-auth="isAuthModalOpen = true"
+      />
       <button
         class="icon-btn user"
         type="button"
         :aria-label="isAuthenticated ? 'Tai khoan' : 'Dang nhap'"
-        @click="isAuthModalOpen = true"
+        @click="handleUserAction"
       >
         <AppIcon name="user" :size="14" />
       </button>
     </div>
   </header>
-  <AuthModal :open="isAuthModalOpen" @close="isAuthModalOpen = false" />
+  <AuthModal
+    :open="isAuthModalOpen"
+    :initial-view="initialAuthView"
+    @close="isAuthModalOpen = false"
+    @authenticated="isAuthModalOpen = false"
+  />
 </template>
 
 <style scoped>
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: var(--app-main-scrollbar-width, 0px);
+  z-index: 120;
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -59,6 +230,7 @@ const isAuthModalOpen = ref(false)
   padding: 0.7rem 1rem;
   background: linear-gradient(180deg, #133f5c 0%, #0c3148 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-sizing: border-box;
 }
 
 .brand {
@@ -117,6 +289,10 @@ const isAuthModalOpen = ref(false)
   gap: 0.45rem;
 }
 
+.notif-wrap {
+  position: relative;
+}
+
 .visualize-btn {
   display: inline-flex;
   align-items: center;
@@ -143,6 +319,7 @@ const isAuthModalOpen = ref(false)
   color: #f5f7f8;
   text-decoration: none;
   font-size: 0.9rem;
+  position: relative;
 }
 
 .icon-btn:hover,
@@ -150,10 +327,269 @@ const isAuthModalOpen = ref(false)
   background: rgba(255, 255, 255, 0.16);
 }
 
+.notif-badge {
+  position: absolute;
+  top: 0.28rem;
+  right: 0.28rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border: 2px solid #0c3148;
+  border-radius: 999px;
+  background: #e53e3e;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -10px;
+  width: 380px;
+  overflow: hidden;
+  border: 1px solid #ece2cf;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgba(18, 32, 46, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.97);
+  transition: all 0.22s cubic-bezier(0.22, 0.68, 0, 1.2);
+  z-index: 600;
+}
+
+.notif-wrap:hover .notif-dropdown {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.notif-dropdown::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  transform: rotate(45deg);
+  border-top: 1px solid #ece2cf;
+  border-left: 1px solid #ece2cf;
+  background: #fff;
+  z-index: 1;
+}
+
+.nd-header {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid #f0e9dd;
+  background: #fff;
+}
+
+.nd-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.nd-unread-count {
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: #e53e3e;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.nd-mark-all {
+  border: none;
+  background: none;
+  color: #c58d2f;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nd-mark-all:hover {
+  color: #e5b84a;
+}
+
+.nd-list {
+  max-height: 340px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.nd-list::-webkit-scrollbar {
+  display: none;
+}
+
+.nd-item {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 16px;
+  border: none;
+  border-bottom: 1px solid #f0e9dd;
+  background: #fff;
+  cursor: pointer;
+  transition: background 0.18s;
+  position: relative;
+  text-align: left;
+}
+
+.nd-item:last-child {
+  border-bottom: none;
+}
+
+.nd-item:hover {
+  background: #faf6f0;
+}
+
+.nd-item.unread {
+  background: #fffbf4;
+}
+
+.nd-item.unread::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 0 2px 2px 0;
+  background: linear-gradient(180deg, #e5b84a, #c9922a);
+}
+
+.nd-icon-wrap {
+  width: 38px;
+  height: 38px;
+  margin-top: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.nd-icon-wrap--order {
+  background: #e3f2fd;
+  color: #2563eb;
+}
+
+.nd-icon-wrap--promo {
+  background: #fff3e0;
+  color: #c58d2f;
+}
+
+.nd-icon-wrap--system {
+  background: #e8f5e9;
+  color: #15803d;
+}
+
+.nd-icon-wrap--review {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.nd-content {
+  min-width: 0;
+}
+
+.nd-item-title {
+  margin-bottom: 3px;
+  color: #1a1a1a;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.nd-item.unread .nd-item-title {
+  color: #12202e;
+}
+
+.nd-item-body {
+  color: #555;
+  font-size: 12px;
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nd-item-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 5px;
+  color: #888;
+  font-size: 11px;
+}
+
+.nd-unread-dot {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: #c9922a;
+}
+
+.nd-empty {
+  padding: 18px 16px;
+  color: #888;
+  font-size: 12px;
+  text-align: center;
+}
+
+.nd-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 16px;
+  border-top: 1px solid #f0e9dd;
+}
+
+.nd-see-all {
+  border: none;
+  background: none;
+  color: #c58d2f;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nd-see-all:hover {
+  color: #e5b84a;
+}
+
+@keyframes badgePulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  50% {
+    transform: scale(1.3);
+    opacity: 0.8;
+  }
+}
+
 @media (max-width: 980px) {
   .header {
     grid-template-columns: 1fr;
     justify-items: center;
+  }
+
+  .notif-dropdown {
+    width: min(92vw, 380px);
+    right: 0;
   }
 }
 </style>

@@ -1,28 +1,11 @@
 <script setup>
-defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: '',
-  },
-  passwordStrength: {
-    type: Number,
-    default: 0,
-  },
-})
+import { useRegisterForm } from '../composables/useRegisterForm'
 
-defineEmits(['submit'])
+const { form, loading, errorMessage, passwordStrength, submitRegister } = useRegisterForm()
 </script>
 
 <template>
-  <form class="form" @submit.prevent="$emit('submit')">
+  <form class="form" @submit.prevent="submitRegister">
     <div class="two-cols">
       <div>
         <label>Họ</label>
@@ -37,9 +20,6 @@ defineEmits(['submit'])
     <label>Email</label>
     <input v-model="form.email" type="email" placeholder="hello@email.com" required />
 
-    <label>Số điện thoại</label>
-    <input v-model="form.phone" type="tel" placeholder="0901 234 567" required />
-
     <label>Mật khẩu</label>
     <input v-model="form.password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
     <div class="strength">
@@ -47,12 +27,12 @@ defineEmits(['submit'])
     </div>
 
     <label class="checkbox">
-      <input v-model="form.agree" type="checkbox" />
+      <input v-model="form.agree" type="checkbox" required />
       <span>Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</span>
     </label>
 
-    <p v-if="error" class="error">{{ error }}</p>
-    <button class="submit-btn" type="submit" :disabled="loading">
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+    <button class="submit-btn" type="submit" :disabled="loading || !form.agree">
       {{ loading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
     </button>
   </form>
@@ -120,7 +100,7 @@ input:focus {
   border: none;
   border-radius: var(--auth-radius-md);
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
+  color: var(--color-white);
   font-weight: 600;
   cursor: pointer;
 }
@@ -130,7 +110,7 @@ input:focus {
 }
 .error {
   margin: 0;
-  color: #b91c1c;
+  color: var(--account-toast-error);
   font-size: 0.8rem;
 }
 </style>
