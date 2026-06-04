@@ -23,6 +23,7 @@ import {
   Vector3,
 } from 'three'
 import { PRODUCTS_3D } from '../core/mockData'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
   mode: {
@@ -77,9 +78,13 @@ const isDraggingProduct = ref(false)
 
 const productMap = new Map(PRODUCTS_3D.map((item) => [item.id, item]))
 const fallbackProductIds = computed(() =>
-  props.sceneItems.filter((item) => !loadedFurnitureIds.value.includes(item.instanceId)),
+  hasRoom.value && isRoomAvailable.value
+    ? props.sceneItems.filter((item) => !loadedFurnitureIds.value.includes(item.instanceId))
+    : [],
 )
-const shouldRenderRoomFallback = computed(() => hasRoom.value && !roomModelGroup.value)
+const shouldRenderRoomFallback = computed(
+  () => hasRoom.value && isRoomAvailable.value && !roomModelGroup.value,
+)
 const viewMode = ref('3d')
 const selectedSceneItem = computed(
   () => props.sceneItems.find((item) => item.instanceId === selectedSceneItemId.value) ?? null,
@@ -92,11 +97,23 @@ const isModelLoading = ref(false)
 const isDragOverCanvas = ref(false)
 const isCanvasBusy = computed(() => props.isAnalyzing || isModelLoading.value)
 const busyText = computed(() =>
-  props.isAnalyzing ? 'Dang tao mo hinh...' : 'Dang tai mo hinh, vui long cho...',
+  props.isAnalyzing ? 'Đang xử lý ảnh...' : 'Đang tải mô hình, vui lòng chờ...',
 )
 const isSelectedInCart = computed(() =>
   selectedProduct.value ? props.cartProductIds.includes(selectedProduct.value.id) : false,
 )
+
+function roomIconName(type) {
+  const iconMap = {
+    bedroom: 'bed',
+    living: 'sofa',
+    dining: 'utensilsCrossed',
+    kitchen: 'utensils',
+    office: 'briefcase',
+    bathroom: 'house',
+  }
+  return iconMap[type] ?? 'house'
+}
 
 const loader = new GLTFLoader()
 
@@ -114,7 +131,7 @@ function focusCameraToRoom() {
   const camera = cameraRef.value?.camera
   if (!camera) return
 
-  // Frame camera theo bounding box that cua model phong de tranh bi lech xuong duoi.
+  // Canh camera theo khối bao thật của mô hình phòng để tránh lệch khung nhìn.
   const roomObject = roomModelGroup.value
   if (roomObject) {
     const box = new Box3().setFromObject(roomObject)
@@ -138,7 +155,7 @@ function focusCameraToRoom() {
     }
   }
 
-  // Fallback cho state chua co room box on dinh.
+  // Giá trị dự phòng khi chưa có khối bao phòng ổn định.
   camera.position.set(0, 3.4, 8)
   camera.lookAt(0, 1, 0)
   camera.updateProjectionMatrix?.()
@@ -771,7 +788,7 @@ async function loadRoomModel() {
       floorGridRef.value.position.y = floorY - 0.03
     }
 
-    // Sau khi model upload / phong mau load xong, frame lai camera theo kich thuoc that.
+    // Sau khi mô hình tải lên hoặc phòng mẫu tải xong, canh lại camera theo kích thước thật.
     requestAnimationFrame(() => {
       focusCameraToRoom()
       resizeRendererToShell()
@@ -985,30 +1002,35 @@ defineExpose({
     </Renderer>
 
     <div v-if="hasRoom" class="room-badge">
-      <span class="room-icon">{{ selectedRoom?.emoji || '🏠' }}</span>
-      <span class="room-name">{{ selectedRoom?.name || 'Phong' }}</span>
-      <span class="room-ai">AI</span>
+      <span class="room-icon"><AppIcon :name="roomIconName(selectedRoom?.type)" :size="15" /></span>
+      <span class="room-name">{{ selectedRoom?.name || 'Phòng' }}</span>
+      <span class="room-ai">Nhận diện</span>
     </div>
 
     <div v-if="hasRoom" class="bottom-controls">
       <div class="view-tabs">
         <button type="button" :class="{ active: viewMode === '3d' }" @click="focusCameraToRoom">3D</button>
-        <button type="button" :class="{ active: viewMode === 'top' }" @click="setTopView">Mat bang</button>
+        <button type="button" :class="{ active: viewMode === 'top' }" @click="setTopView">Mặt bằng</button>
         <button type="button" :class="{ active: viewMode === 'front' }" @click="setFrontView">
-          Mat dung
+          Mặt đứng
         </button>
       </div>
-      <button type="button" class="fullscreen-btn" @click="toggleFullscreen">⛶ Xem toan canh 3D</button>
+      <button type="button" class="fullscreen-btn" @click="toggleFullscreen">
+        <AppIcon name="fullscreen" :size="14" />
+        <span>Xem toàn cảnh 3D</span>
+      </button>
     </div>
 
     <div v-if="selectedProduct" class="item-quick-panel">
       <div class="panel-head">
         <strong>{{ selectedProduct.name }}</strong>
-        <button type="button" class="close-btn" @click="selectedSceneItemId = null">✕</button>
+        <button type="button" class="close-btn" @click="selectedSceneItemId = null">
+          <AppIcon name="close" :size="14" />
+        </button>
       </div>
 
       <div class="panel-row">
-        <label>Rong</label>
+        <label>Rộng</label>
         <input
           type="range"
           min="0.5"
@@ -1030,7 +1052,7 @@ defineExpose({
         />
       </div>
       <div class="panel-row">
-        <label>Sau</label>
+        <label>Sâu</label>
         <input
           type="range"
           min="0.5"
@@ -1041,7 +1063,7 @@ defineExpose({
         />
       </div>
       <div class="panel-row">
-        <label>Mau</label>
+        <label>Màu</label>
         <input type="color" :value="selectedColor" @input="updateSelectedColor($event.target.value)" />
       </div>
       <div class="panel-row">
@@ -1056,35 +1078,40 @@ defineExpose({
         />
       </div>
       <div class="rotate-actions">
-        <button type="button" class="action-btn ghost" @click="rotateSelected(-0.2618)">↺ -15°</button>
-        <button type="button" class="action-btn ghost" @click="rotateSelected(0.2618)">↻ +15°</button>
+        <button type="button" class="action-btn ghost" @click="rotateSelected(-0.2618)">
+          <AppIcon name="rotateCcw" :size="14" />
+          <span>-15°</span>
+        </button>
+        <button type="button" class="action-btn ghost" @click="rotateSelected(0.2618)">
+          <AppIcon name="rotateCw" :size="14" />
+          <span>+15°</span>
+        </button>
       </div>
-      <p class="drag-hint">Keo tha truc tiep tren san de dat vat the vao bat ky vi tri nao.</p>
+      <p class="drag-hint">Kéo thả trực tiếp trên sàn để đặt vật thể vào vị trí mong muốn.</p>
 
       <div class="panel-actions">
-        <button type="button" class="action-btn ghost" @click="resetSelectedColor">Mau mac dinh</button>
+        <button type="button" class="action-btn ghost" @click="resetSelectedColor">Màu mặc định</button>
         <button
           type="button"
           class="action-btn primary"
           :disabled="isSelectedInCart"
           @click="addSelectedProductToCart"
         >
-          {{ isSelectedInCart ? 'Da co trong gio' : 'Them vao gio' }}
+          {{ isSelectedInCart ? 'Đã có trong giỏ' : 'Thêm vào giỏ' }}
         </button>
-        <button type="button" class="action-btn danger" @click="removeSelectedProduct">Xoa khoi phong</button>
+        <button type="button" class="action-btn danger" @click="removeSelectedProduct">Xóa khỏi phòng</button>
       </div>
     </div>
 
     <div v-if="!hasRoom" class="empty">
-      <div class="empty-icon">🧊</div>
-      <h2>Truc quan can nha cua ban</h2>
-      <p>Tai anh phong hoac chon phong co san de bat dau.</p>
+      <div class="empty-icon"><AppIcon name="cloudUpload" :size="48" /></div>
+      <h2>Tải ảnh để bắt đầu</h2>
     </div>
 
     <div v-else-if="!isRoomAvailable" class="empty">
-      <div class="empty-icon">🏗️</div>
-      <h2>Phong dang bo sung model</h2>
-      <p>Vui long chon phong co san khac de truc quan 3D.</p>
+      <div class="empty-icon"><AppIcon name="box" :size="48" /></div>
+      <h2>Đang bổ sung</h2>
+      <p>Loại phòng này chưa có mô hình 3D.</p>
     </div>
 
     <div v-if="isCanvasBusy" class="busy-overlay">
@@ -1093,11 +1120,12 @@ defineExpose({
     </div>
 
     <button v-if="isFullscreen" type="button" class="exit-fullscreen-btn" @click="toggleFullscreen">
-      ✕ Thoat toan canh
+      <AppIcon name="close" :size="14" />
+      <span>Thoát toàn cảnh</span>
     </button>
 
     <div v-if="isDragOverCanvas" class="drop-hint">
-      Tha san pham vao day de dat trong phong
+      Thả sản phẩm vào đây để đặt trong phòng
     </div>
   </section>
 </template>
@@ -1139,7 +1167,8 @@ defineExpose({
   pointer-events: none;
 }
 .empty-icon {
-  font-size: 3rem;
+  color: #0f3f5c;
+  display: inline-flex;
 }
 .empty h2 {
   margin: 0;
@@ -1190,6 +1219,9 @@ defineExpose({
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .exit-fullscreen-btn:hover {
@@ -1234,7 +1266,8 @@ defineExpose({
 }
 
 .room-icon {
-  font-size: 0.9rem;
+  display: inline-flex;
+  color: #9a744f;
 }
 
 .room-name {
@@ -1300,6 +1333,9 @@ defineExpose({
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   transition: transform 0.16s ease, box-shadow 0.16s ease;
 }
 
@@ -1343,6 +1379,9 @@ defineExpose({
   width: 1.4rem;
   height: 1.4rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .panel-row {
@@ -1402,6 +1441,10 @@ defineExpose({
   font-weight: 600;
   padding: 0.42rem 0.6rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
   transition: filter 0.16s ease, opacity 0.16s ease;
 }
 

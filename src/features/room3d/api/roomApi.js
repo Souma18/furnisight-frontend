@@ -1,5 +1,5 @@
 import { apiClient } from '@shared/lib/api/client'
-import { PRODUCTS_3D, ROOM_TEMPLATES } from '../core/mockData'
+import { ROOM_TEMPLATES } from '../core/mockData'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {
@@ -12,15 +12,47 @@ const LABEL_TO_ROOM_TYPE = {
   'home office': 'office',
 }
 
+function normalizeRecommendation(item = {}) {
+  return {
+    id: item.id ?? item.productId ?? '',
+    slug: item.slug ?? '',
+    name: item.name ?? '',
+    categoryName: item.categoryName ?? item.category?.name ?? '',
+    price: Number(item.price) || 0,
+    oldPrice: item.oldPrice ?? null,
+    image: item.image ?? item.imageUrl ?? item.thumbnail ?? '',
+    imageUrl: item.imageUrl ?? item.image ?? item.thumbnail ?? '',
+    rating: Number(item.rating) || 0,
+    ratingCount: Number(item.ratingCount) || 0,
+    soldCount: Number(item.soldCount) || 0,
+    tags: Array.isArray(item.tags) ? item.tags : [],
+    modelUrl: item.modelUrl ?? '',
+    roomTypes: Array.isArray(item.roomTypes) ? item.roomTypes : [],
+  }
+}
+
+export function normalizePredictionResponse(data = {}) {
+  const hasConfidence = typeof data.confidence === 'number' && Number.isFinite(data.confidence)
+  const hasRecommendations = Array.isArray(data.recommendations)
+
+  return {
+    label: typeof data.label === 'string' ? data.label.trim() : '',
+    responseType: hasConfidence || hasRecommendations || data.recommendationMeta ? 'full' : 'legacy',
+    confidence: hasConfidence ? data.confidence : null,
+    recommendations: hasRecommendations ? data.recommendations.map(normalizeRecommendation) : [],
+    recommendationMeta: data.recommendationMeta ?? null,
+  }
+}
+
 /**
- * Chuan hoa label API thanh `selectedRoomType` hop le.
- * Neu khong khop, tra ve `bedroom` lam mac dinh.
+ * Chuẩn hóa nhãn nhận diện thành `selectedRoomType` hợp lệ.
+ * Nếu không khớp, trả về null để không mượn mô hình của loại phòng khác.
  */
 export function mapLabelToRoomType(label) {
-  if (!label || typeof label !== 'string') return 'bedroom'
+  if (!label || typeof label !== 'string') return null
   const key = label.trim().toLowerCase()
   if (ROOM_TEMPLATES.some((r) => r.type === key)) return key
-  return LABEL_TO_ROOM_TYPE[key] ?? 'bedroom'
+  return LABEL_TO_ROOM_TYPE[key] ?? null
 }
 
 function delay(ms = 700) {
@@ -35,7 +67,7 @@ export async function analyzeRoomImage() {
   return { data: room }
 }
 
-// API nhan dien loai phong tu anh (label + confidence).
+// Nhận diện loại phòng từ ảnh tải lên.
 // Goi qua microservices gateway cua apiClient, url='/ai-classifier/predict'
 const CLASSIFY_ENDPOINT = import.meta.env.VITE_ROOM3D_CLASSIFY_URL ?? '/ai-classifier/predict'
 
@@ -55,10 +87,10 @@ export async function classifyRoomImage(file, imageType = 'normal') {
     timeout: 60_000,
   })
 
-  return response.data
+  return normalizePredictionResponse(response.data)
 }
 
-// API sinh mesh 3D tu anh (model_url).
+// Tạo mô hình 3D từ ảnh tải lên.
 // Goi qua microservices gateway cua apiClient, url='/ai-reconstruction/predict'
 const PREDICT_ENDPOINT = import.meta.env.VITE_ROOM3D_PREDICT_URL ?? '/ai-reconstruction/predict'
 
@@ -88,12 +120,4 @@ export async function predictRoomModel(file, options = {}) {
 export async function getRoomTemplates() {
   await delay(350)
   return { data: ROOM_TEMPLATES }
-}
-
-export async function getSuggestedProducts(roomType) {
-  await delay(450)
-  const products = PRODUCTS_3D.filter((product) =>
-    roomType ? product.roomTypes.includes(roomType) : true,
-  )
-  return { data: products }
 }

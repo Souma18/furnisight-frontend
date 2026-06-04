@@ -1,4 +1,7 @@
 <script setup>
+import { computed } from 'vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
+
 const props = defineProps({
   product: {
     type: Object,
@@ -24,12 +27,28 @@ const props = defineProps({
 
 defineEmits(['add'])
 
+const productImage = computed(() => props.product.image || props.product.imageUrl || '')
+const canDragToScene = computed(() => Boolean(props.product.modelUrl))
+const productIconName = computed(() => {
+  const raw = `${props.product.categoryName ?? ''} ${props.product.category ?? ''}`.toLowerCase()
+  if (raw.includes('sofa')) return 'sofa'
+  if (raw.includes('chair') || raw.includes('ghế')) return 'armchair'
+  if (raw.includes('bed') || raw.includes('giường')) return 'bed'
+  if (raw.includes('table') || raw.includes('bàn')) return 'table'
+  if (raw.includes('kệ') || raw.includes('shelf')) return 'box'
+  return 'box'
+})
+
 function onDragStart(event) {
+  if (!canDragToScene.value) {
+    event.preventDefault()
+    return
+  }
   if (!event.dataTransfer) return
   const payload = JSON.stringify({ productId: props.product.id })
   event.dataTransfer.effectAllowed = 'copy'
   event.dataTransfer.setData('application/x-room3d-product', payload)
-  // text/plain dang so thuan de browser nao cung doc duoc.
+  // text/plain dạng số thuần để trình duyệt nào cũng đọc được.
   event.dataTransfer.setData('text/plain', String(props.product.id))
 }
 </script>
@@ -39,24 +58,28 @@ function onDragStart(event) {
     class="card"
     :class="{ added }"
     :style="{ '--pc-step': shapeStep }"
-    draggable="true"
+    :draggable="canDragToScene"
     @dragstart="onDragStart"
   >
     <div class="preview">
-      <span class="new-badge">AI ✦</span>
-      <div class="emoji">{{ product.emoji }}</div>
+      <span v-if="product.tags?.includes?.('new')" class="new-badge">Mới</span>
+      <img v-if="productImage" class="product-image" :src="productImage" :alt="product.name" />
+      <div v-else class="product-icon"><AppIcon :name="productIconName" :size="34" /></div>
     </div>
 
     <div class="content">
       <h4 class="name">{{ product.name }}</h4>
+      <p v-if="product.categoryName" class="category">{{ product.categoryName }}</p>
 
       <div class="bottom">
         <div class="prices">
           <p class="price-current">{{ formatCurrency(product.price) }}</p>
+          <p v-if="product.oldPrice" class="price-old">{{ formatCurrency(product.oldPrice) }}</p>
         </div>
 
-        <button type="button" class="add-btn" :disabled="added" @click="$emit('add', product)">
-          {{ added ? '✓' : '+' }}
+        <button type="button" class="add-btn" :disabled="added" @click.stop="$emit('add', product)">
+          <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
+          <span v-else>Giỏ</span>
         </button>
       </div>
     </div>
@@ -71,7 +94,7 @@ function onDragStart(event) {
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  min-height: calc(10.15rem + (var(--pc-step) * 0.38rem));
+  min-height: calc(13.4rem + (var(--pc-step) * 0.38rem));
   cursor: pointer;
   transition:
     border-color 0.2s ease,
@@ -99,7 +122,7 @@ function onDragStart(event) {
 
 .preview {
   position: relative;
-  min-height: calc(5.25rem + (var(--pc-step) * 0.3rem));
+  min-height: calc(5.8rem + (var(--pc-step) * 0.3rem));
   flex: 0 0 auto;
   background: #ede9e2;
   display: grid;
@@ -125,24 +148,31 @@ function onDragStart(event) {
   letter-spacing: 0.02em;
 }
 
-.emoji {
+.product-icon {
   width: 100%;
+  color: #876844;
   text-align: center;
-  font-size: calc(2.2rem * var(--pc-content-scale));
   line-height: 1;
   transition: transform 0.2s ease;
 }
 
-.card:hover .emoji {
+.product-image {
+  width: 100%;
+  height: calc(5.25rem + (var(--pc-step) * 0.3rem));
+  object-fit: cover;
+  display: block;
+}
+
+.card:hover .product-icon {
   transform: scale(1.06);
 }
 
 .content {
   background: #ffffff;
-  display: grid;
-  grid-template-rows: auto 1fr auto;
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
-  min-height: calc(4.9rem * var(--pc-content-scale));
+  min-height: 0;
   padding: calc(0.45rem * var(--pc-content-scale)) calc(0.5rem * var(--pc-content-scale))
     calc(0.55rem * var(--pc-content-scale));
 }
@@ -159,8 +189,19 @@ function onDragStart(event) {
   overflow: hidden;
 }
 
+.category {
+  margin: 0.18rem 0 0;
+  color: #6f7b86;
+  font-size: calc(0.58rem + (0.08rem * var(--pc-content-scale)));
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .bottom {
-  margin-top: calc(0.28rem * var(--pc-content-scale));
+  margin-top: auto;
+  padding-top: calc(0.48rem * var(--pc-content-scale));
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -172,14 +213,14 @@ function onDragStart(event) {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: calc(100% - (2rem + (0.5rem * var(--pc-content-scale))));
+  max-width: calc(100% - (2.75rem + (0.5rem * var(--pc-content-scale))));
 }
 
 .price-current {
   margin: 0;
   display: block;
   color: #9a744f;
-  font-size: calc(0.62rem + (0.26rem * var(--pc-content-scale)));
+  font-size: calc(0.58rem + (0.2rem * var(--pc-content-scale)));
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -187,9 +228,21 @@ function onDragStart(event) {
   text-overflow: ellipsis;
 }
 
+.price-old {
+  margin: 0.08rem 0 0;
+  color: #9ca3af;
+  font-size: calc(0.56rem + (0.08rem * var(--pc-content-scale)));
+  line-height: 1.1;
+  text-decoration: line-through;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .add-btn {
-  width: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
+  min-width: calc(2.45rem + (0.28rem * var(--pc-content-scale)));
   height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
+  padding: 0 0.45rem;
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -198,7 +251,8 @@ function onDragStart(event) {
   border-radius: 999px;
   background: linear-gradient(180deg, #d8aa56 0%, #c58d2f 100%);
   color: #fff;
-  font-size: calc(0.95rem * var(--pc-content-scale));
+  font-size: calc(0.72rem * var(--pc-content-scale));
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
   transition:

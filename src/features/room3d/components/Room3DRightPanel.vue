@@ -1,6 +1,7 @@
 <script setup>
 import ProductCard3D from './ProductCard3D.vue'
 import Room3DCartSection from './Room3DCartSection.vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
   selectedRoom: {
@@ -56,11 +57,11 @@ defineEmits(['search-change', 'category-change', 'add-product', 'remove-product'
   <aside class="panel">
     <div class="panel-top">
       <div class="search-wrap">
-        <span class="search-icon">🔎</span>
+        <span class="search-icon"><AppIcon name="search" :size="16" /></span>
         <input
           class="search-input"
           :value="searchKeyword"
-          placeholder="Tim kiem noi that..."
+          placeholder="Tìm kiếm nội thất..."
           @input="$emit('search-change', $event.target.value)"
         />
       </div>
@@ -78,20 +79,29 @@ defineEmits(['search-change', 'category-change', 'add-product', 'remove-product'
         </button>
       </div>
 
-      <div v-if="selectedRoom" class="ai-strip">
-        <p class="ai-label">✨ GOI Y AI <span class="smart">SMART</span></p>
-        <p class="ai-text">{{ selectedRoom.suggestText }}</p>
+      <div v-if="filteredProducts.length > 0" class="ai-strip">
+        <p class="ai-label">GỢI Ý NỘI THẤT <span class="smart">PHÙ HỢP</span></p>
+        <p class="ai-text">
+          Chọn sản phẩm để thêm vào giỏ hàng hoặc kéo vào không gian 3D.
+        </p>
       </div>
     </div>
 
     <div class="products-scroll">
-      <div class="grid" :style="{ '--product-columns': productColumns }">
+      <div v-if="filteredProducts.length === 0" class="products-empty">
+        Chưa có sản phẩm nào phù hợp.
+      </div>
+      <div v-else class="grid" :style="{ '--product-columns': productColumns }">
         <ProductCard3D
           v-for="product in filteredProducts"
           :key="product.id"
           :product="product"
-          :added="placedProductIds.includes(product.id)"
-          :suggested="selectedRoom ? product.roomTypes.includes(selectedRoom.type) : false"
+          :added="placedProductIds.includes(String(product.id))"
+          :suggested="
+            selectedRoom && Array.isArray(product.roomTypes)
+              ? product.roomTypes.includes(selectedRoom.type)
+              : false
+          "
           :format-currency="formatCurrency"
           :shape-step="productCardStep"
           @add="$emit('add-product', $event)"
@@ -247,6 +257,18 @@ defineEmits(['search-change', 'category-change', 'add-product', 'remove-product'
   gap: 0.55rem;
   grid-template-columns: repeat(var(--product-columns, 2), minmax(0, 1fr));
   align-items: start;
+}
+
+.products-empty {
+  min-height: 8rem;
+  display: grid;
+  place-items: center;
+  border: 1px dashed #d8cec1;
+  border-radius: 0.8rem;
+  color: #7b7369;
+  font-size: 0.84rem;
+  text-align: center;
+  padding: 1rem;
 }
 
 .panel-cart {

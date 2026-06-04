@@ -1,14 +1,15 @@
 import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
 import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
-import { PRODUCTS_3D, PRODUCT_FILTERS } from '../core/mockData'
+import { PRODUCTS_3D } from '../core/mockData'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
 
 export function useRoom3D() {
   const route = useRoute()
+  const router = useRouter()
   const store = useRoom3DStore()
   const cartStore = useCartStore()
   const state = storeToRefs(store)
@@ -20,6 +21,11 @@ export function useRoom3D() {
   const appliedDeepLinkKey = ref('')
   const cartItems = computed(() => cartState.items.value)
   const placedProductIds = computed(() => cartState.room3dProductIds.value)
+  const cartProductIds = computed(() =>
+    cartState.items.value
+      .map((item) => String(item.productId ?? item.id ?? '').split('::')[0])
+      .filter(Boolean),
+  )
   const cartTotal = computed(() => cartState.totalAmount.value)
   const cartCount = computed(() => cartState.lineCount.value)
 
@@ -30,11 +36,72 @@ export function useRoom3D() {
     '1024': 1024,
   }
 
+  function toFilterValue(value) {
+    return String(value ?? '')
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+  }
+
+  const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+  const SUPPORTED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp'])
+  const UNSUPPORTED_IMAGE_MESSAGE = 'Sai định dạng ảnh. Vui lòng upload JPG, PNG hoặc WEBP.'
+
+  function isSupportedImageFile(file) {
+    const mimeType = String(file?.type ?? '').toLowerCase()
+    const extension = String(file?.name ?? '').split('.').pop()?.toLowerCase() ?? ''
+
+    return SUPPORTED_IMAGE_TYPES.has(mimeType) || SUPPORTED_IMAGE_EXTENSIONS.has(extension)
+  }
+
+  function normalizeUploadError(error, fallback = 'Không thể nhận diện phòng từ ảnh này.') {
+    const message = String(
+      error?.response?.data?.detail ??
+        error?.response?.data?.message ??
+        error?.message ??
+        fallback,
+    )
+    const lowerMessage = message.toLowerCase()
+
+    if (
+      lowerMessage.includes('cannot identify image file') ||
+      lowerMessage.includes('cannot read image file') ||
+      lowerMessage.includes('unsupported image') ||
+      lowerMessage.includes('invalid image') ||
+      lowerMessage.includes('sai dinh dang') ||
+      lowerMessage.includes('định dạng')
+    ) {
+      return UNSUPPORTED_IMAGE_MESSAGE
+    }
+
+    return message
+  }
+
+  const productFilters = computed(() => {
+    const categories = state.recommendations.value
+      .map((item) => item.categoryName || item.category)
+      .filter(Boolean)
+    const uniqueCategories = [...new Set(categories)]
+
+    return [
+      { label: 'Tất cả', value: 'all' },
+      ...uniqueCategories.map((category) => ({
+        label: category,
+        value: toFilterValue(category),
+      })),
+    ]
+  })
+
   const filteredProducts = computed(() => {
-    let result = PRODUCTS_3D
+    if (state.predictionResponseType.value !== 'full') return []
+
+    let result = state.recommendations.value
 
     if (state.selectedCategory.value !== 'all') {
-      result = result.filter((item) => item.category === state.selectedCategory.value)
+      result = result.filter(
+        (item) =>
+          toFilterValue(item.categoryName || item.category) === state.selectedCategory.value,
+      )
     }
 
     const keyword = state.searchKeyword.value.trim().toLowerCase()
@@ -60,60 +127,95 @@ export function useRoom3D() {
     if (!file) return
 
     uploadError.value = ''
-    store.clearAiRecognition()
+
+    if (!isSupportedImageFile(file)) {
+      uploadError.value = UNSUPPORTED_IMAGE_MESSAGE
+      return
+    }
+
+    store.setPredictionLoading()
     store.setUploadedModelUrl('')
-    store.resetRenderSourceIfNoModel()
+    store.showPredictionRoom(null)
+    store.setCategory('all')
     store.setAnalyzing(true)
 
     try {
-      // 1) Nhan dien loai phong: file + image_type -> label, confidence
-      let detectedRoomType = state.selectedRoomType.value ?? 'bedroom'
-      let detectedLabel = ''
-      let detectedConfidence = null
-      try {
-        const cls = await classifyRoomImage(file, state.imageType.value)
-        const label = cls?.label
-        const confidence = cls?.confidence
-        store.setAiRecognition(label, confidence)
-        detectedLabel = label
-        detectedConfidence = confidence
-        detectedRoomType = mapLabelToRoomType(label)
-      } catch {
-        // Nhan dien loi: van sinh mesh duoc; mac dinh phong ngu de UI khong trong.
-        store.clearAiRecognition()
-      }
-
-      // 2) Sinh mesh 3D: file + options (tuong ung image_type) -> model_url
       const meshResolution = QUALITY_TO_MESH_RESOLUTION[state.quality.value] ?? 512
-      const meshData = await predictRoomModel(file, {
-        imageType: state.imageType.value,
-        meshResolution,
-        meshQuality: state.meshQuality.value,
-      })
-      const modelUrl = meshData?.model_url
 
-      if (!modelUrl) {
-        throw new Error('Khong nhan duoc model_url tu backend sinh mesh.')
+      // Gọi song song: nhận diện cho giao diện/gợi ý và tạo mô hình 3D từ ảnh tải lên.
+      const [predictionResult, meshResult] = await Promise.allSettled([
+        classifyRoomImage(file, state.imageType.value),
+        predictRoomModel(file, {
+          imageType: state.imageType.value,
+          meshResolution,
+          meshQuality: state.meshQuality.value,
+        }),
+      ])
+
+      if (predictionResult.status === 'fulfilled') {
+        const prediction = predictionResult.value
+        const detectedRoomType = mapLabelToRoomType(prediction?.label)
+        store.applyPredictionResult(prediction)
+
+        if (meshResult.status === 'fulfilled') {
+          const meshData = meshResult.value
+          const modelUrl = meshData?.model_url
+
+          if (modelUrl) {
+            store.applyAiGeneratedModel({
+              roomType: detectedRoomType,
+              modelUrl,
+            })
+          } else {
+            store.setUploadedModelUrl('')
+            store.showPredictionRoom(null)
+          }
+        }
+
+        if (meshResult.status === 'rejected') {
+          store.setUploadedModelUrl('')
+          store.showPredictionRoom(null)
+          uploadError.value = normalizeUploadError(meshResult.reason, 'Không có kết quả trực quan 3D.')
+        }
+      } else {
+        store.setPredictionError()
+        store.showPredictionRoom(null)
+        uploadError.value = normalizeUploadError(predictionResult.reason, 'Không thể nhận diện phòng từ ảnh này.')
+
+        if (meshResult.status === 'fulfilled') {
+          const meshData = meshResult.value
+          const modelUrl = meshData?.model_url
+
+          if (modelUrl) {
+            store.applyAiGeneratedModel({
+              roomType: null,
+              modelUrl,
+            })
+          }
+        }
       }
 
-      store.applyAiGeneratedModel({
-        roomType: detectedRoomType,
-        modelUrl,
-        label: detectedLabel,
-        confidence: detectedConfidence,
-      })
+      if (predictionResult.status === 'fulfilled' && meshResult.status === 'fulfilled') {
+        const meshData = meshResult.value
+        const modelUrl = meshData?.model_url
+        if (!modelUrl) {
+          store.setUploadedModelUrl('')
+          store.showPredictionRoom(null)
+          uploadError.value = 'Không có kết quả trực quan 3D.'
+        }
+      }
     } catch (error) {
-      uploadError.value =
-        error?.response?.data?.detail ?? error?.message ?? 'Upload / sinh mesh that bai.'
+      uploadError.value = normalizeUploadError(error, 'Không thể nhận diện phòng từ ảnh này.')
+      store.setPredictionError()
       store.setUploadedModelUrl('')
-      store.resetRenderSourceIfNoModel()
+      store.showPredictionRoom(null)
     } finally {
       store.setAnalyzing(false)
     }
   }
 
   function selectRoomType(type) {
-    // Chon phong o => chu dong chuyen qua model phong mau.
+    // Chọn phòng mẫu thì chủ động chuyển sang mô hình có sẵn trong catalog.
     store.selectTemplateRoom(type)
   }
 
@@ -121,6 +223,8 @@ export function useRoom3D() {
     const product =
       typeof productOrId === 'number'
         ? PRODUCTS_3D.find((item) => item.id === productOrId)
+        : typeof productOrId === 'string'
+          ? state.recommendations.value.find((item) => String(item.id) === productOrId)
         : productOrId
     if (!product) return
     cartStore.addItem(product)
@@ -142,6 +246,14 @@ export function useRoom3D() {
 
   function removeProductFromCart(lineId) {
     cartStore.removeItem(lineId)
+  }
+
+  function updateCartQty(lineId, nextQty) {
+    cartStore.updateQty(lineId, nextQty)
+  }
+
+  function goCheckout() {
+    router.push('/checkout')
   }
 
   function removeProductFromScene(instanceId) {
@@ -205,11 +317,12 @@ export function useRoom3D() {
     ...state,
     cartItems,
     placedProductIds,
+    cartProductIds,
     cartTotal,
     cartCount,
     roomTemplates,
     isLoadingTemplates,
-    productFilters: PRODUCT_FILTERS,
+    productFilters,
     filteredProducts,
     orderCode,
     uploadError,
@@ -221,7 +334,8 @@ export function useRoom3D() {
     setSearchKeyword: store.setSearchKeyword,
     setCategory: store.setCategory,
     toggleCart: store.toggleCart,
-    openCheckout: store.openCheckout,
+    openCheckout: goCheckout,
+    goCheckout,
     closeCheckout: store.closeCheckout,
     closeSuccess: store.closeSuccess,
     initRoomTemplates,
@@ -230,6 +344,7 @@ export function useRoom3D() {
     addProductToCart,
     addProductToScene,
     removeProductFromCart,
+    updateCartQty,
     removeProductFromScene,
     submitCheckoutMock,
   }
