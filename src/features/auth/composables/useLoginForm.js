@@ -10,6 +10,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
   const route = useRoute()
   const authStore = useAuthStore()
   const { AUTH_VIEWS, setView, showSuccess } = useAuthViewStateContext()
+  let successTimer = null
 
   const loading = ref(false)
   const errorMessage = ref('')
@@ -39,9 +40,16 @@ export function useLoginForm({ embedded = false, emit } = {}) {
     showPassword.value = !showPassword.value
   }
 
+  function clearSuccessTimer() {
+    if (!successTimer) return
+    clearTimeout(successTimer)
+    successTimer = null
+  }
+
   async function submitLogin() {
     errorMessage.value = ''
     loading.value = true
+    clearSuccessTimer()
     try {
       const response = await authApi.login({
         identifier: form.email,
@@ -54,18 +62,23 @@ export function useLoginForm({ embedded = false, emit } = {}) {
         mode: AUTH_VIEWS.LOGIN,
       })
 
-      setTimeout(async () => {
+      successTimer = setTimeout(async () => {
+        successTimer = null
         emit?.('authenticated')
         const target = resolvePostLoginTarget()
         const shouldNavigate = !embedded || authStore.isAdmin || Boolean(route.query.redirect)
 
         if (embedded) {
           emit?.('close')
+          setView(AUTH_VIEWS.LOGIN)
         }
 
         if (shouldNavigate) {
           await router.push(target)
+          return
         }
+
+        setView(AUTH_VIEWS.LOGIN)
       }, 900)
     } catch (error) {
       errorMessage.value = error.response?.data?.message || error.message || 'Đăng nhập thất bại.'

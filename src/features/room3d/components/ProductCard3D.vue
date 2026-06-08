@@ -77,9 +77,16 @@ function onDragStart(event) {
           <p v-if="product.oldPrice" class="price-old">{{ formatCurrency(product.oldPrice) }}</p>
         </div>
 
-        <button type="button" class="add-btn" :disabled="added" @click.stop="$emit('add', product)">
+        <button
+          type="button"
+          class="add-btn"
+          :disabled="added"
+          :aria-label="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
+          :title="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
+          @click.stop="$emit('add', product)"
+        >
           <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
-          <span v-else>Giỏ</span>
+          <AppIcon v-else name="cart" :size="15" :stroke-width="2.4" />
         </button>
       </div>
     </div>
@@ -95,7 +102,7 @@ function onDragStart(event) {
   display: flex;
   flex-direction: column;
   min-height: calc(13.4rem + (var(--pc-step) * 0.38rem));
-  cursor: pointer;
+  cursor: default;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -113,6 +120,13 @@ function onDragStart(event) {
 
 .card:active {
   transform: translateY(0);
+}
+
+.card:focus,
+.card:focus-visible,
+.card *:focus,
+.card *:focus-visible {
+  outline: none;
 }
 
 .card.added {
@@ -202,10 +216,10 @@ function onDragStart(event) {
 .bottom {
   margin-top: auto;
   padding-top: calc(0.48rem * var(--pc-content-scale));
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) calc(1.86rem + (0.14rem * var(--pc-content-scale)));
   align-items: center;
-  justify-content: space-between;
-  gap: calc(0.25rem * var(--pc-content-scale));
+  gap: calc(0.36rem * var(--pc-content-scale));
   min-height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
 }
 
@@ -213,7 +227,7 @@ function onDragStart(event) {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  max-width: calc(100% - (2.75rem + (0.5rem * var(--pc-content-scale))));
+  max-width: 100%;
 }
 
 .price-current {
@@ -240,10 +254,10 @@ function onDragStart(event) {
 }
 
 .add-btn {
-  min-width: calc(2.45rem + (0.28rem * var(--pc-content-scale)));
-  height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
-  padding: 0 0.45rem;
-  flex: 0 0 auto;
+  width: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
+  min-width: 0;
+  height: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
+  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;

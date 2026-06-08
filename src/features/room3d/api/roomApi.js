@@ -13,22 +13,134 @@ const LABEL_TO_ROOM_TYPE = {
 }
 
 function normalizeRecommendation(item = {}) {
+  const product = item.product && typeof item.product === 'object' ? item.product : {}
+  const variants = Array.isArray(item.variants)
+    ? item.variants
+    : Array.isArray(product.variants)
+      ? product.variants
+      : []
+  const primaryVariant = variants[0] ?? null
+  const id = item.productId ?? item.id ?? product.id ?? ''
+  const variantId = item.variantId ?? item.defaultVariantId ?? primaryVariant?.id ?? null
+  const price = resolveProductPrice(item, product, primaryVariant)
+
   return {
-    id: item.id ?? item.productId ?? '',
-    slug: item.slug ?? '',
-    name: item.name ?? '',
-    categoryName: item.categoryName ?? item.category?.name ?? '',
-    price: Number(item.price) || 0,
-    oldPrice: item.oldPrice ?? null,
-    image: item.image ?? item.imageUrl ?? item.thumbnail ?? '',
-    imageUrl: item.imageUrl ?? item.image ?? item.thumbnail ?? '',
-    rating: Number(item.rating) || 0,
-    ratingCount: Number(item.ratingCount) || 0,
-    soldCount: Number(item.soldCount) || 0,
-    tags: Array.isArray(item.tags) ? item.tags : [],
-    modelUrl: item.modelUrl ?? '',
-    roomTypes: Array.isArray(item.roomTypes) ? item.roomTypes : [],
+    ...item,
+    id,
+    productId: id,
+    variantId,
+    detailId: item.detailId ?? item.slug ?? product.slug ?? id,
+    slug: item.slug ?? product.slug ?? '',
+    name: item.name ?? product.name ?? '',
+    categoryName: resolveCategoryName(item, product),
+    price,
+    oldPrice: resolveFirstNumber(
+      item.oldPrice,
+      item.originalPrice,
+      item.compareAtPrice,
+      item.listPrice,
+      product.oldPrice,
+      product.originalPrice,
+      primaryVariant?.oldPrice,
+    ),
+    image: resolveProductImage(item, product),
+    imageUrl: resolveProductImage(item, product),
+    rating: resolveFirstNumber(item.rating, product.rating) ?? 0,
+    ratingCount: resolveFirstNumber(item.ratingCount, product.ratingCount) ?? 0,
+    soldCount: resolveFirstNumber(item.soldCount, item.soldQuantity, item.sold, product.soldCount) ?? 0,
+    tags: normalizeStringArray(item.tags ?? product.tags),
+    modelUrl: item.modelUrl ?? item.model3dUrl ?? item.glbUrl ?? product.modelUrl ?? '',
+    roomTypes: normalizeStringArray(item.roomTypes ?? item.roomTypeHints ?? product.roomTypes),
+    variants,
   }
+}
+
+function resolveProductPrice(item = {}, product = {}, primaryVariant = null) {
+  return resolveFirstNumber(
+    item.price,
+    item.salePrice,
+    item.sellingPrice,
+    item.discountedPrice,
+    item.currentPrice,
+    item.minPrice,
+    item.basePrice,
+    product.price,
+    product.salePrice,
+    product.sellingPrice,
+    product.minPrice,
+    primaryVariant?.price,
+  ) ?? 0
+}
+
+function resolveFirstNumber(...values) {
+  const normalized = values.map(parsePriceNumber).filter((value) => value != null)
+  return normalized.find((value) => value > 0) ?? normalized[0] ?? null
+}
+
+function parsePriceNumber(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value !== 'string') return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const direct = Number(trimmed.replace(/,/g, ''))
+  if (Number.isFinite(direct)) return direct
+
+  const digitsOnly = trimmed.replace(/[^\d]/g, '')
+  const parsed = Number(digitsOnly)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function resolveProductImage(item = {}, product = {}) {
+  const imageCandidates = [
+    item.imageUrl,
+    item.productImageUrl,
+    item.image,
+    item.thumbnail,
+    item.thumbnailUrl,
+    item.coverImage,
+    item.coverImageUrl,
+    product.imageUrl,
+    product.image,
+    product.thumbnail,
+    product.thumbnailUrl,
+  ]
+
+  for (const gallery of [item.gallery, item.images, product.gallery, product.images]) {
+    if (!Array.isArray(gallery)) continue
+    imageCandidates.push(...gallery.map((entry) => {
+      if (typeof entry === 'string') return entry
+      return entry?.url || entry?.imageUrl || entry?.src || ''
+    }))
+  }
+
+  return imageCandidates.find(Boolean) || ''
+}
+
+function resolveCategoryName(item = {}, product = {}) {
+  const category = (
+    item.categoryName ??
+    item.category?.name ??
+    item.category?.label ??
+    product.categoryName ??
+    product.category?.name ??
+    product.category?.label ??
+    item.category ??
+    ''
+  )
+  return typeof category === 'string' ? category : ''
+}
+
+function normalizeStringArray(value) {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+  return []
 }
 
 export function normalizePredictionResponse(data = {}) {
