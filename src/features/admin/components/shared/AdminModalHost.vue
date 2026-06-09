@@ -13,7 +13,31 @@ const iconOptions = ref([])
 const roleOptions = ref([])
 const categoryOptions = ref([])
 const productOptions = ref([])
-const { modal, isOpen, isWide, titleHtml, form, saving, openSync, close, save, onModelFile, onProductImages, removeImage, moveImage, addVariant, removeVariant, selectVariant, onCategoryImage, removeCategoryImage } = useAdminModal()
+const {
+  modal,
+  isOpen,
+  isWide,
+  titleHtml,
+  form,
+  saving,
+  openSync,
+  close,
+  save,
+  onModelFile,
+  retryModelUpload,
+  removeModel,
+  onModelPreviewError,
+  onModelPreviewReady,
+  onModelPreviewLoading,
+  onProductImages,
+  removeImage,
+  moveImage,
+  addVariant,
+  removeVariant,
+  selectVariant,
+  onCategoryImage,
+  removeCategoryImage,
+} = useAdminModal()
 
 const stockVariantOptions = computed(() => {
   const product = productOptions.value.find((item) => item.id === form.stockProductId)
@@ -81,7 +105,7 @@ watch(() => modal.value.open, (open) => {
 </script>
 
 <template>
-  <AdminModal :open="isOpen" :wide="isWide" :title-html="titleHtml" :saving="saving" @close="close" @save="save">
+  <AdminModal :open="isOpen" :wide="isWide" :title-html="titleHtml" :saving="saving || form.modelUploading || form.modelPreviewLoading" @close="close" @save="save">
     <template v-if="modal.type === 'addUser' || modal.type === 'editUser'">
       <div class="mform-row">
         <div class="mform-group"><label class="mfl">Họ tên *</label><input v-model="form.name" class="mfi" /></div>
@@ -192,9 +216,23 @@ watch(() => modal.value.open, (open) => {
               <div class="mform-row">
                 <div class="mform-group"><label class="mfl">Giá</label><input v-model="variant.price" class="mfi" type="number" min="0" /></div>
                 <div class="mform-group"><label class="mfl">Tồn</label><input v-model="variant.stock" class="mfi" type="number" min="0" /></div>
-                <div class="mform-group"><label class="mfl">SKU variant</label><input v-model="variant.sku" class="mfi" placeholder="Nhập mã SKU nếu có" /></div>
+                <div class="mform-group">
+                  <label class="mfl">SKU variant *</label>
+                  <input
+                    v-model="variant.sku"
+                    class="mfi"
+                    required
+                    placeholder="VD: CHAIR-BROWN-L"
+                    @blur="variant.sku = variant.sku.trim().toUpperCase()"
+                  />
+                  <small v-if="form.variantErrors?.[index]" class="variant-field-error">{{ form.variantErrors[index] }}</small>
+                </div>
               </div>
               <div class="mform-row">
+                <div class="mform-group">
+                  <label class="mfl">Ngưỡng cảnh báo *</label>
+                  <input v-model.number="variant.lowStockThreshold" class="mfi" type="number" min="1" max="9999" required />
+                </div>
                 <div class="mform-group"><label class="mfl">Nặng</label><input v-model="variant.weight" class="mfi" type="number" min="1" /></div>
                 <div class="mform-group"><label class="mfl">Dài</label><input v-model="variant.length" class="mfi" type="number" min="1" /></div>
                 <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
@@ -208,7 +246,21 @@ watch(() => modal.value.open, (open) => {
         </div>
       </div>
       <AdminProductImagesUpload :images="form.imageUrls" :uploading="saving" @select="onProductImages" @remove="removeImage" @move="moveImage" />
-      <AdminModel3dUpload :file-name="form.model3dFileName" :file-size="form.model3dSize" @select="onModelFile" />
+      <AdminModel3dUpload
+        :file-name="form.modelFileName"
+        :file-size="form.modelFileSize"
+        :preview-url="form.modelPreviewUrl"
+        :uploading="form.modelUploading"
+        :progress="form.modelUploadProgress"
+        :error="form.modelUploadError"
+        :retryable="Boolean(form.modelFile && !form.modelUpload)"
+        @select="onModelFile"
+        @retry="retryModelUpload"
+        @remove="removeModel"
+        @preview-error="onModelPreviewError"
+        @preview-ready="onModelPreviewReady"
+        @preview-loading="onModelPreviewLoading"
+      />
       <div class="mform-group"><label class="mfl">Trạng thái</label><select v-model="form.status" class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>
     </template>
 

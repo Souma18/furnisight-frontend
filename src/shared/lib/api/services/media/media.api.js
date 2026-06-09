@@ -42,15 +42,17 @@ class MediaApi {
   initUpload(file, options = {}) {
     return apiClient.post('/media/init-upload', {
       fileName: file.name,
-      contentType: file.type,
+      contentType: file.type || options.contentType || 'application/octet-stream',
       sizeBytes: file.size,
       ownerType: options.ownerType,
       ownerId: options.ownerId,
+      resourceType: options.resourceType,
     }, {
       headers: options.idempotencyKey
         ? { 'Idempotency-Key': options.idempotencyKey }
         : undefined,
       useIdempotencyKey: true,
+      signal: options.signal,
     })
   }
 
@@ -59,7 +61,7 @@ class MediaApi {
    * @param {File} file
    * @param {Object} uploadSession
    */
-  uploadToCloudinary(file, uploadSession) {
+  uploadToCloudinary(file, uploadSession, options = {}) {
     const uploadUrl = pickUploadUrl(uploadSession)
     if (!uploadUrl) {
       throw new Error('Missing Cloudinary upload URL from media init-upload response.')
@@ -69,7 +71,10 @@ class MediaApi {
     appendUploadFields(formData, pickUploadFields(uploadSession))
     formData.append('file', file)
 
-    return axios.post(uploadUrl, formData)
+    return axios.post(uploadUrl, formData, {
+      onUploadProgress: options.onUploadProgress,
+      signal: options.signal,
+    })
   }
 
   /**
@@ -86,20 +91,28 @@ class MediaApi {
   }
 
   async uploadStaged(file, options = {}) {
-    const initResponse = await this.initUpload(file, options)
-    const uploadSession = unwrapData(initResponse)
-    const mediaId = pickMediaId(uploadSession)
-    const cloudinaryResponse = await this.uploadToCloudinary(file, uploadSession)
-    const cloudinaryData = unwrapData(cloudinaryResponse)
+    let mediaId = ''
+    try {
+      const initResponse = await this.initUpload(file, options)
+      const uploadSession = unwrapData(initResponse)
+      mediaId = pickMediaId(uploadSession)
+      const cloudinaryResponse = await this.uploadToCloudinary(file, uploadSession, options)
+      const cloudinaryData = unwrapData(cloudinaryResponse)
 
-    return {
-      ...cloudinaryData,
-      mediaId,
-      uploadSession,
-      cloudinaryData,
-      completed: false,
-      persisted: false,
-      url: cloudinaryData.secure_url || cloudinaryData.url || pickUploadUrl(uploadSession),
+      return {
+        ...cloudinaryData,
+        mediaId,
+        uploadSession,
+        cloudinaryData,
+        completed: false,
+        persisted: false,
+        url: cloudinaryData.secure_url || cloudinaryData.url || pickUploadUrl(uploadSession),
+      }
+    } catch (error) {
+      if (mediaId) {
+        await this.cancelUpload(mediaId).catch(() => {})
+      }
+      throw error
     }
   }
 
@@ -123,7 +136,7 @@ class MediaApi {
     const uploadSession = unwrapData(initResponse)
     const mediaId = pickMediaId(uploadSession)
 
-    const cloudinaryResponse = await this.uploadToCloudinary(file, uploadSession)
+    const cloudinaryResponse = await this.uploadToCloudinary(file, uploadSession, options)
     const cloudinaryData = unwrapData(cloudinaryResponse)
 
     if (!mediaId) {

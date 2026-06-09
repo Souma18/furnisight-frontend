@@ -14,19 +14,14 @@ const data = ref(null)
 const page = ref(1)
 const loading = ref(false)
 const error = ref('')
-const warningSettings = ref({ defaultThreshold: 5, variantThresholds: {} })
 const savingThresholds = ref({})
 
 async function load() {
   loading.value = true
   error.value = ''
   try {
-    const [inventoryRes, settingsRes] = await Promise.all([
-      adminApi.fetchInventory(),
-      adminApi.fetchInventoryWarningSettings().catch(() => ({ data: warningSettings.value })),
-    ])
+    const inventoryRes = await adminApi.fetchInventory()
     data.value = inventoryRes.data
-    warningSettings.value = settingsRes.data ?? warningSettings.value
   } catch (e) {
     error.value = e?.response?.data?.message || e.message || 'Không tải được dữ liệu kho.'
   } finally {
@@ -53,12 +48,10 @@ const columns = [
 const badgeMap = { success: 'b-success', low: 'b-low', cancel: 'b-cancel' }
 
 async function updateVariantThreshold(row, event) {
-  const threshold = Math.max(1, Number(event.target.value) || warningSettings.value.defaultThreshold || 5)
+  const threshold = Math.min(9999, Math.max(1, Number(event.target.value) || 5))
   savingThresholds.value = { ...savingThresholds.value, [row.variantId]: true }
   try {
-    await adminApi.updateInventoryWarningSettings({
-      variantThresholds: { [row.variantId]: threshold },
-    })
+    await adminApi.updateVariantLowStockThreshold(row.variantId, { lowStockThreshold: threshold })
     ui.showToast({ icon: 'check', title: 'Đã cập nhật ngưỡng', subtitle: `${row.sku}: ${threshold}` })
     await load()
   } catch (e) {
@@ -122,6 +115,7 @@ const pagination = computed(() => ({
           class="inventory-threshold-input"
           type="number"
           min="1"
+          max="9999"
           :value="row.threshold"
           :disabled="savingThresholds[row.variantId]"
           @change="updateVariantThreshold(row, $event)"

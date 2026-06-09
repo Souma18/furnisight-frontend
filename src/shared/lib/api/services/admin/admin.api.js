@@ -61,17 +61,6 @@ class AdminApi {
     return apiClient.delete(`/admin/products/${id}`)
   }
 
-  uploadProductModel(fileOrFormData) {
-    const formData = fileOrFormData instanceof FormData ? fileOrFormData : new FormData()
-    if (!(fileOrFormData instanceof FormData)) {
-      formData.append('file', fileOrFormData)
-    }
-
-    return apiClient.post('/admin/products/model-upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  }
-
   fetchOrders(params) {
     return apiClient.get('/admin/orders', { params })
   }
@@ -88,12 +77,8 @@ class AdminApi {
     return apiClient.post('/admin/inventory/stock-in', payload)
   }
 
-  fetchInventoryWarningSettings() {
-    return apiClient.get('/admin/inventory/warning-settings')
-  }
-
-  updateInventoryWarningSettings(payload) {
-    return apiClient.put('/admin/inventory/warning-settings', payload)
+  updateVariantLowStockThreshold(variantId, payload) {
+    return apiClient.put(`/admin/inventory/variants/${variantId}/threshold`, payload)
   }
 
   fetchVouchers(params) {
