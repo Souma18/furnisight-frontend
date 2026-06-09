@@ -141,15 +141,15 @@ class AdminApi {
   }
 
   fetchAdminProfile() {
-    return apiClient.get('/admin/account/profile')
+    return apiClient.get('/users/profile')
   }
 
   updateAdminProfile(payload) {
-    return apiClient.put('/admin/account/profile', payload)
+    return apiClient.put('/users/profile', payload)
   }
 
   changeAdminPassword(payload) {
-    return apiClient.post('/admin/account/password', payload)
+    return apiClient.post('/users/auth/password/change', payload)
   }
 
   fetchMessageTemplates(params) {

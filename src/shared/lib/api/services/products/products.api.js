@@ -59,7 +59,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./products.model').CollectionResponse[], totalElements: number}>>}
    */
   getCollections(params) {
-    return apiClient.get('/collections', { params })
+    return apiClient.get(`${catalogBaseUrl}/collections`, { params })
   }
 
   /**
@@ -68,7 +68,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').CollectionResponse>>}
    */
   getCollectionDetail(slugOrId) {
-    return apiClient.get(`/collections/${slugOrId}`)
+    return apiClient.get(`${catalogBaseUrl}/collections/${slugOrId}`)
   }
 
   // ─── REVIEWS ────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./products.model').ReviewResponse[], totalElements: number}>>}
    */
   getReviews(productId, params) {
-    return apiClient.get(`/products/${productId}/reviews`, { params })
+    return apiClient.get(`${catalogBaseUrl}/reviews/product/${productId}`, { params })
   }
 
   /**
@@ -90,7 +90,10 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').ReviewResponse>>}
    */
   submitReview(productId, payload) {
-    return apiClient.post(`/products/${productId}/reviews`, payload)
+    return apiClient.post(`${catalogBaseUrl}/reviews`, {
+      ...payload,
+      productId,
+    })
   }
 
   /**
