@@ -1,13 +1,11 @@
 <script setup>
-import { computed, onMounted, unref } from 'vue'
+import { computed, onMounted, ref, unref } from 'vue'
 import { NConfigProvider } from 'naive-ui'
 import { useRoom3D } from '../composables/useRoom3D'
 import Room3DTopbar from '../components/Room3DTopbar.vue'
 import Room3DLeftPanel from '../components/Room3DLeftPanel.vue'
 import Room3DCanvas from '../components/Room3DCanvas.vue'
 import Room3DRightPanel from '../components/Room3DRightPanel.vue'
-import CheckoutModal from '../components/CheckoutModal.vue'
-import SuccessModal from '../components/SuccessModal.vue'
 
 const vm = useRoom3D()
 const {
@@ -15,8 +13,14 @@ const {
   roomTemplates,
   selectedRoomType,
   selectedRoom,
+  imageType,
+  meshQuality,
   quality,
   isAnalyzing,
+  predictionStatus,
+  predictionResponseType,
+  aiRecognitionLabel,
+  aiRecognitionConfidence,
   isLoadingTemplates,
   projectName,
   selectedCategory,
@@ -25,15 +29,19 @@ const {
   cartItems,
   sceneItems,
   placedProductIds,
+  cartProductIds,
   cartTotal,
   cartCount,
-  isCheckoutOpen,
-  isSuccessOpen,
-  orderCode,
+  productFilters,
+  uploadError,
 } = vm
 
+const canvasRef = ref(null)
 const isLoadingTemplatesValue = computed(() => Boolean(unref(isLoadingTemplates)))
-const orderCodeValue = computed(() => String(unref(orderCode) ?? ''))
+
+function toggleFullscreen() {
+  canvasRef.value?.toggleFullscreen?.()
+}
 
 onMounted(() => {
   vm.initRoomTemplates()
@@ -45,8 +53,13 @@ onMounted(() => {
     <section class="room-page">
       <Room3DTopbar
         :selected-room="selectedRoom"
+        :cart-items="cartItems"
+        :cart-total="cartTotal"
         :cart-count="cartCount"
-        @open-checkout="vm.openCheckout"
+        @open-checkout="vm.goCheckout"
+        @update-cart-qty="vm.updateCartQty"
+        @remove-product="vm.removeProductFromCart"
+        @toggle-fullscreen="toggleFullscreen"
       />
 
       <div class="room-body">
@@ -55,19 +68,28 @@ onMounted(() => {
           :room-templates="roomTemplates"
           :selected-room-type="selectedRoomType"
           :selected-room="selectedRoom"
+          :image-type="imageType"
+          :mesh-quality="meshQuality"
           :quality="quality"
           :is-analyzing="isAnalyzing"
+          :prediction-status="predictionStatus"
+          :prediction-response-type="predictionResponseType"
+          :prediction-label="aiRecognitionLabel"
+          :prediction-confidence="aiRecognitionConfidence"
           :is-loading-templates="isLoadingTemplatesValue"
           :project-name="projectName"
-          :upload-error="vm.uploadError"
+          :upload-error="uploadError"
           @switch-mode="vm.setMode"
           @upload-image="vm.handleUploadImage"
           @select-room-type="vm.selectRoomType"
+          @image-type-change="vm.setImageType"
+          @mesh-quality-change="vm.setMeshQuality"
           @quality-change="vm.setQuality"
           @project-name-change="projectName = $event"
         />
 
         <Room3DCanvas
+          ref="canvasRef"
           :mode="mode"
           :is-analyzing="isAnalyzing"
           :selected-room="selectedRoom"
@@ -82,10 +104,10 @@ onMounted(() => {
           :selected-room="selectedRoom"
           :selected-category="selectedCategory"
           :search-keyword="searchKeyword"
-          :product-filters="vm.productFilters"
+          :product-filters="productFilters"
           :filtered-products="filteredProducts"
           :cart-items="cartItems"
-          :placed-product-ids="placedProductIds"
+          :placed-product-ids="cartProductIds"
           :cart-total="cartTotal"
           :format-currency="vm.formatCurrency"
           :product-columns="2"
@@ -93,26 +115,12 @@ onMounted(() => {
           @search-change="vm.setSearchKeyword"
           @category-change="vm.setCategory"
           @add-product="vm.addProductToCart"
+          @open-product="vm.openProductDetail"
           @remove-product="vm.removeProductFromCart"
-          @open-checkout="vm.openCheckout"
+          @open-checkout="vm.goCheckout"
         />
       </div>
     </section>
-
-    <CheckoutModal
-      :show="isCheckoutOpen"
-      :cart-items="cartItems"
-      :cart-total="cartTotal"
-      :format-currency="vm.formatCurrency"
-      @update:show="(show) => (show ? vm.openCheckout() : vm.closeCheckout())"
-      @submit="vm.submitCheckoutMock"
-    />
-
-    <SuccessModal
-      :show="isSuccessOpen"
-      :order-code="orderCodeValue"
-      @update:show="(show) => (!show ? vm.closeSuccess() : null)"
-    />
   </NConfigProvider>
 </template>
 

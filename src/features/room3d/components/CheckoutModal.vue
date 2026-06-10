@@ -1,5 +1,6 @@
 <script setup>
 import { NButton, NInput, NModal } from 'naive-ui'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
   show: {
@@ -24,33 +25,36 @@ defineEmits(['update:show', 'submit'])
 </script>
 
 <template>
-  <NModal :show="show" preset="card" title="Xac nhan don hang" style="width: 560px" @update:show="$emit('update:show', $event)">
+  <NModal :show="show" preset="card" title="Xác nhận đơn hàng" style="width: 560px" @update:show="$emit('update:show', $event)">
     <div class="body">
       <section class="section">
-        <h4>San pham da chon</h4>
-        <div v-if="cartItems.length === 0" class="muted">Khong co san pham.</div>
+        <h4>Sản phẩm đã chọn</h4>
+        <div v-if="cartItems.length === 0" class="muted">Không có sản phẩm.</div>
         <div v-else class="items">
           <div v-for="item in cartItems" :key="item.id" class="item">
-            <span>{{ item.emoji }} {{ item.name }}</span>
+            <span class="item-name">
+              <AppIcon :name="item.icon || 'box'" :size="15" />
+              {{ item.name }}
+            </span>
             <strong>{{ formatCurrency(item.price) }}</strong>
           </div>
         </div>
         <div class="total">
-          <span>Tong cong</span>
+          <span>Tổng cộng</span>
           <strong>{{ formatCurrency(cartTotal) }}</strong>
         </div>
       </section>
 
       <section class="section">
-        <h4>Thong tin giao hang</h4>
+        <h4>Thông tin giao hàng</h4>
         <div class="form">
-          <NInput placeholder="Ho va ten" />
-          <NInput placeholder="So dien thoai" />
-          <NInput placeholder="Dia chi" />
+          <NInput placeholder="Họ và tên" />
+          <NInput placeholder="Số điện thoại" />
+          <NInput placeholder="Địa chỉ" />
         </div>
       </section>
 
-      <NButton type="primary" block @click="$emit('submit')">Dat hang ngay</NButton>
+      <NButton type="primary" block @click="$emit('submit')">Đặt hàng ngay</NButton>
     </div>
   </NModal>
 </template>
@@ -75,8 +79,15 @@ defineEmits(['update:show', 'submit'])
 .item,
 .total {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
+}
+
+.item-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 .total {
   margin-top: 0.5rem;

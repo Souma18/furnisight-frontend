@@ -57,7 +57,9 @@ class OrdersApi {
 
   createVnpayPayment(payload) {
     const { orderCode } = payload
-    return apiClient.post(`/orders/payment/vnpay/create?orderCode=${orderCode}`, payload)
+    return apiClient.post('/orders/payment/vnpay/create', null, {
+      params: { orderCode },
+    })
   }
 
   getPaymentCallback(paymentMethod, params) {

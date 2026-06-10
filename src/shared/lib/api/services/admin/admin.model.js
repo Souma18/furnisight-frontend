@@ -23,9 +23,9 @@
  * @property {number} stock
  * @property {'success'|'low'|'cancel'} status
  * @property {string} statusLabel
- * @property {string} [model3dUrl]
- * @property {string} [model3dFileName]
- * @property {number} [model3dSize]
+ * @property {string} [modelUrl]
+ * @property {string} [modelMediaId]
+ * @property {boolean} [supports3d]
  */
 
 /**

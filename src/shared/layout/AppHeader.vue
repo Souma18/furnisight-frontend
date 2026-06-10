@@ -137,7 +137,7 @@ watch(isAuthModalOpen, (newVal) => {
     <div class="actions">
       <RouterLink to="/room3d" class="visualize-btn">
         <AppIcon name="map" :size="14" />
-        Truc quan hoa
+        Trực quan 3D
       </RouterLink>
       <div class="notif-wrap" @mouseenter="loadNotificationsOnce" @click="loadNotificationsOnce">
         <button

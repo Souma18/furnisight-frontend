@@ -6,17 +6,26 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const STORAGE_KEY = 'room3d-store-v1'
   const mode = ref('upload')
   const isAnalyzing = ref(false)
-  const selectedRoomType = ref('bedroom')
+  const selectedRoomType = ref(null)
   const projectName = ref('')
-  // Gia tri gui API mesh_resolution: 128 | 256 | 512 | 1024
+  // Loai anh upload: 'normal' | '360'
+  const imageType = ref('normal')
+  // Chat luong luoi cho anh thuong: 'low' | 'medium' | 'high'
+  const meshQuality = ref('medium')
+  // Giá trị gửi lên dịch vụ dựng ảnh 360: 128 | 256 | 512 | 1024.
   const quality = ref('512')
   const uploadedModelUrl = ref('')
-  // Nguon model dang hien thi giua canvas:
-  // - 'none': chua chon/tao model
-  // - 'uploaded': model sinh tu AI upload
-  // - 'template': model phong mau trong tab "Phong o"
-  const roomRenderSource = ref('template')
-  /** Ket qua API nhan dien: label goc + confidence 0..1 (de hien thi %) */
+  // Nguồn mô hình đang hiển thị giữa canvas:
+  // - 'none': chưa chọn hoặc chưa tạo mô hình
+  // - 'uploaded': mô hình được tạo từ ảnh tải lên
+  // - 'template': mô hình có sẵn trong tab "Phòng mẫu"
+  const roomRenderSource = ref('none')
+  /** Trạng thái nhận diện: idle | loading | success | error */
+  const predictionStatus = ref('idle')
+  const predictionResponseType = ref(null)
+  const recommendationMeta = ref(null)
+  const recommendations = ref([])
+  /** Kết quả nhận diện: nhãn gốc + độ tin cậy 0..1 để hiển thị phần trăm. */
   const aiRecognitionLabel = ref('')
   const aiRecognitionConfidence = ref(null)
   const searchKeyword = ref('')
@@ -34,14 +43,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
       const parsed = JSON.parse(raw)
       if (!parsed || typeof parsed !== 'object') return
 
-      if (typeof parsed.selectedRoomType === 'string') selectedRoomType.value = parsed.selectedRoomType
       if (typeof parsed.searchKeyword === 'string') searchKeyword.value = parsed.searchKeyword
       if (typeof parsed.selectedCategory === 'string') selectedCategory.value = parsed.selectedCategory
-      if (Array.isArray(parsed.sceneItems)) {
-        sceneItems.value = parsed.sceneItems.filter(
-          (item) => item && typeof item.instanceId === 'string' && Number.isFinite(item.productId),
-        )
-      }
     } catch {
       // Ignore corrupted local storage data.
     }
@@ -53,10 +56,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
-          selectedRoomType: selectedRoomType.value,
           searchKeyword: searchKeyword.value,
           selectedCategory: selectedCategory.value,
-          sceneItems: sceneItems.value,
         }),
       )
     } catch {
@@ -69,29 +70,47 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const selectedRoom = computed(() => {
     if (roomRenderSource.value === 'none') return null
 
-    const fallbackRoom = ROOM_TEMPLATES.find((item) => item.type === 'bedroom') ?? null
-    const room =
-      ROOM_TEMPLATES.find((item) => item.type === selectedRoomType.value) ??
-      ROOM_TEMPLATES[0] ??
-      fallbackRoom
-    if (!room) return null
+    const room = selectedRoomType.value
+      ? ROOM_TEMPLATES.find((item) => item.type === selectedRoomType.value) ?? null
+      : null
+    const label = aiRecognitionLabel.value || selectedRoomType.value || ''
+    const placeholderRoom = label
+      ? {
+          id: label,
+          type: label,
+          name: label,
+          icon: 'house',
+          suggestText: '',
+          tags: [],
+          confidence: null,
+          isAvailable: false,
+          statusText: 'Phòng này đang được bổ sung mô hình 3D.',
+          modelUrl: null,
+        }
+      : null
 
-    // Model AI upload: duoc uu tien hien thi cho den khi user chu dong chon phong mau.
+    // Mô hình từ ảnh tải lên được ưu tiên cho đến khi người dùng chọn phòng mẫu.
     if (roomRenderSource.value === 'uploaded' && uploadedModelUrl.value) {
+      const baseRoom = room ?? placeholderRoom
+      if (!baseRoom) return null
       return {
-        ...room,
+        ...baseRoom,
         confidence:
           aiRecognitionConfidence.value != null && Number.isFinite(aiRecognitionConfidence.value)
             ? Math.round(aiRecognitionConfidence.value * 100)
-            : room.confidence,
+            : null,
         modelUrl: uploadedModelUrl.value,
         isAvailable: true,
-        statusText: 'Model duoc sinh tu anh upload.',
+        statusText: 'Không gian 3D đã sẵn sàng từ ảnh đã tải lên.',
       }
     }
 
-    // Model phong mau tu tab "Phong o".
-    return room
+    // Mô hình có sẵn từ tab "Phòng mẫu".
+    if (roomRenderSource.value === 'template') return room
+
+    if (roomRenderSource.value === 'prediction') return room ?? placeholderRoom
+
+    return null
   })
 
   function setMode(nextMode) {
@@ -106,6 +125,14 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedRoomType.value = roomType
   }
 
+  function setImageType(type) {
+    imageType.value = type
+  }
+
+  function setMeshQuality(qualityValue) {
+    meshQuality.value = qualityValue
+  }
+
   function setQuality(nextQuality) {
     quality.value = nextQuality
   }
@@ -114,13 +141,46 @@ export const useRoom3DStore = defineStore('room3d', () => {
     uploadedModelUrl.value = url ?? ''
   }
 
-  function applyAiGeneratedModel({ roomType, modelUrl, label, confidence }) {
-    selectedRoomType.value = roomType ?? selectedRoomType.value ?? 'bedroom'
-    uploadedModelUrl.value = modelUrl ?? ''
-    aiRecognitionLabel.value = label ?? ''
+  function setPredictionLoading() {
+    predictionStatus.value = 'loading'
+    predictionResponseType.value = null
+    recommendationMeta.value = null
+    recommendations.value = []
+    aiRecognitionLabel.value = ''
+    aiRecognitionConfidence.value = null
+  }
+
+  function applyPredictionResult(result = {}) {
+    predictionStatus.value = 'success'
+    predictionResponseType.value = result.responseType ?? 'legacy'
+    recommendationMeta.value = result.recommendationMeta ?? null
+    recommendations.value = Array.isArray(result.recommendations) ? result.recommendations : []
+    aiRecognitionLabel.value = result.label ?? ''
     aiRecognitionConfidence.value =
-      typeof confidence === 'number' && Number.isFinite(confidence) ? confidence : null
+      typeof result.confidence === 'number' && Number.isFinite(result.confidence)
+        ? result.confidence
+        : null
+  }
+
+  function setPredictionError() {
+    predictionStatus.value = 'error'
+    predictionResponseType.value = null
+    recommendationMeta.value = null
+    recommendations.value = []
+    aiRecognitionLabel.value = ''
+    aiRecognitionConfidence.value = null
+  }
+
+  function applyAiGeneratedModel({ roomType, modelUrl }) {
+    selectedRoomType.value = roomType ?? null
+    uploadedModelUrl.value = modelUrl ?? ''
     roomRenderSource.value = uploadedModelUrl.value ? 'uploaded' : 'none'
+  }
+
+  function showPredictionRoom(roomType) {
+    selectedRoomType.value = roomType ?? null
+    uploadedModelUrl.value = ''
+    roomRenderSource.value = 'prediction'
   }
 
   function selectTemplateRoom(roomType) {
@@ -135,6 +195,10 @@ export const useRoom3DStore = defineStore('room3d', () => {
   }
 
   function clearAiRecognition() {
+    predictionStatus.value = 'idle'
+    predictionResponseType.value = null
+    recommendationMeta.value = null
+    recommendations.value = []
     aiRecognitionLabel.value = ''
     aiRecognitionConfidence.value = null
   }
@@ -172,7 +236,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
   }
 
   watch(
-    [selectedRoomType, searchKeyword, selectedCategory, sceneItems],
+    [searchKeyword, selectedCategory],
     () => {
       persistState()
     },
@@ -205,9 +269,15 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedRoomType,
     selectedRoom,
     projectName,
+    imageType,
+    meshQuality,
     quality,
     uploadedModelUrl,
     roomRenderSource,
+    predictionStatus,
+    predictionResponseType,
+    recommendationMeta,
+    recommendations,
     aiRecognitionLabel,
     aiRecognitionConfidence,
     searchKeyword,
@@ -219,9 +289,15 @@ export const useRoom3DStore = defineStore('room3d', () => {
     setMode,
     setAnalyzing,
     setSelectedRoomType,
+    setImageType,
+    setMeshQuality,
     setQuality,
     setUploadedModelUrl,
+    setPredictionLoading,
+    applyPredictionResult,
+    setPredictionError,
     applyAiGeneratedModel,
+    showPredictionRoom,
     selectTemplateRoom,
     setAiRecognition,
     clearAiRecognition,

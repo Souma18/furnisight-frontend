@@ -11,8 +11,8 @@ import { useAdminUiStore } from '../../store/adminUiStore'
 
 const ui = useAdminUiStore()
 const monthCanvas = ref(null)
-const catCanvas = ref(null)
-const { data, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
+
+const { data, loading, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
 
 const monthColumns = [
   { key: 'month', label: 'Tháng' },
@@ -23,14 +23,26 @@ const monthColumns = [
   { key: 'refund', label: 'Hoàn trả' },
 ]
 
+const topProductColumns = [
+  { key: 'imageUrl', label: 'Hình ảnh' },
+  { key: 'productName', label: 'Tên sản phẩm' },
+  { key: 'categoryName', label: 'Danh mục' },
+  { key: 'price', label: 'Đơn giá' },
+  { key: 'soldCount', label: 'Đã bán' },
+  { key: 'totalRevenue', label: 'Doanh thu' },
+]
+
 bindCharts((charts, d) => {
-  charts.renderRevenueBar(monthCanvas.value, d.monthLabels, d.monthData)
-  charts.renderPie(catCanvas.value, d.categoryLabels, d.categoryData)
+  // Biểu đồ bar doanh thu tháng (đơn vị triệu VNĐ)
+  if (monthCanvas.value && d.monthLabels?.length) {
+    charts.renderRevenueBar(monthCanvas.value, d.monthLabels, d.monthData)
+  }
 })
 </script>
 
 <template>
-  <AdminPageHeader eyebrow="Tài chính" title-html="Doanh <em>thu</em>" subtitle="Tháng 5/2026">
+  <AdminPageHeader eyebrow="Tài chính" title-html="Doanh <em>thu</em>"
+    :subtitle="data?.snapshotAt ? `Cập nhật lúc ${data.snapshotAt}` : 'Đang tải...'">
     <template #actions>
       <button type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
         <AppIcon name="download" :size="15" />Xuất báo cáo
@@ -38,14 +50,16 @@ bindCharts((charts, d) => {
     </template>
   </AdminPageHeader>
 
+  <div v-if="loading && !data" class="rev-state">
+    <AppIcon name="trendingUp" :size="28" style="opacity:.3;margin-bottom:8px" />
+    <span>Đang tải dữ liệu doanh thu...</span>
+  </div>
+
   <template v-if="data">
     <AdminKpiGrid :kpis="data.kpis" variant="rev" />
     <div class="rev-charts">
-      <AdminChartCard title="Doanh thu theo tháng" subtitle="12 tháng gần nhất · Tỷ VNĐ">
+      <AdminChartCard title="Doanh thu theo tháng" subtitle="12 tháng gần nhất · Triệu VNĐ">
         <canvas ref="monthCanvas" />
-      </AdminChartCard>
-      <AdminChartCard title="Doanh thu theo danh mục" subtitle="Tháng 5/2026">
-        <canvas ref="catCanvas" />
       </AdminChartCard>
     </div>
     <AdminDataTable :columns="monthColumns" :rows="data.monthlyRows">
@@ -53,7 +67,9 @@ bindCharts((charts, d) => {
         <span style="font-weight:700;color:var(--gold)">{{ row.revenue }}</span>
       </template>
       <template #cell-mom="{ row }">
-        <span :style="{ color: row.momClass === 'up' ? 'var(--green)' : 'var(--red)', fontWeight: 600, fontSize: '12px' }">{{ row.mom }}</span>
+        <span :style="{ color: row.momClass === 'up' ? 'var(--green)' : 'var(--red)', fontWeight: 600, fontSize: '12px' }">
+          {{ row.mom }}
+        </span>
       </template>
       <template #cell-profit="{ row }">
         <span style="color:var(--text3)">{{ row.profit }}</span>
@@ -62,5 +78,49 @@ bindCharts((charts, d) => {
         <span style="color:var(--red);font-size:12px">{{ row.refund }}</span>
       </template>
     </AdminDataTable>
+
+    <div class="top-selling-section" style="margin-top: 32px;">
+      <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--text)">Top 5 sản phẩm bán chạy nhất</h3>
+      <AdminDataTable :columns="topProductColumns" :rows="data.topProducts">
+        <template #cell-imageUrl="{ row }">
+          <img v-if="row.imageUrl" :src="row.imageUrl" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" alt="" />
+          <span v-else style="color:var(--text3); font-size:12px;">—</span>
+        </template>
+        <template #cell-productName="{ row }">
+          <span style="font-weight: 600; color: var(--text)">{{ row.productName }}</span>
+        </template>
+        <template #cell-price="{ row }">
+          <span style="color:var(--text3)">{{ row.price }}</span>
+        </template>
+        <template #cell-soldCount="{ row }">
+          <span style="font-weight: 600; color: var(--text)">{{ row.soldCount }}</span>
+        </template>
+        <template #cell-totalRevenue="{ row }">
+          <span style="font-weight:700;color:var(--gold)">{{ row.totalRevenue }}</span>
+        </template>
+      </AdminDataTable>
+    </div>
   </template>
 </template>
+
+<style scoped>
+.rev-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  color: var(--text3);
+  font-size: 13px;
+  gap: 4px;
+}
+.rev-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+</style>

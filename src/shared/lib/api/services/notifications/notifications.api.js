@@ -1,6 +1,8 @@
 import { apiClient } from '../../client'
 
 class NotificationsApi {
+  static templateBaseUrl = '/notifications/notification-templates'
+
   // ─── INBOX MESSAGES ────────────────────────────────────────────────────────
 
   /**
@@ -27,19 +29,19 @@ class NotificationsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./notifications.model').NotificationTemplateResponse[], totalElements: number}>>}
    */
   getTemplates(params) {
-    return apiClient.get('/notifications/templates', { params })
+    return apiClient.get(NotificationsApi.templateBaseUrl, { params })
   }
 
   createTemplate(payload) {
-    return apiClient.post('/notifications/templates', payload)
+    return apiClient.post(NotificationsApi.templateBaseUrl, payload)
   }
 
   updateTemplate(id, payload) {
-    return apiClient.put(`/notifications/templates/${id}`, payload)
+    return apiClient.put(`${NotificationsApi.templateBaseUrl}/${id}`, payload)
   }
 
   deleteTemplate(id) {
-    return apiClient.delete(`/notifications/templates/${id}`)
+    return apiClient.delete(`${NotificationsApi.templateBaseUrl}/${id}`)
   }
 }
 

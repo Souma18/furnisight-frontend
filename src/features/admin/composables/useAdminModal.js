@@ -2,7 +2,24 @@ import { computed, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { adminApi, mediaApi } from '@shared/lib/api/services'
 import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
-import { applyProductImageFiles, applyProductModelFile, buildProductPayload, cancelUnpersistedProductImages, completePendingProductImages, createEmptyVariant, mapProductToForm, markProductImagesPersisted, moveProductImage, removeProductImage } from './useAdminProductForm'
+import {
+  applyProductImageFiles,
+  applyProductModelFile,
+  buildProductPayload,
+  cancelUnpersistedProductImages,
+  cancelUnpersistedProductModel,
+  completePendingProductImages,
+  completePendingProductModel,
+  createEmptyVariant,
+  mapProductToForm,
+  markProductImagesPersisted,
+  markProductModelPersisted,
+  moveProductImage,
+  releaseProductModelPreview,
+  removeProductImage,
+  removeProductModel,
+  validateProductVariants,
+} from './useAdminProductForm'
 import { useAdminUiStore } from '../store/adminUiStore'
 
 const MODAL_TITLES = {
@@ -78,10 +95,21 @@ export function useAdminModal() {
     orderStatus: 'Chờ xác nhận',
     trackingCode: '',
     note: '',
-    model3dFileName: '',
-    model3dSize: 0,
-    model3dUrl: '',
+    modelUrl: '',
+    modelMediaId: '',
+    supports3d: false,
+    modelFileName: '',
+    modelFileSize: 0,
     modelFile: null,
+    modelUpload: null,
+    modelUploadController: null,
+    modelPreviewUrl: '',
+    modelPreviewObjectUrl: '',
+    modelPreviewError: '',
+    modelPreviewLoading: false,
+    modelUploadProgress: 0,
+    modelUploading: false,
+    modelUploadError: '',
     imageUrls: [],
     imageUploads: [],
     roleDescription: '',
@@ -93,6 +121,7 @@ export function useAdminModal() {
     stockQty: '',
     stockNote: '',
     variants: [],
+    variantErrors: {},
     activeVariantIndex: 0,
     voucherCode: '',
     voucherName: '',
@@ -164,7 +193,34 @@ export function useAdminModal() {
   }
 
   async function onModelFile(file) {
-    await applyProductModelFile(form, file)
+    try {
+      await applyProductModelFile(form, file)
+    } catch (e) {
+      form.modelUploadError = e?.response?.data?.message ?? e.message
+      ui.showToast({ icon: 'x', title: 'Lỗi tải model 3D', subtitle: e?.response?.data?.message ?? e.message })
+    }
+  }
+
+  async function retryModelUpload() {
+    if (!form.modelFile || form.modelUploading) return
+    await onModelFile(form.modelFile)
+  }
+
+  async function removeModel() {
+    if (form.modelUploading) return
+    await removeProductModel(form)
+  }
+
+  function onModelPreviewError(message) {
+    form.modelPreviewError = message || 'Không thể render model GLB.'
+  }
+
+  function onModelPreviewReady() {
+    form.modelPreviewError = ''
+  }
+
+  function onModelPreviewLoading(loading) {
+    form.modelPreviewLoading = loading
   }
 
   async function onProductImages(files) {
@@ -240,6 +296,8 @@ export function useAdminModal() {
       saving.value = true
       try {
         await cancelUnpersistedProductImages(form)
+        await cancelUnpersistedProductModel(form)
+        releaseProductModelPreview(form)
       } finally {
         saving.value = false
       }
@@ -278,11 +336,15 @@ export function useAdminModal() {
         if (form.categoryImageUpload) form.categoryImageUpload.persisted = true
       }
       if (type === 'addProd' || type === 'editProd') {
+        validateProductVariants(form)
         await completePendingProductImages(form)
+        await completePendingProductModel(form)
         const payload = buildProductPayload(form)
         if (type === 'addProd') await adminApi.createProduct(payload)
         else if (modal.value.payload?.id) await adminApi.updateProduct(modal.value.payload.id, payload)
         markProductImagesPersisted(form)
+        markProductModelPersisted(form)
+        releaseProductModelPreview(form)
       }
       if (type === 'editOrder' && modal.value.payload?.id) {
         const status = ORDER_STATUS_TO_API[form.orderStatus]
@@ -350,6 +412,11 @@ export function useAdminModal() {
     close: closeModal,
     save,
     onModelFile,
+    retryModelUpload,
+    removeModel,
+    onModelPreviewError,
+    onModelPreviewReady,
+    onModelPreviewLoading,
     onProductImages,
     removeImage,
     moveImage,

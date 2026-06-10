@@ -16,8 +16,26 @@ const props = defineProps({
     type: Object,
     default: null,
   },
+  imageType: String,
+  meshQuality: String,
   quality: String,
   isAnalyzing: Boolean,
+  predictionStatus: {
+    type: String,
+    default: 'idle',
+  },
+  predictionResponseType: {
+    type: String,
+    default: null,
+  },
+  predictionLabel: {
+    type: String,
+    default: '',
+  },
+  predictionConfidence: {
+    type: Number,
+    default: null,
+  },
   isLoadingTemplates: Boolean,
   projectName: String,
   uploadError: {
@@ -30,6 +48,8 @@ const emit = defineEmits([
   'switch-mode',
   'upload-image',
   'select-room-type',
+  'image-type-change',
+  'mesh-quality-change',
   'quality-change',
   'project-name-change',
 ])
@@ -43,7 +63,20 @@ function onFileChange(event) {
 
 const roomHasModel = computed(() => Boolean(props.selectedRoom?.modelUrl))
 const selectedFile = ref(null)
-const selectedFileName = computed(() => selectedFile.value?.name ?? '')
+const selectedFileName = computed(() => truncateFileName(selectedFile.value?.name ?? ''))
+const hasPredictionConfidence = computed(
+  () => typeof props.predictionConfidence === 'number' && Number.isFinite(props.predictionConfidence),
+)
+const predictionConfidencePercent = computed(() =>
+  hasPredictionConfidence.value ? Math.round(props.predictionConfidence * 100) : null,
+)
+function truncateFileName(name) {
+  if (!name || name.length <= 24) return name
+  const dotIndex = name.lastIndexOf('.')
+  const extension = dotIndex > 0 ? name.slice(dotIndex) : ''
+  const base = dotIndex > 0 ? name.slice(0, dotIndex) : name
+  return `${base.slice(0, 5)}...${extension || base.slice(-6)}`
+}
 
 function runAiGenerate() {
   if (!selectedFile.value || props.isAnalyzing) return
@@ -78,15 +111,37 @@ function runAiGenerate() {
 
     <div v-if="mode === 'upload'" class="upload-section">
       <p class="label">TAI ANH PHONG LEN</p>
+      
+      <div class="image-type-section">
+        <div class="quality-row" style="grid-template-columns: 1fr 1fr;">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: imageType === 'normal' }"
+            @click="emit('image-type-change', 'normal')"
+          >
+            Anh thuong
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: imageType === '360' }"
+            @click="emit('image-type-change', '360')"
+          >
+            Anh 360
+          </button>
+        </div>
+      </div>
+
       <label class="upload-zone">
         <input class="file-input" type="file" accept="image/*" @change="onFileChange" />
         <span class="upload-icon">📤</span>
-        <strong>Nhap / Keo Tha / Dan Hinh Anh</strong>
-        <small>JPG, PNG, WEBP · Toi da 50MB</small>
-        <small>AI se tu nhan dien loai phong</small>
+        <strong>Nhập / Kéo Thả / Dán Hình Ảnh</strong>
+        <small>JPG, PNG, WEBP · Tối đa 50MB</small>
+        <small>AI sẽ tự nhận diện loại phòng</small>
       </label>
-      <p v-if="selectedFileName" class="selected-file">
-        Da chon: <strong>{{ selectedFileName }}</strong>
+      <p v-if="selectedFileName" class="selected-file" :title="selectedFile?.name">
+        Đã chọn: <strong>{{ selectedFileName }}</strong>
       </p>
       <button
         type="button"
@@ -94,7 +149,7 @@ function runAiGenerate() {
         :disabled="!selectedFile || isAnalyzing"
         @click="runAiGenerate"
       >
-        {{ isAnalyzing ? 'Dang tao mo hinh...' : 'Su dung AI' }}
+        {{ isAnalyzing ? 'Dang tạo mô hình...' : 'Sử dụng AI' }}
       </button>
       <!-- <NSpin v-if="isAnalyzing" size="small">AI dang phan tich...</NSpin> -->
       <p v-if="uploadError" class="upload-error">{{ uploadError }}</p>
@@ -102,7 +157,7 @@ function runAiGenerate() {
 
     <div v-else class="room-templates">
       <p class="label">NGUON DU LIEU PHONG</p>
-      <NSpin v-if="isLoadingTemplates" size="small">Dang tai phong mau...</NSpin>
+      <NSpin v-if="isLoadingTemplates" size="small">Đang tải phòng mẫu...</NSpin>
       <div v-else class="room-list">
         <button
           v-for="room in roomTemplates"
@@ -133,10 +188,20 @@ function runAiGenerate() {
 
     <div v-if="mode === 'upload'" class="room-info">
       <p class="label">THONG TIN PHONG</p>
-      <p v-if="!selectedRoom" class="note">Chua co phong duoc chon.</p>
+      <p v-if="predictionStatus === 'idle'" class="note">Chua co ket qua prediction.</p>
+      <p v-else-if="predictionStatus === 'loading'" class="note">Dang dự đoán...</p>
+      <p v-else-if="predictionStatus === 'error'" class="note error-note">Prediction that bai.</p>
       <div v-else class="room-meta">
-        <NTag type="warning">{{ selectedRoom.name }} ({{ selectedRoom.confidence }}%)</NTag>
-        <p>{{ selectedRoom.suggestText }}</p>
+        <div class="tag-row">
+          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || 'Khong ro label' }}</NTag>
+          <NTag v-if="hasPredictionConfidence" type="success">
+            {{ predictionConfidencePercent }}%
+          </NTag>
+        </div>
+        <p v-if="selectedRoom && !roomHasModel">
+          {{ selectedRoom.statusText || 'Phong nay dang duoc bo sung model.' }}
+        </p>
+        <p v-else-if="selectedRoom?.suggestText">{{ selectedRoom.suggestText }}</p>
       </div>
     </div>
 
@@ -151,42 +216,74 @@ function runAiGenerate() {
     </div>
 
     <div v-if="mode === 'upload'" class="quality">
-      <p class="label">MESH RESOLUTION</p>
-      <div class="quality-row">
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '128' }"
-          @click="emit('quality-change', '128')"
-        >
-          128
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '256' }"
-          @click="emit('quality-change', '256')"
-        >
-          256
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '512' }"
-          @click="emit('quality-change', '512')"
-        >
-          512
-        </button>
-        <button
-          type="button"
-          class="quality-btn"
-          :class="{ active: quality === '1024' }"
-          @click="emit('quality-change', '1024')"
-        >
-          1024
-        </button>
-      </div>
-      <small class="quality-hint">Khuyen nghi 256 hoac 512 de can bang toc do va chat luong.</small>
+      <template v-if="imageType === 'normal'">
+        <p class="label">CHAT LUONG LUOI</p>
+        <div class="quality-row" style="grid-template-columns: 1fr 1fr 1fr;">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'low' }"
+            @click="emit('mesh-quality-change', 'low')"
+          >
+            Thap
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'medium' }"
+            @click="emit('mesh-quality-change', 'medium')"
+          >
+            T.Binh
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: meshQuality === 'high' }"
+            @click="emit('mesh-quality-change', 'high')"
+          >
+            Cao
+          </button>
+        </div>
+        <small class="quality-hint">Chat luong "T.Binh" (Medium) duoc khuyen nghi de co thoi gian phan hoi tot nhat.</small>
+      </template>
+      <template v-else>
+        <p class="label">MESH RESOLUTION</p>
+        <div class="quality-row">
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '128' }"
+            @click="emit('quality-change', '128')"
+          >
+            128
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '256' }"
+            @click="emit('quality-change', '256')"
+          >
+            256
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '512' }"
+            @click="emit('quality-change', '512')"
+          >
+            512
+          </button>
+          <button
+            type="button"
+            class="quality-btn"
+            :class="{ active: quality === '1024' }"
+            @click="emit('quality-change', '1024')"
+          >
+            1024
+          </button>
+        </div>
+        <small class="quality-hint">Khuyen nghi 256 hoac 512 de can bang toc do va chat luong.</small>
+      </template>
     </div>
   </aside>
 </template>
@@ -262,7 +359,8 @@ function runAiGenerate() {
 .room-templates,
 .room-info,
 .project-name,
-.quality {
+.quality,
+.image-type-section {
   display: flex;
   flex-direction: column;
   gap: 0.45rem;
@@ -380,6 +478,12 @@ function runAiGenerate() {
   gap: 0.4rem;
 }
 
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
 .room-meta p {
   margin: 0;
   font-size: 0.84rem;
@@ -395,6 +499,10 @@ function runAiGenerate() {
   margin: 0;
   font-size: 0.84rem;
   color: #6e6b66;
+}
+
+.error-note {
+  color: #c54848;
 }
 
 .quality-row {
@@ -452,6 +560,10 @@ function runAiGenerate() {
   color: #6d675f;
   font-size: 0.74rem;
   line-height: 1.3;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .selected-file strong {

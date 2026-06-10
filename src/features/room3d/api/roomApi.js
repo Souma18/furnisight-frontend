@@ -1,5 +1,5 @@
-import axios from 'axios'
-import { PRODUCTS_3D, ROOM_TEMPLATES } from '../core/mockData'
+import { apiClient } from '@shared/lib/api/client'
+import { ROOM_TEMPLATES } from '../core/mockData'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {
@@ -12,15 +12,178 @@ const LABEL_TO_ROOM_TYPE = {
   'home office': 'office',
 }
 
+function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
+  const product = item.product && typeof item.product === 'object' ? item.product : {}
+  const variants = Array.isArray(item.variants)
+    ? item.variants
+    : Array.isArray(product.variants)
+      ? product.variants
+      : []
+  const primaryVariant = variants[0] ?? null
+  const id = item.productId ?? item.id ?? product.id ?? ''
+  const variantId = item.variantId ?? item.defaultVariantId ?? primaryVariant?.id ?? null
+  const price = resolveProductPrice(item, product, primaryVariant)
+
+  return {
+    ...item,
+    id,
+    productId: id,
+    variantId,
+    detailId: item.detailId ?? item.slug ?? product.slug ?? id,
+    slug: item.slug ?? product.slug ?? '',
+    name: item.name ?? product.name ?? '',
+    categoryName: resolveCategoryName(item, product),
+    categorySlug: resolveCategorySlug(item, product) || predictedCategorySlug,
+    price,
+    oldPrice: resolveFirstNumber(
+      item.oldPrice,
+      item.originalPrice,
+      item.compareAtPrice,
+      item.listPrice,
+      product.oldPrice,
+      product.originalPrice,
+      primaryVariant?.oldPrice,
+    ),
+    image: resolveProductImage(item, product),
+    imageUrl: resolveProductImage(item, product),
+    rating: resolveFirstNumber(item.rating, product.rating) ?? 0,
+    ratingCount: resolveFirstNumber(item.ratingCount, product.ratingCount) ?? 0,
+    soldCount: resolveFirstNumber(item.soldCount, item.soldQuantity, item.sold, product.soldCount) ?? 0,
+    tags: normalizeStringArray(item.tags ?? product.tags),
+    modelUrl: item.modelUrl ?? item.model3dUrl ?? item.glbUrl ?? product.modelUrl ?? '',
+    roomTypes: normalizeStringArray(item.roomTypes ?? item.roomTypeHints ?? product.roomTypes),
+    variants,
+  }
+}
+
+function resolveProductPrice(item = {}, product = {}, primaryVariant = null) {
+  return resolveFirstNumber(
+    item.price,
+    item.salePrice,
+    item.sellingPrice,
+    item.discountedPrice,
+    item.currentPrice,
+    item.minPrice,
+    item.basePrice,
+    product.price,
+    product.salePrice,
+    product.sellingPrice,
+    product.minPrice,
+    primaryVariant?.price,
+  ) ?? 0
+}
+
+function resolveFirstNumber(...values) {
+  const normalized = values.map(parsePriceNumber).filter((value) => value != null)
+  return normalized.find((value) => value > 0) ?? normalized[0] ?? null
+}
+
+function parsePriceNumber(value) {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null
+  if (typeof value !== 'string') return null
+
+  const trimmed = value.trim()
+  if (!trimmed) return null
+
+  const direct = Number(trimmed.replace(/,/g, ''))
+  if (Number.isFinite(direct)) return direct
+
+  const digitsOnly = trimmed.replace(/[^\d]/g, '')
+  const parsed = Number(digitsOnly)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function resolveProductImage(item = {}, product = {}) {
+  const imageCandidates = [
+    item.imageUrl,
+    item.productImageUrl,
+    item.image,
+    item.thumbnail,
+    item.thumbnailUrl,
+    item.coverImage,
+    item.coverImageUrl,
+    product.imageUrl,
+    product.image,
+    product.thumbnail,
+    product.thumbnailUrl,
+  ]
+
+  for (const gallery of [item.gallery, item.images, product.gallery, product.images]) {
+    if (!Array.isArray(gallery)) continue
+    imageCandidates.push(...gallery.map((entry) => {
+      if (typeof entry === 'string') return entry
+      return entry?.url || entry?.imageUrl || entry?.src || ''
+    }))
+  }
+
+  return imageCandidates.find(Boolean) || ''
+}
+
+function resolveCategoryName(item = {}, product = {}) {
+  const category = (
+    item.categoryName ??
+    item.category?.name ??
+    item.category?.label ??
+    product.categoryName ??
+    product.category?.name ??
+    product.category?.label ??
+    item.category ??
+    ''
+  )
+  return typeof category === 'string' ? category : ''
+}
+
+function resolveCategorySlug(item = {}, product = {}) {
+  const categorySlug = (
+    item.categorySlug ??
+    item.category?.slug ??
+    product.categorySlug ??
+    product.category?.slug ??
+    ''
+  )
+  return typeof categorySlug === 'string' ? categorySlug.trim().toLowerCase() : ''
+}
+
+function normalizeStringArray(value) {
+  if (Array.isArray(value)) return value.filter(Boolean)
+  if (typeof value === 'string') {
+    return value
+      .split(',')
+      .map((item) => item.trim())
+      .filter(Boolean)
+  }
+  return []
+}
+
+export function normalizePredictionResponse(data = {}) {
+  const hasConfidence = typeof data.confidence === 'number' && Number.isFinite(data.confidence)
+  const hasRecommendations = Array.isArray(data.recommendations)
+  const recommendationMeta = data.recommendationMeta ?? null
+  const predictedCategorySlug =
+    typeof recommendationMeta?.categorySlug === 'string'
+      ? recommendationMeta.categorySlug.trim().toLowerCase()
+      : ''
+
+  return {
+    label: typeof data.label === 'string' ? data.label.trim() : '',
+    responseType: hasConfidence || hasRecommendations || data.recommendationMeta ? 'full' : 'legacy',
+    confidence: hasConfidence ? data.confidence : null,
+    recommendations: hasRecommendations
+      ? data.recommendations.map((item) => normalizeRecommendation(item, predictedCategorySlug))
+      : [],
+    recommendationMeta,
+  }
+}
+
 /**
- * Chuan hoa label API thanh `selectedRoomType` hop le.
- * Neu khong khop, tra ve `bedroom` lam mac dinh.
+ * Chuẩn hóa nhãn nhận diện thành `selectedRoomType` hợp lệ.
+ * Nếu không khớp, trả về null để không mượn mô hình của loại phòng khác.
  */
 export function mapLabelToRoomType(label) {
-  if (!label || typeof label !== 'string') return 'bedroom'
+  if (!label || typeof label !== 'string') return null
   const key = label.trim().toLowerCase()
   if (ROOM_TEMPLATES.some((r) => r.type === key)) return key
-  return LABEL_TO_ROOM_TYPE[key] ?? 'bedroom'
+  return LABEL_TO_ROOM_TYPE[key] ?? null
 }
 
 function delay(ms = 700) {
@@ -35,41 +198,47 @@ export async function analyzeRoomImage() {
   return { data: room }
 }
 
-// API nhan dien loai phong tu anh (label + confidence).
-// Sau nay co the doi qua env VITE_ROOM3D_CLASSIFY_URL; hien dung URL truc tiep theo yeu cau.
-const CLASSIFY_ENDPOINT =
-  import.meta.env.VITE_ROOM3D_CLASSIFY_URL ?? 'http://10.96.157.6:8000/predict'
+// Nhận diện loại phòng từ ảnh tải lên.
+// Goi qua microservices gateway cua apiClient, url='/ai-classifier/predict'
+const CLASSIFY_ENDPOINT = import.meta.env.VITE_ROOM3D_CLASSIFY_URL ?? '/ai-classifier/predict'
 
 /**
  * Goi backend nhan dien: multipart file + image_type.
  * Response: { label: "bedroom", confidence: 0.9231 }
  */
-export async function classifyRoomImage(file, imageType = '360') {
+export async function classifyRoomImage(file, imageType = 'normal') {
   const formData = new FormData()
   formData.append('file', file)
   formData.append('image_type', imageType)
 
-  const response = await axios.post(CLASSIFY_ENDPOINT, formData, {
+  const response = await apiClient.post(CLASSIFY_ENDPOINT, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
     timeout: 60_000,
   })
 
-  return response.data
+  return normalizePredictionResponse(response.data)
 }
 
-// API sinh mesh 3D tu anh (model_url).
-// Co the doi URL qua env VITE_ROOM3D_PREDICT_URL neu can.
-const PREDICT_ENDPOINT = import.meta.env.VITE_ROOM3D_PREDICT_URL ?? 'http://localhost:8000/predict'
+// Tạo mô hình 3D từ ảnh tải lên.
+// Goi qua microservices gateway cua apiClient, url='/ai-reconstruction/predict'
+const PREDICT_ENDPOINT = import.meta.env.VITE_ROOM3D_PREDICT_URL ?? '/ai-reconstruction/predict'
 
-export async function predictRoomModel(file, meshResolution = 512) {
+export async function predictRoomModel(file, options = {}) {
+  const { imageType = 'normal', meshResolution = 512, meshQuality = 'medium' } = options
   const formData = new FormData()
   formData.append('file', file)
-  formData.append('mesh_resolution', String(meshResolution))
+  formData.append('image_type', imageType)
+  
+  if (imageType === '360') {
+    formData.append('mesh_resolution', String(meshResolution))
+  } else {
+    formData.append('mesh_quality', String(meshQuality))
+  }
 
-  // Dung axios direct de tranh xung dot default JSON header.
-  const response = await axios.post(PREDICT_ENDPOINT, formData, {
+  // Thay the axios direct bang apiClient, uu tien timeout lon (2 phut) vi sinh 3D lau
+  const response = await apiClient.post(PREDICT_ENDPOINT, formData, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
@@ -82,12 +251,4 @@ export async function predictRoomModel(file, meshResolution = 512) {
 export async function getRoomTemplates() {
   await delay(350)
   return { data: ROOM_TEMPLATES }
-}
-
-export async function getSuggestedProducts(roomType) {
-  await delay(450)
-  const products = PRODUCTS_3D.filter((product) =>
-    roomType ? product.roomTypes.includes(roomType) : true,
-  )
-  return { data: products }
 }

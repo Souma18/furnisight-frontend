@@ -199,6 +199,18 @@
 .pl-grid.list { grid-template-columns: 1fr; }
 .pl-card { position: relative; background: #fff; border: 1px solid #ece2cf; border-radius: 18px; overflow: hidden; }
 .pl-card-link { color: inherit; display: grid; min-width: 0; text-decoration: none; }
+.pl-card-link:hover,
+.pl-card-link:focus,
+.pl-card-link:focus-visible {
+  color: inherit;
+  outline: none;
+  text-decoration: none;
+}
+.pl-card-link:hover .pl-name,
+.pl-card-link:focus .pl-name,
+.pl-card-link:focus-visible .pl-name {
+  text-decoration: none;
+}
 .pl-grid.list .pl-card-link { grid-template-columns: 210px 1fr; }
 .pl-card-media { height: 210px; background: #f0e9dd; display: grid; place-items: center; font-size: 72px; text-decoration: none; overflow: hidden; }
 .pl-grid.list .pl-card-media { height: 100%; min-height: 180px; }

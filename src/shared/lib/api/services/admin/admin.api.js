@@ -61,17 +61,6 @@ class AdminApi {
     return apiClient.delete(`/admin/products/${id}`)
   }
 
-  uploadProductModel(fileOrFormData) {
-    const formData = fileOrFormData instanceof FormData ? fileOrFormData : new FormData()
-    if (!(fileOrFormData instanceof FormData)) {
-      formData.append('file', fileOrFormData)
-    }
-
-    return apiClient.post('/admin/products/model-upload', formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  }
-
   fetchOrders(params) {
     return apiClient.get('/admin/orders', { params })
   }
@@ -88,12 +77,8 @@ class AdminApi {
     return apiClient.post('/admin/inventory/stock-in', payload)
   }
 
-  fetchInventoryWarningSettings() {
-    return apiClient.get('/admin/inventory/warning-settings')
-  }
-
-  updateInventoryWarningSettings(payload) {
-    return apiClient.put('/admin/inventory/warning-settings', payload)
+  updateVariantLowStockThreshold(variantId, payload) {
+    return apiClient.put(`/admin/inventory/variants/${variantId}/threshold`, payload)
   }
 
   fetchVouchers(params) {
@@ -141,15 +126,15 @@ class AdminApi {
   }
 
   fetchAdminProfile() {
-    return apiClient.get('/admin/account/profile')
+    return apiClient.get('/users/profile')
   }
 
   updateAdminProfile(payload) {
-    return apiClient.put('/admin/account/profile', payload)
+    return apiClient.put('/users/profile', payload)
   }
 
   changeAdminPassword(payload) {
-    return apiClient.post('/admin/account/password', payload)
+    return apiClient.post('/users/auth/password/change', payload)
   }
 
   fetchMessageTemplates(params) {

@@ -16,11 +16,11 @@ defineEmits(['update:show'])
 </script>
 
 <template>
-  <NModal :show="show" preset="card" title="Dat hang thanh cong" style="width: 420px" @update:show="$emit('update:show', $event)">
+  <NModal :show="show" preset="card" title="Đặt hàng thành công" style="width: 420px" @update:show="$emit('update:show', $event)">
     <div class="content">
-      <p>Cam on ban da mua sam tai LUXNEST.</p>
-      <p><strong>Ma don:</strong> {{ orderCode || 'Dang tao...' }}</p>
-      <NButton block type="primary" @click="$emit('update:show', false)">Tiep tuc kham pha</NButton>
+      <p>Cảm ơn bạn đã mua sắm tại LUXNEST.</p>
+      <p><strong>Mã đơn:</strong> {{ orderCode || 'Đang tạo...' }}</p>
+      <NButton block type="primary" @click="$emit('update:show', false)">Tiếp tục khám phá</NButton>
     </div>
   </NModal>
 </template>

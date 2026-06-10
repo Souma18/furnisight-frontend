@@ -650,8 +650,34 @@ textarea.mfi{resize:vertical}
 .admin-shell .icon-picker-item.active{border-color:var(--gold);background:var(--gold-pale)}
 .icon-picker-drop-enter-active,.icon-picker-drop-leave-active{transition:opacity .18s ease,transform .18s ease}
 .icon-picker-drop-enter-from,.icon-picker-drop-leave-to{opacity:0;transform:translateY(-6px)}
-.admin-shell .model-upload-box { border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; background: var(--cream); text-align: center; }
+.admin-shell .model-upload-box { border: 1.5px dashed var(--border); border-radius: 10px; padding: 16px; background: var(--cream); text-align: center; cursor:pointer; transition:border-color .2s,background .2s,box-shadow .2s; }
+.admin-shell .model-upload-box:hover { border-color:var(--gold2); background:var(--white); }
 .admin-shell .model-upload-box.has-file { border-color: var(--gold); background: var(--gold-pale); }
+.admin-shell .model-upload-box.is-uploading { cursor:wait; opacity:.82; }
+.admin-shell .admin-model-upload__head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.admin-shell .admin-model-upload__remove { border:0; background:transparent; color:var(--red); display:inline-flex; align-items:center; gap:5px; padding:3px 0; font:600 11px 'DM Sans',sans-serif; cursor:pointer; }
+.admin-shell .admin-model-upload__remove:disabled { opacity:.45; cursor:not-allowed; }
+.admin-shell .admin-model-upload__icon { display:block; margin:0 auto 8px; color:var(--gold); }
+.admin-shell .model-upload-box strong,
+.admin-shell .model-upload-box span,
+.admin-shell .model-upload-box small { display:block; }
+.admin-shell .model-upload-box strong { font-size:13px; font-weight:600; color:var(--text); overflow-wrap:anywhere; }
+.admin-shell .model-upload-box span { font-size:12px; color:var(--text3); }
+.admin-shell .model-upload-box small { margin-top:4px; font-size:11px; color:var(--text4); }
+.admin-shell .admin-model-upload__progress { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:10px; }
+.admin-shell .admin-model-upload__progress-track { height:7px; overflow:hidden; border-radius:999px; background:var(--cream2); }
+.admin-shell .admin-model-upload__progress-track span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,var(--gold3),var(--gold)); transition:width .2s ease; }
+.admin-shell .admin-model-upload__progress small { color:var(--text3); font-size:11px; white-space:nowrap; }
+.admin-shell .admin-model-upload__error { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 10px; border:1px solid rgba(192,57,43,.25); border-radius:8px; background:var(--red-bg); color:var(--red); font-size:11px; }
+.admin-shell .admin-model-upload__error span,
+.admin-shell .admin-model-upload__error button { display:inline-flex; align-items:center; gap:5px; }
+.admin-shell .admin-model-upload__error button { flex-shrink:0; border:1px solid rgba(192,57,43,.25); border-radius:6px; padding:5px 8px; background:var(--white); color:var(--red); font:600 11px 'DM Sans',sans-serif; cursor:pointer; }
+.admin-shell .admin-model-preview { position:relative; height:280px; overflow:hidden; border:1px solid var(--border); border-radius:10px; background:var(--cream); }
+.admin-shell .admin-model-preview__viewport,
+.admin-shell .admin-model-preview__viewport canvas { width:100%; height:100%; display:block; }
+.admin-shell .admin-model-preview__status { position:absolute; inset:0; display:grid; place-items:center; padding:20px; background:rgba(250,246,240,.82); color:var(--text3); font-size:12px; text-align:center; }
+.admin-shell .admin-model-preview__status--error { color:var(--red); }
+.admin-shell .admin-model-preview__hint { position:absolute; left:50%; bottom:8px; transform:translateX(-50%); padding:4px 8px; border-radius:999px; background:rgba(12,24,32,.72); color:white; font-size:10px; white-space:nowrap; pointer-events:none; }
 .admin-shell .product-image-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
 .admin-shell .product-image-thumb { position: relative; aspect-ratio: 1; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: var(--cream); cursor: grab; }
 .admin-shell .product-image-thumb:active { cursor: grabbing; }

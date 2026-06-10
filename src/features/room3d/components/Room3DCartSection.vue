@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -21,7 +21,14 @@ defineEmits(['remove', 'checkout'])
 
 const isOpen = ref(false)
 
-const cartLabel = computed(() => (isOpen.value ? '▾' : '▸'))
+function itemIconName(item) {
+  const raw = `${item.categoryName ?? ''} ${item.category ?? ''}`.toLowerCase()
+  if (raw.includes('sofa')) return 'sofa'
+  if (raw.includes('chair') || raw.includes('ghế')) return 'armchair'
+  if (raw.includes('bed') || raw.includes('giường')) return 'bed'
+  if (raw.includes('table') || raw.includes('bàn')) return 'table'
+  return 'box'
+}
 </script>
 
 <template>
@@ -29,30 +36,38 @@ const cartLabel = computed(() => (isOpen.value ? '▾' : '▸'))
     <button type="button" class="cart-toggle" @click="isOpen = !isOpen">
       <span class="toggle-left">
         <span class="icon"><AppIcon name="cart" :size="14" /></span>
-        <span class="title">Gio hang</span>
+        <span class="title">Giỏ hàng</span>
         <span class="count">{{ cartItems.length }}</span>
       </span>
       <span class="toggle-right">
         <strong class="total">{{ formatCurrency(cartTotal) }}</strong>
-        <span class="chevron" :class="{ open: isOpen }">{{ cartLabel }}</span>
+        <span class="chevron" :class="{ open: isOpen }">
+          <AppIcon name="chevronRight" :size="13" />
+        </span>
       </span>
     </button>
 
     <div v-if="isOpen" class="cart-body">
-      <div v-if="cartItems.length === 0" class="empty">Chua co san pham nao.</div>
+      <div v-if="cartItems.length === 0" class="empty">Chưa có sản phẩm nào.</div>
       <div v-else class="list">
         <article v-for="item in cartItems" :key="item.id" class="item">
-          <div class="thumb">{{ item.emoji }}</div>
+          <div class="thumb">
+            <img v-if="item.imageUrl || item.image" :src="item.imageUrl || item.image" :alt="item.name" />
+            <span v-else class="thumb-icon"><AppIcon :name="itemIconName(item)" :size="16" /></span>
+          </div>
           <div class="meta">
             <p class="name">{{ item.name }}</p>
             <p class="price">{{ formatCurrency(item.price) }}</p>
           </div>
-          <button type="button" class="remove-btn" @click="$emit('remove', item.id)">✕</button>
+          <button type="button" class="remove-btn" @click="$emit('remove', item.id)">
+            <AppIcon name="close" :size="15" />
+          </button>
         </article>
       </div>
 
       <button type="button" class="checkout" :disabled="cartItems.length === 0" @click="$emit('checkout')">
-        💳 Thanh toan ngay
+        <AppIcon name="creditCard" :size="15" />
+        <span>Thanh toán ngay</span>
       </button>
     </div>
   </section>
@@ -177,6 +192,19 @@ const cartLabel = computed(() => (isOpen.value ? '▾' : '▸'))
   justify-content: center;
   font-size: 1rem;
   flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.thumb-icon {
+  color: #846640;
+  display: inline-flex;
 }
 
 .meta {
@@ -208,6 +236,9 @@ const cartLabel = computed(() => (isOpen.value ? '▾' : '▸'))
   border-radius: 0.38rem;
   cursor: pointer;
   flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background-color 0.18s ease, color 0.18s ease;
 }
 
@@ -227,6 +258,10 @@ const cartLabel = computed(() => (isOpen.value ? '▾' : '▸'))
   font-size: 0.83rem;
   font-weight: 700;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
   transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
 }
 
