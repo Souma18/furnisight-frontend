@@ -58,7 +58,7 @@ function onStockProductChange() {
 
 function variantSummary(variant, index) {
   const parts = [variant.color, variant.material].filter(Boolean)
-  return parts.length ? parts.join(' / ') : `Variant ${index + 1}`
+  return parts.length ? parts.join(' / ') : `Biến thể ${index + 1}`
 }
 
 function variantDisplayCode(variant) {
@@ -195,7 +195,7 @@ watch(() => modal.value.open, (open) => {
       <div class="mform-group">
         <div class="variant-head">
           <label class="mfl">Biến thể sản phẩm</label>
-          <button type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm variant</button>
+          <button type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm biến thể</button>
         </div>
         <div class="variant-list">
           <div v-for="(variant, index) in form.variants" :key="variant.id || index" class="variant-row">
@@ -241,7 +241,7 @@ watch(() => modal.value.open, (open) => {
                 <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
               </div>
               <button type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
-                <AppIcon name="trash2" :size="13" />Xóa variant
+                <AppIcon name="trash2" :size="13" />Xóa biến thể
               </button>
             </div>
           </div>
@@ -304,9 +304,9 @@ watch(() => modal.value.open, (open) => {
         </select>
       </div>
       <div class="mform-group">
-        <label class="mfl">Variant / mã</label>
+        <label class="mfl">Biến thể / mã</label>
         <select v-model="form.stockVariantId" class="mfi">
-          <option value="">Chọn variant</option>
+          <option value="">Chọn biến thể</option>
           <option v-for="(variant, index) in stockVariantOptions" :key="variant.id" :value="variant.id">
             {{ variant.label || variant.sku || variantSummary(variant, index) }} · tồn {{ variant.stock }}
           </option>

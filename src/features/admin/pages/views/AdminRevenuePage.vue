@@ -23,6 +23,15 @@ const monthColumns = [
   { key: 'refund', label: 'Hoàn trả' },
 ]
 
+const topProductColumns = [
+  { key: 'imageUrl', label: 'Hình ảnh' },
+  { key: 'productName', label: 'Tên sản phẩm' },
+  { key: 'categoryName', label: 'Danh mục' },
+  { key: 'price', label: 'Đơn giá' },
+  { key: 'soldCount', label: 'Đã bán' },
+  { key: 'totalRevenue', label: 'Doanh thu' },
+]
+
 bindCharts((charts, d) => {
   // Biểu đồ bar doanh thu tháng (đơn vị triệu VNĐ)
   if (monthCanvas.value && d.monthLabels?.length) {
@@ -69,6 +78,28 @@ bindCharts((charts, d) => {
         <span style="color:var(--red);font-size:12px">{{ row.refund }}</span>
       </template>
     </AdminDataTable>
+
+    <div class="top-selling-section" style="margin-top: 32px;">
+      <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--text)">Top 5 sản phẩm bán chạy nhất</h3>
+      <AdminDataTable :columns="topProductColumns" :rows="data.topProducts">
+        <template #cell-imageUrl="{ row }">
+          <img v-if="row.imageUrl" :src="row.imageUrl" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" alt="" />
+          <span v-else style="color:var(--text3); font-size:12px;">—</span>
+        </template>
+        <template #cell-productName="{ row }">
+          <span style="font-weight: 600; color: var(--text)">{{ row.productName }}</span>
+        </template>
+        <template #cell-price="{ row }">
+          <span style="color:var(--text3)">{{ row.price }}</span>
+        </template>
+        <template #cell-soldCount="{ row }">
+          <span style="font-weight: 600; color: var(--text)">{{ row.soldCount }}</span>
+        </template>
+        <template #cell-totalRevenue="{ row }">
+          <span style="font-weight:700;color:var(--gold)">{{ row.totalRevenue }}</span>
+        </template>
+      </AdminDataTable>
+    </div>
   </template>
 </template>
 

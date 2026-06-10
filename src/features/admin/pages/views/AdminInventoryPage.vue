@@ -106,7 +106,7 @@ async function updateVariantThreshold(row, event) {
   <AdminPageHeader
     eyebrow="Quản lý hệ thống"
     title-html="Kho <em>hàng</em>"
-    :subtitle="data ? `${groupedProducts.length} sản phẩm · ${data.items?.length || 0} variant` : 'Theo dõi tồn kho theo sản phẩm'"
+    :subtitle="data ? `${groupedProducts.length} sản phẩm · ${data.items?.length || 0} biến thể` : 'Theo dõi tồn kho theo sản phẩm'"
   >
     <template #actions>
       <button v-if="data" type="button" class="btn-ghost" @click="expandAll">
@@ -139,7 +139,7 @@ async function updateVariantThreshold(row, event) {
         <span class="inv-group-name">{{ group.name }}</span>
         <span class="inv-group-cat">{{ group.category }}</span>
         <span class="inv-group-meta">
-          <span class="inv-group-count">{{ group.variants.length }} variant</span>
+          <span class="inv-group-count">{{ group.variants.length }} biến thể</span>
           <span class="inv-group-stock">Tổng: <strong>{{ group.totalStock }}</strong></span>
           <span class="badge" :class="badgeMap[group.worstStatus]">{{ group.worstLabel }}</span>
         </span>
