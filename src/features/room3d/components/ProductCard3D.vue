@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -25,10 +25,11 @@ const props = defineProps({
   },
 })
 
-defineEmits(['add'])
+const emit = defineEmits(['add', 'open-detail'])
 
 const productImage = computed(() => props.product.image || props.product.imageUrl || '')
 const canDragToScene = computed(() => Boolean(props.product.modelUrl))
+const isDragging = ref(false)
 const productIconName = computed(() => {
   const raw = `${props.product.categoryName ?? ''} ${props.product.category ?? ''}`.toLowerCase()
   if (raw.includes('sofa')) return 'sofa'
@@ -44,12 +45,24 @@ function onDragStart(event) {
     event.preventDefault()
     return
   }
+  isDragging.value = true
   if (!event.dataTransfer) return
   const payload = JSON.stringify({ productId: props.product.id })
   event.dataTransfer.effectAllowed = 'copy'
   event.dataTransfer.setData('application/x-room3d-product', payload)
   // text/plain dạng số thuần để trình duyệt nào cũng đọc được.
   event.dataTransfer.setData('text/plain', String(props.product.id))
+}
+
+function onDragEnd() {
+  window.setTimeout(() => {
+    isDragging.value = false
+  }, 0)
+}
+
+function openDetail() {
+  if (isDragging.value) return
+  emit('open-detail', props.product)
 }
 </script>
 
@@ -59,7 +72,14 @@ function onDragStart(event) {
     :class="{ added }"
     :style="{ '--pc-step': shapeStep }"
     :draggable="canDragToScene"
+    role="link"
+    tabindex="0"
+    :aria-label="`Xem chi tiết ${product.name}`"
+    @click="openDetail"
+    @keydown.enter.self.prevent="openDetail"
+    @keydown.space.self.prevent="openDetail"
     @dragstart="onDragStart"
+    @dragend="onDragEnd"
   >
     <div class="preview">
       <span v-if="product.tags?.includes?.('new')" class="new-badge">Mới</span>
@@ -101,8 +121,8 @@ function onDragStart(event) {
   background: #ffffff;
   display: flex;
   flex-direction: column;
-  min-height: calc(13.4rem + (var(--pc-step) * 0.38rem));
-  cursor: default;
+  min-height: calc(14.9rem + (var(--pc-step) * 0.38rem));
+  cursor: pointer;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
@@ -217,16 +237,17 @@ function onDragStart(event) {
   margin-top: auto;
   padding-top: calc(0.48rem * var(--pc-content-scale));
   display: grid;
-  grid-template-columns: minmax(0, 1fr) calc(1.86rem + (0.14rem * var(--pc-content-scale)));
-  align-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
   gap: calc(0.36rem * var(--pc-content-scale));
-  min-height: calc(1.7rem + (0.28rem * var(--pc-content-scale)));
+  min-height: calc(3.8rem + (0.28rem * var(--pc-content-scale)));
 }
 
 .prices {
   display: flex;
   flex-direction: column;
   min-width: 0;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -238,8 +259,6 @@ function onDragStart(event) {
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .price-old {
@@ -249,11 +268,10 @@ function onDragStart(event) {
   line-height: 1.1;
   text-decoration: line-through;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .add-btn {
+  justify-self: end;
   width: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
   min-width: 0;
   height: calc(1.86rem + (0.14rem * var(--pc-content-scale)));

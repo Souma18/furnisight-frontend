@@ -12,7 +12,7 @@ const LABEL_TO_ROOM_TYPE = {
   'home office': 'office',
 }
 
-function normalizeRecommendation(item = {}) {
+function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
   const product = item.product && typeof item.product === 'object' ? item.product : {}
   const variants = Array.isArray(item.variants)
     ? item.variants
@@ -33,6 +33,7 @@ function normalizeRecommendation(item = {}) {
     slug: item.slug ?? product.slug ?? '',
     name: item.name ?? product.name ?? '',
     categoryName: resolveCategoryName(item, product),
+    categorySlug: resolveCategorySlug(item, product) || predictedCategorySlug,
     price,
     oldPrice: resolveFirstNumber(
       item.oldPrice,
@@ -132,6 +133,17 @@ function resolveCategoryName(item = {}, product = {}) {
   return typeof category === 'string' ? category : ''
 }
 
+function resolveCategorySlug(item = {}, product = {}) {
+  const categorySlug = (
+    item.categorySlug ??
+    item.category?.slug ??
+    product.categorySlug ??
+    product.category?.slug ??
+    ''
+  )
+  return typeof categorySlug === 'string' ? categorySlug.trim().toLowerCase() : ''
+}
+
 function normalizeStringArray(value) {
   if (Array.isArray(value)) return value.filter(Boolean)
   if (typeof value === 'string') {
@@ -146,13 +158,20 @@ function normalizeStringArray(value) {
 export function normalizePredictionResponse(data = {}) {
   const hasConfidence = typeof data.confidence === 'number' && Number.isFinite(data.confidence)
   const hasRecommendations = Array.isArray(data.recommendations)
+  const recommendationMeta = data.recommendationMeta ?? null
+  const predictedCategorySlug =
+    typeof recommendationMeta?.categorySlug === 'string'
+      ? recommendationMeta.categorySlug.trim().toLowerCase()
+      : ''
 
   return {
     label: typeof data.label === 'string' ? data.label.trim() : '',
     responseType: hasConfidence || hasRecommendations || data.recommendationMeta ? 'full' : 'legacy',
     confidence: hasConfidence ? data.confidence : null,
-    recommendations: hasRecommendations ? data.recommendations.map(normalizeRecommendation) : [],
-    recommendationMeta: data.recommendationMeta ?? null,
+    recommendations: hasRecommendations
+      ? data.recommendations.map((item) => normalizeRecommendation(item, predictedCategorySlug))
+      : [],
+    recommendationMeta,
   }
 }
 

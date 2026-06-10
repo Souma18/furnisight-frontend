@@ -50,7 +50,14 @@ defineProps({
   },
 })
 
-defineEmits(['search-change', 'category-change', 'add-product', 'remove-product', 'open-checkout'])
+defineEmits([
+  'search-change',
+  'category-change',
+  'add-product',
+  'open-product',
+  'remove-product',
+  'open-checkout',
+])
 </script>
 
 <template>
@@ -105,6 +112,7 @@ defineEmits(['search-change', 'category-change', 'add-product', 'remove-product'
           :format-currency="formatCurrency"
           :shape-step="productCardStep"
           @add="$emit('add-product', $event)"
+          @open-detail="$emit('open-product', $event)"
         />
       </div>
     </div>

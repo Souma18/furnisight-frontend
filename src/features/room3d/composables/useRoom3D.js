@@ -36,13 +36,6 @@ export function useRoom3D() {
     '1024': 1024,
   }
 
-  function toFilterValue(value) {
-    return String(value ?? '')
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-  }
-
   const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
   const SUPPORTED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp'])
   const UNSUPPORTED_IMAGE_MESSAGE = 'Sai định dạng ảnh. Vui lòng upload JPG, PNG hoặc WEBP.'
@@ -78,16 +71,18 @@ export function useRoom3D() {
   }
 
   const productFilters = computed(() => {
-    const categories = state.recommendations.value
-      .map((item) => item.categoryName || item.category)
-      .filter(Boolean)
-    const uniqueCategories = [...new Set(categories)]
+    const categoriesBySlug = new Map()
+    for (const item of state.recommendations.value) {
+      const slug = String(item.categorySlug ?? '').trim().toLowerCase()
+      if (!slug || categoriesBySlug.has(slug)) continue
+      categoriesBySlug.set(slug, item.categoryName || slug)
+    }
 
     return [
       { label: 'Tất cả', value: 'all' },
-      ...uniqueCategories.map((category) => ({
-        label: category,
-        value: toFilterValue(category),
+      ...Array.from(categoriesBySlug, ([slug, label]) => ({
+        label,
+        value: slug,
       })),
     ]
   })
@@ -99,8 +94,7 @@ export function useRoom3D() {
 
     if (state.selectedCategory.value !== 'all') {
       result = result.filter(
-        (item) =>
-          toFilterValue(item.categoryName || item.category) === state.selectedCategory.value,
+        (item) => item.categorySlug === state.selectedCategory.value,
       )
     }
 
@@ -230,6 +224,15 @@ export function useRoom3D() {
     cartStore.addItem(product)
   }
 
+  function openProductDetail(product) {
+    const detailId = product?.detailId || product?.slug || product?.id
+    if (!detailId) return
+    router.push({
+      name: 'product-detail',
+      params: { id: detailId },
+    })
+  }
+
   function addProductToScene(payload) {
     if (!payload) return
     if (typeof payload === 'number') {
@@ -342,6 +345,7 @@ export function useRoom3D() {
     handleUploadImage,
     selectRoomType,
     addProductToCart,
+    openProductDetail,
     addProductToScene,
     removeProductFromCart,
     updateCartQty,

@@ -115,6 +115,7 @@ onMounted(() => {
           @search-change="vm.setSearchKeyword"
           @category-change="vm.setCategory"
           @add-product="vm.addProductToCart"
+          @open-product="vm.openProductDetail"
           @remove-product="vm.removeProductFromCart"
           @open-checkout="vm.goCheckout"
         />
