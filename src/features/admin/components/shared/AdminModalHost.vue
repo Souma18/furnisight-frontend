@@ -185,8 +185,11 @@ watch(() => modal.value.open, (open) => {
         </div>
       </div>
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Giá bán (đ)</label><input v-model="form.price" class="mfi" type="number" /></div>
-        <div class="mform-group"><label class="mfl">Tồn kho</label><input v-model="form.stock" class="mfi" type="number" /></div>
+        <div class="mform-group" style="flex:1"><label class="mfl">Giá bán (đ)</label><input v-model="form.price" class="mfi" type="number" /></div>
+      </div>
+      <div class="mform-note">
+        <AppIcon name="warehouse" :size="13" style="margin-right:5px;opacity:.7" />
+        Tồn kho được quản lý tại trang <strong>Kho hàng</strong> · thêm hàng bằng chức năng &ldquo;Nhập kho&rdquo;
       </div>
       <div class="mform-group"><label class="mfl">SKU</label><input v-model="form.sku" class="mfi" /></div>
       <div class="mform-group">
@@ -215,7 +218,6 @@ watch(() => modal.value.open, (open) => {
               </div>
               <div class="mform-row">
                 <div class="mform-group"><label class="mfl">Giá</label><input v-model="variant.price" class="mfi" type="number" min="0" /></div>
-                <div class="mform-group"><label class="mfl">Tồn</label><input v-model="variant.stock" class="mfi" type="number" min="0" /></div>
                 <div class="mform-group">
                   <label class="mfl">SKU variant *</label>
                   <input
@@ -346,3 +348,18 @@ watch(() => modal.value.open, (open) => {
     </template>
   </AdminModal>
 </template>
+
+<style scoped>
+.mform-note {
+  display: flex;
+  align-items: center;
+  font-size: 11.5px;
+  color: var(--text3);
+  background: var(--bg2, #f7f5f0);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  margin-top: 2px;
+  margin-bottom: 6px;
+}
+</style>
