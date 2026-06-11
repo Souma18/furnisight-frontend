@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
@@ -92,7 +93,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
     }
 
     try {
-      const checkoutStore = useCheckoutStore()
+      const checkoutStore = useCheckoutStore(pinia)
       const response = await ordersApi.createVnpayPayment({
         orderCode: order.orderCode,
         returnUrl: `${window.location.origin}/orders/payment/callback`,

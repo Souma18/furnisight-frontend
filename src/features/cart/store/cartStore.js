@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
 
@@ -34,7 +35,7 @@ function isApiBackedCartLine(item = {}) {
 }
 
 export const useCartStore = defineStore('cart', () => {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore(pinia)
   const items = ref([])
   const loading = ref(false)
   const hydrated = ref(false)
