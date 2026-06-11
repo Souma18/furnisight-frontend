@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAddressStore } from '@features/account/store/addressStore'
@@ -53,6 +53,7 @@ export function useCheckout() {
 
   async function initCheckout() {
     await Promise.all([cartStore.ensureHydrated(), addressStore.fetchAddresses(), checkoutStore.hydrateSession()])
+    await checkoutStore.refreshApplicableCombo(checkoutLines.value)
   }
 
   function goBackToCart() {
@@ -65,6 +66,7 @@ export function useCheckout() {
 
   async function updateLineQty(lineId, nextQty) {
     await cartStore.updateQty(lineId, nextQty)
+    await checkoutStore.refreshApplicableCombo(checkoutLines.value)
   }
 
   function buildShippingAddressDetail(address = {}) {
@@ -167,8 +169,10 @@ export function useCheckout() {
       paymentMethod: checkoutState.selectedPaymentId.value,
       shopVoucherCode: checkoutState.shopVoucher.value?.code || null,
       shippingVoucherCode: checkoutState.shippingVoucher.value?.code || null,
+      comboId: checkoutState.selectedCombo.value?.id || null,
       discountAmount: summary.value.shopDiscount,
       shippingDiscount: summary.value.shippingDiscount,
+      comboDiscount: summary.value.comboDiscount,
       shippingFee: summary.value.shipFee,
       insuranceFee: summary.value.insuranceAmount,
       items: linesSnapshot.map(buildOrderItemPayload),
@@ -230,6 +234,14 @@ export function useCheckout() {
 
     return order
   }
+
+  watch(
+    checkoutLines,
+    (lines) => {
+      checkoutStore.refreshApplicableCombo(lines)
+    },
+    { deep: true },
+  )
 
   return {
     ...checkoutState,

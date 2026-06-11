@@ -29,7 +29,7 @@ export function useCheckoutVoucherModal({
   async function handleApplyVoucherCode(code) {
     voucherApplying.value = true
     try {
-      const result = await applyVoucherByCode(code, voucherModalType.value, summary.value.subtotal)
+      const result = await applyVoucherByCode(code, voucherModalType.value, summary.value.subtotal, summary.value.shipFee)
       if (!result.ok) {
         showToast({ icon: 'badgePercent', title: 'Không áp dụng được', subtitle: result.message })
         return
@@ -52,7 +52,7 @@ export function useCheckoutVoucherModal({
     if (!voucher?.code) return
     voucherApplying.value = true
     try {
-      const result = await applyVoucherByCode(voucher.code, voucherModalType.value, summary.value.subtotal)
+      const result = await applyVoucherByCode(voucher.code, voucherModalType.value, summary.value.subtotal, summary.value.shipFee)
       if (!result.ok) {
         showToast({ icon: 'badgePercent', title: 'Không áp dụng được', subtitle: result.message })
         return

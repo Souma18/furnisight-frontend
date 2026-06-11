@@ -42,6 +42,7 @@ const {
   agreedTerms,
   shopVoucher,
   shippingVoucher,
+  selectedCombo,
   lastOrder,
   formatMoney,
   initCheckout,
@@ -138,8 +139,10 @@ function handleContinueShopping() {
           <CheckoutVoucherCard
             :shop-voucher="shopVoucher"
             :shipping-voucher="shippingVoucher"
+            :selected-combo="selectedCombo"
             :shop-discount="summary.shopDiscount"
             :shipping-discount="summary.shippingDiscount"
+            :combo-discount="summary.comboDiscount"
             :format-money="formatMoney"
             @open-voucher="openVoucherModal"
             @remove-voucher="handleRemoveVoucher"

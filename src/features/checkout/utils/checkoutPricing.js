@@ -10,6 +10,7 @@ export function calcLineTotal(line) {
 
 export function calcShopDiscount(subtotal, voucher) {
   if (!voucher) return 0
+  if (voucher.appliedDiscount != null) return Math.max(0, Number(voucher.appliedDiscount) || 0)
   const discountType = String(voucher.discountType || '').toLowerCase()
 
   if (discountType === 'percent') {
@@ -27,6 +28,7 @@ export function calcShopDiscount(subtotal, voucher) {
 
 export function calcShippingDiscount(shipFee, voucher) {
   if (!voucher || !shipFee) return 0
+  if (voucher.appliedDiscount != null) return Math.min(shipFee, Math.max(0, Number(voucher.appliedDiscount) || 0))
   const discountType = String(voucher.discountType || '').toLowerCase()
   if (discountType === 'shipping_cap') {
     return Math.min(shipFee, Number(voucher.discountValue) || shipFee)
@@ -39,6 +41,7 @@ export function buildCheckoutSummary({
   shipFee = 0,
   shopVoucher = null,
   shippingVoucher = null,
+  combo = null,
   hasInsurance = false,
   insurancePrice = 0,
 }) {
@@ -47,12 +50,17 @@ export function buildCheckoutSummary({
   const merchandiseSubtotal = subtotal + insuranceAmount
   const shopDiscount = calcShopDiscount(merchandiseSubtotal, shopVoucher)
   const shippingDiscount = calcShippingDiscount(shipFee, shippingVoucher)
-  const total = Math.max(0, merchandiseSubtotal + shipFee - shopDiscount - shippingDiscount)
+  const comboDiscount = Math.min(
+    merchandiseSubtotal,
+    Math.max(0, Number(combo?.appliedDiscount ?? combo?.comboDiscount ?? combo?.savedAmount) || 0),
+  )
+  const total = Math.max(0, merchandiseSubtotal + shipFee - comboDiscount - shopDiscount - shippingDiscount)
   const itemQty = lines.reduce((sum, line) => sum + (Number(line.qty) || 0), 0)
 
   return {
     subtotal: merchandiseSubtotal,
     shipFee,
+    comboDiscount,
     shopDiscount,
     shippingDiscount,
     insuranceAmount,
