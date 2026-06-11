@@ -72,9 +72,6 @@ const {
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 .btn-primary { background: linear-gradient(135deg, #e5b84a, #c9922a); color: #12202e; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 30px; text-decoration: none; }
 .btn-outline { border: 1.5px solid rgba(255,255,255,.25); color: rgba(255,255,255,.85); font-size: 14px; padding: 14px 28px; border-radius: 30px; text-decoration: none; }
-.hero-stats { display: flex; gap: 36px; margin-top: 48px; padding-top: 36px; border-top: 1px solid rgba(255,255,255,.1); }
-.stat-num { font-size: 36px; font-weight: 600; color: #e5b84a; line-height: 1; }
-.stat-label { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
 .preview-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
 .preview-card-header { padding: 14px 20px; background: rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
 .preview-dots { display: flex; gap: 6px; }
@@ -103,6 +100,7 @@ const {
 .preview-text { font-size: 13px; color: rgba(255,255,255,.55); }
 .preview-start { background: #c9922a; color: #12202e; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 20px; text-decoration: none; }
 .features-strip { background: #1c3148; padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; border-top: 1px solid rgba(201,146,42,.2); border-bottom: 1px solid rgba(201,146,42,.2); }
+.feat-icon { width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #e5b84a; background: rgba(201,146,42,.14); flex: 0 0 auto; }
 .process-3d-wrap { background: #12202e; border-radius: 24px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; min-height: 340px; }
 .process-3d-left { padding: 48px; color: #fff; }
 .process-3d-left .section-title.process-title { color: #fff; margin-bottom: 10px; }
@@ -143,7 +141,7 @@ const {
 .categories-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
 .cat-card { background: #fff; border-radius: 16px; padding: 24px 16px; border: 2px solid transparent; box-shadow: 0 2px 12px rgba(0,0,0,.05); cursor: pointer; }
 .cat-card.active { border-color: #c9922a; box-shadow: 0 8px 30px rgba(201,146,42,.2); transform: translateY(-4px); }
-.cat-icon { font-size: 32px; margin-bottom: 10px; }
+.cat-icon { min-height: 40px; margin-bottom: 10px; display: inline-flex; align-items: center; justify-content: center; color: #c9922a; }
 .cat-name { font-size: 13px; font-weight: 500; }
 .cat-count { font-size: 11px; color: #888; margin-top: 3px; }
 .rooms-bg { background: #12202e; padding: 80px 0; }
@@ -228,5 +226,5 @@ const {
 .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
 .fade-up.is-visible { opacity: 1; transform: translateY(0); }
 @media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .categories-grid { grid-template-columns: repeat(3, 1fr); } .rooms-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: 220px 220px auto; } .room-card.big { grid-row: auto; } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } .rooms-inner { padding: 0 24px; } }
-@media (max-width: 720px) { .hero-title { font-size: 42px; } .hero-stats { gap: 16px; flex-wrap: wrap; } .categories-grid, .products-grid, .rooms-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 720px) { .hero-title { font-size: 42px; } .categories-grid, .products-grid, .rooms-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
 </style>

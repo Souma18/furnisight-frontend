@@ -1,4 +1,6 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
+
 defineProps({
   categories: { type: Array, default: () => [] },
   activeCategoryId: { type: String, default: '' },
@@ -25,7 +27,7 @@ const emit = defineEmits(['select-category'])
       >
         <div class="cat-icon">
           <img v-if="category.icon && (category.icon.startsWith('http') || category.icon.startsWith('/'))" :src="category.icon" :alt="category.name" class="cat-icon-img" />
-          <span v-else>{{ category.icon }}</span>
+          <AppIcon v-else :name="category.icon || 'sofa'" :size="34" />
         </div>
         <div class="cat-name">{{ category.name }}</div>
         <div class="cat-count">{{ category.count }}</div>

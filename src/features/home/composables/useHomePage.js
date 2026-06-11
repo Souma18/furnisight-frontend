@@ -45,7 +45,7 @@ export function useHomePage() {
         const category = new CategoryResponse(item)
         return {
           ...category,
-          icon: category.iconUrl || '🛋️',
+          icon: category.iconUrl || 'sofa',
           count: `${category.productCount || 0} sản phẩm`,
         }
       })
@@ -84,7 +84,7 @@ export function useHomePage() {
         role: '',
         avatar: review.userAvatarUrl || null,
         text: review.content,
-        stars: '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)
+        rating: Number(review.rating) || 5,
       }))
     } catch (error) {
       console.error('Failed to load top reviews:', error)

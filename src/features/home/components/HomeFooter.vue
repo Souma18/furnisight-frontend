@@ -1,9 +1,15 @@
+<script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
+</script>
+
 <template>
   <footer id="footer" class="hn-footer">
     <div class="hn-footer-top">
       <div>
         <a class="hn-logo" href="#">
-          <span class="hn-logo-icon">🪺</span>
+          <span class="hn-logo-icon">
+            <AppIcon name="house" :size="18" />
+          </span>
           <span class="hn-logo-text">LUXNEST</span>
         </a>
         <p class="hn-footer-desc">

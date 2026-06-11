@@ -25,13 +25,6 @@ defineProps({
           <a href="/room3d" class="hn-btn-primary">Thu truc quan 3D</a>
           <a href="#products" class="hn-btn-outline">Kham pha san pham</a>
         </div>
-
-        <div class="hn-hero-stats">
-          <div v-for="item in hero.stats" :key="item.label">
-            <div class="hn-stat-num">{{ item.value }}</div>
-            <div class="hn-stat-label">{{ item.label }}</div>
-          </div>
-        </div>
       </div>
 
       <div class="hn-preview-card">

@@ -23,12 +23,6 @@ defineProps({
           <a href="/room3d" class="btn-primary">Thử trực quan 3D</a>
           <a href="#products" class="btn-outline">Khám phá sản phẩm</a>
         </div>
-        <div class="hero-stats">
-          <div v-for="item in hero.stats" :key="item.label">
-            <div class="stat-num">{{ item.value }}</div>
-            <div class="stat-label">{{ item.label }}</div>
-          </div>
-        </div>
       </div>
       <div class="preview-card">
         <div class="preview-card-header">
