@@ -93,6 +93,7 @@ export function useChat() {
     () => [authStore.isAuthenticated, authStore.user?.id ?? null],
     async () => {
       if (authStore.isAuthenticated) {
+        authModalOpen.value = false
         await chatStore.hydrateSession(true)
       } else {
         chatStore.resetSession()

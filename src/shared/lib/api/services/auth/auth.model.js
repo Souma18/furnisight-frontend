@@ -10,8 +10,9 @@ export class AuthProfileResponse {
   constructor(data = {}) {
     this.id = data.id ?? null
     this.email = data.email || ''
-    this.firstName = data.firstName || ''
-    this.lastName = data.lastName || ''
+    this.firstName = data.firstName || data.givenName || ''
+    this.lastName = data.lastName || data.familyName || ''
+    this.displayName = data.displayName || data.name || [this.lastName, this.firstName].filter(Boolean).join(' ').trim()
     this.avatarUrl = data.avatarUrl || ''
     this.role = data.role || ''
     this.status = data.status || ''
@@ -25,12 +26,12 @@ export class AuthSessionResponse {
    */
   constructor(data = {}) {
     const payload = unwrapApiPayload(data)
-    const profile = payload.profile ?? payload.user ?? null
+    const profile = payload.profile ?? payload.user ?? payload.account ?? payload.customer ?? null
 
-    this.accessToken = payload.accessToken ?? payload.access_token ?? ''
-    this.refreshToken = payload.refreshToken ?? payload.refresh_token ?? ''
+    this.accessToken = payload.accessToken ?? payload.access_token ?? payload.token ?? payload.jwt ?? payload.idToken ?? ''
+    this.refreshToken = payload.refreshToken ?? payload.refresh_token ?? payload.refresh ?? ''
     this.expiresIn = payload.expiresIn ?? payload.expires_in ?? 0
-    this.roles = payload.roles ?? []
+    this.roles = payload.roles ?? payload.authorities ?? (profile?.role ? [profile.role] : [])
     this.profile = profile && typeof profile === 'object' ? new AuthProfileResponse(profile) : null
   }
 }
@@ -42,8 +43,8 @@ export class TokenResponse {
   constructor(data = {}) {
     const payload = unwrapApiPayload(data)
 
-    this.accessToken = payload.accessToken ?? payload.access_token ?? ''
-    this.refreshToken = payload.refreshToken ?? payload.refresh_token ?? ''
+    this.accessToken = payload.accessToken ?? payload.access_token ?? payload.token ?? payload.jwt ?? payload.idToken ?? ''
+    this.refreshToken = payload.refreshToken ?? payload.refresh_token ?? payload.refresh ?? ''
     this.expiresIn = payload.expiresIn ?? payload.expires_in ?? 0
   }
 }

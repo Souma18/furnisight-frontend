@@ -1,13 +1,17 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
 import ChatWidget from '@features/chat/components/ChatWidget.vue'
 import AuthModal from '@features/auth/components/AuthModal.vue'
 import { AUTH_MODAL_EVENT, consumePendingAuthModal } from '@features/auth/lib/authModalBus'
+import { useAuthStore } from '@features/auth/store/authStore'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
 const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
 const isHomePage = computed(() => route.name === 'home')
 const isProductsPage = computed(() => route.name === 'products')
@@ -64,6 +68,13 @@ watch(
     syncHeaderScrollbarInset()
   },
 )
+
+watch(isAuthenticated, (authenticated) => {
+  if (authenticated) {
+    isAuthModalOpen.value = false
+    initialAuthView.value = 'login'
+  }
+})
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncHeaderScrollbarInset)
