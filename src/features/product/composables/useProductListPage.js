@@ -1,13 +1,13 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
 import { useProducts } from './useProducts'
 
 export function useProductListPage() {
   const route = useRoute()
-  const router = useRouter()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
   const { items, total, facets, loading, loadList } = useProducts()
@@ -177,12 +177,7 @@ export function useProductListPage() {
     if (!productId) return
 
     if (!authStore.isAuthenticated) {
-      router.push({
-        name: 'login',
-        query: {
-          redirect: route.fullPath,
-        },
-      })
+      openAuthModal()
       return
     }
 

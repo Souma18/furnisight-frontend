@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { pinia } from '../plugins/pinia'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 
 const routes = [
   {
@@ -22,11 +23,6 @@ const routes = [
     path: '/contact',
     name: 'contact',
     component: () => import('@features/contact/pages/ContactPage.vue'),
-  },
-  {
-    path: '/login',
-    name: 'login',
-    component: () => import('@features/auth/pages/LoginPage.vue'),
   },
   {
     path: '/auth/callback',
@@ -116,17 +112,17 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore(pinia)
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login', query: { redirect: to.fullPath } })
+    openAuthModal()
+    if (!from.name) {
+      next({ name: 'home' })
+      return
+    }
+    next(false)
     return
   }
 
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
     next({ name: 'home' })
-    return
-  }
-
-  if (to.name === 'login' && authStore.isAuthenticated) {
-    next(authStore.isAdmin ? { name: 'admin-dashboard' } : { name: 'home' })
     return
   }
 

@@ -80,7 +80,9 @@ function handleTabChange(tab) {
   width: 100%;
   min-height: calc(100svh - 56px);
   border-radius: 0;
-  background: var(--auth-bg-overlay);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 177, 40, 0.22), transparent 28%),
+    var(--auth-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;

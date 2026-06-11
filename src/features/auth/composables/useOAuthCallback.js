@@ -1,6 +1,7 @@
 import { onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
+import { openAuthModal } from '../lib/authModalBus'
 
 export function useOAuthCallback() {
   const router = useRouter()
@@ -17,6 +18,7 @@ export function useOAuthCallback() {
       return
     }
 
-    router.replace({ name: 'login' })
+    router.replace({ name: 'home' })
+    openAuthModal()
   })
 }

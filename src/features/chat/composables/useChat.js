@@ -16,6 +16,7 @@ export function useChat() {
   const messagesRef = ref(null)
   const inputRef = ref(null)
   const showFabTooltip = ref(false)
+  const authModalOpen = ref(false)
 
   let tooltipTimer = null
 
@@ -27,7 +28,27 @@ export function useChat() {
     })
   }
 
+  function showLogin() {
+    chatStore.resetSession()
+    authModalOpen.value = true
+  }
+
+  async function handleAuthenticated() {
+    authModalOpen.value = false
+    await chatStore.hydrateSession(true)
+    chatStore.open()
+    nextTick(() => {
+      inputRef.value?.focus()
+      scrollToBottom()
+    })
+  }
+
   function toggleChat() {
+    if (!authStore.isAuthenticated) {
+      showLogin()
+      return
+    }
+
     chatStore.toggleOpen()
     if (isOpen.value) {
       nextTick(() => {
@@ -39,8 +60,7 @@ export function useChat() {
 
   function sendDraft() {
     if (!authStore.isAuthenticated) {
-      chatStore.error = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
-      chatStore.open()
+      showLogin()
       return
     }
     chatStore.sendMessage(draft.value)
@@ -114,6 +134,7 @@ export function useChat() {
     messagesRef,
     inputRef,
     showFabTooltip,
+    authModalOpen,
     todayLabel,
     formatTimeLabel: chatStore.formatTimeLabel,
     toggleChat,
@@ -121,6 +142,10 @@ export function useChat() {
     quickSend,
     handleInputKeydown,
     resizeTextarea,
+    handleAuthenticated,
+    closeAuthModal: () => {
+      authModalOpen.value = false
+    },
     closeChat: chatStore.close,
   }
 }

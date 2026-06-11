@@ -1,14 +1,12 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, formatVnd, ProductResponse, productsApi } from '@shared/lib/api/services'
 import { roomFallbacks } from './homeContent'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
 export function useHomePage() {
-  const route = useRoute()
-  const router = useRouter()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
 
@@ -106,12 +104,7 @@ export function useHomePage() {
     if (!productId) return
 
     if (!authStore.isAuthenticated) {
-      router.push({
-        name: 'login',
-        query: {
-          redirect: route.fullPath,
-        },
-      })
+      openAuthModal()
       return
     }
 

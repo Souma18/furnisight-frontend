@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
 import ChatWidget from '@features/chat/components/ChatWidget.vue'
+import AuthModal from '@features/auth/components/AuthModal.vue'
+import { AUTH_MODAL_EVENT, consumePendingAuthModal } from '@features/auth/lib/authModalBus'
 
 const route = useRoute()
 const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
@@ -14,8 +16,9 @@ const isContactPage = computed(() => route.name === 'contact')
 const isCheckoutPage = computed(() => route.name === 'checkout')
 const isAccountPage = computed(() => route.path.startsWith('/account'))
 const isAdminPage = computed(() => route.path.startsWith('/admin'))
-const isLoginPage = computed(() => route.name === 'login')
 const mainRef = ref(null)
+const isAuthModalOpen = ref(false)
+const initialAuthView = ref('login')
 let resizeObserver = null
 let mutationObserver = null
 
@@ -25,11 +28,23 @@ function syncHeaderScrollbarInset() {
   document.documentElement.style.setProperty('--app-main-scrollbar-width', `${scrollbarWidth}px`)
 }
 
+function openAuthModalFromEvent(event) {
+  initialAuthView.value = event?.detail?.initialView || 'login'
+  isAuthModalOpen.value = true
+}
+
 onMounted(async () => {
   await nextTick()
   syncHeaderScrollbarInset()
   window.addEventListener('resize', syncHeaderScrollbarInset)
   window.addEventListener('load', syncHeaderScrollbarInset)
+  window.addEventListener(AUTH_MODAL_EVENT, openAuthModalFromEvent)
+
+  const pendingView = consumePendingAuthModal()
+  if (pendingView) {
+    initialAuthView.value = pendingView
+    isAuthModalOpen.value = true
+  }
 
   if (typeof ResizeObserver !== 'undefined' && mainRef.value) {
     resizeObserver = new ResizeObserver(() => syncHeaderScrollbarInset())
@@ -53,6 +68,7 @@ watch(
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncHeaderScrollbarInset)
   window.removeEventListener('load', syncHeaderScrollbarInset)
+  window.removeEventListener(AUTH_MODAL_EVENT, openAuthModalFromEvent)
   resizeObserver?.disconnect()
   resizeObserver = null
   mutationObserver?.disconnect()
@@ -81,13 +97,18 @@ onBeforeUnmount(() => {
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
         'app-main--checkout': isCheckoutPage,
-        'app-main--login': isLoginPage,
       }"
     >
       <RouterView />
-      <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage && !isLoginPage" />
+      <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
-    <ChatWidget v-if="!isRoom3DPage && !isAdminPage && !isLoginPage" />
+    <ChatWidget v-if="!isRoom3DPage && !isAdminPage" />
+    <AuthModal
+      :open="isAuthModalOpen"
+      :initial-view="initialAuthView"
+      @close="isAuthModalOpen = false"
+      @authenticated="isAuthModalOpen = false"
+    />
   </div>
 </template>
 
@@ -153,12 +174,4 @@ onBeforeUnmount(() => {
   background: #faf6f0;
 }
 
-.app-main--login {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
 </style>
