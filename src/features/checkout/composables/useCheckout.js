@@ -24,6 +24,7 @@ export function useCheckout() {
     if (typeof raw !== 'string' || !raw.trim()) return []
     return raw.split(',').map((id) => id.trim()).filter(Boolean)
   })
+  const requestedComboId = computed(() => String(route.query.comboId || '').trim())
 
   const checkoutLines = computed(() => {
     const available = cartStore.items.filter((item) => !item.outOfStock)
@@ -52,8 +53,16 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
-    await Promise.all([cartStore.ensureHydrated(), addressStore.fetchAddresses(), checkoutStore.hydrateSession()])
-    await checkoutStore.refreshApplicableCombo(checkoutLines.value)
+    await Promise.all([
+      cartStore.ensureHydrated(),
+      addressStore.fetchAddresses(),
+      checkoutStore.hydrateSession({ loadCombos: !requestedComboId.value }),
+    ])
+    if (requestedComboId.value) {
+      await checkoutStore.validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+    } else {
+      await checkoutStore.refreshApplicableCombo(checkoutLines.value)
+    }
   }
 
   function goBackToCart() {
@@ -238,7 +247,11 @@ export function useCheckout() {
   watch(
     checkoutLines,
     (lines) => {
-      checkoutStore.refreshApplicableCombo(lines)
+      if (requestedComboId.value) {
+        checkoutStore.validateRequestedCombo(requestedComboId.value, lines)
+      } else {
+        checkoutStore.refreshApplicableCombo(lines)
+      }
     },
     { deep: true },
   )

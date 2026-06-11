@@ -20,10 +20,6 @@ export function useProductTabs(productRef) {
       rows.push({ key: 'Danh mục', value: product.category.label })
     }
 
-    if (!rows.length && product.collection) {
-      rows.push({ key: 'Bộ sưu tập', value: product.collection })
-    }
-
     if (!rows.length && typeof product.stock === 'number') {
       rows.push({ key: 'Tồn kho', value: `${product.stock} sản phẩm` })
     }

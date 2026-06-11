@@ -37,18 +37,3 @@ export const homeTestimonials = [
     rating: 4,
   },
 ]
-
-export const roomFallbacks = {
-  'Phòng ngủ': { image: '/home/rooms/bedroom.jpg', isBig: true },
-  'Phòng khách': { image: '/home/rooms/livingroom.jpeg', isBig: false },
-  'Phòng tắm': { image: '/home/rooms/bathroom.jpg', isBig: false },
-  'Phòng bếp': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  'Phòng đọc sách': { image: '/home/rooms/readingroom.jpg', isBig: false },
-  'Living Room': { image: '/home/rooms/livingroom.jpeg', isBig: false },
-  Bedroom: { image: '/home/rooms/bedroom.jpg', isBig: true },
-  Kitchen: { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  Bathroom: { image: '/home/rooms/bathroom.jpg', isBig: false },
-  'Study Room': { image: '/home/rooms/readingroom.jpg', isBig: false },
-  'Dining Room': { image: '/home/rooms/kitchanroom.jpeg', isBig: false },
-  Workspace: { image: '/home/rooms/readingroom.jpg', isBig: false },
-}

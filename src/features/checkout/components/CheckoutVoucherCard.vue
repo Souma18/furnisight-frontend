@@ -5,6 +5,7 @@ defineProps({
   shopVoucher: { type: Object, default: null },
   shippingVoucher: { type: Object, default: null },
   selectedCombo: { type: Object, default: null },
+  comboMessage: { type: String, default: '' },
   formatMoney: { type: Function, required: true },
   shopDiscount: { type: Number, default: 0 },
   shippingDiscount: { type: Number, default: 0 },
@@ -46,7 +47,7 @@ defineEmits(['open-voucher', 'remove-voucher'])
           <span class="co-voucher-code">{{ selectedCombo.name }}</span>
           <span v-if="comboDiscount">−{{ formatMoney(comboDiscount) }} ✓</span>
         </div>
-        <span v-else class="co-voucher-muted">Chưa đủ sản phẩm combo</span>
+        <span v-else class="co-voucher-muted">{{ comboMessage || 'Chưa đủ sản phẩm combo' }}</span>
       </div>
 
       <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">

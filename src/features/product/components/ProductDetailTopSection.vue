@@ -54,7 +54,6 @@ const emit = defineEmits([
     </div>
 
     <div class="pd-info">
-      <p class="collection">{{ product.collection }}</p>
       <h1 class="name">{{ product.name }}</h1>
       <div class="rating">
         <span class="rating-stars" aria-label="Đánh giá sản phẩm">

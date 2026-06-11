@@ -10,7 +10,6 @@
 
 .pl-hero { background: #12202e; padding: 40px 0; color: #fff; }
 .pl-hero-inner { display: flex; justify-content: space-between; gap: 30px; align-items: center; }
-.pl-collection { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #e5b84a; }
 /* global.css có `h1 { color: var(--text-heading) }` — ghi đè màu kế thừa từ .pl-hero */
 .pl-title { margin: 0; font-size: 46px; font-family: var(--sans); font-weight: 300; color: inherit; }
 .pl-subtitle { margin: 10px 0 0; max-width: 420px; color: rgba(255, 255, 255, 0.68); line-height: 1.7; }

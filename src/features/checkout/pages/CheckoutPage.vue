@@ -43,6 +43,7 @@ const {
   shopVoucher,
   shippingVoucher,
   selectedCombo,
+  comboMessage,
   lastOrder,
   formatMoney,
   initCheckout,
@@ -140,6 +141,7 @@ function handleContinueShopping() {
             :shop-voucher="shopVoucher"
             :shipping-voucher="shippingVoucher"
             :selected-combo="selectedCombo"
+            :combo-message="comboMessage"
             :shop-discount="summary.shopDiscount"
             :shipping-discount="summary.shippingDiscount"
             :combo-discount="summary.comboDiscount"

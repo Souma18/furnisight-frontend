@@ -4,7 +4,6 @@ import { computed } from 'vue'
 const props = defineProps({
   /** `string` (legacy: mục đầu mặc định link `/`) hoặc `{ label, to? }` */
   breadcrumb: { type: Array, default: () => [] },
-  collection: { type: String, required: true },
   title: { type: String, required: true },
   subtitle: { type: String, required: true },
   stats: { type: Array, default: () => [] },
@@ -35,7 +34,6 @@ const crumbs = computed(() =>
     <div class="pl-hero">
       <div class="pl-inner pl-hero-inner">
         <div>
-          <p class="pl-collection">{{ collection }}</p>
           <h1 class="pl-title">{{ title }}</h1>
           <p class="pl-subtitle">{{ subtitle }}</p>
         </div>

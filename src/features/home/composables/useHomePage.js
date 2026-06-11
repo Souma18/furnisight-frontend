@@ -1,42 +1,29 @@
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useCartStore } from '@features/cart/store/cartStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
-import { CategoryResponse, ProductResponse, productsApi } from '@shared/lib/api/services'
-import { roomFallbacks } from './homeContent'
+import { CategoryResponse, ProductResponse, ordersApi, productsApi } from '@shared/lib/api/services'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
 export function useHomePage() {
+  const router = useRouter()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
+  const cartStore = useCartStore()
 
   const categories = ref([])
+  const combos = ref([])
   const products = ref([])
   const activeCategoryId = ref('')
-  const activeRoomFilter = ref('Tat ca')
   const topReviews = ref([])
+  const comboBuyingId = ref('')
+  const comboMessage = ref('')
+  const pendingCombo = ref(null)
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
 
-  const roomFilters = computed(() => ['Tat ca', ...categories.value.map((category) => category.name)])
   useRevealOnScroll('.fade-up')
-
-  const filteredRooms = computed(() => {
-    const rooms = categories.value.map((category) => {
-      const fallback = roomFallbacks[category.name] || { image: '/home/rooms/livingroom.jpeg', isBig: false }
-      return {
-        id: category.id,
-        slug: category.slug,
-        type: category.name,
-        name: category.name,
-        count: `${category.productCount || 0} sản phẩm`,
-        image: category.imageUrl || fallback.image,
-        isBig: fallback.isBig,
-      }
-    })
-
-    if (activeRoomFilter.value === 'Tat ca') return rooms
-    return rooms.filter((room) => room.type === activeRoomFilter.value)
-  })
 
   async function loadCategories() {
     try {
@@ -56,6 +43,79 @@ export function useHomePage() {
     } catch (error) {
       console.error('Failed to load home categories:', error)
     }
+  }
+
+  async function loadCombos() {
+    try {
+      const { data } = await ordersApi.getActiveCombos()
+      combos.value = (Array.isArray(data) ? data : []).filter((combo) => combo?.imageUrl)
+    } catch (error) {
+      console.error('Failed to load home combos:', error)
+      combos.value = []
+    }
+  }
+
+  function sameComboLine(line, item) {
+    return String(line.productId || '') === String(item.productId || '')
+      && String(line.variantId || '') === String(item.variantId || '')
+  }
+
+  async function prepareComboCheckout(combo) {
+    comboBuyingId.value = combo.id
+    comboMessage.value = ''
+
+    try {
+      await cartStore.ensureHydrated()
+
+      for (const item of combo.items || []) {
+        const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
+        const existing = cartStore.items.find((line) => sameComboLine(line, item))
+        const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
+
+        if (existing && currentQuantity < requiredQuantity) {
+          await cartStore.updateQty(existing.id, requiredQuantity)
+        } else if (!existing) {
+          await cartStore.addItem({
+            productId: item.productId,
+            variantId: item.variantId || null,
+            name: item.productName,
+            imageUrl: item.image,
+            price: item.price,
+            quantity: requiredQuantity,
+          })
+        }
+      }
+
+      const lineIds = (combo.items || [])
+        .map((item) => cartStore.items.find((line) => sameComboLine(line, item))?.id)
+        .filter(Boolean)
+
+      if (!lineIds.length || lineIds.length !== (combo.items || []).length) {
+        throw new Error('Không thể chuẩn bị đầy đủ sản phẩm trong combo.')
+      }
+
+      await router.push({
+        name: 'checkout',
+        query: {
+          lines: lineIds.join(','),
+          comboId: combo.id,
+        },
+      })
+    } catch (error) {
+      comboMessage.value = error?.response?.data?.message || error.message || 'Không thể mua combo lúc này.'
+    } finally {
+      comboBuyingId.value = ''
+    }
+  }
+
+  async function buyCombo(combo) {
+    if (!combo?.id) return
+    if (!authStore.isAuthenticated) {
+      pendingCombo.value = combo
+      openAuthModal()
+      return
+    }
+    await prepareComboCheckout(combo)
   }
 
   async function loadProductsForCategory(categoryId) {
@@ -111,9 +171,16 @@ export function useHomePage() {
   }
 
   watch(activeCategoryId, loadProductsForCategory)
+  watch(() => authStore.isAuthenticated, (authenticated) => {
+    if (!authenticated || !pendingCombo.value) return
+    const combo = pendingCombo.value
+    pendingCombo.value = null
+    prepareComboCheckout(combo)
+  })
 
   onMounted(() => {
     loadCategories()
+    loadCombos()
     loadTopReviews()
 
     if (authStore.isAuthenticated) {
@@ -123,13 +190,14 @@ export function useHomePage() {
 
   return {
     categories,
+    combos,
     products,
     activeCategoryId,
-    activeRoomFilter,
     wishedProductIds,
-    roomFilters,
-    filteredRooms,
     topReviews,
+    comboBuyingId,
+    comboMessage,
+    buyCombo,
     toggleWish,
   }
 }

@@ -217,8 +217,7 @@ export function useProductListPage() {
       return {
         breadcrumb: ['Trang chủ', 'Sản phẩm'],
         title: 'Tất cả sản phẩm',
-        subtitle: facets.value.description ?? 'Khám phá bộ sưu tập nội thất đa dạng của chúng tôi',
-        collection: facets.value.collection ?? 'Bộ sưu tập 2026',
+        subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
         stats: [
           { label: 'Sản phẩm', value: total.value },
           { label: 'Danh mục', value: facets.value.categories?.length || 0 },
@@ -233,8 +232,7 @@ export function useProductListPage() {
     return {
       breadcrumb: ['Trang chủ', 'Sản phẩm', label],
       title: label,
-      subtitle: `Bộ sưu tập ${label} tinh tế và hiện đại`,
-      collection: 'Interior Design',
+      subtitle: `${label} tinh tế và hiện đại`,
       stats: [
         { label: 'Sản phẩm', value: total.value },
         { label: 'Màu sắc', value: facets.value.colors?.length || 0 },

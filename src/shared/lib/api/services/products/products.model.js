@@ -29,7 +29,6 @@ export class ProductResponse {
     this.ratingCount = data.ratingCount ?? 0
     this.soldCount = data.soldCount ?? data.soldQuantity ?? data.sold ?? 0
     this.supports3d = Boolean(data.supports3d)
-    this.collection = data.collection || ''
     this.features = Array.isArray(data.features) ? data.features : []
     this.modelUrl = data.modelUrl || ''
     this.roomTypeHint = data.roomTypeHint || ''
@@ -81,23 +80,6 @@ export class CategoryResponse {
     this.parentId = data.parentId || null
     this.productCount = data.productCount ?? 0
     this.iconUrl = data.iconUrl || ''
-  }
-}
-
-export class CollectionResponse {
-  /**
-   * @param {Object} data 
-   */
-  constructor(data = {}) {
-    this.id = data.id || null
-    this.slug = data.slug || ''
-    this.name = data.name || ''
-    this.description = data.description || ''
-    this.imageUrl = data.imageUrl || data.image || ''
-    this.productCount = data.productCount ?? 0
-    this.products = Array.isArray(data.products) 
-      ? data.products.map(p => new ProductResponse(p))
-      : []
   }
 }
 

@@ -1,7 +1,8 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { adminApi } from '@shared/lib/api/services'
+import { adminApi, mediaApi } from '@shared/lib/api/services'
+import { PriceFormatter } from '@shared/lib/formatters'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 
 const tabs = [
@@ -11,7 +12,6 @@ const tabs = [
   { id: 'notify', label: 'Thông báo Marketing', action: 'Tạo thông báo' },
 ]
 
-const formatMoney = PriceFormatter.format
 const activeTab = ref('voucher')
 const loading = ref(false)
 const saving = ref(false)
@@ -100,6 +100,9 @@ const campaignForm = reactive({
 const comboForm = reactive({
   name: '',
   description: '',
+  imageMediaId: '',
+  imageUrl: '',
+  imageUpload: null,
   discountType: 'PERCENTAGE',
   discountValue: 15,
   startDate: '',
@@ -180,7 +183,11 @@ const kpis = computed(() => [
 ])
 
 function money(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
+  return PriceFormatter.format(value)
+}
+
+function isImageUrl(value) {
+  return /^(https?:|data:|blob:|\/)/i.test(String(value || ''))
 }
 
 function dateOnly(value) {
@@ -511,6 +518,9 @@ function resetComboForm(row = null) {
   editing.combo = row
   comboForm.name = row?.name || ''
   comboForm.description = row?.description || ''
+  comboForm.imageMediaId = row?.imageMediaId || ''
+  comboForm.imageUrl = row?.imageUrl || ''
+  comboForm.imageUpload = null
   comboForm.discountType = row?.discountType || 'PERCENTAGE'
   comboForm.discountValue = row?.discountValue ?? 15
   comboForm.startDate = toDatetimeLocal(row?.startDate)
@@ -526,10 +536,54 @@ async function openComboModal(row = null) {
   modal.combo = true
 }
 
+async function uploadComboImage(file) {
+  if (!file) return
+  saving.value = true
+  try {
+    if (comboForm.imageUpload?.mediaId && !comboForm.imageUpload.persisted) {
+      await mediaApi.cancelUpload(comboForm.imageUpload.mediaId).catch(() => {})
+    }
+    const ownerId = editing.combo?.id || crypto.randomUUID()
+    const upload = await mediaApi.uploadStaged(file, {
+      ownerType: 'MARKETING',
+      ownerId,
+    })
+    comboForm.imageUpload = upload
+    comboForm.imageMediaId = upload.mediaId || ''
+    comboForm.imageUrl = upload.secureUrl || upload.secure_url || upload.url || ''
+  } catch (error) {
+    notify(error?.response?.data?.message || error.message || 'Không tải được ảnh combo')
+  } finally {
+    saving.value = false
+  }
+}
+
+function onComboImageChange(event) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  uploadComboImage(file)
+}
+
+async function removeComboImage() {
+  if (comboForm.imageUpload?.mediaId && !comboForm.imageUpload.persisted) {
+    await mediaApi.cancelUpload(comboForm.imageUpload.mediaId).catch(() => {})
+  }
+  comboForm.imageUpload = null
+  comboForm.imageMediaId = ''
+  comboForm.imageUrl = ''
+}
+
+async function closeComboModal() {
+  await removeComboImage()
+  modal.combo = false
+}
+
 function comboPayload() {
   return {
     name: comboForm.name.trim(),
     description: comboForm.description,
+    imageMediaId: comboForm.imageMediaId || null,
+    imageUrl: comboForm.imageUrl || null,
     discountType: comboForm.discountType,
     discountValue: Number(comboForm.discountValue) || 0,
     startDate: comboForm.startDate || null,
@@ -550,14 +604,26 @@ function comboPayload() {
 }
 
 async function saveCombo() {
-  const payload = comboPayload()
+  saving.value = true
   try {
+    if (comboForm.imageUpload && !comboForm.imageUpload.completed) {
+      comboForm.imageUpload = await mediaApi.completeStagedUpload(comboForm.imageUpload)
+      comboForm.imageMediaId = comboForm.imageUpload.mediaId || comboForm.imageMediaId
+      comboForm.imageUrl = comboForm.imageUpload.secureUrl
+        || comboForm.imageUpload.secure_url
+        || comboForm.imageUpload.url
+        || comboForm.imageUrl
+    }
+    const payload = comboPayload()
     if (editing.combo?.id) await adminApi.updateMarketingCombo(editing.combo.id, payload)
     else await adminApi.createMarketingCombo(payload)
+    if (comboForm.imageUpload) comboForm.imageUpload.persisted = true
     await loadCombos()
   } catch (error) {
     notify(error?.response?.data?.message || error.message || 'Khong luu duoc combo')
     return
+  } finally {
+    saving.value = false
   }
   notify('Đã lưu combo')
   modal.combo = false
@@ -757,7 +823,7 @@ onMounted(async () => {
             <tr v-else-if="!vouchers.length"><td colspan="9" class="mc-empty">Chưa có voucher phù hợp.</td></tr>
             <tr v-for="row in vouchers" v-else :key="row.id">
               <td><span class="code-badge">{{ row.code }}</span></td>
-              <td class="mc-name">{{ row.name }}</td>
+              <td class="mc-name"><div class="combo-name-cell"><img v-if="row.imageUrl" :src="row.imageUrl" alt=""><span>{{ row.name }}</span></div></td>
               <td><span class="type-badge" :class="`type-${String(row.voucherType || 'PUBLIC').toLowerCase()}`">{{ row.voucherType || 'PUBLIC' }}</span></td>
               <td><span class="discount-gold">{{ discountLabel(row) }}</span></td>
               <td><span class="sent-count">{{ row.issuedCount || 0 }} user</span></td>
@@ -915,20 +981,30 @@ onMounted(async () => {
       </div>
     </form>
 
-    <form v-if="modal.combo" class="modal-backdrop" @click.self="modal.combo = false" @submit.prevent="saveCombo">
+    <form v-if="modal.combo" class="modal-backdrop" @click.self="closeComboModal" @submit.prevent="saveCombo">
       <div class="modal-card modal-lg">
-        <header><h2>{{ editing.combo ? 'Sửa' : 'Tạo' }} <em>combo</em></h2><button type="button" @click="modal.combo = false"><AppIcon name="x" /></button></header>
+        <header><h2>{{ editing.combo ? 'Sửa' : 'Tạo' }} <em>combo</em></h2><button type="button" @click="closeComboModal"><AppIcon name="x" /></button></header>
         <div class="modal-body">
           <div class="section-title"><AppIcon name="gift" />Thông tin combo</div>
           <div class="form-row"><label>Tên combo *<input v-model="comboForm.name" required placeholder="Combo phòng ngủ LuxNest"></label><label>Loại ưu đãi<select v-model="comboForm.discountType"><option value="PERCENTAGE">Giảm theo %</option><option value="FIXED_AMOUNT">Giảm số tiền</option><option value="FIXED_COMBO_PRICE">Giá combo cố định</option></select></label></div>
           <div class="form-row"><label>Giá trị ưu đãi<input v-model.number="comboForm.discountValue" type="number" min="0"></label><label>Trạng thái<select v-model="comboForm.active"><option :value="true">Đang bật</option><option :value="false">Bản nháp</option></select></label></div>
           <div class="form-row"><label>Bắt đầu<input v-model="comboForm.startDate" type="datetime-local"></label><label>Kết thúc<input v-model="comboForm.endDate" type="datetime-local"></label></div>
           <label>Mô tả<textarea v-model="comboForm.description" rows="2" /></label>
+          <label>Ảnh combo
+            <span class="combo-image-upload">
+              <input type="file" accept="image/*" @change="onComboImageChange">
+              <span><AppIcon name="image" :size="24" />{{ saving ? 'Đang tải ảnh...' : 'Chọn ảnh đại diện combo' }}</span>
+            </span>
+          </label>
+          <div v-if="comboForm.imageUrl" class="combo-image-preview">
+            <img :src="comboForm.imageUrl" alt="Ảnh combo">
+            <button type="button" title="Xóa ảnh" @click="removeComboImage"><AppIcon name="x" :size="14" /></button>
+          </div>
           <div class="section-title"><AppIcon name="box" />Sản phẩm trong combo</div>
           <button type="button" class="add-product" @click="openProductPicker"><AppIcon name="plus" />Chọn sản phẩm</button>
           <div v-if="!comboForm.items.length" class="empty-box">Chưa có sản phẩm nào trong combo.</div>
           <div v-for="item in comboForm.items" :key="item.id" class="combo-item-card">
-            <div class="prod-thumb"><AppIcon :name="item.image || 'box'" /></div>
+            <div class="prod-thumb"><img v-if="isImageUrl(item.image)" :src="item.image" alt=""><AppIcon v-else :name="item.image || 'box'" /></div>
             <div><b>{{ item.name }}</b><small>SKU: {{ item.sku }} · {{ money(item.price) }} · {{ item.category }}</small></div>
             <label><span>SL</span><input v-model.number="item.quantity" type="number" min="1"></label>
             <button type="button" @click="removeComboItem(item.id)"><AppIcon name="trash" /></button>
@@ -936,7 +1012,7 @@ onMounted(async () => {
           <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang sản phẩm</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Giỏ hàng</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Checkout</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chủ</label></div>
           <div class="combo-summary"><div><span>Giá gốc</span><b>{{ money(comboOriginalAmount) }}</b></div><div><span>Giá combo</span><b>{{ money(comboFinalAmount) }}</b></div><div class="save"><span>Khách tiết kiệm</span><b>{{ money(comboSavedAmount) }}</b></div></div>
         </div>
-        <footer><button type="button" class="mc-cancel" @click="modal.combo = false">Hủy</button><button class="mc-primary"><AppIcon name="save" />Lưu combo</button></footer>
+        <footer><button type="button" class="mc-cancel" @click="closeComboModal">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="save" />Lưu combo</button></footer>
       </div>
     </form>
 
@@ -951,7 +1027,7 @@ onMounted(async () => {
               <tbody>
                 <tr v-for="product in filteredProducts" :key="product.id" :class="{ disabled: product.stock <= 0 }">
                   <td><input :checked="picker.selected[product.id] !== undefined" :disabled="product.stock <= 0" type="checkbox" @change="togglePickerProduct(product, $event.target.checked)"></td>
-                  <td class="product-cell"><span class="prod-thumb"><AppIcon :name="product.image || 'box'" /></span><b>{{ product.name }}</b></td>
+                  <td class="product-cell"><span class="prod-thumb"><img v-if="isImageUrl(product.image)" :src="product.image" alt=""><AppIcon v-else :name="product.image || 'box'" /></span><b>{{ product.name }}</b></td>
                   <td><span class="code-badge">{{ product.sku }}</span></td>
                   <td>{{ product.category }}</td>
                   <td>{{ money(product.price) }}</td>
@@ -1053,6 +1129,8 @@ onMounted(async () => {
 .mc-table tr:hover td { background: #faf6f0; }
 .mc-table tr.disabled { opacity: .55; }
 .mc-name { font-weight: 700; color: #1a2332; }
+.combo-name-cell { display: flex; align-items: center; gap: 9px; min-width: 180px; }
+.combo-name-cell img { width: 42px; height: 34px; object-fit: cover; border-radius: 6px; border: 1px solid #e8e0d0; }
 .code-badge { background: #f5f0e8; border: 1px solid #e0d5c0; border-radius: 6px; padding: 3px 9px; font: 700 11px/1.4 monospace; color: #1a2332; }
 .type-badge { border-radius: 999px; padding: 3px 10px; font-size: 10px; font-weight: 800; }
 .type-public { background: #fef3c7; color: #92400e; }
@@ -1098,6 +1176,7 @@ onMounted(async () => {
 .user-pick-item:last-child { border-bottom: 0; }
 .user-pick-item input { width: auto; }
 .user-pick-item span, .prod-thumb { width: 30px; height: 30px; border-radius: 7px; background: #f5f0e8; border: 1px solid #e8e0d0; display: inline-flex; align-items: center; justify-content: center; color: #c9953a; font-weight: 800; }
+.prod-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
 .user-pick-item small { grid-column: 3; color: #8a7a68; }
 .add-product { background: #fff; border: 1.5px dashed #c9953a; color: #c9953a; border-radius: 8px; padding: 10px 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .empty-box { border: 1.5px dashed #e0d8cc; border-radius: 8px; padding: 20px; color: #8a7a68; text-align: center; background: #faf7f2; }
@@ -1105,6 +1184,12 @@ onMounted(async () => {
 .combo-item-card small { display: block; color: #8a7a68; margin-top: 2px; }
 .combo-item-card label { text-transform: none; letter-spacing: 0; gap: 3px; }
 .combo-item-card button { width: 30px; height: 30px; border-radius: 6px; border: 1px solid #e0d8cc; background: #fff; cursor: pointer; }
+.combo-image-upload { position: relative; min-height: 90px; border: 1.5px dashed #c9953a; border-radius: 8px; background: #fefaf3; display: grid; place-items: center; cursor: pointer; overflow: hidden; }
+.combo-image-upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.combo-image-upload > span { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #8a6b32; font-size: 12px; text-transform: none; letter-spacing: 0; }
+.combo-image-preview { position: relative; width: min(320px, 100%); aspect-ratio: 16 / 9; overflow: hidden; border: 1px solid #e8e0d0; border-radius: 8px; }
+.combo-image-preview img { width: 100%; height: 100%; object-fit: cover; }
+.combo-image-preview button { position: absolute; top: 8px; right: 8px; width: 30px; height: 30px; border: 0; border-radius: 6px; background: rgba(18, 32, 46, .88); color: #fff; display: grid; place-items: center; cursor: pointer; }
 .combo-summary { background: #fefaf3; border: 1px solid #f0dfb8; border-radius: 8px; padding: 11px 14px; display: grid; gap: 6px; }
 .combo-summary div { display: flex; justify-content: space-between; }
 .combo-summary .save { color: #16a34a; font-weight: 800; border-top: 1px dashed #e0cfa8; padding-top: 8px; }

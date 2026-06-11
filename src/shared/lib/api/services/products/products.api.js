@@ -51,26 +51,6 @@ class ProductsApi {
     return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}`)
   }
 
-  // ─── COLLECTIONS ────────────────────────────────────────────────────────
-
-  /**
-   * Retrieves all collections
-   * @param {Object} [params] 
-   * @returns {Promise<import('axios').AxiosResponse<{content: import('./products.model').CollectionResponse[], totalElements: number}>>}
-   */
-  getCollections(params) {
-    return apiClient.get(`${catalogBaseUrl}/collections`, { params })
-  }
-
-  /**
-   * Retrieves collection details by slug or ID
-   * @param {string} slugOrId 
-   * @returns {Promise<import('axios').AxiosResponse<import('./products.model').CollectionResponse>>}
-   */
-  getCollectionDetail(slugOrId) {
-    return apiClient.get(`${catalogBaseUrl}/collections/${slugOrId}`)
-  }
-
   // ─── REVIEWS ────────────────────────────────────────────────────────
 
   /**

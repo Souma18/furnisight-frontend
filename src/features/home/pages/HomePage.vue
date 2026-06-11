@@ -3,7 +3,7 @@ import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
 import HomeFeaturesStripSection from '../components/HomeFeaturesStripSection.vue'
 import HomeCategoriesSection from '../components/HomeCategoriesSection.vue'
-import HomeRoomsSection from '../components/HomeRoomsSection.vue'
+import HomeCombosSection from '../components/HomeCombosSection.vue'
 import HomeSharedProductsSection from '../components/HomeSharedProductsSection.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
@@ -15,13 +15,14 @@ import {
 
 const {
   categories,
+  combos,
   products,
   activeCategoryId,
-  activeRoomFilter,
   wishedProductIds,
-  roomFilters,
-  filteredRooms,
   topReviews,
+  comboBuyingId,
+  comboMessage,
+  buyCombo,
   toggleWish,
 } = useHomePage()
 </script>
@@ -35,12 +36,8 @@ const {
       :active-category-id="activeCategoryId"
       @select-category="activeCategoryId = $event"
     />
-    <HomeRoomsSection
-      :filters="roomFilters"
-      :active-room-filter="activeRoomFilter"
-      :rooms="filteredRooms"
-      @select-filter="activeRoomFilter = $event"
-    />
+    <HomeCombosSection :combos="combos" :buying-id="comboBuyingId" @buy="buyCombo" />
+    <p v-if="comboMessage" class="home-combo-message" role="status">{{ comboMessage }}</p>
     <HomeSharedProductsSection
       :products="products"
       :wished-product-ids="wishedProductIds"
@@ -144,22 +141,7 @@ const {
 .cat-icon { min-height: 40px; margin-bottom: 10px; display: inline-flex; align-items: center; justify-content: center; color: #c9922a; }
 .cat-name { font-size: 13px; font-weight: 500; }
 .cat-count { font-size: 11px; color: #888; margin-top: 3px; }
-.rooms-bg { background: #12202e; padding: 80px 0; }
-.rooms-inner { max-width: 1300px; margin: 0 auto; padding: 0 60px; }
-.rooms-head .section-title { color: #fff; }
-.room-filters { display: flex; gap: 8px; margin-bottom: 28px; }
-.room-filter { padding: 7px 18px; border-radius: 20px; font-size: 13px; border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7); cursor: pointer; background: transparent; }
-.room-filter.active { background: #c9922a; border-color: #c9922a; color: #12202e; font-weight: 600; }
-.rooms-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; grid-template-rows: 240px 240px; gap: 14px; }
-.room-card { position: relative; overflow: hidden; border-radius: 16px; cursor: pointer; background: linear-gradient(135deg, #2d3a4a 0%, #1a2535 100%); }
-.room-card.big { grid-row: 1 / 3; }
-.room-card img { width: 100%; height: 100%; object-fit: cover; }
-.room-img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 56px; opacity: .45; }
-.room-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%); display: flex; align-items: flex-end; padding: 22px; opacity: .95; }
-.room-badge { background: #c9922a; color: #12202e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
-.room-info { margin-left: 10px; }
-.room-name { font-size: 16px; font-weight: 600; color: #fff; }
-.room-count { font-size: 12px; color: rgba(255,255,255,.65); }
+.home-combo-message { max-width: 1180px; margin: -48px auto 48px; padding: 0 24px; color: #a13a2d; font-size: 13px; text-align: center; }
 .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
 .product-card { text-decoration: none; color: inherit; display: block; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
 .product-img { height: 200px; background: #f0e9dd; position: relative; overflow: hidden; }
@@ -225,6 +207,6 @@ const {
 }
 .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
 .fade-up.is-visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .categories-grid { grid-template-columns: repeat(3, 1fr); } .rooms-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: 220px 220px auto; } .room-card.big { grid-row: auto; } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } .rooms-inner { padding: 0 24px; } }
-@media (max-width: 720px) { .hero-title { font-size: 42px; } .categories-grid, .products-grid, .rooms-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .categories-grid { grid-template-columns: repeat(3, 1fr); } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } }
+@media (max-width: 720px) { .hero-title { font-size: 42px; } .categories-grid, .products-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
 </style>
