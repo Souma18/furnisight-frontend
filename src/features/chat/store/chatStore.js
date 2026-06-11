@@ -252,9 +252,21 @@ export const useChatStore = defineStore('chat', () => {
     isOpen.value = false
   }
 
+  function open() {
+    isOpen.value = true
+    unreadCount.value = 0
+  }
+
   async function sendMessage(text) {
     const content = String(text ?? draft.value).trim()
     if (!content) return
+
+    const nextBuyerId = getBuyerId()
+    if (!nextBuyerId) {
+      error.value = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
+      return
+    }
+    buyerId.value = nextBuyerId
 
     draft.value = ''
     error.value = null
@@ -336,6 +348,7 @@ export const useChatStore = defineStore('chat', () => {
     hydrateSession,
     toggleOpen,
     close,
+    open,
     sendMessage,
     disconnectSocket,
   }

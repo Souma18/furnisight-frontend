@@ -38,6 +38,11 @@ export function useChat() {
   }
 
   function sendDraft() {
+    if (!authStore.isAuthenticated) {
+      chatStore.error = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
+      chatStore.open()
+      return
+    }
     chatStore.sendMessage(draft.value)
     scrollToBottom()
   }
@@ -65,14 +70,20 @@ export function useChat() {
   watch(messages, () => scrollToBottom(), { deep: true })
   watch(isTyping, () => scrollToBottom())
   watch(
-    () => authStore.user?.id ?? null,
+    () => [authStore.isAuthenticated, authStore.user?.id ?? null],
     async () => {
-      await chatStore.hydrateSession(true)
+      if (authStore.isAuthenticated) {
+        await chatStore.hydrateSession(true)
+      } else {
+        await chatStore.hydrateSession(true)
+      }
     },
   )
 
   onMounted(async () => {
-    await chatStore.hydrateSession()
+    if (authStore.isAuthenticated) {
+      await chatStore.hydrateSession()
+    }
     scrollToBottom()
 
     tooltipTimer = setTimeout(() => {
