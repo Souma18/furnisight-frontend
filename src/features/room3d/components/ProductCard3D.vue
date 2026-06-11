@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   product: {
@@ -15,10 +16,6 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  formatCurrency: {
-    type: Function,
-    required: true,
-  },
   shapeStep: {
     type: Number,
     default: 0,
@@ -29,6 +26,10 @@ const emit = defineEmits(['add', 'open-detail'])
 
 const productImage = computed(() => props.product.image || props.product.imageUrl || '')
 const canDragToScene = computed(() => Boolean(props.product.modelUrl))
+const priceLabel = computed(() => {
+  const price = Number(props.product.price)
+  return Number.isFinite(price) && price > 0 ? PriceFormatter.format(price) : 'Liên hệ'
+})
 const isDragging = ref(false)
 const productIconName = computed(() => {
   const raw = `${props.product.categoryName ?? ''} ${props.product.category ?? ''}`.toLowerCase()
@@ -91,29 +92,28 @@ function openDetail() {
       <h4 class="name">{{ product.name }}</h4>
       <p v-if="product.categoryName" class="category">{{ product.categoryName }}</p>
 
-      <div class="bottom">
-        <div class="prices">
-          <p class="price-current">{{ formatCurrency(product.price) }}</p>
-        </div>
-
-        <button
-          type="button"
-          class="add-btn"
-          :disabled="added"
-          :aria-label="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
-          :title="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
-          @click.stop="$emit('add', product)"
-        >
-          <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
-          <AppIcon v-else name="cart" :size="15" :stroke-width="2.4" />
-        </button>
+      <div class="prices">
+        <p class="price-current" :title="priceLabel">{{ priceLabel }}</p>
       </div>
+
+      <button
+        type="button"
+        class="add-btn"
+        :disabled="added"
+        :aria-label="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
+        :title="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
+        @click.stop="$emit('add', product)"
+      >
+        <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
+        <AppIcon v-else name="cart" :size="15" :stroke-width="2.4" />
+      </button>
     </div>
   </article>
 </template>
 
 <style scoped>
 .card {
+  position: relative;
   border: 2px solid #f2c36a;
   border-radius: 1rem;
   overflow: hidden;
@@ -201,13 +201,12 @@ function openDetail() {
 }
 
 .content {
+  position: relative;
   background: #ffffff;
-  display: flex;
-  flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
   padding: calc(0.45rem * var(--pc-content-scale)) calc(0.5rem * var(--pc-content-scale))
-    calc(0.55rem * var(--pc-content-scale));
+    calc(2.65rem * var(--pc-content-scale));
 }
 
 .name {
@@ -232,36 +231,30 @@ function openDetail() {
   text-overflow: ellipsis;
 }
 
-.bottom {
-  margin-top: auto;
-  padding-top: calc(0.48rem * var(--pc-content-scale));
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: calc(0.36rem * var(--pc-content-scale));
-  min-height: calc(3.8rem + (0.28rem * var(--pc-content-scale)));
-}
-
 .prices {
-  display: flex;
-  flex-direction: column;
+  margin-top: calc(0.55rem * var(--pc-content-scale));
+  padding-right: calc(2.25rem * var(--pc-content-scale));
   min-width: 0;
   width: 100%;
   max-width: 100%;
+  min-height: 1.4rem;
 }
 
 .price-current {
   margin: 0;
   display: block;
-  color: #9a744f;
-  font-size: calc(0.58rem + (0.2rem * var(--pc-content-scale)));
-  font-weight: 700;
-  line-height: 1.1;
+  width: 100%;
+  color: #7a542a;
+  font-size: calc(0.56rem + (0.18rem * var(--pc-content-scale)));
+  font-weight: 800;
+  line-height: 1.25;
   white-space: nowrap;
 }
 
 .add-btn {
-  justify-self: end;
+  position: absolute;
+  right: calc(0.5rem * var(--pc-content-scale));
+  bottom: calc(0.5rem * var(--pc-content-scale));
   width: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
   min-width: 0;
   height: calc(1.86rem + (0.14rem * var(--pc-content-scale)));

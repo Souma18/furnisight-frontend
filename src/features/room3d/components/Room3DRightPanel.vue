@@ -109,7 +109,6 @@ defineEmits([
               ? product.roomTypes.includes(selectedRoom.type)
               : false
           "
-          :format-currency="formatCurrency"
           :shape-step="productCardStep"
           @add="$emit('add-product', $event)"
           @open-detail="$emit('open-product', $event)"
