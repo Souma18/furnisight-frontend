@@ -2,7 +2,6 @@ import { computed } from 'vue'
 
 export function useProductTabs(productRef) {
   const reviewCountLabel = computed(() => productRef.value?.ratingCount ?? 0)
-  const qaCountLabel = computed(() => productRef.value?.qa?.length ?? 0)
 
   const specsRows = computed(() => {
     const product = productRef.value
@@ -52,7 +51,6 @@ export function useProductTabs(productRef) {
 
   return {
     reviewCountLabel,
-    qaCountLabel,
     specsRows,
     reviewBars,
   }

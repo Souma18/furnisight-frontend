@@ -22,12 +22,22 @@ const {
   activeImage,
   activeTab,
   show3DModal,
+  reviewEligibility,
+  reviewForm,
+  reviewSubmitting,
+  reviewSubmitError,
+  reviewSubmitSuccess,
+  reviewCanSubmit,
+  reviewIsAuthenticated,
   breadcrumbLinks,
   retry,
   changeQty,
   openRoom3D,
   addToCart,
   addToWishlist,
+  updateReviewField,
+  openReviewLogin,
+  submitReview,
 } = useProductDetailPage(props)
 </script>
 
@@ -86,7 +96,21 @@ const {
         @open-3d="show3DModal = true"
         @go-room3d="openRoom3D"
       />
-      <ProductDetailTabsSection :product="product" :active-tab="activeTab" @switch-tab="activeTab = $event" />
+      <ProductDetailTabsSection
+        :product="product"
+        :active-tab="activeTab"
+        :review-eligibility="reviewEligibility"
+        :review-form="reviewForm"
+        :review-submitting="reviewSubmitting"
+        :review-submit-error="reviewSubmitError"
+        :review-submit-success="reviewSubmitSuccess"
+        :review-can-submit="reviewCanSubmit"
+        :review-is-authenticated="reviewIsAuthenticated"
+        @switch-tab="activeTab = $event"
+        @update-review-field="updateReviewField"
+        @submit-review="submitReview"
+        @open-login="openReviewLogin"
+      />
       <ProductDetail3DModal
         :open="show3DModal"
         :model-url="product.modelUrl"

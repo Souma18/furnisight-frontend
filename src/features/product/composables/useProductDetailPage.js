@@ -1,9 +1,12 @@
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
+import { ordersApi } from '@shared/lib/api/services/orders/orders.api'
+import { productsApi } from '@shared/lib/api/services/products/products.api'
+import { ReviewResponse } from '@shared/lib/api/services/products/products.model'
 import { useProducts } from './useProducts'
 
 export function useProductDetailPage(props) {
@@ -22,6 +25,36 @@ export function useProductDetailPage(props) {
   const activeImage = ref('')
   const activeTab = ref('desc')
   const show3DModal = ref(false)
+  const reviewEligibility = ref({
+    loading: false,
+    checked: false,
+    purchased: false,
+    orderItemId: null,
+    error: null,
+  })
+  const reviewForm = ref({
+    rating: 5,
+    title: '',
+    content: '',
+  })
+  const reviewSubmitting = ref(false)
+  const reviewSubmitError = ref('')
+  const reviewSubmitSuccess = ref('')
+  let reviewEligibilityRequestId = 0
+
+  const reviewCanSubmit = computed(() => {
+    return Boolean(
+      authStore.isAuthenticated &&
+      reviewEligibility.value.purchased &&
+      reviewEligibility.value.orderItemId &&
+      !reviewEligibility.value.loading &&
+      !reviewSubmitting.value &&
+      String(reviewForm.value.content || '').trim() &&
+      Number(reviewForm.value.rating) >= 1 &&
+      Number(reviewForm.value.rating) <= 5,
+    )
+  })
+  const reviewIsAuthenticated = computed(() => authStore.isAuthenticated)
 
   async function loadProduct(id) {
     loading.value = true
@@ -38,11 +71,17 @@ export function useProductDetailPage(props) {
       wished.value = false
       activeTab.value = 'desc'
       show3DModal.value = false
+      resetReviewState()
 
       if (authStore.isAuthenticated) {
         await wishlistStore.loadWishlist().catch(() => [])
         wished.value = wishlistStore.hasFavoriteProduct(product.value.id)
       }
+
+      await Promise.all([
+        loadProductReviews(product.value.id),
+        checkReviewEligibility(),
+      ])
     } catch (e) {
       if (e.message === 'not_found' || e.response?.status === 404) {
         error.value = 'not_found'
@@ -56,6 +95,164 @@ export function useProductDetailPage(props) {
 
   function retry() {
     loadProduct(props.id)
+  }
+
+  function resetReviewState() {
+    reviewEligibilityRequestId += 1
+    reviewEligibility.value = {
+      loading: false,
+      checked: false,
+      purchased: false,
+      orderItemId: null,
+      error: null,
+    }
+    reviewForm.value = {
+      rating: 5,
+      title: '',
+      content: '',
+    }
+    reviewSubmitting.value = false
+    reviewSubmitError.value = ''
+    reviewSubmitSuccess.value = ''
+  }
+
+  function normalizeReviewsPayload(data) {
+    if (Array.isArray(data)) return data
+    if (Array.isArray(data?.content)) return data.content
+    if (Array.isArray(data?.items)) return data.items
+    return []
+  }
+
+  async function loadProductReviews(productId) {
+    if (!productId || !product.value) return
+
+    try {
+      const response = await productsApi.getReviews(productId)
+      const reviews = normalizeReviewsPayload(response.data)
+      product.value.reviews = reviews.map((review) => new ReviewResponse(review))
+      product.value.ratingCount = response.data?.totalElements ?? reviews.length
+      if (reviews.length) {
+        const totalRating = product.value.reviews.reduce((total, review) => total + Number(review.rating || 0), 0)
+        product.value.rating = totalRating / product.value.reviews.length
+      }
+    } catch (e) {
+      console.error('Failed to load product reviews:', e)
+    }
+  }
+
+  async function checkReviewEligibility() {
+    const currentProduct = product.value
+    const requestId = ++reviewEligibilityRequestId
+    reviewSubmitError.value = ''
+
+    if (!currentProduct?.id) {
+      reviewEligibility.value = {
+        loading: false,
+        checked: false,
+        purchased: false,
+        orderItemId: null,
+        error: null,
+      }
+      return
+    }
+
+    if (!authStore.isAuthenticated) {
+      reviewEligibility.value = {
+        loading: false,
+        checked: true,
+        purchased: false,
+        orderItemId: null,
+        error: null,
+      }
+      return
+    }
+
+    reviewEligibility.value = {
+      loading: true,
+      checked: false,
+      purchased: false,
+      orderItemId: null,
+      error: null,
+    }
+
+    try {
+      const response = await ordersApi.checkProductPurchased(currentProduct.id)
+      if (requestId !== reviewEligibilityRequestId) return
+      reviewEligibility.value = {
+        loading: false,
+        checked: true,
+        purchased: Boolean(response.data?.purchased),
+        orderItemId: response.data?.orderItemId ?? null,
+        error: null,
+      }
+    } catch (e) {
+      if (requestId !== reviewEligibilityRequestId) return
+      reviewEligibility.value = {
+        loading: false,
+        checked: true,
+        purchased: false,
+        orderItemId: null,
+        error: 'Không thể kiểm tra điều kiện đánh giá. Vui lòng thử lại sau.',
+      }
+    }
+  }
+
+  function updateReviewField({ field, value }) {
+    if (!Object.prototype.hasOwnProperty.call(reviewForm.value, field)) return
+    reviewForm.value = {
+      ...reviewForm.value,
+      [field]: value,
+    }
+    reviewSubmitError.value = ''
+    reviewSubmitSuccess.value = ''
+  }
+
+  function openReviewLogin() {
+    openAuthModal()
+  }
+
+  async function submitReview() {
+    if (!product.value) return
+
+    if (!authStore.isAuthenticated) {
+      openAuthModal()
+      return
+    }
+
+    if (!reviewEligibility.value.purchased || !reviewEligibility.value.orderItemId) {
+      reviewSubmitError.value = 'Bạn cần mua và nhận sản phẩm trước khi đánh giá.'
+      return
+    }
+
+    const content = String(reviewForm.value.content || '').trim()
+    if (!content) {
+      reviewSubmitError.value = 'Vui lòng nhập nội dung đánh giá.'
+      return
+    }
+
+    reviewSubmitting.value = true
+    reviewSubmitError.value = ''
+    reviewSubmitSuccess.value = ''
+
+    try {
+      await productsApi.submitReview(product.value.id, {
+        orderItemId: reviewEligibility.value.orderItemId,
+        title: String(reviewForm.value.title || '').trim(),
+        content,
+        rating: Number(reviewForm.value.rating) || 5,
+      })
+      reviewForm.value = {
+        rating: 5,
+        title: '',
+        content: '',
+      }
+      reviewSubmitSuccess.value = 'Đã gửi đánh giá của bạn.'
+      await loadProductReviews(product.value.id)
+    } catch (e) {
+      reviewSubmitError.value = 'Không thể gửi đánh giá. Có thể bạn đã đánh giá sản phẩm này rồi.'
+    } finally {
+      reviewSubmitting.value = false
+    }
   }
 
   function changeQty(delta) {
@@ -144,6 +341,21 @@ export function useProductDetailPage(props) {
   })
 
   watch(() => props.id, (id) => loadProduct(id))
+  watch(() => authStore.isAuthenticated, async (isAuthenticated) => {
+    if (!product.value) return
+    if (isAuthenticated) {
+      await checkReviewEligibility()
+      return
+    }
+    reviewEligibilityRequestId += 1
+    reviewEligibility.value = {
+      loading: false,
+      checked: true,
+      purchased: false,
+      orderItemId: null,
+      error: null,
+    }
+  })
   onMounted(() => loadProduct(props.id))
 
   return {
@@ -157,11 +369,21 @@ export function useProductDetailPage(props) {
     activeImage,
     activeTab,
     show3DModal,
+    reviewEligibility,
+    reviewForm,
+    reviewSubmitting,
+    reviewSubmitError,
+    reviewSubmitSuccess,
+    reviewCanSubmit,
+    reviewIsAuthenticated,
     breadcrumbLinks,
     retry,
     changeQty,
     openRoom3D,
     addToCart,
     addToWishlist,
+    updateReviewField,
+    openReviewLogin,
+    submitReview,
   }
 }

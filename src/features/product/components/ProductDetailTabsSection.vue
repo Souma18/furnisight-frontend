@@ -1,20 +1,38 @@
 <script setup>
-import { toRef } from 'vue'
+import { computed, toRef } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useProductTabs } from '../composables/useProductTabs'
 
-const emit = defineEmits(['switch-tab'])
+const emit = defineEmits(['switch-tab', 'update-review-field', 'submit-review', 'open-login'])
 const props = defineProps({
   product: { type: Object, required: true },
   activeTab: { type: String, required: true },
+  reviewEligibility: { type: Object, required: true },
+  reviewForm: { type: Object, required: true },
+  reviewSubmitting: { type: Boolean, default: false },
+  reviewSubmitError: { type: String, default: '' },
+  reviewSubmitSuccess: { type: String, default: '' },
+  reviewCanSubmit: { type: Boolean, default: false },
+  reviewIsAuthenticated: { type: Boolean, default: false },
 })
 
 const {
   reviewCountLabel,
-  qaCountLabel,
   specsRows,
   reviewBars,
 } = useProductTabs(toRef(props, 'product'))
+
+const reviewGateMessage = computed(() => {
+  if (props.reviewEligibility.loading) return 'Đang kiểm tra điều kiện đánh giá...'
+  if (props.reviewEligibility.error) return props.reviewEligibility.error
+  if (!props.reviewIsAuthenticated) return 'Đăng nhập để kiểm tra điều kiện đánh giá.'
+  if (!props.reviewEligibility.purchased) return 'Bạn cần mua và nhận sản phẩm trước khi đánh giá.'
+  return ''
+})
+
+function updateReviewField(field, value) {
+  emit('update-review-field', { field, value })
+}
 </script>
 
 <template>
@@ -28,9 +46,6 @@ const {
       </button>
       <button type="button" :class="{ active: activeTab === 'review' }" @click="emit('switch-tab', 'review')">
         Đánh giá ({{ reviewCountLabel }})
-      </button>
-      <button type="button" :class="{ active: activeTab === 'qa' }" @click="emit('switch-tab', 'qa')">
-        Hỏi & Đáp ({{ qaCountLabel }})
       </button>
     </div>
     <div v-if="activeTab === 'desc'" class="desc-grid">
@@ -84,6 +99,61 @@ const {
           </div>
         </div>
       </div>
+      <form class="review-form" @submit.prevent="emit('submit-review')">
+        <div class="review-form-head">
+          <div>
+            <h3>Viết đánh giá</h3>
+            <p v-if="reviewGateMessage" class="review-gate">{{ reviewGateMessage }}</p>
+            <p v-else class="review-gate ready">Chia sẻ trải nghiệm thực tế của bạn về sản phẩm.</p>
+          </div>
+          <button
+            v-if="!reviewIsAuthenticated && !reviewEligibility.loading"
+            type="button"
+            class="review-login-btn"
+            @click="emit('open-login')"
+          >
+            Đăng nhập
+          </button>
+        </div>
+        <div class="rating-picker" aria-label="Chọn số sao">
+          <button
+            v-for="star in 5"
+            :key="`pick-star-${star}`"
+            type="button"
+            class="star-pick"
+            :class="{ active: star <= Number(reviewForm.rating || 0) }"
+            :disabled="!reviewEligibility.purchased || reviewSubmitting"
+            @click="updateReviewField('rating', star)"
+          >
+            <AppIcon name="star" :size="22" />
+          </button>
+        </div>
+        <input
+          class="review-title-input"
+          type="text"
+          placeholder="Tiêu đề đánh giá"
+          :value="reviewForm.title"
+          :disabled="!reviewEligibility.purchased || reviewSubmitting"
+          maxlength="255"
+          @input="updateReviewField('title', $event.target.value)"
+        />
+        <textarea
+          class="review-content-input"
+          rows="4"
+          placeholder="Cảm nhận của bạn về sản phẩm"
+          :value="reviewForm.content"
+          :disabled="!reviewEligibility.purchased || reviewSubmitting"
+          @input="updateReviewField('content', $event.target.value)"
+        ></textarea>
+        <div class="review-form-actions">
+          <p v-if="reviewSubmitError" class="review-submit-msg error">{{ reviewSubmitError }}</p>
+          <p v-else-if="reviewSubmitSuccess" class="review-submit-msg success">{{ reviewSubmitSuccess }}</p>
+          <span v-else></span>
+          <button type="submit" class="review-submit-btn" :disabled="!reviewCanSubmit">
+            {{ reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá' }}
+          </button>
+        </div>
+      </form>
       <div v-for="item in product.reviews || []" :key="item.id" class="review-card">
         <div class="review-head">
           <img v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img" />
@@ -106,15 +176,6 @@ const {
         <div v-if="item.images?.length" class="review-images">
           <span v-for="img in item.images" :key="`${item.id}-${img}`" class="review-image">{{ img }}</span>
         </div>
-      </div>
-    </div>
-    <div v-else-if="activeTab === 'qa'" class="pd-qa">
-      <div v-for="item in product.qa || []" :key="item.id" class="qa-card">
-        <p class="question">
-          <AppIcon name="messageCircle" :size="15" />
-          {{ item.question }}
-        </p>
-        <p class="answer"><strong>LUXNEST:</strong> {{ item.answer }}</p>
       </div>
     </div>
     <div v-else class="content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>

@@ -20,6 +20,10 @@ class OrdersApi {
     return apiClient.get(`/orders/${orderCode}`)
   }
 
+  checkProductPurchased(productId) {
+    return apiClient.get(`/orders/user/products/${productId}/purchased`)
+  }
+
   /**
    * Creates a new order
    * @param {Object} payload 

@@ -36,9 +36,6 @@ export class ProductResponse {
     this.reviews = Array.isArray(data.reviews)
       ? data.reviews.map((review) => new ReviewResponse(review))
       : []
-    this.qa = Array.isArray(data.qa)
-      ? data.qa.map((item) => new QuestionAnswerResponse(item))
-      : []
     this.variants = variants
     this.fallbackColor = data.color || primaryVariant?.color || ''
     this.fallbackMaterial = data.material || primaryVariant?.material || ''
@@ -121,19 +118,6 @@ export class ReviewResponse {
     this.comment = data.comment || data.content || ''
     this.images = Array.isArray(data.images) ? data.images : []
     this.createdAt = data.createdAt || null
-  }
-}
-
-export class QuestionAnswerResponse {
-  /**
-   * @param {Object} data
-   */
-  constructor(data = {}) {
-    this.id = data.id || null
-    this.question = data.question || ''
-    this.answer = data.answer || ''
-    this.asker = data.asker || ''
-    this.date = data.date || data.createdAt || ''
   }
 }
 
