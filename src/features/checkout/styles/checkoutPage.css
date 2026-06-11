@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 
 .checkout-page {
   --co-navy: #12202e;
@@ -345,7 +345,7 @@
   justify-content: center;
   padding: 1rem;
   animation: checkout-success-fade-in 0.3s ease;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
 }
 
 @keyframes checkout-success-fade-in {
@@ -383,7 +383,7 @@
 }
 
 .checkout-success-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--sans);
   font-size: 32px;
   font-weight: 300;
   color: #1a1a1a;
@@ -481,7 +481,7 @@
 
 .checkout-success-overlay .success-btn-track,
 .checkout-success-overlay .success-btn-home {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
   font-size: 14px;
   line-height: 1.2;
   cursor: pointer;

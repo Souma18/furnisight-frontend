@@ -12,12 +12,12 @@
 .pl-hero-inner { display: flex; justify-content: space-between; gap: 30px; align-items: center; }
 .pl-collection { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: 0.15em; color: #e5b84a; }
 /* global.css có `h1 { color: var(--text-heading) }` — ghi đè màu kế thừa từ .pl-hero */
-.pl-title { margin: 0; font-size: 46px; font-family: 'Cormorant Garamond', serif; font-weight: 300; color: inherit; }
+.pl-title { margin: 0; font-size: 46px; font-family: var(--sans); font-weight: 300; color: inherit; }
 .pl-subtitle { margin: 10px 0 0; max-width: 420px; color: rgba(255, 255, 255, 0.68); line-height: 1.7; }
 .pl-hero-stats { display: flex; }
 .pl-stat { padding: 0 26px; border-right: 1px solid rgba(255, 255, 255, 0.15); text-align: center; }
 .pl-stat:last-child { border-right: none; }
-.pl-num { margin: 0; color: #e5b84a; font-size: 36px; font-family: 'Cormorant Garamond', serif; }
+.pl-num { margin: 0; color: #e5b84a; font-size: 36px; font-family: var(--sans); }
 .pl-label { margin: 4px 0 0; font-size: 12px; color: rgba(255, 255, 255, 0.62); }
 
 .pl-toolbar { background: #fff; border-bottom: 1px solid #ece2cf; padding: 14px 0; }
@@ -251,7 +251,7 @@
 .pl-rating strong { font-size: 12px; }
 .pl-rating small { color: #888; font-size: 12px; }
 .pl-price-row { display: flex; justify-content: space-between; align-items: center; }
-.pl-price { margin: 0; color: #c9922a; font-size: 19px; font-family: 'Cormorant Garamond', serif; font-weight: 700; }
+.pl-price { margin: 0; color: #c9922a; font-size: 19px; font-family: var(--sans); font-weight: 700; }
 .pl-old { margin: 2px 0 0; color: #888; font-size: 12px; text-decoration: line-through; }
 .pl-sold { color: #7e7c77; font-size: 12px; font-weight: 500; white-space: nowrap; }
 

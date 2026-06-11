@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 
 .contact-page {
   min-height: calc(100svh - 56px);
   background: #faf6f0;
   color: #1a1a1a;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
   padding-bottom: 72px;
 }
 
@@ -114,7 +114,7 @@
 .ct-sec-title,
 .ct-form-title {
   margin: 0;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--sans);
   font-weight: 300;
   line-height: 1.15;
   color: inherit;
@@ -373,7 +373,7 @@
   background: #faf6f0;
   color: #1a1a1a;
   font-size: 14px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
   outline: none;
   transition: all 0.2s;
 }
@@ -523,7 +523,7 @@ select.ct-fi {
   color: #12202e;
   font-size: 15px;
   font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
   box-shadow: 0 6px 20px rgba(201, 146, 42, 0.4);
   cursor: pointer;
   transition: all 0.25s;

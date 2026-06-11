@@ -24,10 +24,10 @@
 .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .thumb.active { border-color: #c9922a; }
 .collection { color: #c9922a; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-.name { font-family: 'Cormorant Garamond', serif; font-size: 38px; font-weight: 300; line-height: 1.2; margin: 0 0 14px; }
+.name { font-family: var(--sans); font-size: 38px; font-weight: 300; line-height: 1.2; margin: 0 0 14px; }
 .rating { display: flex; gap: 12px; margin-bottom: 22px; font-size: 13px; align-items: center; }
 .price-box { background: #12202e; border-radius: 12px; padding: 20px 24px; color: #fff; display: flex; justify-content: space-between; margin-bottom: 24px; }
-.price { margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 40px; color: #e5b84a; }
+.price { margin: 0; font-family: var(--sans); font-size: 40px; color: #e5b84a; }
 .old { margin: 3px 0 0; color: rgba(255, 255, 255, 0.4); text-decoration: line-through; font-size: 15px; }
 .save { background: #e53e3e; border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 700; align-self: center; }
 .opt-label { margin: 0 0 10px; font-size: 13px; font-weight: 600; }
@@ -51,7 +51,7 @@
 .pd-tabs .nav button { border: none; background: none; padding: 14px 24px; color: #888; border-bottom: 2px solid transparent; margin-bottom: -2px; }
 .pd-tabs .nav button.active { color: #c9922a; border-bottom-color: #c9922a; font-weight: 600; }
 .pd-tabs .content { display: grid; gap: 12px; font-size: 14px; color: #555; line-height: 1.8; }
-.pd-tabs .content h2 { font-family: 'Cormorant Garamond', serif; font-size: 28px; color: #1a1a1a; margin: 0; }
+.pd-tabs .content h2 { font-family: var(--sans); font-size: 28px; color: #1a1a1a; margin: 0; }
 .pd-tabs .content ul { margin: 0; padding-left: 16px; }
 .pd-tabs .content.muted { color: #888; }
 .desc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; }
@@ -66,7 +66,7 @@
 .spec-val { flex: 1; padding: 13px 20px; font-size: 13px; font-weight: 500; color: #1a1a1a; }
 .pd-review { display: grid; gap: 16px; }
 .review-summary { display: flex; align-items: center; gap: 40px; padding: 30px; background: #fff; border-radius: 20px; border: 1px solid #ece2cf; }
-.review-score .score { margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 72px; font-weight: 300; line-height: 1; color: #1a1a1a; }
+.review-score .score { margin: 0; font-family: var(--sans); font-size: 72px; font-weight: 300; line-height: 1; color: #1a1a1a; }
 .review-score .stars { margin: 4px 0; color: #c9922a; font-size: 22px; }
 .review-score .count { margin: 0; color: #888; font-size: 13px; }
 .review-bars { flex: 1; }

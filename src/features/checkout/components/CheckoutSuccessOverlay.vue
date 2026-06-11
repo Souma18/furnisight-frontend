@@ -78,7 +78,7 @@ defineEmits(['view-order', 'continue-shopping'])
   align-items: center;
   justify-content: center;
   padding: 1rem;
-  font-family: 'DM Sans', system-ui, sans-serif;
+  font-family: var(--sans);
 }
 
 .checkout-success-box {
@@ -98,7 +98,7 @@ defineEmits(['view-order', 'continue-shopping'])
 }
 
 .checkout-success-title {
-  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-family: var(--sans);
   font-size: 32px;
   font-weight: 300;
   color: #1a1a1a;

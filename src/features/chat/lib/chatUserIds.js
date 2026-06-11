@@ -1,9 +1,9 @@
 import { useAuthStore } from '@features/auth/store/authStore'
 
 /**
- * ID người dùng tạm cho MessageService (buyer / staff).
- * TODO(BE/gateway): sau khi gateway giải JWT, lấy userId từ token claim thay vì env/mock.
- * Ưu tiên: VITE_CHAT_BUYER_ID / VITE_CHAT_STAFF_ID → profile.id → mặc định 1001 / 5001.
+ * ID người dùng cho MessageService (buyer / staff).
+ * Buyer chỉ lấy từ VITE_CHAT_BUYER_ID hoặc profile.id để tránh gọi nhầm user mock.
+ * Staff vẫn fallback 5001 cho admin/dev mode khi profile chưa có id số.
  */
 
 function parseNumericId(value) {
@@ -28,7 +28,7 @@ export function getBuyerId() {
   const fromProfile = parseNumericId(authStore.user?.id)
   if (fromProfile != null) return fromProfile
 
-  return 1001
+  return null
 }
 
 export function getStaffId() {

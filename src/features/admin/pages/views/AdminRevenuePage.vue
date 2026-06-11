@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
@@ -12,7 +12,10 @@ import { useAdminUiStore } from '../../store/adminUiStore'
 const ui = useAdminUiStore()
 const monthCanvas = ref(null)
 
-const { data, loading, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
+const { data, error, loading, load, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
+const hasRevenueData = computed(() =>
+  Boolean(data.value?.kpis?.length || data.value?.monthlyRows?.length || data.value?.monthLabels?.length),
+)
 
 const monthColumns = [
   { key: 'month', label: 'Tháng' },
@@ -55,7 +58,21 @@ bindCharts((charts, d) => {
     <span>Đang tải dữ liệu doanh thu...</span>
   </div>
 
-  <template v-if="data">
+  <div v-else-if="error" class="rev-state rev-state--error">
+    <AppIcon name="alert" :size="28" style="opacity:.45;margin-bottom:8px" />
+    <strong>Không tải được dữ liệu doanh thu</strong>
+    <span>{{ error }}</span>
+    <button type="button" class="btn-export rev-retry" @click="load">Tải lại</button>
+  </div>
+
+  <div v-else-if="data && !hasRevenueData" class="rev-state">
+    <AppIcon name="trendingUp" :size="28" style="opacity:.3;margin-bottom:8px" />
+    <strong>Chưa có dữ liệu doanh thu</strong>
+    <span>Hệ thống đã phản hồi nhưng chưa có snapshot hoặc đơn hàng phù hợp.</span>
+    <button type="button" class="btn-export rev-retry" @click="load">Tải lại</button>
+  </div>
+
+  <template v-if="data && hasRevenueData">
     <AdminKpiGrid :kpis="data.kpis" variant="rev" />
     <div class="rev-charts">
       <AdminChartCard title="Doanh thu theo tháng" subtitle="12 tháng gần nhất · Triệu VNĐ">
@@ -116,6 +133,15 @@ bindCharts((charts, d) => {
   color: var(--text3);
   font-size: 13px;
   gap: 4px;
+  text-align: center;
+}
+.rev-state--error {
+  color: var(--red);
+  border-color: rgba(192, 57, 43, .3);
+  background: var(--red-bg);
+}
+.rev-retry {
+  margin-top: 10px;
 }
 .rev-charts {
   display: grid;

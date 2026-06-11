@@ -1,18 +1,20 @@
 <script setup>
+import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
+import { isAdminAccount } from '../../utils/adminAccountRoles'
 
-const { items, search, ui } = useAdminListPage(adminApi.fetchAdminUsers.bind(adminApi))
+const { items, search, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
+const userRows = computed(() => items.value.filter((item) => !isAdminAccount(item)))
 const columns = [
   { key: 'id', label: '#' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
   { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },
   { key: 'statusLabel', label: 'Trạng thái' }, { key: 'createdAt', label: 'Ngày tạo' }, { key: 'actions', label: 'Hành động' },
 ]
-const pagination = { info: 'Hiển thị <strong>1–10</strong> / 1.243 người dùng', buttons: [{ label: '1', active: true }, { label: '2' }, { label: '3' }] }
 </script>
 
 <template>
@@ -23,7 +25,7 @@ const pagination = { info: 'Hiển thị <strong>1–10</strong> / 1.243 ngườ
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm theo tên hoặc email..." />
-  <AdminDataTable :columns="columns" :rows="items" :pagination="pagination">
+  <AdminDataTable :columns="columns" :rows="userRows">
     <template #cell-name="{ row }"><div class="flex-cell"><div class="av" :class="`av-${row.avTone}`">{{ row.av }}</div><div class="cell-name">{{ row.name }}</div></div></template>
     <template #cell-role="{ row }"><span class="badge" :class="row.role === 'Admin' ? 'b-gold' : 'b-navy'">{{ row.role }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="row.status === 'active' ? 'b-success' : 'b-cancel'">{{ row.statusLabel }}</span></template>

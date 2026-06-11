@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
 :root {
   --text: #374151;
   --text-muted: #6b7280;
@@ -8,7 +10,7 @@
   --accent-hover: #6d28d9;
   --accent-soft: rgba(124, 58, 237, 0.08);
   --radius: 8px;
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --sans: 'Be Vietnam Pro', system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
   /* Auth tokens */

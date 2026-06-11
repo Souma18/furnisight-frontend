@@ -3,10 +3,12 @@ import { storeToRefs } from 'pinia'
 import { adminApi } from '@shared/lib/api/services'
 import { ADMIN_PERMISSION_OPTIONS } from '../config/adminPermissions'
 import { useAdminUiStore } from '../store/adminUiStore'
+import { isAdminAccount, isAdminRoleName, normalizeRoleName } from '../utils/adminAccountRoles'
 
 const roleIconMap = {
   admin: 'crown',
   super: 'crown',
+  'super admin': 'crown',
   manager: 'shield',
   staff: 'user',
 }
@@ -14,6 +16,7 @@ const roleIconMap = {
 const roleToneMap = {
   admin: 'rt-super',
   super: 'rt-super',
+  'super admin': 'rt-super',
   manager: 'rt-manager',
   staff: 'rt-staff',
 }
@@ -31,10 +34,14 @@ export function useAdminRoles() {
     try {
       const [roleRes, userRes] = await Promise.all([
         adminApi.fetchRoles(),
-        adminApi.fetchAdminUsers({ size: 100 }),
+        adminApi.fetchAdminUsers({ size: 100, scope: 'ADMIN' }),
       ])
-      const roles = (roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? []).map(normalizeRole)
-      const adminAccounts = (userRes.data?.items ?? userRes.data?.accounts ?? userRes.data ?? []).map(normalizeAdminAccount)
+      const adminAccounts = (userRes.data?.items ?? userRes.data?.accounts ?? userRes.data ?? [])
+        .filter(isAdminAccount)
+        .map(normalizeAdminAccount)
+      const roles = (roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? [])
+        .filter((role) => isAdminRoleName(role.name))
+        .map((role) => normalizeRole(role, adminAccounts))
       data.value = {
         roles,
         adminAccounts,
@@ -53,17 +60,20 @@ export function useAdminRoles() {
   return { data, loading, error, load }
 }
 
-function normalizeRole(role = {}) {
+function normalizeRole(role = {}, adminAccounts = []) {
   const perms = normalizePermissions(role.permissions)
-  const roleKey = String(role.name || '').toLowerCase()
+  const roleKey = normalizeRoleName(role.name)
+  const userCount = adminAccounts.filter((account) =>
+    normalizeRoleName(account.role) === normalizeRoleName(role.name),
+  ).length
   return {
     ...role,
     perms,
     permissionIds: perms,
     icon: role.icon || roleIconMap[roleKey] || 'shield',
     tagClass: role.tagClass || roleToneMap[roleKey] || 'rt-manager',
-    system: ['admin', 'super admin', 'manager', 'staff'].includes(roleKey),
-    userCount: role.userCount ?? 0,
+    system: ['admin', 'super', 'super admin', 'manager', 'staff'].includes(roleKey),
+    userCount: userCount || role.userCount || 0,
     note: role.description || role.note || `${perms.length} quyền`,
   }
 }

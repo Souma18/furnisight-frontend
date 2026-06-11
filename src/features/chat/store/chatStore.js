@@ -180,6 +180,11 @@ export const useChatStore = defineStore('chat', () => {
     error.value = null
 
     try {
+      if (!buyerId.value) {
+        hydrated.value = true
+        return
+      }
+
       const list = await getConversationsByUser(buyerId.value)
       const existing = pickLatestConversation(list, CHAT_CHANNEL)
 
@@ -201,6 +206,9 @@ export const useChatStore = defineStore('chat', () => {
 
   async function ensureConversationForFirstMessage(firstMessage) {
     if (conversationId.value) return { createdWithFirstMessage: false }
+    if (!buyerId.value) {
+      throw new Error('Vui lòng đăng nhập để sử dụng chat hỗ trợ.')
+    }
 
     const list = await getConversationsByUser(buyerId.value)
     const existing = pickLatestConversation(list, CHAT_CHANNEL)
