@@ -1,7 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import AppIcon from './AppIcon.vue'
-import { formatVnd } from '@shared/lib/api/services/products/products.model'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   products: { type: Array, default: () => [] },
@@ -25,7 +25,7 @@ function categoryLabel(item) {
 }
 
 function priceLabel(item) {
-  return item.formattedPrice || formatVnd(item.price)
+  return item.formattedPrice || PriceFormatter.format(item.price)
 }
 
 function roundedRating(rating) {

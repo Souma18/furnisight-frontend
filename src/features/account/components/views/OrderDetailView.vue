@@ -4,6 +4,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAccountOrders } from '../../composables/useAccountOrders'
 import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
 import { canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const emit = defineEmits(['notify'])
 
@@ -25,9 +26,7 @@ function handleRetryPayment() {
   retryPayment(order.value)
 }
 
-function formatMoney(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatMoney = PriceFormatter.format
 
 function formatDate(dateStr) {
   if (!dateStr) return ''

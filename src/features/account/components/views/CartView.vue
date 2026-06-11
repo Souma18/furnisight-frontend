@@ -6,6 +6,7 @@ import CartItemCard from '@features/cart/components/CartItemCard.vue'
 import CartSummaryBar from '@features/cart/components/CartSummaryBar.vue'
 import { useCart } from '@features/cart/composables/useCart'
 import { productsApi, ProductResponse } from '@shared/lib/api/services'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
@@ -243,9 +244,7 @@ async function removeLine(itemId) {
   }
 }
 
-function formatPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatPrice = PriceFormatter.format
 
 function handleCheckout() {
   if (!selectedCount.value) return

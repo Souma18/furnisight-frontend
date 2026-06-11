@@ -1,6 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   item: {
@@ -29,9 +30,7 @@ const summaryLabel = computed(() => {
   return color || size || 'Phân loại mặc định'
 })
 
-function formatPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatPrice = PriceFormatter.format
 </script>
 
 <template>

@@ -7,13 +7,14 @@ import AdminKpiGrid from '../../components/shared/AdminKpiGrid.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminChartPage } from '../../composables/useAdminChartPage'
 import { useAdminUiStore } from '../../store/adminUiStore'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const ui = useAdminUiStore()
 const userCanvas = ref(null)
 const catCanvas = ref(null)
 const { data, bindCharts } = useAdminChartPage(adminApi.fetchStats.bind(adminApi))
 
-const formatCurrency = (value) => `${new Intl.NumberFormat('vi-VN').format(Number(value || 0))}đ`
+const formatCurrency = PriceFormatter.format
 
 const kpis = computed(() => {
   const user = data.value?.user || {}

@@ -260,15 +260,6 @@ function openDetail() {
   white-space: nowrap;
 }
 
-.price-old {
-  margin: 0.08rem 0 0;
-  color: #9ca3af;
-  font-size: calc(0.56rem + (0.08rem * var(--pc-content-scale)));
-  line-height: 1.1;
-  text-decoration: line-through;
-  white-space: nowrap;
-}
-
 .add-btn {
   justify-self: end;
   width: calc(1.86rem + (0.14rem * var(--pc-content-scale)));

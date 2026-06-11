@@ -1,6 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   manager: {
@@ -115,7 +116,7 @@ function sendProduct() {
               <div class="sp-prod-body">
                 <div class="sp-prod-cat">{{ p.cat }}</div>
                 <div class="sp-prod-name">{{ p.name }}</div>
-                <div class="sp-prod-price">{{ p.price }}</div>
+                <div class="sp-prod-price">{{ PriceFormatter.format(p.price) }}</div>
                 <div class="sp-prod-sku">{{ p.id }} · {{ p.stock > 0 ? `Còn ${p.stock} sp` : 'Hết hàng' }}</div>
               </div>
             </div>

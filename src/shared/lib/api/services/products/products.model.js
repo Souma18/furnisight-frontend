@@ -1,3 +1,5 @@
+import { PriceFormatter } from '@shared/lib/formatters'
+
 export class ProductResponse {
   /**
    * @param {Object} data
@@ -159,8 +161,7 @@ export class ProductVariantResponse {
 }
 
 export function formatVnd(value) {
-  if (value == null) return ''
-  return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
+  return PriceFormatter.format(value)
 }
 
 function normalizeVariants(data = {}) {

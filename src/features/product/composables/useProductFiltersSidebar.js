@@ -1,4 +1,5 @@
 import { reactive, computed, watch } from 'vue'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 export function useProductFiltersSidebar(props, emit) {
   const openBlocks = reactive({
@@ -104,9 +105,11 @@ export function useProductFiltersSidebar(props, emit) {
     else arr.splice(i, 1)
   }
 
-  const priceMinLabel = '0đ'
+  const priceMinLabel = PriceFormatter.formatShort(0)
   const priceMaxLabel = computed(() =>
-    pending.priceSliderPct >= 100 ? '50tr+' : `${Math.round((pending.priceSliderPct / 100) * 50)}tr`,
+    pending.priceSliderPct >= 100
+      ? PriceFormatter.formatShort(50000000, { plus: true })
+      : PriceFormatter.formatShort(Math.round((pending.priceSliderPct / 100) * 50) * 1000000),
   )
 
   function applyFilters() {

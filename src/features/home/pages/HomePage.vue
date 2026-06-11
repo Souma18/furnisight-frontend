@@ -178,7 +178,6 @@ const {
 .product-name-disabled { color: #444; cursor: default; }
 .product-footer { display: flex; align-items: center; justify-content: space-between; }
 .product-price { font-size: 16px; font-weight: 600; color: #c9922a; }
-.product-price-old { font-size: 12px; color: #888; text-decoration: line-through; margin-left: 6px; }
 .product-sold { color: #7e7c77; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .testi-card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,.06); }

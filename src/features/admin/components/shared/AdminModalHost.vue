@@ -8,6 +8,7 @@ import AdminModel3dUpload from '../forms/AdminModel3dUpload.vue'
 import AdminProductImagesUpload from '../forms/AdminProductImagesUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const iconOptions = ref([])
 const roleOptions = ref([])
@@ -65,9 +66,7 @@ function variantDisplayCode(variant) {
   return variant.sku || 'Chưa có mã SKU'
 }
 
-function formatVariantPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatVariantPrice = PriceFormatter.format
 
 onMounted(async () => {
   try {

@@ -5,6 +5,7 @@ import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const { items, search, load, ui } = useAdminListPage(adminApi.fetchVouchers.bind(adminApi))
 
@@ -18,9 +19,7 @@ const columns = [
   { key: 'actions', label: 'Hành động' },
 ]
 
-function formatMoney(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatMoney = PriceFormatter.format
 
 function discountLabel(row) {
   if (row.discountType === 'PERCENT') return `${row.discountValue}%`

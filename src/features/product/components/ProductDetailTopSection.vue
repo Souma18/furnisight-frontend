@@ -72,7 +72,7 @@ const emit = defineEmits([
       </div>
       <div class="price-box">
         <div>
-          <p class="price">₫ {{ product.formattedPrice }}</p>
+          <p class="price">{{ product.formattedPrice }}</p>
         </div>
       </div>
       <p v-if="product.colors?.length" class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>

@@ -1,5 +1,5 @@
-export function formatCurrency(value, locale = 'vi-VN', currency = 'VND') {
-  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(
-    Number(value) || 0,
-  )
+import { PriceFormatter } from '@shared/lib/formatters'
+
+export function formatCurrency(value) {
+  return PriceFormatter.format(value)
 }

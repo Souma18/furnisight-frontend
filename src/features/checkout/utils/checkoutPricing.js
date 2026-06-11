@@ -1,5 +1,7 @@
+import { PriceFormatter } from '@shared/lib/formatters'
+
 export function formatCheckoutMoney(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
+  return PriceFormatter.format(value)
 }
 
 export function calcLineTotal(line) {

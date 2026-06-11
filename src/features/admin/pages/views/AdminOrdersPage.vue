@@ -5,6 +5,7 @@ import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
 const { items, ui } = useAdminListPage(adminApi.fetchOrders.bind(adminApi))
@@ -13,7 +14,7 @@ const columns = [
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },
 ]
 const badgeMap = { shipping: 'b-shipping', success: 'b-success', pending: 'b-pending', cancel: 'b-cancel' }
-function formatPrice(v) { return `${Number(v).toLocaleString('vi-VN')}₫` }
+const formatPrice = PriceFormatter.format
 function openDetail(row) {
   const orderCode = row.orderCode || row.id
   if (orderCode) router.push({ name: 'admin-order-detail', params: { orderCode } })

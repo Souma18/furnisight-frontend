@@ -1,6 +1,6 @@
 <script setup>
 import { computed } from 'vue'
-import { formatVnd } from '@shared/lib/api/services/products/products.model'
+import { PriceFormatter } from '@shared/lib/formatters'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -65,7 +65,7 @@ function lineMeta(line) {
           </div>
         </div>
 
-        <div class="cart-item-price">{{ formatVnd((Number(line.price) || 0) * (Number(line.qty) || 0)) }}</div>
+        <div class="cart-item-price">{{ PriceFormatter.format((Number(line.price) || 0) * (Number(line.qty) || 0)) }}</div>
       </button>
     </div>
 
@@ -76,7 +76,7 @@ function lineMeta(line) {
     <div class="cart-footer">
       <div class="cart-total">
         <span>Tổng cộng</span>
-        <strong>{{ formatVnd(totalAmount) }}</strong>
+        <strong>{{ PriceFormatter.format(totalAmount) }}</strong>
       </div>
 
       <div class="cart-actions">
