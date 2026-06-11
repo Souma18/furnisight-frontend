@@ -61,9 +61,7 @@ const emit = defineEmits([
       <div class="price-box">
         <div>
           <p class="price">₫ {{ product.formattedPrice }}</p>
-          <p v-if="product.hasDiscount" class="old">{{ product.formattedOldPrice }} đ</p>
         </div>
-        <span v-if="product.hasDiscount" class="save">{{ product.formattedSave }}</span>
       </div>
       <p v-if="product.colors?.length" class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>
       <div v-if="product.colors?.length" class="colors">

@@ -111,7 +111,6 @@ export function useCheckout() {
       categoryName: item.categoryName || item.categoryLabel || '',
       productName: item.productName || item.name,
       price: Number(item.price) || 0,
-      oldPrice: item.oldPrice ?? item.originalPrice ?? item.price ?? 0,
       quantity: Math.max(1, Number(item.qty ?? item.quantity) || 1),
       imageUrl: resolveLineImageUrl(item),
     }

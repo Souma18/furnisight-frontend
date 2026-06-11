@@ -94,7 +94,6 @@ function openDetail() {
       <div class="bottom">
         <div class="prices">
           <p class="price-current">{{ formatCurrency(product.price) }}</p>
-          <p v-if="product.oldPrice" class="price-old">{{ formatCurrency(product.oldPrice) }}</p>
         </div>
 
         <button

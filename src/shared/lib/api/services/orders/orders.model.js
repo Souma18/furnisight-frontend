@@ -68,7 +68,6 @@ export class OrderItemResponse {
     }
     this.imageUrl = this.productSnapshot.imageUrl
     this.price = data.price ?? 0
-    this.oldPrice = data.oldPrice ?? null
     this.quantity = data.quantity ?? 1
   }
 }

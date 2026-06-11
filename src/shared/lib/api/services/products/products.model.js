@@ -14,7 +14,6 @@ export class ProductResponse {
     this.description = data.description || ''
     this.status = data.status || ''
     this.price = resolvePrice(data, primaryVariant)
-    this.oldPrice = data.oldPrice ?? null
     this.categoryId = data.categoryId || data.category?.id || null
     this.categoryName = data.categoryName || data.category?.name || data.category?.label || ''
     this.category = data.category ? new CategoryResponse(data.category) : null
@@ -66,26 +65,8 @@ export class ProductResponse {
     return variantStock || this.fallbackStock || 0
   }
 
-  get hasDiscount() {
-    return this.oldPrice != null && this.oldPrice > this.price
-  }
-
-  get discountPercent() {
-    if (!this.hasDiscount) return 0
-    return Math.round(((this.oldPrice - this.price) / this.oldPrice) * 100)
-  }
-
   get formattedPrice() {
     return formatVnd(this.price)
-  }
-
-  get formattedOldPrice() {
-    return this.oldPrice ? formatVnd(this.oldPrice) : ''
-  }
-
-  get formattedSave() {
-    if (!this.hasDiscount) return ''
-    return `Tiết kiệm ${formatVnd(this.oldPrice - this.price)}`
   }
 }
 

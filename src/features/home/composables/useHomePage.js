@@ -2,7 +2,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
-import { CategoryResponse, formatVnd, ProductResponse, productsApi } from '@shared/lib/api/services'
+import { CategoryResponse, ProductResponse, productsApi } from '@shared/lib/api/services'
 import { roomFallbacks } from './homeContent'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
@@ -69,16 +69,7 @@ export function useHomePage() {
         size: 8,
       })
       const rawProducts = data?.products ?? data?.content ?? []
-      products.value = rawProducts.map((item) => {
-        const product = new ProductResponse(item)
-        return {
-          ...product,
-          detailId: product.slug || product.id,
-          category: product.categoryName,
-          price: formatVnd(product.price),
-          image: product.image || '/home/products/placeholder.jpg',
-        }
-      })
+      products.value = rawProducts.map((item) => new ProductResponse(item))
     } catch (error) {
       console.error('Failed to load products for category:', error)
     }

@@ -4,7 +4,7 @@ import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
 import HomeFeaturesStripSection from '../components/HomeFeaturesStripSection.vue'
 import HomeCategoriesSection from '../components/HomeCategoriesSection.vue'
 import HomeRoomsSection from '../components/HomeRoomsSection.vue'
-import HomeProductsSectionV2 from '../components/HomeProductsSectionV2.vue'
+import HomeSharedProductsSection from '../components/HomeSharedProductsSection.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
 import { useHomePage } from '../composables/useHomePage'
@@ -41,7 +41,7 @@ const {
       :rooms="filteredRooms"
       @select-filter="activeRoomFilter = $event"
     />
-    <HomeProductsSectionV2
+    <HomeSharedProductsSection
       :products="products"
       :wished-product-ids="wishedProductIds"
       @toggle-wish="toggleWish"

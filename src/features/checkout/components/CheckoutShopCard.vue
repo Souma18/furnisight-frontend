@@ -71,9 +71,6 @@ const merchandiseSubtotal = () =>
       </div>
       <div>
         <div class="co-prod-unit">{{ formatMoney(line.price) }}</div>
-        <div v-if="line.oldPrice && line.oldPrice > line.price" class="co-prod-variant" style="text-align: right">
-          {{ formatMoney(line.oldPrice) }}
-        </div>
       </div>
       <div class="co-qty">
         <button type="button" aria-label="Giảm" @click="changeQty(line, -1)">−</button>

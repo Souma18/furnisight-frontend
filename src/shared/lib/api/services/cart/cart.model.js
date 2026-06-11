@@ -47,7 +47,6 @@ function normalizeVariant(raw = {}) {
     color: raw.color || '',
     size: buildDimensionLabel(raw),
     price: raw.price ?? null,
-    oldPrice: raw.oldPrice ?? null,
     stockQuantity: raw.stockQuantity ?? null,
     length: raw.length ?? null,
     width: raw.width ?? null,
@@ -78,7 +77,6 @@ function resolveActiveVariant(raw = {}, variants = []) {
 function normalizeTopLevel(raw = {}, activeVariant = null) {
   return {
     price: raw.price ?? activeVariant?.price ?? 0,
-    oldPrice: raw.oldPrice ?? activeVariant?.oldPrice ?? null,
     stockQuantity: raw.stockQuantity ?? activeVariant?.stockQuantity ?? null,
     length: raw.length ?? activeVariant?.length ?? null,
     width: raw.width ?? activeVariant?.width ?? null,
@@ -125,7 +123,6 @@ export class CartItemResponse {
     this.imageFallback = raw.imageFallback || ''
     this.emoji = raw.emoji || ''
     this.price = normalized.price
-    this.oldPrice = normalized.oldPrice
     this.quantity = raw.quantity ?? raw.qty ?? 1
     this.qty = this.quantity
     this.stockQuantity = normalized.stockQuantity

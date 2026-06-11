@@ -48,12 +48,6 @@ export function buildCheckoutSummary({
   const total = Math.max(0, merchandiseSubtotal + shipFee - shopDiscount - shippingDiscount)
   const itemQty = lines.reduce((sum, line) => sum + (Number(line.qty) || 0), 0)
 
-  const originalTotal = lines.reduce((sum, line) => {
-    const unitOld = Number(line.oldPrice) || Number(line.price) || 0
-    return sum + unitOld * (Number(line.qty) || 0)
-  }, 0)
-  const saved = Math.max(0, originalTotal + shipFee - total)
-
   return {
     subtotal: merchandiseSubtotal,
     shipFee,
@@ -62,6 +56,6 @@ export function buildCheckoutSummary({
     insuranceAmount,
     total,
     itemQty,
-    saved,
+    saved: Math.max(0, shopDiscount + shippingDiscount),
   }
 }
