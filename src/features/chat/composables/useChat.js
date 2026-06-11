@@ -75,7 +75,7 @@ export function useChat() {
       if (authStore.isAuthenticated) {
         await chatStore.hydrateSession(true)
       } else {
-        await chatStore.hydrateSession(true)
+        chatStore.resetSession()
       }
     },
   )

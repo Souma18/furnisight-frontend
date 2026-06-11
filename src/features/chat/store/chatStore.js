@@ -346,6 +346,7 @@ export const useChatStore = defineStore('chat', () => {
     hasUnread,
     formatTimeLabel,
     hydrateSession,
+    resetSession: resetSessionState,
     toggleOpen,
     close,
     open,
