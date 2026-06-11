@@ -1,4 +1,6 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
+
 defineProps({
   product: { type: Object, required: true },
   selectedColor: { type: String, required: false },
@@ -25,7 +27,6 @@ const emit = defineEmits([
     <div class="pd-gallery">
       <div class="pd-main">
         <span class="pd-badge">Mới</span>
-        <span class="pd-badge sale">-20%</span>
         <div class="pd-img-wrap">
           <img
             v-if="activeImage || product.image"
@@ -34,7 +35,10 @@ const emit = defineEmits([
             class="pd-main-img"
           />
         </div>
-        <button type="button" class="pd-btn-3d" @click="emit('open-3d')">📦 Xem mô hình 3D</button>
+        <button type="button" class="pd-btn-3d" @click="emit('open-3d')">
+          <AppIcon name="box" :size="16" />
+          Xem mô hình 3D
+        </button>
       </div>
       <div class="pd-thumbs">
         <button
@@ -53,7 +57,15 @@ const emit = defineEmits([
       <p class="collection">{{ product.collection }}</p>
       <h1 class="name">{{ product.name }}</h1>
       <div class="rating">
-        <span>{{ '★'.repeat(Math.round(product.rating || 5)).padEnd(5, '☆') }}</span>
+        <span class="rating-stars" aria-label="Đánh giá sản phẩm">
+          <AppIcon
+            v-for="star in 5"
+            :key="`detail-star-${star}`"
+            name="star"
+            :size="15"
+            :class="{ active: star <= Math.round(product.rating || 5) }"
+          />
+        </span>
         <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
         <small>({{ product.ratingCount || 0 }} đánh giá)</small>
         <small>Đã bán {{ product.soldCount || 0 }}</small>
@@ -93,24 +105,35 @@ const emit = defineEmits([
 
       <div class="qty-row">
         <div class="qty-ctrl">
-          <button type="button" @click="emit('change-qty', -1)">−</button>
+          <button type="button" aria-label="Giảm số lượng" @click="emit('change-qty', -1)">
+            <AppIcon name="minus" :size="15" />
+          </button>
           <input :value="qty" readonly />
-          <button type="button" @click="emit('change-qty', 1)">+</button>
+          <button type="button" aria-label="Tăng số lượng" @click="emit('change-qty', 1)">
+            <AppIcon name="plus" :size="15" />
+          </button>
         </div>
         <span>{{ product.stock > 0 ? `Còn hàng (${product.stock} sản phẩm)` : 'Tạm hết hàng' }}</span>
       </div>
       <div class="actions">
-        <button type="button" class="outline" @click="emit('add-cart')">🛒 Thêm vào giỏ</button>
-        <button type="button" class="solid">✦ Mua ngay</button>
-        <button type="button" class="wish" :class="{ active: wished }" @click="emit('toggle-wish')">
-          {{ wished ? '♥' : '♡' }}
+        <button type="button" class="outline" @click="emit('add-cart')">
+          <AppIcon name="cart" :size="17" />
+          Thêm vào giỏ
+        </button>
+        <button type="button" class="solid">
+          <AppIcon name="sparkles" :size="17" />
+          Mua ngay
+        </button>
+        <button
+          type="button"
+          class="wish"
+          :class="{ active: wished }"
+          :aria-label="wished ? 'Bỏ yêu thích' : 'Yêu thích'"
+          @click="emit('toggle-wish')"
+        >
+          <AppIcon name="heart" :size="18" />
         </button>
       </div>
-      <!-- <div class="room3d-cta">
-        <button type="button" class="solid room3d-btn" @click="emit('go-room3d')">
-          🏠 Đặt vào phòng 3D
-        </button>
-      </div> -->
     </div>
   </div>
 </template>

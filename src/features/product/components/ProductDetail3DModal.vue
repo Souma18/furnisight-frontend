@@ -1,5 +1,6 @@
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import { Scene, PerspectiveCamera, WebGLRenderer, AmbientLight, DirectionalLight, Box3, Vector3, GridHelper } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -150,7 +151,9 @@ onBeforeUnmount(() => {
     <div class="box">
       <div class="head">
         <strong>Trực quan 3D – {{ productName }}</strong>
-        <button type="button" @click="emit('close')">✕</button>
+        <button type="button" aria-label="Đóng" @click="emit('close')">
+          <AppIcon name="close" :size="16" />
+        </button>
       </div>
       <div class="scene">
         <div class="scene-controls">

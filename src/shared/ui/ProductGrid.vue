@@ -28,12 +28,8 @@ function priceLabel(item) {
   return item.formattedPrice || formatVnd(item.price)
 }
 
-function stars(rating) {
-  if (rating >= 4.8) return '★★★★★'
-  if (rating >= 3.8) return '★★★★☆'
-  if (rating >= 2.8) return '★★★☆☆'
-  if (rating >= 1.8) return '★★☆☆☆'
-  return '★☆☆☆☆'
+function roundedRating(rating) {
+  return Math.max(0, Math.min(5, Math.round(Number(rating) || 0)))
 }
 </script>
 
@@ -64,7 +60,15 @@ function stars(rating) {
           <p v-if="viewMode === 'list'" class="shared-product-card__desc">{{ item.description || '' }}</p>
 
           <div class="shared-product-card__rating">
-            <span>{{ stars(item.rating) }}</span>
+            <span class="shared-product-card__stars" aria-label="Đánh giá sản phẩm">
+              <AppIcon
+                v-for="star in 5"
+                :key="`${item.id}-product-star-${star}`"
+                name="star"
+                :size="13"
+                :class="{ active: star <= roundedRating(item.rating) }"
+              />
+            </span>
             <strong>{{ item.rating ?? 0 }}</strong>
             <small>({{ item.ratingCount ?? 0 }})</small>
           </div>
@@ -193,9 +197,16 @@ function stars(rating) {
   margin-bottom: 12px;
 }
 
-.shared-product-card__rating span {
+.shared-product-card__stars {
+  align-items: center;
+  color: #cfc6b9;
+  display: inline-flex;
+  gap: 1px;
+}
+
+.shared-product-card__stars .active {
   color: #c9922a;
-  font-size: 12px;
+  fill: currentColor;
 }
 
 .shared-product-card__rating strong,

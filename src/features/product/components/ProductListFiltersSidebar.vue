@@ -1,4 +1,5 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
 import {
   PRODUCT_PRICE_BAND_OPTIONS,
 } from '../composables/productFilterOptions'
@@ -49,10 +50,11 @@ const {
     <div class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('cat')">
         <div class="pl-fb-title">
-          <span class="pl-fb-icon">📂</span> Danh mục
+          <AppIcon class="pl-fb-icon" name="category" :size="16" />
+          Danh mục
           <span class="pl-fb-count">{{ totalCategoryCount }}</span>
         </div>
-        <span class="pl-fb-toggle" :class="{ open: openBlocks.cat }">▲</span>
+        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.cat }" name="chevronDown" :size="16" />
       </div>
       <div v-show="openBlocks.cat" class="pl-filter-body">
         <ul class="pl-cat-list" role="list">
@@ -71,8 +73,8 @@ const {
 
     <div class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('price')">
-        <div class="pl-fb-title"><span class="pl-fb-icon">💰</span> Khoảng giá</div>
-        <span class="pl-fb-toggle" :class="{ open: openBlocks.price }">▲</span>
+        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="banknote" :size="16" /> Khoảng giá</div>
+        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.price }" name="chevronDown" :size="16" />
       </div>
       <div v-show="openBlocks.price" class="pl-filter-body">
         <div class="pl-price-range-display">
@@ -102,8 +104,8 @@ const {
 
     <div class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('mat')">
-        <div class="pl-fb-title"><span class="pl-fb-icon">🪵</span> Chất liệu</div>
-        <span class="pl-fb-toggle" :class="{ open: openBlocks.mat }">▲</span>
+        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="box" :size="16" /> Chất liệu</div>
+        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.mat }" name="chevronDown" :size="16" />
       </div>
       <div v-show="openBlocks.mat" class="pl-filter-body">
         <div class="pl-mat-list">
@@ -121,8 +123,8 @@ const {
 
     <div class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('color')">
-        <div class="pl-fb-title"><span class="pl-fb-icon">🎨</span> Màu sắc</div>
-        <span class="pl-fb-toggle" :class="{ open: openBlocks.color }">▲</span>
+        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="palette" :size="16" /> Màu sắc</div>
+        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.color }" name="chevronDown" :size="16" />
       </div>
       <div v-show="openBlocks.color" class="pl-filter-body">
         <div class="pl-color-filter-row">
@@ -146,8 +148,8 @@ const {
 
     <div class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('rating')">
-        <div class="pl-fb-title"><span class="pl-fb-icon">⭐</span> Đánh giá</div>
-        <span class="pl-fb-toggle" :class="{ open: openBlocks.rating }">▲</span>
+        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="star" :size="16" /> Đánh giá</div>
+        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.rating }" name="chevronDown" :size="16" />
       </div>
       <div v-show="openBlocks.rating" class="pl-filter-body">
         <div class="pl-star-rows">
@@ -158,7 +160,15 @@ const {
               :value="opt.value"
               v-model="pending.minStar"
             />
-            <span class="pl-star-icons">{{ opt.stars }}</span>
+            <span class="pl-star-icons" aria-label="Mức đánh giá">
+              <AppIcon
+                v-for="star in 5"
+                :key="`${opt.value}-filter-star-${star}`"
+                name="star"
+                :size="14"
+                :class="{ active: star <= opt.value }"
+              />
+            </span>
             <span class="pl-star-num">{{ opt.hint }}</span>
           </label>
           <label class="pl-star-row">
@@ -176,7 +186,10 @@ const {
 
     <div class="pl-filter-block pl-filter-actions">
       <button type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</button>
-      <button type="button" class="pl-filter-clear" @click="clearAll">✕ Xóa tất cả bộ lọc</button>
+      <button type="button" class="pl-filter-clear" @click="clearAll">
+        <AppIcon name="close" :size="15" />
+        Xóa tất cả bộ lọc
+      </button>
     </div>
   </aside>
 </template>

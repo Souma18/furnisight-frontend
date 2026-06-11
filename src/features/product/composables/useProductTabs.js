@@ -50,15 +50,10 @@ export function useProductTabs(productRef) {
     return bars;
   })
 
-  function getStars(rating) {
-    return '★'.repeat(Math.round(rating || 5)).padEnd(5, '☆')
-  }
-
   return {
     reviewCountLabel,
     qaCountLabel,
     specsRows,
     reviewBars,
-    getStars,
   }
 }

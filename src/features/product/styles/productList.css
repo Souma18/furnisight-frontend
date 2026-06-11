@@ -75,7 +75,11 @@
   align-items: center;
   gap: 8px;
 }
-.pl-fb-icon { font-size: 15px; }
+.pl-fb-icon {
+  color: #c9922a;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
 .pl-fb-count {
   font-size: 11px;
   font-weight: 700;
@@ -84,7 +88,12 @@
   padding: 2px 8px;
   border-radius: 8px;
 }
-.pl-fb-toggle { font-size: 12px; color: #888; transition: transform 0.2s; }
+.pl-fb-toggle {
+  color: #888;
+  display: inline-flex;
+  flex: 0 0 auto;
+  transition: transform 0.2s;
+}
 .pl-fb-toggle.open { transform: rotate(180deg); }
 
 .pl-filter-body { padding: 16px 20px; }
@@ -154,7 +163,8 @@
 .pl-star-rows { display: flex; flex-direction: column; gap: 9px; }
 .pl-star-row { display: flex; align-items: center; gap: 10px; cursor: pointer; }
 .pl-star-row input { width: 15px; height: 15px; accent-color: #c9922a; cursor: pointer; }
-.pl-star-icons { color: #c9922a; font-size: 13px; }
+.pl-star-icons { display: inline-flex; align-items: center; gap: 1px; color: #cfc6b9; }
+.pl-star-icons .active { color: #c9922a; fill: currentColor; }
 .pl-star-num { font-size: 12px; color: #888; }
 
 .pl-filter-apply {
@@ -173,7 +183,10 @@
 .pl-filter-apply:hover { background: #1c3148; box-shadow: 0 6px 18px rgba(18, 32, 46, 0.3); }
 
 .pl-filter-clear {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
   text-align: center;
   font-size: 13px;

@@ -79,7 +79,6 @@ export function useProductFiltersSidebar(props, emit) {
       const count = apiRatings[star] || 0
       return {
         value: star,
-        stars: '★'.repeat(star) + '☆'.repeat(5 - star),
         hint: star === 5 ? `(${count})` : `${star} sao+ (${count})`,
         count: count,
       }
