@@ -85,6 +85,10 @@ class AdminApi {
     return apiClient.get('/admin/vouchers', { params })
   }
 
+  fetchVoucherStats() {
+    return apiClient.get('/admin/vouchers/stats')
+  }
+
   createVoucher(payload) {
     return apiClient.post('/admin/vouchers', payload)
   }
@@ -95,6 +99,58 @@ class AdminApi {
 
   deleteVoucher(id) {
     return apiClient.delete(`/admin/vouchers/${id}`)
+  }
+
+  publishVoucher(id, payload) {
+    return apiClient.post(`/admin/vouchers/${id}/publish`, payload)
+  }
+
+  fetchMarketingCampaigns(params) {
+    return apiClient.get('/admin/marketing/campaigns', { params })
+  }
+
+  createMarketingCampaign(payload) {
+    return apiClient.post('/admin/marketing/campaigns', payload)
+  }
+
+  updateMarketingCampaign(id, payload) {
+    return apiClient.put(`/admin/marketing/campaigns/${id}`, payload)
+  }
+
+  deleteMarketingCampaign(id) {
+    return apiClient.delete(`/admin/marketing/campaigns/${id}`)
+  }
+
+  fetchMarketingCombos(params) {
+    return apiClient.get('/admin/marketing/combos', { params })
+  }
+
+  createMarketingCombo(payload) {
+    return apiClient.post('/admin/marketing/combos', payload)
+  }
+
+  updateMarketingCombo(id, payload) {
+    return apiClient.put(`/admin/marketing/combos/${id}`, payload)
+  }
+
+  deleteMarketingCombo(id) {
+    return apiClient.delete(`/admin/marketing/combos/${id}`)
+  }
+
+  fetchMarketingNotifications(params) {
+    return apiClient.get('/admin/marketing/notifications', { params })
+  }
+
+  createMarketingNotification(payload) {
+    return apiClient.post('/admin/marketing/notifications', payload)
+  }
+
+  updateMarketingNotification(id, payload) {
+    return apiClient.put(`/admin/marketing/notifications/${id}`, payload)
+  }
+
+  deleteMarketingNotification(id) {
+    return apiClient.delete(`/admin/marketing/notifications/${id}`)
   }
 
   fetchRevenue(params) {

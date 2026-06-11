@@ -4,9 +4,11 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 defineProps({
   shopVoucher: { type: Object, default: null },
   shippingVoucher: { type: Object, default: null },
+  selectedCombo: { type: Object, default: null },
   formatMoney: { type: Function, required: true },
   shopDiscount: { type: Number, default: 0 },
   shippingDiscount: { type: Number, default: 0 },
+  comboDiscount: { type: Number, default: 0 },
 })
 
 defineEmits(['open-voucher', 'remove-voucher'])
@@ -33,6 +35,18 @@ defineEmits(['open-voucher', 'remove-voucher'])
         <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'shop')">
           Chọn Voucher
         </button>
+      </div>
+
+      <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">
+
+      <div class="co-voucher-row">
+        <span>🎁</span>
+        <span class="co-voucher-label">Combo khuyến mãi</span>
+        <div v-if="selectedCombo" class="co-voucher-applied">
+          <span class="co-voucher-code">{{ selectedCombo.name }}</span>
+          <span v-if="comboDiscount">−{{ formatMoney(comboDiscount) }} ✓</span>
+        </div>
+        <span v-else class="co-voucher-muted">Chưa đủ sản phẩm combo</span>
       </div>
 
       <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">

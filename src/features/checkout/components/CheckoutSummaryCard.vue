@@ -46,6 +46,10 @@ function lineThumb(line) {
           <span>Voucher vận chuyển</span>
           <span class="green">−{{ formatMoney(summary.shippingDiscount) }}</span>
         </div>
+        <div v-if="summary.comboDiscount" class="co-sum-row">
+          <span>Combo khuyến mãi</span>
+          <span class="green">−{{ formatMoney(summary.comboDiscount) }}</span>
+        </div>
         <div class="co-sum-row">
           <span>Voucher Shop</span>
           <span :class="{ green: summary.shopDiscount }">

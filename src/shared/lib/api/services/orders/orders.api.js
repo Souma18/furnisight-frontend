@@ -72,16 +72,28 @@ class OrdersApi {
   // ─── VOUCHERS ────────────────────────────────────────────────────────
 
   getVouchers(params) {
-    // Backend uses @GetMapping("/user") on VoucherController
-    return apiClient.get('/orders/vouchers/user', { params })
+    return apiClient.get('/promotions/vouchers/user', { params })
   }
 
   applyVoucher(code, orderAmount) {
-    return apiClient.post('/orders/vouchers/apply', { code, orderAmount })
+    return apiClient.post('/promotions/vouchers/validate', {
+      code,
+      type: 'shop',
+      subtotal: orderAmount,
+      shippingFee: 0,
+    })
   }
 
   validateCheckoutVoucher(payload) {
-    return apiClient.post('/orders/vouchers/validate', payload)
+    return apiClient.post('/promotions/vouchers/validate', payload)
+  }
+
+  getActiveCombos(params) {
+    return apiClient.get('/promotions/combos/active', { params })
+  }
+
+  validateCheckoutCombo(payload) {
+    return apiClient.post('/promotions/combos/validate', payload)
   }
 }
 
