@@ -51,8 +51,9 @@ export function useLoginForm({ embedded = false, emit } = {}) {
     loading.value = true
     clearSuccessTimer()
     try {
+      const identifier = String(form.email || '').trim().toLowerCase()
       const response = await authApi.login({
-        identifier: form.email,
+        identifier,
         password: form.password,
       })
       authStore.setSession(normalizeAuthSession(response))
@@ -81,7 +82,18 @@ export function useLoginForm({ embedded = false, emit } = {}) {
         setView(AUTH_VIEWS.LOGIN)
       }, 900)
     } catch (error) {
-      errorMessage.value = error.response?.data?.message || error.message || 'Đăng nhập thất bại.'
+      const code = error.response?.data?.code
+      const messageByCode = {
+        ACCOUNT_NOT_FOUND: 'Không tìm thấy tài khoản với email này.',
+        INVALID_PASSWORD: 'Mật khẩu không chính xác.',
+        ACCOUNT_BANNED: 'Tài khoản đã bị khóa.',
+        ACCOUNT_TEMPORARILY_LOCKED: 'Tài khoản đang tạm khóa. Vui lòng thử lại sau.',
+        ACCOUNT_NOT_VERIFIED: 'Tài khoản chưa được xác minh.',
+      }
+      errorMessage.value = messageByCode[code]
+        || error.response?.data?.message
+        || error.message
+        || 'Đăng nhập thất bại.'
     } finally {
       loading.value = false
     }

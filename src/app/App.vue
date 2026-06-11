@@ -1,13 +1,14 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
-import ChatWidget from '@features/chat/components/ChatWidget.vue'
 import AuthModal from '@features/auth/components/AuthModal.vue'
 import { AUTH_MODAL_EVENT, consumePendingAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
+
+const ChatWidget = defineAsyncComponent(() => import('@features/chat/components/ChatWidget.vue'))
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -23,8 +24,10 @@ const isAdminPage = computed(() => route.path.startsWith('/admin'))
 const mainRef = ref(null)
 const isAuthModalOpen = ref(false)
 const initialAuthView = ref('login')
+const chatWidgetReady = ref(false)
 let resizeObserver = null
-let mutationObserver = null
+let chatIdleHandle = null
+let chatReadyTimer = null
 
 function syncHeaderScrollbarInset() {
   const el = mainRef.value
@@ -55,9 +58,17 @@ onMounted(async () => {
     resizeObserver.observe(mainRef.value)
   }
 
-  if (typeof MutationObserver !== 'undefined' && mainRef.value) {
-    mutationObserver = new MutationObserver(() => syncHeaderScrollbarInset())
-    mutationObserver.observe(mainRef.value, { childList: true, subtree: true })
+  if (typeof window.requestIdleCallback === 'function') {
+    chatIdleHandle = window.requestIdleCallback(
+      () => {
+        chatWidgetReady.value = true
+      },
+      { timeout: 2500 },
+    )
+  } else {
+    chatReadyTimer = window.setTimeout(() => {
+      chatWidgetReady.value = true
+    }, 1200)
   }
 })
 
@@ -82,8 +93,10 @@ onBeforeUnmount(() => {
   window.removeEventListener(AUTH_MODAL_EVENT, openAuthModalFromEvent)
   resizeObserver?.disconnect()
   resizeObserver = null
-  mutationObserver?.disconnect()
-  mutationObserver = null
+  if (chatIdleHandle != null && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(chatIdleHandle)
+  }
+  if (chatReadyTimer != null) window.clearTimeout(chatReadyTimer)
 })
 </script>
 
@@ -113,7 +126,7 @@ onBeforeUnmount(() => {
       <RouterView />
       <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
-    <ChatWidget v-if="!isRoom3DPage && !isAdminPage" />
+    <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
     <AuthModal
       :open="isAuthModalOpen"
       :initial-view="initialAuthView"

@@ -87,7 +87,7 @@ export function useChat() {
 
   const todayLabel = computed(() => 'Hôm nay')
 
-  watch(messages, () => scrollToBottom(), { deep: true })
+  watch(() => messages.value.length, () => scrollToBottom())
   watch(isTyping, () => scrollToBottom())
   watch(
     () => [authStore.isAuthenticated, authStore.user?.id ?? null],

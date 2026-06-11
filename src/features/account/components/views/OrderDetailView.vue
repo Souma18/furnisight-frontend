@@ -34,6 +34,14 @@ function formatDate(dateStr) {
   return isNaN(date.getTime()) ? dateStr : new Intl.DateTimeFormat('vi-VN').format(date)
 }
 
+function formatDateTime(dateStr) {
+  if (!dateStr) return ''
+  const date = new Date(dateStr)
+  return Number.isNaN(date.getTime())
+    ? dateStr
+    : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+}
+
 function orderItemImage(item = {}) {
   return item.imageUrl || item.productSnapshot?.imageUrl || ''
 }
@@ -43,6 +51,90 @@ function hideBrokenImage(event) {
 }
 
 const statusLabel = computed(() => ORDER_STATUS_LABELS[order.value?.status] ?? order.value?.status ?? '')
+
+const paymentStatusLabel = computed(() => {
+  const rawStatus = String(order.value?.paymentDetail?.paymentStatus || order.value?.rawStatus || '').toUpperCase()
+  if (rawStatus === 'PAID') return 'Đã thanh toán'
+  if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return 'Thanh toán thất bại'
+  if (order.value?.status === 'unpaid') return 'Chờ thanh toán'
+  return rawStatus || 'Chưa ghi nhận'
+})
+
+const transactionTimeline = computed(() => {
+  const current = order.value
+  if (!current) return []
+
+  const timeline = current.paymentTimeline || {}
+  const items = [
+    {
+      key: 'created',
+      title: 'Đơn hàng được tạo',
+      sub: 'Hệ thống đã ghi nhận đơn hàng.',
+      time: timeline.orderCreatedAt || current.createdAt,
+      state: 'done',
+      icon: 'clipboardList',
+    },
+  ]
+
+  if (timeline.paymentInitiatedAt) {
+    items.push({
+      key: 'initiated',
+      title: 'Khởi tạo thanh toán',
+      sub: `Phương thức ${current.paymentDetail?.paymentMethod || current.paymentMethod || 'thanh toán'}.`,
+      time: timeline.paymentInitiatedAt,
+      state: 'done',
+      icon: 'creditCard',
+    })
+  }
+
+  if (timeline.paymentCompletedAt || current.paymentDetail?.paidAt) {
+    items.push({
+      key: 'completed',
+      title: 'Thanh toán thành công',
+      sub: `Đã ghi nhận ${formatMoney(current.paymentDetail?.paidAmount || current.totalAmount)}.`,
+      time: timeline.paymentCompletedAt || current.paymentDetail?.paidAt,
+      state: 'done',
+      icon: 'check',
+    })
+  } else if (timeline.paymentFailedAt || current.status === 'payment_failed') {
+    items.push({
+      key: 'failed',
+      title: 'Thanh toán thất bại',
+      sub: 'Giao dịch chưa được cổng thanh toán chấp nhận.',
+      time: timeline.paymentFailedAt,
+      state: 'failed',
+      icon: 'ban',
+    })
+  } else {
+    items.push({
+      key: 'pending',
+      title: 'Chờ thanh toán',
+      sub: current.canRetryPayment
+        ? 'Bạn vẫn có thể tiếp tục thanh toán đơn hàng.'
+        : 'Chưa ghi nhận thanh toán thành công.',
+      time: timeline.paymentExpiresAt || current.paymentExpiresAt,
+      state: current.canRetryPayment ? 'active' : 'pending',
+      icon: 'clock',
+    })
+  }
+
+  return items
+})
+
+const transactionRows = computed(() => {
+  const current = order.value
+  if (!current) return []
+
+  const payment = current.paymentDetail || {}
+  const timeline = current.paymentTimeline || {}
+  return [
+    { label: 'Mã giao dịch', value: payment.transactionCode || current.orderCode || 'Chưa có' },
+    { label: 'Trạng thái', value: paymentStatusLabel.value },
+    { label: 'Số tiền ghi nhận', value: formatMoney(payment.paidAmount || 0) },
+    { label: 'Thời điểm thanh toán', value: formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || 'Chưa ghi nhận' },
+    { label: 'Hạn thanh toán', value: formatDateTime(timeline.paymentExpiresAt || current.paymentExpiresAt) || 'Không áp dụng' },
+  ]
+})
 
 const paymentDeadline = computed(() => {
   if (!order.value || !canRetryOrderPayment(order.value) || !order.value.paymentExpiresAt) return ''
@@ -56,7 +148,8 @@ const paymentDeadline = computed(() => {
 <template>
   <section v-if="order" class="order-detail">
     <button type="button" class="order-detail-back" @click="backToOrders">
-      ← Quay lại đơn hàng
+      <AppIcon name="chevronLeft" :size="15" />
+      Quay lại đơn hàng
     </button>
 
     <header class="order-detail-head">
@@ -82,6 +175,30 @@ const paymentDeadline = computed(() => {
 
     <div class="order-detail-grid">
       <div class="order-detail-main">
+        <article class="detail-card">
+          <h2 class="detail-card-title">
+            <AppIcon name="history" :size="16" />
+            Lịch sử giao dịch
+          </h2>
+          <ol class="transaction-timeline">
+            <li
+              v-for="item in transactionTimeline"
+              :key="item.key"
+              class="transaction-timeline-item"
+              :class="`is-${item.state}`"
+            >
+              <span class="transaction-timeline-icon">
+                <AppIcon :name="item.icon" :size="14" />
+              </span>
+              <div>
+                <p class="timeline-title">{{ item.title }}</p>
+                <p class="timeline-sub">{{ item.sub }}</p>
+                <p class="timeline-time">{{ formatDateTime(item.time) || 'Chưa ghi nhận thời điểm' }}</p>
+              </div>
+            </li>
+          </ol>
+        </article>
+
         <article v-if="order.timeline && order.timeline.length" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
@@ -158,6 +275,19 @@ const paymentDeadline = computed(() => {
           <p v-if="paymentDeadline" class="payment-deadline">{{ paymentDeadline }}</p>
         </article>
 
+        <article class="detail-card">
+          <h2 class="detail-card-title">
+            <AppIcon name="creditCard" :size="16" />
+            Thông tin giao dịch
+          </h2>
+          <div class="transaction-rows">
+            <div v-for="row in transactionRows" :key="row.label" class="transaction-row">
+              <span>{{ row.label }}</span>
+              <strong>{{ row.value }}</strong>
+            </div>
+          </div>
+        </article>
+
         <article v-if="order.shippingDetail" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
@@ -191,6 +321,7 @@ const paymentDeadline = computed(() => {
 .order-detail-back {
   border: none; background: none; color: var(--auth-brand-start, #c9922a);
   font-size: 0.82rem; cursor: pointer; padding: 0; width: fit-content;
+  display: inline-flex; align-items: center; gap: 0.3rem;
 }
 .order-detail-head {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem;
@@ -309,6 +440,25 @@ const paymentDeadline = computed(() => {
 .timeline-sub { margin: 0.2rem 0 0; font-size: 0.75rem; color: var(--auth-text-secondary); }
 .timeline-time { margin: 0.25rem 0 0; font-size: 0.68rem; color: var(--auth-text-secondary); }
 .timeline-item.pending .timeline-title { color: var(--auth-text-secondary); }
+.transaction-timeline { list-style: none; margin: 0; padding: 0; display: grid; }
+.transaction-timeline-item {
+  position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr);
+  gap: 0.65rem; padding-bottom: 1rem;
+}
+.transaction-timeline-item:not(:last-child)::before {
+  content: ''; position: absolute; left: 15px; top: 30px; bottom: 0;
+  width: 2px; background: var(--auth-border, #e0d9ce);
+}
+.transaction-timeline-item:last-child { padding-bottom: 0; }
+.transaction-timeline-icon {
+  width: 32px; height: 32px; border-radius: 50%; display: inline-flex;
+  align-items: center; justify-content: center; color: #777;
+  background: #f3eee6; border: 1px solid var(--auth-border, #e0d9ce); z-index: 1;
+}
+.transaction-timeline-item.is-done .transaction-timeline-icon { color: #fff; background: #2a7a50; border-color: #2a7a50; }
+.transaction-timeline-item.is-active .transaction-timeline-icon { color: #fff; background: #c9922a; border-color: #c9922a; }
+.transaction-timeline-item.is-failed .transaction-timeline-icon { color: #fff; background: #c0392b; border-color: #c0392b; }
+.transaction-timeline-item.is-pending { opacity: 0.68; }
 .order-lines { display: grid; gap: 0; }
 .order-line {
   display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto;
@@ -335,10 +485,21 @@ const paymentDeadline = computed(() => {
 .payment-label { margin: 0.85rem 0 0.25rem; font-size: 0.72rem; color: var(--auth-text-secondary); }
 .payment-value { margin: 0; font-size: 0.82rem; font-weight: 500; }
 .payment-deadline { margin: 0.5rem 0 0; font-size: 0.74rem; color: #c9922a; font-weight: 500; }
+.transaction-rows { display: grid; }
+.transaction-row {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 0.75rem; padding: 0.55rem 0; border-bottom: 1px solid var(--auth-border, #e0d9ce);
+  font-size: 0.76rem;
+}
+.transaction-row:last-child { border-bottom: none; }
+.transaction-row span { color: var(--auth-text-secondary); }
+.transaction-row strong { text-align: right; font-weight: 500; overflow-wrap: anywhere; }
 .address-block { margin: 0; font-size: 0.8rem; line-height: 1.6; color: var(--auth-text-secondary); }
 .order-detail-missing { color: var(--auth-text-secondary); }
 @media (max-width: 980px) {
   .order-detail-grid { grid-template-columns: 1fr; }
   .order-line { grid-template-columns: 64px minmax(0, 1fr); }
+  .transaction-row { grid-template-columns: 1fr; gap: 0.2rem; }
+  .transaction-row strong { text-align: left; }
 }
 </style>

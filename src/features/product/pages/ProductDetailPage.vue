@@ -1,11 +1,13 @@
 <script setup>
+import { defineAsyncComponent } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductDetailTopSection from '../components/ProductDetailTopSection.vue'
 import ProductDetailTabsSection from '../components/ProductDetailTabsSection.vue'
-import ProductDetail3DModal from '../components/ProductDetail3DModal.vue'
 import { useProductDetailPage } from '../composables/useProductDetailPage'
 import '../styles/productDetail.css'
+
+const ProductDetail3DModal = defineAsyncComponent(() => import('../components/ProductDetail3DModal.vue'))
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -112,6 +114,7 @@ const {
         @open-login="openReviewLogin"
       />
       <ProductDetail3DModal
+        v-if="show3DModal"
         :open="show3DModal"
         :model-url="product.modelUrl"
         :product-name="product.name"
