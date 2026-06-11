@@ -30,9 +30,3 @@ export const ADMIN_SIM_USERS = {
     roleIcon: 'user',
   },
 }
-
-export const ADMIN_NAV_BADGES = {
-  users: '1.2K',
-  products: '3',
-  orders: '8',
-}

@@ -53,10 +53,10 @@ const {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
 
 .home-page { background: #faf6f0; color: #1a1a1a; }
-.home-page { font-family: 'DM Sans', sans-serif; }
+.home-page { font-family: var(--sans); }
 .hero { position: relative; overflow: hidden; background: #12202e; min-height: 88vh; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 70% 40%, rgba(201,146,42,.13) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 20% 80%, rgba(28,49,72,.8) 0%, transparent 60%); }
 .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .18; animation: floatOrb 8s ease-in-out infinite alternate; }
@@ -66,7 +66,7 @@ const {
 @keyframes floatOrb { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(20px, -30px) scale(1.1); } }
 .hero-content { position: relative; z-index: 2; max-width: 1300px; margin: 0 auto; width: 100%; padding: 80px 60px; display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
 .hero-tag { display: inline-flex; background: rgba(201,146,42,.15); border: 1px solid rgba(201,146,42,.3); color: #e5b84a; font-size: 12px; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px; text-transform: uppercase; }
-.hero-title { font-family: 'Cormorant Garamond', serif; font-size: 62px; line-height: 1.1; font-weight: 300; color: #fff; margin-bottom: 20px; }
+.hero-title { font-family: var(--sans); font-size: 62px; line-height: 1.1; font-weight: 300; color: #fff; margin-bottom: 20px; }
 .hero-title em { color: #e5b84a; }
 .hero-sub { color: rgba(255,255,255,.6); font-size: 15px; line-height: 1.7; margin-bottom: 36px; max-width: 440px; }
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
@@ -200,7 +200,7 @@ const {
 }
 .newsletter-title {
   margin: 0 0 8px;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--sans);
   font-size: 34px;
   font-weight: 600;
   color: #12202e;

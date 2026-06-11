@@ -9,12 +9,12 @@ export const ADMIN_NAV_SECTIONS = [
   {
     label: 'Quản lý',
     items: [
-      { name: 'admin-users', label: 'Người dùng', icon: 'users', badge: 'users', badgeTone: 'gold' },
+      { name: 'admin-users', label: 'Người dùng', icon: 'users' },
       { name: 'admin-categories', label: 'Danh mục', icon: 'category' },
-      { name: 'admin-products', label: 'Sản phẩm', icon: 'armchair', badge: 'products', badgeTone: 'red' },
+      { name: 'admin-products', label: 'Sản phẩm', icon: 'armchair' },
       { name: 'admin-orders', label: 'Đơn hàng', icon: 'box', badge: 'orders', badgeTone: 'red' },
       { name: 'admin-vouchers', label: 'Voucher', icon: 'badgePercent' },
-      { name: 'admin-inventory', label: 'Kho hàng', icon: 'warehouse' },
+      { name: 'admin-inventory', label: 'Kho hàng', icon: 'warehouse', badge: 'inventory', badgeTone: 'red' },
       { name: 'admin-revenue', label: 'Doanh thu', icon: 'banknote' },
       { name: 'admin-conversations', label: 'Hỗ trợ Chat', icon: 'messageSquare', badge: 'conversations', badgeTone: 'red' },
     ],

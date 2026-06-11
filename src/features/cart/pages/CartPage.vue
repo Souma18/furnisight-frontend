@@ -358,7 +358,7 @@ function handleCheckout() {
   background: #faf6f0;
   min-height: calc(100vh - 80px);
   padding: 40px 20px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--sans);
   color: #1a1a1a;
 }
 
@@ -373,7 +373,7 @@ function handleCheckout() {
 }
 
 .page-title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: var(--sans);
   font-size: 42px;
   font-weight: 600;
   color: #12202e;

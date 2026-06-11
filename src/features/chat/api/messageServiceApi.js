@@ -4,6 +4,7 @@ const PREFIX = '/messages'
 
 export function unwrapMessageService(response) {
   const body = response?.data ?? response
+  if (body == null || body === '') return null
   if (body && typeof body === 'object' && 'code' in body) {
     if (body.code !== 200) {
       const err = new Error(body.message || 'MessageService request failed')
@@ -25,8 +26,9 @@ export async function createConversation(payload) {
 }
 
 export async function getConversationsByUser(userId) {
+  if (userId == null || userId === '') return []
   const res = await apiClient.get(msUrl(`/conversation/all/${userId}`))
-  return unwrapMessageService(res)
+  return unwrapMessageService(res) ?? []
 }
 
 export async function getConversation(conversationId) {
