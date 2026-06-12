@@ -11,7 +11,7 @@ defineEmits(['buy'])
 </script>
 
 <template>
-  <section v-if="combos.length" class="home-combos fade-up">
+  <section v-if="combos.length" class="home-combos">
     <header class="combo-heading">
       <div>
         <p class="section-label">Combo nội thất</p>
@@ -22,7 +22,12 @@ defineEmits(['buy'])
     <div class="combo-grid">
       <article v-for="combo in combos" :key="combo.id" class="combo-card">
         <div class="combo-media">
-          <img :src="combo.imageUrl" :alt="combo.name" loading="lazy">
+          <img
+            :src="combo.imageUrl"
+            :alt="combo.name"
+            loading="lazy"
+            @error="$event.target.src = '/home/rooms/livingroom.jpeg'"
+          >
           <span class="combo-saving">Tiết kiệm {{ PriceFormatter.format(combo.savedAmount) }}</span>
         </div>
         <div class="combo-body">

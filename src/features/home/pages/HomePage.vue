@@ -31,13 +31,11 @@ const {
   <div class="home-page">
     <HomeHeroSection :hero="homeHero" />
     <HomeFeaturesStripSection :items="homeFeatures" />
-    <HomeCategoriesSection
-      :categories="categories"
-      :active-category-id="activeCategoryId"
-      @select-category="activeCategoryId = $event"
-    />
     <HomeCombosSection :combos="combos" :buying-id="comboBuyingId" @buy="buyCombo" />
     <p v-if="comboMessage" class="home-combo-message" role="status">{{ comboMessage }}</p>
+    <HomeCategoriesSection
+      :categories="categories"
+    />
     <HomeSharedProductsSection
       :products="products"
       :wished-product-ids="wishedProductIds"
@@ -135,12 +133,6 @@ const {
 .section-label { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #c9922a; font-weight: 600; margin-bottom: 10px; }
 .section-title { font-size: 42px; font-weight: 300; line-height: 1.2; color: #1a1a1a; margin-bottom: 14px; }
 .section-title em { color: #c9922a; }
-.categories-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-.cat-card { background: #fff; border-radius: 16px; padding: 24px 16px; border: 2px solid transparent; box-shadow: 0 2px 12px rgba(0,0,0,.05); cursor: pointer; }
-.cat-card.active { border-color: #c9922a; box-shadow: 0 8px 30px rgba(201,146,42,.2); transform: translateY(-4px); }
-.cat-icon { min-height: 40px; margin-bottom: 10px; display: inline-flex; align-items: center; justify-content: center; color: #c9922a; }
-.cat-name { font-size: 13px; font-weight: 500; }
-.cat-count { font-size: 11px; color: #888; margin-top: 3px; }
 .home-combo-message { max-width: 1180px; margin: -48px auto 48px; padding: 0 24px; color: #a13a2d; font-size: 13px; text-align: center; }
 .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
 .product-card { text-decoration: none; color: inherit; display: block; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
@@ -207,6 +199,6 @@ const {
 }
 .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
 .fade-up.is-visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .categories-grid { grid-template-columns: repeat(3, 1fr); } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } }
-@media (max-width: 720px) { .hero-title { font-size: 42px; } .categories-grid, .products-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } }
+@media (max-width: 720px) { .hero-title { font-size: 42px; } .products-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
 </style>

@@ -79,6 +79,7 @@ export class CategoryResponse {
     this.label = data.label || data.name || ''
     this.parentId = data.parentId || null
     this.productCount = data.productCount ?? 0
+    this.imageUrl = data.imageUrl || data.image || ''
     this.iconUrl = data.iconUrl || ''
   }
 }

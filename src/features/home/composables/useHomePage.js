@@ -27,8 +27,13 @@ export function useHomePage() {
 
   async function loadCategories() {
     try {
-      const { data } = await productsApi.getRootCategories()
-      categories.value = data.map((item) => {
+      const response = await productsApi.getRootCategories()
+      const data = response?.data
+      const items = Array.isArray(data)
+        ? data
+        : data?.items ?? data?.content ?? data?.data ?? []
+
+      categories.value = items.map((item) => {
         const category = new CategoryResponse(item)
         return {
           ...category,
@@ -42,17 +47,34 @@ export function useHomePage() {
       }
     } catch (error) {
       console.error('Failed to load home categories:', error)
+      categories.value = []
     }
   }
 
   async function loadCombos() {
     try {
       const { data } = await ordersApi.getActiveCombos()
-      combos.value = (Array.isArray(data) ? data : []).filter((combo) => combo?.imageUrl)
+      const items = Array.isArray(data)
+        ? data
+        : data?.items ?? data?.content ?? data?.data ?? []
+      combos.value = items.map((combo) => ({
+        ...combo,
+        imageUrl: resolveComboImage(combo),
+      }))
     } catch (error) {
       console.error('Failed to load home combos:', error)
       combos.value = []
     }
+  }
+
+  function resolveComboImage(combo = {}) {
+    const itemImage = (combo.items || [])
+      .map((item) => item.imageUrl || item.image)
+      .find((value) => /^(https?:|data:|blob:|\/)/i.test(String(value || '')))
+
+    return combo.imageUrl
+      || itemImage
+      || '/home/rooms/livingroom.jpeg'
   }
 
   function sameComboLine(line, item) {

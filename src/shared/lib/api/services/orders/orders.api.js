@@ -93,7 +93,10 @@ class OrdersApi {
   }
 
   getActiveCombos(params) {
-    return apiClient.get('/promotions/combos/active', { params })
+    return apiClient.get('/promotions/combos/active', {
+      params,
+      skipAuth: true,
+    })
   }
 
   validateCheckoutCombo(payload) {

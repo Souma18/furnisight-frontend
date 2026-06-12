@@ -1,7 +1,7 @@
 <script setup>
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { router } from './router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
 import AuthModal from '@features/auth/components/AuthModal.vue'
@@ -10,17 +10,17 @@ import { useAuthStore } from '@features/auth/store/authStore'
 
 const ChatWidget = defineAsyncComponent(() => import('@features/chat/components/ChatWidget.vue'))
 
-const route = useRoute()
+const route = router.currentRoute
 const authStore = useAuthStore()
 const { isAuthenticated } = storeToRefs(authStore)
-const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
-const isHomePage = computed(() => route.name === 'home')
-const isProductsPage = computed(() => route.name === 'products')
-const isProductDetailPage = computed(() => route.name === 'product-detail')
-const isContactPage = computed(() => route.name === 'contact')
-const isCheckoutPage = computed(() => route.name === 'checkout')
-const isAccountPage = computed(() => route.path.startsWith('/account'))
-const isAdminPage = computed(() => route.path.startsWith('/admin'))
+const isRoom3DPage = computed(() => route.value.path.startsWith('/room3d'))
+const isHomePage = computed(() => route.value.name === 'home')
+const isProductsPage = computed(() => route.value.name === 'products')
+const isProductDetailPage = computed(() => route.value.name === 'product-detail')
+const isContactPage = computed(() => route.value.name === 'contact')
+const isCheckoutPage = computed(() => route.value.name === 'checkout')
+const isAccountPage = computed(() => route.value.path.startsWith('/account'))
+const isAdminPage = computed(() => route.value.path.startsWith('/admin'))
 const mainRef = ref(null)
 const isAuthModalOpen = ref(false)
 const initialAuthView = ref('login')
@@ -73,7 +73,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.fullPath,
+  () => route.value.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()

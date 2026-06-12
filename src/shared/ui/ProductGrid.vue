@@ -158,7 +158,13 @@ function roundedRating(rating) {
   height: 100%;
   object-fit: cover;
   object-position: center center;
+  transition: transform 0.35s ease;
   width: 100%;
+}
+
+.shared-product-card:hover .shared-product-card__img,
+.shared-product-card:focus-within .shared-product-card__img {
+  transform: scale(1.025);
 }
 
 .shared-product-card__body {
