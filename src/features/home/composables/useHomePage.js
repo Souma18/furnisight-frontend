@@ -4,7 +4,7 @@ import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
-import { CategoryResponse, ProductResponse, ordersApi, productsApi } from '@shared/lib/api/services'
+import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
 export function useHomePage() {
@@ -19,8 +19,10 @@ export function useHomePage() {
   const activeCategoryId = ref('')
   const topReviews = ref([])
   const comboBuyingId = ref('')
+  const comboAddingId = ref('')
   const comboMessage = ref('')
   const pendingCombo = ref(null)
+  const pendingComboAction = ref('buy')
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
 
   useRevealOnScroll('.fade-up')
@@ -53,7 +55,12 @@ export function useHomePage() {
 
   async function loadCombos() {
     try {
-      const { data } = await ordersApi.getActiveCombos()
+      const { data } = await promotionsApi.getCombos({
+        placement: 'HOME',
+        page: 0,
+        size: 3,
+        sort: 'save-desc',
+      })
       const items = Array.isArray(data)
         ? data
         : data?.items ?? data?.content ?? data?.data ?? []
@@ -87,44 +94,49 @@ export function useHomePage() {
       && String(line.variantId || '') === String(item.variantId || '')
   }
 
+  async function ensureComboInCart(combo) {
+    if (!Array.isArray(combo.items) || !combo.items.length) {
+      throw new Error('Combo chưa có sản phẩm hợp lệ.')
+    }
+
+    await cartStore.ensureHydrated()
+
+    for (const item of combo.items || []) {
+      const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
+      const existing = cartStore.items.find((line) => sameComboLine(line, item))
+      const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
+
+      if (existing && currentQuantity < requiredQuantity) {
+        await cartStore.updateQty(existing.id, requiredQuantity)
+      } else if (!existing) {
+        await cartStore.addItem({
+          productId: item.productId,
+          variantId: item.variantId || null,
+          name: item.productName,
+          imageUrl: item.imageUrl || item.image || '',
+          price: item.price,
+          quantity: requiredQuantity,
+        })
+      }
+    }
+
+    const lineIds = (combo.items || [])
+      .map((item) => cartStore.items.find((line) => sameComboLine(line, item))?.id)
+      .filter(Boolean)
+
+    if (!lineIds.length || lineIds.length !== (combo.items || []).length) {
+      throw new Error('Không thể chuẩn bị đầy đủ sản phẩm trong combo.')
+    }
+
+    return lineIds
+  }
+
   async function prepareComboCheckout(combo) {
     comboBuyingId.value = combo.id
     comboMessage.value = ''
 
     try {
-      if (!Array.isArray(combo.items) || !combo.items.length) {
-        throw new Error('Combo chưa có sản phẩm hợp lệ.')
-      }
-
-      await cartStore.ensureHydrated()
-
-      for (const item of combo.items || []) {
-        const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
-        const existing = cartStore.items.find((line) => sameComboLine(line, item))
-        const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
-
-        if (existing && currentQuantity < requiredQuantity) {
-          await cartStore.updateQty(existing.id, requiredQuantity)
-        } else if (!existing) {
-          await cartStore.addItem({
-            productId: item.productId,
-            variantId: item.variantId || null,
-            name: item.productName,
-            imageUrl: item.imageUrl || item.image || '',
-            price: item.price,
-            quantity: requiredQuantity,
-          })
-        }
-      }
-
-      const lineIds = (combo.items || [])
-        .map((item) => cartStore.items.find((line) => sameComboLine(line, item))?.id)
-        .filter(Boolean)
-
-      if (!lineIds.length || lineIds.length !== (combo.items || []).length) {
-        throw new Error('Không thể chuẩn bị đầy đủ sản phẩm trong combo.')
-      }
-
+      const lineIds = await ensureComboInCart(combo)
       await router.push({
         name: 'checkout',
         query: {
@@ -139,10 +151,32 @@ export function useHomePage() {
     }
   }
 
+  async function addComboToCart(combo) {
+    if (!combo?.id) return
+    if (!authStore.isAuthenticated) {
+      pendingCombo.value = combo
+      pendingComboAction.value = 'add'
+      openAuthModal()
+      return
+    }
+
+    comboAddingId.value = combo.id
+    comboMessage.value = ''
+    try {
+      await ensureComboInCart(combo)
+      comboMessage.value = 'Đã thêm combo vào giỏ.'
+    } catch (error) {
+      comboMessage.value = error?.response?.data?.message || error.message || 'Không thể thêm combo lúc này.'
+    } finally {
+      comboAddingId.value = ''
+    }
+  }
+
   async function buyCombo(combo) {
     if (!combo?.id) return
     if (!authStore.isAuthenticated) {
       pendingCombo.value = combo
+      pendingComboAction.value = 'buy'
       openAuthModal()
       return
     }
@@ -171,7 +205,7 @@ export function useHomePage() {
       const { data } = await productsApi.getTopRandomReviews(3)
       topReviews.value = (data || []).map((review) => ({
         id: review.id,
-        name: review.userName || 'Khach hang an danh',
+        name: review.userName || 'Khách hàng ẩn danh',
         role: '',
         avatar: review.userAvatarUrl || null,
         text: review.content,
@@ -205,7 +239,13 @@ export function useHomePage() {
   watch(() => authStore.isAuthenticated, (authenticated) => {
     if (!authenticated || !pendingCombo.value) return
     const combo = pendingCombo.value
+    const action = pendingComboAction.value
     pendingCombo.value = null
+    pendingComboAction.value = 'buy'
+    if (action === 'add') {
+      addComboToCart(combo)
+      return
+    }
     prepareComboCheckout(combo)
   })
 
@@ -227,7 +267,9 @@ export function useHomePage() {
     wishedProductIds,
     topReviews,
     comboBuyingId,
+    comboAddingId,
     comboMessage,
+    addComboToCart,
     buyCombo,
     toggleWish,
   }

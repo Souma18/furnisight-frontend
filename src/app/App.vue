@@ -18,6 +18,7 @@ const isHomePage = computed(() => route.value.name === 'home')
 const isProductsPage = computed(() => route.value.name === 'products')
 const isProductDetailPage = computed(() => route.value.name === 'product-detail')
 const isContactPage = computed(() => route.value.name === 'contact')
+const isPromotionsPage = computed(() => route.value.name === 'promotions')
 const isCheckoutPage = computed(() => route.value.name === 'checkout')
 const isAccountPage = computed(() => route.value.path.startsWith('/account'))
 const isAdminPage = computed(() => route.value.path.startsWith('/admin'))
@@ -125,11 +126,13 @@ onBeforeUnmount(() => {
           !isProductDetailPage &&
           !isProductsPage &&
           !isContactPage &&
+          !isPromotionsPage &&
           !isCheckoutPage,
         'app-main--home': isHomePage,
         'app-main--products': isProductsPage,
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
+        'app-main--promotions': isPromotionsPage,
         'app-main--checkout': isCheckoutPage,
       }"
     >
@@ -200,6 +203,13 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 56px 0 0;
   background: #faf6f0;
+}
+
+.app-main--promotions {
+  max-width: none;
+  margin: 0;
+  padding: 56px 0 0;
+  background: #faf7f2;
 }
 
 .app-main--checkout {

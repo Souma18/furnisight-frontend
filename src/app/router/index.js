@@ -25,6 +25,11 @@ const routes = [
     component: () => import('@features/contact/pages/ContactPage.vue'),
   },
   {
+    path: '/khuyen-mai',
+    name: 'promotions',
+    component: () => import('@features/promotions/pages/PromotionsPage.vue'),
+  },
+  {
     path: '/auth/callback',
     name: 'auth-callback',
     component: () => import('@features/auth/pages/OAuthCallbackPage.vue'),

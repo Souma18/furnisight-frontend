@@ -66,7 +66,7 @@ function handleTabChange(tab) {
             v-else
             :title="successState.title"
             :message="successState.message"
-            :loading="successState.mode === AUTH_VIEWS.LOGIN"
+            :loading="successState.loading"
           />
         </Transition>
       </div>

@@ -21,7 +21,9 @@ const {
   wishedProductIds,
   topReviews,
   comboBuyingId,
+  comboAddingId,
   comboMessage,
+  addComboToCart,
   buyCombo,
   toggleWish,
 } = useHomePage()
@@ -31,7 +33,13 @@ const {
   <div class="home-page">
     <HomeHeroSection :hero="homeHero" />
     <HomeFeaturesStripSection :items="homeFeatures" />
-    <HomeCombosSection :combos="combos" :buying-id="comboBuyingId" @buy="buyCombo" />
+    <HomeCombosSection
+      :combos="combos"
+      :buying-id="comboBuyingId"
+      :adding-id="comboAddingId"
+      @add="addComboToCart"
+      @buy="buyCombo"
+    />
     <p v-if="comboMessage" class="home-combo-message" role="status">{{ comboMessage }}</p>
     <HomeCategoriesSection
       :categories="categories"

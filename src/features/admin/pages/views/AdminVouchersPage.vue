@@ -81,6 +81,7 @@ const voucherForm = reactive({
   description: '',
   icon: 'badgePercent',
   active: true,
+  placements: ['PROMOTION_PAGE', 'CHECKOUT'],
 })
 
 const campaignForm = reactive({
@@ -108,7 +109,7 @@ const comboForm = reactive({
   startDate: '',
   endDate: '',
   active: true,
-  placements: ['PRODUCT_DETAIL', 'CART'],
+  placements: ['PROMOTION_PAGE', 'HOME'],
   items: [],
 })
 
@@ -405,6 +406,9 @@ function resetVoucherForm(row = null) {
   voucherForm.description = row?.description || ''
   voucherForm.icon = row?.icon || 'badgePercent'
   voucherForm.active = row?.active ?? true
+  voucherForm.placements = Array.isArray(row?.placements) && row.placements.length
+    ? [...row.placements]
+    : ['PROMOTION_PAGE', 'CHECKOUT']
 }
 
 function openVoucherModal(row = null) {
@@ -426,6 +430,7 @@ function voucherPayload() {
     startDate: voucherForm.startDate || null,
     endDate: voucherForm.endDate || null,
     active: voucherForm.active,
+    placements: voucherForm.placements,
   }
 }
 
@@ -526,7 +531,9 @@ function resetComboForm(row = null) {
   comboForm.startDate = toDatetimeLocal(row?.startDate)
   comboForm.endDate = toDatetimeLocal(row?.endDate)
   comboForm.active = row?.active ?? true
-  comboForm.placements = row?.placements ? [...row.placements] : ['PRODUCT_DETAIL', 'CART']
+  comboForm.placements = Array.isArray(row?.placements) && row.placements.length
+    ? [...row.placements]
+    : ['PROMOTION_PAGE', 'HOME']
   comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName })) : []
 }
 
@@ -948,6 +955,13 @@ onMounted(async () => {
           <div class="form-row"><label>Giảm tối đa<input v-model="voucherForm.maxDiscount" type="number" min="0"></label><label>Đơn tối thiểu<input v-model="voucherForm.minOrder" type="number" min="0"></label></div>
           <div class="form-row"><label>Bắt đầu<input v-model="voucherForm.startDate" type="datetime-local"></label><label>Kết thúc<input v-model="voucherForm.endDate" type="datetime-local"></label></div>
           <label>Mô tả<textarea v-model="voucherForm.description" rows="3" /></label>
+          <div class="section-title"><AppIcon name="mapPin" />Vi tri hien thi</div>
+          <div class="checkbox-grid">
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyen mai</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="HOME">Trang chu</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CART">Gio hang</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CHECKOUT">Checkout</label>
+          </div>
           <label class="check-line"><input v-model="voucherForm.active" type="checkbox">Đang bật</label>
         </div>
         <footer><button type="button" class="mc-cancel" @click="modal.voucher = false">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="check" />Lưu thay đổi</button></footer>
@@ -1009,7 +1023,7 @@ onMounted(async () => {
             <label><span>SL</span><input v-model.number="item.quantity" type="number" min="1"></label>
             <button type="button" @click="removeComboItem(item.id)"><AppIcon name="trash" /></button>
           </div>
-          <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang sản phẩm</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Giỏ hàng</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Checkout</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chủ</label></div>
+          <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyen mai</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chu</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang san pham</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Gio hang</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Checkout</label></div>
           <div class="combo-summary"><div><span>Giá gốc</span><b>{{ money(comboOriginalAmount) }}</b></div><div><span>Giá combo</span><b>{{ money(comboFinalAmount) }}</b></div><div class="save"><span>Khách tiết kiệm</span><b>{{ money(comboSavedAmount) }}</b></div></div>
         </div>
         <footer><button type="button" class="mc-cancel" @click="closeComboModal">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="save" />Lưu combo</button></footer>

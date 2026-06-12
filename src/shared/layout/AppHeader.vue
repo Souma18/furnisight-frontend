@@ -21,6 +21,7 @@ const activeNav = computed(() => {
   if (path.startsWith('/products')) return 'products'
   if (route.path.startsWith('/contact')) return 'contact'
   if (path.startsWith('/room3d')) return 'room3d'
+  if (path.startsWith('/khuyen-mai')) return 'promotions'
   if (path === '/') return 'home'
   return ''
 })
@@ -115,7 +116,7 @@ watch(() => route.query.otpCode, (newVal) => {
       <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
       <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
       <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
-      <RouterLink to="/">Dự án</RouterLink>
+      <RouterLink to="/khuyen-mai" :class="{ 'nav-pill': activeNav === 'promotions' }">Khuyến mãi</RouterLink>
       <RouterLink to="/contact" :class="{ 'nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
     </nav>
 

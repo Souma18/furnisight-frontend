@@ -166,9 +166,22 @@ export const useCheckoutStore = defineStore('checkout', () => {
     return selectedShipping.value?.isFree ? 0 : fee
   })
 
+  async function refreshVouchers() {
+    const voucherResponse = await ordersApi.getVouchers().catch(() => ({ data: [] }))
+    const vouchers = Array.isArray(voucherResponse?.data)
+      ? voucherResponse.data.map(normalizeVoucher).filter((voucher) => voucher.active !== false)
+      : []
+
+    shopVouchers.value = vouchers.filter((voucher) => voucher.discountType !== 'shipping_cap')
+    shippingVouchers.value = vouchers.filter((voucher) => voucher.discountType === 'shipping_cap')
+  }
+
   async function hydrateSession(options = {}) {
     const { loadCombos = true } = options
-    if (hydrated.value && (!loadCombos || combosHydrated.value)) return
+    if (hydrated.value && (!loadCombos || combosHydrated.value)) {
+      await refreshVouchers()
+      return
+    }
     loading.value = true
 
     try {
@@ -181,13 +194,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
         { id: 'vnpay', name: 'Thanh toán qua VNPAY', description: 'Thanh toán an toàn qua ví VNPAY', icon: 'vnpay' },
         { id: 'cod', name: 'Thanh toán khi nhận hàng (COD)', description: 'Thanh toán tiền mặt khi nhận hàng', icon: 'cash' }
       ]
-      const voucherResponse = await ordersApi.getVouchers().catch(() => ({ data: [] }))
-      const vouchers = Array.isArray(voucherResponse?.data)
-        ? voucherResponse.data.map(normalizeVoucher).filter((voucher) => voucher.active !== false)
-        : []
-
-      shopVouchers.value = vouchers.filter((voucher) => voucher.discountType !== 'shipping_cap')
-      shippingVouchers.value = vouchers.filter((voucher) => voucher.discountType === 'shipping_cap')
+      await refreshVouchers()
       if (loadCombos) {
         const comboResponse = await ordersApi.getActiveCombos().catch(() => ({ data: [] }))
         activeCombos.value = Array.isArray(comboResponse?.data)
