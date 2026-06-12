@@ -38,6 +38,11 @@ const reviewFormEnabled = computed(() => Boolean(
   !props.reviewEligibility.loading,
 ))
 
+const reviewRatingEnabled = computed(() => Boolean(
+  props.reviewIsAuthenticated &&
+  !props.reviewSubmitting,
+))
+
 function updateReviewField(field, value) {
   emit('update-review-field', { field, value })
 }
@@ -130,7 +135,7 @@ function updateReviewField(field, value) {
             type="button"
             class="star-pick"
             :class="{ active: star <= Number(reviewForm.rating || 0) }"
-            :disabled="!reviewFormEnabled || reviewSubmitting"
+            :disabled="!reviewRatingEnabled"
             @click="updateReviewField('rating', star)"
           >
             <AppIcon name="star" :size="22" />

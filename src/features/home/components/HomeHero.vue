@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   hero: { type: Object, required: true },
 })
@@ -22,8 +24,8 @@ defineProps({
         <p class="hn-hero-sub">{{ hero.subtitle }}</p>
 
         <div class="hn-hero-actions">
-          <a href="/room3d" class="hn-btn-primary">Thu truc quan 3D</a>
-          <a href="#products" class="hn-btn-outline">Kham pha san pham</a>
+          <RouterLink to="/room3d" class="hn-btn-primary">Thu truc quan 3D</RouterLink>
+          <RouterLink to="/products" class="hn-btn-outline">Kham pha san pham</RouterLink>
         </div>
       </div>
 
@@ -49,7 +51,7 @@ defineProps({
         </div>
         <div class="hn-preview-foot">
           <p>Tai anh phong hoac chon mau san de bat dau.</p>
-          <a href="/room3d" class="hn-preview-btn">Bat dau</a>
+          <RouterLink to="/room3d" class="hn-preview-btn">Bat dau</RouterLink>
         </div>
       </div>
     </div>

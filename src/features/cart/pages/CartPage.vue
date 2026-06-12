@@ -111,17 +111,27 @@ function normalizeEditorVariants(variants = []) {
     .filter((variant) => variant.color || variant.size)
 }
 
+function resolveProductDetailLookup(item) {
+  return item?.detailId || item?.slug || ''
+}
+
 async function buildEditorItem(item) {
   const normalizedExistingVariants = normalizeEditorVariants(item?.variants ?? [])
   if (normalizedExistingVariants.length) {
     return {
       ...item,
       variants: normalizedExistingVariants,
+      variantLoadFailed: false,
     }
   }
 
-  const lookupId = item?.detailId || item?.slug || item?.productId
-  if (!lookupId) return item
+  const lookupId = resolveProductDetailLookup(item)
+  if (!lookupId) {
+    return {
+      ...item,
+      variantLoadFailed: true,
+    }
+  }
 
   try {
     const response = await productsApi.getProductDetail(lookupId)
@@ -129,20 +139,27 @@ async function buildEditorItem(item) {
     const fetchedVariants = normalizeEditorVariants(product?.variants ?? [])
 
     if (!fetchedVariants.length) {
-      return item
+      return {
+        ...item,
+        variantLoadFailed: true,
+      }
     }
 
     return {
       ...item,
       variants: fetchedVariants,
+      variantLoadFailed: false,
       colors: Array.isArray(product?.colors) ? product.colors : [],
       sizes: Array.isArray(product?.sizes) ? product.sizes : [],
       selectedColor: item.selectedColor || product?.colors?.[0] || '',
       selectedSize: item.selectedSize || product?.sizes?.[0] || '',
     }
   } catch (error) {
-    console.error('Failed to load product variants for cart item:', error)
-    return item
+    console.warn('Failed to load product variants for cart item:', error?.response?.status || error?.message || error)
+    return {
+      ...item,
+      variantLoadFailed: true,
+    }
   }
 }
 
@@ -348,6 +365,10 @@ function handleCheckout() {
                 </option>
               </select>
             </label>
+
+            <p v-if="activeItem.variantLoadFailed" class="variant-modal-hint">
+              Không tải được dữ liệu phân loại cho sản phẩm này. Vui lòng xóa sản phẩm và thêm lại từ trang chi tiết nếu cần đổi phân loại.
+            </p>
 
             <label>
               <span>Kích thước</span>
@@ -591,6 +612,17 @@ function handleCheckout() {
 .variant-modal-body span {
   color: #7a7a7a;
   font-size: 12px;
+}
+
+.variant-modal-hint {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #efd7a5;
+  border-radius: 10px;
+  background: #fff8e8;
+  color: #8b6a21;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .variant-modal-body select,

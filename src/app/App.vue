@@ -40,6 +40,17 @@ function openAuthModalFromEvent(event) {
   isAuthModalOpen.value = true
 }
 
+async function closeAuthModal() {
+  isAuthModalOpen.value = false
+  initialAuthView.value = 'login'
+
+  if (route.value.query.otpCode) {
+    const query = { ...route.value.query }
+    delete query.otpCode
+    await router.replace({ query })
+  }
+}
+
 onMounted(async () => {
   await nextTick()
   syncHeaderScrollbarInset()
@@ -127,10 +138,11 @@ onBeforeUnmount(() => {
     </main>
     <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
     <AuthModal
+      :key="initialAuthView"
       :open="isAuthModalOpen"
       :initial-view="initialAuthView"
-      @close="isAuthModalOpen = false"
-      @authenticated="isAuthModalOpen = false"
+      @close="closeAuthModal"
+      @authenticated="closeAuthModal"
     />
   </div>
 </template>

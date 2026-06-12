@@ -162,6 +162,13 @@ export const useRoom3DStore = defineStore('room3d', () => {
         : null
   }
 
+  function applyManualRecommendations(result = {}) {
+    predictionStatus.value = 'success'
+    predictionResponseType.value = 'full'
+    recommendationMeta.value = result.recommendationMeta ?? null
+    recommendations.value = Array.isArray(result.recommendations) ? result.recommendations : []
+  }
+
   function setPredictionError() {
     predictionStatus.value = 'error'
     predictionResponseType.value = null
@@ -295,6 +302,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     setUploadedModelUrl,
     setPredictionLoading,
     applyPredictionResult,
+    applyManualRecommendations,
     setPredictionError,
     applyAiGeneratedModel,
     showPredictionRoom,

@@ -12,7 +12,17 @@ const LABEL_TO_ROOM_TYPE = {
   'home office': 'office',
 }
 
-function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
+const ROOM_RECOMMENDATION_FILTERS = {
+  living: { category: 'living-room' },
+  livingroom: { category: 'living-room' },
+  bedroom: { category: 'bedroom' },
+  dining: { category: 'kitchen' },
+  kitchen: { category: 'kitchen' },
+  bathroom: { category: 'bathroom' },
+  office: { q: 'bàn' },
+}
+
+export function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
   const product = item.product && typeof item.product === 'object' ? item.product : {}
   const variants = Array.isArray(item.variants)
     ? item.variants
@@ -242,4 +252,46 @@ export async function predictRoomModel(file, options = {}) {
 export async function getRoomTemplates() {
   await delay(350)
   return { data: ROOM_TEMPLATES }
+}
+
+export async function getRoomRecommendations(roomType, options = {}) {
+  const normalizedRoomType = String(roomType || '').trim().toLowerCase()
+  const filters = ROOM_RECOMMENDATION_FILTERS[normalizedRoomType]
+  if (!filters) {
+    return {
+      recommendations: [],
+      recommendationMeta: {
+        categorySlug: '',
+        roomType: normalizedRoomType,
+        reason: 'missing_room_type',
+      },
+    }
+  }
+
+  const response = await apiClient.get('/catalog/products', {
+    params: {
+      ...filters,
+      size: options.limit ?? 8,
+      sort: options.sort ?? 'popular',
+    },
+  })
+
+  const products = Array.isArray(response.data?.products)
+    ? response.data.products
+    : Array.isArray(response.data?.content)
+      ? response.data.content
+      : []
+
+  return {
+    recommendations: products.map((item) => ({
+      ...normalizeRecommendation(item, filters.category || ''),
+      roomTypes: [normalizedRoomType],
+    })),
+    recommendationMeta: {
+      categorySlug: filters.category || '',
+      query: filters.q || '',
+      roomType: normalizedRoomType,
+      source: 'manual',
+    },
+  }
 }

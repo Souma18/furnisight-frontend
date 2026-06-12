@@ -108,13 +108,17 @@ function roundedRating(rating) {
   background: #fff;
   border: 1px solid #ece2cf;
   border-radius: 18px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   position: relative;
 }
 
 .shared-product-card__link {
   color: inherit;
-  display: grid;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   min-width: 0;
   text-decoration: none;
 }
@@ -134,6 +138,7 @@ function roundedRating(rating) {
 }
 
 .shared-product-grid--list .shared-product-card__link {
+  display: grid;
   grid-template-columns: 210px 1fr;
 }
 
@@ -168,6 +173,10 @@ function roundedRating(rating) {
 }
 
 .shared-product-card__body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 176px;
   padding: 16px;
 }
 
@@ -186,7 +195,11 @@ function roundedRating(rating) {
   font-weight: 500;
   line-height: 1.4;
   margin: 0 0 8px;
+  min-height: 42px;
   text-decoration: none;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .shared-product-card__desc {
@@ -194,6 +207,10 @@ function roundedRating(rating) {
   font-size: 13px;
   line-height: 1.6;
   margin: 0 0 10px;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
 }
 
 .shared-product-card__rating {
@@ -228,6 +245,9 @@ function roundedRating(rating) {
   align-items: center;
   display: flex;
   justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  min-height: 28px;
 }
 
 .shared-product-card__price {
@@ -236,6 +256,10 @@ function roundedRating(rating) {
   font-size: 19px;
   font-weight: 700;
   margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .shared-product-card__sold {

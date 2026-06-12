@@ -1,4 +1,6 @@
 <script setup>
+import { RouterLink } from 'vue-router'
+
 defineProps({
   hero: { type: Object, required: true },
 })
@@ -20,8 +22,8 @@ defineProps({
         </h1>
         <p class="hero-sub">{{ hero.subtitle }}</p>
         <div class="hero-actions">
-          <a href="/room3d" class="btn-primary">Thử trực quan 3D</a>
-          <a href="#products" class="btn-outline">Khám phá sản phẩm</a>
+          <RouterLink to="/room3d" class="btn-primary">Thử trực quan 3D</RouterLink>
+          <RouterLink to="/products" class="btn-outline">Khám phá sản phẩm</RouterLink>
         </div>
       </div>
       <div class="preview-card">
@@ -46,7 +48,7 @@ defineProps({
         </div>
         <div class="preview-footer">
           <div class="preview-text">Tải ảnh phòng hoặc chọn phòng có sẵn để bắt đầu.</div>
-          <a href="/room3d" class="preview-start">Bắt đầu</a>
+          <RouterLink to="/room3d" class="preview-start">Bắt đầu</RouterLink>
         </div>
       </div>
     </div>

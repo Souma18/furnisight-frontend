@@ -24,6 +24,10 @@ defineProps({
     type: Array,
     default: () => [],
   },
+  recommendationError: {
+    type: String,
+    default: '',
+  },
   cartItems: {
     type: Array,
     default: () => [],
@@ -95,7 +99,10 @@ defineEmits([
     </div>
 
     <div class="products-scroll">
-      <div v-if="filteredProducts.length === 0" class="products-empty">
+      <div v-if="recommendationError" class="products-empty products-empty--error">
+        {{ recommendationError }}
+      </div>
+      <div v-else-if="filteredProducts.length === 0" class="products-empty">
         Chưa có sản phẩm nào phù hợp.
       </div>
       <div v-else class="grid" :style="{ '--product-columns': productColumns }">
@@ -276,6 +283,12 @@ defineEmits([
   font-size: 0.84rem;
   text-align: center;
   padding: 1rem;
+}
+
+.products-empty--error {
+  color: #9a5b22;
+  background: #fff8e8;
+  border-color: #efd7a5;
 }
 
 .panel-cart {

@@ -62,7 +62,19 @@ export function useHomePage() {
         .map((combo) => ({
           ...combo,
           imageUrl: combo.imageUrl || '',
-          items: Array.isArray(combo.items) ? combo.items : [],
+          originalAmount: Number(combo.originalAmount || 0),
+          finalAmount: Number(combo.finalAmount || 0),
+          savedAmount: Number(combo.savedAmount || 0),
+          items: Array.isArray(combo.items)
+            ? combo.items
+                .filter((item) => item?.productId)
+                .map((item) => ({
+                  ...item,
+                  imageUrl: item.imageUrl || item.image || '',
+                  quantity: Math.max(1, Number(item.quantity) || 1),
+                  price: Number(item.price || 0),
+                }))
+            : [],
         }))
     } catch (error) {
       console.error('Failed to load home combos:', error)

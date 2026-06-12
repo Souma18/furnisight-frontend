@@ -52,6 +52,16 @@ const {
 
 .home-page { background: #faf6f0; color: #1a1a1a; }
 .home-page { font-family: var(--sans); }
+.home-page a,
+.home-page a:hover,
+.home-page a:focus {
+  text-decoration: none;
+}
+.home-page a:focus-visible,
+.home-page button:focus-visible {
+  outline: 2px solid rgba(201, 146, 42, 0.58);
+  outline-offset: 3px;
+}
 .hero { position: relative; overflow: hidden; background: #12202e; min-height: 88vh; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 70% 40%, rgba(201,146,42,.13) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 20% 80%, rgba(28,49,72,.8) 0%, transparent 60%); }
 .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .18; animation: floatOrb 8s ease-in-out infinite alternate; }

@@ -31,7 +31,7 @@ const emit = defineEmits(['notify'])
   </script>
   
   <template>
-    <AccountSectionCard title="Địa chỉ giao hàng">
+    <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
       <template #head>
         <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
       </template>
@@ -139,6 +139,16 @@ const emit = defineEmits(['notify'])
 </template>
 
 <style scoped>
+.address-card {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.address-card :deep(.card-head h3) {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
 .list {
   display: grid;
   gap: 0.6rem;
@@ -153,6 +163,8 @@ const emit = defineEmits(['notify'])
   border-radius: 12px;
   padding: 0.75rem;
   background: var(--account-surface);
+  font-size: 1rem;
+  line-height: 1.45;
 }
 .item--default {
   border-color: rgba(201, 146, 42, 0.45);
@@ -229,11 +241,14 @@ const emit = defineEmits(['notify'])
 .name {
   margin: 0 0 0.2rem;
   font-weight: 600;
+  font-size: 0.94rem;
+  line-height: 1.35;
 }
 .meta {
   margin: 0;
   color: var(--auth-text-secondary);
   font-size: 0.84rem;
+  line-height: 1.45;
 }
 .overlay {
   position: fixed;
@@ -249,11 +264,24 @@ const emit = defineEmits(['notify'])
   width: min(680px, 100%);
   border-radius: 14px;
   padding: 1rem;
+  font-size: 1rem;
 }
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
+}
+.form-grid label {
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+.form-grid input,
+.form-grid select,
+.actions button,
+.primary,
+.ghost {
+  font: inherit;
+  font-size: 0.86rem;
 }
 .detail-field {
   min-width: 0;
