@@ -36,7 +36,7 @@ const {
   toggleBlock,
   selectCategory,
   toggleArrayItem,
-  onSliderInput,
+  togglePriceBand,
   priceMinLabel,
   priceMaxLabel,
   applyFilters,
@@ -86,15 +86,17 @@ const {
           class="pl-range-slider"
           type="range"
           min="0"
-          max="100"
-          v-model.number="pending.priceSliderPct"
+          max="4"
+          step="1"
+          v-model.number="pending.priceSliderStep"
         />
         <div class="pl-price-checks">
           <label v-for="opt in PRODUCT_PRICE_BAND_OPTIONS" :key="opt.id" class="pl-check-row">
             <input
               type="checkbox"
               :value="opt.id"
-              v-model="pending.priceBands"
+              :checked="pending.priceBands.includes(opt.id)"
+              @change="togglePriceBand(opt.id)"
             />
             <span>{{ opt.label }}</span>
           </label>

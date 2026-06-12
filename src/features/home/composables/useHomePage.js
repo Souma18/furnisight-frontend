@@ -57,24 +57,17 @@ export function useHomePage() {
       const items = Array.isArray(data)
         ? data
         : data?.items ?? data?.content ?? data?.data ?? []
-      combos.value = items.map((combo) => ({
-        ...combo,
-        imageUrl: resolveComboImage(combo),
-      }))
+      combos.value = items
+        .filter((combo) => combo?.id)
+        .map((combo) => ({
+          ...combo,
+          imageUrl: combo.imageUrl || '',
+          items: Array.isArray(combo.items) ? combo.items : [],
+        }))
     } catch (error) {
       console.error('Failed to load home combos:', error)
       combos.value = []
     }
-  }
-
-  function resolveComboImage(combo = {}) {
-    const itemImage = (combo.items || [])
-      .map((item) => item.imageUrl || item.image)
-      .find((value) => /^(https?:|data:|blob:|\/)/i.test(String(value || '')))
-
-    return combo.imageUrl
-      || itemImage
-      || '/home/rooms/livingroom.jpeg'
   }
 
   function sameComboLine(line, item) {
@@ -87,6 +80,10 @@ export function useHomePage() {
     comboMessage.value = ''
 
     try {
+      if (!Array.isArray(combo.items) || !combo.items.length) {
+        throw new Error('Combo chưa có sản phẩm hợp lệ.')
+      }
+
       await cartStore.ensureHydrated()
 
       for (const item of combo.items || []) {
@@ -101,7 +98,7 @@ export function useHomePage() {
             productId: item.productId,
             variantId: item.variantId || null,
             name: item.productName,
-            imageUrl: item.image,
+            imageUrl: item.imageUrl || item.image || '',
             price: item.price,
             quantity: requiredQuantity,
           })

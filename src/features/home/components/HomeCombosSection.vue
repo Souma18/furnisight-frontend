@@ -23,11 +23,12 @@ defineEmits(['buy'])
       <article v-for="combo in combos" :key="combo.id" class="combo-card">
         <div class="combo-media">
           <img
+            v-if="combo.imageUrl"
             :src="combo.imageUrl"
             :alt="combo.name"
             loading="lazy"
-            @error="$event.target.src = '/home/rooms/livingroom.jpeg'"
           >
+          <div v-else class="combo-media-empty">Chưa có ảnh combo</div>
           <span class="combo-saving">Tiết kiệm {{ PriceFormatter.format(combo.savedAmount) }}</span>
         </div>
         <div class="combo-body">
@@ -63,6 +64,7 @@ defineEmits(['buy'])
 .combo-card { overflow: hidden; border: 1px solid #e4ddd2; border-radius: 8px; background: #fff; box-shadow: 0 10px 28px rgba(18, 32, 46, .08); }
 .combo-media { position: relative; aspect-ratio: 16 / 9; overflow: hidden; background: #eee8de; }
 .combo-media img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s ease; }
+.combo-media-empty { width: 100%; height: 100%; display: grid; place-items: center; color: #7a7266; font-size: 13px; background: #f2ece2; }
 .combo-card:hover .combo-media img { transform: scale(1.025); }
 .combo-saving { position: absolute; left: 14px; bottom: 14px; padding: 6px 10px; border-radius: 6px; background: #c9922a; color: #12202e; font-size: 11px; font-weight: 700; }
 .combo-body { min-height: 210px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; }

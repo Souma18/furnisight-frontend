@@ -24,6 +24,8 @@ const {
   activeImage,
   activeTab,
   show3DModal,
+  cartAdding,
+  cartAdded,
   reviewEligibility,
   reviewForm,
   reviewSubmitting,
@@ -89,6 +91,8 @@ const {
         :qty="qty"
         :wished="wished"
         :active-image="activeImage"
+        :cart-adding="cartAdding"
+        :cart-added="cartAdded"
         @pick-image="activeImage = $event"
         @pick-color="selectedColor = $event"
         @pick-size="selectedSize = $event"

@@ -6,6 +6,13 @@ import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
 import { useProducts } from './useProducts'
 
+const PRICE_BAND_TAGS = {
+  lt5m: 'Dưới 5tr',
+  '5-15m': '5tr - 15tr',
+  '15-30m': '15tr - 30tr',
+  gt30m: '30tr - 50tr+',
+}
+
 export function useProductListPage() {
   const route = useRoute()
   const wishlistStore = useWishlistStore()
@@ -41,7 +48,7 @@ export function useProductListPage() {
     if (f.materials?.length) tags.push(`${f.materials.length} chất liệu`)
     if (f.colors?.length) tags.push(`${f.colors.length} màu`)
     if (f.minStar != null) tags.push(`${f.minStar}+ sao`)
-    if (f.priceBands?.length) tags.push('Khoảng giá')
+    if (f.priceBands?.length) tags.push(PRICE_BAND_TAGS[f.priceBands[0]] ?? 'Khoảng giá')
     return tags
   })
 

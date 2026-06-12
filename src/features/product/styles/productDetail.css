@@ -55,6 +55,9 @@
 .actions .solid,
 .actions .wish { min-height: 48px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; }
 .actions .outline { border: 2px solid #12202e; border-radius: 12px; background: #fff; }
+.actions .outline:disabled { cursor: wait; opacity: 0.78; }
+.actions .outline.loading { background: #f7f1e6; border-color: #c9922a; color: #9a6a13; }
+.actions .outline.added { background: #ecf8ee; border-color: #4f9d5d; color: #2f703b; }
 .actions .solid { border: none; border-radius: 12px; background: linear-gradient(135deg, #e5b84a, #c9922a); color: #12202e; font-weight: 700; }
 .actions .wish { width: 52px; border: 2px solid #ece2cf; border-radius: 12px; background: #fff; color: #12202e; }
 .actions .wish.active { border-color: #e53e3e; color: #e53e3e; background: #fff0f0; }

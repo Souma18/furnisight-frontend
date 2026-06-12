@@ -7,6 +7,7 @@ export class ProfileResponse {
     this.email = data.email || ''
     this.firstName = data.firstName || ''
     this.lastName = data.lastName || ''
+    this.avatarMediaId = data.avatarMediaId || null
     this.avatarUrl = data.avatarUrl || ''
     this.role = data.role || ''
     this.birthday = data.birthday || data.dateOfBirth || ''

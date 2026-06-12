@@ -1,6 +1,21 @@
 import { reactive, computed, watch } from 'vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 
+const PRICE_BANDS = [
+  { id: 'lt5m', step: 1, min: 0, max: 5000000 },
+  { id: '5-15m', step: 2, min: 5000000, max: 15000000 },
+  { id: '15-30m', step: 3, min: 15000000, max: 30000000 },
+  { id: 'gt30m', step: 4, min: 30000000, max: 50000000, plus: true },
+]
+
+function bandById(id) {
+  return PRICE_BANDS.find((band) => band.id === id) ?? null
+}
+
+function bandByStep(step) {
+  return PRICE_BANDS.find((band) => band.step === Number(step)) ?? null
+}
+
 export function useProductFiltersSidebar(props, emit) {
   const openBlocks = reactive({
     cat: true,
@@ -13,6 +28,7 @@ export function useProductFiltersSidebar(props, emit) {
   const pending = reactive({
     priceBands: [],
     priceSliderPct: 100,
+    priceSliderStep: 0,
     materials: [],
     colors: [],
     minStar: null,
@@ -20,7 +36,9 @@ export function useProductFiltersSidebar(props, emit) {
 
   function syncPendingFromApplied() {
     const a = props.applied ?? {}
-    pending.priceBands = [...(a.priceBands ?? [])]
+    const activeBand = bandById(a.priceBands?.[0])
+    pending.priceBands = activeBand ? [activeBand.id] : []
+    pending.priceSliderStep = activeBand?.step ?? 0
     pending.priceSliderPct = Number(a.priceSliderPct ?? 100)
     pending.materials = [...(a.materials ?? [])]
     pending.colors = [...(a.colors ?? [])]
@@ -32,28 +50,19 @@ export function useProductFiltersSidebar(props, emit) {
   watch(() => pending.priceBands, (bands) => {
     if (isSyncingPrice) return
     isSyncingPrice = true
-    
-    if (bands.length > 1) {
-      pending.priceBands = [bands[bands.length - 1]]
-      bands = pending.priceBands
-    }
-
-    if (bands.includes('gt30m')) pending.priceSliderPct = 100
-    else if (bands.includes('15-30m')) pending.priceSliderPct = 60
-    else if (bands.includes('5-15m')) pending.priceSliderPct = 30
-    else if (bands.includes('lt5m')) pending.priceSliderPct = 10
-    else pending.priceSliderPct = 100
+    const activeBand = bandById(bands[bands.length - 1])
+    pending.priceBands = activeBand ? [activeBand.id] : []
+    pending.priceSliderStep = activeBand?.step ?? 0
+    pending.priceSliderPct = 100
     setTimeout(() => { isSyncingPrice = false }, 10)
   }, { deep: true })
 
-  watch(() => pending.priceSliderPct, (pct) => {
+  watch(() => pending.priceSliderStep, (step) => {
     if (isSyncingPrice) return
     isSyncingPrice = true
-    pending.priceBands = []
-    if (pct <= 10) pending.priceBands.push('lt5m')
-    else if (pct > 10 && pct <= 30) pending.priceBands.push('5-15m')
-    else if (pct > 30 && pct <= 60) pending.priceBands.push('15-30m')
-    else if (pct > 60) pending.priceBands.push('gt30m')
+    const activeBand = bandByStep(step)
+    pending.priceBands = activeBand ? [activeBand.id] : []
+    pending.priceSliderPct = 100
     setTimeout(() => { isSyncingPrice = false }, 10)
   })
 
@@ -105,17 +114,24 @@ export function useProductFiltersSidebar(props, emit) {
     else arr.splice(i, 1)
   }
 
-  const priceMinLabel = PriceFormatter.formatShort(0)
-  const priceMaxLabel = computed(() =>
-    pending.priceSliderPct >= 100
-      ? PriceFormatter.formatShort(50000000, { plus: true })
-      : PriceFormatter.formatShort(Math.round((pending.priceSliderPct / 100) * 50) * 1000000),
-  )
+  function togglePriceBand(id) {
+    const activeBand = bandById(id)
+    if (!activeBand) return
+    pending.priceBands = pending.priceBands.includes(id) ? [] : [id]
+  }
+
+  const activePriceBand = computed(() => bandById(pending.priceBands[0]))
+  const priceMinLabel = computed(() => PriceFormatter.formatShort(activePriceBand.value?.min ?? 0))
+  const priceMaxLabel = computed(() => {
+    const band = activePriceBand.value
+    if (!band) return PriceFormatter.formatShort(50000000, { plus: true })
+    return PriceFormatter.formatShort(band.max, { plus: Boolean(band.plus) })
+  })
 
   function applyFilters() {
     emit('apply', {
       priceBands: [...pending.priceBands],
-      priceSliderPct: pending.priceSliderPct,
+      priceSliderPct: 100,
       materials: [...pending.materials],
       colors: [...pending.colors],
       minStar: pending.minStar,
@@ -143,6 +159,8 @@ export function useProductFiltersSidebar(props, emit) {
     toggleBlock,
     selectCategory,
     toggleArrayItem,
+    togglePriceBand,
+    activePriceBand,
     priceMinLabel,
     priceMaxLabel,
     applyFilters,

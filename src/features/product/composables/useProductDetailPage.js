@@ -1,4 +1,4 @@
-import { computed, ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -25,6 +25,8 @@ export function useProductDetailPage(props) {
   const activeImage = ref('')
   const activeTab = ref('desc')
   const show3DModal = ref(false)
+  const cartAdding = ref(false)
+  const cartAdded = ref(false)
   const reviewEligibility = ref({
     loading: false,
     checked: false,
@@ -41,6 +43,7 @@ export function useProductDetailPage(props) {
   const reviewSubmitError = ref('')
   const reviewSubmitSuccess = ref('')
   let reviewEligibilityRequestId = 0
+  let cartAddedTimer = null
 
   const reviewCanSubmit = computed(() => {
     return Boolean(
@@ -71,6 +74,7 @@ export function useProductDetailPage(props) {
       wished.value = false
       activeTab.value = 'desc'
       show3DModal.value = false
+      resetCartButtonState()
       resetReviewState()
 
       if (authStore.isAuthenticated) {
@@ -95,6 +99,12 @@ export function useProductDetailPage(props) {
 
   function retry() {
     loadProduct(props.id)
+  }
+
+  function resetCartButtonState() {
+    clearTimeout(cartAddedTimer)
+    cartAdding.value = false
+    cartAdded.value = false
   }
 
   function resetReviewState() {
@@ -285,7 +295,7 @@ export function useProductDetailPage(props) {
   }
 
   async function addToCart() {
-    if (!product.value) return
+    if (!product.value || cartAdding.value) return
 
     if (!authStore.isAuthenticated) {
       openAuthModal()
@@ -294,18 +304,33 @@ export function useProductDetailPage(props) {
 
     const selectedVariant = resolveSelectedVariant()
 
-    await cartStore.addItem({
-      productId: product.value.id,
-      detailId: product.value.slug || product.value.id,
-      variantId: selectedVariant?.id ?? null,
-      name: product.value.name,
-      price: selectedVariant?.price ?? product.value.price ?? 0,
-      imageUrl: activeImage.value || product.value.image || product.value.gallery?.[0] || '',
-      quantity: qty.value,
-      selectedColor: selectedColor.value,
-      selectedSize: selectedSize.value,
-      room3dProductId: product.value.room3dProductId ?? null,
-    })
+    clearTimeout(cartAddedTimer)
+    cartAdding.value = true
+    cartAdded.value = false
+
+    try {
+      await cartStore.addItem({
+        productId: product.value.id,
+        detailId: product.value.slug || product.value.id,
+        variantId: selectedVariant?.id ?? null,
+        name: product.value.name,
+        price: selectedVariant?.price ?? product.value.price ?? 0,
+        imageUrl: activeImage.value || product.value.image || product.value.gallery?.[0] || '',
+        quantity: qty.value,
+        selectedColor: selectedColor.value,
+        selectedSize: selectedSize.value,
+        room3dProductId: product.value.room3dProductId ?? null,
+      })
+      cartAdded.value = true
+      cartAddedTimer = setTimeout(() => {
+        cartAdded.value = false
+      }, 900)
+    } catch (e) {
+      cartAdded.value = false
+      console.error('Failed to add product to cart:', e)
+    } finally {
+      cartAdding.value = false
+    }
   }
 
   async function addToWishlist() {
@@ -357,6 +382,7 @@ export function useProductDetailPage(props) {
     }
   })
   onMounted(() => loadProduct(props.id))
+  onBeforeUnmount(() => clearTimeout(cartAddedTimer))
 
   return {
     product,
@@ -369,6 +395,8 @@ export function useProductDetailPage(props) {
     activeImage,
     activeTab,
     show3DModal,
+    cartAdding,
+    cartAdded,
     reviewEligibility,
     reviewForm,
     reviewSubmitting,

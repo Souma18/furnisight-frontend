@@ -8,6 +8,8 @@ defineProps({
   qty: { type: Number, required: true },
   wished: { type: Boolean, default: false },
   activeImage: { type: String, required: true },
+  cartAdding: { type: Boolean, default: false },
+  cartAdded: { type: Boolean, default: false },
 })
 
 const emit = defineEmits([
@@ -114,9 +116,16 @@ const emit = defineEmits([
         <span>{{ product.stock > 0 ? `Còn hàng (${product.stock} sản phẩm)` : 'Tạm hết hàng' }}</span>
       </div>
       <div class="actions">
-        <button type="button" class="outline" @click="emit('add-cart')">
-          <AppIcon name="cart" :size="17" />
-          Thêm vào giỏ
+        <button
+          type="button"
+          class="outline"
+          :class="{ loading: cartAdding, added: cartAdded }"
+          :disabled="cartAdding"
+          @click="emit('add-cart')"
+        >
+          <AppIcon v-if="cartAdded" name="check" :size="17" />
+          <AppIcon v-else name="cart" :size="17" />
+          {{ cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
         </button>
         <button type="button" class="solid">
           <AppIcon name="sparkles" :size="17" />

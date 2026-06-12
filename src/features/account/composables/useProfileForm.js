@@ -15,6 +15,7 @@ export function useProfileForm(props, emit) {
     birthday: '',
     gender: 'MALE',
     bio: '',
+    avatarMediaId: null,
   })
 
   watch(
@@ -27,7 +28,10 @@ export function useProfileForm(props, emit) {
   )
 
   async function submit() {
-    await profileStore.saveProfile({ ...form })
+    await profileStore.saveProfile({
+      ...form,
+      avatarMediaId: form.avatarMediaId ?? props.profile?.avatarMediaId ?? null,
+    })
     emit('notify', 'Đã lưu thông tin cá nhân.')
   }
 
