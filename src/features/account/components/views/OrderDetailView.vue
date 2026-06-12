@@ -1,9 +1,11 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { useAccountOrders } from '../../composables/useAccountOrders'
+import { usePaymentCountdown } from '../../composables/usePaymentCountdown'
 import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
-import { canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+import { canRetryOrderPayment, parseOrderDate, shouldShowRetryPayment } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const emit = defineEmits(['notify'])
@@ -13,12 +15,29 @@ const {
   backToOrders,
   cancelOrder,
   retryPayment,
+  retryingOrderCode,
 } = useAccountOrders((msg, type) => emit('notify', msg, type))
+
+const cancelDialogOpen = ref(false)
+const canceling = ref(false)
+const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
 
 function handleCancel() {
   if (!order.value || !['unpaid', 'payment_failed'].includes(order.value.status)) return
-  if (!confirm(`Huỷ đơn ${order.value.orderCode}?`)) return
-  cancelOrder(order.value.orderCode || order.value.id)
+  cancelDialogOpen.value = true
+}
+
+function closeCancelDialog() {
+  if (canceling.value) return
+  cancelDialogOpen.value = false
+}
+
+async function confirmCancel() {
+  if (!order.value || canceling.value) return
+  canceling.value = true
+  const success = await cancelOrder(order.value.orderCode || order.value.id)
+  canceling.value = false
+  if (success) cancelDialogOpen.value = false
 }
 
 function handleRetryPayment() {
@@ -26,20 +45,30 @@ function handleRetryPayment() {
   retryPayment(order.value)
 }
 
+const retryingPayment = computed(() =>
+  Boolean(order.value) && retryingOrderCode.value === (order.value.orderCode || order.value.id),
+)
+
+const canRetryPaymentNow = computed(() =>
+  Boolean(order.value)
+    && canRetryOrderPayment(order.value)
+    && isPaymentTimeRemaining(order.value),
+)
+
 const formatMoney = PriceFormatter.format
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return isNaN(date.getTime()) ? dateStr : new Intl.DateTimeFormat('vi-VN').format(date)
+  const date = parseOrderDate(dateStr)
+  return date ? new Intl.DateTimeFormat('vi-VN').format(date) : dateStr
 }
 
 function formatDateTime(dateStr) {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return Number.isNaN(date.getTime())
-    ? dateStr
-    : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+  const date = parseOrderDate(dateStr)
+  return date
+    ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+    : dateStr
 }
 
 function orderItemImage(item = {}) {
@@ -109,11 +138,11 @@ const transactionTimeline = computed(() => {
     items.push({
       key: 'pending',
       title: 'Chờ thanh toán',
-      sub: current.canRetryPayment
+      sub: canRetryPaymentNow.value
         ? 'Bạn vẫn có thể tiếp tục thanh toán đơn hàng.'
-        : 'Chưa ghi nhận thanh toán thành công.',
+        : 'Đơn hàng đã hết thời gian thanh toán.',
       time: timeline.paymentExpiresAt || current.paymentExpiresAt,
-      state: current.canRetryPayment ? 'active' : 'pending',
+      state: canRetryPaymentNow.value ? 'active' : 'pending',
       icon: 'clock',
     })
   }
@@ -137,11 +166,8 @@ const transactionRows = computed(() => {
 })
 
 const paymentDeadline = computed(() => {
-  if (!order.value || !canRetryOrderPayment(order.value) || !order.value.paymentExpiresAt) return ''
-  const ms = new Date(order.value.paymentExpiresAt).getTime() - Date.now()
-  if (ms <= 0) return ''
-  const minutes = Math.max(1, Math.ceil(ms / 60000))
-  return `Còn ${minutes} phút để hoàn tất thanh toán`
+  if (!order.value || !canRetryPaymentNow.value) return ''
+  return `Còn ${formatCountdown(order.value)} để hoàn tất thanh toán`
 })
 </script>
 
@@ -162,9 +188,16 @@ const paymentDeadline = computed(() => {
       </div>
       <div class="order-detail-head-actions">
         <span class="status-badge" :class="order.status">{{ statusLabel }}</span>
-        <button v-if="canRetryOrderPayment(order)" type="button" class="order-pay-btn" @click="handleRetryPayment">
-          <AppIcon name="creditCard" :size="14" />
-          Thanh toán lại
+        <button
+          v-if="shouldShowRetryPayment(order)"
+          type="button"
+          class="order-pay-btn"
+          :disabled="!canRetryPaymentNow || retryingPayment"
+          :title="canRetryPaymentNow ? 'Tiếp tục thanh toán đơn hàng' : 'Đơn hàng đã quá hạn thanh toán'"
+          @click="handleRetryPayment"
+        >
+          <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />
+          {{ retryingPayment ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
         </button>
         <button v-if="order.status === 'unpaid' || order.status === 'payment_failed'" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
@@ -311,6 +344,18 @@ const paymentDeadline = computed(() => {
         </article>
       </aside>
     </div>
+
+    <ConfirmDialog
+      :open="cancelDialogOpen"
+      title="Xác nhận hủy đơn"
+      :message="`Bạn có chắc muốn hủy đơn ${order.orderCode}? Thao tác này không thể hoàn tác.`"
+      confirm-label="Hủy đơn"
+      cancel-label="Giữ đơn"
+      :loading="canceling"
+      danger
+      @close="closeCancelDialog"
+      @confirm="confirmCancel"
+    />
   </section>
 
   <p v-else class="order-detail-missing">Không tìm thấy đơn hàng.</p>
@@ -413,6 +458,13 @@ const paymentDeadline = computed(() => {
 .order-pay-btn:hover {
   background: #a9781e;
 }
+.order-pay-btn:disabled {
+  background: #b7b0a5;
+  cursor: not-allowed;
+  opacity: 0.78;
+}
+.spin-icon { animation: order-spin 0.8s linear infinite; }
+@keyframes order-spin { to { transform: rotate(360deg); } }
 .order-detail-grid {
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1rem; align-items: start;
 }

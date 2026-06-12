@@ -1,4 +1,6 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
+
 defineProps({
   open: { type: Boolean, default: false },
   orderCode: { type: String, default: '' },
@@ -17,7 +19,9 @@ defineEmits(['view-order', 'continue-shopping'])
       aria-labelledby="checkout-success-title"
     >
       <div class="checkout-success-box">
-        <div class="checkout-success-icon">🎉</div>
+        <div class="checkout-success-icon">
+          <AppIcon name="partyPopper" :size="46" />
+        </div>
         <h2 id="checkout-success-title" class="checkout-success-title">
           Đặt hàng <em>thành công!</em>
         </h2>
@@ -27,19 +31,19 @@ defineEmits(['view-order', 'continue-shopping'])
 
         <div class="checkout-success-steps">
           <div class="ss-item">
-            <div class="ss-dot done">✓</div>
+            <div class="ss-dot done"><AppIcon name="check" :size="14" /></div>
             <div class="ss-label">Đặt hàng</div>
           </div>
           <div class="ss-item">
-            <div class="ss-dot pend">📦</div>
+            <div class="ss-dot pend"><AppIcon name="package" :size="14" /></div>
             <div class="ss-label">Xử lý</div>
           </div>
           <div class="ss-item">
-            <div class="ss-dot pend">🚚</div>
+            <div class="ss-dot pend"><AppIcon name="truck" :size="14" /></div>
             <div class="ss-label">Giao hàng</div>
           </div>
           <div class="ss-item">
-            <div class="ss-dot pend">🏠</div>
+            <div class="ss-dot pend"><AppIcon name="home" :size="14" /></div>
             <div class="ss-label">Hoàn tất</div>
           </div>
         </div>
@@ -48,7 +52,8 @@ defineEmits(['view-order', 'continue-shopping'])
 
         <div class="checkout-success-actions">
           <button type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
-            📦 Xem đơn hàng
+            <AppIcon name="package" :size="16" />
+            Xem đơn hàng
           </button>
           <button type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
             Tiếp tục mua sắm
@@ -92,9 +97,16 @@ defineEmits(['view-order', 'continue-shopping'])
 }
 
 .checkout-success-icon {
-  font-size: 64px;
-  line-height: 1;
+  width: 72px;
+  height: 72px;
+  margin-inline: auto;
   margin-bottom: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 146, 42, 0.14);
+  color: var(--co-gold);
 }
 
 .checkout-success-title {
@@ -201,6 +213,10 @@ defineEmits(['view-order', 'continue-shopping'])
   cursor: pointer;
   border: none;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
 .checkout-success-btn--primary {

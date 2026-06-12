@@ -41,6 +41,7 @@ defineEmits(['update-payment'])
             <div class="co-pay-name">{{ method.name }}</div>
             <div class="co-pay-sub">{{ method.sub }}</div>
           </div>
+          <AppIcon v-if="selectedPaymentId === method.id" class="co-pay-selected" name="check" :size="13" />
         </label>
       </div>
 

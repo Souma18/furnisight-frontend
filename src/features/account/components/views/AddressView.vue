@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAddressForm } from '../../composables/useAddressForm'
 
 const props = defineProps({
@@ -49,7 +50,10 @@ const emit = defineEmits(['notify'])
         >
           <div class="item-head">
             <div class="item-tags">
-              <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
+              <span v-if="address.isDefault" class="badge badge-default">
+                <AppIcon name="mapPin" :size="12" />
+                Mặc định
+              </span>
               <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
             </div>
   
@@ -60,6 +64,7 @@ const emit = defineEmits(['notify'])
                 class="set-default-btn"
                 @click="setAsDefault(address.id)"
               >
+                <AppIcon name="mapPin" :size="13" />
                 Đặt làm mặc định
               </button>
               <button
@@ -194,6 +199,7 @@ const emit = defineEmits(['notify'])
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  gap: 0.25rem;
 }
 .badge-default {
   border: 1px solid rgba(201, 146, 42, 0.42);
@@ -220,6 +226,9 @@ const emit = defineEmits(['notify'])
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 .set-default-btn:hover {
   background: #faf6f0;

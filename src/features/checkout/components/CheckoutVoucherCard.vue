@@ -26,12 +26,17 @@ defineEmits(['open-voucher', 'remove-voucher'])
 
     <div class="co-voucher-wrap">
       <div class="co-voucher-row">
-        <span>🏷️</span>
+        <AppIcon name="tag" :size="17" />
         <span class="co-voucher-label">Voucher của Shop</span>
         <div v-if="shopVoucher" class="co-voucher-applied">
           <span class="co-voucher-code">{{ shopVoucher.code }}</span>
-          <span v-if="shopDiscount">−{{ formatMoney(shopDiscount) }} ✓</span>
-          <button type="button" class="co-voucher-remove" @click="$emit('remove-voucher', 'shop')">✕</button>
+          <span v-if="shopDiscount" class="co-voucher-discount">
+            −{{ formatMoney(shopDiscount) }}
+            <AppIcon name="check" :size="13" />
+          </span>
+          <button type="button" class="co-voucher-remove" aria-label="Bỏ voucher" @click="$emit('remove-voucher', 'shop')">
+            <AppIcon name="close" :size="14" />
+          </button>
         </div>
         <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'shop')">
           Chọn Voucher
@@ -41,11 +46,14 @@ defineEmits(['open-voucher', 'remove-voucher'])
       <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">
 
       <div class="co-voucher-row">
-        <span>🎁</span>
+        <AppIcon name="gift" :size="17" />
         <span class="co-voucher-label">Combo khuyến mãi</span>
         <div v-if="selectedCombo" class="co-voucher-applied">
           <span class="co-voucher-code">{{ selectedCombo.name }}</span>
-          <span v-if="comboDiscount">−{{ formatMoney(comboDiscount) }} ✓</span>
+          <span v-if="comboDiscount" class="co-voucher-discount">
+            −{{ formatMoney(comboDiscount) }}
+            <AppIcon name="check" :size="13" />
+          </span>
         </div>
         <span v-else class="co-voucher-muted">{{ comboMessage || 'Chưa đủ sản phẩm combo' }}</span>
       </div>
@@ -53,12 +61,17 @@ defineEmits(['open-voucher', 'remove-voucher'])
       <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">
 
       <div class="co-voucher-row">
-        <span>🚚</span>
+        <AppIcon name="truck" :size="17" />
         <span class="co-voucher-label">Voucher vận chuyển</span>
         <div v-if="shippingVoucher" class="co-voucher-applied">
           <span class="co-voucher-code">{{ shippingVoucher.code }}</span>
-          <span v-if="shippingDiscount">−{{ formatMoney(shippingDiscount) }} ✓</span>
-          <button type="button" class="co-voucher-remove" @click="$emit('remove-voucher', 'ship')">✕</button>
+          <span v-if="shippingDiscount" class="co-voucher-discount">
+            −{{ formatMoney(shippingDiscount) }}
+            <AppIcon name="check" :size="13" />
+          </span>
+          <button type="button" class="co-voucher-remove" aria-label="Bỏ voucher vận chuyển" @click="$emit('remove-voucher', 'ship')">
+            <AppIcon name="close" :size="14" />
+          </button>
         </div>
         <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'ship')">
           Chọn Voucher

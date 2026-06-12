@@ -1,9 +1,11 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { useAccountOrders } from '../../composables/useAccountOrders'
+import { usePaymentCountdown } from '../../composables/usePaymentCountdown'
 import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
-import { canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+import { canRetryOrderPayment, parseOrderDate, shouldShowRetryPayment } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const emit = defineEmits(['notify'])
@@ -14,12 +16,29 @@ const {
   openOrderDetail,
   cancelOrder,
   retryPayment,
+  retryingOrderCode,
 } = useAccountOrders((msg, type) => emit('notify', msg, type))
+
+const cancelTarget = ref(null)
+const canceling = ref(false)
+const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
 
 function handleCancel(order, event) {
   event?.stopPropagation?.()
-  if (!confirm(`Huỷ đơn ${displayCode(order)}?`)) return
-  cancelOrder(order.orderCode || order.id)
+  cancelTarget.value = order
+}
+
+function closeCancelDialog() {
+  if (canceling.value) return
+  cancelTarget.value = null
+}
+
+async function confirmCancel() {
+  if (!cancelTarget.value || canceling.value) return
+  canceling.value = true
+  const success = await cancelOrder(cancelTarget.value.orderCode || cancelTarget.value.id)
+  canceling.value = false
+  if (success) cancelTarget.value = null
 }
 
 function handleRetryPayment(order, event) {
@@ -27,12 +46,26 @@ function handleRetryPayment(order, event) {
   retryPayment(order)
 }
 
+function isRetrying(order) {
+  return retryingOrderCode.value === (order.orderCode || order.id)
+}
+
+function retryPaymentTitle(order) {
+  return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
+    ? 'Tiếp tục thanh toán đơn hàng'
+    : 'Đơn hàng đã quá hạn thanh toán'
+}
+
+function canRetryPaymentNow(order) {
+  return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
+}
+
 const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'cancel']
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
-  const date = new Date(dateStr)
-  return isNaN(date.getTime()) ? dateStr : new Intl.DateTimeFormat('vi-VN').format(date)
+  const date = parseOrderDate(dateStr)
+  return date ? new Intl.DateTimeFormat('vi-VN').format(date) : dateStr
 }
 
 const formatMoney = PriceFormatter.format
@@ -55,11 +88,8 @@ function hideBrokenImage(event) {
 }
 
 function formatPaymentDeadline(order) {
-  if (!canRetryOrderPayment(order) || !order.paymentExpiresAt) return ''
-  const ms = new Date(order.paymentExpiresAt).getTime() - Date.now()
-  if (ms <= 0) return ''
-  const minutes = Math.max(1, Math.ceil(ms / 60000))
-  return `Còn ${minutes} phút để thanh toán`
+  if (!canRetryPaymentNow(order)) return ''
+  return `Còn ${formatCountdown(order)} để thanh toán`
 }
 </script>
 
@@ -118,13 +148,15 @@ function formatPaymentDeadline(order) {
               Huỷ đơn
             </button>
             <button
-              v-if="canRetryOrderPayment(order)"
+              v-if="shouldShowRetryPayment(order)"
               type="button"
               class="order-pay-btn"
+              :disabled="!canRetryPaymentNow(order) || isRetrying(order)"
+              :title="retryPaymentTitle(order)"
               @click="handleRetryPayment(order, $event)"
             >
-              <AppIcon name="creditCard" :size="15" />
-              Thanh toán lại
+              <AppIcon :name="isRetrying(order) ? 'refresh' : 'creditCard'" :size="15" :class="{ 'spin-icon': isRetrying(order) }" />
+              {{ isRetrying(order) ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
             </button>
             <button type="button" class="order-detail-btn" @click="openOrderDetail(order.orderCode || order.id)">
               <AppIcon name="eye" :size="15" />
@@ -139,6 +171,18 @@ function formatPaymentDeadline(order) {
         Không có đơn hàng ở trạng thái này.
       </p>
     </div>
+
+    <ConfirmDialog
+      :open="Boolean(cancelTarget)"
+      title="Xác nhận hủy đơn"
+      :message="`Bạn có chắc muốn hủy đơn ${cancelTarget ? displayCode(cancelTarget) : ''}? Thao tác này không thể hoàn tác.`"
+      confirm-label="Hủy đơn"
+      cancel-label="Giữ đơn"
+      :loading="canceling"
+      danger
+      @close="closeCancelDialog"
+      @confirm="confirmCancel"
+    />
   </section>
 </template>
 
@@ -344,6 +388,20 @@ function formatPaymentDeadline(order) {
 
 .order-pay-btn:hover {
   background: #a9781e;
+}
+
+.order-pay-btn:disabled {
+  background: #b7b0a5;
+  cursor: not-allowed;
+  opacity: 0.78;
+}
+
+.spin-icon {
+  animation: order-spin 0.8s linear infinite;
+}
+
+@keyframes order-spin {
+  to { transform: rotate(360deg); }
 }
 
 .order-detail-btn {

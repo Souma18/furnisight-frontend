@@ -44,7 +44,9 @@ function handleApplyCode() {
     <div class="co-modal" role="dialog" aria-modal="true">
       <div class="co-modal-head">
         <p style="font-size: 1rem; font-weight: 600">Chọn <em style="font-style: italic; color: var(--co-gold, #c9922a)">Voucher</em></p>
-        <button type="button" class="checkout-card-change" @click="$emit('close')">✕</button>
+        <button type="button" class="checkout-card-change" aria-label="Đóng" @click="$emit('close')">
+          <AppIcon name="close" :size="16" />
+        </button>
       </div>
 
       <div class="co-modal-body">

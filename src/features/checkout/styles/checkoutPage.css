@@ -190,6 +190,7 @@
   display: grid; place-items: center; font-size: 1.5rem; border: 1px solid var(--co-cream-mid);
   position: relative; overflow: hidden;
 }
+.co-prod-thumb > svg { color: var(--co-gold); }
 .co-prod-thumb-img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;
 }
@@ -246,6 +247,7 @@
 
 .co-voucher-wrap { padding: 0.85rem 1rem; display: grid; gap: 0.75rem; }
 .co-voucher-row { display: flex; align-items: center; gap: 0.55rem; }
+.co-voucher-row > svg { flex: 0 0 auto; color: var(--co-gold); }
 .co-voucher-label { flex: 1; font-size: 0.82rem; font-weight: 500; }
 .co-voucher-btn {
   border: 1.5px solid #f5e6c8; background: #fff; color: var(--co-gold); font-size: 0.76rem; font-weight: 600;
@@ -257,7 +259,12 @@
   background: rgba(45, 158, 107, 0.1); border: 1px dashed var(--co-green);
   padding: 0.15rem 0.45rem; border-radius: 6px; font-size: 0.7rem;
 }
-.co-voucher-remove { border: none; background: none; cursor: pointer; color: var(--co-text-light); }
+.co-voucher-discount { display: inline-flex; align-items: center; gap: 0.18rem; }
+.co-voucher-remove {
+  width: 26px; height: 26px; display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 7px; background: none; cursor: pointer; color: var(--co-text-light);
+}
+.co-voucher-remove:hover { background: #fdf0ee; color: #c0392b; }
 
 .co-pay-wrap { padding: 0.85rem 1rem; }
 .co-pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
@@ -266,9 +273,7 @@
   border-radius: 11px; border: 2px solid var(--co-cream-mid); cursor: pointer; position: relative;
 }
 .co-pay-method.active { border-color: var(--co-gold); background: #f5e6c8; }
-.co-pay-method.active::after {
-  content: '✓'; position: absolute; top: 5px; right: 7px; font-size: 0.58rem; font-weight: 700; color: var(--co-gold);
-}
+.co-pay-selected { position: absolute; top: 7px; right: 8px; color: var(--co-gold); }
 .co-pay-icon { font-size: 1.2rem; }
 .co-pay-name { font-size: 0.76rem; font-weight: 600; }
 .co-pay-sub { font-size: 0.64rem; color: var(--co-text-light); }
@@ -292,6 +297,7 @@
   width: 2.2rem; height: 2.2rem; border-radius: 8px; background: var(--co-cream-dark);
   display: grid; place-items: center; position: relative; font-size: 1rem;
 }
+.co-sum-thumb-img { width: 100%; height: 100%; object-fit: cover; }
 .co-sum-qty {
   position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; border-radius: 50%;
   background: var(--co-navy); color: #fff; font-size: 0.52rem; font-weight: 700; display: grid; place-items: center;
@@ -317,7 +323,12 @@
   box-shadow: 0 6px 22px rgba(201, 146, 42, 0.45);
 }
 .co-btn-order:disabled { opacity: 0.6; cursor: not-allowed; }
-.co-btn-order-sub { text-align: center; font-size: 0.68rem; color: var(--co-text-light); margin-top: 0.45rem; }
+.co-btn-order-sub {
+  text-align: center; font-size: 0.68rem; color: var(--co-text-light); margin-top: 0.45rem;
+  display: flex; align-items: center; justify-content: center; gap: 0.3rem;
+}
+.co-sum-saving { display: flex; align-items: center; justify-content: flex-end; gap: 0.3rem; }
+.co-btn-order { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; }
 
 .co-modal-backdrop {
   position: fixed; inset: 0; z-index: 900; background: rgba(10, 18, 28, 0.65);

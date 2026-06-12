@@ -88,7 +88,7 @@ const formatPrice = PriceFormatter.format
     <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
 
     <button type="button" class="delete-btn" aria-label="Xóa sản phẩm" @click="$emit('remove', item.id)">
-      <AppIcon name="trash2" :size="22" />
+      <AppIcon name="trash" :size="22" />
     </button>
   </article>
 </template>
