@@ -353,14 +353,28 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   function resetCheckoutState() {
+    loading.value = false
+    placing.value = false
+    hydrated.value = false
+    combosHydrated.value = false
+    shippingOptions.value = []
+    paymentMethods.value = []
+    shopVouchers.value = []
+    shippingVouchers.value = []
+    activeCombos.value = []
     shopVoucher.value = null
     shippingVoucher.value = null
     selectedCombo.value = null
     comboMessage.value = ''
+    insuranceOption.value = null
+    codNote.value = ''
+    selectedShippingId.value = ''
+    selectedPaymentId.value = 'vnpay'
     sellerNote.value = ''
     hasInsurance.value = false
     agreedTerms.value = true
     lastOrder.value = null
+    clearPendingPayment()
   }
 
   function rememberPendingPayment(payload = {}) {
