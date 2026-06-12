@@ -176,16 +176,18 @@ const emit = defineEmits(['notify'])
   display: inline-flex;
   align-items: center;
   min-height: 1.35rem;
-  padding: 0 0.5rem;
-  border-radius: 999px;
+  padding: 0 0.55rem;
+  border-radius: 7px;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 .badge-default {
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
+  border: 1px solid rgba(201, 146, 42, 0.42);
+  background: #c9922a;
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(201, 146, 42, 0.18);
 }
 .badge-type {
   background: #f5efe6;

@@ -27,8 +27,16 @@ const reviewGateMessage = computed(() => {
   if (props.reviewEligibility.error) return props.reviewEligibility.error
   if (!props.reviewIsAuthenticated) return 'Đăng nhập để kiểm tra điều kiện đánh giá.'
   if (!props.reviewEligibility.purchased) return 'Bạn cần mua và nhận sản phẩm trước khi đánh giá.'
+  if (!props.reviewEligibility.orderItemId) return 'Không tìm thấy dòng đơn hàng hợp lệ để đánh giá.'
   return ''
 })
+
+const reviewFormEnabled = computed(() => Boolean(
+  props.reviewIsAuthenticated &&
+  props.reviewEligibility.purchased &&
+  props.reviewEligibility.orderItemId &&
+  !props.reviewEligibility.loading,
+))
 
 function updateReviewField(field, value) {
   emit('update-review-field', { field, value })
@@ -122,7 +130,7 @@ function updateReviewField(field, value) {
             type="button"
             class="star-pick"
             :class="{ active: star <= Number(reviewForm.rating || 0) }"
-            :disabled="!reviewEligibility.purchased || reviewSubmitting"
+            :disabled="!reviewFormEnabled || reviewSubmitting"
             @click="updateReviewField('rating', star)"
           >
             <AppIcon name="star" :size="22" />
@@ -133,7 +141,7 @@ function updateReviewField(field, value) {
           type="text"
           placeholder="Tiêu đề đánh giá"
           :value="reviewForm.title"
-          :disabled="!reviewEligibility.purchased || reviewSubmitting"
+          :disabled="!reviewFormEnabled || reviewSubmitting"
           maxlength="255"
           @input="updateReviewField('title', $event.target.value)"
         />
@@ -142,7 +150,7 @@ function updateReviewField(field, value) {
           rows="4"
           placeholder="Cảm nhận của bạn về sản phẩm"
           :value="reviewForm.content"
-          :disabled="!reviewEligibility.purchased || reviewSubmitting"
+          :disabled="!reviewFormEnabled || reviewSubmitting"
           @input="updateReviewField('content', $event.target.value)"
         ></textarea>
         <div class="review-form-actions">

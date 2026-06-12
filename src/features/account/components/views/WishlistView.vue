@@ -10,8 +10,15 @@ const props = defineProps({
   },
 })
 
+const emit = defineEmits(['remove-favorite'])
+
 const products = computed(() => props.items.map((item) => item.product || item).filter(Boolean))
 const wishedProductIds = computed(() => products.value.map((item) => item.id).filter(Boolean))
+
+function removeFavorite(productId) {
+  if (!productId) return
+  emit('remove-favorite', productId)
+}
 </script>
 
 <template>
@@ -23,6 +30,7 @@ const wishedProductIds = computed(() => products.value.map((item) => item.id).fi
       :products="products"
       :wished-product-ids="wishedProductIds"
       :columns="3"
+      @toggle-wish="removeFavorite"
     />
   </AccountSectionCard>
 </template>

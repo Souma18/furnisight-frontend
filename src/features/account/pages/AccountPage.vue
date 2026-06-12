@@ -29,6 +29,7 @@ const {
   toast,
   setView,
   showToast,
+  removeWishlistFavorite,
 } = useAccountPage()
 
 const notificationCategory = computed(() => {
@@ -79,7 +80,11 @@ async function handleLogout() {
       <VouchersView v-else-if="activeView === 'vouchers'" @notify="showToast" />
       <OrderDetailView v-else-if="activeView === 'order-detail'" @notify="showToast" />
       <CartView v-else-if="activeView === 'cart'" />
-      <WishlistView v-else-if="activeView === 'wishlist'" :items="wishlist" />
+      <WishlistView
+        v-else-if="activeView === 'wishlist'"
+        :items="wishlist"
+        @remove-favorite="removeWishlistFavorite"
+      />
       <SecurityView
         v-else-if="activeView === 'security'"
         :profile="profile"

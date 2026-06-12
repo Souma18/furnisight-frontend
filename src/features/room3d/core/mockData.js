@@ -52,6 +52,8 @@ export const ROOM_TEMPLATES = [
 export const PRODUCTS_3D = [
   {
     id: 1,
+    productId: 'e0000000-0000-0000-0000-000000000003',
+    variantId: 'a0000003-0000-0000-0000-000000000001',
     name: 'Ghế Ergonomic ProFlex',
     icon: 'armchair',
     price: 1200000,
@@ -62,6 +64,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 2,
+    productId: 'e0000000-0000-0000-0000-000000000004',
+    variantId: 'a0000004-0000-0000-0000-000000000001',
     name: 'Giường Agape',
     icon: 'bed',
     price: 5900000,
@@ -72,6 +76,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 7,
+    productId: 'e0000000-0000-0000-0000-000000000005',
+    variantId: 'a0000005-0000-0000-0000-000000000001',
     name: 'Giường SoftSleep',
     icon: 'bedDouble',
     price: 6800000,
@@ -82,6 +88,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 3,
+    productId: 'e0000000-0000-0000-0000-000000000002',
+    variantId: 'a0000002-0000-0000-0000-000000000001',
     name: 'Sofa Nordic 3 chỗ',
     icon: 'sofa',
     price: 8500000,
@@ -92,6 +100,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 4,
+    productId: 'e0000000-0000-0000-0000-000000000007',
+    variantId: 'a0000007-0000-0000-0000-000000000001',
     name: 'Bàn ăn 6 ghế',
     icon: 'utensilsCrossed',
     price: 4500000,
@@ -102,6 +112,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 5,
+    productId: 'e0000000-0000-0000-0000-000000000003',
+    variantId: 'a0000003-0000-0000-0000-000000000001',
     name: 'Bàn làm việc 1m4',
     icon: 'table',
     price: 1800000,
@@ -112,6 +124,8 @@ export const PRODUCTS_3D = [
   },
   {
     id: 6,
+    productId: 'e0000000-0000-0000-0000-000000000006',
+    variantId: 'a0000006-0000-0000-0000-000000000001',
     name: 'Kệ sách treo tường',
     icon: 'box',
     price: 680000,

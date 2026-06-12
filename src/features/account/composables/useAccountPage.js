@@ -68,7 +68,17 @@ export function useAccountPage() {
     }, 2600)
   }
 
+  async function removeWishlistFavorite(productId) {
+    if (!productId) return
 
+    try {
+      await wishlistStore.removeFavorite(productId)
+      showToast('Đã bỏ sản phẩm khỏi danh sách yêu thích.')
+    } catch (error) {
+      console.error('Failed to remove favorite product:', error)
+      showToast('Không thể bỏ yêu thích sản phẩm. Vui lòng thử lại.', 'error')
+    }
+  }
 
   const loading = ref(false)
 
@@ -109,5 +119,6 @@ export function useAccountPage() {
     toast,
     setView,
     showToast,
+    removeWishlistFavorite,
   }
 }

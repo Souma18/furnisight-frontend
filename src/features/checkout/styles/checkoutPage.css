@@ -164,7 +164,8 @@
 .co-addr-name { font-weight: 600; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
 .co-addr-default {
   font-size: 0.58rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 0.1rem 0.45rem; border-radius: 5px; background: rgba(201, 146, 42, 0.15); color: var(--co-gold);
+  padding: 0.14rem 0.5rem; border-radius: 7px; background: var(--co-gold); color: #fff;
+  border: 1px solid rgba(201, 146, 42, 0.38); box-shadow: 0 5px 14px rgba(201, 146, 42, 0.16);
 }
 .co-addr-street { font-size: 0.78rem; color: var(--co-text-mid); margin-top: 0.25rem; line-height: 1.5; }
 .co-empty { padding: 1rem; color: var(--co-text-mid); font-size: 0.84rem; }
