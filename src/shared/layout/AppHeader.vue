@@ -95,8 +95,6 @@ watch(isAuthenticated, (newVal) => {
     notifications.value = []
     notificationsLoaded.value = false
   } else {
-    isAuthModalOpen.value = false
-    initialAuthView.value = 'login'
     notificationsLoaded.value = false
   }
 })

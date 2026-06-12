@@ -16,6 +16,16 @@ const activeDraft = ref(null)
 const editorLoading = ref(false)
 const checkedIds = ref([])
 
+const availableItems = computed(() => items.value.filter((item) => !item.outOfStock))
+const availableItemIds = computed(() => availableItems.value.map((item) => item.id))
+const allAvailableChecked = computed(() =>
+  availableItemIds.value.length > 0 &&
+  availableItemIds.value.every((id) => checkedIds.value.includes(id)),
+)
+const partiallyChecked = computed(() =>
+  checkedIds.value.some((id) => availableItemIds.value.includes(id)) && !allAvailableChecked.value,
+)
+
 const selectedItems = computed(() =>
   items.value.filter((item) => checkedIds.value.includes(item.id) && !item.outOfStock),
 )
@@ -234,6 +244,15 @@ function toggleChecked(itemId) {
   checkedIds.value = [...checkedIds.value, itemId]
 }
 
+function toggleAllChecked() {
+  if (allAvailableChecked.value) {
+    checkedIds.value = checkedIds.value.filter((id) => !availableItemIds.value.includes(id))
+    return
+  }
+
+  checkedIds.value = [...new Set([...checkedIds.value, ...availableItemIds.value])]
+}
+
 async function removeLine(itemId) {
   try {
     await removeItem(itemId)
@@ -255,6 +274,20 @@ function handleCheckout() {
 
 <template>
   <AccountSectionCard title="Giỏ hàng">
+    <div v-if="items.length" class="select-all-row">
+      <label class="select-all-box">
+        <input
+          type="checkbox"
+          :checked="allAvailableChecked"
+          :indeterminate="partiallyChecked"
+          :disabled="!availableItemIds.length"
+          @change="toggleAllChecked"
+        >
+        <span>Chọn tất cả</span>
+      </label>
+      <span>{{ selectedCount }} / {{ availableItemIds.length }} sản phẩm</span>
+    </div>
+
     <div class="list">
       <CartItemCard
         v-for="item in items"
@@ -337,6 +370,30 @@ function handleCheckout() {
 
 <style scoped>
 .list { display:grid; gap:0.75rem; }
+.select-all-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #ece2cf;
+  color: var(--auth-text-secondary);
+  font-size: 14px;
+}
+.select-all-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--auth-text-primary);
+  font-weight: 700;
+  cursor: pointer;
+}
+.select-all-box input {
+  width: 16px;
+  height: 16px;
+  accent-color: #c9922a;
+}
 .modal-qty {
   display: inline-flex;
   align-items: center;

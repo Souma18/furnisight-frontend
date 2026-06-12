@@ -117,7 +117,7 @@ export function useCheckout() {
 
   function buildOrderItemPayload(item = {}) {
     return {
-      productId: item.productId || item.id,
+      productId: item.productId,
       variantId: item.variantId || null,
       categoryName: item.categoryName || item.categoryLabel || '',
       productName: item.productName || item.name,

@@ -26,7 +26,6 @@ const emit = defineEmits([
   <div class="pd-wrap">
     <div class="pd-gallery">
       <div class="pd-main">
-        <span class="pd-badge">Mới</span>
         <div class="pd-img-wrap">
           <img
             v-if="activeImage || product.image"

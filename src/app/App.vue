@@ -81,8 +81,7 @@ watch(
 )
 
 watch(isAuthenticated, (authenticated) => {
-  if (authenticated) {
-    isAuthModalOpen.value = false
+  if (!authenticated) {
     initialAuthView.value = 'login'
   }
 })
