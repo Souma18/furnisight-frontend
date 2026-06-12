@@ -15,6 +15,7 @@ const VIEWS = [
   'bell-system',
   'bell-review',
   'orders',
+  'vouchers',
   'order-detail',
   'cart',
   'wishlist',

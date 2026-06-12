@@ -122,6 +122,12 @@ export const useOrderStore = defineStore('accountOrder', () => {
     }
   }
 
+  function resetOrderState() {
+    orders.value = []
+    orderDetails.value = {}
+    loading.value = false
+  }
+
   return {
     orders,
     orderDetails,
@@ -131,5 +137,6 @@ export const useOrderStore = defineStore('accountOrder', () => {
     getOrderDetail,
     cancelOrder,
     retryPayment,
+    resetOrderState,
   }
 })

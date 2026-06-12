@@ -82,6 +82,20 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  function resetCartState() {
+    items.value = []
+    loading.value = false
+    hydrated.value = false
+    hydratePromise = null
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY)
+      for (const storageKey of LEGACY_STORAGE_KEYS) {
+        window.localStorage.removeItem(storageKey)
+      }
+    }
+  }
+
   restorePersistedItems()
 
   const lineCount = computed(() => items.value.length)
@@ -124,9 +138,7 @@ export const useCartStore = defineStore('cart', () => {
         return items.value
       } catch (error) {
         if (typeof window !== 'undefined' && error?.response?.status === 401) {
-          items.value = []
-          hydrated.value = false
-          window.localStorage.removeItem(STORAGE_KEY)
+          resetCartState()
           authStore.logout()
           return items.value
         }
@@ -221,5 +233,6 @@ export const useCartStore = defineStore('cart', () => {
     updateQty,
     removeItem,
     clearCart,
+    resetCartState,
   }
 })

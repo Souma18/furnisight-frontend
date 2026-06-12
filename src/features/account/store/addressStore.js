@@ -34,6 +34,10 @@ export const useAddressStore = defineStore('accountAddress', () => {
     return await fetchAddresses()
   }
 
+  function resetAddressState() {
+    addresses.value = []
+  }
+
   return {
     addresses,
     defaultAddress,
@@ -41,6 +45,7 @@ export const useAddressStore = defineStore('accountAddress', () => {
     fetchAddresses,
     addAddress,
     setDefaultAddress,
-    deleteAddress
+    deleteAddress,
+    resetAddressState,
   }
 })

@@ -75,11 +75,16 @@ export const useProfileStore = defineStore('accountProfile', () => {
     await saveProfile({ ...profile.value, avatarUrl: '' })
   }
 
+  function resetProfileState() {
+    profile.value = null
+  }
+
   return {
     profile,
     fetchProfile,
     saveProfile,
     uploadAvatar,
-    removeAvatar
+    removeAvatar,
+    resetProfileState,
   }
 })
