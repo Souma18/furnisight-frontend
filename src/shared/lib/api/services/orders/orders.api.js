@@ -69,6 +69,7 @@ class OrdersApi {
   getPaymentCallback(paymentMethod, params) {
     return apiClient.get(`/orders/payment/${paymentMethod}/callback`, {
       params,
+      skipAuth: true,
       headers: { Accept: 'application/json' },
     })
   }
