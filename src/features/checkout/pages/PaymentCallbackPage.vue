@@ -69,13 +69,25 @@ async function removePaidCartLines() {
   }
 }
 
+async function redirectToOrderDetail() {
+  const orderId = orderCode.value || pendingPayment.value?.orderCode || pendingPayment.value?.orderId
+  checkoutStore.clearPendingPayment()
+
+  await router.replace({
+    name: 'account',
+    query: orderId
+      ? { view: 'order-detail', orderId }
+      : { view: 'orders' },
+  })
+}
+
 async function processCallback() {
   if (route.name === 'payment-success') {
     status.value = 'success'
     orderCode.value = pendingPayment.value?.orderCode || ''
     message.value = 'Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.'
     await removePaidCartLines()
-    checkoutStore.clearPendingPayment()
+    await redirectToOrderDetail()
     return
   }
 
@@ -105,7 +117,7 @@ async function processCallback() {
       status.value = 'success'
       message.value = 'Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.'
       await removePaidCartLines()
-      checkoutStore.clearPendingPayment()
+      await redirectToOrderDetail()
       return
     }
 

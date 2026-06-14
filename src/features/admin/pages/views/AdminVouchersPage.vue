@@ -277,6 +277,14 @@ function getListPayload(data) {
   return []
 }
 
+function sortByCreatedAtDesc(items) {
+  return [...items].sort((left, right) => {
+    const leftTime = Date.parse(left?.createdAt || '') || 0
+    const rightTime = Date.parse(right?.createdAt || '') || 0
+    return rightTime - leftTime
+  })
+}
+
 function notify(message) {
   toast.value = message
   window.setTimeout(() => {
@@ -292,10 +300,11 @@ async function loadVoucherData() {
         query: filters.voucher.query,
         type: filters.voucher.type,
         status: filters.voucher.status,
+        sort: 'createdAt,desc',
       }),
       adminApi.fetchVoucherStats().catch(() => ({ data: stats.value })),
     ])
-    vouchers.value = getListPayload(listRes?.data)
+    vouchers.value = sortByCreatedAtDesc(getListPayload(listRes?.data))
     stats.value = { ...stats.value, ...(statsRes?.data || {}) }
   } finally {
     loading.value = false

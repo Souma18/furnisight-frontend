@@ -49,8 +49,24 @@ export function useAccountPage() {
     wishlistCount: wishlistStore.wishlist.length,
   }))
 
-  function setView(nextView) {
-    if (VIEWS.includes(nextView)) activeView.value = nextView
+  async function setView(nextView) {
+    if (!VIEWS.includes(nextView)) return
+
+    activeView.value = nextView
+
+    const query = {
+      ...route.query,
+      view: nextView,
+    }
+
+    if (nextView !== 'order-detail') {
+      delete query.orderId
+    }
+
+    await router.push({
+      name: 'account',
+      query,
+    })
   }
 
   function syncViewFromQuery(nextView = route.query.view) {

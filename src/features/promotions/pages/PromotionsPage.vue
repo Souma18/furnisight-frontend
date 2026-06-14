@@ -1,8 +1,9 @@
 ﻿<script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { productsApi, promotionsApi } from '@shared/lib/api/services'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -24,6 +25,7 @@ const activeFilter = ref(route.query.tab === 'combo' ? 'combo' : 'all')
 const loading = ref(false)
 const loadingMore = ref(false)
 const claimingCode = ref('')
+const pendingVoucher = ref(null)
 const addingComboId = ref('')
 const buyingComboId = ref('')
 const selectedVoucher = ref(null)
@@ -160,14 +162,14 @@ function stopVoucherDrag(event) {
 async function claimVoucher(voucher) {
   if (!voucher?.code) return
   if (!isAuthenticated.value) {
-    await router.push({ name: 'login', query: { redirect: '/khuyen-mai' } })
+    pendingVoucher.value = voucher
+    openAuthModal()
     return
   }
 
   claimingCode.value = voucher.code
   try {
     await promotionsApi.saveVoucher(voucher.code)
-    await mergeUserVoucherStatus()
     vouchers.value = vouchers.value.map((item) =>
       item.code === voucher.code ? { ...item, saved: true, used: false, statusLabel: 'Đã lưu' } : item,
     )
@@ -178,6 +180,13 @@ async function claimVoucher(voucher) {
     claimingCode.value = ''
   }
 }
+
+watch(isAuthenticated, (authenticated) => {
+  if (!authenticated || !pendingVoucher.value) return
+  const voucher = pendingVoucher.value
+  pendingVoucher.value = null
+  claimVoucher(voucher)
+})
 
 async function useVoucherNow() {
   await router.push(cartItems.value.length ? '/checkout' : '/products')

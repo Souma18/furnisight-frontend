@@ -12,17 +12,11 @@ defineProps({
   },
 })
 
-const emit = defineEmits(['close', 'authenticated'])
-
-function handleBackdropClick(event) {
-  if (event.target === event.currentTarget) {
-    emit('close')
-  }
-}
+defineEmits(['close', 'authenticated'])
 </script>
 
 <template>
-  <div v-if="open" class="modal-backdrop" @click="handleBackdropClick">
+  <div v-if="open" class="modal-backdrop">
     <div class="auth-modal-frame">
       <AuthContainer embedded :initialView="initialView" @close="$emit('close')" @authenticated="$emit('authenticated')" />
     </div>

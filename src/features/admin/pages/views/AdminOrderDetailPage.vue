@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
@@ -202,7 +202,7 @@ function hideBrokenImage(event) {
   event.target.style.display = 'none'
 }
 
-onMounted(load)
+watch(() => props.orderCode, load, { immediate: true })
 </script>
 
 <template>

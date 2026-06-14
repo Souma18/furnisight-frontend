@@ -25,12 +25,22 @@ export function useAccountOrders(emitNotify) {
     return orderStore.getOrderDetail(selectedOrderId.value)
   })
 
-  function openOrderDetail(orderId) {
-    router.push({ path: '/account', query: { view: 'order-detail', orderId } })
+  async function openOrderDetail(orderId) {
+    if (!orderId) return
+    await router.push({
+      name: 'account',
+      query: {
+        view: 'order-detail',
+        orderId,
+      },
+    })
   }
 
-  function backToOrders() {
-    router.push({ path: '/account', query: { view: 'orders' } })
+  async function backToOrders() {
+    await router.push({
+      name: 'account',
+      query: { view: 'orders' },
+    })
   }
 
   async function cancelOrder(orderId) {
