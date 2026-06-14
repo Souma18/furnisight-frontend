@@ -3,6 +3,13 @@ import { adminApi } from '@shared/lib/api/services'
 
 const PAGE_SIZE = 20
 
+function resolveLogMeta(log = {}) {
+  const actor = log.actorName || log.actor || log.adminName || ''
+  const ip = log.ipAddress || ''
+  if (actor && ip) return `${actor} · ${ip}`
+  return actor || log.meta || ip
+}
+
 export function useAdminAuditLogs() {
   const items = ref([])
   const total = ref(0)
@@ -25,7 +32,10 @@ export function useAdminAuditLogs() {
         page: page.value,
         pageSize: PAGE_SIZE,
       })
-      items.value = res.data?.items ?? []
+      items.value = (res.data?.items ?? []).map((log) => ({
+        ...log,
+        meta: resolveLogMeta(log),
+      }))
       total.value = res.data?.total ?? 0
       totalPages.value = Math.max(1, res.data?.totalPages ?? Math.ceil(total.value / PAGE_SIZE) ?? 1)
     } finally {

@@ -31,6 +31,8 @@ const buyingComboId = ref('')
 const selectedVoucher = ref(null)
 const selectedCombo = ref(null)
 const voucherRail = ref(null)
+const mineVoucherTypeFilter = ref('all')
+const mineVoucherTimeFilter = ref('all')
 const toast = ref({ show: false, title: '', subtitle: '', icon: 'check' })
 let toastTimer = null
 let voucherDrag = null
@@ -45,6 +47,23 @@ const filterTabs = [
   { key: 'saved', label: 'Đã lưu', icon: 'wallet' },
 ]
 
+const voucherTypeOptions = [
+  { value: 'all', label: 'Tất cả loại' },
+  { value: 'shop', label: 'Voucher đơn hàng' },
+  { value: 'ship', label: 'Voucher vận chuyển' },
+  { value: 'PUBLIC', label: 'Công khai' },
+  { value: 'PERSONAL', label: 'Cá nhân' },
+  { value: 'MARKETING', label: 'Marketing' },
+]
+
+const voucherTimeOptions = [
+  { value: 'all', label: 'Tất cả thời gian' },
+  { value: 'active', label: 'Đang dùng được' },
+  { value: 'expiring', label: 'Sắp hết hạn' },
+  { value: 'upcoming', label: 'Sắp diễn ra' },
+  { value: 'expired', label: 'Đã hết hạn' },
+]
+
 const filteredVouchers = computed(() => {
   const key = activeFilter.value
   if (key === 'freeship') return vouchers.value.filter((item) => isShippingVoucher(item))
@@ -54,6 +73,9 @@ const filteredVouchers = computed(() => {
 })
 
 const savedVouchers = computed(() => vouchers.value.filter((item) => item.saved && !item.used))
+const filteredSavedVouchers = computed(() => savedVouchers.value
+  .filter((voucher) => matchesVoucherType(voucher, mineVoucherTypeFilter.value))
+  .filter((voucher) => matchesVoucherTime(voucher, mineVoucherTimeFilter.value)))
 const showVoucherSection = computed(() => ['all', 'voucher', 'freeship', 'expiring', 'saved'].includes(activeFilter.value))
 const showComboSection = computed(() => activeFilter.value === 'all' || activeFilter.value === 'combo')
 const hasMoreCombos = computed(() => combos.value.length < comboTotal.value)
@@ -307,7 +329,9 @@ function normalizeVoucher(raw = {}) {
     discountValue: Number(raw.discountValue) || 0,
     maxDiscount: raw.maxDiscount ?? null,
     minOrder: raw.minOrder ?? null,
+    startDate: raw.startDate || null,
     endDate: raw.endDate || null,
+    voucherType: raw.voucherType || raw.type || '',
     active: raw.active !== false,
     saved: Boolean(raw.saved),
     used: Boolean(raw.used),
@@ -386,6 +410,34 @@ function discountLabel(voucher) {
 
 function isShippingVoucher(voucher) {
   return String(voucher.discountType || '').toUpperCase() === 'SHIPPING_CAP'
+}
+
+function matchesVoucherType(voucher, filter) {
+  if (filter === 'all') return true
+  if (filter === 'shop') return !isShippingVoucher(voucher)
+  if (filter === 'ship') return isShippingVoucher(voucher)
+  return String(voucher.voucherType || '').toUpperCase() === filter
+}
+
+function matchesVoucherTime(voucher, filter) {
+  if (filter === 'all') return true
+  const now = Date.now()
+  const start = toTime(voucher.startDate)
+  const end = toTime(voucher.endDate)
+  if (filter === 'upcoming') return Boolean(start && start > now)
+  if (filter === 'expired') return Boolean(end && end < now)
+  if (filter === 'expiring') return isActiveByTime(start, end, now) && Boolean(end && end - now <= 7 * 24 * 60 * 60 * 1000)
+  return voucher.active !== false && isActiveByTime(start, end, now)
+}
+
+function isActiveByTime(start, end, now = Date.now()) {
+  return (!start || start <= now) && (!end || end >= now)
+}
+
+function toTime(value) {
+  if (!value) return null
+  const time = new Date(value).getTime()
+  return Number.isNaN(time) ? null : time
 }
 
 function conditionText(voucher) {
@@ -585,10 +637,22 @@ function showToast(title, subtitle, icon = 'check') {
           <p>Tài khoản của bạn</p>
           <h2>Voucher của tôi</h2>
         </div>
-        <span class="promo-count">{{ savedVouchers.length }} voucher</span>
+        <div class="mine-tools">
+          <span class="promo-count">{{ filteredSavedVouchers.length }} / {{ savedVouchers.length }} voucher</span>
+          <select v-model="mineVoucherTypeFilter" aria-label="Lọc loại voucher của tôi">
+            <option v-for="option in voucherTypeOptions" :key="`mine-type-${option.value}`" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <select v-model="mineVoucherTimeFilter" aria-label="Lọc thời gian voucher của tôi">
+            <option v-for="option in voucherTimeOptions" :key="`mine-time-${option.value}`" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </div>
       </div>
-      <div v-if="isAuthenticated && savedVouchers.length" class="mine-list">
-        <article v-for="voucher in savedVouchers" :key="`mine-${voucher.id}`" class="mine-row">
+      <div v-if="isAuthenticated && filteredSavedVouchers.length" class="mine-list">
+        <article v-for="voucher in filteredSavedVouchers" :key="`mine-${voucher.id}`" class="mine-row">
           <strong>{{ voucher.code }}</strong>
           <span>{{ discountLabel(voucher) }}</span>
           <small>Hết hạn {{ formatDate(voucher.endDate) }}</small>
@@ -596,7 +660,7 @@ function showToast(title, subtitle, icon = 'check') {
         </article>
       </div>
       <div v-else class="empty-state">
-        {{ isAuthenticated ? 'Bạn chưa lưu voucher nào.' : 'Đăng nhập để lưu voucher và sử dụng khi thanh toán.' }}
+        {{ isAuthenticated ? (savedVouchers.length ? 'Không có voucher phù hợp bộ lọc.' : 'Bạn chưa lưu voucher nào.') : 'Đăng nhập để lưu voucher và sử dụng khi thanh toán.' }}
       </div>
     </section>
 
@@ -696,7 +760,7 @@ function showToast(title, subtitle, icon = 'check') {
 }
 .promo-hero h1 em { color: #e5b84a; font-style: normal; }
 .promo-desc { max-width: 560px; color: rgba(255,255,255,.68); font-size: 15px; line-height: 1.7; }
-.promo-actions, .promo-stats, .combo-actions, .modal-actions, .combo-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.promo-actions, .promo-stats, .combo-actions, .modal-actions, .combo-tools, .mine-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .promo-btn, .claim-btn, .combo-btn, .load-more { border: 0; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-weight: 800; cursor: pointer; text-decoration: none; }
 .promo-btn { padding: 13px 22px; }
 .promo-btn.primary, .claim-btn, .load-more { background: #c9953a; color: #17233b; }
@@ -734,7 +798,9 @@ function showToast(title, subtitle, icon = 'check') {
 .claim-btn.muted { background: #eee8dd; color: #827464; }
 .info-btn, .modal-close { border: 0; background: #f5f0e8; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }
 .info-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; color: #827464; }
-.combo-tools select { border: 1px solid #e8e0d0; background: #fff; border-radius: 999px; padding: 9px 13px; font-weight: 700; }
+.combo-tools select,
+.mine-tools select { border: 1px solid #e8e0d0; background: #fff; border-radius: 999px; padding: 9px 38px 9px 13px; color: #4d4135; font-weight: 700; }
+.mine-tools { justify-content: flex-end; }
 .combo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .combo-card { background: #fff; border: 1px solid #e8e0d0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 .combo-card:hover { transform: translateY(-3px); border-color: #d8c39d; box-shadow: 0 14px 34px rgba(18,32,46,.1); }

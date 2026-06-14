@@ -49,7 +49,12 @@ const ORDER_STATUS_TO_API = {
 function nextOrderStatus(payload) {
   if (payload?.statusLabel === 'Đã thanh toán') return 'Đang giao'
   if (payload?.statusLabel === 'Đang giao') return 'Hoàn thành'
+  if (isCodOrder(payload) && ['Chờ xác nhận', 'Chờ thanh toán'].includes(payload?.statusLabel)) return 'Đang giao'
   return ''
+}
+
+function isCodOrder(order) {
+  return String(order?.paymentMethod || order?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
 }
 
 function buildUserPayload(form) {

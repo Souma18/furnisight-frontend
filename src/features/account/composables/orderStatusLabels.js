@@ -7,4 +7,5 @@ export const ORDER_STATUS_LABELS = {
   delivering: 'Đang giao',
   done: 'Hoàn thành',
   cancel: 'Đã huỷ',
+  refund_pending: 'Chờ hoàn tiền',
 }

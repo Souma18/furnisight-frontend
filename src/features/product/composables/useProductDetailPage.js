@@ -4,6 +4,7 @@ import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
+import { useProfileStore } from '@features/account/store/profileStore'
 import { ordersApi } from '@shared/lib/api/services/orders/orders.api'
 import { productsApi } from '@shared/lib/api/services/products/products.api'
 import { ReviewResponse } from '@shared/lib/api/services/products/products.model'
@@ -15,6 +16,7 @@ export function useProductDetailPage(props) {
   const cartStore = useCartStore()
   const authStore = useAuthStore()
   const wishlistStore = useWishlistStore()
+  const profileStore = useProfileStore()
   const { loadDetail } = useProducts()
   const product = ref(null)
   const loading = ref(false)
@@ -246,11 +248,14 @@ export function useProductDetailPage(props) {
     reviewSubmitSuccess.value = ''
 
     try {
+      const reviewer = await getReviewerSnapshot()
       await productsApi.submitReview(product.value.id, {
         orderItemId: reviewEligibility.value.orderItemId,
         title: String(reviewForm.value.title || '').trim(),
         content,
         rating: Number(reviewForm.value.rating) || 5,
+        userName: reviewer.userName,
+        userAvatarMediaId: reviewer.userAvatarMediaId,
       })
       reviewForm.value = {
         rating: 5,
@@ -263,6 +268,32 @@ export function useProductDetailPage(props) {
       reviewSubmitError.value = 'Không thể gửi đánh giá. Có thể bạn đã đánh giá sản phẩm này rồi.'
     } finally {
       reviewSubmitting.value = false
+    }
+  }
+
+  async function getReviewerSnapshot() {
+    if (!profileStore.profile) {
+      try {
+        await profileStore.fetchProfile()
+      } catch {
+        // Auth profile is enough for the name fallback; avatar media id is optional.
+      }
+    }
+
+    const profile = profileStore.profile
+    const authUser = authStore.user
+    const profileName = [profile?.lastName, profile?.firstName]
+      .map((part) => String(part || '').trim())
+      .filter(Boolean)
+      .join(' ')
+    const authName = authUser?.displayName || [authUser?.lastName, authUser?.firstName]
+      .map((part) => String(part || '').trim())
+      .filter(Boolean)
+      .join(' ')
+
+    return {
+      userName: profileName || authName || authUser?.email || 'Khách hàng',
+      userAvatarMediaId: profile?.avatarMediaId || null,
     }
   }
 

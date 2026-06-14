@@ -249,6 +249,7 @@ const {
 .badge-type {
   background: #f5efe6;
   color: #8b6a21;
+  text-transform: none;
 }
 .item-actions {
   display: flex;

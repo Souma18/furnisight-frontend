@@ -33,7 +33,6 @@ const navGroups = [
     items: [
       { key: 'cart', label: 'Giỏ hàng', icon: 'cart' },
       { key: 'orders', label: 'Đơn hàng', icon: 'box' },
-      { key: 'vouchers', label: 'Voucher', icon: 'badgePercent' },
       { key: 'wishlist', label: 'Yêu thích', icon: 'heart' },
     ],
   },

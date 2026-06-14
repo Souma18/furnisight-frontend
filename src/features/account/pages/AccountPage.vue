@@ -5,7 +5,6 @@ import AccountToast from '../components/AccountToast.vue'
 import ProfileView from '../components/views/ProfileView.vue'
 import AddressView from '../components/views/AddressView.vue'
 import OrdersView from '../components/views/OrdersView.vue'
-import VouchersView from '../components/views/VouchersView.vue'
 import OrderDetailView from '../components/views/OrderDetailView.vue'
 import CartView from '../components/views/CartView.vue'
 import WishlistView from '../components/views/WishlistView.vue'
@@ -77,7 +76,6 @@ async function handleLogout() {
         @notify="showToast"
       />
       <OrdersView v-else-if="activeView === 'orders'" @notify="showToast" />
-      <VouchersView v-else-if="activeView === 'vouchers'" @notify="showToast" />
       <OrderDetailView v-else-if="activeView === 'order-detail'" @notify="showToast" />
       <CartView v-else-if="activeView === 'cart'" />
       <WishlistView

@@ -70,10 +70,13 @@ export const useOrderStore = defineStore('accountOrder', () => {
     try {
       const orderCode = detail.orderCode || orderId
       await ordersApi.cancelOrder(orderCode)
-      const updatedDetail = { ...detail, status: 'cancel', rawStatus: 'CANCELLED', canRetryPayment: false }
+      const isPaidOrder = detail.status === 'paid' || detail.rawStatus === 'PAID'
+      const nextStatus = isPaidOrder ? 'refund_pending' : 'cancel'
+      const nextRawStatus = isPaidOrder ? 'REFUND_PENDING' : 'CANCELLED'
+      const updatedDetail = { ...detail, status: nextStatus, rawStatus: nextRawStatus, canRetryPayment: false }
       orders.value = orders.value.map((order) =>
         order.id === detail.id || order.orderCode === orderCode
-          ? { ...order, status: 'cancel', rawStatus: 'CANCELLED', canRetryPayment: false }
+          ? { ...order, status: nextStatus, rawStatus: nextRawStatus, canRetryPayment: false }
           : order,
       )
       orderDetails.value = {
@@ -81,7 +84,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
         [orderCode]: updatedDetail,
         ...(detail.id ? { [detail.id]: updatedDetail } : {}),
       }
-      return { ok: true }
+      return { ok: true, status: nextStatus }
     } catch (error) {
       return { ok: false, message: error.response?.data?.message || 'Không thể huỷ đơn hàng lúc này.' }
     }

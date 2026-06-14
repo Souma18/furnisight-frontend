@@ -25,7 +25,7 @@ const canceling = ref(false)
 const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
 
 function handleCancel() {
-  if (!order.value || !['unpaid', 'payment_failed'].includes(order.value.status)) return
+  if (!canCancelCurrentOrder.value) return
   cancelDialogOpen.value = true
 }
 
@@ -55,6 +55,10 @@ const canRetryPaymentNow = computed(() =>
   Boolean(order.value)
     && canRetryOrderPayment(order.value)
     && isPaymentTimeRemaining(order.value),
+)
+
+const canCancelCurrentOrder = computed(() =>
+  ['unpaid', 'payment_failed', 'paid'].includes(order.value?.status),
 )
 
 const formatMoney = PriceFormatter.format
@@ -111,6 +115,7 @@ const paymentStatusLabel = computed(() => {
   if (rawStatus === 'PAID') return 'Đã thanh toán'
   if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return 'Thanh toán thất bại'
   if (order.value?.status === 'unpaid') return 'Chờ thanh toán'
+  if (order.value?.status === 'refund_pending') return 'Chờ hoàn tiền'
   return rawStatus || 'Chưa ghi nhận'
 })
 
@@ -172,6 +177,17 @@ const transactionTimeline = computed(() => {
     })
   }
 
+  if (current.status === 'refund_pending') {
+    items.push({
+      key: 'refund_pending',
+      title: 'Chờ hoàn tiền',
+      sub: 'Đơn đã thanh toán được hủy trước khi giao và đang chờ xử lý hoàn tiền.',
+      time: null,
+      state: 'active',
+      icon: 'refresh',
+    })
+  }
+
   return items
 })
 
@@ -224,7 +240,7 @@ const paymentDeadline = computed(() => {
           <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />
           {{ retryingPayment ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
         </button>
-        <button v-if="order.status === 'unpaid' || order.status === 'payment_failed'" type="button" class="order-cancel-btn" @click="handleCancel">
+        <button v-if="canCancelCurrentOrder" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
           Huỷ đơn
         </button>
@@ -457,6 +473,11 @@ const paymentDeadline = computed(() => {
 .status-badge.paid {
   background: #eef5ff;
   color: #2364a8;
+}
+
+.status-badge.refund_pending {
+  background: #fff6e6;
+  color: #9a6500;
 }
 
 .status-badge.delivering {

@@ -49,7 +49,12 @@ export function useAccountOrders(emitNotify) {
       if (emitNotify) emitNotify(result.message ?? 'Không thể huỷ đơn.', 'error')
       return false
     }
-    if (emitNotify) emitNotify('Đã huỷ đơn hàng.', 'success')
+    if (emitNotify) {
+      emitNotify(
+        result.status === 'refund_pending' ? 'Đã hủy đơn. Đơn đang chờ hoàn tiền.' : 'Đã huỷ đơn hàng.',
+        'success',
+      )
+    }
     return true
   }
 

@@ -60,7 +60,7 @@ function canRetryPaymentNow(order) {
   return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
 }
 
-const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'cancel']
+const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'refund_pending', 'cancel']
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -74,6 +74,7 @@ function statusClass(status) {
   if (status === 'delivering') return 'shipping'
   if (status === 'done') return 'done'
   if (status === 'cancel') return 'cancel'
+  if (status === 'refund_pending') return 'refund'
   if (status === 'payment_failed') return 'failed'
   if (status === 'paid') return 'paid'
   return 'pending'
@@ -90,6 +91,10 @@ function hideBrokenImage(event) {
 function formatPaymentDeadline(order) {
   if (!canRetryPaymentNow(order)) return ''
   return `Còn ${formatCountdown(order)} để thanh toán`
+}
+
+function canCancelOrder(order) {
+  return ['unpaid', 'payment_failed', 'paid'].includes(order?.status)
 }
 </script>
 
@@ -140,7 +145,7 @@ function formatPaymentDeadline(order) {
           </div>
           <div class="order-card-actions">
             <button
-              v-if="order.status === 'unpaid' || order.status === 'payment_failed'"
+              v-if="canCancelOrder(order)"
               type="button"
               class="order-cancel-btn"
               @click="handleCancel(order, $event)"
@@ -300,6 +305,11 @@ function formatPaymentDeadline(order) {
 .status-badge.paid {
   background: #eef5ff;
   color: #2364a8;
+}
+
+.status-badge.refund {
+  background: #fff6e6;
+  color: #9a6500;
 }
 
 .status-badge.cancel {

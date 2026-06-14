@@ -50,10 +50,18 @@ const stockVariantOptions = computed(() => {
 const orderStatusOptions = computed(() => {
   if (modal.value.payload?.statusLabel === 'Đã thanh toán') return ['Đang giao']
   if (modal.value.payload?.statusLabel === 'Đang giao') return ['Hoàn thành']
+  if (
+    isCodOrder(modal.value.payload) &&
+    ['Chờ xác nhận', 'Chờ thanh toán'].includes(modal.value.payload?.statusLabel)
+  ) return ['Đang giao']
   return []
 })
 
 const isCompletingOrder = computed(() => form.orderStatus === 'Hoàn thành')
+
+function isCodOrder(order) {
+  return String(order?.paymentMethod || order?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
+}
 
 function onCategoryImageChange(event) {
   const file = event.target.files?.[0]

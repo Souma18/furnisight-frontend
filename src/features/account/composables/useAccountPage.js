@@ -15,7 +15,6 @@ const VIEWS = [
   'bell-system',
   'bell-review',
   'orders',
-  'vouchers',
   'order-detail',
   'cart',
   'wishlist',
@@ -69,10 +68,21 @@ export function useAccountPage() {
     })
   }
 
+  async function cleanOrderDetailQuery(nextView) {
+    if (nextView === 'order-detail' || !route.query.orderId) return
+
+    const query = { ...route.query }
+    delete query.orderId
+    await router.replace({
+      name: 'account',
+      query,
+    })
+  }
+
   function syncViewFromQuery(nextView = route.query.view) {
-    if (typeof nextView === 'string' && VIEWS.includes(nextView)) {
-      activeView.value = nextView
-    }
+    const normalizedView = typeof nextView === 'string' && VIEWS.includes(nextView) ? nextView : 'profile'
+    activeView.value = normalizedView
+    cleanOrderDetailQuery(normalizedView)
   }
 
   let toastTimer = null
@@ -118,9 +128,12 @@ export function useAccountPage() {
     syncViewFromQuery()
   })
 
-  watch(() => route.query.view, (nextView) => {
-    syncViewFromQuery(nextView)
-  })
+  watch(
+    () => route.query,
+    (query) => {
+      syncViewFromQuery(query.view)
+    },
+  )
 
   return {
     activeView,

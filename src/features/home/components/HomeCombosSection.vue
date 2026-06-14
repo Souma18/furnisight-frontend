@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
+import ComboCard from '@features/promotions/components/ComboCard.vue'
 
 defineProps({
   combos: { type: Array, default: () => [] },
@@ -13,14 +14,6 @@ defineProps({
 defineEmits(['buy', 'add'])
 
 const selectedCombo = ref(null)
-
-function comboPreviewItems(combo = {}) {
-  return (combo.items || []).filter((item) => item.imageUrl).slice(0, 4)
-}
-
-function comboRoomLabel(combo = {}) {
-  return combo.roomLabel || combo.items?.[0]?.categoryName || 'Nội thất'
-}
 
 function openCombo(combo) {
   selectedCombo.value = combo
@@ -41,58 +34,15 @@ function openCombo(combo) {
     </header>
 
     <div class="combo-grid">
-      <article
+      <ComboCard
         v-for="combo in combos"
         :key="combo.id"
-        class="combo-card"
-        role="button"
-        tabindex="0"
-        :aria-label="`Xem chi tiết ${combo.name}`"
-        @click="openCombo(combo)"
-        @keydown.enter.self="openCombo(combo)"
-        @keydown.space.self.prevent="openCombo(combo)"
-      >
-        <div class="combo-media">
-          <img
-            v-if="combo.imageUrl"
-            :src="combo.imageUrl"
-            :alt="combo.name"
-            loading="lazy"
-            @error="$event.target.style.display = 'none'"
-          >
-          <AppIcon v-else name="armchair" :size="52" />
-          <span class="room-tag">{{ comboRoomLabel(combo) }}</span>
-          <span class="save-tag">Tiết kiệm {{ PriceFormatter.format(combo.savedAmount) }}</span>
-          <div class="combo-thumbs">
-            <span v-for="item in comboPreviewItems(combo)" :key="`${combo.id}-${item.productId}-${item.variantId}`">
-              <img :src="item.imageUrl" :alt="item.productName" loading="lazy">
-            </span>
-          </div>
-        </div>
-
-        <div class="combo-body">
-          <p class="combo-count">{{ combo.itemCount || combo.items?.length || 0 }} sản phẩm</p>
-          <h3>{{ combo.name }}</h3>
-          <p class="combo-desc">{{ combo.description }}</p>
-          <div class="combo-price">
-            <span><small>Giá gốc</small><del>{{ PriceFormatter.format(combo.originalAmount) }}</del></span>
-            <span><small>Giá combo</small><b>{{ PriceFormatter.format(combo.finalAmount) }}</b></span>
-          </div>
-          <div class="combo-actions">
-            <button type="button" class="combo-btn outline" @click.stop="openCombo(combo)">
-              <AppIcon name="eye" :size="14" />Xem combo
-            </button>
-            <button
-              type="button"
-              class="combo-btn dark"
-              :disabled="buyingId === combo.id"
-              @click.stop="$emit('buy', combo)"
-            >
-              <AppIcon name="cart" :size="14" />{{ buyingId === combo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
-            </button>
-          </div>
-        </div>
-      </article>
+        :combo="combo"
+        :buying-id="buyingId"
+        compact
+        @view="openCombo"
+        @buy="$emit('buy', $event)"
+      />
     </div>
 
     <div v-if="selectedCombo" class="modal-overlay" @click.self="selectedCombo = null">
@@ -151,26 +101,7 @@ function openCombo(combo) {
 .combo-heading { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; }
 .combo-all-link { min-height: 40px; padding: 9px 15px; border-radius: 7px; background: #12202e; color: #fff; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-size: 13px; font-weight: 700; text-decoration: none; white-space: nowrap; }
 .combo-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
-.combo-card { background: #fff; border: 1px solid #e8e0d0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
-.combo-card:hover { transform: translateY(-3px); border-color: #d8c39d; box-shadow: 0 14px 34px rgba(18,32,46,.1); }
-.combo-card:focus-visible { outline: 3px solid rgba(201,149,58,.35); outline-offset: 3px; }
-.combo-media { position: relative; aspect-ratio: 4 / 3; background: #e8decc; display: flex; align-items: center; justify-content: center; color: #fff; overflow: hidden; }
-.combo-media > img { width: 100%; height: 100%; object-fit: cover; }
-.room-tag, .save-tag { position: absolute; left: 10px; border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 900; }
-.room-tag { top: 10px; background: rgba(22,35,59,.82); color: #fff; }
-.save-tag { bottom: 10px; background: #c9953a; color: #17233b; }
-.combo-thumbs { position: absolute; right: 10px; bottom: 10px; display: flex; }
-.combo-thumbs span { width: 29px; height: 29px; margin-left: -8px; overflow: hidden; border-radius: 7px; border: 2px solid #fff; background: #f5f0e8; display: inline-flex; }
-.combo-thumbs img { width: 100%; height: 100%; object-fit: cover; }
-.combo-body { padding: 12px; }
-.combo-count { margin: 0 0 6px; color: #c9953a; font-size: 10px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; }
-.combo-body h3 { margin: 0; color: #182532; font-size: 14px; line-height: 1.3; }
-.combo-desc { min-height: 31px; margin: 0; color: #7a6a5a; font-size: 10.5px; line-height: 1.45; display: -webkit-box; overflow: hidden; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-.combo-price { display: flex; justify-content: space-between; gap: 8px; border-top: 1px solid #e8e0d0; padding-top: 10px; margin-top: 10px; }
-.combo-price small { display: block; color: #918474; font-size: 10px; }
-.combo-price del { color: #9f9488; font-size: 11px; }
-.combo-price b { color: #16233b; font-size: 15px; }
-.combo-actions, .modal-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.modal-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .combo-btn { flex: 1; min-height: 34px; padding: 7px 8px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 800; cursor: pointer; text-decoration: none; }
 .combo-btn.outline { background: #fff; border: 1px solid #e8e0d0; color: #1a2332; }
 .combo-btn.dark { background: #16233b; color: #fff; }
@@ -194,7 +125,7 @@ function openCombo(combo) {
 @media (max-width: 760px) {
   .combo-heading { align-items: flex-start; flex-direction: column; }
   .combo-grid { grid-template-columns: 1fr; }
-  .combo-actions, .modal-actions { align-items: stretch; flex-direction: column; }
+  .modal-actions { align-items: stretch; flex-direction: column; }
   .combo-btn { width: 100%; }
   .combo-modal-row { grid-template-columns: 56px minmax(0, 1fr) 18px; }
   .combo-product-image { width: 56px; height: 52px; }
