@@ -208,8 +208,23 @@ async function ensureComboInCart(combo) {
     const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
     const existing = cartStore.items.find((line) => sameComboLine(line, item))
     const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
+    const productItem = await enrichComboItemImage(item)
+    const productImageUrl = productItem.imageUrl || ''
+    const hasWrongImage = existing
+      && productImageUrl
+      && existing.imageUrl !== productImageUrl
 
-    if (existing && currentQuantity < requiredQuantity) {
+    if (hasWrongImage) {
+      await cartStore.removeItem(existing.id)
+      await cartStore.addItem({
+        productId: item.productId,
+        variantId: item.variantId || null,
+        name: item.productName,
+        price: item.price,
+        imageUrl: productImageUrl,
+        quantity: Math.max(currentQuantity, requiredQuantity),
+      })
+    } else if (existing && currentQuantity < requiredQuantity) {
       await cartStore.updateQty(existing.id, requiredQuantity)
     } else if (!existing) {
       await cartStore.addItem({
@@ -217,7 +232,7 @@ async function ensureComboInCart(combo) {
         variantId: item.variantId || null,
         name: item.productName,
         price: item.price,
-        imageUrl: imageLikeUrl(item.image) ? item.image : combo.imageUrl,
+        imageUrl: productImageUrl,
         quantity: requiredQuantity,
       })
     }

@@ -7,6 +7,39 @@ import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
+const comboProductImageCache = new Map()
+
+function imageLikeUrl(value) {
+  return typeof value === 'string' && (/^https?:\/\//.test(value) || value.startsWith('/'))
+}
+
+async function resolveComboProductImage(item) {
+  if (imageLikeUrl(item.imageUrl)) return item.imageUrl
+  if (imageLikeUrl(item.image)) return item.image
+  if (!item.productId) return ''
+
+  if (!comboProductImageCache.has(item.productId)) {
+    comboProductImageCache.set(item.productId, productsApi.getProductDetail(item.productId)
+      .then(({ data }) => {
+        const candidates = [
+          ...(Array.isArray(data?.gallery) ? data.gallery : []),
+          ...(Array.isArray(data?.images) ? data.images : []),
+          data?.imageUrl,
+          data?.image,
+          data?.thumbnailUrl,
+          data?.thumbnail,
+        ]
+
+        return candidates
+          .map((image) => typeof image === 'string' ? image : image?.url || image?.imageUrl || '')
+          .find(imageLikeUrl) || ''
+      })
+      .catch(() => ''))
+  }
+
+  return comboProductImageCache.get(item.productId)
+}
+
 export function useHomePage() {
   const router = useRouter()
   const wishlistStore = useWishlistStore()
@@ -64,25 +97,25 @@ export function useHomePage() {
       const items = Array.isArray(data)
         ? data
         : data?.items ?? data?.content ?? data?.data ?? []
-      combos.value = items
+      combos.value = await Promise.all(items
         .filter((combo) => combo?.id)
-        .map((combo) => ({
+        .map(async (combo) => ({
           ...combo,
           imageUrl: combo.imageUrl || '',
           originalAmount: Number(combo.originalAmount || 0),
           finalAmount: Number(combo.finalAmount || 0),
           savedAmount: Number(combo.savedAmount || 0),
           items: Array.isArray(combo.items)
-            ? combo.items
+            ? await Promise.all(combo.items
                 .filter((item) => item?.productId)
-                .map((item) => ({
+                .map(async (item) => ({
                   ...item,
-                  imageUrl: item.imageUrl || item.image || '',
+                  imageUrl: await resolveComboProductImage(item),
                   quantity: Math.max(1, Number(item.quantity) || 1),
                   price: Number(item.price || 0),
-                }))
+                })))
             : [],
-        }))
+        })))
     } catch (error) {
       console.error('Failed to load home combos:', error)
       combos.value = []
@@ -105,15 +138,29 @@ export function useHomePage() {
       const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
       const existing = cartStore.items.find((line) => sameComboLine(line, item))
       const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
+      const productImageUrl = await resolveComboProductImage(item)
+      const hasWrongImage = existing
+        && productImageUrl
+        && existing.imageUrl !== productImageUrl
 
-      if (existing && currentQuantity < requiredQuantity) {
+      if (hasWrongImage) {
+        await cartStore.removeItem(existing.id)
+        await cartStore.addItem({
+          productId: item.productId,
+          variantId: item.variantId || null,
+          name: item.productName,
+          imageUrl: productImageUrl,
+          price: item.price,
+          quantity: Math.max(currentQuantity, requiredQuantity),
+        })
+      } else if (existing && currentQuantity < requiredQuantity) {
         await cartStore.updateQty(existing.id, requiredQuantity)
       } else if (!existing) {
         await cartStore.addItem({
           productId: item.productId,
           variantId: item.variantId || null,
           name: item.productName,
-          imageUrl: item.imageUrl || item.image || '',
+          imageUrl: productImageUrl,
           price: item.price,
           quantity: requiredQuantity,
         })

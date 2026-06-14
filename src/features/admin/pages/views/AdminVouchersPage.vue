@@ -22,7 +22,8 @@ const combos = ref([])
 const notifications = ref([])
 const products = ref([])
 const users = ref([])
-const toast = ref('')
+const toast = ref({ message: '', type: 'info' })
+let toastTimer = null
 
 const stats = ref({
   totalVouchers: 0,
@@ -285,10 +286,11 @@ function sortByCreatedAtDesc(items) {
   })
 }
 
-function notify(message) {
-  toast.value = message
-  window.setTimeout(() => {
-    if (toast.value === message) toast.value = ''
+function notify(message, type = 'info') {
+  window.clearTimeout(toastTimer)
+  toast.value = { message, type }
+  toastTimer = window.setTimeout(() => {
+    toast.value = { message: '', type: 'info' }
   }, 2600)
 }
 
@@ -462,11 +464,17 @@ async function saveVoucher() {
 async function deleteVoucher(row) {
   if (!row?.id || !window.confirm(`Xóa voucher ${row.code}?`)) return
   try {
-    await adminApi.deleteVoucher(row.id)
-    notify('Đã xóa voucher')
+    const response = await adminApi.deleteVoucher(row.id)
+    if (response?.data?.success === false) {
+      throw new Error(response.data.message || 'Không xóa được voucher')
+    }
+    notify(`Đã xóa voucher ${row.code}.`, 'success')
     await loadVoucherData()
   } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Không xóa được voucher')
+    notify(
+      error?.response?.data?.message || error.message || `Không thể xóa voucher ${row.code}.`,
+      'error',
+    )
   }
 }
 
@@ -723,9 +731,8 @@ async function deleteMarketing(type, row) {
     if (type === 'combo') await adminApi.deleteMarketingCombo(row.id)
     if (type === 'notify') await adminApi.deleteMarketingNotification(row.id)
     await loadActiveTab()
-  } catch {
-    notify('Khong xoa duoc')
-    notify('Khong xoa duoc')
+  } catch (error) {
+    notify(error?.response?.data?.message || error.message || 'Không xóa được.', 'error')
   }
 }
 
@@ -1117,7 +1124,16 @@ onMounted(async () => {
       </div>
     </aside>
 
-    <div v-if="toast" class="mc-toast">{{ toast }}</div>
+    <div
+      v-if="toast.message"
+      class="mc-toast"
+      :class="`mc-toast--${toast.type}`"
+      role="status"
+      aria-live="polite"
+    >
+      <AppIcon :name="toast.type === 'error' ? 'alert' : toast.type === 'success' ? 'check' : 'info'" :size="16" />
+      {{ toast.message }}
+    </div>
   </div>
 </template>
 
@@ -1226,7 +1242,9 @@ onMounted(async () => {
 .segment-choice button { flex-direction: row; align-items: center; }
 .segment-choice span { display: flex; flex-direction: column; }
 .warn-box { background: #fef9ee; border: 1px solid #f5d38a; border-radius: 8px; padding: 11px 13px; color: #92400e; font-size: 12px; }
-.mc-toast { position: fixed; right: 22px; bottom: 22px; z-index: 120; background: #1a2332; color: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); }
+.mc-toast { position: fixed; right: 22px; bottom: 22px; z-index: 120; background: #1a2332; color: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); display: inline-flex; align-items: center; gap: 8px; }
+.mc-toast--success { background: #176b4d; }
+.mc-toast--error { background: #a83232; }
 @media (max-width: 900px) {
   .mc-stats { grid-template-columns: repeat(2, 1fr); }
   .choice-grid { grid-template-columns: 1fr; }

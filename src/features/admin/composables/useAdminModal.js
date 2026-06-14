@@ -24,6 +24,7 @@ import { useAdminUiStore } from '../store/adminUiStore'
 
 const MODAL_TITLES = {
   addUser: 'Thêm <em>người dùng</em>',
+  viewUser: 'Thông tin <em>người dùng</em>',
   editUser: 'Chỉnh sửa <em>người dùng</em>',
   addCat: 'Thêm <em>danh mục</em>',
   editCat: 'Sửa <em>danh mục</em>',

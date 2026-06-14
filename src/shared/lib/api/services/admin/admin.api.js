@@ -99,6 +99,10 @@ class AdminApi {
     return apiClient.put(`/admin/users/${id}`, payload)
   }
 
+  updateAdminUserStatus(id, status) {
+    return apiClient.patch(`/admin/users/${id}/status`, { status })
+  }
+
   deleteAdminUser(id) {
     return apiClient.delete(`/admin/users/${id}`)
   }

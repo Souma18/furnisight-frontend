@@ -6,6 +6,7 @@ defineProps({
   titleHtml: { type: String, default: '' },
   saving: { type: Boolean, default: false },
   wide: { type: Boolean, default: false },
+  readOnly: { type: Boolean, default: false },
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -28,8 +29,8 @@ function onOverlayClick(event) {
         <slot />
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn-modal-cancel" @click="emit('close')">Huỷ</button>
-        <button type="button" class="btn-modal-save" :disabled="saving" @click="emit('save')">
+        <button type="button" class="btn-modal-cancel" @click="emit('close')">{{ readOnly ? 'Đóng' : 'Huỷ' }}</button>
+        <button v-if="!readOnly" type="button" class="btn-modal-save" :disabled="saving" @click="emit('save')">
           <AppIcon name="check" :size="14" />
           Lưu thay đổi
         </button>

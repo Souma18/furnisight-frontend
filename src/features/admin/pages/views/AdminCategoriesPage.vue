@@ -1,13 +1,32 @@
 <script setup>
+import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { useAdminCategories } from '../../composables/useAdminCategories'
-import { useAdminUiStore } from '../../store/adminUiStore'
 
-const { filtered, search, columns, openAdd, openEdit } = useAdminCategories()
-const ui = useAdminUiStore()
+const { filtered, search, columns, openAdd, openEdit, deleteCategory } = useAdminCategories()
+const deleteTarget = ref(null)
+const deleting = ref(false)
+
+function requestDelete(row) {
+  deleteTarget.value = row
+}
+
+function closeDeleteDialog() {
+  if (deleting.value) return
+  deleteTarget.value = null
+}
+
+async function confirmDelete() {
+  if (!deleteTarget.value || deleting.value) return
+  deleting.value = true
+  const deleted = await deleteCategory(deleteTarget.value)
+  deleting.value = false
+  if (deleted) deleteTarget.value = null
+}
 </script>
 
 <template>
@@ -36,10 +55,31 @@ const ui = useAdminUiStore()
     <template #cell-actions="{ row }">
       <div class="row-actions">
         <button type="button" class="ra-btn ra-edit" @click="openEdit(row)"><AppIcon name="edit" :size="14" /></button>
-        <button type="button" class="ra-btn ra-del" @click="ui.showToast({ icon: 'trash2', title: 'Đã xóa danh mục' })"><AppIcon name="trash2" :size="14" /></button>
+        <button
+          type="button"
+          class="ra-btn ra-del"
+          :aria-label="`Xóa danh mục ${row.name}`"
+          @click="requestDelete(row)"
+        >
+          <AppIcon name="trash2" :size="14" />
+        </button>
       </div>
     </template>
   </AdminDataTable>
+
+  <ConfirmDialog
+    :open="Boolean(deleteTarget)"
+    title="Xóa danh mục?"
+    :message="deleteTarget
+      ? `Bạn có chắc muốn xóa danh mục “${deleteTarget.name}”? Thao tác này không thể hoàn tác.`
+      : ''"
+    confirm-label="Xóa danh mục"
+    cancel-label="Hủy"
+    :loading="deleting"
+    danger
+    @close="closeDeleteDialog"
+    @confirm="confirmDelete"
+  />
 </template>
 
 <style scoped>

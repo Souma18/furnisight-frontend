@@ -1,6 +1,7 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
@@ -8,13 +9,59 @@ import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { isAdminAccount } from '../../utils/adminAccountRoles'
 
-const { items, search, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
+const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
 const userRows = computed(() => items.value.filter((item) => !isAdminAccount(item)))
+const statusTarget = ref(null)
+const updatingStatus = ref(false)
 const columns = [
   { key: 'id', label: '#' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
   { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },
   { key: 'statusLabel', label: 'Trạng thái' }, { key: 'createdAt', label: 'Ngày tạo' }, { key: 'actions', label: 'Hành động' },
 ]
+
+function isBlocked(user) {
+  return ['blocked', 'banned', 'locked'].includes(String(user?.status || '').toLowerCase())
+}
+
+function requestStatusChange(user) {
+  statusTarget.value = user
+}
+
+function closeStatusDialog() {
+  if (updatingStatus.value) return
+  statusTarget.value = null
+}
+
+async function confirmStatusChange() {
+  if (!statusTarget.value?.id || updatingStatus.value) return
+
+  const user = statusTarget.value
+  const unlocking = isBlocked(user)
+  updatingStatus.value = true
+
+  try {
+    const response = await adminApi.updateAdminUserStatus(user.id, unlocking ? 'ACTIVE' : 'BANNED')
+    if (response?.data?.success === false) {
+      throw new Error(response.data.message || 'Không thể cập nhật trạng thái tài khoản.')
+    }
+
+    statusTarget.value = null
+    await load()
+    ui.showToast({
+      icon: unlocking ? 'refresh' : 'lock',
+      title: unlocking ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản',
+      subtitle: user.email,
+    })
+  } catch (error) {
+    ui.showToast({
+      icon: 'alert',
+      title: unlocking ? 'Không thể mở khóa' : 'Không thể khóa tài khoản',
+      subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại.',
+    })
+  } finally {
+    updatingStatus.value = false
+  }
+}
 </script>
 
 <template>
@@ -31,10 +78,31 @@ const columns = [
     <template #cell-statusLabel="{ row }"><span class="badge" :class="row.status === 'active' ? 'b-success' : 'b-cancel'">{{ row.statusLabel }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <button type="button" class="ra-btn ra-view" @click="ui.openModal('editUser', row)"><AppIcon name="eye" :size="14" /></button>
+        <button type="button" class="ra-btn ra-view" title="Xem người dùng" @click="ui.openModal('viewUser', row)"><AppIcon name="eye" :size="14" /></button>
         <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="14" /></button>
-        <button type="button" class="ra-btn ra-lock"><AppIcon name="lock" :size="14" /></button>
+        <button
+          type="button"
+          class="ra-btn ra-lock"
+          :title="isBlocked(row) ? 'Mở khóa tài khoản' : 'Khóa tài khoản'"
+          @click="requestStatusChange(row)"
+        >
+          <AppIcon :name="isBlocked(row) ? 'refresh' : 'lock'" :size="14" />
+        </button>
       </div>
     </template>
   </AdminDataTable>
+
+  <ConfirmDialog
+    :open="Boolean(statusTarget)"
+    :title="statusTarget && isBlocked(statusTarget) ? 'Mở khóa tài khoản?' : 'Khóa tài khoản?'"
+    :message="statusTarget
+      ? `${isBlocked(statusTarget) ? 'Mở khóa' : 'Khóa'} tài khoản ${statusTarget.email}?`
+      : ''"
+    :confirm-label="statusTarget && isBlocked(statusTarget) ? 'Mở khóa' : 'Khóa tài khoản'"
+    cancel-label="Hủy"
+    :loading="updatingStatus"
+    :danger="Boolean(statusTarget && !isBlocked(statusTarget))"
+    @close="closeStatusDialog"
+    @confirm="confirmStatusChange"
+  />
 </template>

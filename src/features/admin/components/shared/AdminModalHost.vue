@@ -135,8 +135,32 @@ watch(
 </script>
 
 <template>
-  <AdminModal :open="isOpen" :wide="isWide" :title-html="titleHtml" :saving="saving || form.modelUploading || form.modelPreviewLoading" @close="close" @save="save">
-    <template v-if="modal.type === 'addUser' || modal.type === 'editUser'">
+  <AdminModal
+    :open="isOpen"
+    :wide="isWide"
+    :title-html="titleHtml"
+    :saving="saving || form.modelUploading || form.modelPreviewLoading"
+    :read-only="modal.type === 'viewUser'"
+    @close="close"
+    @save="save"
+  >
+    <template v-if="modal.type === 'viewUser'">
+      <div class="user-view-head">
+        <div class="user-view-avatar">{{ modal.payload?.av || String(modal.payload?.name || 'U').charAt(0).toUpperCase() }}</div>
+        <div>
+          <strong>{{ modal.payload?.name || 'Người dùng' }}</strong>
+          <span>{{ modal.payload?.email || 'Chưa có email' }}</span>
+        </div>
+      </div>
+      <dl class="user-view-grid">
+        <div><dt>Vai trò</dt><dd>{{ modal.payload?.role || 'Khách hàng' }}</dd></div>
+        <div><dt>Trạng thái</dt><dd>{{ modal.payload?.statusLabel || modal.payload?.status }}</dd></div>
+        <div><dt>Số điện thoại</dt><dd>{{ modal.payload?.phone || 'Chưa cập nhật' }}</dd></div>
+        <div><dt>Ngày tạo</dt><dd>{{ modal.payload?.createdAt || 'Chưa có dữ liệu' }}</dd></div>
+      </dl>
+    </template>
+
+    <template v-else-if="modal.type === 'addUser' || modal.type === 'editUser'">
       <div class="mform-row">
         <div class="mform-group"><label class="mfl">Họ tên *</label><input v-model="form.name" class="mfi" /></div>
         <div class="mform-group"><label class="mfl">Email *</label><input v-model="form.email" class="mfi" type="email" :disabled="modal.type === 'editUser'" /></div>
@@ -392,4 +416,13 @@ watch(
   margin-top: 2px;
   margin-bottom: 6px;
 }
+.user-view-head { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+.user-view-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; }
+.user-view-head div:last-child { display: grid; gap: 3px; }
+.user-view-head strong { font-size: 15px; }
+.user-view-head span { color: var(--text3); font-size: 12px; }
+.user-view-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; }
+.user-view-grid div { padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2, #f7f5f0); }
+.user-view-grid dt { color: var(--text3); font-size: 11px; }
+.user-view-grid dd { margin: 5px 0 0; font-size: 13px; font-weight: 600; }
 </style>

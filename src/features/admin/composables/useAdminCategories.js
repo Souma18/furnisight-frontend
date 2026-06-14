@@ -43,10 +43,36 @@ export function useAdminCategories() {
     ui.openModal('editCat', row)
   }
 
+  async function deleteCategory(category) {
+    if (!category?.id) return false
+
+    try {
+      const response = await adminApi.deleteCategory(category.id)
+      if (response?.data?.success === false) {
+        throw new Error(response.data.message || 'Không thể xóa danh mục.')
+      }
+
+      await load()
+      ui.showToast({
+        icon: 'check',
+        title: 'Đã xóa danh mục',
+        subtitle: category.name,
+      })
+      return true
+    } catch (error) {
+      ui.showToast({
+        icon: 'alert',
+        title: 'Không thể xóa danh mục',
+        subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại.',
+      })
+      return false
+    }
+  }
+
   const { reloadTick } = storeToRefs(ui)
 
   onMounted(load)
   watch(reloadTick, load)
 
-  return { items, filtered, iconOptions, search, columns, load, openAdd, openEdit }
+  return { items, filtered, iconOptions, search, columns, load, openAdd, openEdit, deleteCategory }
 }
