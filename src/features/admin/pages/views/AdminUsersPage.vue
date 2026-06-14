@@ -10,11 +10,13 @@ import { useAdminListPage } from '../../composables/useAdminListPage'
 import { isAdminAccount } from '../../utils/adminAccountRoles'
 
 const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
-const userRows = computed(() => items.value.filter((item) => !isAdminAccount(item)))
+const userRows = computed(() => items.value
+  .filter((item) => !isAdminAccount(item))
+  .map((item, index) => ({ ...item, stt: index + 1 })))
 const statusTarget = ref(null)
 const updatingStatus = ref(false)
 const columns = [
-  { key: 'id', label: '#' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
+  { key: 'stt', label: 'STT' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
   { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },
   { key: 'statusLabel', label: 'Trạng thái' }, { key: 'createdAt', label: 'Ngày tạo' }, { key: 'actions', label: 'Hành động' },
 ]

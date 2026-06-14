@@ -19,6 +19,10 @@ function openDetail(row) {
   const orderCode = row.orderCode || row.id
   if (orderCode) router.push({ name: 'admin-order-detail', params: { orderCode } })
 }
+
+function canUpdateStatus(row) {
+  return ['Đã thanh toán', 'Đang giao'].includes(row?.statusLabel)
+}
 </script>
 
 <template>
@@ -32,7 +36,15 @@ function openDetail(row) {
     <template #cell-actions="{ row }">
       <div class="row-actions">
         <button type="button" class="ra-btn ra-view" @click="openDetail(row)"><AppIcon name="eye" :size="14" /></button>
-        <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editOrder', row)"><AppIcon name="edit" :size="14" /></button>
+        <button
+          v-if="canUpdateStatus(row)"
+          type="button"
+          class="ra-btn ra-edit"
+          title="Cập nhật trạng thái"
+          @click="ui.openModal('editOrder', row)"
+        >
+          <AppIcon name="edit" :size="14" />
+        </button>
       </div>
     </template>
   </AdminDataTable>

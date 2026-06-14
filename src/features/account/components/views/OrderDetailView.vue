@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { useAccountOrders } from '../../composables/useAccountOrders'
@@ -9,6 +10,7 @@ import { canRetryOrderPayment, parseOrderDate, shouldShowRetryPayment } from '@s
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const emit = defineEmits(['notify'])
+const router = useRouter()
 
 const {
   selectedOrder: order,
@@ -73,6 +75,20 @@ function formatDateTime(dateStr) {
 
 function orderItemImage(item = {}) {
   return item.imageUrl || item.productSnapshot?.imageUrl || ''
+}
+
+function orderItemProductId(item = {}) {
+  return item.productId || item.productSnapshot?.productId || ''
+}
+
+function reviewProduct(item) {
+  const productId = orderItemProductId(item)
+  if (!productId || order.value?.status !== 'done') return
+  router.push({
+    name: 'product-detail',
+    params: { id: productId },
+    query: { tab: 'review' },
+  })
 }
 
 function hideBrokenImage(event) {
@@ -273,6 +289,15 @@ const paymentDeadline = computed(() => {
               </div>
               <span class="order-line-qty">SL: {{ item.quantity }}</span>
               <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
+              <button
+                v-if="order.status === 'done' && orderItemProductId(item)"
+                type="button"
+                class="order-review-btn"
+                @click="reviewProduct(item)"
+              >
+                <AppIcon name="star" :size="14" />
+                Đánh giá
+              </button>
             </div>
           </div>
         </article>
@@ -513,7 +538,7 @@ const paymentDeadline = computed(() => {
 .transaction-timeline-item.is-pending { opacity: 0.68; }
 .order-lines { display: grid; gap: 0; }
 .order-line {
-  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  display: grid; grid-template-columns: 64px minmax(0, 1fr) auto auto auto;
   gap: 0.65rem; align-items: center; padding: 0.85rem 0;
   border-bottom: 1px solid var(--auth-border);
 }
@@ -531,6 +556,24 @@ const paymentDeadline = computed(() => {
 .order-line-var { margin: 0.15rem 0 0; font-size: 0.72rem; color: var(--auth-text-secondary); }
 .order-line-qty { font-size: 0.75rem; color: var(--auth-text-secondary); }
 .order-line-price { font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
+.order-review-btn {
+  min-height: 34px;
+  padding: 0.4rem 0.7rem;
+  border: 1px solid #c9922a;
+  border-radius: 8px;
+  background: #fffaf0;
+  color: #9a6817;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font: inherit;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.order-review-btn:hover { background: #c9922a; color: #fff; }
 .summary-rows { display: grid; gap: 0.35rem; }
 .summary-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--auth-text-secondary); }
 .summary-row.total { font-weight: 600; color: var(--account-field-text); border-top: 1px solid var(--auth-border); padding-top: 0.5rem; margin-top: 0.25rem; }
@@ -551,6 +594,9 @@ const paymentDeadline = computed(() => {
 @media (max-width: 980px) {
   .order-detail-grid { grid-template-columns: 1fr; }
   .order-line { grid-template-columns: 64px minmax(0, 1fr); }
+  .order-line-qty,
+  .order-line-price,
+  .order-review-btn { grid-column: 2; justify-self: start; }
   .transaction-row { grid-template-columns: 1fr; gap: 0.2rem; }
   .transaction-row strong { text-align: left; }
 }

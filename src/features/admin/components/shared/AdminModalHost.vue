@@ -47,6 +47,14 @@ const stockVariantOptions = computed(() => {
   return product?.variants ?? []
 })
 
+const orderStatusOptions = computed(() => {
+  if (modal.value.payload?.statusLabel === 'Đã thanh toán') return ['Đang giao']
+  if (modal.value.payload?.statusLabel === 'Đang giao') return ['Hoàn thành']
+  return []
+})
+
+const isCompletingOrder = computed(() => form.orderStatus === 'Hoàn thành')
+
 function onCategoryImageChange(event) {
   const file = event.target.files?.[0]
   if (file) onCategoryImage(file)
@@ -321,8 +329,21 @@ watch(
     </template>
 
     <template v-else-if="modal.type === 'editOrder'">
-      <div class="mform-group"><label class="mfl">Trạng thái đơn hàng</label><select v-model="form.orderStatus" class="mfi"><option>Đang giao</option><option>Hoàn thành</option></select></div>
-      <div class="mform-group"><label class="mfl">Mã vận đơn</label><input v-model="form.trackingCode" class="mfi" /></div>
+      <div class="mform-group">
+        <label class="mfl">Trạng thái đơn hàng</label>
+        <select v-model="form.orderStatus" class="mfi">
+          <option v-for="status in orderStatusOptions" :key="status" :value="status">{{ status }}</option>
+        </select>
+      </div>
+      <div class="mform-group">
+        <label class="mfl">Mã vận đơn</label>
+        <input
+          v-model="form.trackingCode"
+          class="mfi"
+          :disabled="isCompletingOrder"
+          :placeholder="isCompletingOrder ? 'Không thể chỉnh sửa khi hoàn thành đơn' : ''"
+        />
+      </div>
       <div class="mform-group"><label class="mfl">Ghi chú nội bộ</label><textarea v-model="form.note" class="mfi" rows="3" /></div>
     </template>
 

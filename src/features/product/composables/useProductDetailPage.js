@@ -1,5 +1,5 @@
 import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
@@ -10,6 +10,7 @@ import { ReviewResponse } from '@shared/lib/api/services/products/products.model
 import { useProducts } from './useProducts'
 
 export function useProductDetailPage(props) {
+  const route = useRoute()
   const router = useRouter()
   const cartStore = useCartStore()
   const authStore = useAuthStore()
@@ -72,7 +73,7 @@ export function useProductDetailPage(props) {
       activeImage.value = product.value.gallery?.[0] ?? product.value.image ?? ''
       qty.value = 1
       wished.value = false
-      activeTab.value = 'desc'
+      activeTab.value = route.query.tab === 'review' ? 'review' : 'desc'
       show3DModal.value = false
       resetCartButtonState()
       resetReviewState()
@@ -366,6 +367,9 @@ export function useProductDetailPage(props) {
   })
 
   watch(() => props.id, (id) => loadProduct(id))
+  watch(() => route.query.tab, (tab) => {
+    if (tab === 'review') activeTab.value = 'review'
+  })
   watch(() => authStore.isAuthenticated, async (isAuthenticated) => {
     if (!product.value) return
     if (isAuthenticated) {

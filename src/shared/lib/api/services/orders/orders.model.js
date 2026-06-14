@@ -81,6 +81,7 @@ export class OrderItemResponse {
    */
   constructor(data = {}) {
     this.id = data.id || null
+    this.productId = data.productId || data.productSnapshot?.productId || null
     this.productSnapshot = {
       ...(data.productSnapshot || {}),
       imageUrl: resolveOrderItemImageUrl(data),

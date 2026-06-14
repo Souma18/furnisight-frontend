@@ -139,6 +139,7 @@ async function changeComboSort(event) {
 
 function startVoucherDrag(event) {
   if (event.button !== 0 || !voucherRail.value) return
+  if (event.target.closest('button, a, input, select, textarea, [role="button"]')) return
   voucherDrag = {
     pointerId: event.pointerId,
     startX: event.clientX,

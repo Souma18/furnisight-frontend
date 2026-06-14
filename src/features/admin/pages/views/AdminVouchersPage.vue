@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { adminApi, mediaApi } from '@shared/lib/api/services'
 import { PriceFormatter } from '@shared/lib/formatters'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
@@ -23,6 +24,8 @@ const notifications = ref([])
 const products = ref([])
 const users = ref([])
 const toast = ref({ message: '', type: 'info' })
+const comboDeleteTarget = ref(null)
+const deletingCombo = ref(false)
 let toastTimer = null
 
 const stats = ref({
@@ -728,11 +731,39 @@ async function deleteMarketing(type, row) {
   if (!row?.id || !window.confirm(`Xóa ${row.name || row.title}?`)) return
   try {
     if (type === 'campaign') await adminApi.deleteMarketingCampaign(row.id)
-    if (type === 'combo') await adminApi.deleteMarketingCombo(row.id)
     if (type === 'notify') await adminApi.deleteMarketingNotification(row.id)
     await loadActiveTab()
   } catch (error) {
     notify(error?.response?.data?.message || error.message || 'Không xóa được.', 'error')
+  }
+}
+
+function requestComboDelete(row) {
+  comboDeleteTarget.value = row
+}
+
+function closeComboDelete() {
+  if (deletingCombo.value) return
+  comboDeleteTarget.value = null
+}
+
+async function confirmComboDelete() {
+  const combo = comboDeleteTarget.value
+  if (!combo?.id || deletingCombo.value) return
+
+  deletingCombo.value = true
+  try {
+    const response = await adminApi.deleteMarketingCombo(combo.id)
+    if (response?.data?.success === false) {
+      throw new Error(response.data.message || 'Không thể xóa combo.')
+    }
+    comboDeleteTarget.value = null
+    await loadCombos()
+    notify(`Đã xóa combo ${combo.name}.`, 'success')
+  } catch (error) {
+    notify(error?.response?.data?.message || error.message || 'Không thể xóa combo.', 'error')
+  } finally {
+    deletingCombo.value = false
   }
 }
 
@@ -923,7 +954,7 @@ onMounted(async () => {
               <td>{{ numberText(row.usedCount) }}</td>
               <td>{{ dateOnly(row.endDate) }}</td>
               <td><span class="status-badge" :class="statusTone(row.status)"><span />{{ statusLabel(row.status) }}</span></td>
-              <td><div class="mc-actions"><button @click="openComboModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteMarketing('combo', row)"><AppIcon name="trash" :size="14" /></button></div></td>
+              <td><div class="mc-actions"><button @click="openComboModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="requestComboDelete(row)"><AppIcon name="trash" :size="14" /></button></div></td>
             </tr>
           </tbody>
         </table>
@@ -1123,6 +1154,20 @@ onMounted(async () => {
         </div>
       </div>
     </aside>
+
+    <ConfirmDialog
+      :open="Boolean(comboDeleteTarget)"
+      title="Xóa combo?"
+      :message="comboDeleteTarget
+        ? `Bạn có chắc muốn xóa combo “${comboDeleteTarget.name}”? Thao tác này không thể hoàn tác.`
+        : ''"
+      confirm-label="Xóa combo"
+      cancel-label="Hủy"
+      :loading="deletingCombo"
+      danger
+      @close="closeComboDelete"
+      @confirm="confirmComboDelete"
+    />
 
     <div
       v-if="toast.message"

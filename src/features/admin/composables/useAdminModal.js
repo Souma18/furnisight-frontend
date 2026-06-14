@@ -46,6 +46,12 @@ const ORDER_STATUS_TO_API = {
   'Hoàn thành': 'DELIVERED',
 }
 
+function nextOrderStatus(payload) {
+  if (payload?.statusLabel === 'Đã thanh toán') return 'Đang giao'
+  if (payload?.statusLabel === 'Đang giao') return 'Hoàn thành'
+  return ''
+}
+
 function buildUserPayload(form) {
   return {
     name: form.name?.trim(),
@@ -150,7 +156,7 @@ export function useAdminModal() {
       roleId: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
       accountStatus: payload?.status === 'blocked' || payload?.status === 'banned' ? 'BANNED' : 'ACTIVE',
       password: '',
-      orderStatus: payload?.statusLabel ?? 'Chờ xác nhận',
+      orderStatus: nextOrderStatus(payload),
       trackingCode: '',
       note: '',
       roleDescription: payload?.description ?? '',
@@ -350,7 +356,11 @@ export function useAdminModal() {
       if (type === 'editOrder' && modal.value.payload?.id) {
         const status = ORDER_STATUS_TO_API[form.orderStatus]
         if (!status) throw new Error('Trạng thái này chưa được backend hỗ trợ cập nhật từ admin.')
-        await adminApi.updateOrder(modal.value.payload.id, { status, trackingCode: form.trackingCode, note: form.note })
+        assertActionResult(await adminApi.updateOrder(modal.value.payload.id, {
+          status,
+          trackingCode: status === 'SHIPPING' ? form.trackingCode : null,
+          note: form.note,
+        }))
       }
       if (type === 'stockIn') {
         await adminApi.stockInVariant({
