@@ -65,7 +65,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
       if (shouldNavigate) {
         setTimeout(async () => {
           await router.push(target)
-        }, isAdminLogin ? 900 : 500)
+        }, isAdminLogin ? 2000 : 2000)
       }
     } catch (error) {
       const code = error.response?.data?.code
