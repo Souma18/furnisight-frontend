@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '@shared/lib/api/services'
 import { normalizeAuthSession } from '../utils/normalizeAuthSession'
+import { resetUserSessionState } from '../utils/resetUserSessionState'
 
 export function useAuth(pinia) {
   const store = useAuthStore(pinia)
@@ -22,7 +23,9 @@ export function useAuth(pinia) {
   }
 
   /** @param {{ name: string } | string} [redirectTo] */
-  async function logout(redirectTo = { name: 'home' }) {
+  async function logout(redirectTo = { name: 'home' }, options = {}) {
+    const { clearRemoteCart = true } = options
+    await resetUserSessionState({ clearRemoteCart: clearRemoteCart && store.isAuthenticated })
     store.logout()
     if (router) {
       await router.push(redirectTo)

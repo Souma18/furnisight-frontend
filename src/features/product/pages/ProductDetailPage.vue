@@ -1,10 +1,13 @@
 <script setup>
+import { defineAsyncComponent } from 'vue'
 import { RouterLink } from 'vue-router'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductDetailTopSection from '../components/ProductDetailTopSection.vue'
 import ProductDetailTabsSection from '../components/ProductDetailTabsSection.vue'
-import ProductDetail3DModal from '../components/ProductDetail3DModal.vue'
 import { useProductDetailPage } from '../composables/useProductDetailPage'
 import '../styles/productDetail.css'
+
+const ProductDetail3DModal = defineAsyncComponent(() => import('../components/ProductDetail3DModal.vue'))
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -21,12 +24,24 @@ const {
   activeImage,
   activeTab,
   show3DModal,
+  cartAdding,
+  cartAdded,
+  reviewEligibility,
+  reviewForm,
+  reviewSubmitting,
+  reviewSubmitError,
+  reviewSubmitSuccess,
+  reviewCanSubmit,
+  reviewIsAuthenticated,
   breadcrumbLinks,
   retry,
   changeQty,
   openRoom3D,
   addToCart,
   addToWishlist,
+  updateReviewField,
+  openReviewLogin,
+  submitReview,
 } = useProductDetailPage(props)
 </script>
 
@@ -40,18 +55,24 @@ const {
 
     <!-- Not found state -->
     <div v-else-if="error === 'not_found'" class="pd-state-center">
-      <p class="pd-state-icon">🔍</p>
+      <AppIcon class="pd-state-icon" name="search" :size="34" />
       <h2>Sản phẩm không tồn tại</h2>
       <p>Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
-      <RouterLink class="pd-btn-back" :to="{ name: 'products' }">← Quay lại danh sách</RouterLink>
+      <RouterLink class="pd-btn-back" :to="{ name: 'products' }">
+        <AppIcon name="chevronLeft" :size="16" />
+        Quay lại danh sách
+      </RouterLink>
     </div>
 
     <!-- API error state -->
     <div v-else-if="error === 'api_error'" class="pd-state-center">
-      <p class="pd-state-icon">⚠️</p>
+      <AppIcon class="pd-state-icon" name="alert" :size="34" />
       <h2>Không thể tải sản phẩm</h2>
       <p>Đã xảy ra lỗi kết nối. Vui lòng thử lại.</p>
-      <button class="pd-btn-retry" @click="retry">Thử lại</button>
+      <button class="pd-btn-retry" @click="retry">
+        <AppIcon name="refresh" :size="16" />
+        Thử lại
+      </button>
     </div>
 
     <!-- Product loaded -->
@@ -70,6 +91,8 @@ const {
         :qty="qty"
         :wished="wished"
         :active-image="activeImage"
+        :cart-adding="cartAdding"
+        :cart-added="cartAdded"
         @pick-image="activeImage = $event"
         @pick-color="selectedColor = $event"
         @pick-size="selectedSize = $event"
@@ -79,8 +102,23 @@ const {
         @open-3d="show3DModal = true"
         @go-room3d="openRoom3D"
       />
-      <ProductDetailTabsSection :product="product" :active-tab="activeTab" @switch-tab="activeTab = $event" />
+      <ProductDetailTabsSection
+        :product="product"
+        :active-tab="activeTab"
+        :review-eligibility="reviewEligibility"
+        :review-form="reviewForm"
+        :review-submitting="reviewSubmitting"
+        :review-submit-error="reviewSubmitError"
+        :review-submit-success="reviewSubmitSuccess"
+        :review-can-submit="reviewCanSubmit"
+        :review-is-authenticated="reviewIsAuthenticated"
+        @switch-tab="activeTab = $event"
+        @update-review-field="updateReviewField"
+        @submit-review="submitReview"
+        @open-login="openReviewLogin"
+      />
       <ProductDetail3DModal
+        v-if="show3DModal"
         :open="show3DModal"
         :model-url="product.modelUrl"
         :product-name="product.name"

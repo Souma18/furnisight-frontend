@@ -1,28 +1,37 @@
 <script setup>
+import { computed } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
-import HomeProductTile from '@features/home/components/HomeProductTile.vue'
+import ProductGrid from '@shared/ui/ProductGrid.vue'
 
-defineProps({
+const props = defineProps({
   items: {
     type: Array,
     default: () => [],
   },
 })
+
+const emit = defineEmits(['remove-favorite'])
+
+const products = computed(() => props.items.map((item) => item.product || item).filter(Boolean))
+const wishedProductIds = computed(() => products.value.map((item) => item.id).filter(Boolean))
+
+function removeFavorite(productId) {
+  if (!productId) return
+  emit('remove-favorite', productId)
+}
 </script>
 
 <template>
   <AccountSectionCard title="Sản phẩm yêu thích">
     <div v-if="!items.length" class="empty-state">Chưa có sản phẩm nào trong danh sách yêu thích.</div>
 
-    <div v-else class="grid">
-      <HomeProductTile
-        v-for="item in items"
-        :key="item.id"
-        :product="item.product || item"
-        :wished="true"
-        :wish-readonly="true"
-      />
-    </div>
+    <ProductGrid
+      v-else
+      :products="products"
+      :wished-product-ids="wishedProductIds"
+      :columns="3"
+      @toggle-wish="removeFavorite"
+    />
   </AccountSectionCard>
 </template>
 
@@ -35,21 +44,4 @@ defineProps({
   text-align: center;
 }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.9rem;
-}
-
-@media (max-width: 1100px) {
-  .grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 780px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

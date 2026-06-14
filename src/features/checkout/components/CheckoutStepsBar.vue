@@ -1,6 +1,7 @@
 <script setup>
 import { CHECKOUT_STEPS } from '../composables/checkoutContent'
 import { RouterLink } from 'vue-router'
+import AppIcon from '@shared/ui/AppIcon.vue'
 </script>
 
 <template>
@@ -12,7 +13,10 @@ import { RouterLink } from 'vue-router'
         :class="[step.status, { 'checkout-step-link': step.to }]"
         :to="step.to"
       >
-        <span class="checkout-step-num">{{ step.status === 'done' ? '✓' : index + 1 }}</span>
+        <span class="checkout-step-num">
+          <AppIcon v-if="step.status === 'done'" name="check" :size="14" />
+          <template v-else>{{ index + 1 }}</template>
+        </span>
         {{ step.label }}
       </component>
       <span

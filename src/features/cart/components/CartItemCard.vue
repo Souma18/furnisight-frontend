@@ -1,6 +1,8 @@
 <script setup>
 import { computed } from 'vue'
+import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   item: {
@@ -29,9 +31,12 @@ const summaryLabel = computed(() => {
   return color || size || 'Phân loại mặc định'
 })
 
-function formatPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const detailRoute = computed(() => {
+  const detailId = props.item?.detailId || props.item?.slug || ''
+  return detailId ? `/products/${detailId}` : ''
+})
+
+const formatPrice = PriceFormatter.format
 </script>
 
 <template>
@@ -49,14 +54,19 @@ function formatPrice(value) {
       <span v-else class="stock-badge">Hết hàng</span>
     </div>
 
-    <div class="thumb">
+    <RouterLink v-if="detailRoute" :to="detailRoute" class="thumb thumb-link">
       <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
-      <template v-else>{{ item.imageFallback ?? item.emoji ?? '🛍️' }}</template>
+      <template v-else>{{ item.imageFallback ?? item.emoji ?? 'SP' }}</template>
+    </RouterLink>
+    <div v-else class="thumb">
+      <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
+      <template v-else>{{ item.imageFallback ?? item.emoji ?? 'SP' }}</template>
     </div>
 
     <div class="name-wrap">
       <p class="category">{{ item.categoryLabel || 'Sản phẩm' }}</p>
-      <p class="name">{{ item.name }}</p>
+      <RouterLink v-if="detailRoute" :to="detailRoute" class="name name-link">{{ item.name }}</RouterLink>
+      <p v-else class="name">{{ item.name }}</p>
       <p class="summary">{{ summaryLabel }}</p>
     </div>
 
@@ -78,7 +88,7 @@ function formatPrice(value) {
     <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
 
     <button type="button" class="delete-btn" aria-label="Xóa sản phẩm" @click="$emit('remove', item.id)">
-      <AppIcon name="trash2" :size="22" />
+      <AppIcon name="trash" :size="22" />
     </button>
   </article>
 </template>
@@ -174,6 +184,17 @@ function formatPrice(value) {
   font-size: 22px;
   border: 1px solid rgba(201, 146, 42, 0.15);
   overflow: hidden;
+  color: #8b6a21;
+  text-decoration: none;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.thumb-link:hover,
+.thumb-link:focus,
+.thumb-link:focus-visible {
+  color: #8b6a21;
+  outline: none;
+  text-decoration: none;
 }
 .thumb-image {
   width: 100%;
@@ -199,6 +220,16 @@ function formatPrice(value) {
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
+}
+.name-link {
+  text-decoration: none;
+}
+.name-link:hover,
+.name-link:focus,
+.name-link:focus-visible {
+  color: #8b6a21;
+  outline: none;
+  text-decoration: none;
 }
 .summary {
   margin: 0.3rem 0 0;

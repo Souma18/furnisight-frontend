@@ -2,7 +2,13 @@ import { storeToRefs } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
-import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
+import {
+  classifyRoomImage,
+  getRoomRecommendations,
+  getRoomTemplates,
+  mapLabelToRoomType,
+  predictRoomModel,
+} from '../api/roomApi'
 import { PRODUCTS_3D } from '../core/mockData'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
@@ -18,7 +24,9 @@ export function useRoom3D() {
   const isLoadingTemplates = ref(false)
   const orderCode = ref('')
   const uploadError = ref('')
+  const recommendationError = ref('')
   const appliedDeepLinkKey = ref('')
+  let manualRecommendationRequestId = 0
   const cartItems = computed(() => cartState.items.value)
   const placedProductIds = computed(() => cartState.room3dProductIds.value)
   const cartProductIds = computed(() =>
@@ -208,18 +216,46 @@ export function useRoom3D() {
     }
   }
 
-  function selectRoomType(type) {
-    // Chọn phòng mẫu thì chủ động chuyển sang mô hình có sẵn trong catalog.
+  async function selectRoomType(type) {
+    const requestId = ++manualRecommendationRequestId
+    recommendationError.value = ''
     store.selectTemplateRoom(type)
+    store.setCategory('all')
+    store.setSearchKeyword('')
+
+    try {
+      const result = await getRoomRecommendations(type)
+      if (requestId !== manualRecommendationRequestId) return
+      store.applyManualRecommendations(result)
+    } catch (error) {
+      if (requestId !== manualRecommendationRequestId) return
+      store.applyManualRecommendations({
+        recommendations: [],
+        recommendationMeta: {
+          roomType: type,
+          source: 'manual',
+          reason: 'catalog_unavailable',
+        },
+      })
+      recommendationError.value = 'Không thể tải gợi ý sản phẩm cho phòng này.'
+      console.warn('Failed to load manual room recommendations:', error?.response?.status || error?.message || error)
+    }
   }
 
   function addProductToCart(productOrId) {
-    const product =
-      typeof productOrId === 'number'
-        ? PRODUCTS_3D.find((item) => item.id === productOrId)
-        : typeof productOrId === 'string'
-          ? state.recommendations.value.find((item) => String(item.id) === productOrId)
-        : productOrId
+    let product = productOrId
+
+    if (typeof productOrId === 'number') {
+      const sceneProduct = PRODUCTS_3D.find((item) => item.id === productOrId)
+      product = sceneProduct
+        ? state.recommendations.value.find(
+            (item) => String(item.productId || item.id) === String(sceneProduct.productId),
+          )
+        : null
+    } else if (typeof productOrId === 'string') {
+      product = state.recommendations.value.find((item) => String(item.id) === productOrId)
+    }
+
     if (!product) return
     cartStore.addItem(product)
   }
@@ -283,7 +319,7 @@ export function useRoom3D() {
     if (roomType) {
       const templateExists = roomTemplates.value.some((item) => item.type === roomType)
       if (templateExists) {
-        store.selectTemplateRoom(roomType)
+        void selectRoomType(roomType)
         applied = true
       }
     }
@@ -294,7 +330,7 @@ export function useRoom3D() {
         // "Xem 3D" tu trang chi tiet se dua san pham vao scene, khong tu dong dua vao gio.
         store.addToScene(target.id)
         if (!roomType && Array.isArray(target.roomTypes) && target.roomTypes.length > 0) {
-          store.selectTemplateRoom(target.roomTypes[0])
+          void selectRoomType(target.roomTypes[0])
         }
         // Van reset filter de user thay day du san pham sau khi dieu huong.
         store.setCategory('all')
@@ -329,6 +365,7 @@ export function useRoom3D() {
     filteredProducts,
     orderCode,
     uploadError,
+    recommendationError,
     formatCurrency,
     setImageType: store.setImageType,
     setMeshQuality: store.setMeshQuality,

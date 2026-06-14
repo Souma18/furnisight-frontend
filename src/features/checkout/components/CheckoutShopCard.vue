@@ -22,10 +22,6 @@ function variantTags(line) {
   return tags
 }
 
-function lineThumb(line) {
-  return line.imageFallback ?? line.emoji ?? '🛍️'
-}
-
 function hideBrokenImage(event) {
   event.target.style.display = 'none'
 }
@@ -61,7 +57,7 @@ const merchandiseSubtotal = () =>
     >
       <div class="co-prod-thumb">
         <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-prod-thumb-img" @error="hideBrokenImage">
-        <span>{{ lineThumb(line) }}</span>
+        <AppIcon v-else name="image" :size="20" />
       </div>
       <div>
         <p class="co-prod-name">{{ line.name }}</p>
@@ -71,9 +67,6 @@ const merchandiseSubtotal = () =>
       </div>
       <div>
         <div class="co-prod-unit">{{ formatMoney(line.price) }}</div>
-        <div v-if="line.oldPrice && line.oldPrice > line.price" class="co-prod-variant" style="text-align: right">
-          {{ formatMoney(line.oldPrice) }}
-        </div>
       </div>
       <div class="co-qty">
         <button type="button" aria-label="Giảm" @click="changeQty(line, -1)">−</button>
@@ -89,7 +82,7 @@ const merchandiseSubtotal = () =>
         :checked="hasInsurance"
         @change="$emit('update-insurance', $event.target.checked)"
       >
-      <span>🛡️</span>
+      <AppIcon name="shield" :size="18" />
       <div class="co-addon-label">
         <strong>{{ insuranceOption.label }}</strong>
         <span v-if="insuranceOption.badge" class="co-addon-badge">{{ insuranceOption.badge }}</span>

@@ -1,4 +1,6 @@
 <script setup>
+import { PriceFormatter } from '@shared/lib/formatters'
+
 defineProps({
   product: {
     type: Object,
@@ -8,9 +10,7 @@ defineProps({
 
 const emit = defineEmits(['add-to-cart'])
 
-function formatPrice(value) {
-  return `${Number(value).toLocaleString('vi-VN')}₫`
-}
+const formatPrice = PriceFormatter.format
 </script>
 
 <template>

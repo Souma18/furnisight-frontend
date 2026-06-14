@@ -3,8 +3,8 @@ import { RouterLink } from 'vue-router'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import AuthModal from '@features/auth/components/AuthModal.vue'
 import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -14,8 +14,6 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authStore)
-const isAuthModalOpen = ref(false)
-const initialAuthView = ref('login')
 const notifications = ref([])
 
 const activeNav = computed(() => {
@@ -23,6 +21,7 @@ const activeNav = computed(() => {
   if (path.startsWith('/products')) return 'products'
   if (route.path.startsWith('/contact')) return 'contact'
   if (path.startsWith('/room3d')) return 'room3d'
+  if (path.startsWith('/khuyen-mai')) return 'promotions'
   if (path === '/') return 'home'
   return ''
 })
@@ -38,7 +37,7 @@ async function loadNotifications() {
 
 async function openAccountNotifications() {
   if (!isAuthenticated.value) {
-    isAuthModalOpen.value = true
+    openAuthModal()
     return
   }
 
@@ -75,7 +74,7 @@ function handleUserAction() {
     router.push('/account')
     return
   }
-  isAuthModalOpen.value = true
+  openAuthModal()
 }
 
 const notificationsLoaded = ref(false)
@@ -101,22 +100,9 @@ watch(isAuthenticated, (newVal) => {
 
 watch(() => route.query.otpCode, (newVal) => {
   if (newVal) {
-    initialAuthView.value = 'verify'
-    isAuthModalOpen.value = true
+    openAuthModal('verify')
   }
 }, { immediate: true })
-
-watch(isAuthModalOpen, (newVal) => {
-  if (!newVal) {
-    initialAuthView.value = 'login'
-    
-    if (route.query.otpCode) {
-      const query = { ...route.query }
-      delete query.otpCode
-      router.replace({ query })
-    }
-  }
-})
 </script>
 
 <template>
@@ -130,7 +116,7 @@ watch(isAuthModalOpen, (newVal) => {
       <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
       <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
       <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
-      <RouterLink to="/">Dự án</RouterLink>
+      <RouterLink to="/khuyen-mai" :class="{ 'nav-pill': activeNav === 'promotions' }">Khuyến mãi</RouterLink>
       <RouterLink to="/contact" :class="{ 'nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
     </nav>
 
@@ -196,7 +182,7 @@ watch(isAuthModalOpen, (newVal) => {
       </div>
       <AppHeaderCartDropdown
         :is-authenticated="isAuthenticated"
-        @require-auth="isAuthModalOpen = true"
+        @require-auth="openAuthModal()"
       />
       <button
         class="icon-btn user"
@@ -208,12 +194,6 @@ watch(isAuthModalOpen, (newVal) => {
       </button>
     </div>
   </header>
-  <AuthModal
-    :open="isAuthModalOpen"
-    :initial-view="initialAuthView"
-    @close="isAuthModalOpen = false"
-    @authenticated="isAuthModalOpen = false"
-  />
 </template>
 
 <style scoped>

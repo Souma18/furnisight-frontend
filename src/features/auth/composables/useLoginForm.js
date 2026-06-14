@@ -50,27 +50,32 @@ export function useLoginForm({ embedded = false, emit } = {}) {
     errorMessage.value = ''
     loading.value = true
     clearSuccessTimer()
+
     try {
+      const identifier = String(form.email || '').trim().toLowerCase()
       const response = await authApi.login({
-        identifier: form.email,
+        identifier,
         password: form.password,
       })
+
       authStore.setSession(normalizeAuthSession(response))
+      const isAdminLogin = authStore.isAdmin
       showSuccess({
         title: 'Đăng nhập thành công!',
-        message: 'Chào mừng trở lại. Bạn đang được chuyển hướng...',
+        message: isAdminLogin
+          ? 'Chào mừng trở lại. Bạn đang được chuyển hướng...'
+          : 'Chào mừng trở lại.',
         mode: AUTH_VIEWS.LOGIN,
+        loading: isAdminLogin,
       })
 
       successTimer = setTimeout(async () => {
         successTimer = null
-        emit?.('authenticated')
         const target = resolvePostLoginTarget()
-        const shouldNavigate = !embedded || authStore.isAdmin || Boolean(route.query.redirect)
+        const shouldNavigate = !embedded || isAdminLogin || Boolean(route.query.redirect)
 
         if (embedded) {
-          emit?.('close')
-          setView(AUTH_VIEWS.LOGIN)
+          emit?.(isAdminLogin || Boolean(route.query.redirect) ? 'authenticated' : 'close')
         }
 
         if (shouldNavigate) {
@@ -78,10 +83,23 @@ export function useLoginForm({ embedded = false, emit } = {}) {
           return
         }
 
-        setView(AUTH_VIEWS.LOGIN)
-      }, 900)
+        if (!embedded) {
+          setView(AUTH_VIEWS.LOGIN)
+        }
+      }, isAdminLogin ? 900 : 650)
     } catch (error) {
-      errorMessage.value = error.response?.data?.message || error.message || 'Đăng nhập thất bại.'
+      const code = error.response?.data?.code
+      const messageByCode = {
+        ACCOUNT_NOT_FOUND: 'Không tìm thấy tài khoản với email này.',
+        INVALID_PASSWORD: 'Mật khẩu không chính xác.',
+        ACCOUNT_BANNED: 'Tài khoản đã bị khóa.',
+        ACCOUNT_TEMPORARILY_LOCKED: 'Tài khoản đang tạm khóa. Vui lòng thử lại sau.',
+        ACCOUNT_NOT_VERIFIED: 'Tài khoản chưa được xác minh.',
+      }
+      errorMessage.value = messageByCode[code]
+        || error.response?.data?.message
+        || error.message
+        || 'Đăng nhập thất bại.'
     } finally {
       loading.value = false
     }

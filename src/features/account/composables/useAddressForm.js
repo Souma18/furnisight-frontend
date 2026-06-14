@@ -109,8 +109,12 @@ export function useAddressForm(props, emit) {
   }
 
   async function setAsDefault(addressId) {
-    await addressStore.setDefaultAddress(addressId)
-    emit('notify', 'Đã cập nhật địa chỉ mặc định.')
+    try {
+      await addressStore.setDefaultAddress(addressId)
+      emit('notify', 'Đã cập nhật địa chỉ mặc định.')
+    } catch (error) {
+      emit('notify', error.response?.data?.message || 'Không thể đặt địa chỉ mặc định.', 'error')
+    }
   }
 
   async function deleteAddress(addressId) {

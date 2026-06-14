@@ -66,19 +66,82 @@ function normalizeVoucher(raw = {}) {
     discountValue: Number(raw.discountValue) || 0,
     maxDiscount: raw.maxDiscount ?? null,
     minOrder: raw.minOrder ?? null,
+    appliedDiscount: raw.appliedDiscount ?? null,
     icon: iconMap[raw.icon] || (discountType === 'shipping_cap' ? 'truck' : 'badgePercent'),
   }
+}
+
+function normalizeCombo(raw = {}) {
+  return {
+    ...raw,
+    id: raw.id || raw.comboId || '',
+    name: raw.name || raw.comboName || 'Combo khuyến mãi',
+    items: Array.isArray(raw.items) ? raw.items : [],
+    placements: Array.isArray(raw.placements) ? raw.placements : [],
+    appliedDiscount: Number(raw.appliedDiscount ?? raw.comboDiscount ?? raw.savedAmount) || 0,
+  }
+}
+
+function lineProductId(line = {}) {
+  return String(line.productId || line.product?.id || line.id || '').trim()
+}
+
+function lineVariantId(line = {}) {
+  return String(line.variantId || line.variant?.id || '').trim()
+}
+
+function lineQuantity(line = {}) {
+  return Math.max(1, Number(line.qty ?? line.quantity) || 1)
+}
+
+function comboSupportsCheckout(combo = {}) {
+  const placements = Array.isArray(combo.placements) ? combo.placements : []
+  return placements.length === 0 || placements.includes('CHECKOUT')
+}
+
+function comboMatchesLines(combo = {}, lines = []) {
+  const requiredItems = Array.isArray(combo.items) ? combo.items : []
+  if (!requiredItems.length || !comboSupportsCheckout(combo)) return false
+
+  return requiredItems.every((item) => {
+    const requiredProductId = String(item.productId || '').trim()
+    const requiredVariantId = String(item.variantId || '').trim()
+    const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
+    if (!requiredProductId) return false
+
+    const matchingQuantity = lines
+      .filter((line) => {
+        if (lineProductId(line) !== requiredProductId) return false
+        return !requiredVariantId || lineVariantId(line) === requiredVariantId
+      })
+      .reduce((sum, line) => sum + lineQuantity(line), 0)
+
+    return matchingQuantity >= requiredQuantity
+  })
+}
+
+function comboValidateItems(lines = []) {
+  return lines.map((line) => ({
+    productId: lineProductId(line),
+    variantId: lineVariantId(line) || null,
+    quantity: lineQuantity(line),
+    price: Number(line.price) || 0,
+  }))
 }
 
 export const useCheckoutStore = defineStore('checkout', () => {
   const loading = ref(false)
   const placing = ref(false)
   const hydrated = ref(false)
+  const combosHydrated = ref(false)
 
   const shippingOptions = ref([])
   const paymentMethods = ref([])
   const shopVouchers = ref([])
   const shippingVouchers = ref([])
+  const activeCombos = ref([])
+  const selectedCombo = ref(null)
+  const comboMessage = ref('')
   const insuranceOption = ref(null)
   const codNote = ref('')
 
@@ -103,8 +166,22 @@ export const useCheckoutStore = defineStore('checkout', () => {
     return selectedShipping.value?.isFree ? 0 : fee
   })
 
-  async function hydrateSession() {
-    if (hydrated.value) return
+  async function refreshVouchers() {
+    const voucherResponse = await ordersApi.getVouchers().catch(() => ({ data: [] }))
+    const vouchers = Array.isArray(voucherResponse?.data)
+      ? voucherResponse.data.map(normalizeVoucher).filter((voucher) => voucher.active !== false)
+      : []
+
+    shopVouchers.value = vouchers.filter((voucher) => voucher.discountType !== 'shipping_cap')
+    shippingVouchers.value = vouchers.filter((voucher) => voucher.discountType === 'shipping_cap')
+  }
+
+  async function hydrateSession(options = {}) {
+    const { loadCombos = true } = options
+    if (hydrated.value && (!loadCombos || combosHydrated.value)) {
+      await refreshVouchers()
+      return
+    }
     loading.value = true
 
     try {
@@ -117,13 +194,17 @@ export const useCheckoutStore = defineStore('checkout', () => {
         { id: 'vnpay', name: 'Thanh toán qua VNPAY', description: 'Thanh toán an toàn qua ví VNPAY', icon: 'vnpay' },
         { id: 'cod', name: 'Thanh toán khi nhận hàng (COD)', description: 'Thanh toán tiền mặt khi nhận hàng', icon: 'cash' }
       ]
-      const voucherResponse = await ordersApi.getVouchers().catch(() => ({ data: [] }))
-      const vouchers = Array.isArray(voucherResponse?.data)
-        ? voucherResponse.data.map(normalizeVoucher).filter((voucher) => voucher.active !== false)
-        : []
-
-      shopVouchers.value = vouchers.filter((voucher) => voucher.discountType !== 'shipping_cap')
-      shippingVouchers.value = vouchers.filter((voucher) => voucher.discountType === 'shipping_cap')
+      await refreshVouchers()
+      if (loadCombos) {
+        const comboResponse = await ordersApi.getActiveCombos().catch(() => ({ data: [] }))
+        activeCombos.value = Array.isArray(comboResponse?.data)
+          ? comboResponse.data.map(normalizeCombo).filter((combo) => combo.active !== false)
+          : []
+        combosHydrated.value = true
+      } else {
+        activeCombos.value = []
+        combosHydrated.value = false
+      }
       insuranceOption.value = { price: 20000, label: 'Bảo hiểm hàng hóa (Bồi thường 100% nếu thất lạc/hư hỏng)' }
       codNote.value = 'Quý khách vui lòng chuẩn bị số tiền tương ứng khi nhận hàng.'
 
@@ -143,26 +224,93 @@ export const useCheckoutStore = defineStore('checkout', () => {
       shipFee: shipFee.value,
       shopVoucher: shopVoucher.value,
       shippingVoucher: shippingVoucher.value,
+      combo: selectedCombo.value,
       hasInsurance: hasInsurance.value,
       insurancePrice: insuranceOption.value?.price ?? 0,
     })
   }
 
-  async function applyVoucherByCode(code, type, subtotal) {
-    const response = await ordersApi.validateCheckoutVoucher({ code, type, subtotal })
+  async function refreshApplicableCombo(lines = []) {
+    comboMessage.value = ''
+    selectedCombo.value = null
+    if (!activeCombos.value.length || !Array.isArray(lines) || !lines.length) return null
+
+    const candidates = activeCombos.value
+      .filter((combo) => comboMatchesLines(combo, lines))
+      .sort((a, b) => Number(b.savedAmount || b.appliedDiscount || 0) - Number(a.savedAmount || a.appliedDiscount || 0))
+
+    if (!candidates.length) return null
+
+    for (const combo of candidates) {
+      try {
+        const response = await ordersApi.validateCheckoutCombo({
+          comboId: combo.id,
+          items: comboValidateItems(lines),
+        })
+        const data = response?.data ?? {}
+        if (data.valid) {
+          selectedCombo.value = normalizeCombo({
+            ...combo,
+            ...data,
+            appliedDiscount: data.comboDiscount ?? combo.savedAmount,
+          })
+          comboMessage.value = data.message || ''
+          return selectedCombo.value
+        }
+        comboMessage.value = data.message || comboMessage.value
+      } catch (error) {
+        comboMessage.value = error?.response?.data?.message || error.message || comboMessage.value
+      }
+    }
+
+    return null
+  }
+
+  async function validateRequestedCombo(comboId, lines = []) {
+    comboMessage.value = ''
+    selectedCombo.value = null
+    if (!comboId || !Array.isArray(lines) || !lines.length) return null
+
+    try {
+      const response = await ordersApi.validateCheckoutCombo({
+        comboId,
+        items: comboValidateItems(lines),
+      })
+      const data = response?.data ?? {}
+      comboMessage.value = data.message || ''
+
+      if (!data.valid) return null
+
+      selectedCombo.value = normalizeCombo({
+        ...data,
+        id: data.comboId || comboId,
+        name: data.comboName,
+        appliedDiscount: data.comboDiscount,
+      })
+      return selectedCombo.value
+    } catch (error) {
+      comboMessage.value = error?.response?.data?.message || error.message || 'Không thể xác thực combo.'
+      return null
+    }
+  }
+
+  async function applyVoucherByCode(code, type, subtotal, shippingFee = 0) {
+    const response = await ordersApi.validateCheckoutVoucher({ code, type, subtotal, shippingFee })
     const data = response?.data ?? {}
 
     if (!data.valid) {
       return { ok: false, message: data.message ?? 'Mã không hợp lệ.' }
     }
 
+    const normalized = normalizeVoucher({ ...(data.voucher || {}), appliedDiscount: data.discount ?? null })
+
     if (type === 'ship') {
-      shippingVoucher.value = normalizeVoucher(data.voucher)
+      shippingVoucher.value = normalized
     } else {
-      shopVoucher.value = normalizeVoucher(data.voucher)
+      shopVoucher.value = normalized
     }
 
-    return { ok: true, voucher: normalizeVoucher(data.voucher), discount: data.discount ?? 0 }
+    return { ok: true, voucher: normalized, discount: data.discount ?? 0 }
   }
 
   function applyVoucher(voucher, type = 'shop') {
@@ -212,12 +360,28 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   function resetCheckoutState() {
+    loading.value = false
+    placing.value = false
+    hydrated.value = false
+    combosHydrated.value = false
+    shippingOptions.value = []
+    paymentMethods.value = []
+    shopVouchers.value = []
+    shippingVouchers.value = []
+    activeCombos.value = []
     shopVoucher.value = null
     shippingVoucher.value = null
+    selectedCombo.value = null
+    comboMessage.value = ''
+    insuranceOption.value = null
+    codNote.value = ''
+    selectedShippingId.value = ''
+    selectedPaymentId.value = 'vnpay'
     sellerNote.value = ''
     hasInsurance.value = false
     agreedTerms.value = true
     lastOrder.value = null
+    clearPendingPayment()
   }
 
   function rememberPendingPayment(payload = {}) {
@@ -247,6 +411,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
     paymentMethods,
     shopVouchers,
     shippingVouchers,
+    activeCombos,
+    selectedCombo,
+    comboMessage,
     insuranceOption,
     codNote,
     selectedShippingId,
@@ -262,6 +429,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
     shipFee,
     hydrateSession,
     buildSummary,
+    refreshApplicableCombo,
+    validateRequestedCombo,
     applyVoucherByCode,
     applyVoucher,
     removeVoucher,

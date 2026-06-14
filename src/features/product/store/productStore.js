@@ -10,6 +10,7 @@ export const useProductStore = defineStore('product', () => {
   const error = ref(null)
   const selectedProduct = ref(null)
   const productDetails = ref({})
+  let listRequestId = 0
 
   function mapProductList(data) {
     const rawItems = data?.products ?? data?.content ?? []
@@ -17,20 +18,23 @@ export const useProductStore = defineStore('product', () => {
   }
 
   async function loadList(params) {
+    const requestId = ++listRequestId
     loading.value = true
     error.value = null
     try {
       const { data } = await productsApi.getProducts(params)
+      if (requestId !== listRequestId) return
       items.value = mapProductList(data)
       total.value = data?.total ?? data?.page?.totalElements ?? items.value.length
       facets.value = data?.facets ?? {}
     } catch (e) {
+      if (requestId !== listRequestId) return
       error.value = e
       items.value = []
       total.value = 0
       facets.value = {}
     } finally {
-      loading.value = false
+      if (requestId === listRequestId) loading.value = false
     }
   }
 

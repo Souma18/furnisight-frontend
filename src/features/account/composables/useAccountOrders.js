@@ -6,6 +6,7 @@ export function useAccountOrders(emitNotify) {
   const route = useRoute()
   const router = useRouter()
   const orderStore = useOrderStore()
+  const retryingOrderCode = ref('')
 
   const orders = computed(() => orderStore.orders)
 
@@ -43,13 +44,21 @@ export function useAccountOrders(emitNotify) {
   }
 
   async function retryPayment(order) {
-    const result = await orderStore.retryPayment(order)
-    if (!result.ok) {
-      if (emitNotify) emitNotify(result.message ?? 'Không thể thanh toán lại.', 'error')
-      return false
+    const orderCode = order?.orderCode || order?.id || ''
+    if (!orderCode || retryingOrderCode.value) return false
+
+    retryingOrderCode.value = orderCode
+    try {
+      const result = await orderStore.retryPayment(order)
+      if (!result.ok) {
+        if (emitNotify) emitNotify(result.message ?? 'Không thể thanh toán lại.', 'error')
+        return false
+      }
+      if (emitNotify) emitNotify('Đang chuyển sang cổng thanh toán.', 'success')
+      return true
+    } finally {
+      retryingOrderCode.value = ''
     }
-    if (emitNotify) emitNotify('Đang chuyển sang cổng thanh toán.', 'success')
-    return true
   }
 
   watch(selectedOrderId, (orderId) => {
@@ -68,5 +77,6 @@ export function useAccountOrders(emitNotify) {
     backToOrders,
     cancelOrder,
     retryPayment,
+    retryingOrderCode,
   }
 }

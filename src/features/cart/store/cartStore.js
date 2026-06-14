@@ -1,5 +1,6 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
+import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
 
@@ -34,7 +35,7 @@ function isApiBackedCartLine(item = {}) {
 }
 
 export const useCartStore = defineStore('cart', () => {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore(pinia)
   const items = ref([])
   const loading = ref(false)
   const hydrated = ref(false)
@@ -81,6 +82,20 @@ export const useCartStore = defineStore('cart', () => {
     }
   }
 
+  function resetCartState() {
+    items.value = []
+    loading.value = false
+    hydrated.value = false
+    hydratePromise = null
+
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(STORAGE_KEY)
+      for (const storageKey of LEGACY_STORAGE_KEYS) {
+        window.localStorage.removeItem(storageKey)
+      }
+    }
+  }
+
   restorePersistedItems()
 
   const lineCount = computed(() => items.value.length)
@@ -123,9 +138,7 @@ export const useCartStore = defineStore('cart', () => {
         return items.value
       } catch (error) {
         if (typeof window !== 'undefined' && error?.response?.status === 401) {
-          items.value = []
-          hydrated.value = false
-          window.localStorage.removeItem(STORAGE_KEY)
+          resetCartState()
           authStore.logout()
           return items.value
         }
@@ -220,5 +233,6 @@ export const useCartStore = defineStore('cart', () => {
     updateQty,
     removeItem,
     clearCart,
+    resetCartState,
   }
 })

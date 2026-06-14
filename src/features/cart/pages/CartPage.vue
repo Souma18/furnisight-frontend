@@ -5,6 +5,7 @@ import CartItemCard from '../components/CartItemCard.vue'
 import CartSummaryBar from '../components/CartSummaryBar.vue'
 import { useCart } from '../composables/useCart'
 import { productsApi, ProductResponse } from '@shared/lib/api/services'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
@@ -13,6 +14,16 @@ const activeItem = ref(null)
 const activeDraft = ref(null)
 const editorLoading = ref(false)
 const checkedIds = ref([])
+
+const availableItems = computed(() => items.value.filter((item) => !item.outOfStock))
+const availableItemIds = computed(() => availableItems.value.map((item) => item.id))
+const allAvailableChecked = computed(() =>
+  availableItemIds.value.length > 0 &&
+  availableItemIds.value.every((id) => checkedIds.value.includes(id)),
+)
+const partiallyChecked = computed(() =>
+  checkedIds.value.some((id) => availableItemIds.value.includes(id)) && !allAvailableChecked.value,
+)
 
 const selectedItems = computed(() =>
   items.value.filter((item) => checkedIds.value.includes(item.id) && !item.outOfStock),
@@ -100,17 +111,27 @@ function normalizeEditorVariants(variants = []) {
     .filter((variant) => variant.color || variant.size)
 }
 
+function resolveProductDetailLookup(item) {
+  return item?.detailId || item?.slug || ''
+}
+
 async function buildEditorItem(item) {
   const normalizedExistingVariants = normalizeEditorVariants(item?.variants ?? [])
   if (normalizedExistingVariants.length) {
     return {
       ...item,
       variants: normalizedExistingVariants,
+      variantLoadFailed: false,
     }
   }
 
-  const lookupId = item?.detailId || item?.slug || item?.productId
-  if (!lookupId) return item
+  const lookupId = resolveProductDetailLookup(item)
+  if (!lookupId) {
+    return {
+      ...item,
+      variantLoadFailed: true,
+    }
+  }
 
   try {
     const response = await productsApi.getProductDetail(lookupId)
@@ -118,20 +139,27 @@ async function buildEditorItem(item) {
     const fetchedVariants = normalizeEditorVariants(product?.variants ?? [])
 
     if (!fetchedVariants.length) {
-      return item
+      return {
+        ...item,
+        variantLoadFailed: true,
+      }
     }
 
     return {
       ...item,
       variants: fetchedVariants,
+      variantLoadFailed: false,
       colors: Array.isArray(product?.colors) ? product.colors : [],
       sizes: Array.isArray(product?.sizes) ? product.sizes : [],
       selectedColor: item.selectedColor || product?.colors?.[0] || '',
       selectedSize: item.selectedSize || product?.sizes?.[0] || '',
     }
   } catch (error) {
-    console.error('Failed to load product variants for cart item:', error)
-    return item
+    console.warn('Failed to load product variants for cart item:', error?.response?.status || error?.message || error)
+    return {
+      ...item,
+      variantLoadFailed: true,
+    }
   }
 }
 
@@ -232,6 +260,15 @@ function toggleChecked(itemId) {
   checkedIds.value = [...checkedIds.value, itemId]
 }
 
+function toggleAllChecked() {
+  if (allAvailableChecked.value) {
+    checkedIds.value = checkedIds.value.filter((id) => !availableItemIds.value.includes(id))
+    return
+  }
+
+  checkedIds.value = [...new Set([...checkedIds.value, ...availableItemIds.value])]
+}
+
 async function removeLine(itemId) {
   try {
     await removeItem(itemId)
@@ -242,9 +279,7 @@ async function removeLine(itemId) {
   }
 }
 
-function formatPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatPrice = PriceFormatter.format
 
 function handleCheckout() {
   if (!selectedCount.value) return
@@ -262,6 +297,20 @@ function handleCheckout() {
       </div>
 
       <div class="cart-content" v-if="items.length">
+        <div class="select-all-row">
+          <label class="select-all-box">
+            <input
+              type="checkbox"
+              :checked="allAvailableChecked"
+              :indeterminate="partiallyChecked"
+              :disabled="!availableItemIds.length"
+              @change="toggleAllChecked"
+            >
+            <span>Chọn tất cả</span>
+          </label>
+          <span>{{ selectedCount }} / {{ availableItemIds.length }} sản phẩm</span>
+        </div>
+
         <div class="list">
           <CartItemCard
             v-for="item in items"
@@ -316,6 +365,10 @@ function handleCheckout() {
                 </option>
               </select>
             </label>
+
+            <p v-if="activeItem.variantLoadFailed" class="variant-modal-hint">
+              Không tải được dữ liệu phân loại cho sản phẩm này. Vui lòng xóa sản phẩm và thêm lại từ trang chi tiết nếu cần đổi phân loại.
+            </p>
 
             <label>
               <span>Kích thước</span>
@@ -392,6 +445,33 @@ function handleCheckout() {
   padding: 30px;
   box-shadow: 0 10px 40px rgba(18, 32, 46, 0.05);
   border: 1px solid #ece2cf;
+}
+
+.select-all-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #ece2cf;
+  color: #7a7a7a;
+  font-size: 14px;
+}
+
+.select-all-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #12202e;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.select-all-box input {
+  width: 16px;
+  height: 16px;
+  accent-color: #c9922a;
 }
 
 .list { 
@@ -532,6 +612,17 @@ function handleCheckout() {
 .variant-modal-body span {
   color: #7a7a7a;
   font-size: 12px;
+}
+
+.variant-modal-hint {
+  margin: 0;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #efd7a5;
+  border-radius: 10px;
+  background: #fff8e8;
+  color: #8b6a21;
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .variant-modal-body select,

@@ -8,7 +8,12 @@ export default defineConfig({
   plugins: [vue(), tailwindcss()],
   server: {
     host: true,
-    allowedHosts: ["furnisight.store"]
+    allowedHosts: ['furnisight.store'],
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      Pragma: 'no-cache',
+      Expires: '0',
+    },
   },
   define: {
     global: 'window',
@@ -22,4 +27,3 @@ export default defineConfig({
     },
   },
 })
-

@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
@@ -67,9 +68,19 @@ export const useOrderStore = defineStore('accountOrder', () => {
     if (!detail) return { ok: false, message: 'Đơn hàng không tồn tại.' }
     
     try {
-      await ordersApi.cancelOrder(detail.orderCode || orderId)
-      orders.value = orders.value.map(o => o.id === orderId || o.orderCode === orderId ? { ...o, status: 'cancel' } : o)
-      orderDetails.value = { ...orderDetails.value, [orderId]: { ...detail, status: 'cancel' } }
+      const orderCode = detail.orderCode || orderId
+      await ordersApi.cancelOrder(orderCode)
+      const updatedDetail = { ...detail, status: 'cancel', rawStatus: 'CANCELLED', canRetryPayment: false }
+      orders.value = orders.value.map((order) =>
+        order.id === detail.id || order.orderCode === orderCode
+          ? { ...order, status: 'cancel', rawStatus: 'CANCELLED', canRetryPayment: false }
+          : order,
+      )
+      orderDetails.value = {
+        ...orderDetails.value,
+        [orderCode]: updatedDetail,
+        ...(detail.id ? { [detail.id]: updatedDetail } : {}),
+      }
       return { ok: true }
     } catch (error) {
       return { ok: false, message: error.response?.data?.message || 'Không thể huỷ đơn hàng lúc này.' }
@@ -92,7 +103,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
     }
 
     try {
-      const checkoutStore = useCheckoutStore()
+      const checkoutStore = useCheckoutStore(pinia)
       const response = await ordersApi.createVnpayPayment({
         orderCode: order.orderCode,
         returnUrl: `${window.location.origin}/orders/payment/callback`,
@@ -121,6 +132,12 @@ export const useOrderStore = defineStore('accountOrder', () => {
     }
   }
 
+  function resetOrderState() {
+    orders.value = []
+    orderDetails.value = {}
+    loading.value = false
+  }
+
   return {
     orders,
     orderDetails,
@@ -130,5 +147,6 @@ export const useOrderStore = defineStore('accountOrder', () => {
     getOrderDetail,
     cancelOrder,
     retryPayment,
+    resetOrderState,
   }
 })

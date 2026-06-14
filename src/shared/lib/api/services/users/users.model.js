@@ -7,6 +7,7 @@ export class ProfileResponse {
     this.email = data.email || ''
     this.firstName = data.firstName || ''
     this.lastName = data.lastName || ''
+    this.avatarMediaId = data.avatarMediaId || null
     this.avatarUrl = data.avatarUrl || ''
     this.role = data.role || ''
     this.birthday = data.birthday || data.dateOfBirth || ''
@@ -55,7 +56,6 @@ export class FavoriteProductDto {
     this.categoryName = data.categoryName || ''
     this.image = data.image || data.imageUrl || ''
     this.price = data.price ?? 0
-    this.oldPrice = data.oldPrice ?? null
     this.soldCount = data.soldCount ?? data.soldQuantity ?? 0
   }
 }

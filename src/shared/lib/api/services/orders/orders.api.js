@@ -20,6 +20,10 @@ class OrdersApi {
     return apiClient.get(`/orders/${orderCode}`)
   }
 
+  checkProductPurchased(productId) {
+    return apiClient.get(`/orders/user/products/${productId}/purchased`)
+  }
+
   /**
    * Creates a new order
    * @param {Object} payload 
@@ -65,6 +69,7 @@ class OrdersApi {
   getPaymentCallback(paymentMethod, params) {
     return apiClient.get(`/orders/payment/${paymentMethod}/callback`, {
       params,
+      skipAuth: true,
       headers: { Accept: 'application/json' },
     })
   }
@@ -72,16 +77,31 @@ class OrdersApi {
   // ─── VOUCHERS ────────────────────────────────────────────────────────
 
   getVouchers(params) {
-    // Backend uses @GetMapping("/user") on VoucherController
-    return apiClient.get('/orders/vouchers/user', { params })
+    return apiClient.get('/promotions/vouchers/user', { params })
   }
 
   applyVoucher(code, orderAmount) {
-    return apiClient.post('/orders/vouchers/apply', { code, orderAmount })
+    return apiClient.post('/promotions/vouchers/validate', {
+      code,
+      type: 'shop',
+      subtotal: orderAmount,
+      shippingFee: 0,
+    })
   }
 
   validateCheckoutVoucher(payload) {
-    return apiClient.post('/orders/vouchers/validate', payload)
+    return apiClient.post('/promotions/vouchers/validate', payload)
+  }
+
+  getActiveCombos(params) {
+    return apiClient.get('/promotions/combos/active', {
+      params,
+      skipAuth: true,
+    })
+  }
+
+  validateCheckoutCombo(payload) {
+    return apiClient.post('/promotions/combos/validate', payload)
   }
 }
 

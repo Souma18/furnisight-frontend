@@ -90,6 +90,12 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
     return true
   }
 
+  function resetWishlistState() {
+    wishlist.value = []
+    wishlistHydrated.value = false
+    wishlistPromise = null
+  }
+
   return {
     wishlist,
     wishlistHydrated,
@@ -98,6 +104,7 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
     upsertFavorite,
     loadWishlist,
     addFavorite,
-    removeFavorite
+    removeFavorite,
+    resetWishlistState,
   }
 })

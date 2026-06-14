@@ -2,7 +2,6 @@ import { computed } from 'vue'
 
 export function useProductTabs(productRef) {
   const reviewCountLabel = computed(() => productRef.value?.ratingCount ?? 0)
-  const qaCountLabel = computed(() => productRef.value?.qa?.length ?? 0)
 
   const specsRows = computed(() => {
     const product = productRef.value
@@ -19,10 +18,6 @@ export function useProductTabs(productRef) {
 
     if (!rows.length && product.category?.label) {
       rows.push({ key: 'Danh mục', value: product.category.label })
-    }
-
-    if (!rows.length && product.collection) {
-      rows.push({ key: 'Bộ sưu tập', value: product.collection })
     }
 
     if (!rows.length && typeof product.stock === 'number') {
@@ -50,15 +45,9 @@ export function useProductTabs(productRef) {
     return bars;
   })
 
-  function getStars(rating) {
-    return '★'.repeat(Math.round(rating || 5)).padEnd(5, '☆')
-  }
-
   return {
     reviewCountLabel,
-    qaCountLabel,
     specsRows,
     reviewBars,
-    getStars,
   }
 }

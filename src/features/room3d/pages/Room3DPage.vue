@@ -34,6 +34,7 @@ const {
   cartCount,
   productFilters,
   uploadError,
+  recommendationError,
 } = vm
 
 const canvasRef = ref(null)
@@ -106,6 +107,7 @@ onMounted(() => {
           :search-keyword="searchKeyword"
           :product-filters="productFilters"
           :filtered-products="filteredProducts"
+          :recommendation-error="recommendationError"
           :cart-items="cartItems"
           :placed-product-ids="cartProductIds"
           :cart-total="cartTotal"

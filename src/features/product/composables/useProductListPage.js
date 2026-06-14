@@ -1,13 +1,20 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
 import { useProducts } from './useProducts'
 
+const PRICE_BAND_TAGS = {
+  lt5m: 'Dưới 5tr',
+  '5-15m': '5tr - 15tr',
+  '15-30m': '15tr - 30tr',
+  gt30m: '30tr - 50tr+',
+}
+
 export function useProductListPage() {
   const route = useRoute()
-  const router = useRouter()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
   const { items, total, facets, loading, loadList } = useProducts()
@@ -41,7 +48,7 @@ export function useProductListPage() {
     if (f.materials?.length) tags.push(`${f.materials.length} chất liệu`)
     if (f.colors?.length) tags.push(`${f.colors.length} màu`)
     if (f.minStar != null) tags.push(`${f.minStar}+ sao`)
-    if (f.priceBands?.length) tags.push('Khoảng giá')
+    if (f.priceBands?.length) tags.push(PRICE_BAND_TAGS[f.priceBands[0]] ?? 'Khoảng giá')
     return tags
   })
 
@@ -177,12 +184,7 @@ export function useProductListPage() {
     if (!productId) return
 
     if (!authStore.isAuthenticated) {
-      router.push({
-        name: 'login',
-        query: {
-          redirect: route.fullPath,
-        },
-      })
+      openAuthModal()
       return
     }
 
@@ -222,8 +224,7 @@ export function useProductListPage() {
       return {
         breadcrumb: ['Trang chủ', 'Sản phẩm'],
         title: 'Tất cả sản phẩm',
-        subtitle: facets.value.description ?? 'Khám phá bộ sưu tập nội thất đa dạng của chúng tôi',
-        collection: facets.value.collection ?? 'Bộ sưu tập 2026',
+        subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
         stats: [
           { label: 'Sản phẩm', value: total.value },
           { label: 'Danh mục', value: facets.value.categories?.length || 0 },
@@ -238,8 +239,7 @@ export function useProductListPage() {
     return {
       breadcrumb: ['Trang chủ', 'Sản phẩm', label],
       title: label,
-      subtitle: `Bộ sưu tập ${label} tinh tế và hiện đại`,
-      collection: 'Interior Design',
+      subtitle: `${label} tinh tế và hiện đại`,
       stats: [
         { label: 'Sản phẩm', value: total.value },
         { label: 'Màu sắc', value: facets.value.colors?.length || 0 },

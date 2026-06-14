@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAddressForm } from '../../composables/useAddressForm'
 
 const props = defineProps({
@@ -31,7 +32,7 @@ const emit = defineEmits(['notify'])
   </script>
   
   <template>
-    <AccountSectionCard title="Địa chỉ giao hàng">
+    <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
       <template #head>
         <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
       </template>
@@ -49,7 +50,10 @@ const emit = defineEmits(['notify'])
         >
           <div class="item-head">
             <div class="item-tags">
-              <span v-if="address.isDefault" class="badge badge-default">Mặc định</span>
+              <span v-if="address.isDefault" class="badge badge-default">
+                <AppIcon name="mapPin" :size="12" />
+                Mặc định
+              </span>
               <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
             </div>
   
@@ -60,6 +64,7 @@ const emit = defineEmits(['notify'])
                 class="set-default-btn"
                 @click="setAsDefault(address.id)"
               >
+                <AppIcon name="mapPin" :size="13" />
                 Đặt làm mặc định
               </button>
               <button
@@ -139,6 +144,16 @@ const emit = defineEmits(['notify'])
 </template>
 
 <style scoped>
+.address-card {
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.address-card :deep(.card-head h3) {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
 .list {
   display: grid;
   gap: 0.6rem;
@@ -153,6 +168,8 @@ const emit = defineEmits(['notify'])
   border-radius: 12px;
   padding: 0.75rem;
   background: var(--account-surface);
+  font-size: 1rem;
+  line-height: 1.45;
 }
 .item--default {
   border-color: rgba(201, 146, 42, 0.45);
@@ -176,16 +193,19 @@ const emit = defineEmits(['notify'])
   display: inline-flex;
   align-items: center;
   min-height: 1.35rem;
-  padding: 0 0.5rem;
-  border-radius: 999px;
+  padding: 0 0.55rem;
+  border-radius: 7px;
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  gap: 0.25rem;
 }
 .badge-default {
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
+  border: 1px solid rgba(201, 146, 42, 0.42);
+  background: #c9922a;
+  color: #fff;
+  box-shadow: 0 5px 14px rgba(201, 146, 42, 0.18);
 }
 .badge-type {
   background: #f5efe6;
@@ -206,6 +226,9 @@ const emit = defineEmits(['notify'])
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 .set-default-btn:hover {
   background: #faf6f0;
@@ -227,11 +250,14 @@ const emit = defineEmits(['notify'])
 .name {
   margin: 0 0 0.2rem;
   font-weight: 600;
+  font-size: 0.94rem;
+  line-height: 1.35;
 }
 .meta {
   margin: 0;
   color: var(--auth-text-secondary);
   font-size: 0.84rem;
+  line-height: 1.45;
 }
 .overlay {
   position: fixed;
@@ -247,11 +273,24 @@ const emit = defineEmits(['notify'])
   width: min(680px, 100%);
   border-radius: 14px;
   padding: 1rem;
+  font-size: 1rem;
 }
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
+}
+.form-grid label {
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+.form-grid input,
+.form-grid select,
+.actions button,
+.primary,
+.ghost {
+  font: inherit;
+  font-size: 0.86rem;
 }
 .detail-field {
   min-width: 0;

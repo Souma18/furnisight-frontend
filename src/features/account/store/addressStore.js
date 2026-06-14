@@ -13,10 +13,22 @@ export const useAddressStore = defineStore('accountAddress', () => {
     return [...list].sort((a, b) => Number(b.isDefault) - Number(a.isDefault))
   }
 
+  function normalizeAddress(address = {}) {
+    return {
+      ...address,
+      isDefault: Boolean(address.isDefault ?? address.default),
+    }
+  }
+
+  function setAddresses(list) {
+    const normalized = Array.isArray(list) ? list.map(normalizeAddress) : []
+    addresses.value = sortAddressesByDefault(normalized)
+    return addresses.value
+  }
+
   async function fetchAddresses() {
     const res = await usersApi.getAddresses()
-    addresses.value = sortAddressesByDefault(res.data || res)
-    return addresses.value
+    return setAddresses(res.data || res)
   }
 
   async function addAddress(payload) {
@@ -25,7 +37,8 @@ export const useAddressStore = defineStore('accountAddress', () => {
   }
 
   async function setDefaultAddress(addressId) {
-    await usersApi.setDefaultAddress(addressId)
+    const response = await usersApi.setDefaultAddress(addressId)
+    if (Array.isArray(response.data)) return setAddresses(response.data)
     return await fetchAddresses()
   }
 
@@ -34,13 +47,19 @@ export const useAddressStore = defineStore('accountAddress', () => {
     return await fetchAddresses()
   }
 
+  function resetAddressState() {
+    addresses.value = []
+  }
+
   return {
     addresses,
     defaultAddress,
     sortAddressesByDefault,
+    normalizeAddress,
     fetchAddresses,
     addAddress,
     setDefaultAddress,
-    deleteAddress
+    deleteAddress,
+    resetAddressState,
   }
 })

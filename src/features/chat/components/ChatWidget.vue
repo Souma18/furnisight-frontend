@@ -1,5 +1,6 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AuthModal from '@features/auth/components/AuthModal.vue'
 import { useChat } from '../composables/useChat'
 import ChatMessageBubble from './ChatMessageBubble.vue'
 import '../styles/chatWidget.css'
@@ -16,6 +17,7 @@ const {
   messagesRef,
   inputRef,
   showFabTooltip,
+  authModalOpen,
   todayLabel,
   formatTimeLabel,
   toggleChat,
@@ -23,6 +25,8 @@ const {
   quickSend,
   handleInputKeydown,
   resizeTextarea,
+  handleAuthenticated,
+  closeAuthModal,
   closeChat,
   loading,
   error,
@@ -161,4 +165,10 @@ function handleAddToCart(product) {
       </footer>
     </div>
   </div>
+  <AuthModal
+    :open="authModalOpen"
+    initial-view="login"
+    @close="closeAuthModal"
+    @authenticated="handleAuthenticated"
+  />
 </template>

@@ -16,6 +16,7 @@ export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
     title: '',
     message: '',
     mode: AUTH_VIEWS.LOGIN,
+    loading: false,
   })
 
   const showTabs = computed(
@@ -26,8 +27,8 @@ export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
     activeView.value = view
   }
 
-  function showSuccess({ title, message, mode = AUTH_VIEWS.LOGIN }) {
-    successState.value = { title, message, mode }
+  function showSuccess({ title, message, mode = AUTH_VIEWS.LOGIN, loading = false }) {
+    successState.value = { title, message, mode, loading }
     activeView.value = AUTH_VIEWS.SUCCESS
   }
 

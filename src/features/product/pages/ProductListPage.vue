@@ -33,7 +33,6 @@ const {
   <section class="products-page">
     <ProductListHeroSection
       :breadcrumb="dynamicHero.breadcrumb"
-      :collection="dynamicHero.collection"
       :title="dynamicHero.title"
       :subtitle="dynamicHero.subtitle"
       :stats="dynamicHero.stats"

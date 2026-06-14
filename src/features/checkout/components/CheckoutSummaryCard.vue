@@ -1,4 +1,6 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
+
 defineProps({
   lines: { type: Array, default: () => [] },
   summary: { type: Object, required: true },
@@ -9,9 +11,6 @@ defineProps({
 
 defineEmits(['update-agreed', 'place-order'])
 
-function lineThumb(line) {
-  return line.imageFallback ?? line.emoji ?? '🛍️'
-}
 </script>
 
 <template>
@@ -25,7 +24,8 @@ function lineThumb(line) {
       <div class="co-sum-products">
         <div v-for="line in lines" :key="line.id" class="co-sum-item">
           <div class="co-sum-thumb">
-            {{ lineThumb(line) }}
+            <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-sum-thumb-img">
+            <AppIcon v-else name="image" :size="18" />
             <span class="co-sum-qty">{{ line.qty }}</span>
           </div>
           <span class="co-sum-name">{{ line.name }}</span>
@@ -45,6 +45,10 @@ function lineThumb(line) {
         <div v-if="summary.shippingDiscount" class="co-sum-row">
           <span>Voucher vận chuyển</span>
           <span class="green">−{{ formatMoney(summary.shippingDiscount) }}</span>
+        </div>
+        <div v-if="summary.comboDiscount" class="co-sum-row">
+          <span>Combo khuyến mãi</span>
+          <span class="green">−{{ formatMoney(summary.comboDiscount) }}</span>
         </div>
         <div class="co-sum-row">
           <span>Voucher Shop</span>
@@ -67,7 +71,10 @@ function lineThumb(line) {
       <div class="co-sum-total">
         <p style="font-size: 0.78rem; color: var(--co-text-mid, #555)">Tổng thanh toán</p>
         <p class="co-sum-total-val">{{ formatMoney(summary.total) }}</p>
-        <p v-if="summary.saved" class="co-sum-saving">🎉 Tiết kiệm {{ formatMoney(summary.saved) }} so với giá gốc</p>
+        <p v-if="summary.saved" class="co-sum-saving">
+          <AppIcon name="partyPopper" :size="14" />
+          Tiết kiệm {{ formatMoney(summary.saved) }} so với giá gốc
+        </p>
       </div>
 
       <div class="co-sum-confirm">
@@ -88,9 +95,13 @@ function lineThumb(line) {
           :disabled="placing"
           @click="$emit('place-order')"
         >
-          ✦ Đặt hàng – {{ formatMoney(summary.total) }}
+          <AppIcon name="creditCard" :size="17" />
+          Đặt hàng – {{ formatMoney(summary.total) }}
         </button>
-        <p class="co-btn-order-sub">🔒 Thanh toán được mã hoá và bảo mật</p>
+        <p class="co-btn-order-sub">
+          <AppIcon name="lockKeyhole" :size="13" />
+          Thanh toán được mã hoá và bảo mật
+        </p>
       </div>
     </div>
   </aside>

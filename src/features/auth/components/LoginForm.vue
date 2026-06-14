@@ -25,7 +25,15 @@ const {
 <template>
   <form class="form" @submit.prevent="submitLogin">
     <label>Email</label>
-    <input v-model="form.email" type="email" placeholder="hello@email.com" required />
+    <input
+      v-model.trim="form.email"
+      type="email"
+      placeholder="hello@email.com"
+      autocomplete="email"
+      autocapitalize="none"
+      spellcheck="false"
+      required
+    />
 
     <label>Mật khẩu</label>
     <div class="password-row">
@@ -33,6 +41,7 @@ const {
         v-model="form.password"
         :type="showPassword ? 'text' : 'password'"
         placeholder="Nhập mật khẩu"
+        autocomplete="current-password"
         minlength="8"
         required
       />

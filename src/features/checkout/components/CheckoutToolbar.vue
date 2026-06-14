@@ -37,7 +37,8 @@ defineEmits(['back'])
       "
       @click="$emit('back')"
     >
-      ← Giỏ hàng
+      <AppIcon name="arrowLeft" :size="14" />
+      Giỏ hàng
     </button>
   </div>
 </template>

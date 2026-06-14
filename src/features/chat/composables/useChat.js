@@ -16,6 +16,7 @@ export function useChat() {
   const messagesRef = ref(null)
   const inputRef = ref(null)
   const showFabTooltip = ref(false)
+  const authModalOpen = ref(false)
 
   let tooltipTimer = null
 
@@ -27,7 +28,27 @@ export function useChat() {
     })
   }
 
+  function showLogin() {
+    chatStore.resetSession()
+    authModalOpen.value = true
+  }
+
+  async function handleAuthenticated() {
+    authModalOpen.value = false
+    await chatStore.hydrateSession(true)
+    chatStore.open()
+    nextTick(() => {
+      inputRef.value?.focus()
+      scrollToBottom()
+    })
+  }
+
   function toggleChat() {
+    if (!authStore.isAuthenticated) {
+      showLogin()
+      return
+    }
+
     chatStore.toggleOpen()
     if (isOpen.value) {
       nextTick(() => {
@@ -38,6 +59,10 @@ export function useChat() {
   }
 
   function sendDraft() {
+    if (!authStore.isAuthenticated) {
+      showLogin()
+      return
+    }
     chatStore.sendMessage(draft.value)
     scrollToBottom()
   }
@@ -62,17 +87,24 @@ export function useChat() {
 
   const todayLabel = computed(() => 'Hôm nay')
 
-  watch(messages, () => scrollToBottom(), { deep: true })
+  watch(() => messages.value.length, () => scrollToBottom())
   watch(isTyping, () => scrollToBottom())
   watch(
-    () => authStore.user?.id ?? null,
+    () => [authStore.isAuthenticated, authStore.user?.id ?? null],
     async () => {
-      await chatStore.hydrateSession(true)
+      if (authStore.isAuthenticated) {
+        authModalOpen.value = false
+        await chatStore.hydrateSession(true)
+      } else {
+        chatStore.resetSession()
+      }
     },
   )
 
   onMounted(async () => {
-    await chatStore.hydrateSession()
+    if (authStore.isAuthenticated) {
+      await chatStore.hydrateSession()
+    }
     scrollToBottom()
 
     tooltipTimer = setTimeout(() => {
@@ -103,6 +135,7 @@ export function useChat() {
     messagesRef,
     inputRef,
     showFabTooltip,
+    authModalOpen,
     todayLabel,
     formatTimeLabel: chatStore.formatTimeLabel,
     toggleChat,
@@ -110,6 +143,10 @@ export function useChat() {
     quickSend,
     handleInputKeydown,
     resizeTextarea,
+    handleAuthenticated,
+    closeAuthModal: () => {
+      authModalOpen.value = false
+    },
     closeChat: chatStore.close,
   }
 }

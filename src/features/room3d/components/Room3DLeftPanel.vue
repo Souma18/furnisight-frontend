@@ -1,6 +1,7 @@
 <script setup>
 import { NSpin, NTag } from 'naive-ui'
 import { computed, ref } from 'vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
   mode: String,
@@ -95,7 +96,7 @@ function runAiGenerate() {
         :class="{ active: mode === 'upload' }"
         @click="emit('switch-mode', 'upload')"
       >
-        <span class="tab-icon">🖼️</span>
+        <span class="tab-icon"><AppIcon name="image" :size="22" /></span>
         <span>Hinh anh</span>
       </button>
       <button
@@ -104,7 +105,7 @@ function runAiGenerate() {
         :class="{ active: mode === 'room' }"
         @click="emit('switch-mode', 'room')"
       >
-        <span class="tab-icon">🏠</span>
+        <span class="tab-icon"><AppIcon name="house" :size="22" /></span>
         <span>Phong o</span>
       </button>
     </div>
@@ -135,7 +136,7 @@ function runAiGenerate() {
 
       <label class="upload-zone">
         <input class="file-input" type="file" accept="image/*" @change="onFileChange" />
-        <span class="upload-icon">📤</span>
+        <span class="upload-icon"><AppIcon name="cloudUpload" :size="26" /></span>
         <strong>Nhập / Kéo Thả / Dán Hình Ảnh</strong>
         <small>JPG, PNG, WEBP · Tối đa 50MB</small>
         <small>AI sẽ tự nhận diện loại phòng</small>
@@ -167,7 +168,9 @@ function runAiGenerate() {
           :class="{ active: selectedRoomType === room.type }"
           @click="emit('select-room-type', room.type)"
         >
-          <span class="room-btn-icon">{{ room.emoji }}</span>
+          <span class="room-btn-icon">
+            <AppIcon :name="room.icon || 'house'" :size="22" />
+          </span>
           <span class="room-btn-content">
             <strong>{{ room.name }}</strong>
             <small>{{ room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }} san pham phu hop</small>
@@ -344,7 +347,9 @@ function runAiGenerate() {
 }
 
 .tab-icon {
-  font-size: 1.4rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .label {
@@ -395,7 +400,9 @@ function runAiGenerate() {
 }
 
 .upload-icon {
-  font-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 0.1rem;
 }
 
@@ -431,7 +438,13 @@ function runAiGenerate() {
 }
 
 .room-btn-icon {
-  font-size: 1.4rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: 0 0 1.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #876844;
 }
 
 .room-btn-content {

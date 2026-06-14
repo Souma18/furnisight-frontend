@@ -1,23 +1,34 @@
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { router } from './router'
 import AppHeader from '@shared/layout/AppHeader.vue'
 import AppFooter from '@shared/layout/AppFooter.vue'
-import ChatWidget from '@features/chat/components/ChatWidget.vue'
+import AuthModal from '@features/auth/components/AuthModal.vue'
+import { AUTH_MODAL_EVENT, consumePendingAuthModal } from '@features/auth/lib/authModalBus'
+import { useAuthStore } from '@features/auth/store/authStore'
 
-const route = useRoute()
-const isRoom3DPage = computed(() => route.path.startsWith('/room3d'))
-const isHomePage = computed(() => route.name === 'home')
-const isProductsPage = computed(() => route.name === 'products')
-const isProductDetailPage = computed(() => route.name === 'product-detail')
-const isContactPage = computed(() => route.name === 'contact')
-const isCheckoutPage = computed(() => route.name === 'checkout')
-const isAccountPage = computed(() => route.path.startsWith('/account'))
-const isAdminPage = computed(() => route.path.startsWith('/admin'))
-const isLoginPage = computed(() => route.name === 'login')
+const ChatWidget = defineAsyncComponent(() => import('@features/chat/components/ChatWidget.vue'))
+
+const route = router.currentRoute
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
+const isRoom3DPage = computed(() => route.value.path.startsWith('/room3d'))
+const isHomePage = computed(() => route.value.name === 'home')
+const isProductsPage = computed(() => route.value.name === 'products')
+const isProductDetailPage = computed(() => route.value.name === 'product-detail')
+const isContactPage = computed(() => route.value.name === 'contact')
+const isPromotionsPage = computed(() => route.value.name === 'promotions')
+const isCheckoutPage = computed(() => route.value.name === 'checkout')
+const isAccountPage = computed(() => route.value.path.startsWith('/account'))
+const isAdminPage = computed(() => route.value.path.startsWith('/admin'))
 const mainRef = ref(null)
+const isAuthModalOpen = ref(false)
+const initialAuthView = ref('login')
+const chatWidgetReady = ref(false)
 let resizeObserver = null
-let mutationObserver = null
+let chatIdleHandle = null
+let chatReadyTimer = null
 
 function syncHeaderScrollbarInset() {
   const el = mainRef.value
@@ -25,38 +36,78 @@ function syncHeaderScrollbarInset() {
   document.documentElement.style.setProperty('--app-main-scrollbar-width', `${scrollbarWidth}px`)
 }
 
+function openAuthModalFromEvent(event) {
+  initialAuthView.value = event?.detail?.initialView || 'login'
+  isAuthModalOpen.value = true
+}
+
+async function closeAuthModal() {
+  isAuthModalOpen.value = false
+  initialAuthView.value = 'login'
+
+  if (route.value.query.otpCode) {
+    const query = { ...route.value.query }
+    delete query.otpCode
+    await router.replace({ query })
+  }
+}
+
 onMounted(async () => {
   await nextTick()
   syncHeaderScrollbarInset()
   window.addEventListener('resize', syncHeaderScrollbarInset)
   window.addEventListener('load', syncHeaderScrollbarInset)
+  window.addEventListener(AUTH_MODAL_EVENT, openAuthModalFromEvent)
+
+  const pendingView = consumePendingAuthModal()
+  if (pendingView) {
+    initialAuthView.value = pendingView
+    isAuthModalOpen.value = true
+  }
 
   if (typeof ResizeObserver !== 'undefined' && mainRef.value) {
     resizeObserver = new ResizeObserver(() => syncHeaderScrollbarInset())
     resizeObserver.observe(mainRef.value)
   }
 
-  if (typeof MutationObserver !== 'undefined' && mainRef.value) {
-    mutationObserver = new MutationObserver(() => syncHeaderScrollbarInset())
-    mutationObserver.observe(mainRef.value, { childList: true, subtree: true })
+  if (typeof window.requestIdleCallback === 'function') {
+    chatIdleHandle = window.requestIdleCallback(
+      () => {
+        chatWidgetReady.value = true
+      },
+      { timeout: 2500 },
+    )
+  } else {
+    chatReadyTimer = window.setTimeout(() => {
+      chatWidgetReady.value = true
+    }, 1200)
   }
 })
 
 watch(
-  () => route.fullPath,
+  () => route.value.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()
   },
 )
 
+watch(isAuthenticated, (authenticated) => {
+  if (!authenticated) {
+    initialAuthView.value = 'login'
+  }
+})
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', syncHeaderScrollbarInset)
   window.removeEventListener('load', syncHeaderScrollbarInset)
+  window.removeEventListener(AUTH_MODAL_EVENT, openAuthModalFromEvent)
   resizeObserver?.disconnect()
   resizeObserver = null
-  mutationObserver?.disconnect()
-  mutationObserver = null
+  if (chatIdleHandle != null && typeof window.cancelIdleCallback === 'function') {
+    window.cancelIdleCallback(chatIdleHandle)
+  }
+  if (chatReadyTimer != null) window.clearTimeout(chatReadyTimer)
 })
 </script>
 
@@ -75,19 +126,27 @@ onBeforeUnmount(() => {
           !isProductDetailPage &&
           !isProductsPage &&
           !isContactPage &&
+          !isPromotionsPage &&
           !isCheckoutPage,
         'app-main--home': isHomePage,
         'app-main--products': isProductsPage,
         'app-main--product-detail': isProductDetailPage,
         'app-main--contact': isContactPage,
+        'app-main--promotions': isPromotionsPage,
         'app-main--checkout': isCheckoutPage,
-        'app-main--login': isLoginPage,
       }"
     >
       <RouterView />
-      <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage && !isLoginPage" />
+      <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
-    <ChatWidget v-if="!isRoom3DPage && !isAdminPage && !isLoginPage" />
+    <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
+    <AuthModal
+      :key="initialAuthView"
+      :open="isAuthModalOpen"
+      :initial-view="initialAuthView"
+      @close="closeAuthModal"
+      @authenticated="closeAuthModal"
+    />
   </div>
 </template>
 
@@ -146,6 +205,13 @@ onBeforeUnmount(() => {
   background: #faf6f0;
 }
 
+.app-main--promotions {
+  max-width: none;
+  margin: 0;
+  padding: 56px 0 0;
+  background: #faf7f2;
+}
+
 .app-main--checkout {
   max-width: none;
   margin: 0;
@@ -153,12 +219,4 @@ onBeforeUnmount(() => {
   background: #faf6f0;
 }
 
-.app-main--login {
-  max-width: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
 </style>

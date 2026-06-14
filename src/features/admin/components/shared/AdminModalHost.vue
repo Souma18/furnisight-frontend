@@ -1,18 +1,21 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { adminApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminModal from './AdminModal.vue'
 import AdminIconPicker from '../forms/AdminIconPicker.vue'
-import AdminModel3dUpload from '../forms/AdminModel3dUpload.vue'
 import AdminProductImagesUpload from '../forms/AdminProductImagesUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
+import { PriceFormatter } from '@shared/lib/formatters'
+
+const AdminModel3dUpload = defineAsyncComponent(() => import('../forms/AdminModel3dUpload.vue'))
 
 const iconOptions = ref([])
 const roleOptions = ref([])
 const categoryOptions = ref([])
 const productOptions = ref([])
+const loadedOptions = new Set()
 const {
   modal,
   isOpen,
@@ -65,43 +68,70 @@ function variantDisplayCode(variant) {
   return variant.sku || 'Chưa có mã SKU'
 }
 
-function formatVariantPrice(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatVariantPrice = PriceFormatter.format
 
-onMounted(async () => {
+async function loadIconOptions() {
+  if (loadedOptions.has('icons')) return
+  loadedOptions.add('icons')
   try {
     const iconRes = await adminApi.fetchCategoryIconOptions()
     iconOptions.value = iconRes.data?.items ?? iconRes.data ?? []
   } catch {
+    loadedOptions.delete('icons')
     iconOptions.value = []
   }
+}
 
+async function loadRoleOptions() {
+  if (loadedOptions.has('roles')) return
+  loadedOptions.add('roles')
   try {
     const roleRes = await adminApi.fetchRoles()
     roleOptions.value = roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? []
   } catch {
+    loadedOptions.delete('roles')
     roleOptions.value = []
   }
+}
 
+async function loadCategoryOptions() {
+  if (loadedOptions.has('categories')) return
+  loadedOptions.add('categories')
   try {
     const categoryRes = await adminApi.fetchCategories()
     categoryOptions.value = categoryRes.data?.items ?? categoryRes.data?.content ?? categoryRes.data ?? []
   } catch {
+    loadedOptions.delete('categories')
     categoryOptions.value = []
   }
+}
 
+async function loadProductOptions() {
+  if (loadedOptions.has('products')) return
+  loadedOptions.add('products')
   try {
     const productRes = await adminApi.fetchProducts({ size: 500 })
     productOptions.value = productRes.data?.items ?? productRes.data?.content ?? productRes.data ?? []
   } catch {
+    loadedOptions.delete('products')
     productOptions.value = []
   }
-})
+}
 
-watch(() => modal.value.open, (open) => {
-  if (open) openSync()
-})
+watch(
+  () => [modal.value.open, modal.value.type],
+  async ([open, type]) => {
+    if (!open) return
+    openSync()
+
+    const loaders = []
+    if (['addUser', 'editUser', 'addAdmin'].includes(type)) loaders.push(loadRoleOptions())
+    if (['addCat', 'editCat'].includes(type)) loaders.push(loadIconOptions())
+    if (['addProd', 'editProd'].includes(type)) loaders.push(loadCategoryOptions())
+    if (type === 'stockIn') loaders.push(loadProductOptions())
+    await Promise.all(loaders)
+  },
+)
 </script>
 
 <template>

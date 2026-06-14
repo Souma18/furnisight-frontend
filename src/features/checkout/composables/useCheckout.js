@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAddressStore } from '@features/account/store/addressStore'
@@ -24,6 +24,7 @@ export function useCheckout() {
     if (typeof raw !== 'string' || !raw.trim()) return []
     return raw.split(',').map((id) => id.trim()).filter(Boolean)
   })
+  const requestedComboId = computed(() => String(route.query.comboId || '').trim())
 
   const checkoutLines = computed(() => {
     const available = cartStore.items.filter((item) => !item.outOfStock)
@@ -52,7 +53,16 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
-    await Promise.all([cartStore.ensureHydrated(), addressStore.fetchAddresses(), checkoutStore.hydrateSession()])
+    await Promise.all([
+      cartStore.ensureHydrated(),
+      addressStore.fetchAddresses(),
+      checkoutStore.hydrateSession({ loadCombos: !requestedComboId.value }),
+    ])
+    if (requestedComboId.value) {
+      await checkoutStore.validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+    } else {
+      await checkoutStore.refreshApplicableCombo(checkoutLines.value)
+    }
   }
 
   function goBackToCart() {
@@ -65,6 +75,7 @@ export function useCheckout() {
 
   async function updateLineQty(lineId, nextQty) {
     await cartStore.updateQty(lineId, nextQty)
+    await checkoutStore.refreshApplicableCombo(checkoutLines.value)
   }
 
   function buildShippingAddressDetail(address = {}) {
@@ -106,12 +117,11 @@ export function useCheckout() {
 
   function buildOrderItemPayload(item = {}) {
     return {
-      productId: item.productId || item.id,
+      productId: item.productId,
       variantId: item.variantId || null,
       categoryName: item.categoryName || item.categoryLabel || '',
       productName: item.productName || item.name,
       price: Number(item.price) || 0,
-      oldPrice: item.oldPrice ?? item.originalPrice ?? item.price ?? 0,
       quantity: Math.max(1, Number(item.qty ?? item.quantity) || 1),
       imageUrl: resolveLineImageUrl(item),
     }
@@ -168,8 +178,10 @@ export function useCheckout() {
       paymentMethod: checkoutState.selectedPaymentId.value,
       shopVoucherCode: checkoutState.shopVoucher.value?.code || null,
       shippingVoucherCode: checkoutState.shippingVoucher.value?.code || null,
+      comboId: checkoutState.selectedCombo.value?.id || null,
       discountAmount: summary.value.shopDiscount,
       shippingDiscount: summary.value.shippingDiscount,
+      comboDiscount: summary.value.comboDiscount,
       shippingFee: summary.value.shipFee,
       insuranceFee: summary.value.insuranceAmount,
       items: linesSnapshot.map(buildOrderItemPayload),
@@ -231,6 +243,18 @@ export function useCheckout() {
 
     return order
   }
+
+  watch(
+    checkoutLines,
+    (lines) => {
+      if (requestedComboId.value) {
+        checkoutStore.validateRequestedCombo(requestedComboId.value, lines)
+      } else {
+        checkoutStore.refreshApplicableCombo(lines)
+      }
+    },
+    { deep: true },
+  )
 
   return {
     ...checkoutState,

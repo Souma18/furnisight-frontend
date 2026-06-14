@@ -1,3 +1,5 @@
+import { PriceFormatter } from '@shared/lib/formatters'
+
 export class ProductResponse {
   /**
    * @param {Object} data
@@ -14,7 +16,6 @@ export class ProductResponse {
     this.description = data.description || ''
     this.status = data.status || ''
     this.price = resolvePrice(data, primaryVariant)
-    this.oldPrice = data.oldPrice ?? null
     this.categoryId = data.categoryId || data.category?.id || null
     this.categoryName = data.categoryName || data.category?.name || data.category?.label || ''
     this.category = data.category ? new CategoryResponse(data.category) : null
@@ -28,15 +29,11 @@ export class ProductResponse {
     this.ratingCount = data.ratingCount ?? 0
     this.soldCount = data.soldCount ?? data.soldQuantity ?? data.sold ?? 0
     this.supports3d = Boolean(data.supports3d)
-    this.collection = data.collection || ''
     this.features = Array.isArray(data.features) ? data.features : []
     this.modelUrl = data.modelUrl || ''
     this.roomTypeHint = data.roomTypeHint || ''
     this.reviews = Array.isArray(data.reviews)
       ? data.reviews.map((review) => new ReviewResponse(review))
-      : []
-    this.qa = Array.isArray(data.qa)
-      ? data.qa.map((item) => new QuestionAnswerResponse(item))
       : []
     this.variants = variants
     this.fallbackColor = data.color || primaryVariant?.color || ''
@@ -66,26 +63,8 @@ export class ProductResponse {
     return variantStock || this.fallbackStock || 0
   }
 
-  get hasDiscount() {
-    return this.oldPrice != null && this.oldPrice > this.price
-  }
-
-  get discountPercent() {
-    if (!this.hasDiscount) return 0
-    return Math.round(((this.oldPrice - this.price) / this.oldPrice) * 100)
-  }
-
   get formattedPrice() {
     return formatVnd(this.price)
-  }
-
-  get formattedOldPrice() {
-    return this.oldPrice ? formatVnd(this.oldPrice) : ''
-  }
-
-  get formattedSave() {
-    if (!this.hasDiscount) return ''
-    return `Tiết kiệm ${formatVnd(this.oldPrice - this.price)}`
   }
 }
 
@@ -100,24 +79,8 @@ export class CategoryResponse {
     this.label = data.label || data.name || ''
     this.parentId = data.parentId || null
     this.productCount = data.productCount ?? 0
-    this.iconUrl = data.iconUrl || ''
-  }
-}
-
-export class CollectionResponse {
-  /**
-   * @param {Object} data 
-   */
-  constructor(data = {}) {
-    this.id = data.id || null
-    this.slug = data.slug || ''
-    this.name = data.name || ''
-    this.description = data.description || ''
     this.imageUrl = data.imageUrl || data.image || ''
-    this.productCount = data.productCount ?? 0
-    this.products = Array.isArray(data.products) 
-      ? data.products.map(p => new ProductResponse(p))
-      : []
+    this.iconUrl = data.iconUrl || ''
   }
 }
 
@@ -138,19 +101,6 @@ export class ReviewResponse {
     this.comment = data.comment || data.content || ''
     this.images = Array.isArray(data.images) ? data.images : []
     this.createdAt = data.createdAt || null
-  }
-}
-
-export class QuestionAnswerResponse {
-  /**
-   * @param {Object} data
-   */
-  constructor(data = {}) {
-    this.id = data.id || null
-    this.question = data.question || ''
-    this.answer = data.answer || ''
-    this.asker = data.asker || ''
-    this.date = data.date || data.createdAt || ''
   }
 }
 
@@ -178,8 +128,7 @@ export class ProductVariantResponse {
 }
 
 export function formatVnd(value) {
-  if (value == null) return ''
-  return `${new Intl.NumberFormat('vi-VN').format(value)}đ`
+  return PriceFormatter.format(value)
 }
 
 function normalizeVariants(data = {}) {

@@ -1,4 +1,15 @@
-const PAYMENT_WINDOW_MS = 5 * 60 * 1000
+const PAYMENT_WINDOW_MS = 15 * 60 * 1000
+
+export function parseOrderDate(value) {
+  if (!value) return null
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value
+
+  const rawValue = String(value).trim()
+  const hasTimezone = /(?:Z|[+-]\d{2}:?\d{2})$/i.test(rawValue)
+  const normalizedValue = hasTimezone ? rawValue : `${rawValue}Z`
+  const date = new Date(normalizedValue)
+  return Number.isNaN(date.getTime()) ? null : date
+}
 
 export function normalizeOrderStatus(status) {
   const normalized = String(status || '').trim().toUpperCase()
@@ -23,8 +34,8 @@ function resolvePaymentExpiresAt(data = {}) {
   if (data.paymentExpiresAt) return data.paymentExpiresAt
   if (!data.createdAt) return null
 
-  const createdAt = new Date(data.createdAt)
-  if (Number.isNaN(createdAt.getTime())) return null
+  const createdAt = parseOrderDate(data.createdAt)
+  if (!createdAt) return null
 
   return new Date(createdAt.getTime() + PAYMENT_WINDOW_MS).toISOString()
 }
@@ -36,13 +47,21 @@ export function canRetryOrderPayment(order = {}) {
   const paymentMethod = String(order.paymentMethod || order.paymentDetail?.paymentMethod || 'vnpay').toLowerCase()
   if (paymentMethod !== 'vnpay') return false
 
-  const expiresAt = order.paymentExpiresAt ? new Date(order.paymentExpiresAt) : null
+  const expiresAt = parseOrderDate(order.paymentExpiresAt)
   const withinDeadline = expiresAt ? expiresAt.getTime() > Date.now() : true
   if (typeof order.canRetryPayment === 'boolean') {
     return order.canRetryPayment && withinDeadline
   }
 
   return withinDeadline
+}
+
+export function shouldShowRetryPayment(order = {}) {
+  const status = normalizeOrderStatus(order.status)
+  if (!['unpaid', 'payment_failed'].includes(status)) return false
+
+  const paymentMethod = String(order.paymentMethod || order.paymentDetail?.paymentMethod || 'vnpay').toLowerCase()
+  return paymentMethod === 'vnpay'
 }
 
 function resolveOrderItemImageUrl(data = {}) {
@@ -68,7 +87,6 @@ export class OrderItemResponse {
     }
     this.imageUrl = this.productSnapshot.imageUrl
     this.price = data.price ?? 0
-    this.oldPrice = data.oldPrice ?? null
     this.quantity = data.quantity ?? 1
   }
 }

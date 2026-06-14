@@ -1,5 +1,7 @@
+import { PriceFormatter } from '@shared/lib/formatters'
+
 export function formatCheckoutMoney(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
+  return PriceFormatter.format(value)
 }
 
 export function calcLineTotal(line) {
@@ -8,6 +10,7 @@ export function calcLineTotal(line) {
 
 export function calcShopDiscount(subtotal, voucher) {
   if (!voucher) return 0
+  if (voucher.appliedDiscount != null) return Math.max(0, Number(voucher.appliedDiscount) || 0)
   const discountType = String(voucher.discountType || '').toLowerCase()
 
   if (discountType === 'percent') {
@@ -25,6 +28,7 @@ export function calcShopDiscount(subtotal, voucher) {
 
 export function calcShippingDiscount(shipFee, voucher) {
   if (!voucher || !shipFee) return 0
+  if (voucher.appliedDiscount != null) return Math.min(shipFee, Math.max(0, Number(voucher.appliedDiscount) || 0))
   const discountType = String(voucher.discountType || '').toLowerCase()
   if (discountType === 'shipping_cap') {
     return Math.min(shipFee, Number(voucher.discountValue) || shipFee)
@@ -37,6 +41,7 @@ export function buildCheckoutSummary({
   shipFee = 0,
   shopVoucher = null,
   shippingVoucher = null,
+  combo = null,
   hasInsurance = false,
   insurancePrice = 0,
 }) {
@@ -45,23 +50,22 @@ export function buildCheckoutSummary({
   const merchandiseSubtotal = subtotal + insuranceAmount
   const shopDiscount = calcShopDiscount(merchandiseSubtotal, shopVoucher)
   const shippingDiscount = calcShippingDiscount(shipFee, shippingVoucher)
-  const total = Math.max(0, merchandiseSubtotal + shipFee - shopDiscount - shippingDiscount)
+  const comboDiscount = Math.min(
+    merchandiseSubtotal,
+    Math.max(0, Number(combo?.appliedDiscount ?? combo?.comboDiscount ?? combo?.savedAmount) || 0),
+  )
+  const total = Math.max(0, merchandiseSubtotal + shipFee - comboDiscount - shopDiscount - shippingDiscount)
   const itemQty = lines.reduce((sum, line) => sum + (Number(line.qty) || 0), 0)
-
-  const originalTotal = lines.reduce((sum, line) => {
-    const unitOld = Number(line.oldPrice) || Number(line.price) || 0
-    return sum + unitOld * (Number(line.qty) || 0)
-  }, 0)
-  const saved = Math.max(0, originalTotal + shipFee - total)
 
   return {
     subtotal: merchandiseSubtotal,
     shipFee,
+    comboDiscount,
     shopDiscount,
     shippingDiscount,
     insuranceAmount,
     total,
     itemQty,
-    saved,
+    saved: Math.max(0, shopDiscount + shippingDiscount),
   }
 }

@@ -1,3 +1,4 @@
+import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 
 /**
@@ -21,10 +22,12 @@ function envStaffId() {
 }
 
 export function getBuyerId() {
+  const authStore = useAuthStore(pinia)
+  if (!authStore.isAuthenticated) return null
+
   const fromEnv = envBuyerId()
   if (fromEnv != null) return fromEnv
 
-  const authStore = useAuthStore()
   const fromProfile = parseNumericId(authStore.user?.id)
   if (fromProfile != null) return fromProfile
 
@@ -32,10 +35,12 @@ export function getBuyerId() {
 }
 
 export function getStaffId() {
+  const authStore = useAuthStore(pinia)
+  if (!authStore.isAuthenticated) return null
+
   const fromEnv = envStaffId()
   if (fromEnv != null) return fromEnv
 
-  const authStore = useAuthStore()
   const fromProfile = parseNumericId(authStore.user?.id)
   if (fromProfile != null) return fromProfile
 

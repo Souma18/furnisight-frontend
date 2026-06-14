@@ -3,8 +3,8 @@ import HomeHeroSection from '../components/HomeHeroSection.vue'
 import HomeProcess3DSection from '../components/HomeProcess3DSection.vue'
 import HomeFeaturesStripSection from '../components/HomeFeaturesStripSection.vue'
 import HomeCategoriesSection from '../components/HomeCategoriesSection.vue'
-import HomeRoomsSection from '../components/HomeRoomsSection.vue'
-import HomeProductsSectionV2 from '../components/HomeProductsSectionV2.vue'
+import HomeCombosSection from '../components/HomeCombosSection.vue'
+import HomeSharedProductsSection from '../components/HomeSharedProductsSection.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
 import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
 import { useHomePage } from '../composables/useHomePage'
@@ -15,13 +15,16 @@ import {
 
 const {
   categories,
+  combos,
   products,
   activeCategoryId,
-  activeRoomFilter,
   wishedProductIds,
-  roomFilters,
-  filteredRooms,
   topReviews,
+  comboBuyingId,
+  comboAddingId,
+  comboMessage,
+  addComboToCart,
+  buyCombo,
   toggleWish,
 } = useHomePage()
 </script>
@@ -30,18 +33,18 @@ const {
   <div class="home-page">
     <HomeHeroSection :hero="homeHero" />
     <HomeFeaturesStripSection :items="homeFeatures" />
+    <HomeCombosSection
+      :combos="combos"
+      :buying-id="comboBuyingId"
+      :adding-id="comboAddingId"
+      @add="addComboToCart"
+      @buy="buyCombo"
+    />
+    <p v-if="comboMessage" class="home-combo-message" role="status">{{ comboMessage }}</p>
     <HomeCategoriesSection
       :categories="categories"
-      :active-category-id="activeCategoryId"
-      @select-category="activeCategoryId = $event"
     />
-    <HomeRoomsSection
-      :filters="roomFilters"
-      :active-room-filter="activeRoomFilter"
-      :rooms="filteredRooms"
-      @select-filter="activeRoomFilter = $event"
-    />
-    <HomeProductsSectionV2
+    <HomeSharedProductsSection
       :products="products"
       :wished-product-ids="wishedProductIds"
       @toggle-wish="toggleWish"
@@ -57,6 +60,16 @@ const {
 
 .home-page { background: #faf6f0; color: #1a1a1a; }
 .home-page { font-family: var(--sans); }
+.home-page a,
+.home-page a:hover,
+.home-page a:focus {
+  text-decoration: none;
+}
+.home-page a:focus-visible,
+.home-page button:focus-visible {
+  outline: 2px solid rgba(201, 146, 42, 0.58);
+  outline-offset: 3px;
+}
 .hero { position: relative; overflow: hidden; background: #12202e; min-height: 88vh; display: flex; align-items: center; }
 .hero-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 70% at 70% 40%, rgba(201,146,42,.13) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 20% 80%, rgba(28,49,72,.8) 0%, transparent 60%); }
 .orb { position: absolute; border-radius: 50%; filter: blur(60px); opacity: .18; animation: floatOrb 8s ease-in-out infinite alternate; }
@@ -72,9 +85,6 @@ const {
 .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
 .btn-primary { background: linear-gradient(135deg, #e5b84a, #c9922a); color: #12202e; font-size: 14px; font-weight: 600; padding: 14px 28px; border-radius: 30px; text-decoration: none; }
 .btn-outline { border: 1.5px solid rgba(255,255,255,.25); color: rgba(255,255,255,.85); font-size: 14px; padding: 14px 28px; border-radius: 30px; text-decoration: none; }
-.hero-stats { display: flex; gap: 36px; margin-top: 48px; padding-top: 36px; border-top: 1px solid rgba(255,255,255,.1); }
-.stat-num { font-size: 36px; font-weight: 600; color: #e5b84a; line-height: 1; }
-.stat-label { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; }
 .preview-card { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.5); }
 .preview-card-header { padding: 14px 20px; background: rgba(255,255,255,.05); border-bottom: 1px solid rgba(255,255,255,.08); display: flex; align-items: center; gap: 10px; }
 .preview-dots { display: flex; gap: 6px; }
@@ -103,6 +113,7 @@ const {
 .preview-text { font-size: 13px; color: rgba(255,255,255,.55); }
 .preview-start { background: #c9922a; color: #12202e; font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 20px; text-decoration: none; }
 .features-strip { background: #1c3148; padding: 28px 60px; display: flex; align-items: center; justify-content: center; gap: 60px; border-top: 1px solid rgba(201,146,42,.2); border-bottom: 1px solid rgba(201,146,42,.2); }
+.feat-icon { width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #e5b84a; background: rgba(201,146,42,.14); flex: 0 0 auto; }
 .process-3d-wrap { background: #12202e; border-radius: 24px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; min-height: 340px; }
 .process-3d-left { padding: 48px; color: #fff; }
 .process-3d-left .section-title.process-title { color: #fff; margin-bottom: 10px; }
@@ -140,28 +151,7 @@ const {
 .section-label { font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #c9922a; font-weight: 600; margin-bottom: 10px; }
 .section-title { font-size: 42px; font-weight: 300; line-height: 1.2; color: #1a1a1a; margin-bottom: 14px; }
 .section-title em { color: #c9922a; }
-.categories-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-.cat-card { background: #fff; border-radius: 16px; padding: 24px 16px; border: 2px solid transparent; box-shadow: 0 2px 12px rgba(0,0,0,.05); cursor: pointer; }
-.cat-card.active { border-color: #c9922a; box-shadow: 0 8px 30px rgba(201,146,42,.2); transform: translateY(-4px); }
-.cat-icon { font-size: 32px; margin-bottom: 10px; }
-.cat-name { font-size: 13px; font-weight: 500; }
-.cat-count { font-size: 11px; color: #888; margin-top: 3px; }
-.rooms-bg { background: #12202e; padding: 80px 0; }
-.rooms-inner { max-width: 1300px; margin: 0 auto; padding: 0 60px; }
-.rooms-head .section-title { color: #fff; }
-.room-filters { display: flex; gap: 8px; margin-bottom: 28px; }
-.room-filter { padding: 7px 18px; border-radius: 20px; font-size: 13px; border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7); cursor: pointer; background: transparent; }
-.room-filter.active { background: #c9922a; border-color: #c9922a; color: #12202e; font-weight: 600; }
-.rooms-grid { display: grid; grid-template-columns: 1.6fr 1fr 1fr; grid-template-rows: 240px 240px; gap: 14px; }
-.room-card { position: relative; overflow: hidden; border-radius: 16px; cursor: pointer; background: linear-gradient(135deg, #2d3a4a 0%, #1a2535 100%); }
-.room-card.big { grid-row: 1 / 3; }
-.room-card img { width: 100%; height: 100%; object-fit: cover; }
-.room-img-placeholder { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 56px; opacity: .45; }
-.room-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%); display: flex; align-items: flex-end; padding: 22px; opacity: .95; }
-.room-badge { background: #c9922a; color: #12202e; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 8px; text-transform: uppercase; }
-.room-info { margin-left: 10px; }
-.room-name { font-size: 16px; font-weight: 600; color: #fff; }
-.room-count { font-size: 12px; color: rgba(255,255,255,.65); }
+.home-combo-message { max-width: 1180px; margin: -48px auto 48px; padding: 0 24px; color: #a13a2d; font-size: 13px; text-align: center; }
 .products-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }
 .product-card { text-decoration: none; color: inherit; display: block; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.06); position: relative; }
 .product-img { height: 200px; background: #f0e9dd; position: relative; overflow: hidden; }
@@ -178,7 +168,6 @@ const {
 .product-name-disabled { color: #444; cursor: default; }
 .product-footer { display: flex; align-items: center; justify-content: space-between; }
 .product-price { font-size: 16px; font-weight: 600; color: #c9922a; }
-.product-price-old { font-size: 12px; color: #888; text-decoration: line-through; margin-left: 6px; }
 .product-sold { color: #7e7c77; font-size: 12px; font-weight: 500; white-space: nowrap; }
 .testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
 .testi-card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 2px 16px rgba(0,0,0,.06); }
@@ -228,6 +217,6 @@ const {
 }
 .fade-up { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
 .fade-up.is-visible { opacity: 1; transform: translateY(0); }
-@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .categories-grid { grid-template-columns: repeat(3, 1fr); } .rooms-grid { grid-template-columns: repeat(2, 1fr); grid-template-rows: 220px 220px auto; } .room-card.big { grid-row: auto; } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } .rooms-inner { padding: 0 24px; } }
-@media (max-width: 720px) { .hero-title { font-size: 42px; } .hero-stats { gap: 16px; flex-wrap: wrap; } .categories-grid, .products-grid, .rooms-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 1100px) { .hero-content { grid-template-columns: 1fr; gap: 36px; padding: 56px 24px; } .features-strip { padding: 20px 24px; gap: 24px; flex-wrap: wrap; } .process-3d-wrap { grid-template-columns: 1fr; } .process-3d-left, .process-3d-right { padding: 24px; } .products-grid { grid-template-columns: repeat(2, 1fr); } .testimonials-grid { grid-template-columns: 1fr; } .newsletter-wrap { margin: 0 24px 64px; padding: 32px 24px; flex-direction: column; align-items: flex-start; } .newsletter-form { width: 100%; } .newsletter-input { width: 100%; min-width: 0; } .home-page section { padding: 56px 24px; } }
+@media (max-width: 720px) { .hero-title { font-size: 42px; } .products-grid { grid-template-columns: 1fr; } .preview-footer { flex-direction: column; align-items: flex-start; } }
 </style>

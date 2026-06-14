@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { mediaApi, usersApi } from '@shared/lib/api/services'
+import { ProfileResponse } from '@shared/lib/api/services/users/users.model'
 
 function unwrapData(response) {
   return response?.data?.data ?? response?.data ?? response
@@ -28,8 +29,13 @@ function toProfilePayload(value = {}) {
     birthday: value.birthday || value.dateOfBirth || '',
     gender: value.gender || 'MALE',
     bio: value.bio || '',
-    avatarMediaId: value.avatarMediaId || null,
+    avatarMediaId: value.avatarMediaId ?? null,
   }
+}
+
+function normalizeProfile(data) {
+  if (!data) return null
+  return data instanceof ProfileResponse ? data : new ProfileResponse(data)
 }
 
 export const useProfileStore = defineStore('accountProfile', () => {
@@ -39,14 +45,14 @@ export const useProfileStore = defineStore('accountProfile', () => {
     const res = await usersApi.getProfile()
     const data = unwrapData(res)
     if (data) {
-      profile.value = data
+      profile.value = normalizeProfile(data)
     }
     return res
   }
 
   async function saveProfile(payload) {
     const response = await usersApi.updateProfile(toProfilePayload(payload))
-    profile.value = unwrapData(response)
+    profile.value = normalizeProfile(unwrapData(response))
     return profile.value
   }
 
@@ -65,14 +71,18 @@ export const useProfileStore = defineStore('accountProfile', () => {
     const avatarMediaId = uploadData?.mediaId || uploadData?.id || null
     if (!avatarMediaId) return null
 
-    await saveProfile({ ...toProfilePayload(profile.value), avatarMediaId })
+    const updatedProfile = await saveProfile({ ...toProfilePayload(profile.value), avatarMediaId })
 
-    return getAvatarUrl(uploadData)
+    return updatedProfile?.avatarUrl || getAvatarUrl(uploadData)
   }
 
   async function removeAvatar() {
     if (!profile.value) return
-    await saveProfile({ ...profile.value, avatarUrl: '' })
+    await saveProfile({ ...profile.value, avatarMediaId: null })
+  }
+
+  function resetProfileState() {
+    profile.value = null
   }
 
   return {
@@ -80,6 +90,7 @@ export const useProfileStore = defineStore('accountProfile', () => {
     fetchProfile,
     saveProfile,
     uploadAvatar,
-    removeAvatar
+    removeAvatar,
+    resetProfileState,
   }
 })

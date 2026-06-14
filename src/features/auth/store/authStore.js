@@ -102,13 +102,8 @@ export const useAuthStore = defineStore('auth', () => {
 function normalizeJwtToken(value) {
   if (typeof value !== 'string') return null
 
-  const token = value.trim()
+  const token = value.trim().replace(/^Bearer\s+/i, '')
   if (!token) return null
-
-  const segments = token.split('.')
-  if (segments.length !== 3 || segments.some((segment) => !segment)) {
-    return null
-  }
 
   return token
 }

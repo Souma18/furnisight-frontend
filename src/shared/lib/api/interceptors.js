@@ -120,6 +120,10 @@ export function registerApiInterceptors() {
 
         if (!refreshToken) {
           isRefreshing = false
+          import('../../../features/auth/composables/useAuth').then(({ useAuth }) => {
+            const { logout } = useAuth(pinia)
+            logout({ name: 'home' }, { clearRemoteCart: false })
+          }).catch(e => console.error("Could not load authStore", e))
           return Promise.reject(error)
         }
 
@@ -141,7 +145,7 @@ export function registerApiInterceptors() {
           // Thoát phiên đăng nhập nếu refresh hết hạn
           import('../../../features/auth/composables/useAuth').then(({ useAuth }) => {
             const { logout } = useAuth(pinia)
-            logout()
+            logout({ name: 'home' }, { clearRemoteCart: false })
           }).catch(e => console.error("Could not load authStore", e))
           
           return Promise.reject(refreshError)

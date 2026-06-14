@@ -5,6 +5,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderDetailResponse } from '@shared/lib/api/services/orders/orders.model'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   orderCode: { type: String, required: true },
@@ -174,9 +175,7 @@ async function load() {
   }
 }
 
-function formatMoney(value) {
-  return `${Number(value || 0).toLocaleString('vi-VN')}đ`
-}
+const formatMoney = PriceFormatter.format
 
 function formatDate(value) {
   if (!value) return ''

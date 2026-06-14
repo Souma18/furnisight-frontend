@@ -42,6 +42,7 @@
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, #e5b84a, var(--hn-gold));
+  color: var(--hn-navy);
 }
 
 .hn-logo-text {
@@ -81,6 +82,9 @@
   border-radius: 999px;
   padding: 0.65rem 1rem;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .hn-icon-btn {
@@ -88,7 +92,11 @@
   border: 0;
   color: #fff;
   width: 2rem;
+  height: 2rem;
   border-radius: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .hn-hero {
@@ -193,23 +201,6 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   padding: 0.65rem 1rem;
-}
-
-.hn-hero-stats {
-  display: flex;
-  gap: 1.5rem;
-  margin-top: 1.75rem;
-}
-
-.hn-stat-num {
-  color: #f0cb79;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.hn-stat-label {
-  font-size: 0.8rem;
-  color: #ced6df;
 }
 
 .hn-preview-card {

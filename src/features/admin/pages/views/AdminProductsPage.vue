@@ -5,13 +5,14 @@ import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
+import { PriceFormatter } from '@shared/lib/formatters'
 
 const { items, search, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi))
 const columns = [
   { key: 'name', label: 'Sản phẩm' }, { key: 'sku', label: 'SKU' }, { key: 'category', label: 'Danh mục' },
   { key: 'price', label: 'Giá bán' }, { key: 'stock', label: 'Tồn kho' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'actions', label: 'Hành động' },
 ]
-function formatPrice(v) { return `${Number(v).toLocaleString('vi-VN')}₫` }
+const formatPrice = PriceFormatter.format
 const badgeMap = { success: 'b-success', low: 'b-low', cancel: 'b-cancel' }
 </script>
 
