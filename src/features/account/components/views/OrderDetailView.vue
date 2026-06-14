@@ -81,6 +81,15 @@ function orderItemProductId(item = {}) {
   return item.productId || item.productSnapshot?.productId || ''
 }
 
+function openProductDetail(item) {
+  const productId = orderItemProductId(item)
+  if (!productId) return
+  router.push({
+    name: 'product-detail',
+    params: { id: productId },
+  })
+}
+
 function reviewProduct(item) {
   const productId = orderItemProductId(item)
   if (!productId || order.value?.status !== 'done') return
@@ -277,12 +286,27 @@ const paymentDeadline = computed(() => {
           </h2>
           <div class="order-lines">
             <div v-for="(item, index) in order.items" :key="index" class="order-line">
-              <span class="order-line-thumb">
+              <button
+                type="button"
+                class="order-line-thumb"
+                :class="{ clickable: orderItemProductId(item) }"
+                :disabled="!orderItemProductId(item)"
+                :aria-label="`Xem chi tiết ${item.productSnapshot?.productName || 'sản phẩm'}`"
+                @click="openProductDetail(item)"
+              >
                 <img v-if="orderItemImage(item)" :src="orderItemImage(item)" alt="product" class="line-thumb-img" @error="hideBrokenImage" />
                 <AppIcon name="image" :size="16" />
-              </span>
+              </button>
               <div class="order-line-info">
-                <p class="order-line-name">{{ item.productSnapshot?.productName || 'Sản phẩm' }}</p>
+                <button
+                  v-if="orderItemProductId(item)"
+                  type="button"
+                  class="order-line-name order-line-name-btn"
+                  @click="openProductDetail(item)"
+                >
+                  {{ item.productSnapshot?.productName || 'Sản phẩm' }}
+                </button>
+                <p v-else class="order-line-name">{{ item.productSnapshot?.productName || 'Sản phẩm' }}</p>
                 <p v-if="item.productSnapshot?.color || item.productSnapshot?.material" class="order-line-var">
                   {{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}
                 </p>
@@ -547,12 +571,41 @@ const paymentDeadline = computed(() => {
   width: 64px; height: 64px; border-radius: 9px; background: #f5f0e8;
   display: grid; place-items: center; font-size: 1.6rem; overflow: hidden;
   position: relative;
+  border: 0;
+  padding: 0;
+  color: inherit;
+}
+.order-line-thumb.clickable {
+  cursor: pointer;
+  transition: transform .16s ease, box-shadow .16s ease;
+}
+.order-line-thumb.clickable:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(18, 32, 46, .16);
+}
+.order-line-thumb:disabled {
+  cursor: default;
 }
 .line-thumb-img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;
 }
 .order-line-cat { margin: 0; font-size: 0.65rem; color: #c9922a; font-weight: 600; text-transform: uppercase; }
 .order-line-name { margin: 0.15rem 0 0; font-size: 0.84rem; font-weight: 500; }
+.order-line-name-btn {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.order-line-name-btn:hover {
+  color: #c9922a;
+  text-decoration: underline;
+}
 .order-line-var { margin: 0.15rem 0 0; font-size: 0.72rem; color: var(--auth-text-secondary); }
 .order-line-qty { font-size: 0.75rem; color: var(--auth-text-secondary); }
 .order-line-price { font-size: 0.82rem; font-weight: 600; white-space: nowrap; }

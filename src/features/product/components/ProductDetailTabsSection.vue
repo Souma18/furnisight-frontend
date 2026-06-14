@@ -170,10 +170,10 @@ function updateReviewField(field, value) {
       <div v-for="item in product.reviews || []" :key="item.id" class="review-card">
         <div class="review-head">
           <img v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img" />
-          <span v-else class="avatar">U</span>
+          <span v-else class="avatar">{{ (item.userName || item.user || 'K').slice(0, 1).toUpperCase() }}</span>
           <div>
-            <p class="name">{{ item.user }}</p>
-            <p class="date">{{ item.createdAt }}</p>
+            <p class="name">{{ item.userName || item.user || 'Khách hàng' }}</p>
+            <p class="date">{{ item.createdAtFormatted || item.createdAt }}</p>
           </div>
           <span class="stars" aria-label="Đánh giá">
             <AppIcon
@@ -185,6 +185,7 @@ function updateReviewField(field, value) {
             />
           </span>
         </div>
+        <p v-if="item.title" class="review-title">{{ item.title }}</p>
         <p class="text">{{ item.comment }}</p>
         <div v-if="item.images?.length" class="review-images">
           <span v-for="img in item.images" :key="`${item.id}-${img}`" class="review-image">{{ img }}</span>

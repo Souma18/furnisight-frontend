@@ -1,17 +1,17 @@
 <script setup>
-import AccountSectionCard from '../AccountSectionCard.vue'
-import AppIcon from '@shared/ui/AppIcon.vue'
-import { formatVietnamAddress } from '@shared/lib/formatters'
-import { useAddressForm } from '../../composables/useAddressForm'
+import AccountSectionCard from "../AccountSectionCard.vue";
+import AppIcon from "@shared/ui/AppIcon.vue";
+import { formatVietnamAddress } from "@shared/lib/formatters";
+import { useAddressForm } from "../../composables/useAddressForm";
 
 const props = defineProps({
   addresses: {
     type: Array,
     default: () => [],
   },
-})
+});
 
-const emit = defineEmits(['notify'])
+const emit = defineEmits(["notify"]);
 
 const {
   showModal,
@@ -29,55 +29,58 @@ const {
   setAsDefault,
   deleteAddress,
   getTypeLabel,
-} = useAddressForm(props, emit)
+} = useAddressForm(props, emit);
 </script>
-  
-  <template>
-    <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
-      <template #head>
-        <button class="primary" type="button" @click="openModal">Thêm địa chỉ mới</button>
-      </template>
-  
-      <div v-if="!addresses.length" class="empty">
-        Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
-      </div>
-  
-      <div v-else class="list">
-        <article
-          v-for="address in addresses"
-          :key="address.id"
-          class="item"
-          :class="{ 'item--default': address.isDefault }"
-        >
-          <div class="item-head">
-            <div class="item-tags">
-              <span v-if="address.isDefault" class="badge badge-default">
-                <AppIcon name="mapPin" :size="12" />
-                Mặc định
-              </span>
-              <span class="badge badge-type">{{ getTypeLabel(address.type) }}</span>
-            </div>
-  
-            <div class="item-actions">
-              <button
-                v-if="!address.isDefault"
-                type="button"
-                class="set-default-btn"
-                @click="setAsDefault(address.id)"
-              >
-                <AppIcon name="mapPin" :size="13" />
-                Đặt làm mặc định
-              </button>
-              <button
-                type="button"
-                class="delete-btn"
-                @click="deleteAddress(address.id)"
-                title="Xóa địa chỉ"
-              >
-                Xóa
-              </button>
-            </div>
+
+<template>
+  <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
+    <template #head>
+      <button class="primary" type="button" @click="openModal">
+        Thêm địa chỉ mới
+      </button>
+    </template>
+
+    <div v-if="!addresses.length" class="empty">
+      Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
+    </div>
+
+    <div v-else class="list">
+      <article
+        v-for="address in addresses"
+        :key="address.id"
+        class="item"
+        :class="{ 'item--default': address.isDefault }"
+      >
+        <div class="item-head">
+          <div class="item-tags">
+            <span class="badge badge-type">{{
+              getTypeLabel(address.type)
+            }}</span>
+            <span v-if="address.isDefault" class="badge badge-default">
+              <AppIcon name="pin" :size="14" />
+            </span>
           </div>
+
+          <div class="item-actions">
+            <button
+              v-if="!address.isDefault"
+              type="button"
+              class="set-default-btn"
+              @click="setAsDefault(address.id)"
+            >
+              <AppIcon name="pin" :size="13" />
+              Đặt làm mặc định
+            </button>
+            <button
+              type="button"
+              class="delete-btn"
+              @click="deleteAddress(address.id)"
+              title="Xóa địa chỉ"
+            >
+              Xóa
+            </button>
+          </div>
+        </div>
 
         <p class="name">{{ address.fullName }}</p>
         <p class="meta">{{ address.phone }}</p>
@@ -90,8 +93,14 @@ const {
     <div class="modal">
       <h4>Thêm địa chỉ</h4>
       <div class="form-grid">
-        <label>Họ tên <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A" /></label>
-        <label>Số điện thoại <input v-model.trim="form.phone" placeholder="0123456789" /></label>
+        <label
+          >Họ tên
+          <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A"
+        /></label>
+        <label
+          >Số điện thoại
+          <input v-model.trim="form.phone" placeholder="0123456789"
+        /></label>
         <label>
           Tỉnh/Thành
           <select
@@ -99,8 +108,14 @@ const {
             :disabled="loadingProvince || addressApiUnavailable"
             @change="onProvinceChange"
           >
-            <option value="">{{ loadingProvince ? 'Đang tải...' : 'Chọn tỉnh thành' }}</option>
-            <option v-for="province in provinces" :key="province.code" :value="province.code">
+            <option value="">
+              {{ loadingProvince ? "Đang tải..." : "Chọn tỉnh thành" }}
+            </option>
+            <option
+              v-for="province in provinces"
+              :key="province.code"
+              :value="province.code"
+            >
               {{ province.name }}
             </option>
           </select>
@@ -112,19 +127,34 @@ const {
             :disabled="loadingWard || !wards.length"
             @change="onWardChange"
           >
-            <option value="">{{ loadingWard ? 'Đang tải...' : 'Chọn phường xã' }}</option>
-            <option v-for="ward in wards" :key="ward.code" :value="ward.code">{{ ward.name }}</option>
+            <option value="">
+              {{ loadingWard ? "Đang tải..." : "Chọn phường xã" }}
+            </option>
+            <option v-for="ward in wards" :key="ward.code" :value="ward.code">
+              {{ ward.name }}
+            </option>
           </select>
         </label>
-        <div v-if="addressApiUnavailable" class="address-api-error detail-field">
+        <div
+          v-if="addressApiUnavailable"
+          class="address-api-error detail-field"
+        >
           <span>Không tải được dữ liệu tỉnh/thành.</span>
-          <button type="button" class="ghost" :disabled="loadingProvince" @click="loadProvinces">
-            {{ loadingProvince ? 'Đang thử lại...' : 'Thử lại' }}
+          <button
+            type="button"
+            class="ghost"
+            :disabled="loadingProvince"
+            @click="loadProvinces"
+          >
+            {{ loadingProvince ? "Đang thử lại..." : "Thử lại" }}
           </button>
         </div>
         <label class="detail-field">
           Địa chỉ cụ thể
-          <input v-model.trim="form.detail" placeholder="Số nhà, tên đường..." />
+          <input
+            v-model.trim="form.detail"
+            placeholder="Số nhà, tên đường..."
+          />
         </label>
         <label>
           Loại địa chỉ
@@ -139,8 +169,12 @@ const {
         </label>
       </div>
       <div class="actions">
-        <button type="button" class="ghost" @click="showModal = false">Huỷ</button>
-        <button type="button" class="primary" @click="submitAddress">Lưu địa chỉ</button>
+        <button type="button" class="ghost" @click="showModal = false">
+          Huỷ
+        </button>
+        <button type="button" class="primary" @click="submitAddress">
+          Lưu địa chỉ
+        </button>
       </div>
     </div>
   </div>
@@ -205,10 +239,12 @@ const {
   gap: 0.25rem;
 }
 .badge-default {
-  border: 1px solid rgba(201, 146, 42, 0.42);
-  background: #c9922a;
-  color: #fff;
-  box-shadow: 0 5px 14px rgba(201, 146, 42, 0.18);
+  min-height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #dc2626;
+  box-shadow: none;
 }
 .badge-type {
   background: #f5efe6;
@@ -364,7 +400,11 @@ select {
 }
 .primary {
   color: var(--color-white);
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+  background: linear-gradient(
+    135deg,
+    var(--auth-brand-start),
+    var(--auth-brand-end)
+  );
 }
 input::placeholder {
   color: #9ca3af;

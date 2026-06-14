@@ -56,6 +56,13 @@ const notificationItems = [
 
 const notificationMenuOpen = ref(false)
 const isNotificationView = computed(() => String(props.activeView).startsWith('bell'))
+const profileName = computed(() => {
+  const nameParts = [props.profile?.lastName, props.profile?.firstName]
+    .map((part) => String(part || '').trim())
+    .filter(Boolean)
+
+  return nameParts.join(' ') || props.profile?.displayName || props.profile?.email || 'Khách hàng'
+})
 
 watch(
   () => props.activeView,
@@ -83,7 +90,7 @@ function toggleNotificationMenu() {
         <img v-if="profile?.avatarUrl" :src="profile.avatarUrl" alt="Avatar" />
         <span v-else>{{ profile?.initials ?? 'NA' }}</span>
       </div>
-      <p class="name">{{ profile?.lastName }} {{ profile?.firstName }}</p>
+      <p class="name" :title="profileName">{{ profileName }}</p>
       <p class="email">{{ profile?.email }}</p>
     </div>
     <div class="stats">
@@ -190,7 +197,14 @@ function toggleNotificationMenu() {
 }
 .name {
   margin: 0.7rem 0 0.2rem;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--account-text-strong);
+  font-size: 0.94rem;
   font-weight: 600;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .email {
   margin: 0;

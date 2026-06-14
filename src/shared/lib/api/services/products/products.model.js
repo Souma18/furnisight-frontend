@@ -92,15 +92,17 @@ export class ReviewResponse {
     this.id = data.id || null
     this.productId = data.productId || null
     this.userId = data.userId || null
-    this.userName = data.userName || data.user || ''
-    this.user = data.user || data.userName || ''
-    this.userAvatar = data.userAvatar || data.avatar || ''
-    this.avatar = data.avatar || data.userAvatar || ''
+    this.userName = data.userName || data.user || 'Khách hàng'
+    this.user = data.user || data.userName || 'Khách hàng'
+    this.userAvatar = data.userAvatarUrl || data.userAvatar || data.avatar || ''
+    this.avatar = data.avatar || data.userAvatarUrl || data.userAvatar || ''
     this.rating = data.rating ?? 5
+    this.title = data.title || ''
     this.content = data.content || data.comment || ''
     this.comment = data.comment || data.content || ''
     this.images = Array.isArray(data.images) ? data.images : []
     this.createdAt = data.createdAt || null
+    this.createdAtFormatted = formatReviewDateTime(this.createdAt)
   }
 }
 
@@ -129,6 +131,20 @@ export class ProductVariantResponse {
 
 export function formatVnd(value) {
   return PriceFormatter.format(value)
+}
+
+export function formatReviewDateTime(value) {
+  if (!value) return ''
+  const normalized = String(value).trim()
+  const date = new Date(/(?:Z|[+-]\d{2}:?\d{2})$/i.test(normalized) ? normalized : `${normalized}Z`)
+  if (Number.isNaN(date.getTime())) return normalized
+
+  const pad = (number) => String(number).padStart(2, '0')
+  return [
+    pad(date.getDate()),
+    pad(date.getMonth() + 1),
+    date.getFullYear(),
+  ].join('/') + ` ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
 }
 
 function normalizeVariants(data = {}) {
