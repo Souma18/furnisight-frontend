@@ -2,7 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { promotionsApi } from '@shared/lib/api/services'
+import { productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -32,6 +32,7 @@ const voucherRail = ref(null)
 const toast = ref({ show: false, title: '', subtitle: '', icon: 'check' })
 let toastTimer = null
 let voucherDrag = null
+const productImageCache = new Map()
 
 const filterTabs = [
   { key: 'all', label: 'Tất cả', icon: 'list' },
@@ -104,7 +105,11 @@ async function loadCombos(reset = false) {
       sort: comboSort.value,
     })
     const payload = response.data || {}
-    const rows = normalizeList(payload).map(normalizeCombo)
+    const rows = await Promise.all(normalizeList(payload).map(async (rawCombo) => {
+      const combo = normalizeCombo(rawCombo)
+      combo.items = await Promise.all(combo.items.map(enrichComboItemImage))
+      return combo
+    }))
     comboTotal.value = Number(payload.total ?? rows.length)
     combos.value = reset ? rows : [...combos.value, ...rows]
   } catch (error) {
@@ -285,7 +290,16 @@ function normalizeVoucher(raw = {}) {
 }
 
 function normalizeCombo(raw = {}) {
-  const items = Array.isArray(raw.items) ? raw.items : []
+  const items = Array.isArray(raw.items)
+    ? raw.items.map((item) => ({
+        ...item,
+        imageUrl: imageLikeUrl(item.imageUrl)
+          ? item.imageUrl
+          : imageLikeUrl(item.image)
+            ? item.image
+            : '',
+      }))
+    : []
   return {
     ...raw,
     id: raw.id,
@@ -299,6 +313,42 @@ function normalizeCombo(raw = {}) {
     savedAmount: Number(raw.savedAmount) || 0,
     roomLabel: items[0]?.categoryName || 'Nội thất',
   }
+}
+
+async function enrichComboItemImage(item) {
+  if (item.imageUrl || !item.productId) return item
+
+  if (!productImageCache.has(item.productId)) {
+    productImageCache.set(item.productId, productsApi.getProductDetail(item.productId)
+      .then(({ data }) => {
+        const candidates = [
+          ...(Array.isArray(data?.gallery) ? data.gallery : []),
+          ...(Array.isArray(data?.images) ? data.images : []),
+          data?.imageUrl,
+          data?.image,
+          data?.thumbnailUrl,
+          data?.thumbnail,
+        ]
+
+        return candidates
+          .map((image) => typeof image === 'string' ? image : image?.url || image?.imageUrl || '')
+          .find(imageLikeUrl) || ''
+      })
+      .catch(() => ''))
+  }
+
+  return {
+    ...item,
+    imageUrl: await productImageCache.get(item.productId),
+  }
+}
+
+function comboPreviewItems(combo) {
+  return combo.items.filter((item) => item.imageUrl).slice(0, 4)
+}
+
+function openCombo(combo) {
+  selectedCombo.value = combo
 }
 
 function discountLabel(voucher) {
@@ -337,14 +387,6 @@ function formatCurrency(value) {
 
 function imageLikeUrl(value) {
   return typeof value === 'string' && (/^https?:\/\//.test(value) || value.startsWith('/'))
-}
-
-function thumbIcon(item) {
-  const text = `${item.categoryName || ''} ${item.productName || ''}`.toLowerCase()
-  if (text.includes('giường') || text.includes('bed')) return 'bed'
-  if (text.includes('sofa')) return 'sofa'
-  if (text.includes('bàn') || text.includes('table')) return 'table'
-  return 'armchair'
 }
 
 function showToast(title, subtitle, icon = 'check') {
@@ -465,15 +507,25 @@ function showToast(title, subtitle, icon = 'check') {
       </div>
 
       <div class="combo-grid">
-        <article v-for="combo in combos" :key="combo.id" class="combo-card">
+        <article
+          v-for="combo in combos"
+          :key="combo.id"
+          class="combo-card"
+          role="button"
+          tabindex="0"
+          :aria-label="`Xem chi tiết ${combo.name}`"
+          @click="openCombo(combo)"
+          @keydown.enter.self="openCombo(combo)"
+          @keydown.space.self.prevent="openCombo(combo)"
+        >
           <div class="combo-media">
             <img v-if="combo.imageUrl" :src="combo.imageUrl" :alt="combo.name" @error="$event.target.style.display = 'none'" />
             <AppIcon v-else name="armchair" :size="52" />
             <span class="room-tag">{{ combo.roomLabel }}</span>
             <span class="save-tag">Tiết kiệm {{ formatCurrency(combo.savedAmount) }}</span>
             <div class="combo-thumbs">
-              <span v-for="item in combo.items.slice(0, 4)" :key="`${combo.id}-${item.productId}-${item.variantId}`">
-                <AppIcon :name="thumbIcon(item)" :size="15" />
+              <span v-for="item in comboPreviewItems(combo)" :key="`${combo.id}-${item.productId}-${item.variantId}`">
+                <img :src="item.imageUrl" :alt="item.productName" loading="lazy">
               </span>
             </div>
           </div>
@@ -486,8 +538,8 @@ function showToast(title, subtitle, icon = 'check') {
               <span><small>Giá combo</small><b>{{ formatCurrency(combo.finalAmount) }}</b></span>
             </div>
             <div class="combo-actions">
-              <button type="button" class="combo-btn outline" @click="selectedCombo = combo"><AppIcon name="eye" :size="14" />Xem combo</button>
-              <button type="button" class="combo-btn dark" :disabled="buyingComboId === combo.id" @click="buyCombo(combo)">
+              <button type="button" class="combo-btn outline" @click.stop="openCombo(combo)"><AppIcon name="eye" :size="14" />Xem combo</button>
+              <button type="button" class="combo-btn dark" :disabled="buyingComboId === combo.id" @click.stop="buyCombo(combo)">
                 <AppIcon name="cart" :size="14" />{{ buyingComboId === combo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
               </button>
             </div>
@@ -538,17 +590,34 @@ function showToast(title, subtitle, icon = 'check') {
     </div>
 
     <div v-if="selectedCombo" class="modal-overlay" @click.self="selectedCombo = null">
-      <div class="modal-box wide">
+      <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="`Chi tiết ${selectedCombo.name}`">
         <button class="modal-close" type="button" @click="selectedCombo = null"><AppIcon name="close" :size="16" /></button>
         <h3>{{ selectedCombo.name }}</h3>
         <p>{{ selectedCombo.description }}</p>
         <div class="combo-modal-list">
-          <div v-for="item in selectedCombo.items" :key="`modal-${item.productId}-${item.variantId}`" class="combo-modal-row">
-            <span><AppIcon :name="thumbIcon(item)" :size="18" /></span>
-            <strong>{{ item.productName }}</strong>
-            <small>x{{ item.quantity || 1 }}</small>
+          <RouterLink
+            v-for="item in selectedCombo.items"
+            :key="`modal-${item.productId}-${item.variantId}`"
+            class="combo-modal-row"
+            :to="{ name: 'product-detail', params: { id: item.productId } }"
+            @click="selectedCombo = null"
+          >
+            <span class="combo-product-image">
+              <img
+                v-if="item.imageUrl"
+                :src="item.imageUrl"
+                :alt="item.productName"
+                loading="lazy"
+                @error="$event.target.style.display = 'none'"
+              >
+            </span>
+            <span class="combo-product-info">
+              <strong>{{ item.productName }}</strong>
+              <small>{{ item.categoryName || 'Sản phẩm nội thất' }} · x{{ item.quantity || 1 }}</small>
+            </span>
             <b>{{ formatCurrency(item.price) }}</b>
-          </div>
+            <AppIcon class="combo-product-arrow" name="chevronRight" :size="18" />
+          </RouterLink>
         </div>
         <div class="modal-actions">
           <button type="button" class="combo-btn outline" @click="selectedCombo = null">Đóng</button>
@@ -642,14 +711,17 @@ function showToast(title, subtitle, icon = 'check') {
 .info-btn { position: absolute; top: 8px; right: 8px; width: 24px; height: 24px; color: #827464; }
 .combo-tools select { border: 1px solid #e8e0d0; background: #fff; border-radius: 999px; padding: 9px 13px; font-weight: 700; }
 .combo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-.combo-card { background: #fff; border: 1px solid #e8e0d0; border-radius: 14px; overflow: hidden; }
+.combo-card { background: #fff; border: 1px solid #e8e0d0; border-radius: 14px; overflow: hidden; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.combo-card:hover { transform: translateY(-3px); border-color: #d8c39d; box-shadow: 0 14px 34px rgba(18,32,46,.1); }
+.combo-card:focus-visible { outline: 3px solid rgba(201,149,58,.35); outline-offset: 3px; }
 .combo-media { position: relative; aspect-ratio: 4 / 3; background: #e8decc; display: flex; align-items: center; justify-content: center; color: #fff; }
 .combo-media img { width: 100%; height: 100%; object-fit: cover; }
 .room-tag, .save-tag { position: absolute; left: 12px; border-radius: 999px; padding: 6px 10px; font-size: 11px; font-weight: 900; }
 .room-tag { top: 12px; background: rgba(22,35,59,.82); color: #fff; }
 .save-tag { bottom: 12px; background: #c9953a; color: #17233b; }
 .combo-thumbs { position: absolute; right: 12px; bottom: 12px; display: flex; }
-.combo-thumbs span { width: 30px; height: 30px; margin-left: -9px; border-radius: 7px; border: 2px solid #fff; background: #fff; color: #17233b; display: inline-flex; align-items: center; justify-content: center; }
+.combo-thumbs span { width: 34px; height: 34px; margin-left: -9px; overflow: hidden; border-radius: 7px; border: 2px solid #fff; background: #f5f0e8; display: inline-flex; }
+.combo-thumbs img { width: 100%; height: 100%; object-fit: cover; }
 .combo-body { padding: 16px; }
 .combo-price { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid #e8e0d0; padding-top: 12px; margin-top: 12px; }
 .combo-price small { display: block; color: #918474; font-size: 11px; }
@@ -670,8 +742,15 @@ function showToast(title, subtitle, icon = 'check') {
 .modal-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; }
 .modal-box ul { padding-left: 18px; color: #6c5f52; line-height: 1.8; }
 .combo-modal-list { display: grid; gap: 10px; margin: 18px 0; }
-.combo-modal-row { display: grid; grid-template-columns: 38px 1fr auto auto; align-items: center; gap: 10px; background: #f5f0e8; border-radius: 10px; padding: 10px; }
-.combo-modal-row span { width: 32px; height: 32px; background: #fff; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; }
+.combo-modal-row { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto 18px; align-items: center; gap: 12px; background: #f5f0e8; border: 1px solid transparent; border-radius: 12px; padding: 10px; color: inherit; text-decoration: none; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.combo-modal-row:hover { background: #fffaf1; border-color: #dcc69f; transform: translateX(2px); }
+.combo-product-image { position: relative; width: 64px; height: 56px; overflow: hidden; background: #e8e0d5; border-radius: 9px; display: inline-flex; }
+.combo-product-image img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.combo-product-info { min-width: 0; display: grid; gap: 4px; }
+.combo-product-info strong { overflow: hidden; color: #182532; text-overflow: ellipsis; white-space: nowrap; }
+.combo-product-info small { color: #7a6a5a; }
+.combo-modal-row b { color: #17233b; white-space: nowrap; }
+.combo-product-arrow { color: #9b8052; }
 .promo-toast { position: fixed; right: 22px; bottom: 22px; z-index: 140; display: flex; align-items: center; gap: 10px; background: #16233b; color: #fff; border-radius: 12px; padding: 12px 14px; opacity: 0; transform: translateY(12px); pointer-events: none; transition: .2s ease; }
 .promo-toast.show { opacity: 1; transform: translateY(0); }
 .promo-toast small { display: block; color: #d7deeb; }
@@ -687,5 +766,9 @@ function showToast(title, subtitle, icon = 'check') {
   .voucher-card { flex-basis: 310px; }
   .combo-grid { grid-template-columns: 1fr; }
   .promo-section-head { align-items: flex-start; flex-direction: column; }
+  .combo-modal-row { grid-template-columns: 56px minmax(0, 1fr) 18px; }
+  .combo-product-image { width: 56px; height: 52px; }
+  .combo-modal-row > b { grid-column: 2; }
+  .combo-product-arrow { grid-column: 3; grid-row: 1 / span 2; }
 }
 </style>
