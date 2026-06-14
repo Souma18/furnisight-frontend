@@ -23,7 +23,7 @@ function handleBackdropClick(event) {
 
 <template>
   <div v-if="open" class="modal-backdrop" @click="handleBackdropClick">
-    <div class="modal-box">
+    <div class="auth-modal-frame">
       <AuthContainer embedded :initialView="initialView" @close="$emit('close')" @authenticated="$emit('authenticated')" />
     </div>
   </div>
@@ -40,7 +40,7 @@ function handleBackdropClick(event) {
   place-items: center;
 }
 
-.modal-box {
+.auth-modal-frame {
   width: 100%;
   max-width: 430px;
 }

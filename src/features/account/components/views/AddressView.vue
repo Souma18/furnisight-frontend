@@ -1,7 +1,7 @@
 <script setup>
-import { reactive, ref } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { formatVietnamAddress } from '@shared/lib/formatters'
 import { useAddressForm } from '../../composables/useAddressForm'
 
 const props = defineProps({
@@ -13,23 +13,24 @@ const props = defineProps({
 
 const emit = defineEmits(['notify'])
 
-  const {
-    showModal,
-    provinces,
-    districts,
-    wards,
-    fallbackMode,
-    form,
-    openModal,
-    onProvinceChange,
-    onDistrictChange,
-    onWardChange,
-    submitAddress,
-    setAsDefault,
-    deleteAddress,
-    getTypeLabel,
-  } = useAddressForm(props, emit)
-  </script>
+const {
+  showModal,
+  provinces,
+  wards,
+  loadingProvince,
+  loadingWard,
+  addressApiUnavailable,
+  form,
+  openModal,
+  loadProvinces,
+  onProvinceChange,
+  onWardChange,
+  submitAddress,
+  setAsDefault,
+  deleteAddress,
+  getTypeLabel,
+} = useAddressForm(props, emit)
+</script>
   
   <template>
     <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
@@ -80,10 +81,7 @@ const emit = defineEmits(['notify'])
 
         <p class="name">{{ address.fullName }}</p>
         <p class="meta">{{ address.phone }}</p>
-        <p class="meta">
-          {{ address.detail }}, {{ address.wardName }}, {{ address.districtName }},
-          {{ address.provinceName }}
-        </p>
+        <p class="meta">{{ formatVietnamAddress(address) }}</p>
       </article>
     </div>
   </AccountSectionCard>
@@ -96,29 +94,34 @@ const emit = defineEmits(['notify'])
         <label>Số điện thoại <input v-model.trim="form.phone" placeholder="0123456789" /></label>
         <label>
           Tỉnh/Thành
-          <select v-model="form.provinceCode" :disabled="fallbackMode" @change="onProvinceChange">
-            <option value="">Chọn tỉnh thành</option>
+          <select
+            v-model="form.provinceCode"
+            :disabled="loadingProvince || addressApiUnavailable"
+            @change="onProvinceChange"
+          >
+            <option value="">{{ loadingProvince ? 'Đang tải...' : 'Chọn tỉnh thành' }}</option>
             <option v-for="province in provinces" :key="province.code" :value="province.code">
               {{ province.name }}
             </option>
           </select>
         </label>
         <label>
-          Quận/Huyện
-          <select v-model="form.districtCode" :disabled="!districts.length" @change="onDistrictChange">
-            <option value="">Chọn quận huyện</option>
-            <option v-for="district in districts" :key="district.code" :value="district.code">
-              {{ district.name }}
-            </option>
-          </select>
-        </label>
-        <label>
           Phường/Xã
-          <select v-model="form.wardCode" :disabled="!wards.length" @change="onWardChange">
-            <option value="">Chọn phường xã</option>
+          <select
+            v-model="form.wardCode"
+            :disabled="loadingWard || !wards.length"
+            @change="onWardChange"
+          >
+            <option value="">{{ loadingWard ? 'Đang tải...' : 'Chọn phường xã' }}</option>
             <option v-for="ward in wards" :key="ward.code" :value="ward.code">{{ ward.name }}</option>
           </select>
         </label>
+        <div v-if="addressApiUnavailable" class="address-api-error detail-field">
+          <span>Không tải được dữ liệu tỉnh/thành.</span>
+          <button type="button" class="ghost" :disabled="loadingProvince" @click="loadProvinces">
+            {{ loadingProvince ? 'Đang thử lại...' : 'Thử lại' }}
+          </button>
+        </div>
         <label class="detail-field">
           Địa chỉ cụ thể
           <input v-model.trim="form.detail" placeholder="Số nhà, tên đường..." />
@@ -298,6 +301,22 @@ const emit = defineEmits(['notify'])
 .detail-field input {
   width: 100%;
   min-width: 0;
+}
+.address-api-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  color: var(--account-toast-error);
+  font-size: 0.8rem;
+}
+.address-api-error .ghost {
+  min-height: 2rem;
+  white-space: nowrap;
+}
+.address-api-error .ghost:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
 }
 label {
   display: grid;

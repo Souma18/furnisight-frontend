@@ -10,11 +10,8 @@ export function useLoginForm({ embedded = false, emit } = {}) {
   const route = useRoute()
   const authStore = useAuthStore()
   const { AUTH_VIEWS, setView, showSuccess } = useAuthViewStateContext()
-  let successTimer = null
-
   const loading = ref(false)
   const errorMessage = ref('')
-  const showPassword = ref(false)
   const form = reactive({
     email: '',
     password: '',
@@ -36,20 +33,9 @@ export function useLoginForm({ embedded = false, emit } = {}) {
     setView(AUTH_VIEWS.FORGOT)
   }
 
-  function togglePassword() {
-    showPassword.value = !showPassword.value
-  }
-
-  function clearSuccessTimer() {
-    if (!successTimer) return
-    clearTimeout(successTimer)
-    successTimer = null
-  }
-
   async function submitLogin() {
     errorMessage.value = ''
     loading.value = true
-    clearSuccessTimer()
 
     try {
       const identifier = String(form.email || '').trim().toLowerCase()
@@ -69,24 +55,18 @@ export function useLoginForm({ embedded = false, emit } = {}) {
         loading: isAdminLogin,
       })
 
-      successTimer = setTimeout(async () => {
-        successTimer = null
-        const target = resolvePostLoginTarget()
-        const shouldNavigate = !embedded || isAdminLogin || Boolean(route.query.redirect)
+      const target = resolvePostLoginTarget()
+      const shouldNavigate = !embedded || isAdminLogin || Boolean(route.query.redirect)
 
-        if (embedded) {
-          emit?.(isAdminLogin || Boolean(route.query.redirect) ? 'authenticated' : 'close')
-        }
+      if (embedded) {
+        emit?.('authenticated', { isAdminLogin })
+      }
 
-        if (shouldNavigate) {
+      if (shouldNavigate) {
+        setTimeout(async () => {
           await router.push(target)
-          return
-        }
-
-        if (!embedded) {
-          setView(AUTH_VIEWS.LOGIN)
-        }
-      }, isAdminLogin ? 900 : 650)
+        }, isAdminLogin ? 900 : 500)
+      }
     } catch (error) {
       const code = error.response?.data?.code
       const messageByCode = {
@@ -109,9 +89,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
     form,
     loading,
     errorMessage,
-    showPassword,
     openForgotPassword,
     submitLogin,
-    togglePassword,
   }
 }

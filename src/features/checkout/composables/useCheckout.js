@@ -6,6 +6,7 @@ import { useOrderStore } from '@features/account/store/orderStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
+import { formatVietnamAddress } from '@shared/lib/formatters'
 
 export function useCheckout() {
   const route = useRoute()
@@ -79,12 +80,7 @@ export function useCheckout() {
   }
 
   function buildShippingAddressDetail(address = {}) {
-    return [
-      address.detail || address.street,
-      address.wardName || address.ward,
-      address.districtName || address.district,
-      address.provinceName || address.city,
-    ].filter(Boolean).join(', ')
+    return formatVietnamAddress(address)
   }
 
   function resolveLineImageUrl(item = {}) {

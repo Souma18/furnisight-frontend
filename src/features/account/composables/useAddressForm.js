@@ -1,9 +1,5 @@
 import { reactive, ref } from 'vue'
-import {
-  getProvinces,
-  getDistrictsByProvince,
-  getWardsByDistrict,
-} from '@shared/lib/publicApis/vietnamAddressApi'
+import { getProvinces, getWardsByProvince } from '@shared/lib/publicApis/vietnamAddressApi'
 import { useAddressStore } from '../store/addressStore'
 
 const ADDRESS_TYPE_LABELS = {
@@ -15,12 +11,10 @@ export function useAddressForm(props, emit) {
   const addressStore = useAddressStore()
   const showModal = ref(false)
   const provinces = ref([])
-  const districts = ref([])
   const wards = ref([])
   const loadingProvince = ref(false)
-  const loadingDistrict = ref(false)
   const loadingWard = ref(false)
-  const fallbackMode = ref(false)
+  const addressApiUnavailable = ref(false)
 
   function createEmptyForm() {
     return {
@@ -28,10 +22,8 @@ export function useAddressForm(props, emit) {
       phone: '',
       detail: '',
       provinceCode: '',
-      districtCode: '',
       wardCode: '',
       provinceName: '',
-      districtName: '',
       wardName: '',
       type: 'home',
       isDefault: false,
@@ -42,51 +34,40 @@ export function useAddressForm(props, emit) {
 
   function resetForm() {
     Object.assign(form, createEmptyForm())
-    districts.value = []
     wards.value = []
   }
 
-  async function openModal() {
-    resetForm()
-    showModal.value = true
-    if (provinces.value.length) return
+  async function loadProvinces() {
     loadingProvince.value = true
     try {
       provinces.value = await getProvinces()
-      fallbackMode.value = false
+      addressApiUnavailable.value = false
     } catch (_error) {
-      fallbackMode.value = true
-      emit('notify', 'API địa chỉ công khai lỗi, đang dùng nhập tay.', 'error')
+      addressApiUnavailable.value = true
+      emit('notify', 'Không tải được dữ liệu địa chỉ. Vui lòng thử lại.', 'error')
     } finally {
       loadingProvince.value = false
     }
   }
 
+  async function openModal() {
+    resetForm()
+    showModal.value = true
+    if (!provinces.value.length) await loadProvinces()
+  }
+
   async function onProvinceChange() {
     const selected = provinces.value.find((item) => String(item.code) === String(form.provinceCode))
     form.provinceName = selected?.name ?? ''
-    form.districtCode = ''
     form.wardCode = ''
-    districts.value = []
+    form.wardName = ''
     wards.value = []
     if (!form.provinceCode) return
-    loadingDistrict.value = true
-    try {
-      districts.value = await getDistrictsByProvince(form.provinceCode)
-    } finally {
-      loadingDistrict.value = false
-    }
-  }
-
-  async function onDistrictChange() {
-    const selected = districts.value.find((item) => String(item.code) === String(form.districtCode))
-    form.districtName = selected?.name ?? ''
-    form.wardCode = ''
-    wards.value = []
-    if (!form.districtCode) return
     loadingWard.value = true
     try {
-      wards.value = await getWardsByDistrict(form.districtCode)
+      wards.value = await getWardsByProvince(form.provinceCode)
+    } catch (_error) {
+      emit('notify', 'Không tải được danh sách phường/xã. Vui lòng chọn lại tỉnh/thành.', 'error')
     } finally {
       loadingWard.value = false
     }
@@ -98,7 +79,7 @@ export function useAddressForm(props, emit) {
   }
 
   async function submitAddress() {
-    if (!form.fullName || !form.phone || !form.detail) {
+    if (!form.fullName || !form.phone || !form.detail || !form.provinceCode || !form.wardCode) {
       emit('notify', 'Vui lòng điền thông tin bắt buộc.', 'error')
       return
     }
@@ -130,16 +111,14 @@ export function useAddressForm(props, emit) {
   return {
     showModal,
     provinces,
-    districts,
     wards,
     loadingProvince,
-    loadingDistrict,
     loadingWard,
-    fallbackMode,
+    addressApiUnavailable,
     form,
     openModal,
+    loadProvinces,
     onProvinceChange,
-    onDistrictChange,
     onWardChange,
     submitAddress,
     setAsDefault,

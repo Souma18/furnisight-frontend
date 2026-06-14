@@ -1,4 +1,5 @@
 <script setup>
+import { onBeforeUnmount } from 'vue'
 import { provideAuthViewState, useAuthViewState } from '../composables/useAuthViewState'
 import AuthTabs from './AuthTabs.vue'
 import LoginForm from './LoginForm.vue'
@@ -19,7 +20,8 @@ const props = defineProps({
   },
 })
 
-defineEmits(['close', 'authenticated'])
+const emit = defineEmits(['close', 'authenticated'])
+let authenticatedTimer = null
 
 const authViewState = useAuthViewState(props.initialView)
 provideAuthViewState(authViewState)
@@ -28,6 +30,18 @@ const { AUTH_VIEWS, activeView, successState, showTabs, setView } = authViewStat
 function handleTabChange(tab) {
   setView(tab)
 }
+
+function handleAuthenticated(payload = {}) {
+  if (authenticatedTimer) clearTimeout(authenticatedTimer)
+  authenticatedTimer = setTimeout(() => {
+    authenticatedTimer = null
+    emit('authenticated', payload)
+  }, 500)
+}
+
+onBeforeUnmount(() => {
+  if (authenticatedTimer) clearTimeout(authenticatedTimer)
+})
 </script>
 
 <template>
@@ -56,8 +70,7 @@ function handleTabChange(tab) {
           <LoginForm
             v-if="activeView === AUTH_VIEWS.LOGIN"
             :embedded="embedded"
-            @authenticated="$emit('authenticated')"
-            @close="$emit('close')"
+            @authenticated="handleAuthenticated"
           />
           <RegisterForm v-else-if="activeView === AUTH_VIEWS.REGISTER" />
           <ForgotPasswordForm v-else-if="activeView === AUTH_VIEWS.FORGOT" />

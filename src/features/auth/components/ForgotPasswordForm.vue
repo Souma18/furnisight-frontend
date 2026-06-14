@@ -1,5 +1,6 @@
 <script setup>
 import { useForgotPasswordForm } from '../composables/useForgotPasswordForm'
+import PasswordField from './PasswordField.vue'
 
 const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = useForgotPasswordForm()
 </script>
@@ -32,7 +33,13 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
 
     <template v-else>
       <label>Mật khẩu mới</label>
-      <input v-model="form.newPassword" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
+      <PasswordField
+        v-model="form.newPassword"
+        placeholder="Tối thiểu 8 ký tự"
+        autocomplete="new-password"
+        minlength="8"
+        required
+      />
     </template>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>

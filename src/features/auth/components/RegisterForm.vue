@@ -1,5 +1,6 @@
 <script setup>
 import { useRegisterForm } from '../composables/useRegisterForm'
+import PasswordField from './PasswordField.vue'
 
 const { form, loading, errorMessage, passwordStrength, submitRegister } = useRegisterForm()
 </script>
@@ -21,7 +22,13 @@ const { form, loading, errorMessage, passwordStrength, submitRegister } = useReg
     <input v-model="form.email" type="email" placeholder="hello@email.com" required />
 
     <label>Mật khẩu</label>
-    <input v-model="form.password" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
+    <PasswordField
+      v-model="form.password"
+      placeholder="Tối thiểu 8 ký tự"
+      autocomplete="new-password"
+      minlength="8"
+      required
+    />
     <div class="strength">
       <span v-for="idx in 4" :key="idx" :class="{ active: idx <= passwordStrength }" />
     </div>
@@ -49,8 +56,7 @@ label {
 }
 input[type='text'],
 input[type='email'],
-input[type='tel'],
-input[type='password'] {
+input[type='tel'] {
   min-height: 2.55rem;
   border-radius: var(--auth-radius-md);
   border: 1px solid var(--auth-border);

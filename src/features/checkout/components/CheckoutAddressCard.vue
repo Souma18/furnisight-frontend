@@ -1,5 +1,6 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { formatVietnamAddress } from '@shared/lib/formatters'
 
 defineProps({
   address: {
@@ -33,9 +34,7 @@ defineEmits(['change-address'])
             {{ address.fullName }} ({{ address.phone }})
             <span v-if="address.isDefault" class="co-addr-default">Mặc định</span>
           </div>
-          <p class="co-addr-street">
-            {{ address.detail }}, {{ address.wardName }}, {{ address.districtName }}, {{ address.provinceName }}
-          </p>
+          <p class="co-addr-street">{{ formatVietnamAddress(address) }}</p>
         </div>
       </div>
     </div>

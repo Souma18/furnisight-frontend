@@ -5,7 +5,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderDetailResponse } from '@shared/lib/api/services/orders/orders.model'
-import { PriceFormatter } from '@shared/lib/formatters'
+import { formatVietnamAddress, PriceFormatter } from '@shared/lib/formatters'
 
 const props = defineProps({
   orderCode: { type: String, required: true },
@@ -32,12 +32,11 @@ const statusMeta = computed(() => statusMap[order.value?.status] ?? {
 
 const shippingAddress = computed(() => {
   const detail = order.value?.shippingDetail || {}
-  return [
-    detail.shippingAddressDetail,
-    detail.wardName,
-    detail.districtName,
-    detail.provinceName,
-  ].filter(Boolean).join(', ')
+  return formatVietnamAddress({
+    detail: detail.shippingAddressDetail,
+    wardName: detail.wardName,
+    provinceName: detail.provinceName,
+  })
 })
 
 const paymentStatusMeta = computed(() => {

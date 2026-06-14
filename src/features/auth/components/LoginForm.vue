@@ -1,7 +1,7 @@
 <script setup>
 import { useLoginForm } from '../composables/useLoginForm'
 import AuthSocialButtons from './AuthSocialButtons.vue'
-import AppIcon from '@shared/ui/AppIcon.vue'
+import PasswordField from './PasswordField.vue'
 
 const props = defineProps({
   embedded: {
@@ -10,15 +10,13 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['authenticated', 'close'])
+const emit = defineEmits(['authenticated'])
 const {
   form,
   loading,
   errorMessage,
-  showPassword,
   openForgotPassword,
   submitLogin,
-  togglePassword,
 } = useLoginForm({ embedded: props.embedded, emit })
 </script>
 
@@ -36,24 +34,13 @@ const {
     />
 
     <label>Mật khẩu</label>
-    <div class="password-row">
-      <input
-        v-model="form.password"
-        :type="showPassword ? 'text' : 'password'"
-        placeholder="Nhập mật khẩu"
-        autocomplete="current-password"
-        minlength="8"
-        required
-      />
-      <button
-        type="button"
-        class="ghost-btn"
-        :aria-label="showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
-        @click="togglePassword"
-      >
-        <AppIcon :name="showPassword ? 'eyeOff' : 'eye'" :size="16" />
-      </button>
-    </div>
+    <PasswordField
+      v-model="form.password"
+      placeholder="Nhập mật khẩu"
+      autocomplete="current-password"
+      minlength="8"
+      required
+    />
 
     <div class="right-link">
       <button type="button" class="text-btn" @click="openForgotPassword">Quên mật khẩu?</button>
@@ -90,28 +77,6 @@ input {
 input:focus {
   outline: none;
   box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
-.password-row {
-  position: relative;
-}
-.password-row input {
-  width: 100%;
-  padding-right: 3rem;
-}
-.ghost-btn {
-  position: absolute;
-  right: 0.2rem;
-  top: 0.2rem;
-  bottom: 0.2rem;
-  border: none;
-  border-radius: var(--auth-radius-sm);
-  background: transparent;
-  color: var(--auth-text-secondary);
-  cursor: pointer;
-  width: 2rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
 }
 .right-link {
   text-align: right;
