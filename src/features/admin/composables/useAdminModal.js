@@ -59,6 +59,15 @@ function isCodOrder(order) {
   return String(order?.paymentMethod || order?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
 }
 
+function resolveTrackingCode(order) {
+  return order?.trackingCode || order?.tracking_code || order?.shippingTrackingCode || ''
+}
+
+function canEditTrackingCode(order, nextStatusLabel) {
+  const currentStatus = String(order?.status || '').toUpperCase()
+  return currentStatus !== 'DELIVERED' && nextStatusLabel === 'Đang giao'
+}
+
 function buildUserPayload(form) {
   return {
     name: form.name?.trim(),
@@ -164,7 +173,7 @@ export function useAdminModal() {
       accountStatus: payload?.status === 'blocked' || payload?.status === 'banned' ? 'BANNED' : 'ACTIVE',
       password: '',
       orderStatus: nextOrderStatus(payload),
-      trackingCode: '',
+      trackingCode: resolveTrackingCode(payload),
       note: '',
       roleDescription: payload?.description ?? '',
       imageUrl: payload?.imageUrl ?? '',
@@ -363,9 +372,10 @@ export function useAdminModal() {
       if (type === 'editOrder' && modal.value.payload?.id) {
         const status = ORDER_STATUS_TO_API[form.orderStatus]
         if (!status) throw new Error('Trạng thái này chưa được backend hỗ trợ cập nhật từ admin.')
+        const canEditTracking = canEditTrackingCode(modal.value.payload, form.orderStatus)
         assertActionResult(await adminApi.updateOrder(modal.value.payload.id, {
           status,
-          trackingCode: status === 'SHIPPING' ? form.trackingCode : null,
+          trackingCode: canEditTracking ? form.trackingCode : null,
           note: form.note,
         }))
       }
