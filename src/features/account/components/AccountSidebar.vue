@@ -167,6 +167,8 @@ function toggleNotificationMenu() {
   background: var(--account-surface);
   display: flex;
   flex-direction: column;
+  box-shadow: none;
+  filter: none;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }

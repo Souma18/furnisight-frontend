@@ -33,11 +33,13 @@ const routes = [
     path: '/auth/callback',
     name: 'auth-callback',
     component: () => import('@features/auth/pages/OAuthCallbackPage.vue'),
+    meta: { allowsAdmin: true },
   },
   {
     path: '/auth/verify',
     name: 'auth-verify',
-    redirect: to => ({ path: '/', query: to.query })
+    redirect: to => ({ path: '/', query: to.query }),
+    meta: { allowsAdmin: true },
   },
   {
     path: '/cart',
@@ -54,7 +56,7 @@ const routes = [
     path: '/checkout',
     name: 'checkout',
     component: () => import('@features/checkout/pages/CheckoutPage.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, requiresCustomer: true },
   },
   {
     path: '/orders/payment/callback',
@@ -126,8 +128,19 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
+  const isAdminRoute = to.matched.some((record) => record.meta.requiresAdmin)
+  if (authStore.isAdmin && !isAdminRoute && !to.meta.allowsAdmin) {
+    next({ name: 'admin-dashboard' })
+    return
+  }
+
   if (to.meta.requiresAdmin && !authStore.isAdmin) {
     next({ name: 'home' })
+    return
+  }
+
+  if (to.meta.requiresCustomer && !authStore.isCustomer) {
+    next({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
     return
   }
 

@@ -18,6 +18,7 @@ const emit = defineEmits([
   'pick-size',
   'change-qty',
   'add-cart',
+  'buy-now',
   'toggle-wish',
   'open-3d',
   'go-room3d',
@@ -127,9 +128,14 @@ const emit = defineEmits([
           <AppIcon v-else name="cart" :size="17" />
           {{ cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
         </button>
-        <button type="button" class="solid">
+        <button
+          type="button"
+          class="solid"
+          :disabled="cartAdding"
+          @click="emit('buy-now')"
+        >
           <AppIcon name="sparkles" :size="17" />
-          Mua ngay
+          {{ cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
         </button>
         <button
           type="button"

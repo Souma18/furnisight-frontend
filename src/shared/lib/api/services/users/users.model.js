@@ -4,7 +4,9 @@ export class ProfileResponse {
    */
   constructor(data = {}) {
     this.id = data.id || null
+    this.accountId = data.accountId || null
     this.email = data.email || ''
+    this.displayName = data.displayName || data.name || ''
     this.firstName = data.firstName || ''
     this.lastName = data.lastName || ''
     this.avatarMediaId = data.avatarMediaId || null

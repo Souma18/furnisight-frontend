@@ -9,7 +9,7 @@ defineProps({
     <div class="section-head">
       <div>
         <div class="section-label">Danh gia</div>
-        <h2 class="section-title">Khach hang <em>noi gi</em></h2>
+        <h2 class="section-title">Khách hàng <em>nói gì</em></h2>
       </div>
     </div>
     <div class="testimonials-grid">

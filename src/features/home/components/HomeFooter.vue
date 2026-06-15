@@ -17,7 +17,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
         </p>
       </div>
       <div class="hn-footer-col">
-        <h4>San pham</h4>
+        <h4>Sản phẩm</h4>
         <a href="#">Ghe van phong</a>
         <a href="#">Giuong ngu</a>
         <a href="#">Sofa</a>

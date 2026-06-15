@@ -326,43 +326,76 @@ export function useProductDetailPage(props) {
     )
   }
 
+  function buildCartPayload() {
+    const selectedVariant = resolveSelectedVariant()
+
+    return {
+      productId: product.value.id,
+      detailId: product.value.slug || product.value.id,
+      variantId: selectedVariant?.id ?? null,
+      name: product.value.name,
+      price: selectedVariant?.price ?? product.value.price ?? 0,
+      imageUrl: activeImage.value || product.value.image || product.value.gallery?.[0] || '',
+      quantity: qty.value,
+      selectedColor: selectedColor.value,
+      selectedSize: selectedSize.value,
+      room3dProductId: product.value.room3dProductId ?? null,
+    }
+  }
+
+  function findCartLine(items, payload) {
+    const productId = String(payload.productId ?? '')
+    const variantId = String(payload.variantId ?? '')
+
+    return items.find((item) =>
+      String(item.productId ?? '') === productId &&
+      String(item.variantId ?? '') === variantId,
+    ) ?? null
+  }
+
   async function addToCart() {
-    if (!product.value || cartAdding.value) return
+    if (!product.value || cartAdding.value) return null
 
     if (!authStore.isAuthenticated) {
       openAuthModal()
-      return
+      return null
     }
 
-    const selectedVariant = resolveSelectedVariant()
+    if (!authStore.isCustomer) {
+      await router.replace({ name: 'admin-dashboard' })
+      return null
+    }
 
     clearTimeout(cartAddedTimer)
     cartAdding.value = true
     cartAdded.value = false
 
     try {
-      await cartStore.addItem({
-        productId: product.value.id,
-        detailId: product.value.slug || product.value.id,
-        variantId: selectedVariant?.id ?? null,
-        name: product.value.name,
-        price: selectedVariant?.price ?? product.value.price ?? 0,
-        imageUrl: activeImage.value || product.value.image || product.value.gallery?.[0] || '',
-        quantity: qty.value,
-        selectedColor: selectedColor.value,
-        selectedSize: selectedSize.value,
-        room3dProductId: product.value.room3dProductId ?? null,
-      })
+      const payload = buildCartPayload()
+      const items = await cartStore.addItem(payload)
+      const addedLine = findCartLine(items, payload)
       cartAdded.value = true
       cartAddedTimer = setTimeout(() => {
         cartAdded.value = false
       }, 900)
+      return addedLine
     } catch (e) {
       cartAdded.value = false
       console.error('Failed to add product to cart:', e)
+      return null
     } finally {
       cartAdding.value = false
     }
+  }
+
+  async function buyNow() {
+    const addedLine = await addToCart()
+    if (!addedLine?.id) return
+
+    await router.push({
+      name: 'checkout',
+      query: { lines: addedLine.id },
+    })
   }
 
   async function addToWishlist() {
@@ -444,6 +477,7 @@ export function useProductDetailPage(props) {
     changeQty,
     openRoom3D,
     addToCart,
+    buyNow,
     addToWishlist,
     updateReviewField,
     openReviewLogin,

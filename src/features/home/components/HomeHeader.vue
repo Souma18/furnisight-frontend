@@ -34,10 +34,10 @@ defineProps({
       <button type="button" class="hn-icon-btn" aria-label="Thong bao">
         <AppIcon name="bell" :size="17" />
       </button>
-      <button type="button" class="hn-icon-btn" aria-label="Gio hang">
+      <button type="button" class="hn-icon-btn" aria-label="Giỏ hàng">
         <AppIcon name="cart" :size="17" />
       </button>
-      <button type="button" class="hn-icon-btn" aria-label="Tai khoan">
+      <button type="button" class="hn-icon-btn" aria-label="Tài khoản">
         <AppIcon name="user" :size="17" />
       </button>
     </div>

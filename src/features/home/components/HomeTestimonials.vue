@@ -9,7 +9,7 @@ defineProps({
     <div class="hn-section-head">
       <div>
         <p class="hn-label">Danh gia</p>
-        <h2 class="hn-title">Khach hang <em>noi gi</em></h2>
+        <h2 class="hn-title">Khách hàng <em>nói gì</em></h2>
       </div>
     </div>
 

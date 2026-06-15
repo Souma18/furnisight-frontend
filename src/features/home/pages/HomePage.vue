@@ -56,8 +56,6 @@ const {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
-
 .home-page { background: #faf6f0; color: #1a1a1a; }
 .home-page { font-family: var(--sans); }
 .home-page a,

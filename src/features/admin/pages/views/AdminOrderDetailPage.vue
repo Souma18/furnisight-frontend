@@ -24,6 +24,7 @@ const statusMap = {
   done: { label: 'Hoàn thành', className: 'b-success' },
   cancel: { label: 'Đã hủy', className: 'b-cancel' },
   refund_pending: { label: 'Chờ hoàn tiền', className: 'b-pending' },
+  refunded: { label: 'Đã hoàn tiền', className: 'b-success' },
 }
 
 const statusMeta = computed(() => statusMap[order.value?.status] ?? {
@@ -45,6 +46,7 @@ const paymentStatusMeta = computed(() => {
   if (status === 'PAID') return { label: 'Đã thanh toán', className: 'b-success' }
   if (status === 'FAILED' || status === 'PAYMENT_FAILED') return { label: 'Thanh toán lỗi', className: 'b-cancel' }
   if (order.value?.status === 'refund_pending') return { label: 'Chờ hoàn tiền', className: 'b-pending' }
+  if (order.value?.status === 'refunded') return { label: 'Đã hoàn tiền', className: 'b-success' }
   if (order.value?.status === 'unpaid') return { label: 'Chờ thanh toán', className: 'b-pending' }
   return { label: status || 'Chưa rõ', className: 'b-pending' }
 })
@@ -168,6 +170,17 @@ const timelineItems = computed(() => {
       at: null,
       state: 'current',
       icon: 'refresh',
+    })
+  }
+
+  if (current.status === 'refunded') {
+    items.push({
+      key: 'refunded',
+      title: 'Đã hoàn tiền',
+      desc: 'Admin đã xác nhận hoàn tiền cho khách hàng.',
+      at: null,
+      state: 'done',
+      icon: 'checkCheck',
     })
   }
 

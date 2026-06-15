@@ -9,11 +9,16 @@ export class AuthProfileResponse {
    */
   constructor(data = {}) {
     this.id = data.id ?? null
+    this.accountId = data.accountId ?? null
     this.email = data.email || ''
     this.firstName = data.firstName || data.givenName || ''
     this.lastName = data.lastName || data.familyName || ''
     this.displayName = data.displayName || data.name || [this.lastName, this.firstName].filter(Boolean).join(' ').trim()
     this.avatarUrl = data.avatarUrl || ''
+    this.avatarMediaId = data.avatarMediaId || null
+    this.bio = data.bio || ''
+    this.birthday = data.birthday || null
+    this.gender = data.gender || ''
     this.role = data.role || ''
     this.status = data.status || ''
     this.createdAt = data.createdAt ?? null

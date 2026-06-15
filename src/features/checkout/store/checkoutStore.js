@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { ordersApi } from '@shared/lib/api/services'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { buildCheckoutSummary } from '../utils/checkoutPricing'
 
 const PENDING_PAYMENT_KEY = 'luxnest-pending-payment'
@@ -130,6 +131,7 @@ function comboValidateItems(lines = []) {
 }
 
 export const useCheckoutStore = defineStore('checkout', () => {
+  const authStore = useAuthStore()
   const loading = ref(false)
   const placing = ref(false)
   const hydrated = ref(false)
@@ -326,6 +328,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function placeOrder(payload) {
+    if (!authStore.isCustomer) {
+      throw new Error('Chỉ tài khoản khách hàng mới có thể đặt hàng.')
+    }
     placing.value = true
     try {
       const response = await ordersApi.createOrder(payload)
@@ -337,6 +342,15 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function createVnpayPaymentAction(payload) {
+    if (!authStore.isCustomer) {
+      return {
+        ok: false,
+        status: 403,
+        paymentUrl: '',
+        transactionRef: '',
+        message: 'Chỉ tài khoản khách hàng mới có thể thanh toán.',
+      }
+    }
     try {
       const response = await ordersApi.createVnpayPayment(payload)
       const ok = response?.status === 200

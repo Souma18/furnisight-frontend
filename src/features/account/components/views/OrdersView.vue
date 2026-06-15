@@ -60,7 +60,7 @@ function canRetryPaymentNow(order) {
   return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
 }
 
-const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'refund_pending', 'cancel']
+const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'refund_pending', 'refunded', 'cancel']
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -75,6 +75,7 @@ function statusClass(status) {
   if (status === 'done') return 'done'
   if (status === 'cancel') return 'cancel'
   if (status === 'refund_pending') return 'refund'
+  if (status === 'refunded') return 'done'
   if (status === 'payment_failed') return 'failed'
   if (status === 'paid') return 'paid'
   return 'pending'

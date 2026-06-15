@@ -61,6 +61,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const isAuthenticated = computed(() => Boolean(token.value))
   const isAdmin = computed(() => isAdminRole(roles.value.length ? roles.value : user.value?.role))
+  const isCustomer = computed(() => isAuthenticated.value && !isAdmin.value)
 
   function setSession(sessionPayload = {}) {
     const session = sessionPayload instanceof AuthSessionResponse
@@ -96,7 +97,16 @@ export const useAuthStore = defineStore('auth', () => {
     document.documentElement.classList.remove('admin-route-active')
   }
 
-  return { user, token, refreshToken, roles, isAuthenticated, isAdmin, setSession, logout }
+  function updateProfile(profile = {}) {
+    const mergedProfile = normalizeStoredProfile({
+      ...(user.value || {}),
+      ...profile,
+    })
+    user.value = mergedProfile
+    writeStoredProfile(mergedProfile)
+  }
+
+  return { user, token, refreshToken, roles, isAuthenticated, isAdmin, isCustomer, setSession, updateProfile, logout }
 })
 
 function normalizeJwtToken(value) {

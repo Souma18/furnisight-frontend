@@ -12,9 +12,25 @@ export function useAdminPassword() {
   })
 
   async function submit() {
+    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
+      ui.showToast({ icon: 'x', title: 'Thiếu thông tin', subtitle: 'Vui lòng nhập đầy đủ các trường mật khẩu.' })
+      return
+    }
+    if (form.newPassword !== form.confirmPassword) {
+      ui.showToast({ icon: 'x', title: 'Mật khẩu không khớp', subtitle: 'Xác nhận mật khẩu mới chưa chính xác.' })
+      return
+    }
+    if (form.newPassword.length < 8) {
+      ui.showToast({ icon: 'x', title: 'Mật khẩu quá ngắn', subtitle: 'Mật khẩu mới phải có ít nhất 8 ký tự.' })
+      return
+    }
+
     saving.value = true
     try {
-      await adminApi.changeAdminPassword({ ...form })
+      await adminApi.changeAdminPassword({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      })
       ui.showToast({ title: 'Đã cập nhật mật khẩu', subtitle: 'Mật khẩu mới đã được lưu.' })
       form.currentPassword = ''
       form.newPassword = ''

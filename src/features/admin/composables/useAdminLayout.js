@@ -104,7 +104,7 @@ export function useAdminLayout() {
     const normalizedRole = String(profile.role || 'ADMIN').toUpperCase().replace(/^ROLE_/, '')
     const preset = ROLE_PRESETS[normalizedRole] || ROLE_PRESETS.ADMIN
     const fallback = ADMIN_SIM_USERS.super
-    const fullName = `${profile.firstName ?? ''} ${profile.lastName ?? ''}`.trim()
+    const fullName = profile.displayName || `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
 
     return {
       id: profile.id || fallback.id,

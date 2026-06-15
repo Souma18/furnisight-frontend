@@ -150,7 +150,7 @@ function runAiGenerate() {
         :disabled="!selectedFile || isAnalyzing"
         @click="runAiGenerate"
       >
-        {{ isAnalyzing ? 'Dang tạo mô hình...' : 'Sử dụng AI' }}
+        {{ isAnalyzing ? 'Đang tạo mô hình...' : 'Sử dụng AI' }}
       </button>
       <!-- <NSpin v-if="isAnalyzing" size="small">AI dang phan tich...</NSpin> -->
       <p v-if="uploadError" class="upload-error">{{ uploadError }}</p>
@@ -191,8 +191,8 @@ function runAiGenerate() {
 
     <div v-if="mode === 'upload'" class="room-info">
       <p class="label">THONG TIN PHONG</p>
-      <p v-if="predictionStatus === 'idle'" class="note">Chua co ket qua prediction.</p>
-      <p v-else-if="predictionStatus === 'loading'" class="note">Dang dự đoán...</p>
+      <p v-if="predictionStatus === 'idle'" class="note">Chưa có kết quả dự đoán.</p>
+      <p v-else-if="predictionStatus === 'loading'" class="note">Đang dự đoán...</p>
       <p v-else-if="predictionStatus === 'error'" class="note error-note">Prediction that bai.</p>
       <div v-else class="room-meta">
         <div class="tag-row">

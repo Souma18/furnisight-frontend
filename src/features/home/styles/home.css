@@ -1,7 +1,7 @@
 :root {
-  --hn-navy: #12202e;
-  --hn-gold: #c9922a;
-  --hn-cream: #faf6f0;
+  --hn-navy: var(--brand-navy-800);
+  --hn-gold: var(--brand-gold-600);
+  --hn-cream: var(--brand-cream-50);
 }
 
 .home-page {

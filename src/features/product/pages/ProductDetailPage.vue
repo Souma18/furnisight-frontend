@@ -38,6 +38,7 @@ const {
   changeQty,
   openRoom3D,
   addToCart,
+  buyNow,
   addToWishlist,
   updateReviewField,
   openReviewLogin,
@@ -98,6 +99,7 @@ const {
         @pick-size="selectedSize = $event"
         @change-qty="changeQty"
         @add-cart="addToCart"
+        @buy-now="buyNow"
         @toggle-wish="addToWishlist"
         @open-3d="show3DModal = true"
         @go-room3d="openRoom3D"

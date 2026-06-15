@@ -11,6 +11,10 @@ export function usePasswordManager(emitNotify) {
   const isLoading = ref(false)
 
   async function submit() {
+    if (!form.currentPassword) {
+      if (emitNotify) emitNotify('Vui lòng nhập mật khẩu hiện tại.', 'error')
+      return
+    }
     if (!form.newPassword || form.newPassword !== form.confirmPassword) {
       if (emitNotify) emitNotify('Mật khẩu xác nhận chưa khớp.', 'error')
       return
@@ -18,7 +22,10 @@ export function usePasswordManager(emitNotify) {
     
     try {
       isLoading.value = true
-      await authApi.changePassword({ newPassword: form.newPassword })
+      await authApi.changePassword({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword,
+      })
       if (emitNotify) emitNotify('Đã cập nhật mật khẩu thành công.')
       form.currentPassword = ''
       form.newPassword = ''

@@ -8,20 +8,20 @@
   design tokens. Apply .cm-feature-vars on overlay roots (see Vue modals).
 */
 .cm-feature-vars {
-  --navy: #0c1820;
-  --navy2: #12202e;
-  --navy3: #1c3148;
-  --navy4: #243650;
-  --gold: #c9922a;
-  --gold2: #d4a030;
-  --gold3: #e5b84a;
-  --gold4: #f0cc6e;
-  --gold-pale: #fdf6e8;
-  --gold-dim: #a07320;
-  --cream: #faf6f0;
-  --cream2: #f0e9dd;
-  --cream3: #ece2cf;
-  --cream4: #e4d8c4;
+  --navy: var(--brand-navy-900);
+  --navy2: var(--brand-navy-800);
+  --navy3: var(--brand-navy-700);
+  --navy4: var(--brand-navy-600);
+  --gold: var(--brand-gold-600);
+  --gold2: var(--brand-gold-500);
+  --gold3: var(--brand-gold-400);
+  --gold4: var(--brand-gold-300);
+  --gold-pale: var(--brand-gold-50);
+  --gold-dim: var(--brand-gold-700);
+  --cream: var(--brand-cream-50);
+  --cream2: var(--brand-cream-100);
+  --cream3: var(--brand-cream-200);
+  --cream4: var(--brand-cream-300);
   --white: #ffffff;
   --text: #1a1812;
   --text2: #3d3830;

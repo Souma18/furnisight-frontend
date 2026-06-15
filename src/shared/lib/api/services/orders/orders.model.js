@@ -27,6 +27,7 @@ export function normalizeOrderStatus(status) {
     CANCEL: 'cancel',
     REFUND_PENDING: 'refund_pending',
     PENDING_REFUND: 'refund_pending',
+    REFUNDED: 'refunded',
   }
 
   return statusMap[normalized] || String(status || 'unpaid').toLowerCase()

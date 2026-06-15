@@ -1,0 +1,20 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-sans: 'Be Vietnam Pro', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, Consolas, monospace;
+  --brand-navy-900: #0c1820;
+  --brand-navy-800: #12202e;
+  --brand-navy-700: #1c3148;
+  --brand-navy-600: #243650;
+  --brand-gold-700: #a07320;
+  --brand-gold-600: #c9922a;
+  --brand-gold-500: #d4a030;
+  --brand-gold-400: #e5b84a;
+  --brand-gold-300: #f0cc6e;
+  --brand-gold-50: #fdf6e8;
+  --brand-cream-50: #faf6f0;
+  --brand-cream-100: #f0e9dd;
+  --brand-cream-200: #ece2cf;
+  --brand-cream-300: #e4d8c4;
+}

@@ -1004,9 +1004,9 @@ onMounted(async () => {
           <label>Mô tả<textarea v-model="voucherForm.description" rows="3" /></label>
           <div class="section-title"><AppIcon name="mapPin" />Vi tri hien thi</div>
           <div class="checkbox-grid">
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyen mai</label>
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="HOME">Trang chu</label>
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CART">Gio hang</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyến mãi</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="HOME">Trang chủ</label>
+            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CART">Giỏ hàng</label>
             <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CHECKOUT">Checkout</label>
           </div>
           <label class="check-line"><input v-model="voucherForm.active" type="checkbox">Đang bật</label>
@@ -1070,7 +1070,7 @@ onMounted(async () => {
             <label><span>SL</span><input v-model.number="item.quantity" type="number" min="1"></label>
             <button type="button" @click="removeComboItem(item.id)"><AppIcon name="trash" /></button>
           </div>
-          <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyen mai</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chu</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang san pham</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Gio hang</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Checkout</label></div>
+          <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyến mãi</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chủ</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang sản phẩm</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Giỏ hàng</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Thanh toán</label></div>
           <div class="combo-summary"><div><span>Giá gốc</span><b>{{ money(comboOriginalAmount) }}</b></div><div><span>Giá combo</span><b>{{ money(comboFinalAmount) }}</b></div><div class="save"><span>Khách tiết kiệm</span><b>{{ money(comboSavedAmount) }}</b></div></div>
         </div>
         <footer><button type="button" class="mc-cancel" @click="closeComboModal">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="save" />Lưu combo</button></footer>

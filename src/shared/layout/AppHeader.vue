@@ -187,7 +187,7 @@ watch(() => route.query.otpCode, (newVal) => {
       <button
         class="icon-btn user"
         type="button"
-        :aria-label="isAuthenticated ? 'Tai khoan' : 'Dang nhap'"
+        :aria-label="isAuthenticated ? 'Tài khoản' : 'Đăng nhập'"
         @click="handleUserAction"
       >
         <AppIcon name="user" :size="14" />

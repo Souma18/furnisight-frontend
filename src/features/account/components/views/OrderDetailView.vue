@@ -116,6 +116,7 @@ const paymentStatusLabel = computed(() => {
   if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return 'Thanh toán thất bại'
   if (order.value?.status === 'unpaid') return 'Chờ thanh toán'
   if (order.value?.status === 'refund_pending') return 'Chờ hoàn tiền'
+  if (order.value?.status === 'refunded') return 'Đã hoàn tiền'
   return rawStatus || 'Chưa ghi nhận'
 })
 
@@ -185,6 +186,17 @@ const transactionTimeline = computed(() => {
       time: null,
       state: 'active',
       icon: 'refresh',
+    })
+  }
+
+  if (current.status === 'refunded') {
+    items.push({
+      key: 'refunded',
+      title: 'Đã hoàn tiền',
+      sub: 'Admin đã xác nhận hoàn tiền cho đơn hàng.',
+      time: null,
+      state: 'done',
+      icon: 'checkCheck',
     })
   }
 
@@ -478,6 +490,11 @@ const paymentDeadline = computed(() => {
 .status-badge.refund_pending {
   background: #fff6e6;
   color: #9a6500;
+}
+
+.status-badge.refunded {
+  background: #eaf5ef;
+  color: #2a7a50;
 }
 
 .status-badge.delivering {

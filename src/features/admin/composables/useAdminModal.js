@@ -44,11 +44,13 @@ const WIDE_MODALS = new Set(['addRole', 'editRole', 'addProd', 'editProd'])
 const ORDER_STATUS_TO_API = {
   'Đang giao': 'SHIPPING',
   'Hoàn thành': 'DELIVERED',
+  'Đã hoàn tiền': 'REFUNDED',
 }
 
 function nextOrderStatus(payload) {
   if (payload?.statusLabel === 'Đã thanh toán') return 'Đang giao'
   if (payload?.statusLabel === 'Đang giao') return 'Hoàn thành'
+  if (payload?.statusLabel === 'Chờ hoàn tiền') return 'Đã hoàn tiền'
   if (isCodOrder(payload) && ['Chờ xác nhận', 'Chờ thanh toán'].includes(payload?.statusLabel)) return 'Đang giao'
   return ''
 }

@@ -8,4 +8,5 @@ export const ORDER_STATUS_LABELS = {
   done: 'Hoàn thành',
   cancel: 'Đã huỷ',
   refund_pending: 'Chờ hoàn tiền',
+  refunded: 'Đã hoàn tiền',
 }

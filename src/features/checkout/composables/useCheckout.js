@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useAddressStore } from '@features/account/store/addressStore'
 import { useOrderStore } from '@features/account/store/orderStore'
 import { useCartStore } from '@features/cart/store/cartStore'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
 import { formatVietnamAddress } from '@shared/lib/formatters'
@@ -15,6 +16,7 @@ export function useCheckout() {
   const addressStore = useAddressStore()
   const orderStore = useOrderStore()
   const checkoutStore = useCheckoutStore()
+  const authStore = useAuthStore()
 
   const checkoutState = storeToRefs(checkoutStore)
   const showSuccess = ref(false)
@@ -54,6 +56,10 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
+    if (!authStore.isCustomer) {
+      await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
+      return
+    }
     await Promise.all([
       cartStore.ensureHydrated(),
       addressStore.fetchAddresses(),
@@ -124,6 +130,15 @@ export function useCheckout() {
   }
 
   async function placeOrder() {
+    if (!authStore.isCustomer) {
+      showToast({
+        icon: 'shield',
+        title: 'Không có quyền đặt hàng',
+        subtitle: 'Chỉ tài khoản khách hàng mới có thể đặt hàng và thanh toán.',
+      })
+      return null
+    }
+
     if (!checkoutState.agreedTerms.value) {
       showToast({
         icon: 'shield',
