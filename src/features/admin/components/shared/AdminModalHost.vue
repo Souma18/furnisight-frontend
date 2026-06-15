@@ -48,13 +48,13 @@ const stockVariantOptions = computed(() => {
 })
 
 const orderStatusOptions = computed(() => {
+  if (
+    isCodOrder(modal.value.payload) &&
+    ['Đã thanh toán', 'Chờ xác nhận', 'Chờ thanh toán'].includes(modal.value.payload?.statusLabel)
+  ) return ['Đang giao', 'Hoàn thành']
   if (modal.value.payload?.statusLabel === 'Đã thanh toán') return ['Đang giao']
   if (modal.value.payload?.statusLabel === 'Đang giao') return ['Hoàn thành']
   if (modal.value.payload?.statusLabel === 'Chờ hoàn tiền') return ['Đã hoàn tiền']
-  if (
-    isCodOrder(modal.value.payload) &&
-    ['Chờ xác nhận', 'Chờ thanh toán'].includes(modal.value.payload?.statusLabel)
-  ) return ['Đang giao']
   return []
 })
 

@@ -14,19 +14,11 @@ function resolveCurrentAdminName(profile = {}) {
 
 function resolveLogMeta(log = {}, currentAdmin = {}) {
   const isCurrentAdmin = String(log.actorId || '') === String(currentAdmin.id || '')
-  const actor = log.actorName
+  return log.actorName
     || log.actor
     || log.adminName
     || log.admin
     || (isCurrentAdmin ? currentAdmin.name : '')
-  const ip = log.ipAddress || ''
-  if (actor && ip) return `${actor} · ${ip}`
-  if (actor) return actor
-
-  const backendMeta = String(log.meta || '')
-  const actorId = String(log.actorId || '')
-  if (backendMeta && (!actorId || !backendMeta.includes(actorId))) return backendMeta
-  return ip
 }
 
 export function useAdminAuditLogs() {
