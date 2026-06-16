@@ -3,8 +3,21 @@ import { getProvinces, getWardsByProvince } from '@shared/lib/publicApis/vietnam
 import { useAddressStore } from '../store/addressStore'
 
 const ADDRESS_TYPE_LABELS = {
-  home: 'Nhà riêng',
-  office: 'Văn phòng',
+  home: 'nhà riêng',
+  office: 'văn phòng',
+  other: 'khác',
+}
+
+function capitalizeFirst(value) {
+  const text = String(value || '').trim().toLocaleLowerCase('vi-VN')
+  return text ? text.charAt(0).toLocaleUpperCase('vi-VN') + text.slice(1) : ''
+}
+
+function normalizeAddressType(type) {
+  return String(type || '')
+    .trim()
+    .toLocaleLowerCase('vi-VN')
+    .replace(/[_\s-]+/g, '')
 }
 
 export function useAddressForm(props, emit) {
@@ -105,7 +118,9 @@ export function useAddressForm(props, emit) {
   }
 
   function getTypeLabel(type) {
-    return ADDRESS_TYPE_LABELS[type] ?? 'Khác'
+    const normalized = normalizeAddressType(type)
+    const label = ADDRESS_TYPE_LABELS[normalized] ?? type ?? ADDRESS_TYPE_LABELS.other
+    return capitalizeFirst(label)
   }
 
   return {

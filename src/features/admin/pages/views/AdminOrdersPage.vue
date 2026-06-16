@@ -50,7 +50,7 @@ function openDetail(row) {
 
 function canUpdateStatus(row) {
   if (row?.statusLabel === 'Chờ hoàn tiền') return true
-  if (['Đã thanh toán', 'Đang giao'].includes(row?.statusLabel)) return true
+  if (['Đã thanh toán', 'Thanh toán khi nhận hàng', 'Đang giao'].includes(row?.statusLabel)) return true
   return isCodOrder(row) && ['Chờ xác nhận', 'Chờ thanh toán'].includes(row?.statusLabel)
 }
 

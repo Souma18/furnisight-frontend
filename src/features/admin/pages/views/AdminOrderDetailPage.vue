@@ -21,7 +21,7 @@ const statusMap = {
   payment_failed: { label: 'Thanh toán lỗi', className: 'b-cancel' },
   paid: { label: 'Đã thanh toán', className: 'b-success' },
   delivering: { label: 'Đang giao', className: 'b-shipping' },
-  done: { label: 'Hoàn thành', className: 'b-success' },
+  done: { label: 'Đã giao', className: 'b-success' },
   cancel: { label: 'Đã hủy', className: 'b-cancel' },
   refund_pending: { label: 'Chờ hoàn tiền', className: 'b-pending' },
   refunded: { label: 'Đã hoàn tiền', className: 'b-success' },
@@ -30,6 +30,17 @@ const statusMap = {
 const statusMeta = computed(() => statusMap[order.value?.status] ?? {
   label: order.value?.rawStatus || order.value?.status || '',
   className: 'b-pending',
+})
+
+function isCodOrder(current = order.value) {
+  return String(current?.paymentMethod || current?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
+}
+
+const displayStatusMeta = computed(() => {
+  if (isCodOrder() && order.value?.status === 'paid') {
+    return { label: 'Thanh toán khi nhận hàng', className: 'b-success' }
+  }
+  return statusMeta.value
 })
 
 const shippingAddress = computed(() => {
@@ -42,6 +53,7 @@ const shippingAddress = computed(() => {
 })
 
 const paymentStatusMeta = computed(() => {
+  if (isCodOrder()) return { label: 'Thanh toán khi nhận hàng', className: 'b-success' }
   const status = String(order.value?.paymentDetail?.paymentStatus || order.value?.rawStatus || '').toUpperCase()
   if (status === 'PAID') return { label: 'Đã thanh toán', className: 'b-success' }
   if (status === 'FAILED' || status === 'PAYMENT_FAILED') return { label: 'Thanh toán lỗi', className: 'b-cancel' }
@@ -56,13 +68,17 @@ const paymentRows = computed(() => {
   const timeline = order.value?.paymentTimeline || {}
   return [
     { label: 'Mã giao dịch nội bộ', value: payment.transactionCode || order.value?.orderCode || 'Chưa có' },
-    { label: 'Phương thức', value: payment.paymentMethod || order.value?.paymentMethod || 'Chưa rõ' },
+    { label: 'Phương thức', value: paymentMethodLabel(order.value) },
     { label: 'Trạng thái thanh toán', value: paymentStatusMeta.value.label },
-    { label: 'Số tiền đã ghi nhận', value: formatMoney(payment.paidAmount || 0) },
-    { label: 'Thời điểm thanh toán', value: formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || 'Chưa ghi nhận' },
+    { label: isCodOrder() ? 'Số tiền cần thu' : 'Số tiền đã ghi nhận', value: formatMoney(isCodOrder() ? order.value?.totalAmount : (payment.paidAmount || 0)) },
+    { label: 'Thời điểm thanh toán', value: isCodOrder() ? 'Khi nhận hàng' : (formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || 'Chưa ghi nhận') },
     { label: 'Hạn thanh toán', value: formatDateTime(timeline.paymentExpiresAt || order.value?.paymentExpiresAt) || 'Không áp dụng' },
   ]
 })
+
+function paymentMethodLabel(current = order.value) {
+  return isCodOrder(current) ? 'Thanh toán khi nhận hàng' : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || 'Chưa rõ')
+}
 
 const timelineItems = computed(() => {
   const current = order.value
@@ -84,7 +100,7 @@ const timelineItems = computed(() => {
     items.push({
       key: 'payment_initiated',
       title: 'Khởi tạo thanh toán',
-      desc: `Khách chọn phương thức ${current.paymentDetail?.paymentMethod || current.paymentMethod || 'thanh toán'}.`,
+      desc: `Khách chọn phương thức ${paymentMethodLabel(current)}.`,
       at: timeline.paymentInitiatedAt,
       state: 'done',
       icon: 'creditCard',
@@ -100,7 +116,16 @@ const timelineItems = computed(() => {
     })
   }
 
-  if (timeline.paymentCompletedAt || current.paymentDetail?.paidAt) {
+  if (isCodOrder(current)) {
+    items.push({
+      key: 'cod',
+      title: 'Thanh toán khi nhận hàng',
+      desc: 'Khách sẽ thanh toán tiền mặt khi nhận hàng.',
+      at: timeline.orderCreatedAt || current.createdAt,
+      state: 'current',
+      icon: 'cash',
+    })
+  } else if (timeline.paymentCompletedAt || current.paymentDetail?.paidAt) {
     items.push({
       key: 'payment_completed',
       title: 'Thanh toán thành công',
@@ -143,8 +168,8 @@ const timelineItems = computed(() => {
   if (current.status === 'done') {
     items.push({
       key: 'done',
-      title: 'Hoàn thành',
-      desc: 'Đơn hàng đã hoàn tất.',
+      title: 'Đã giao',
+      desc: 'Đơn hàng đã được giao thành công.',
       at: null,
       state: 'done',
       icon: 'checkCheck',
@@ -255,7 +280,7 @@ watch(() => props.orderCode, load, { immediate: true })
           <h2>{{ order.orderCode }}</h2>
           <p class="admin-detail-muted">Ngày đặt: {{ formatDate(order.createdAt) }}</p>
         </div>
-        <span class="badge" :class="statusMeta.className">{{ statusMeta.label }}</span>
+        <span class="badge" :class="displayStatusMeta.className">{{ displayStatusMeta.label }}</span>
       </div>
 
       <div class="admin-order-lines">
@@ -302,7 +327,7 @@ watch(() => props.orderCode, load, { immediate: true })
         <div class="admin-summary-row"><span>Giảm giá</span><strong>{{ formatMoney(order.savedAmount) }}</strong></div>
         <div class="admin-summary-row"><span>Phí vận chuyển</span><strong>{{ formatMoney(order.fee?.shippingFee) }}</strong></div>
         <div class="admin-summary-row admin-summary-row--total"><span>Tổng cộng</span><strong>{{ formatMoney(order.totalAmount) }}</strong></div>
-        <p class="admin-detail-muted">Phương thức: {{ order.paymentDetail?.paymentMethod || order.paymentMethod || 'Chưa rõ' }}</p>
+        <p class="admin-detail-muted">Phương thức: {{ paymentMethodLabel(order) }}</p>
       </article>
 
       <article class="admin-detail-card">

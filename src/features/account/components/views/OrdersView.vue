@@ -97,6 +97,11 @@ function formatPaymentDeadline(order) {
 function canCancelOrder(order) {
   return ['unpaid', 'payment_failed', 'paid'].includes(order?.status)
 }
+
+function displayStatusLabel(order) {
+  if (order?.statusLabel) return order.statusLabel
+  return ORDER_STATUS_LABELS[order.status] ?? order.status
+}
 </script>
 
 <template>
@@ -131,7 +136,7 @@ function canCancelOrder(order) {
           <div class="order-card-right">
             <span class="status-badge" :class="statusClass(order.status)">
               <AppIcon v-if="order.status === 'delivering'" name="truck" :size="14" />
-              {{ ORDER_STATUS_LABELS[order.status] ?? order.status }}
+              {{ displayStatusLabel(order) }}
             </span>
             <strong class="order-total">{{ formatMoney(order.totalAmount) }}</strong>
           </div>

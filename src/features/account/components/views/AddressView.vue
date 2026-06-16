@@ -159,8 +159,8 @@ const {
         <label>
           Loại địa chỉ
           <select v-model="form.type">
-            <option value="home">Nhà riêng</option>
-            <option value="office">Văn phòng</option>
+            <option value="home">{{ getTypeLabel("home") }}</option>
+            <option value="office">{{ getTypeLabel("office") }}</option>
           </select>
         </label>
         <label class="default-check">

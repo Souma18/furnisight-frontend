@@ -3,14 +3,44 @@ import { useAuthStore } from '@features/auth/store/authStore'
 
 /**
  * ID người dùng cho MessageService (buyer / staff).
- * Buyer chỉ lấy từ VITE_CHAT_BUYER_ID hoặc profile.id để tránh gọi nhầm user mock.
- * Staff vẫn fallback 5001 cho admin/dev mode khi profile chưa có id số.
+ * MessageService hiện lưu buyer/staff id dạng Integer, trong khi user-service dùng UUID.
+ * Vì vậy ưu tiên env/id số nếu có, nếu không thì tạo id số ổn định từ profile thật.
  */
 
 function parseNumericId(value) {
   if (value == null || value === '') return null
   const n = Number(value)
-  return Number.isFinite(n) ? n : null
+  return Number.isInteger(n) && n > 0 ? n : null
+}
+
+function hashStableNumericId(value, offset = 100_000, span = 1_400_000_000) {
+  const text = String(value ?? '').trim()
+  if (!text) return null
+
+  let hash = 0
+  for (let i = 0; i < text.length; i += 1) {
+    hash = ((hash << 5) - hash + text.charCodeAt(i)) | 0
+  }
+
+  return Math.abs(hash) % span + offset
+}
+
+function profileNumericId(profile, offset, span) {
+  if (!profile) return null
+
+  const direct = parseNumericId(profile.id)
+    ?? parseNumericId(profile.accountId)
+    ?? parseNumericId(profile.userId)
+  if (direct != null) return direct
+
+  return hashStableNumericId(
+    profile.id
+      ?? profile.accountId
+      ?? profile.email
+      ?? profile.displayName,
+    offset,
+    span,
+  )
 }
 
 function envBuyerId() {
@@ -28,7 +58,7 @@ export function getBuyerId() {
   const fromEnv = envBuyerId()
   if (fromEnv != null) return fromEnv
 
-  const fromProfile = parseNumericId(authStore.user?.id)
+  const fromProfile = profileNumericId(authStore.user, 100_000, 1_400_000_000)
   if (fromProfile != null) return fromProfile
 
   return null
@@ -41,7 +71,7 @@ export function getStaffId() {
   const fromEnv = envStaffId()
   if (fromEnv != null) return fromEnv
 
-  const fromProfile = parseNumericId(authStore.user?.id)
+  const fromProfile = profileNumericId(authStore.user, 1_500_000_000, 600_000_000)
   if (fromProfile != null) return fromProfile
 
   return 5001

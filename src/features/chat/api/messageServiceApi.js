@@ -53,6 +53,11 @@ export async function getMessages({ conversationId, page = 0, size = 50, include
   return unwrapMessageService(res)
 }
 
+export async function postMessage(payload) {
+  const res = await apiClient.post(msUrl('/message'), payload)
+  return unwrapMessageService(res)
+}
+
 export async function markMessageRead(messageId) {
   const res = await apiClient.patch(msUrl(`/message/${messageId}/read`))
   return unwrapMessageService(res)

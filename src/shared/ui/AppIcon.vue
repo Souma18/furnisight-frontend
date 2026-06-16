@@ -164,6 +164,7 @@ const iconMap = {
   warehouse: Warehouse,
   badgePercent: BadgePercent,
   banknote: Banknote,
+  cash: Banknote,
   building2: Building2,
   cart: ShoppingCart,
   creditCard: CreditCard,

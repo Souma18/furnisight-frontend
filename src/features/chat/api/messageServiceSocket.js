@@ -5,11 +5,11 @@ const SEND_DESTINATION = '/app/chat.sendMessage'
 
 function resolveWsUrl(explicitUrl) {
   if (explicitUrl) return explicitUrl
-  const prefix = import.meta.env.VITE_MESSAGE_SERVICE_PREFIX ?? ''
+  const prefix = import.meta.env.VITE_MESSAGE_SERVICE_PREFIX || '/messages'
   if (typeof window !== 'undefined') {
     return `${window.location.origin}${prefix}/ws`
   }
-  return 'http://localhost:8085/ws'
+  return 'http://localhost:8080/messages/ws'
 }
 
 /**

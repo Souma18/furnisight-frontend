@@ -6,6 +6,7 @@ import {
   getConversationsByUser,
   getMessages,
   markMessageRead,
+  postMessage,
 } from '../api/messageServiceApi'
 import { getBuyerId } from '../lib/chatUserIds'
 import {
@@ -294,7 +295,11 @@ export const useChatStore = defineStore('chat', () => {
         createdAt: new Date().toISOString(),
       })
 
-      const sent = socketClient?.sendChatMessage({
+      if (!socketClient?.isConnected?.()) {
+        connectSocket()
+      }
+
+      const saved = await postMessage({
         conversationId: conversationId.value,
         senderId: buyerId.value,
         receiverId: staffId.value,
@@ -302,18 +307,7 @@ export const useChatStore = defineStore('chat', () => {
         messageType: 'TEXT',
         isInternal: false,
       })
-
-      if (!sent) {
-        connectSocket()
-        socketClient?.sendChatMessage({
-          conversationId: conversationId.value,
-          senderId: buyerId.value,
-          receiverId: staffId.value,
-          content,
-          messageType: 'TEXT',
-          isInternal: false,
-        })
-      }
+      upsertMessage(mapMessageToCustomer(saved, buyerId.value))
     } catch (err) {
       error.value = err.message || 'Gửi tin nhắn thất bại'
       console.error('[chatStore] sendMessage', err)

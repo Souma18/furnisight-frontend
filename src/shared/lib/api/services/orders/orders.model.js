@@ -104,6 +104,7 @@ export class OrderListResponse {
     this.orderCode = data.orderCode || ''
     this.rawStatus = data.status || 'UNPAID'
     this.status = normalizeOrderStatus(data.status)
+    this.statusLabel = data.statusLabel || data.label || ''
     this.totalAmount = data.totalAmount ?? 0
     this.createdAt = data.createdAt || null
     this.paymentExpiresAt = resolvePaymentExpiresAt(data)
@@ -126,6 +127,7 @@ export class OrderDetailResponse {
     this.orderCode = data.orderCode || ''
     this.rawStatus = data.status || 'UNPAID'
     this.status = normalizeOrderStatus(data.status)
+    this.statusLabel = data.statusLabel || data.label || ''
     this.subTotal = data.subTotal ?? 0
     this.totalAmount = data.totalAmount ?? 0
     this.savedAmount = data.savedAmount ?? 0

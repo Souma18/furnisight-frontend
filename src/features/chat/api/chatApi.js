@@ -4,6 +4,7 @@ export {
   getConversation,
   getAdminInbox,
   getMessages,
+  postMessage,
   markMessageRead,
   postInternalNote,
   patchAssign,

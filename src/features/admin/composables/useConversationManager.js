@@ -6,6 +6,7 @@ import { PRODUCTS_DATA, TEMPLATE_CATEGORIES } from '../config/adminConversationC
 import {
   getAdminInbox,
   getMessages,
+  postMessage,
   postInternalNote,
   patchStatus,
   closeConversation,
@@ -326,7 +327,23 @@ export function useConversationManager() {
 
     if (!socketClient?.sendChatMessage(dto)) {
       connectSocketForConversation(currentConvId.value)
-      setTimeout(() => socketClient?.sendChatMessage(dto), 800)
+      try {
+        const saved = await postMessage(dto)
+        const mapped = mapMessageToAdminTimeline(saved, {
+          buyerId: conv?.buyerId,
+          staffId,
+          staffName: currentAdmin.value.name,
+        })
+        if (!timelineMessages.value.some((m) => m.id === mapped.id)) {
+          timelineMessages.value.push(mapped)
+        }
+      } catch (error) {
+        uiStore.showToast({
+          icon: 'alert',
+          title: 'Gửi tin nhắn thất bại',
+          subtitle: error.message || '',
+        })
+      }
     }
   }
 
