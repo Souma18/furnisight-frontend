@@ -41,6 +41,15 @@ function openAuthModalFromEvent(event) {
   isAuthModalOpen.value = true
 }
 
+async function ensureAuthProfile() {
+  if (!authStore.isAuthenticated) return
+  try {
+    await authStore.ensureProfileLoaded()
+  } catch (error) {
+    console.error('[App] ensureProfileLoaded', error)
+  }
+}
+
 async function closeAuthModal() {
   isAuthModalOpen.value = false
   initialAuthView.value = 'login'
@@ -54,6 +63,7 @@ async function closeAuthModal() {
 
 onMounted(async () => {
   await nextTick()
+  ensureAuthProfile()
   syncHeaderScrollbarInset()
   window.addEventListener('resize', syncHeaderScrollbarInset)
   window.addEventListener('load', syncHeaderScrollbarInset)
@@ -95,7 +105,10 @@ watch(
 watch(isAuthenticated, (authenticated) => {
   if (!authenticated) {
     initialAuthView.value = 'login'
+    return
   }
+
+  ensureAuthProfile()
 })
 
 onBeforeUnmount(() => {

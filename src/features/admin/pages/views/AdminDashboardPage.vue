@@ -7,7 +7,23 @@ import { useAdminLayout } from '../../composables/useAdminLayout'
 const { data, revenueCanvas, orderCanvas } = useAdminDashboard()
 const { simUser } = useAdminLayout()
 
-const badgeMap = { success: 'b-success', shipping: 'b-shipping', pending: 'b-pending', cancel: 'b-cancel', low: 'b-low' }
+const badgeMap = {
+  success: 'b-success',
+  shipping: 'b-shipping',
+  pending: 'b-pending',
+  unpaid: 'b-pending',
+  payment_failed: 'b-cancel',
+  paid: 'b-success',
+  cod_pending_confirmation: 'b-pending',
+  cod_confirmed: 'b-success',
+  in_transit: 'b-shipping',
+  delivering: 'b-shipping',
+  done: 'b-success',
+  refund_pending: 'b-pending',
+  refunded: 'b-success',
+  cancel: 'b-cancel',
+  low: 'b-low',
+}
 </script>
 
 <template>

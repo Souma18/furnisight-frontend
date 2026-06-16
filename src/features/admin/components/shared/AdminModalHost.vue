@@ -8,6 +8,10 @@ import AdminProductImagesUpload from '../forms/AdminProductImagesUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
 import { PriceFormatter } from '@shared/lib/formatters'
+import {
+  canEditOrderTrackingCode,
+  getOrderStatusOptions,
+} from '@shared/lib/orders/orderStatusMapper'
 
 const AdminModel3dUpload = defineAsyncComponent(() => import('../forms/AdminModel3dUpload.vue'))
 
@@ -47,26 +51,12 @@ const stockVariantOptions = computed(() => {
   return product?.variants ?? []
 })
 
-const orderStatusOptions = computed(() => {
-  if (
-    isCodOrder(modal.value.payload) &&
-    ['Đã thanh toán', 'Thanh toán khi nhận hàng', 'Chờ xác nhận', 'Chờ thanh toán'].includes(modal.value.payload?.statusLabel)
-  ) return ['Đang giao', 'Đã giao']
-  if (modal.value.payload?.statusLabel === 'Đã thanh toán') return ['Đang giao']
-  if (modal.value.payload?.statusLabel === 'Đang giao') return ['Đã giao']
-  if (modal.value.payload?.statusLabel === 'Chờ hoàn tiền') return ['Đã hoàn tiền']
-  return []
-})
+const orderStatusOptions = computed(() => getOrderStatusOptions(modal.value.payload))
 
 const trackingCodeLocked = computed(() => {
-  const status = String(modal.value.payload?.status || '').toUpperCase()
-  return status === 'DELIVERED' || form.orderStatus !== 'Đang giao'
+  return !canEditOrderTrackingCode(modal.value.payload, form.orderStatus)
 })
 const trackingCodeDisplay = computed(() => form.trackingCode || 'Chưa có mã vận đơn')
-
-function isCodOrder(order) {
-  return String(order?.paymentMethod || order?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
-}
 
 function onCategoryImageChange(event) {
   const file = event.target.files?.[0]

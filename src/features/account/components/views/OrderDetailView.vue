@@ -58,7 +58,7 @@ const canRetryPaymentNow = computed(() =>
 )
 
 const canCancelCurrentOrder = computed(() =>
-  ['unpaid', 'payment_failed', 'paid'].includes(order.value?.status),
+  ['unpaid', 'payment_failed', 'paid', 'cod_pending_confirmation', 'cod_confirmed'].includes(order.value?.status),
 )
 
 const formatMoney = PriceFormatter.format
@@ -497,6 +497,11 @@ const paymentDeadline = computed(() => {
   color: #c9922a;
 }
 
+.status-badge.cod_pending_confirmation {
+  background: #fdf6e8;
+  color: #c9922a;
+}
+
 .status-badge.payment_failed {
   background: #fff0df;
   color: #b95e00;
@@ -505,6 +510,16 @@ const paymentDeadline = computed(() => {
 .status-badge.paid {
   background: #eef5ff;
   color: #2364a8;
+}
+
+.status-badge.cod_confirmed {
+  background: #eef5ff;
+  color: #2364a8;
+}
+
+.status-badge.in_transit {
+  background: #eaf5ef;
+  color: #2a7a50;
 }
 
 .status-badge.refund_pending {

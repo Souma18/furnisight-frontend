@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { isAdminRole } from '../utils/normalizeAuthSession'
 import { AuthProfileResponse, AuthSessionResponse } from '@shared/lib/api/services/auth/auth.model'
+import { usersApi } from '@shared/lib/api/services/users/users.api'
 
 const PROFILE_STORAGE_KEY = 'auth_profile'
 
@@ -58,10 +59,13 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(initialAccessToken)
   const refreshToken = ref(initialRefreshToken)
   const roles = ref(initialRoles)
+  const profileLoading = ref(false)
+  let profileLoadPromise = null
 
   const isAuthenticated = computed(() => Boolean(token.value))
   const isAdmin = computed(() => isAdminRole(roles.value.length ? roles.value : user.value?.role))
   const isCustomer = computed(() => isAuthenticated.value && !isAdmin.value)
+  const hasProfileIdentity = computed(() => Boolean(user.value?.id || user.value?.accountId || user.value?.email))
 
   function setSession(sessionPayload = {}) {
     const session = sessionPayload instanceof AuthSessionResponse
@@ -106,7 +110,51 @@ export const useAuthStore = defineStore('auth', () => {
     writeStoredProfile(mergedProfile)
   }
 
-  return { user, token, refreshToken, roles, isAuthenticated, isAdmin, isCustomer, setSession, updateProfile, logout }
+  async function ensureProfileLoaded({ force = false } = {}) {
+    if (!isAuthenticated.value) return null
+    if (!force && hasProfileIdentity.value) return user.value
+    if (profileLoadPromise) return profileLoadPromise
+
+    profileLoading.value = true
+    profileLoadPromise = usersApi.getProfile()
+      .then((response) => {
+        const profile = unwrapApiData(response)
+        if (!profile || typeof profile !== 'object') {
+          throw new Error('Không tải được thông tin người dùng.')
+        }
+        updateProfile(profile)
+        return user.value
+      })
+      .catch((error) => {
+        const status = error?.response?.status
+        if (status === 401 || status === 403) {
+          logout()
+        }
+        throw error
+      })
+      .finally(() => {
+        profileLoading.value = false
+        profileLoadPromise = null
+      })
+
+    return profileLoadPromise
+  }
+
+  return {
+    user,
+    token,
+    refreshToken,
+    roles,
+    profileLoading,
+    isAuthenticated,
+    isAdmin,
+    isCustomer,
+    hasProfileIdentity,
+    setSession,
+    updateProfile,
+    ensureProfileLoaded,
+    logout,
+  }
 })
 
 function normalizeJwtToken(value) {
@@ -128,4 +176,8 @@ function normalizeStoredToken(value) {
 function normalizeStoredProfile(value) {
   if (!value || typeof value !== 'object') return null
   return new AuthProfileResponse(value)
+}
+
+function unwrapApiData(response) {
+  return response?.data?.data ?? response?.data ?? response
 }

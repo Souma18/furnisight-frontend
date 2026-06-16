@@ -6,6 +6,7 @@ import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderDetailResponse } from '@shared/lib/api/services/orders/orders.model'
 import { formatVietnamAddress, PriceFormatter } from '@shared/lib/formatters'
+import { getOrderStatusLabel } from '@shared/lib/orders/orderStatusMapper'
 
 const props = defineProps({
   orderCode: { type: String, required: true },
@@ -20,8 +21,11 @@ const statusMap = {
   unpaid: { label: 'Chờ thanh toán', className: 'b-pending' },
   payment_failed: { label: 'Thanh toán lỗi', className: 'b-cancel' },
   paid: { label: 'Đã thanh toán', className: 'b-success' },
+  cod_pending_confirmation: { label: 'Chờ xác nhận', className: 'b-pending' },
+  cod_confirmed: { label: 'Xác nhận thành công', className: 'b-success' },
+  in_transit: { label: 'Đang vận chuyển', className: 'b-shipping' },
   delivering: { label: 'Đang giao', className: 'b-shipping' },
-  done: { label: 'Đã giao', className: 'b-success' },
+  done: { label: 'Hoàn thành', className: 'b-success' },
   cancel: { label: 'Đã hủy', className: 'b-cancel' },
   refund_pending: { label: 'Chờ hoàn tiền', className: 'b-pending' },
   refunded: { label: 'Đã hoàn tiền', className: 'b-success' },
@@ -37,10 +41,10 @@ function isCodOrder(current = order.value) {
 }
 
 const displayStatusMeta = computed(() => {
-  if (isCodOrder() && order.value?.status === 'paid') {
-    return { label: 'Thanh toán khi nhận hàng', className: 'b-success' }
+  return {
+    ...statusMeta.value,
+    label: getOrderStatusLabel(order.value),
   }
-  return statusMeta.value
 })
 
 const shippingAddress = computed(() => {

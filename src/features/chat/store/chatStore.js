@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { createMessageServiceSocket } from '../api/messageServiceSocket'
+import { useAuthStore } from '@features/auth/store/authStore'
 import {
   createConversation,
   getConversationsByUser,
@@ -44,6 +45,17 @@ export const useChatStore = defineStore('chat', () => {
 
   let socketClient = null
   let subscribedConvId = null
+
+  async function resolveBuyerId() {
+    const authStore = useAuthStore()
+    if (!authStore.isAuthenticated) return null
+
+    if (!authStore.hasProfileIdentity) {
+      await authStore.ensureProfileLoaded()
+    }
+
+    return getBuyerId()
+  }
 
   function resetSessionState() {
     disconnectSocket()
@@ -164,23 +176,23 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   async function hydrateSession(force = false) {
-    const nextBuyerId = getBuyerId()
-    const userChanged = buyerId.value !== nextBuyerId
-
-    if (userChanged) {
-      resetSessionState()
-      buyerId.value = nextBuyerId
-    } else if (force) {
-      resetSessionState()
-      buyerId.value = nextBuyerId
-    } else if (hydrated.value) {
-      return
-    }
-
     loading.value = true
     error.value = null
 
     try {
+      const nextBuyerId = await resolveBuyerId()
+      const userChanged = buyerId.value !== nextBuyerId
+
+      if (userChanged) {
+        resetSessionState()
+        buyerId.value = nextBuyerId
+      } else if (force) {
+        resetSessionState()
+        buyerId.value = nextBuyerId
+      } else if (hydrated.value) {
+        return
+      }
+
       if (!buyerId.value) {
         hydrated.value = true
         return
@@ -198,7 +210,10 @@ export const useChatStore = defineStore('chat', () => {
 
       hydrated.value = true
     } catch (err) {
-      error.value = err.message || 'Không thể tải hội thoại'
+      const authStore = useAuthStore()
+      error.value = authStore.isAuthenticated
+        ? (err.message || 'Không thể tải hội thoại')
+        : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] hydrateSession', err)
     } finally {
       loading.value = false
@@ -262,19 +277,19 @@ export const useChatStore = defineStore('chat', () => {
     const content = String(text ?? draft.value).trim()
     if (!content) return
 
-    const nextBuyerId = getBuyerId()
-    if (!nextBuyerId) {
-      error.value = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
-      return
-    }
-    buyerId.value = nextBuyerId
-
     draft.value = ''
     error.value = null
+    loading.value = true
 
     try {
+      const nextBuyerId = await resolveBuyerId()
+      if (!nextBuyerId) {
+        error.value = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
+        return
+      }
+      buyerId.value = nextBuyerId
+
       if (!conversationId.value) {
-        loading.value = true
         const { createdWithFirstMessage } = await ensureConversationForFirstMessage(content)
         if (createdWithFirstMessage) {
           return
@@ -309,7 +324,10 @@ export const useChatStore = defineStore('chat', () => {
       })
       upsertMessage(mapMessageToCustomer(saved, buyerId.value))
     } catch (err) {
-      error.value = err.message || 'Gửi tin nhắn thất bại'
+      const authStore = useAuthStore()
+      error.value = authStore.isAuthenticated
+        ? (err.message || 'Gửi tin nhắn thất bại')
+        : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] sendMessage', err)
     } finally {
       loading.value = false

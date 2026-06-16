@@ -60,7 +60,20 @@ function canRetryPaymentNow(order) {
   return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
 }
 
-const filterOptions = ['all', 'unpaid', 'payment_failed', 'paid', 'delivering', 'done', 'refund_pending', 'refunded', 'cancel']
+const filterOptions = [
+  'all',
+  'cod_pending_confirmation',
+  'cod_confirmed',
+  'unpaid',
+  'payment_failed',
+  'paid',
+  'in_transit',
+  'delivering',
+  'done',
+  'refund_pending',
+  'refunded',
+  'cancel',
+]
 
 function formatDate(dateStr) {
   if (!dateStr) return ''
@@ -72,11 +85,14 @@ const formatMoney = PriceFormatter.format
 
 function statusClass(status) {
   if (status === 'delivering') return 'shipping'
+  if (status === 'in_transit') return 'shipping'
   if (status === 'done') return 'done'
   if (status === 'cancel') return 'cancel'
   if (status === 'refund_pending') return 'refund'
   if (status === 'refunded') return 'done'
   if (status === 'payment_failed') return 'failed'
+  if (status === 'cod_confirmed') return 'paid'
+  if (status === 'cod_pending_confirmation') return 'pending'
   if (status === 'paid') return 'paid'
   return 'pending'
 }
@@ -95,7 +111,7 @@ function formatPaymentDeadline(order) {
 }
 
 function canCancelOrder(order) {
-  return ['unpaid', 'payment_failed', 'paid'].includes(order?.status)
+  return ['unpaid', 'payment_failed', 'paid', 'cod_pending_confirmation', 'cod_confirmed'].includes(order?.status)
 }
 
 function displayStatusLabel(order) {

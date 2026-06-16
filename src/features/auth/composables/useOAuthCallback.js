@@ -8,12 +8,20 @@ export function useOAuthCallback() {
   const route = useRoute()
   const authStore = useAuthStore()
 
-  onMounted(() => {
+  onMounted(async () => {
     const accessToken = route.query.access_token
     const refreshToken = route.query.refresh_token
 
     if (accessToken && refreshToken) {
       authStore.setSession({ accessToken, refreshToken })
+      try {
+        await authStore.ensureProfileLoaded()
+      } catch (error) {
+        console.error('[useOAuthCallback] ensureProfileLoaded', error)
+        router.replace({ name: 'home' })
+        openAuthModal()
+        return
+      }
       router.replace(route.query.redirect || '/account')
       return
     }

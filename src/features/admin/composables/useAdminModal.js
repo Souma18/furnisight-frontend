@@ -1,6 +1,11 @@
 import { computed, reactive, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { adminApi, mediaApi } from '@shared/lib/api/services'
+import {
+  canEditOrderTrackingCode,
+  getNextOrderStatusLabel,
+  getOrderStatusApiValue,
+} from '@shared/lib/orders/orderStatusMapper'
 import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
 import {
   applyProductImageFiles,
@@ -41,33 +46,8 @@ const MODAL_TITLES = {
 
 const WIDE_MODALS = new Set(['addRole', 'editRole', 'addProd', 'editProd'])
 
-const ORDER_STATUS_TO_API = {
-  'Đang giao': 'SHIPPING',
-  'Hoàn thành': 'DELIVERED',
-  'Đã giao': 'DELIVERED',
-  'Đã hoàn tiền': 'REFUNDED',
-}
-
-function nextOrderStatus(payload) {
-  if (payload?.statusLabel === 'Thanh toán khi nhận hàng') return 'Đang giao'
-  if (payload?.statusLabel === 'Đã thanh toán') return 'Đang giao'
-  if (payload?.statusLabel === 'Đang giao') return 'Đã giao'
-  if (payload?.statusLabel === 'Chờ hoàn tiền') return 'Đã hoàn tiền'
-  if (isCodOrder(payload) && ['Chờ xác nhận', 'Chờ thanh toán'].includes(payload?.statusLabel)) return 'Đang giao'
-  return ''
-}
-
-function isCodOrder(order) {
-  return String(order?.paymentMethod || order?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
-}
-
 function resolveTrackingCode(order) {
   return order?.trackingCode || order?.tracking_code || order?.shippingTrackingCode || ''
-}
-
-function canEditTrackingCode(order, nextStatusLabel) {
-  const currentStatus = String(order?.status || '').toUpperCase()
-  return currentStatus !== 'DELIVERED' && nextStatusLabel === 'Đang giao'
 }
 
 function buildUserPayload(form) {
@@ -174,7 +154,7 @@ export function useAdminModal() {
       roleId: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
       accountStatus: payload?.status === 'blocked' || payload?.status === 'banned' ? 'BANNED' : 'ACTIVE',
       password: '',
-      orderStatus: nextOrderStatus(payload),
+      orderStatus: getNextOrderStatusLabel(payload),
       trackingCode: resolveTrackingCode(payload),
       note: '',
       roleDescription: payload?.description ?? '',
@@ -372,9 +352,9 @@ export function useAdminModal() {
         releaseProductModelPreview(form)
       }
       if (type === 'editOrder' && modal.value.payload?.id) {
-        const status = ORDER_STATUS_TO_API[form.orderStatus]
+        const status = getOrderStatusApiValue(form.orderStatus)
         if (!status) throw new Error('Trạng thái này chưa được backend hỗ trợ cập nhật từ admin.')
-        const canEditTracking = canEditTrackingCode(modal.value.payload, form.orderStatus)
+        const canEditTracking = canEditOrderTrackingCode(modal.value.payload, form.orderStatus)
         assertActionResult(await adminApi.updateOrder(modal.value.payload.id, {
           status,
           trackingCode: canEditTracking ? form.trackingCode : null,

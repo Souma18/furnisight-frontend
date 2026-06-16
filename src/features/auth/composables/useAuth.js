@@ -19,6 +19,7 @@ export function useAuth(pinia) {
     const response = await authApi.renewAccessToken({ refreshToken })
     const session = normalizeAuthSession(response)
     store.setSession(session)
+    await store.ensureProfileLoaded()
     return session
   }
 
@@ -37,6 +38,7 @@ export function useAuth(pinia) {
     isAuthenticated,
     isAdmin,
     setSession: store.setSession,
+    ensureProfileLoaded: store.ensureProfileLoaded,
     logout,
     renewToken,
   }

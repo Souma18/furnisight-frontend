@@ -4,6 +4,7 @@ import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+import { applyOrderStatusMapping } from '@shared/lib/orders/orderStatusMapper'
 
 export const useOrderStore = defineStore('accountOrder', () => {
   const orders = ref([])
@@ -70,13 +71,24 @@ export const useOrderStore = defineStore('accountOrder', () => {
     try {
       const orderCode = detail.orderCode || orderId
       await ordersApi.cancelOrder(orderCode)
-      const isPaidOrder = detail.status === 'paid' || detail.rawStatus === 'PAID'
+      const paymentMethod = String(detail.paymentMethod || detail.paymentDetail?.paymentMethod || '').toLowerCase()
+      const isPaidOrder = paymentMethod !== 'cod' && (detail.status === 'paid' || detail.rawStatus === 'PAID')
       const nextStatus = isPaidOrder ? 'refund_pending' : 'cancel'
       const nextRawStatus = isPaidOrder ? 'REFUND_PENDING' : 'CANCELLED'
-      const updatedDetail = { ...detail, status: nextStatus, rawStatus: nextRawStatus, canRetryPayment: false }
+      const updatedDetail = applyOrderStatusMapping({
+        ...detail,
+        status: nextStatus,
+        rawStatus: nextRawStatus,
+        canRetryPayment: false,
+      })
       orders.value = orders.value.map((order) =>
         order.id === detail.id || order.orderCode === orderCode
-          ? { ...order, status: nextStatus, rawStatus: nextRawStatus, canRetryPayment: false }
+          ? applyOrderStatusMapping({
+              ...order,
+              status: nextStatus,
+              rawStatus: nextRawStatus,
+              canRetryPayment: false,
+            })
           : order,
       )
       orderDetails.value = {

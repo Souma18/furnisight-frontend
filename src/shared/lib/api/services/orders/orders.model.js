@@ -1,3 +1,10 @@
+import {
+  getOrderStatusLabel,
+  normalizeOrderStatus,
+  normalizeOrderUiStatus,
+  normalizePaymentType,
+} from '@shared/lib/orders/orderStatusMapper'
+
 const PAYMENT_WINDOW_MS = 15 * 60 * 1000
 
 export function parseOrderDate(value) {
@@ -9,28 +16,6 @@ export function parseOrderDate(value) {
   const normalizedValue = hasTimezone ? rawValue : `${rawValue}Z`
   const date = new Date(normalizedValue)
   return Number.isNaN(date.getTime()) ? null : date
-}
-
-export function normalizeOrderStatus(status) {
-  const normalized = String(status || '').trim().toUpperCase()
-  const statusMap = {
-    UNPAID: 'unpaid',
-    PENDING: 'unpaid',
-    PAYMENT_FAILED: 'payment_failed',
-    PAID: 'paid',
-    SHIPPING: 'delivering',
-    DELIVERING: 'delivering',
-    DELIVERED: 'done',
-    DONE: 'done',
-    CANCELLED: 'cancel',
-    CANCELED: 'cancel',
-    CANCEL: 'cancel',
-    REFUND_PENDING: 'refund_pending',
-    PENDING_REFUND: 'refund_pending',
-    REFUNDED: 'refunded',
-  }
-
-  return statusMap[normalized] || String(status || 'unpaid').toLowerCase()
 }
 
 function resolvePaymentExpiresAt(data = {}) {
@@ -47,8 +32,7 @@ export function canRetryOrderPayment(order = {}) {
   const status = normalizeOrderStatus(order.status)
   if (!['unpaid', 'payment_failed'].includes(status)) return false
 
-  const paymentMethod = String(order.paymentMethod || order.paymentDetail?.paymentMethod || 'vnpay').toLowerCase()
-  if (paymentMethod !== 'vnpay') return false
+  if (normalizePaymentType(order) !== 'vnpay') return false
 
   const expiresAt = parseOrderDate(order.paymentExpiresAt)
   const withinDeadline = expiresAt ? expiresAt.getTime() > Date.now() : true
@@ -63,8 +47,7 @@ export function shouldShowRetryPayment(order = {}) {
   const status = normalizeOrderStatus(order.status)
   if (!['unpaid', 'payment_failed'].includes(status)) return false
 
-  const paymentMethod = String(order.paymentMethod || order.paymentDetail?.paymentMethod || 'vnpay').toLowerCase()
-  return paymentMethod === 'vnpay'
+  return normalizePaymentType(order) === 'vnpay'
 }
 
 function resolveOrderItemImageUrl(data = {}) {
@@ -103,12 +86,12 @@ export class OrderListResponse {
     this.id = data.id || null
     this.orderCode = data.orderCode || ''
     this.rawStatus = data.status || 'UNPAID'
-    this.status = normalizeOrderStatus(data.status)
-    this.statusLabel = data.statusLabel || data.label || ''
+    this.paymentMethod = data.paymentMethod || data.paymentDetail?.paymentMethod || 'vnpay'
+    this.status = normalizeOrderUiStatus(this)
+    this.statusLabel = getOrderStatusLabel(this)
     this.totalAmount = data.totalAmount ?? 0
     this.createdAt = data.createdAt || null
     this.paymentExpiresAt = resolvePaymentExpiresAt(data)
-    this.paymentMethod = data.paymentMethod || data.paymentDetail?.paymentMethod || 'vnpay'
     this.canRetryPayment = data.canRetryPayment ?? canRetryOrderPayment(this)
     this.firstProductImage = data.firstProductImage
       || data.firstProduct?.imageUrl
@@ -126,8 +109,9 @@ export class OrderDetailResponse {
     this.id = data.id || null
     this.orderCode = data.orderCode || ''
     this.rawStatus = data.status || 'UNPAID'
-    this.status = normalizeOrderStatus(data.status)
-    this.statusLabel = data.statusLabel || data.label || ''
+    this.paymentMethod = data.paymentMethod || data.paymentDetail?.paymentMethod || 'vnpay'
+    this.status = normalizeOrderUiStatus(this)
+    this.statusLabel = getOrderStatusLabel(this)
     this.subTotal = data.subTotal ?? 0
     this.totalAmount = data.totalAmount ?? 0
     this.savedAmount = data.savedAmount ?? 0
@@ -141,7 +125,8 @@ export class OrderDetailResponse {
       : []
     this.createdAt = data.createdAt || null
     this.paymentExpiresAt = resolvePaymentExpiresAt(data)
-    this.paymentMethod = data.paymentMethod || data.paymentDetail?.paymentMethod || 'vnpay'
     this.canRetryPayment = data.canRetryPayment ?? canRetryOrderPayment(this)
   }
 }
+
+export { normalizeOrderStatus }

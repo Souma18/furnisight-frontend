@@ -8,6 +8,10 @@ import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter } from '@shared/lib/formatters'
+import {
+  applyOrderStatusMapping,
+  canUpdateOrderStatus,
+} from '@shared/lib/orders/orderStatusMapper'
 
 const router = useRouter()
 const statusFilter = ref('')
@@ -17,18 +21,34 @@ const columns = [
   { key: 'id', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },
 ]
-const badgeMap = { shipping: 'b-shipping', success: 'b-success', pending: 'b-pending', cancel: 'b-cancel' }
+const badgeMap = {
+  unpaid: 'b-pending',
+  payment_failed: 'b-cancel',
+  paid: 'b-success',
+  cod_pending_confirmation: 'b-pending',
+  cod_confirmed: 'b-success',
+  in_transit: 'b-shipping',
+  delivering: 'b-shipping',
+  done: 'b-success',
+  cancel: 'b-cancel',
+  refund_pending: 'b-pending',
+  refunded: 'b-success',
+  shipping: 'b-shipping',
+  success: 'b-success',
+  pending: 'b-pending',
+}
 const formatPrice = PriceFormatter.format
+const normalizedOrders = computed(() => items.value.map((item) => applyOrderStatusMapping(item)))
 const statusOptions = computed(() => {
   const labels = new Set()
-  items.value.forEach((item) => {
+  normalizedOrders.value.forEach((item) => {
     if (item.statusLabel) labels.add(item.statusLabel)
   })
   return Array.from(labels)
 })
 const filteredOrders = computed(() => {
   const keyword = normalizeSearch(search.value)
-  return items.value.filter((row) => {
+  return normalizedOrders.value.filter((row) => {
     const matchesSearch = !keyword || [
       row.id,
       row.orderCode,
@@ -49,13 +69,7 @@ function openDetail(row) {
 }
 
 function canUpdateStatus(row) {
-  if (row?.statusLabel === 'Chờ hoàn tiền') return true
-  if (['Đã thanh toán', 'Thanh toán khi nhận hàng', 'Đang giao'].includes(row?.statusLabel)) return true
-  return isCodOrder(row) && ['Chờ xác nhận', 'Chờ thanh toán'].includes(row?.statusLabel)
-}
-
-function isCodOrder(row) {
-  return String(row?.paymentMethod || row?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
+  return canUpdateOrderStatus(row)
 }
 
 function normalizeSearch(value) {

@@ -4,7 +4,7 @@ import { useAuthStore } from '@features/auth/store/authStore'
 /**
  * ID người dùng cho MessageService (buyer / staff).
  * MessageService hiện lưu buyer/staff id dạng Integer, trong khi user-service dùng UUID.
- * Vì vậy ưu tiên env/id số nếu có, nếu không thì tạo id số ổn định từ profile thật.
+ * Vì vậy ưu tiên env/id số nếu có, nếu không thì tạo id số ổn định từ authStore.user.
  */
 
 function parseNumericId(value) {

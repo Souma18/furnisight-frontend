@@ -90,7 +90,12 @@ export function useChat() {
   watch(() => messages.value.length, () => scrollToBottom())
   watch(isTyping, () => scrollToBottom())
   watch(
-    () => [authStore.isAuthenticated, authStore.user?.id ?? null],
+    () => [
+      authStore.isAuthenticated,
+      authStore.user?.id ?? null,
+      authStore.user?.accountId ?? null,
+      authStore.user?.email ?? null,
+    ],
     async () => {
       if (authStore.isAuthenticated) {
         authModalOpen.value = false

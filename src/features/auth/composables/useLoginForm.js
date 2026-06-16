@@ -45,6 +45,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
       })
 
       authStore.setSession(normalizeAuthSession(response))
+      await authStore.ensureProfileLoaded()
       const isAdminLogin = authStore.isAdmin
       showSuccess({
         title: 'Đăng nhập thành công!',
