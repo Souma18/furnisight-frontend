@@ -15,6 +15,8 @@ const userRows = computed(() => items.value
   .map((item, index) => ({ ...item, stt: index + 1 })))
 const statusTarget = ref(null)
 const updatingStatus = ref(false)
+const deleteTarget = ref(null)
+const deletingUser = ref(false)
 const columns = [
   { key: 'stt', label: 'STT' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
   { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },
@@ -64,6 +66,38 @@ async function confirmStatusChange() {
     updatingStatus.value = false
   }
 }
+
+function requestDeleteUser(user) {
+  deleteTarget.value = user
+}
+
+function closeDeleteDialog() {
+  if (deletingUser.value) return
+  deleteTarget.value = null
+}
+
+async function confirmDeleteUser() {
+  if (!deleteTarget.value?.id || deletingUser.value) return
+  deletingUser.value = true
+  const user = deleteTarget.value
+  try {
+    const response = await adminApi.deleteAdminUser(user.id)
+    if (response?.data?.success === false) {
+      throw new Error(response.data.message || 'Không thể xóa tài khoản.')
+    }
+    deleteTarget.value = null
+    await load()
+    ui.showToast({ icon: 'check', title: 'Đã xóa tài khoản', subtitle: user.email })
+  } catch (error) {
+    ui.showToast({
+      icon: 'alert',
+      title: 'Không thể xóa tài khoản',
+      subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại.',
+    })
+  } finally {
+    deletingUser.value = false
+  }
+}
 </script>
 
 <template>
@@ -90,6 +124,7 @@ async function confirmStatusChange() {
         >
           <AppIcon :name="isBlocked(row) ? 'refresh' : 'lock'" :size="14" />
         </button>
+        <button type="button" class="ra-btn ra-del" title="Xóa tài khoản" @click="requestDeleteUser(row)"><AppIcon name="trash2" :size="14" /></button>
       </div>
     </template>
   </AdminDataTable>
@@ -106,5 +141,17 @@ async function confirmStatusChange() {
     :danger="Boolean(statusTarget && !isBlocked(statusTarget))"
     @close="closeStatusDialog"
     @confirm="confirmStatusChange"
+  />
+
+  <ConfirmDialog
+    :open="Boolean(deleteTarget)"
+    title="Xóa tài khoản người dùng?"
+    :message="deleteTarget ? `Bạn có chắc chắn muốn xóa vĩnh viễn tài khoản người dùng ${deleteTarget.email}? Hành động này không thể hoàn tác.` : ''"
+    confirm-label="Xóa tài khoản"
+    cancel-label="Hủy"
+    :loading="deletingUser"
+    danger
+    @close="closeDeleteDialog"
+    @confirm="confirmDeleteUser"
   />
 </template>

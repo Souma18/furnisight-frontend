@@ -40,7 +40,6 @@ export function useAdminRoles() {
         .filter(isAdminAccount)
         .map(normalizeAdminAccount)
       const roles = (roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? [])
-        .filter((role) => isAdminRoleName(role.name))
         .map((role) => normalizeRole(role, adminAccounts))
       data.value = {
         roles,

@@ -21,7 +21,7 @@ export function accountRoleNames(account = {}) {
 
 export function isAdminRoleName(roleName) {
   const normalized = normalizeRoleName(roleName)
-  return ADMIN_ROLE_KEYS.has(normalized) || normalized.includes('admin')
+  return normalized !== '' && normalized !== 'user'
 }
 
 export function isAdminAccount(account = {}) {

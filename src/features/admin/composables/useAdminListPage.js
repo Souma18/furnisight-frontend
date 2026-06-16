@@ -12,7 +12,7 @@ export function useAdminListPage(fetcher) {
   async function load() {
     const params = search.value ? { query: search.value } : undefined
     const res = await fetcher(params)
-    items.value = res.data?.items ?? res.data?.content ?? res.data?.accounts ?? res.data ?? []
+    items.value = res.data?.items ?? res.data?.content ?? res.data?.accounts ?? res.data?.orders ?? res.data ?? []
   }
 
   onMounted(load)

@@ -110,41 +110,7 @@ async function confirmDeleteAdmin() {
   <div v-if="loading && !data" class="admin-detail-state">Đang tải vai trò...</div>
   <div v-else-if="error" class="admin-detail-state admin-detail-state--error">{{ error }}</div>
 
-  <div v-if="data" class="roles-grid">
-    <div class="tcard">
-      <div class="tcard-header"><div class="tcard-title"><AppIcon name="lock" :size="17" />Nhóm vai trò (Role Groups)</div></div>
-      <div class="role-card-list">
-        <div v-for="role in data.roles" :key="role.id" class="role-card">
-          <div class="role-card-head">
-            <span class="role-tag" :class="role.tagClass"><AppIcon :name="iconName(role.icon, fallbackRoleIcon)" :size="14" />{{ role.name }}</span>
-            <div class="row-actions">
-              <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editRole', role)"><AppIcon name="edit" :size="14" /></button>
-              <button
-                v-if="!role.system"
-                type="button"
-                class="ra-btn ra-del"
-                @click="deleteRole(role)"
-              >
-                <AppIcon name="trash2" :size="14" />
-              </button>
-              <button
-                v-else
-                type="button"
-                class="ra-btn ra-del"
-                @click="ui.showToast({ icon: 'x', title: 'Không thể xóa', subtitle: 'Vai trò hệ thống không thể xóa.' })"
-              >
-                <AppIcon name="trash2" :size="14" />
-              </button>
-            </div>
-          </div>
-          <div class="role-perms-wrap">
-            <span v-for="p in role.perms" :key="p" class="perm-badge" :class="permClass[p]">{{ permLabels[p] || p }}</span>
-          </div>
-          <div class="role-user-count"><AppIcon name="users" :size="13" />{{ role.userCount }} tài khoản · {{ role.note }}</div>
-        </div>
-      </div>
-    </div>
-
+  <div v-if="data" class="roles-container">
     <div class="tcard roles-table-card">
       <div class="tcard-header">
         <div class="tcard-title"><AppIcon name="users" :size="17" />Tài khoản quản trị</div>
@@ -186,22 +152,38 @@ async function confirmDeleteAdmin() {
         </template>
       </AdminDataTable>
     </div>
-  </div>
 
-  <div v-if="data" class="tcard">
-    <div class="tcard-header"><div class="tcard-title"><AppIcon name="list" :size="17" />Ma trận quyền hạn chi tiết</div></div>
-    <div class="perm-matrix-wrap">
-      <div class="perm-matrix">
-        <div class="perm-matrix-head perm-matrix-feature">Chức năng</div>
-        <div class="perm-matrix-head perm-matrix-col">Super Admin</div>
-        <div class="perm-matrix-head perm-matrix-col">Manager</div>
-        <div class="perm-matrix-head perm-matrix-col">Staff</div>
-        <template v-for="row in data.matrix" :key="row.feature">
-          <div class="perm-matrix-cell perm-matrix-feature">{{ row.feature }}</div>
-          <div class="perm-matrix-cell">{{ row.super }}</div>
-          <div class="perm-matrix-cell">{{ row.manager }}</div>
-          <div class="perm-matrix-cell">{{ row.staff }}</div>
-        </template>
+    <div class="tcard">
+      <div class="tcard-header"><div class="tcard-title"><AppIcon name="lock" :size="17" />Nhóm vai trò (Role Groups)</div></div>
+      <div class="role-card-grid">
+        <div v-for="role in data.roles" :key="role.id" class="role-card">
+          <div class="role-card-head">
+            <span class="role-tag" :class="role.tagClass"><AppIcon :name="iconName(role.icon, fallbackRoleIcon)" :size="14" />{{ role.name }}</span>
+            <div class="row-actions">
+              <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editRole', role)"><AppIcon name="edit" :size="14" /></button>
+              <button
+                v-if="!role.system"
+                type="button"
+                class="ra-btn ra-del"
+                @click="deleteRole(role)"
+              >
+                <AppIcon name="trash2" :size="14" />
+              </button>
+              <button
+                v-else
+                type="button"
+                class="ra-btn ra-del"
+                @click="ui.showToast({ icon: 'x', title: 'Không thể xóa', subtitle: 'Vai trò hệ thống không thể xóa.' })"
+              >
+                <AppIcon name="trash2" :size="14" />
+              </button>
+            </div>
+          </div>
+          <div class="role-perms-wrap">
+            <span v-for="p in role.perms" :key="p" class="perm-badge" :class="permClass[p]">{{ permLabels[p] || p }}</span>
+          </div>
+          <div class="role-user-count"><AppIcon name="users" :size="13" />{{ role.userCount }} tài khoản · {{ role.note }}</div>
+        </div>
       </div>
     </div>
   </div>
@@ -220,6 +202,17 @@ async function confirmDeleteAdmin() {
 </template>
 
 <style scoped>
+.roles-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.role-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  padding: 16px;
+}
 .role-perms-wrap {
   margin-bottom: 8px;
   display: flex;
@@ -235,50 +228,5 @@ async function confirmDeleteAdmin() {
 }
 .admin-detail-state--error {
   color: var(--red2);
-}
-.perm-matrix-wrap {
-  padding: 16px 20px;
-  overflow-x: auto;
-}
-.perm-matrix {
-  display: grid;
-  grid-template-columns: 1fr repeat(3, 140px);
-  gap: 0;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  overflow: hidden;
-  min-width: 520px;
-}
-.perm-matrix-head {
-  padding: 10px 14px;
-  background: var(--navy);
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-.perm-matrix-head.perm-matrix-feature {
-  color: rgba(255, 255, 255, 0.6);
-}
-.perm-matrix-head.perm-matrix-col {
-  text-align: center;
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--gold3);
-}
-.perm-matrix-head.perm-matrix-col:nth-child(3) {
-  color: #93c5fd;
-}
-.perm-matrix-head.perm-matrix-col:nth-child(4) {
-  color: #86efac;
-}
-.perm-matrix-cell {
-  padding: 10px 14px;
-  border-top: 1px solid var(--border);
-  font-size: 12px;
-  text-align: center;
-}
-.perm-matrix-cell.perm-matrix-feature {
-  font-size: 13px;
-  text-align: left;
 }
 </style>
