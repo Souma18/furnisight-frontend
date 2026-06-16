@@ -107,7 +107,7 @@ function normalizeRawStatus(value) {
 }
 
 export function normalizeOrderStatusCode(orderOrStatus = '') {
-  const status = typeof orderOrStatus === 'object'
+  const status = (orderOrStatus && typeof orderOrStatus === 'object')
     ? orderOrStatus.rawStatus || orderOrStatus.statusCode || orderOrStatus.status
     : orderOrStatus
   const normalized = normalizeRawStatus(status)
@@ -121,7 +121,7 @@ export function normalizeOrderStatus(status) {
 
 export function normalizeOrderUiStatus(orderOrStatus = '', paymentType = '') {
   const code = normalizeOrderStatusCode(orderOrStatus)
-  if (isCodPayment(typeof orderOrStatus === 'object' ? orderOrStatus : paymentType)) {
+  if (isCodPayment((orderOrStatus && typeof orderOrStatus === 'object') ? orderOrStatus : paymentType)) {
     return COD_STATUS_CODE_TO_UI_KEY[code] || STATUS_CODE_TO_UI_KEY[code] || String(orderOrStatus || '').toLowerCase()
   }
 
@@ -129,7 +129,7 @@ export function normalizeOrderUiStatus(orderOrStatus = '', paymentType = '') {
 }
 
 export function normalizePaymentType(orderOrPaymentType = '') {
-  const value = typeof orderOrPaymentType === 'object'
+  const value = (orderOrPaymentType && typeof orderOrPaymentType === 'object')
     ? orderOrPaymentType.paymentMethod
       || orderOrPaymentType.paymentType
       || orderOrPaymentType.paymentDetail?.paymentMethod
@@ -145,7 +145,7 @@ export function isCodPayment(orderOrPaymentType = '') {
 
 export function getOrderStatusLabel(orderOrStatus = '', paymentType = '') {
   const code = normalizeOrderStatusCode(orderOrStatus)
-  const labels = isCodPayment(typeof orderOrStatus === 'object' ? orderOrStatus : paymentType)
+  const labels = isCodPayment((orderOrStatus && typeof orderOrStatus === 'object') ? orderOrStatus : paymentType)
     ? COD_STATUS_LABELS
     : ONLINE_PAYMENT_STATUS_LABELS
 

@@ -1,5 +1,7 @@
 <script setup>
+import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
@@ -62,6 +64,38 @@ async function deleteRole(role) {
     await load()
   } catch (e) {
     ui.showToast({ icon: 'x', title: 'Lỗi xóa vai trò', subtitle: e?.response?.data?.message || e.message })
+  }
+}
+
+const deleteAdminTarget = ref(null)
+const deletingAdmin = ref(false)
+
+function requestDeleteAdmin(user) {
+  deleteAdminTarget.value = user
+}
+
+function closeDeleteAdminDialog() {
+  if (deletingAdmin.value) return
+  deleteAdminTarget.value = null
+}
+
+async function confirmDeleteAdmin() {
+  if (!deleteAdminTarget.value?.id || deletingAdmin.value) return
+  deletingAdmin.value = true
+  const adminAccount = deleteAdminTarget.value
+  try {
+    await adminApi.deleteAdminUser(adminAccount.id)
+    deleteAdminTarget.value = null
+    await load()
+    ui.showToast({ icon: 'check', title: 'Đã thu hồi tài khoản', subtitle: adminAccount.email })
+  } catch (e) {
+    ui.showToast({
+      icon: 'x',
+      title: 'Lỗi thu hồi tài khoản',
+      subtitle: e?.response?.data?.message || e.message || 'Vui lòng thử lại.'
+    })
+  } finally {
+    deletingAdmin.value = false
   }
 }
 </script>
@@ -144,10 +178,10 @@ async function deleteRole(role) {
           <span class="cell-muted">{{ row.createdAt }}</span>
         </template>
         <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ row.statusLabel }}</span></template>
-        <template #cell-actions>
+        <template #cell-actions="{ row }">
           <div class="row-actions row-actions--sm">
-            <button type="button" class="ra-btn ra-btn--sm ra-edit"><AppIcon name="edit" :size="12" /></button>
-            <button type="button" class="ra-btn ra-btn--sm ra-del" @click="ui.showToast({ icon: 'trash2', title: 'Đã thu hồi tài khoản' })"><AppIcon name="trash2" :size="12" /></button>
+            <button type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="12" /></button>
+            <button type="button" class="ra-btn ra-btn--sm ra-del" @click="requestDeleteAdmin(row)"><AppIcon name="trash2" :size="12" /></button>
           </div>
         </template>
       </AdminDataTable>
@@ -171,6 +205,18 @@ async function deleteRole(role) {
       </div>
     </div>
   </div>
+
+  <ConfirmDialog
+    :open="Boolean(deleteAdminTarget)"
+    title="Thu hồi tài khoản quản trị?"
+    :message="deleteAdminTarget ? `Bạn có chắc chắn muốn thu hồi (xóa) tài khoản quản trị ${deleteAdminTarget.email}?` : ''"
+    confirm-label="Thu hồi"
+    cancel-label="Hủy"
+    :loading="deletingAdmin"
+    danger
+    @close="closeDeleteAdminDialog"
+    @confirm="confirmDeleteAdmin"
+  />
 </template>
 
 <style scoped>

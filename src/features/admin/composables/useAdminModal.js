@@ -161,7 +161,7 @@ export function useAdminModal() {
       imageUrl: payload?.imageUrl ?? '',
       categoryImageUpload: null,
       permissions: payload?.permissionIds ?? ['dashboard'],
-      adminRole: payload?.role ?? 'Manager',
+      adminRole: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
       stockSku: payload?.sku ?? '',
       stockProductId: payload?.productId ?? '',
       stockVariantId: payload?.variantId ?? '',
@@ -322,12 +322,14 @@ export function useAdminModal() {
     saving.value = true
     try {
       const type = modal.value.type
-      if (type === 'addUser') await adminApi.createAdminUser({
-        name: form.name?.trim(),
-        email: form.email?.trim(),
-        role: form.roleId || form.role,
-        password: form.password,
-      })
+      if (type === 'addUser') {
+        assertActionResult(await adminApi.createAdminUser({
+          name: form.name?.trim(),
+          email: form.email?.trim(),
+          role: form.roleId || form.role,
+          password: form.password,
+        }))
+      }
       if (type === 'editUser') {
         if (!modal.value.payload?.id) throw new Error('Thiếu người dùng cần cập nhật.')
         await adminApi.updateAdminUser(modal.value.payload.id, buildUserPayload(form))
@@ -394,12 +396,15 @@ export function useAdminModal() {
         assertActionResult(await adminApi.updateRole(modal.value.payload.id, buildRolePayload(form)))
       }
       if (type === 'addAdmin') {
-        await adminApi.createAdminUser({
+        if (!form.adminRole) {
+          throw new Error('Vui lòng chọn vai trò cho tài khoản quản trị.')
+        }
+        assertActionResult(await adminApi.createAdminUser({
           name: form.name?.trim(),
           email: form.email?.trim(),
           role: form.adminRole,
           password: form.password,
-        })
+        }))
       }
       ui.closeModal()
       ui.showToast({ title: 'Đã lưu thành công', subtitle: 'Dữ liệu đã được cập nhật.' })
