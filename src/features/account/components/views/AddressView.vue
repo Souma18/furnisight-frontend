@@ -1,17 +1,14 @@
 <script setup>
+import { computed, onMounted } from "vue";
 import AccountSectionCard from "../AccountSectionCard.vue";
 import AppIcon from "@shared/ui/AppIcon.vue";
 import { formatVietnamAddress } from "@shared/lib/formatters";
 import { useAddressForm } from "../../composables/useAddressForm";
-
-const props = defineProps({
-  addresses: {
-    type: Array,
-    default: () => [],
-  },
-});
+import { useAddressStore } from "../../store/addressStore";
 
 const emit = defineEmits(["notify"]);
+const addressStore = useAddressStore();
+const addresses = computed(() => addressStore.addresses);
 
 const {
   showModal,
@@ -29,7 +26,13 @@ const {
   setAsDefault,
   deleteAddress,
   getTypeLabel,
-} = useAddressForm(props, emit);
+} = useAddressForm((message, type) => emit("notify", message, type));
+
+onMounted(() => {
+  addressStore.fetchAddresses().catch((error) => {
+    emit("notify", error?.response?.data?.message || "Không tải được danh sách địa chỉ.", "error");
+  });
+});
 </script>
 
 <template>

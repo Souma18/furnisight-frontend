@@ -1,11 +1,12 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
 import ContactBookingSection from '../components/ContactBookingSection.vue'
 import ContactFaqSection from '../components/ContactFaqSection.vue'
 import ContactFormCard from '../components/ContactFormCard.vue'
 import ContactHeroSection from '../components/ContactHeroSection.vue'
 import ContactSidebar from '../components/ContactSidebar.vue'
 import ContactToast from '../components/ContactToast.vue'
+import { useContactReveal } from '../composables/useContactReveal'
+import { useContactToast } from '../composables/useContactToast'
 import {
   CONTACT_BREADCRUMB,
   CONTACT_BOOKING_OPTIONS,
@@ -16,30 +17,11 @@ import {
   CONTACT_FORM_CONFIG,
   CONTACT_HERO,
   CONTACT_SIDEBAR,
-} from '../mock/contactPageMockData'
+} from '../config/contactPageContent'
 import '../styles/contactPage.css'
 
-const toast = ref({
-  show: false,
-  title: CONTACT_DEFAULT_TOAST.title,
-  subtitle: CONTACT_DEFAULT_TOAST.subtitle,
-})
-
-let toastTimer = null
-let revealObserver = null
-
-function showToast(payload = CONTACT_DEFAULT_TOAST) {
-  toast.value = {
-    show: true,
-    title: payload.title,
-    subtitle: payload.subtitle,
-  }
-
-  window.clearTimeout(toastTimer)
-  toastTimer = window.setTimeout(() => {
-    toast.value = { ...toast.value, show: false }
-  }, 4000)
-}
+const { toast, showToast } = useContactToast(CONTACT_DEFAULT_TOAST)
+useContactReveal()
 
 function handleSubmitSuccess() {
   showToast(CONTACT_DEFAULT_TOAST)
@@ -51,26 +33,6 @@ function handleBook(item) {
     subtitle: 'Đội ngũ LUXNEST sẽ liên hệ để chốt thời gian phù hợp.',
   })
 }
-
-onMounted(() => {
-  revealObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) entry.target.classList.add('ct-visible')
-      })
-    },
-    { threshold: 0.08 },
-  )
-
-  document.querySelectorAll('.ct-fade-up').forEach((element) => revealObserver.observe(element))
-})
-
-onBeforeUnmount(() => {
-  window.clearTimeout(toastTimer)
-  toastTimer = null
-  revealObserver?.disconnect()
-  revealObserver = null
-})
 </script>
 
 <template>

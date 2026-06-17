@@ -1,127 +1,26 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { ordersApi } from '@shared/lib/api/services'
-import { PriceFormatter } from '@shared/lib/formatters'
+import { useAccountVouchers } from '../../composables/useAccountVouchers'
+import {
+  conditionText,
+  discountLabel,
+  formatDate,
+  isShippingVoucher,
+  voucherStatusClass,
+  voucherStatusLabel,
+} from '@features/promotions/lib/voucherPresentation'
 
 const emit = defineEmits(['notify'])
-
-const loading = ref(false)
-const vouchers = ref([])
-const typeFilter = ref('all')
-const timeFilter = ref('all')
-
-const typeOptions = [
-  { value: 'all', label: 'Tất cả loại' },
-  { value: 'shop', label: 'Voucher đơn hàng' },
-  { value: 'ship', label: 'Voucher vận chuyển' },
-  { value: 'PUBLIC', label: 'Công khai' },
-  { value: 'PERSONAL', label: 'Cá nhân' },
-  { value: 'MARKETING', label: 'Marketing' },
-]
-
-const timeOptions = [
-  { value: 'all', label: 'Tất cả thời gian' },
-  { value: 'active', label: 'Đang dùng được' },
-  { value: 'expiring', label: 'Sắp hết hạn' },
-  { value: 'upcoming', label: 'Sắp diễn ra' },
-  { value: 'expired', label: 'Đã hết hạn' },
-]
-
-const filteredVouchers = computed(() => vouchers.value
-  .filter((voucher) => matchesType(voucher, typeFilter.value))
-  .filter((voucher) => matchesTime(voucher, timeFilter.value)))
-
-onMounted(fetchVouchers)
-
-async function fetchVouchers() {
-  loading.value = true
-  try {
-    const { data } = await ordersApi.getVouchers()
-    vouchers.value = Array.isArray(data) ? data : data?.items ?? []
-  } catch (error) {
-    console.error('Failed to load account vouchers:', error)
-    emit('notify', 'Không tải được danh sách voucher.', 'error')
-  } finally {
-    loading.value = false
-  }
-}
-
-function matchesType(voucher, filter) {
-  if (filter === 'all') return true
-  if (filter === 'shop') return voucher.discountType !== 'SHIPPING_CAP'
-  if (filter === 'ship') return voucher.discountType === 'SHIPPING_CAP'
-  return voucher.voucherType === filter
-}
-
-function matchesTime(voucher, filter) {
-  if (filter === 'all') return true
-  const now = Date.now()
-  const start = toTime(voucher.startDate)
-  const end = toTime(voucher.endDate)
-  if (filter === 'upcoming') return start && start > now
-  if (filter === 'expired') return end && end < now
-  if (filter === 'expiring') return isActiveByTime(start, end, now) && end && end - now <= 7 * 24 * 60 * 60 * 1000
-  return isActiveByTime(start, end, now)
-}
-
-function isActiveByTime(start, end, now = Date.now()) {
-  return (!start || start <= now) && (!end || end >= now)
-}
-
-function toTime(value) {
-  if (!value) return null
-  const time = new Date(value).getTime()
-  return Number.isNaN(time) ? null : time
-}
-
-function formatDate(value) {
-  if (!value) return 'Không giới hạn'
-  const date = new Date(value)
-  return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('vi-VN').format(date)
-}
-
-function discountLabel(voucher) {
-  if (voucher.discountType === 'SHIPPING_CAP') return `Giảm phí ship ${PriceFormatter.format(voucher.discountValue)}`
-  if (voucher.discountType === 'PERCENT') {
-    const cap = voucher.maxDiscount ? `, tối đa ${PriceFormatter.format(voucher.maxDiscount)}` : ''
-    return `Giảm ${voucher.discountValue}%${cap}`
-  }
-  return `Giảm ${PriceFormatter.format(voucher.discountValue)}`
-}
-
-function minOrderLabel(voucher) {
-  return voucher.minOrder ? `Đơn từ ${PriceFormatter.format(voucher.minOrder)}` : 'Không yêu cầu giá trị tối thiểu'
-}
-
-function statusClass(voucher) {
-  const now = Date.now()
-  const start = toTime(voucher.startDate)
-  const end = toTime(voucher.endDate)
-  if (!voucher.active) return 'off'
-  if (start && start > now) return 'upcoming'
-  if (end && end < now) return 'expired'
-  if (end && end - now <= 7 * 24 * 60 * 60 * 1000) return 'expiring'
-  return 'active'
-}
-
-function statusLabel(voucher) {
-  const status = statusClass(voucher)
-  if (status === 'off') return 'Đang tắt'
-  if (status === 'upcoming') return 'Sắp diễn ra'
-  if (status === 'expired') return 'Đã hết hạn'
-  if (status === 'expiring') return 'Sắp hết hạn'
-  return 'Đang dùng được'
-}
-
-async function copyCode(code) {
-  try {
-    await navigator.clipboard?.writeText(code)
-    emit('notify', `Đã sao chép mã ${code}.`)
-  } catch {
-    emit('notify', 'Không sao chép được mã voucher.', 'error')
-  }
-}
+const {
+  loading,
+  typeFilter,
+  timeFilter,
+  typeOptions,
+  timeOptions,
+  filteredVouchers,
+  fetchVouchers,
+  copyCode,
+} = useAccountVouchers((message, type) => emit('notify', message, type))
 </script>
 
 <template>
@@ -164,17 +63,17 @@ async function copyCode(code) {
     <div v-else class="voucher-list">
       <article v-for="voucher in filteredVouchers" :key="voucher.id || voucher.code" class="voucher-card">
         <div class="voucher-mark">
-          <AppIcon :name="voucher.discountType === 'SHIPPING_CAP' ? 'truck' : 'badgePercent'" :size="22" />
+          <AppIcon :name="isShippingVoucher(voucher) ? 'truck' : 'badgePercent'" :size="22" />
         </div>
         <div class="voucher-info">
           <div class="voucher-title-row">
             <h3>{{ voucher.name || voucher.code }}</h3>
-            <span class="voucher-status" :class="statusClass(voucher)">{{ statusLabel(voucher) }}</span>
+            <span class="voucher-status" :class="voucherStatusClass(voucher)">{{ voucherStatusLabel(voucher) }}</span>
           </div>
           <p class="voucher-code">{{ voucher.code }}</p>
           <p class="voucher-discount">{{ discountLabel(voucher) }}</p>
           <p class="voucher-meta">
-            {{ minOrderLabel(voucher) }} · HSD {{ formatDate(voucher.endDate) }}
+            {{ conditionText(voucher) }} · HSD {{ formatDate(voucher.endDate) }}
           </p>
         </div>
         <button type="button" class="copy-btn" @click="copyCode(voucher.code)">

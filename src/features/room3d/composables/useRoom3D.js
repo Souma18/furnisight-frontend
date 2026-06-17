@@ -1,17 +1,15 @@
 import { storeToRefs } from 'pinia'
-import { computed, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
-import {
-  classifyRoomImage,
-  getRoomRecommendations,
-  getRoomTemplates,
-  mapLabelToRoomType,
-  predictRoomModel,
-} from '../api/roomApi'
-import { PRODUCTS_3D } from '../core/mockData'
+import { room3dApi } from '@shared/lib/api/services'
+const { getRoomTemplates } = room3dApi
 import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
+import { useRoomCartBridge } from './useRoomCartBridge'
+import { useRoomDeepLink } from './useRoomDeepLink'
+import { useRoomRecommendations } from './useRoomRecommendations'
+import { useRoomUpload } from './useRoomUpload'
 
 export function useRoom3D() {
   const route = useRoute()
@@ -22,96 +20,39 @@ export function useRoom3D() {
   const cartState = storeToRefs(cartStore)
   const roomTemplates = ref([])
   const isLoadingTemplates = ref(false)
-  const orderCode = ref('')
-  const uploadError = ref('')
-  const recommendationError = ref('')
-  const appliedDeepLinkKey = ref('')
-  let manualRecommendationRequestId = 0
-  const cartItems = computed(() => cartState.items.value)
-  const placedProductIds = computed(() => cartState.room3dProductIds.value)
-  const cartProductIds = computed(() =>
-    cartState.items.value
-      .map((item) => String(item.productId ?? item.id ?? '').split('::')[0])
-      .filter(Boolean),
-  )
-  const cartTotal = computed(() => cartState.totalAmount.value)
-  const cartCount = computed(() => cartState.lineCount.value)
 
-  const QUALITY_TO_MESH_RESOLUTION = {
-    '128': 128,
-    '256': 256,
-    '512': 512,
-    '1024': 1024,
-  }
-
-  const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
-  const SUPPORTED_IMAGE_EXTENSIONS = new Set(['jpg', 'jpeg', 'png', 'webp'])
-  const UNSUPPORTED_IMAGE_MESSAGE = 'Sai định dạng ảnh. Vui lòng upload JPG, PNG hoặc WEBP.'
-
-  function isSupportedImageFile(file) {
-    const mimeType = String(file?.type ?? '').toLowerCase()
-    const extension = String(file?.name ?? '').split('.').pop()?.toLowerCase() ?? ''
-
-    return SUPPORTED_IMAGE_TYPES.has(mimeType) || SUPPORTED_IMAGE_EXTENSIONS.has(extension)
-  }
-
-  function normalizeUploadError(error, fallback = 'Không thể nhận diện phòng từ ảnh này.') {
-    const message = String(
-      error?.response?.data?.detail ??
-        error?.response?.data?.message ??
-        error?.message ??
-        fallback,
-    )
-    const lowerMessage = message.toLowerCase()
-
-    if (
-      lowerMessage.includes('cannot identify image file') ||
-      lowerMessage.includes('cannot read image file') ||
-      lowerMessage.includes('unsupported image') ||
-      lowerMessage.includes('invalid image') ||
-      lowerMessage.includes('sai dinh dang') ||
-      lowerMessage.includes('định dạng')
-    ) {
-      return UNSUPPORTED_IMAGE_MESSAGE
-    }
-
-    return message
-  }
-
-  const productFilters = computed(() => {
-    const categoriesBySlug = new Map()
-    for (const item of state.recommendations.value) {
-      const slug = String(item.categorySlug ?? '').trim().toLowerCase()
-      if (!slug || categoriesBySlug.has(slug)) continue
-      categoriesBySlug.set(slug, item.categoryName || slug)
-    }
-
-    return [
-      { label: 'Tất cả', value: 'all' },
-      ...Array.from(categoriesBySlug, ([slug, label]) => ({
-        label,
-        value: slug,
-      })),
-    ]
+  const { uploadError, handleUploadImage } = useRoomUpload({ store, state })
+  const {
+    recommendationError,
+    productFilters,
+    filteredProducts,
+    selectRoomType,
+  } = useRoomRecommendations({ store, state })
+  const {
+    orderCode,
+    cartItems,
+    placedProductIds,
+    cartProductIds,
+    cartTotal,
+    cartCount,
+    addProductToCart,
+    openProductDetail,
+    removeProductFromCart,
+    updateCartQty,
+    goCheckout,
+    submitCheckoutMock,
+  } = useRoomCartBridge({
+    store,
+    state,
+    cartStore,
+    cartState,
+    router,
   })
-
-  const filteredProducts = computed(() => {
-    if (state.predictionResponseType.value !== 'full') return []
-
-    let result = state.recommendations.value
-
-    if (state.selectedCategory.value !== 'all') {
-      result = result.filter(
-        (item) => item.categorySlug === state.selectedCategory.value,
-      )
-    }
-
-    const keyword = state.searchKeyword.value.trim().toLowerCase()
-    if (keyword) {
-      result = result.filter((item) => item.name.toLowerCase().includes(keyword))
-    }
-
-    return result
+  useRoomDeepLink({
+    route,
+    store,
+    roomTemplates,
+    selectRoomType,
   })
 
   async function initRoomTemplates() {
@@ -123,150 +64,6 @@ export function useRoom3D() {
     } finally {
       isLoadingTemplates.value = false
     }
-  }
-
-  async function handleUploadImage(file) {
-    if (!file) return
-
-    uploadError.value = ''
-
-    if (!isSupportedImageFile(file)) {
-      uploadError.value = UNSUPPORTED_IMAGE_MESSAGE
-      return
-    }
-
-    store.setPredictionLoading()
-    store.setUploadedModelUrl('')
-    store.showPredictionRoom(null)
-    store.setCategory('all')
-    store.setAnalyzing(true)
-
-    try {
-      const meshResolution = QUALITY_TO_MESH_RESOLUTION[state.quality.value] ?? 512
-
-      // Gọi song song: nhận diện cho giao diện/gợi ý và tạo mô hình 3D từ ảnh tải lên.
-      const [predictionResult, meshResult] = await Promise.allSettled([
-        classifyRoomImage(file, state.imageType.value),
-        predictRoomModel(file, {
-          imageType: state.imageType.value,
-          meshResolution,
-          meshQuality: state.meshQuality.value,
-        }),
-      ])
-
-      if (predictionResult.status === 'fulfilled') {
-        const prediction = predictionResult.value
-        const detectedRoomType = mapLabelToRoomType(prediction?.label)
-        store.applyPredictionResult(prediction)
-
-        if (meshResult.status === 'fulfilled') {
-          const meshData = meshResult.value
-          const modelUrl = meshData?.model_url
-
-          if (modelUrl) {
-            store.applyAiGeneratedModel({
-              roomType: detectedRoomType,
-              modelUrl,
-            })
-          } else {
-            store.setUploadedModelUrl('')
-            store.showPredictionRoom(null)
-          }
-        }
-
-        if (meshResult.status === 'rejected') {
-          store.setUploadedModelUrl('')
-          store.showPredictionRoom(null)
-          uploadError.value = normalizeUploadError(meshResult.reason, 'Không có kết quả trực quan 3D.')
-        }
-      } else {
-        store.setPredictionError()
-        store.showPredictionRoom(null)
-        uploadError.value = normalizeUploadError(predictionResult.reason, 'Không thể nhận diện phòng từ ảnh này.')
-
-        if (meshResult.status === 'fulfilled') {
-          const meshData = meshResult.value
-          const modelUrl = meshData?.model_url
-
-          if (modelUrl) {
-            store.applyAiGeneratedModel({
-              roomType: null,
-              modelUrl,
-            })
-          }
-        }
-      }
-
-      if (predictionResult.status === 'fulfilled' && meshResult.status === 'fulfilled') {
-        const meshData = meshResult.value
-        const modelUrl = meshData?.model_url
-        if (!modelUrl) {
-          store.setUploadedModelUrl('')
-          store.showPredictionRoom(null)
-          uploadError.value = 'Không có kết quả trực quan 3D.'
-        }
-      }
-    } catch (error) {
-      uploadError.value = normalizeUploadError(error, 'Không thể nhận diện phòng từ ảnh này.')
-      store.setPredictionError()
-      store.setUploadedModelUrl('')
-      store.showPredictionRoom(null)
-    } finally {
-      store.setAnalyzing(false)
-    }
-  }
-
-  async function selectRoomType(type) {
-    const requestId = ++manualRecommendationRequestId
-    recommendationError.value = ''
-    store.selectTemplateRoom(type)
-    store.setCategory('all')
-    store.setSearchKeyword('')
-
-    try {
-      const result = await getRoomRecommendations(type)
-      if (requestId !== manualRecommendationRequestId) return
-      store.applyManualRecommendations(result)
-    } catch (error) {
-      if (requestId !== manualRecommendationRequestId) return
-      store.applyManualRecommendations({
-        recommendations: [],
-        recommendationMeta: {
-          roomType: type,
-          source: 'manual',
-          reason: 'catalog_unavailable',
-        },
-      })
-      recommendationError.value = 'Không thể tải gợi ý sản phẩm cho phòng này.'
-      console.warn('Failed to load manual room recommendations:', error?.response?.status || error?.message || error)
-    }
-  }
-
-  function addProductToCart(productOrId) {
-    let product = productOrId
-
-    if (typeof productOrId === 'number') {
-      const sceneProduct = PRODUCTS_3D.find((item) => item.id === productOrId)
-      product = sceneProduct
-        ? state.recommendations.value.find(
-            (item) => String(item.productId || item.id) === String(sceneProduct.productId),
-          )
-        : null
-    } else if (typeof productOrId === 'string') {
-      product = state.recommendations.value.find((item) => String(item.id) === productOrId)
-    }
-
-    if (!product) return
-    cartStore.addItem(product)
-  }
-
-  function openProductDetail(product) {
-    const detailId = product?.detailId || product?.slug || product?.id
-    if (!detailId) return
-    router.push({
-      name: 'product-detail',
-      params: { id: detailId },
-    })
   }
 
   function addProductToScene(payload) {
@@ -283,74 +80,9 @@ export function useRoom3D() {
     }
   }
 
-  function removeProductFromCart(lineId) {
-    cartStore.removeItem(lineId)
-  }
-
-  function updateCartQty(lineId, nextQty) {
-    cartStore.updateQty(lineId, nextQty)
-  }
-
-  function goCheckout() {
-    router.push('/checkout')
-  }
-
   function removeProductFromScene(instanceId) {
     store.removeFromScene(instanceId)
   }
-
-  function submitCheckoutMock() {
-    orderCode.value = `LN${Date.now().toString().slice(-6)}`
-    store.closeCheckout()
-    store.openSuccess()
-    cartStore.clearCart()
-  }
-
-  function applyDeepLinkProduct() {
-    const roomTypeRaw = route.query.roomType
-    const productIdRaw = route.query.productId
-    const roomType = typeof roomTypeRaw === 'string' ? roomTypeRaw.trim() : ''
-    const productId = Number.parseInt(String(productIdRaw ?? ''), 10)
-    const deepLinkKey = `${roomType || 'none'}:${Number.isFinite(productId) ? productId : 'none'}`
-    if (appliedDeepLinkKey.value === deepLinkKey) return
-
-    let applied = false
-
-    if (roomType) {
-      const templateExists = roomTemplates.value.some((item) => item.type === roomType)
-      if (templateExists) {
-        void selectRoomType(roomType)
-        applied = true
-      }
-    }
-
-    if (Number.isFinite(productId)) {
-      const target = PRODUCTS_3D.find((item) => item.id === productId)
-      if (target) {
-        // "Xem 3D" tu trang chi tiet se dua san pham vao scene, khong tu dong dua vao gio.
-        store.addToScene(target.id)
-        if (!roomType && Array.isArray(target.roomTypes) && target.roomTypes.length > 0) {
-          void selectRoomType(target.roomTypes[0])
-        }
-        // Van reset filter de user thay day du san pham sau khi dieu huong.
-        store.setCategory('all')
-        store.setSearchKeyword('')
-        applied = true
-      }
-    }
-
-    if (applied) {
-      appliedDeepLinkKey.value = deepLinkKey
-    }
-  }
-
-  watch(
-    () => [route.query.roomType, route.query.productId, roomTemplates.value.length],
-    () => {
-      applyDeepLinkProduct()
-    },
-    { immediate: true },
-  )
 
   return {
     ...state,

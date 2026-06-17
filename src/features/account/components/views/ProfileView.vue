@@ -1,17 +1,14 @@
 <script setup>
+import { computed, onMounted } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 import { useProfileForm } from '../../composables/useProfileForm'
-
-const props = defineProps({
-  profile: {
-    type: Object,
-    default: null,
-  },
-})
+import { useProfileStore } from '../../store/profileStore'
 
 const emit = defineEmits(['notify'])
+const profileStore = useProfileStore()
+const profile = computed(() => profileStore.profile)
 
 const {
   form,
@@ -22,7 +19,13 @@ const {
   pickAvatar,
   onAvatarSelected,
   removeAvatar,
-} = useProfileForm(props, emit)
+} = useProfileForm(profile, (message, type) => emit('notify', message, type))
+
+onMounted(() => {
+  profileStore.fetchProfile().catch((error) => {
+    emit('notify', error?.response?.data?.message || 'Không tải được thông tin cá nhân.', 'error')
+  })
+})
 </script>
 
 <template>

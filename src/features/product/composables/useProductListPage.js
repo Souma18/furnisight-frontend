@@ -4,14 +4,13 @@ import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
+import {
+  buildActiveProductTags,
+  buildProductListParams,
+  createDefaultProductFilters,
+  parseProductListQueryPreset,
+} from './productListFilters'
 import { useProducts } from './useProducts'
-
-const PRICE_BAND_TAGS = {
-  lt5m: 'Dưới 5tr',
-  '5-15m': '5tr - 15tr',
-  '15-30m': '15tr - 30tr',
-  gt30m: '30tr - 50tr+',
-}
 
 export function useProductListPage() {
   const route = useRoute()
@@ -26,50 +25,20 @@ export function useProductListPage() {
   const saleOnly = ref(false)
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
 
-  function defaultAppliedFilters() {
-    return {
-      priceBands: [],
-      priceSliderPct: 100,
-      materials: [],
-      colors: [],
-      minStar: null,
-    }
-  }
+  const appliedFilters = ref(createDefaultProductFilters())
 
-  const appliedFilters = ref(defaultAppliedFilters())
-
-  const activeTags = computed(() => {
-    const tags = []
-    if (selectedCategory.value !== 'all') tags.push(selectedCategory.value)
-    if (selectedSubcategory.value !== 'all') tags.push(selectedSubcategory.value)
-    if (searchKeyword.value.trim()) tags.push(`"${searchKeyword.value.trim()}"`)
-    if (saleOnly.value) tags.push('Sale')
-    const f = appliedFilters.value
-    if (f.materials?.length) tags.push(`${f.materials.length} chất liệu`)
-    if (f.colors?.length) tags.push(`${f.colors.length} màu`)
-    if (f.minStar != null) tags.push(`${f.minStar}+ sao`)
-    if (f.priceBands?.length) tags.push(PRICE_BAND_TAGS[f.priceBands[0]] ?? 'Khoảng giá')
-    return tags
-  })
+  const activeTags = computed(() => buildActiveProductTags({
+    appliedFilters: appliedFilters.value,
+    saleOnly: saleOnly.value,
+    searchKeyword: searchKeyword.value,
+    selectedCategory: selectedCategory.value,
+    selectedSubcategory: selectedSubcategory.value,
+  }))
 
   function parseQueryPreset() {
-    const qCategory = String(route.query.category ?? '').trim()
-    const qBreadcrumb = String(route.query.breadcrumb ?? '').trim()
-    const qKeyword = String(route.query.q ?? '').trim()
-
-    if (qCategory && qCategory !== 'all') {
-      selectedCategory.value = qCategory
-    } else if (qBreadcrumb && qBreadcrumb !== 'sản phẩm') {
-      selectedCategory.value = qBreadcrumb || 'all'
-    } else {
-      selectedCategory.value = 'all'
-    }
-
-    if (qKeyword) {
-      searchKeyword.value = qKeyword
-    } else {
-      searchKeyword.value = ''
-    }
+    const preset = parseProductListQueryPreset(route.query)
+    selectedCategory.value = preset.selectedCategory
+    searchKeyword.value = preset.searchKeyword
   }
 
   const dynamicQuickFilters = ref([])
@@ -143,12 +112,12 @@ export function useProductListPage() {
   }
 
   function onApplySidebar(payload) {
-    appliedFilters.value = { ...defaultAppliedFilters(), ...payload }
+    appliedFilters.value = { ...createDefaultProductFilters(), ...payload }
     requestList()
   }
 
   function onClearFilters() {
-    appliedFilters.value = defaultAppliedFilters()
+    appliedFilters.value = createDefaultProductFilters()
     saleOnly.value = false
     selectedCategory.value = 'all'
     selectedSubcategory.value = 'all'
@@ -157,27 +126,14 @@ export function useProductListPage() {
   }
 
   function requestList() {
-    const f = appliedFilters.value
-
-    // Determine which category slug to send to the API
-    let categorySlug = ''
-    if (selectedSubcategory.value !== 'all') {
-      categorySlug = selectedSubcategory.value
-    } else if (selectedCategory.value !== 'all') {
-      categorySlug = selectedCategory.value
-    }
-
-    loadList({
-      ...(searchKeyword.value ? { q: searchKeyword.value } : {}),
-      ...(categorySlug ? { category: categorySlug } : {}),
-      sort: sortBy.value,
-      ...(f.priceBands?.length ? { priceBands: f.priceBands } : {}),
-      ...(f.priceSliderPct < 100 ? { priceSliderPct: f.priceSliderPct } : {}),
-      ...(f.materials?.length ? { materials: f.materials } : {}),
-      ...(f.colors?.length ? { colors: f.colors } : {}),
-      ...(f.minStar != null ? { minStar: f.minStar } : {}),
-      ...(saleOnly.value ? { saleOnly: true } : {}),
-    })
+    loadList(buildProductListParams({
+      appliedFilters: appliedFilters.value,
+      saleOnly: saleOnly.value,
+      searchKeyword: searchKeyword.value,
+      selectedCategory: selectedCategory.value,
+      selectedSubcategory: selectedSubcategory.value,
+      sortBy: sortBy.value,
+    }))
   }
 
   async function favoriteProduct(productId) {

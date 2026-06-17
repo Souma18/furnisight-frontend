@@ -20,15 +20,10 @@ const { logout: authLogout } = useAuth()
 const {
   activeView,
   profile,
-  addresses,
-  wishlist,
-  settings,
-  projects,
   stats,
   toast,
   setView,
   showToast,
-  removeWishlistFavorite,
 } = useAccountPage()
 
 const notificationCategory = computed(() => {
@@ -62,12 +57,10 @@ async function handleLogout() {
     <main class="content">
       <ProfileView
         v-if="activeView === 'profile'"
-        :profile="profile"
         @notify="showToast"
       />
       <AddressView
         v-else-if="activeView === 'address'"
-        :addresses="addresses"
         @notify="showToast"
       />
       <NotificationsView
@@ -80,16 +73,14 @@ async function handleLogout() {
       <CartView v-else-if="activeView === 'cart'" />
       <WishlistView
         v-else-if="activeView === 'wishlist'"
-        :items="wishlist"
-        @remove-favorite="removeWishlistFavorite"
+        @notify="showToast"
       />
       <SecurityView
         v-else-if="activeView === 'security'"
-        :profile="profile"
         @notify="showToast"
       />
-      <SettingsView v-else-if="activeView === 'settings'" :settings="settings" />
-      <Projects3DView v-else :projects="projects" />
+      <SettingsView v-else-if="activeView === 'settings'" />
+      <Projects3DView v-else />
     </main>
 
     <AccountToast :show="toast.open" :message="toast.message" :type="toast.type" />

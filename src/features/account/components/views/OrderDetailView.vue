@@ -1,247 +1,36 @@
 <script setup>
-import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
-import { useAccountOrders } from '../../composables/useAccountOrders'
-import { usePaymentCountdown } from '../../composables/usePaymentCountdown'
-import { ORDER_STATUS_LABELS } from '../../composables/orderStatusLabels'
-import { canRetryOrderPayment, parseOrderDate, shouldShowRetryPayment } from '@shared/lib/api/services/orders/orders.model'
-import { PriceFormatter } from '@shared/lib/formatters'
+import { useOrderDetailView } from '../../composables/useOrderDetailView'
 
 const emit = defineEmits(['notify'])
-const router = useRouter()
-
 const {
-  selectedOrder: order,
+  order,
   backToOrders,
-  cancelOrder,
-  retryPayment,
-  retryingOrderCode,
-} = useAccountOrders((msg, type) => emit('notify', msg, type))
-
-const cancelDialogOpen = ref(false)
-const canceling = ref(false)
-const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
-
-function handleCancel() {
-  if (!canCancelCurrentOrder.value) return
-  cancelDialogOpen.value = true
-}
-
-function closeCancelDialog() {
-  if (canceling.value) return
-  cancelDialogOpen.value = false
-}
-
-async function confirmCancel() {
-  if (!order.value || canceling.value) return
-  canceling.value = true
-  const success = await cancelOrder(order.value.orderCode || order.value.id)
-  canceling.value = false
-  if (success) cancelDialogOpen.value = false
-}
-
-function handleRetryPayment() {
-  if (!order.value) return
-  retryPayment(order.value)
-}
-
-const retryingPayment = computed(() =>
-  Boolean(order.value) && retryingOrderCode.value === (order.value.orderCode || order.value.id),
-)
-
-const canRetryPaymentNow = computed(() =>
-  Boolean(order.value)
-    && canRetryOrderPayment(order.value)
-    && isPaymentTimeRemaining(order.value),
-)
-
-const canCancelCurrentOrder = computed(() =>
-  ['unpaid', 'payment_failed', 'paid', 'cod_pending_confirmation', 'cod_confirmed'].includes(order.value?.status),
-)
-
-const formatMoney = PriceFormatter.format
-
-function formatDate(dateStr) {
-  if (!dateStr) return ''
-  const date = parseOrderDate(dateStr)
-  return date ? new Intl.DateTimeFormat('vi-VN').format(date) : dateStr
-}
-
-function formatDateTime(dateStr) {
-  if (!dateStr) return ''
-  const date = parseOrderDate(dateStr)
-  return date
-    ? new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
-    : dateStr
-}
-
-function orderItemImage(item = {}) {
-  return item.imageUrl || item.productSnapshot?.imageUrl || ''
-}
-
-function orderItemProductId(item = {}) {
-  return item.productId || item.productSnapshot?.productId || ''
-}
-
-function openProductDetail(item) {
-  const productId = orderItemProductId(item)
-  if (!productId) return
-  router.push({
-    name: 'product-detail',
-    params: { id: productId },
-  })
-}
-
-function reviewProduct(item) {
-  const productId = orderItemProductId(item)
-  if (!productId || order.value?.status !== 'done') return
-  router.push({
-    name: 'product-detail',
-    params: { id: productId },
-    query: { tab: 'review' },
-  })
-}
-
-function hideBrokenImage(event) {
-  event.target.style.display = 'none'
-}
-
-function isCodOrder(current = order.value) {
-  return String(current?.paymentMethod || current?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
-}
-
-const statusLabel = computed(() => {
-  return order.value?.statusLabel || ORDER_STATUS_LABELS[order.value?.status] || order.value?.status || ''
-})
-
-const paymentStatusLabel = computed(() => {
-  if (isCodOrder()) return 'Thanh toán khi nhận hàng'
-  const rawStatus = String(order.value?.paymentDetail?.paymentStatus || order.value?.rawStatus || '').toUpperCase()
-  if (rawStatus === 'PAID') return 'Đã thanh toán'
-  if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return 'Thanh toán thất bại'
-  if (order.value?.status === 'unpaid') return 'Chờ thanh toán'
-  if (order.value?.status === 'refund_pending') return 'Chờ hoàn tiền'
-  if (order.value?.status === 'refunded') return 'Đã hoàn tiền'
-  return rawStatus || 'Chưa ghi nhận'
-})
-
-const transactionTimeline = computed(() => {
-  const current = order.value
-  if (!current) return []
-
-  const timeline = current.paymentTimeline || {}
-  const items = [
-    {
-      key: 'created',
-      title: 'Đơn hàng được tạo',
-      sub: 'Hệ thống đã ghi nhận đơn hàng.',
-      time: timeline.orderCreatedAt || current.createdAt,
-      state: 'done',
-      icon: 'clipboardList',
-    },
-  ]
-
-  if (timeline.paymentInitiatedAt) {
-    items.push({
-      key: 'initiated',
-      title: 'Khởi tạo thanh toán',
-      sub: `Phương thức ${paymentMethodLabel(current)}.`,
-      time: timeline.paymentInitiatedAt,
-      state: 'done',
-      icon: 'creditCard',
-    })
-  }
-
-  if (isCodOrder(current)) {
-    items.push({
-      key: 'cod',
-      title: 'Thanh toán khi nhận hàng',
-      sub: 'Khách sẽ thanh toán tiền mặt khi nhận hàng.',
-      time: timeline.orderCreatedAt || current.createdAt,
-      state: 'active',
-      icon: 'cash',
-    })
-  } else if (timeline.paymentCompletedAt || current.paymentDetail?.paidAt) {
-    items.push({
-      key: 'completed',
-      title: 'Thanh toán thành công',
-      sub: `Đã ghi nhận ${formatMoney(current.paymentDetail?.paidAmount || current.totalAmount)}.`,
-      time: timeline.paymentCompletedAt || current.paymentDetail?.paidAt,
-      state: 'done',
-      icon: 'check',
-    })
-  } else if (timeline.paymentFailedAt || current.status === 'payment_failed') {
-    items.push({
-      key: 'failed',
-      title: 'Thanh toán thất bại',
-      sub: 'Giao dịch chưa được cổng thanh toán chấp nhận.',
-      time: timeline.paymentFailedAt,
-      state: 'failed',
-      icon: 'ban',
-    })
-  } else {
-    items.push({
-      key: 'pending',
-      title: 'Chờ thanh toán',
-      sub: canRetryPaymentNow.value
-        ? 'Bạn vẫn có thể tiếp tục thanh toán đơn hàng.'
-        : 'Đơn hàng đã hết thời gian thanh toán.',
-      time: timeline.paymentExpiresAt || current.paymentExpiresAt,
-      state: canRetryPaymentNow.value ? 'active' : 'pending',
-      icon: 'clock',
-    })
-  }
-
-  if (current.status === 'refund_pending') {
-    items.push({
-      key: 'refund_pending',
-      title: 'Chờ hoàn tiền',
-      sub: 'Đơn đã thanh toán được hủy trước khi giao và đang chờ xử lý hoàn tiền.',
-      time: null,
-      state: 'active',
-      icon: 'refresh',
-    })
-  }
-
-  if (current.status === 'refunded') {
-    items.push({
-      key: 'refunded',
-      title: 'Đã hoàn tiền',
-      sub: 'Admin đã xác nhận hoàn tiền cho đơn hàng.',
-      time: null,
-      state: 'done',
-      icon: 'checkCheck',
-    })
-  }
-
-  return items
-})
-
-const transactionRows = computed(() => {
-  const current = order.value
-  if (!current) return []
-
-  const payment = current.paymentDetail || {}
-  const timeline = current.paymentTimeline || {}
-  return [
-    { label: 'Mã giao dịch', value: payment.transactionCode || current.orderCode || 'Chưa có' },
-    { label: 'Trạng thái', value: paymentStatusLabel.value },
-    { label: isCodOrder(current) ? 'Số tiền cần thu' : 'Số tiền ghi nhận', value: formatMoney(isCodOrder(current) ? current.totalAmount : (payment.paidAmount || 0)) },
-    { label: 'Thời điểm thanh toán', value: isCodOrder(current) ? 'Khi nhận hàng' : (formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || 'Chưa ghi nhận') },
-    { label: 'Hạn thanh toán', value: formatDateTime(timeline.paymentExpiresAt || current.paymentExpiresAt) || 'Không áp dụng' },
-  ]
-})
-
-function paymentMethodLabel(current = order.value) {
-  return isCodOrder(current) ? 'Thanh toán khi nhận hàng' : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || 'Chưa rõ')
-}
-
-const paymentDeadline = computed(() => {
-  if (!order.value || !canRetryPaymentNow.value) return ''
-  return `Còn ${formatCountdown(order.value)} để hoàn tất thanh toán`
-})
+  cancelDialogOpen,
+  canceling,
+  retryingPayment,
+  canRetryPaymentNow,
+  canCancelCurrentOrder,
+  statusLabel,
+  transactionTimeline,
+  transactionRows,
+  paymentDeadline,
+  shouldShowRetryPayment,
+  formatMoney,
+  formatDate,
+  formatDateTime,
+  orderItemImage,
+  orderItemProductId,
+  openProductDetail,
+  reviewProduct,
+  hideBrokenImage,
+  paymentMethodLabel,
+  handleCancel,
+  closeCancelDialog,
+  confirmCancel,
+  handleRetryPayment,
+} = useOrderDetailView((msg, type) => emit('notify', msg, type))
 </script>
 
 <template>

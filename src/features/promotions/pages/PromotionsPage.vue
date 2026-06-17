@@ -1,11 +1,23 @@
 ﻿<script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { productsApi, promotionsApi } from '@shared/lib/api/services'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
+import { useComboCart } from '../composables/useComboCart'
+import { usePromotionToast } from '../composables/usePromotionToast'
+import { usePromotionsCombos } from '../composables/usePromotionsCombos'
+import { usePromotionsVouchers } from '../composables/usePromotionsVouchers'
+import { useVoucherRailDrag } from '../composables/useVoucherRailDrag'
+import {
+  conditionText,
+  discountLabel,
+  formatCurrency,
+  formatDate,
+  isExpiring,
+  isShippingVoucher,
+} from '../lib/voucherPresentation'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ComboCard from '../components/ComboCard.vue'
 
@@ -16,28 +28,67 @@ const cartStore = useCartStore()
 const { isAuthenticated } = storeToRefs(authStore)
 const { items: cartItems } = storeToRefs(cartStore)
 
-const vouchers = ref([])
-const combos = ref([])
-const comboPage = ref(0)
-const comboSize = 6
-const comboTotal = ref(0)
-const comboSort = ref('save-desc')
 const activeFilter = ref(route.query.tab === 'combo' ? 'combo' : 'all')
-const loading = ref(false)
-const loadingMore = ref(false)
-const claimingCode = ref('')
-const pendingVoucher = ref(null)
-const addingComboId = ref('')
-const buyingComboId = ref('')
 const selectedVoucher = ref(null)
 const selectedCombo = ref(null)
 const voucherRail = ref(null)
 const mineVoucherTypeFilter = ref('all')
 const mineVoucherTimeFilter = ref('all')
-const toast = ref({ show: false, title: '', subtitle: '', icon: 'check' })
-let toastTimer = null
-let voucherDrag = null
-const productImageCache = new Map()
+const { toast, showToast } = usePromotionToast()
+const {
+  startVoucherDrag,
+  moveVoucherDrag,
+  stopVoucherDrag,
+} = useVoucherRailDrag(voucherRail)
+const {
+  addingComboId,
+  buyingComboId,
+  addComboToCart,
+  buyCombo,
+  enrichComboItemImage,
+} = useComboCart({
+  authRequired: true,
+  onAuthRequired: openAuthModal,
+  onMessage(message, error, combo) {
+    if (!message) return
+    if (error) {
+      showToast('Không thể xử lý combo', message, 'alert')
+      return
+    }
+    showToast(message, combo?.name || '', 'cart')
+  },
+})
+
+const {
+  claimingCode,
+  filteredVouchers,
+  savedVouchers,
+  filteredSavedVouchers,
+  activeVoucherCount,
+  loadVouchers,
+  claimVoucher,
+} = usePromotionsVouchers({
+  activeFilter,
+  isAuthenticated,
+  mineVoucherTypeFilter,
+  mineVoucherTimeFilter,
+  onAuthRequired: openAuthModal,
+  showToast,
+})
+
+const {
+  combos,
+  comboTotal,
+  comboSort,
+  loadingMore,
+  hasMoreCombos,
+  loadCombos,
+  loadMoreCombos,
+  changeComboSort,
+} = usePromotionsCombos({
+  enrichComboItemImage,
+  showToast,
+})
 
 const filterTabs = [
   { key: 'all', label: 'Tất cả', icon: 'list' },
@@ -65,410 +116,20 @@ const voucherTimeOptions = [
   { value: 'expired', label: 'Đã hết hạn' },
 ]
 
-const filteredVouchers = computed(() => {
-  const key = activeFilter.value
-  if (key === 'freeship') return vouchers.value.filter((item) => isShippingVoucher(item))
-  if (key === 'expiring') return vouchers.value.filter((item) => isExpiring(item.endDate))
-  if (key === 'saved') return vouchers.value.filter((item) => item.saved)
-  return vouchers.value
-})
-
-const savedVouchers = computed(() => vouchers.value.filter((item) => item.saved && !item.used))
-const filteredSavedVouchers = computed(() => savedVouchers.value
-  .filter((voucher) => matchesVoucherType(voucher, mineVoucherTypeFilter.value))
-  .filter((voucher) => matchesVoucherTime(voucher, mineVoucherTimeFilter.value)))
 const showVoucherSection = computed(() => ['all', 'voucher', 'freeship', 'expiring', 'saved'].includes(activeFilter.value))
 const showComboSection = computed(() => activeFilter.value === 'all' || activeFilter.value === 'combo')
-const hasMoreCombos = computed(() => combos.value.length < comboTotal.value)
-const activeVoucherCount = computed(() => vouchers.value.filter((item) => item.active !== false).length)
 
 onMounted(async () => {
   await Promise.allSettled([loadVouchers(), loadCombos(true)])
   cartStore.ensureHydrated().catch(() => null)
 })
 
-async function loadVouchers() {
-  try {
-    const response = await promotionsApi.getPublicVouchers({ placement: 'PROMOTION_PAGE' })
-    vouchers.value = normalizeList(response.data).map(normalizeVoucher)
-    if (isAuthenticated.value) {
-      await mergeUserVoucherStatus()
-    }
-  } catch (error) {
-    vouchers.value = []
-    showToast('Chưa tải được voucher', error.response?.data?.message || 'Vui lòng thử lại sau.', 'alert')
-  }
-}
-
-async function mergeUserVoucherStatus() {
-  try {
-    const response = await promotionsApi.getUserVouchers()
-    const byCode = new Map(normalizeList(response.data).map((item) => [item.code, normalizeVoucher(item)]))
-    vouchers.value = vouchers.value.map((item) => {
-      const userVoucher = byCode.get(item.code)
-      return userVoucher ? { ...item, saved: userVoucher.saved, used: userVoucher.used } : item
-    })
-  } catch {
-    // Public vouchers should still render when the optional user-specific status cannot be loaded.
-  }
-}
-
-async function loadCombos(reset = false) {
-  if (reset) {
-    comboPage.value = 0
-    combos.value = []
-    loading.value = true
-  } else {
-    loadingMore.value = true
-  }
-
-  try {
-    const response = await promotionsApi.getCombos({
-      placement: 'PROMOTION_PAGE',
-      page: comboPage.value,
-      size: comboSize,
-      sort: comboSort.value,
-    })
-    const payload = response.data || {}
-    const rows = await Promise.all(normalizeList(payload).map(async (rawCombo) => {
-      const combo = normalizeCombo(rawCombo)
-      combo.items = await Promise.all(combo.items.map(enrichComboItemImage))
-      return combo
-    }))
-    comboTotal.value = Number(payload.total ?? rows.length)
-    combos.value = reset ? rows : [...combos.value, ...rows]
-  } catch (error) {
-    if (reset) {
-      combos.value = []
-      comboTotal.value = 0
-    }
-    showToast('Chưa tải được combo', error.response?.data?.message || 'Vui lòng thử lại sau.', 'alert')
-  } finally {
-    loading.value = false
-    loadingMore.value = false
-  }
-}
-
-async function loadMoreCombos() {
-  if (!hasMoreCombos.value || loadingMore.value) return
-  comboPage.value += 1
-  await loadCombos(false)
-}
-
-async function changeComboSort(event) {
-  comboSort.value = event.target.value
-  await loadCombos(true)
-}
-
-function startVoucherDrag(event) {
-  if (event.button !== 0 || !voucherRail.value) return
-  if (event.target.closest('button, a, input, select, textarea, [role="button"]')) return
-  voucherDrag = {
-    pointerId: event.pointerId,
-    startX: event.clientX,
-    scrollLeft: voucherRail.value.scrollLeft,
-  }
-  voucherRail.value.setPointerCapture?.(event.pointerId)
-}
-
-function moveVoucherDrag(event) {
-  if (!voucherDrag || !voucherRail.value) return
-  const delta = event.clientX - voucherDrag.startX
-  voucherRail.value.scrollLeft = voucherDrag.scrollLeft - delta
-}
-
-function stopVoucherDrag(event) {
-  if (!voucherDrag || !voucherRail.value) return
-  voucherRail.value.releasePointerCapture?.(event.pointerId)
-  voucherDrag = null
-}
-
-async function claimVoucher(voucher) {
-  if (!voucher?.code) return
-  if (!isAuthenticated.value) {
-    pendingVoucher.value = voucher
-    openAuthModal()
-    return
-  }
-
-  claimingCode.value = voucher.code
-  try {
-    await promotionsApi.saveVoucher(voucher.code)
-    vouchers.value = vouchers.value.map((item) =>
-      item.code === voucher.code ? { ...item, saved: true, used: false, statusLabel: 'Đã lưu' } : item,
-    )
-    showToast('Đã lưu voucher', voucher.code, 'check')
-  } catch (error) {
-    showToast('Không thể lưu voucher', error.response?.data?.message || 'Vui lòng thử lại sau.', 'alert')
-  } finally {
-    claimingCode.value = ''
-  }
-}
-
-watch(isAuthenticated, (authenticated) => {
-  if (!authenticated || !pendingVoucher.value) return
-  const voucher = pendingVoucher.value
-  pendingVoucher.value = null
-  claimVoucher(voucher)
-})
-
 async function useVoucherNow() {
   await router.push(cartItems.value.length ? '/checkout' : '/products')
 }
 
-function sameComboLine(line, item) {
-  return String(line.productId || '') === String(item.productId || '')
-    && String(line.variantId || '') === String(item.variantId || '')
-}
-
-async function ensureComboInCart(combo) {
-  if (!Array.isArray(combo?.items) || !combo.items.length) {
-    throw new Error('Combo chua co san pham hop le.')
-  }
-
-  await cartStore.ensureHydrated()
-
-  for (const item of combo.items) {
-    const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
-    const existing = cartStore.items.find((line) => sameComboLine(line, item))
-    const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
-    const productItem = await enrichComboItemImage(item)
-    const productImageUrl = productItem.imageUrl || ''
-    const hasWrongImage = existing
-      && productImageUrl
-      && existing.imageUrl !== productImageUrl
-
-    if (hasWrongImage) {
-      await cartStore.removeItem(existing.id)
-      await cartStore.addItem({
-        productId: item.productId,
-        variantId: item.variantId || null,
-        name: item.productName,
-        price: item.price,
-        imageUrl: productImageUrl,
-        quantity: Math.max(currentQuantity, requiredQuantity),
-      })
-    } else if (existing && currentQuantity < requiredQuantity) {
-      await cartStore.updateQty(existing.id, requiredQuantity)
-    } else if (!existing) {
-      await cartStore.addItem({
-        productId: item.productId,
-        variantId: item.variantId || null,
-        name: item.productName,
-        price: item.price,
-        imageUrl: productImageUrl,
-        quantity: requiredQuantity,
-      })
-    }
-  }
-
-  const lineIds = combo.items
-    .map((item) => cartStore.items.find((line) => sameComboLine(line, item))?.id)
-    .filter(Boolean)
-
-  if (!lineIds.length || lineIds.length !== combo.items.length) {
-    throw new Error('Khong the chuan bi day du san pham trong combo.')
-  }
-
-  return lineIds
-}
-
-async function addComboToCart(combo) {
-  if (!isAuthenticated.value) {
-    await router.push({ name: 'login', query: { redirect: '/khuyen-mai?tab=combo' } })
-    return
-  }
-
-  addingComboId.value = combo.id
-  try {
-    await ensureComboInCart(combo)
-    showToast('Đã thêm combo vào giỏ', combo.name, 'cart')
-  } catch (error) {
-    showToast('Không thể thêm combo', error.response?.data?.message || 'Kiểm tra lại sản phẩm trong combo.', 'alert')
-  } finally {
-    addingComboId.value = ''
-  }
-}
-
-async function buyCombo(combo) {
-  if (!isAuthenticated.value) {
-    await router.push({ name: 'login', query: { redirect: '/khuyen-mai?tab=combo' } })
-    return
-  }
-
-  buyingComboId.value = combo.id
-  try {
-    const lineIds = await ensureComboInCart(combo)
-    await router.push({
-      name: 'checkout',
-      query: {
-        lines: lineIds.join(','),
-        comboId: combo.id,
-      },
-    })
-  } catch (error) {
-    showToast('Khong the mua combo', error.response?.data?.message || error.message || 'Vui long thu lai sau.', 'alert')
-  } finally {
-    buyingComboId.value = ''
-  }
-}
-
-function normalizeList(data) {
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.items)) return data.items
-  return []
-}
-
-function normalizeVoucher(raw = {}) {
-  return {
-    ...raw,
-    id: raw.id || raw.code,
-    code: raw.code || '',
-    name: raw.name || raw.code || 'Voucher',
-    description: raw.description || raw.desc || '',
-    discountType: String(raw.discountType || '').toUpperCase(),
-    discountValue: Number(raw.discountValue) || 0,
-    maxDiscount: raw.maxDiscount ?? null,
-    minOrder: raw.minOrder ?? null,
-    startDate: raw.startDate || null,
-    endDate: raw.endDate || null,
-    voucherType: raw.voucherType || raw.type || '',
-    active: raw.active !== false,
-    saved: Boolean(raw.saved),
-    used: Boolean(raw.used),
-  }
-}
-
-function normalizeCombo(raw = {}) {
-  const items = Array.isArray(raw.items)
-    ? raw.items.map((item) => ({
-        ...item,
-        imageUrl: imageLikeUrl(item.imageUrl)
-          ? item.imageUrl
-          : imageLikeUrl(item.image)
-            ? item.image
-            : '',
-      }))
-    : []
-  return {
-    ...raw,
-    id: raw.id,
-    name: raw.name || 'Combo nội thất',
-    description: raw.description || '',
-    imageUrl: raw.imageUrl || '',
-    items,
-    itemCount: raw.itemCount ?? items.length,
-    originalAmount: Number(raw.originalAmount) || 0,
-    finalAmount: Number(raw.finalAmount) || 0,
-    savedAmount: Number(raw.savedAmount) || 0,
-    roomLabel: items[0]?.categoryName || 'Nội thất',
-  }
-}
-
-async function enrichComboItemImage(item) {
-  if (item.imageUrl || !item.productId) return item
-
-  if (!productImageCache.has(item.productId)) {
-    productImageCache.set(item.productId, productsApi.getProductDetail(item.productId)
-      .then(({ data }) => {
-        const candidates = [
-          ...(Array.isArray(data?.gallery) ? data.gallery : []),
-          ...(Array.isArray(data?.images) ? data.images : []),
-          data?.imageUrl,
-          data?.image,
-          data?.thumbnailUrl,
-          data?.thumbnail,
-        ]
-
-        return candidates
-          .map((image) => typeof image === 'string' ? image : image?.url || image?.imageUrl || '')
-          .find(imageLikeUrl) || ''
-      })
-      .catch(() => ''))
-  }
-
-  return {
-    ...item,
-    imageUrl: await productImageCache.get(item.productId),
-  }
-}
-
 function openCombo(combo) {
   selectedCombo.value = combo
-}
-
-function discountLabel(voucher) {
-  if (isShippingVoucher(voucher)) return `Giảm ship ${formatCurrency(voucher.discountValue)}`
-  if (voucher.discountType === 'PERCENT') {
-    return `Giảm ${voucher.discountValue}%${voucher.maxDiscount ? ` tối đa ${formatCurrency(voucher.maxDiscount)}` : ''}`
-  }
-  return `Giảm ${formatCurrency(voucher.discountValue)}`
-}
-
-function isShippingVoucher(voucher) {
-  return String(voucher.discountType || '').toUpperCase() === 'SHIPPING_CAP'
-}
-
-function matchesVoucherType(voucher, filter) {
-  if (filter === 'all') return true
-  if (filter === 'shop') return !isShippingVoucher(voucher)
-  if (filter === 'ship') return isShippingVoucher(voucher)
-  return String(voucher.voucherType || '').toUpperCase() === filter
-}
-
-function matchesVoucherTime(voucher, filter) {
-  if (filter === 'all') return true
-  const now = Date.now()
-  const start = toTime(voucher.startDate)
-  const end = toTime(voucher.endDate)
-  if (filter === 'upcoming') return Boolean(start && start > now)
-  if (filter === 'expired') return Boolean(end && end < now)
-  if (filter === 'expiring') return isActiveByTime(start, end, now) && Boolean(end && end - now <= 7 * 24 * 60 * 60 * 1000)
-  return voucher.active !== false && isActiveByTime(start, end, now)
-}
-
-function isActiveByTime(start, end, now = Date.now()) {
-  return (!start || start <= now) && (!end || end >= now)
-}
-
-function toTime(value) {
-  if (!value) return null
-  const time = new Date(value).getTime()
-  return Number.isNaN(time) ? null : time
-}
-
-function conditionText(voucher) {
-  if (!voucher.minOrder) return 'Không yêu cầu đơn tối thiểu'
-  return `Đơn tối thiểu ${formatCurrency(voucher.minOrder)}`
-}
-
-function formatDate(value) {
-  if (!value) return 'Không giới hạn'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Không giới hạn'
-  return new Intl.DateTimeFormat('vi-VN').format(date)
-}
-
-function isExpiring(value) {
-  if (!value) return false
-  const diff = new Date(value).getTime() - Date.now()
-  return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000
-}
-
-function formatCurrency(value) {
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND', maximumFractionDigits: 0 }).format(Number(value) || 0)
-}
-
-function imageLikeUrl(value) {
-  return typeof value === 'string' && (/^https?:\/\//.test(value) || value.startsWith('/'))
-}
-
-function showToast(title, subtitle, icon = 'check') {
-  window.clearTimeout(toastTimer)
-  toast.value = { show: true, title, subtitle, icon }
-  toastTimer = window.setTimeout(() => {
-    toast.value = { ...toast.value, show: false }
-  }, 2600)
 }
 </script>
 

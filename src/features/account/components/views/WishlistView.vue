@@ -1,24 +1,31 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
+import { useWishlistStore } from '../../store/wishlistStore'
 
-const props = defineProps({
-  items: {
-    type: Array,
-    default: () => [],
-  },
-})
+const emit = defineEmits(['notify'])
+const wishlistStore = useWishlistStore()
 
-const emit = defineEmits(['remove-favorite'])
-
-const products = computed(() => props.items.map((item) => item.product || item).filter(Boolean))
+const items = computed(() => wishlistStore.wishlist)
+const products = computed(() => items.value.map((item) => item.product || item).filter(Boolean))
 const wishedProductIds = computed(() => products.value.map((item) => item.id).filter(Boolean))
 
-function removeFavorite(productId) {
+async function removeFavorite(productId) {
   if (!productId) return
-  emit('remove-favorite', productId)
+  try {
+    await wishlistStore.removeFavorite(productId)
+    emit('notify', 'Đã bỏ sản phẩm khỏi danh sách yêu thích.')
+  } catch (error) {
+    emit('notify', error?.response?.data?.message || 'Không thể bỏ yêu thích sản phẩm. Vui lòng thử lại.', 'error')
+  }
 }
+
+onMounted(() => {
+  wishlistStore.loadWishlist().catch((error) => {
+    emit('notify', error?.response?.data?.message || 'Không tải được danh sách yêu thích.', 'error')
+  })
+})
 </script>
 
 <template>

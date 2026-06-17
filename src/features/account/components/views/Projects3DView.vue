@@ -1,12 +1,10 @@
 <script setup>
+import { computed } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
+import { useAccountStore } from '../../store/accountStore'
 
-defineProps({
-  projects: {
-    type: Array,
-    default: () => [],
-  },
-})
+const accountStore = useAccountStore()
+const projects = computed(() => accountStore.projects)
 </script>
 
 <template>

@@ -20,7 +20,7 @@ function normalizeAddressType(type) {
     .replace(/[_\s-]+/g, '')
 }
 
-export function useAddressForm(props, emit) {
+export function useAddressForm(emit) {
   const addressStore = useAddressStore()
   const showModal = ref(false)
   const provinces = ref([])

@@ -104,7 +104,8 @@ export function useAdminLayout() {
     const rolesList = authStore.roles || []
     const firstRole = rolesList[0] || profile.role || ''
     const normalizedRole = String(firstRole).toUpperCase().replace(/^ROLE_/, '')
-    const preset = ROLE_PRESETS[normalizedRole] || { role: firstRole || 'Admin', roleTag: firstRole || 'Admin', rtClass: 'rt-manager', roleIcon: 'shield' }
+    const cleanRole = String(firstRole).replace(/^ROLE_/i, '')
+    const preset = ROLE_PRESETS[normalizedRole] || { role: cleanRole || 'Admin', roleTag: cleanRole || 'Admin', rtClass: 'rt-manager', roleIcon: 'shield' }
     const fallback = ADMIN_SIM_USERS.super
     const fullName = profile.displayName || `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
 

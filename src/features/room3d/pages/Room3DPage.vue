@@ -1,11 +1,12 @@
 <script setup>
-import { computed, onMounted, ref, unref } from 'vue'
+import { computed, defineAsyncComponent, onMounted, ref, unref } from 'vue'
 import { NConfigProvider } from 'naive-ui'
 import { useRoom3D } from '../composables/useRoom3D'
 import Room3DTopbar from '../components/Room3DTopbar.vue'
 import Room3DLeftPanel from '../components/Room3DLeftPanel.vue'
-import Room3DCanvas from '../components/Room3DCanvas.vue'
 import Room3DRightPanel from '../components/Room3DRightPanel.vue'
+
+const Room3DCanvas = defineAsyncComponent(() => import('../components/Room3DCanvas.vue'))
 
 const vm = useRoom3D()
 const {

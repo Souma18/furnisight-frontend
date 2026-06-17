@@ -1,807 +1,156 @@
 <script setup>
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { reactive, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
-import { adminApi, mediaApi } from '@shared/lib/api/services'
-import { PriceFormatter } from '@shared/lib/formatters'
+import { ADMIN_PROMOTION_TABS } from '../../config/adminPromotionContent'
+import {
+  createAdminPromotionEditingState,
+  createAdminPromotionFilters,
+  createAdminPromotionModalState,
+} from '../../config/adminPromotionState'
+import {
+  channelText,
+  dateOnly,
+  discountLabel,
+  isImageUrl,
+  money,
+  numberText,
+  segmentLabel,
+  statusLabel,
+  statusTone,
+  targetText,
+  voucherStatusTone,
+} from '../../lib/adminPromotionFormatters'
+import { useAdminCampaigns } from '../../composables/useAdminCampaigns'
+import { useAdminCombos } from '../../composables/useAdminCombos'
+import { useAdminNotifications } from '../../composables/useAdminNotifications'
+import { useAdminPromotionShell } from '../../composables/useAdminPromotionShell'
+import { useAdminPromotionToast } from '../../composables/useAdminPromotionToast'
+import { useAdminPromotionUsers } from '../../composables/useAdminPromotionUsers'
+import { useAdminVouchers } from '../../composables/useAdminVouchers'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
+import AdminVoucherForm from '../../components/promotion/AdminVoucherForm.vue'
 
-const tabs = [
-  { id: 'voucher', label: 'Voucher', action: 'Tạo voucher' },
-  { id: 'campaign', label: 'Chiến dịch Voucher', action: 'Tạo chiến dịch' },
-  { id: 'combo', label: 'Combo Khuyến mãi', action: 'Tạo combo' },
-  { id: 'notify', label: 'Thông báo Marketing', action: 'Tạo thông báo' },
-]
-
-const activeTab = ref('voucher')
+const tabs = ADMIN_PROMOTION_TABS
 const loading = ref(false)
 const saving = ref(false)
-const publishing = ref(false)
-const vouchers = ref([])
-const campaigns = ref([])
-const combos = ref([])
-const notifications = ref([])
-const products = ref([])
-const users = ref([])
-const toast = ref({ message: '', type: 'info' })
-const comboDeleteTarget = ref(null)
-const deletingCombo = ref(false)
-let toastTimer = null
+const { toast, notify } = useAdminPromotionToast()
+const { users, loadUsersForTarget } = useAdminPromotionUsers({ notify })
 
-const stats = ref({
-  totalVouchers: 0,
-  activeVouchers: 0,
-  issuedCount: 0,
-  campaignCount: 0,
-  runningCampaignCount: 0,
-  activeCombos: 0,
-  comboUsedCount: 0,
+const filters = reactive(createAdminPromotionFilters())
+const modal = reactive(createAdminPromotionModalState())
+const editing = reactive(createAdminPromotionEditingState())
+
+const {
+  stats,
+  vouchers,
+  publish,
+  voucherForm,
+  publishing,
+  filteredUsers,
+  loadVoucherData,
+  openVoucherModal,
+  saveVoucher,
+  deleteVoucher,
+  openPublishDrawer,
+  confirmPublishVoucher,
+} = useAdminVouchers({
+  filters,
+  modal,
+  editing,
+  users,
+  loading,
+  saving,
+  notify,
 })
 
-const filters = reactive({
-  voucher: { query: '', type: '', status: '' },
-  campaign: { query: '', status: '' },
-  combo: { query: '', status: '' },
-  notify: { query: '', status: '' },
+const {
+  campaigns,
+  campaignForm,
+  filteredCampaigns,
+  loadCampaigns,
+  openCampaignModal,
+  saveCampaign,
+  deleteCampaign,
+} = useAdminCampaigns({
+  filters,
+  modal,
+  editing,
+  users,
+  vouchers,
+  notify,
 })
 
-const modal = reactive({
-  voucher: false,
-  campaign: false,
-  combo: false,
-  notify: false,
-  picker: false,
+const {
+  combos,
+  comboForm,
+  picker,
+  comboDeleteTarget,
+  deletingCombo,
+  filteredCombos,
+  filteredProducts,
+  productCategories,
+  selectedPickerProducts,
+  comboOriginalAmount,
+  comboFinalAmount,
+  comboSavedAmount,
+  loadCombos,
+  loadProductsForPicker,
+  openComboModal,
+  onComboImageChange,
+  removeComboImage,
+  closeComboModal,
+  saveCombo,
+  openProductPicker,
+  togglePickerProduct,
+  applyPickerProducts,
+  removeComboItem,
+  requestComboDelete,
+  closeComboDelete,
+  confirmComboDelete,
+} = useAdminCombos({
+  filters,
+  modal,
+  editing,
+  saving,
+  notify,
 })
 
-const editing = reactive({
-  voucher: null,
-  campaign: null,
-  combo: null,
-  notify: null,
+const {
+  notifications,
+  notifyForm,
+  filteredNotifications,
+  loadNotifications,
+  openNotifyModal,
+  saveNotification,
+  deleteNotification,
+} = useAdminNotifications({
+  filters,
+  modal,
+  editing,
+  notify,
 })
 
-const publish = reactive({
-  voucher: null,
-  segment: 'one',
-  selectedUserIds: [],
-  userQuery: '',
-  segmentKey: 'NEW_USERS',
-  channels: ['NOTIFICATION', 'EMAIL'],
-  sendOption: 'NOW',
-  title: '',
-  body: '',
-})
-
-const voucherForm = reactive({
-  code: '',
-  name: '',
-  voucherType: 'PUBLIC',
-  discountType: 'PERCENT',
-  discountValue: 0,
-  maxDiscount: null,
-  minOrder: 0,
-  startDate: '',
-  endDate: '',
-  description: '',
-  icon: 'badgePercent',
-  active: true,
-  placements: ['PROMOTION_PAGE', 'CHECKOUT'],
-})
-
-const campaignForm = reactive({
-  name: '',
-  voucherId: '',
-  targetType: 'MANUAL',
-  targetUserIds: [],
-  segmentKey: 'NEW_USERS',
-  channels: ['NOTIFICATION', 'EMAIL'],
-  scheduleType: 'NOW',
-  scheduledAt: '',
-  notificationTitle: '',
-  notificationBody: '',
-  active: true,
-})
-
-const comboForm = reactive({
-  name: '',
-  description: '',
-  imageMediaId: '',
-  imageUrl: '',
-  imageUpload: null,
-  discountType: 'PERCENTAGE',
-  discountValue: 15,
-  startDate: '',
-  endDate: '',
-  active: true,
-  placements: ['PROMOTION_PAGE', 'HOME'],
-  items: [],
-})
-
-const notifyForm = reactive({
-  title: '',
-  body: '',
-  targetType: 'ALL',
-  targetUserIds: [],
-  segmentKey: 'VIP',
-  channels: ['NOTIFICATION'],
-  sendType: 'NOW',
-  scheduledAt: '',
-  relatedVoucherId: '',
-  active: true,
-})
-
-const picker = reactive({
-  query: '',
-  category: '',
-  status: '',
-  stock: '',
-  selected: {},
-})
-
-const activeAction = computed(() => tabs.find((tab) => tab.id === activeTab.value)?.action || 'Tạo mới')
-const activeTabLabel = computed(() => tabs.find((tab) => tab.id === activeTab.value)?.label || '')
-
-const filteredCampaigns = computed(() => filterLocal(campaigns.value, filters.campaign, ['name', 'voucherCode', 'targetLabel']))
-const filteredCombos = computed(() => filterLocal(combos.value, filters.combo, ['name', 'status']))
-const filteredNotifications = computed(() => filterLocal(notifications.value, filters.notify, ['title', 'targetLabel']))
-
-const filteredUsers = computed(() => {
-  const query = publish.userQuery.trim().toLowerCase()
-  if (!query) return users.value
-  return users.value.filter((user) => `${user.name} ${user.email}`.toLowerCase().includes(query))
-})
-
-const filteredProducts = computed(() => {
-  const query = picker.query.trim().toLowerCase()
-  return products.value.filter((product) => {
-    if (query && !`${product.name} ${product.sku}`.toLowerCase().includes(query)) return false
-    if (picker.category && product.category !== picker.category) return false
-    if (picker.status && product.status !== picker.status) return false
-    if (picker.stock === 'instock' && product.stock <= 0) return false
-    if (picker.stock === 'outstock' && product.stock > 0) return false
-    return true
-  })
-})
-
-const productCategories = computed(() => [...new Set(products.value.map((product) => product.category).filter(Boolean))])
-
-const selectedPickerProducts = computed(() => Object.entries(picker.selected).map(([id, quantity]) => {
-  const product = products.value.find((item) => item.id === id)
-  return product ? { ...product, quantity } : null
-}).filter(Boolean))
-
-const comboOriginalAmount = computed(() => comboForm.items.reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0))
-const comboFinalAmount = computed(() => {
-  const original = comboOriginalAmount.value
-  const value = Number(comboForm.discountValue || 0)
-  if (comboForm.discountType === 'PERCENTAGE') return Math.max(0, original * (1 - value / 100))
-  if (comboForm.discountType === 'FIXED_AMOUNT') return Math.max(0, original - value)
-  return Math.min(original, value)
-})
-const comboSavedAmount = computed(() => Math.max(0, comboOriginalAmount.value - comboFinalAmount.value))
-
-const kpis = computed(() => [
-  { label: 'Tổng voucher', value: stats.value.totalVouchers, sub: `${stats.value.activeVouchers} đang bật`, icon: 'badgePercent' },
-  { label: 'Đã phát', value: stats.value.issuedCount, sub: 'lượt cấp phát', icon: 'send', gold: true },
-  { label: 'Chiến dịch', value: stats.value.campaignCount || campaigns.value.length, sub: `${stats.value.runningCampaignCount || campaigns.value.filter((item) => item.status === 'RUNNING').length} đang chạy`, icon: 'calendar' },
-  { label: 'Combo đang bật', value: stats.value.activeCombos || combos.value.filter((item) => item.status === 'ACTIVE').length, sub: `${stats.value.comboUsedCount || combos.value.reduce((sum, item) => sum + Number(item.usedCount || 0), 0)} lượt đã dùng`, icon: 'gift' },
-])
-
-function money(value) {
-  return PriceFormatter.format(value)
-}
-
-function isImageUrl(value) {
-  return /^(https?:|data:|blob:|\/)/i.test(String(value || ''))
-}
-
-function dateOnly(value) {
-  if (!value) return 'Chưa đặt'
-  return String(value).slice(0, 10)
-}
-
-function toDatetimeLocal(value) {
-  if (!value) return ''
-  return String(value).slice(0, 16)
-}
-
-function numberText(value) {
-  return Number(value || 0).toLocaleString('vi-VN')
-}
-
-function discountLabel(row) {
-  if (row.discountType === 'PERCENT') return `${Number(row.discountValue || 0)}%`
-  if (row.discountType === 'SHIPPING_CAP') return `Ship ${money(row.discountValue)}`
-  return money(row.discountValue)
-}
-
-function statusLabel(status) {
-  return {
-    ACTIVE: 'Đang bật',
-    RUNNING: 'Đang chạy',
-    SCHEDULED: 'Đã hẹn lịch',
-    DRAFT: 'Bản nháp',
-    SENT: 'Đã gửi',
-    PAUSED: 'Tạm dừng',
-    EXPIRED: 'Hết hạn',
-  }[status] || status || 'Đang bật'
-}
-
-function statusTone(rowOrStatus) {
-  const status = typeof rowOrStatus === 'string' ? rowOrStatus : rowOrStatus?.status
-  if (rowOrStatus && typeof rowOrStatus === 'object' && rowOrStatus.active === false) return 'off'
-  if (['DRAFT', 'PAUSED'].includes(status)) return 'off'
-  if (['EXPIRED'].includes(status)) return 'expired'
-  if (['SCHEDULED'].includes(status)) return 'scheduled'
-  return 'on'
-}
-
-function voucherStatusTone(row) {
-  if (!row.active) return 'off'
-  if (row.statusLabel === 'Hết hạn') return 'expired'
-  if (row.statusLabel === 'Sắp diễn ra') return 'scheduled'
-  return 'on'
-}
-
-function channelText(channels) {
-  return Array.isArray(channels) ? channels.join(' + ') : channels || ''
-}
-
-function targetText(type, segmentKey, userIds) {
-  if (type === 'ALL') return 'Toàn bộ người dùng'
-  if (type === 'SEGMENT') return segmentLabel(segmentKey)
-  return `${userIds?.length || 0} người dùng đã chọn`
-}
-
-function segmentLabel(key) {
-  return {
-    NEW_USERS: 'Khách mới đăng ký',
-    VIP: 'Khách VIP',
-    INACTIVE_30D: 'Chưa mua hàng 30 ngày',
-    ABANDONED_CART: 'Giỏ hàng chưa checkout',
-    HIGH_SPEND: 'Chi tiêu > 5.000.000đ',
-  }[key] || 'Theo điều kiện'
-}
-
-function filterLocal(items, filter, fields) {
-  const query = filter.query.trim().toLowerCase()
-  const status = filter.status
-  return items.filter((item) => {
-    const matchesQuery = !query || fields.some((field) => String(item[field] || '').toLowerCase().includes(query))
-    const matchesStatus = !status || item.status === status
-    return matchesQuery && matchesStatus
-  })
-}
-
-function getListPayload(data) {
-  if (Array.isArray(data)) return data
-  if (Array.isArray(data?.items)) return data.items
-  if (Array.isArray(data?.content)) return data.content
-  if (Array.isArray(data?.data)) return data.data
-  return []
-}
-
-function sortByCreatedAtDesc(items) {
-  return [...items].sort((left, right) => {
-    const leftTime = Date.parse(left?.createdAt || '') || 0
-    const rightTime = Date.parse(right?.createdAt || '') || 0
-    return rightTime - leftTime
-  })
-}
-
-function notify(message, type = 'info') {
-  window.clearTimeout(toastTimer)
-  toast.value = { message, type }
-  toastTimer = window.setTimeout(() => {
-    toast.value = { message: '', type: 'info' }
-  }, 2600)
-}
-
-async function loadVoucherData() {
-  loading.value = true
-  try {
-    const [listRes, statsRes] = await Promise.all([
-      adminApi.fetchVouchers({
-        query: filters.voucher.query,
-        type: filters.voucher.type,
-        status: filters.voucher.status,
-        sort: 'createdAt,desc',
-      }),
-      adminApi.fetchVoucherStats().catch(() => ({ data: stats.value })),
-    ])
-    vouchers.value = sortByCreatedAtDesc(getListPayload(listRes?.data))
-    stats.value = { ...stats.value, ...(statsRes?.data || {}) }
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadCampaigns() {
-  try {
-    const response = await adminApi.fetchMarketingCampaigns({ query: filters.campaign.query, status: filters.campaign.status, size: 50 })
-    campaigns.value = getListPayload(response?.data)
-  } catch (error) {
-    campaigns.value = []
-    notify(error?.response?.data?.message || error.message || 'Khong tai duoc chien dich')
-  }
-}
-
-async function loadCombos() {
-  try {
-    const response = await adminApi.fetchMarketingCombos({ query: filters.combo.query, status: filters.combo.status, size: 50 })
-    combos.value = getListPayload(response?.data)
-  } catch (error) {
-    combos.value = []
-    notify(error?.response?.data?.message || error.message || 'Khong tai duoc combo')
-  }
-}
-
-async function loadNotifications() {
-  try {
-    const response = await adminApi.fetchMarketingNotifications({ query: filters.notify.query, status: filters.notify.status, size: 50 })
-    notifications.value = getListPayload(response?.data)
-  } catch (error) {
-    notifications.value = []
-    notify(error?.response?.data?.message || error.message || 'Khong tai duoc thong bao')
-  }
-}
-
-async function loadProductsForPicker() {
-  try {
-    const response = await adminApi.fetchProducts({ size: 500 })
-    const items = getListPayload(response?.data)
-    products.value = items.map(mapProduct)
-  } catch (error) {
-    products.value = []
-    notify(error?.response?.data?.message || error.message || 'Khong tai duoc san pham')
-  }
-}
-
-async function loadUsersForTarget() {
-  try {
-    const response = await adminApi.fetchAdminUsers({ size: 500 })
-    users.value = getListPayload(response?.data).map(mapUser).filter((user) => user.id)
-  } catch (error) {
-    users.value = []
-    notify(error?.response?.data?.message || error.message || 'Khong tai duoc user')
-  }
-}
-
-function mapProduct(item) {
-  const variant = item.variants?.[0] || item.defaultVariant || item
-  return {
-    id: item.id,
-    variantId: variant.id || item.variantId || item.id,
-    name: item.name,
-    sku: variant.sku || item.sku || item.slug || item.id,
-    category: item.categoryName || item.category?.name || item.category || 'Sản phẩm',
-    price: Number(variant.price || item.price || item.minPrice || 0),
-    stock: Number(variant.stockQuantity ?? variant.stock ?? item.stockQuantity ?? item.stock ?? 0),
-    status: item.status || item.productStatus || 'Đang bán',
-    image: item.image || item.thumbnailUrl || item.imageUrl || 'box',
-  }
-}
-
-function mapUser(item) {
-  const name = item.displayName || item.fullName || item.name || item.username || item.email || item.id || item.userId
-  return {
-    id: item.id || item.userId,
-    name,
-    email: item.email || '',
-    avatar: String(name || 'U').trim().slice(0, 2).toUpperCase(),
-  }
-}
-
-async function loadActiveTab() {
-  if (activeTab.value === 'voucher') await loadVoucherData()
-  if (activeTab.value === 'campaign') await loadCampaigns()
-  if (activeTab.value === 'combo') await Promise.all([loadCombos(), loadProductsForPicker()])
-  if (activeTab.value === 'notify') await loadNotifications()
-}
-
-function openPrimaryAction() {
-  if (activeTab.value === 'voucher') return openVoucherModal()
-  if (activeTab.value === 'campaign') return openCampaignModal()
-  if (activeTab.value === 'combo') return openComboModal()
-  return openNotifyModal()
-}
-
-function resetVoucherForm(row = null) {
-  editing.voucher = row
-  voucherForm.code = row?.code || ''
-  voucherForm.name = row?.name || ''
-  voucherForm.voucherType = row?.voucherType || 'PUBLIC'
-  voucherForm.discountType = row?.discountType || 'PERCENT'
-  voucherForm.discountValue = row?.discountValue ?? 0
-  voucherForm.maxDiscount = row?.maxDiscount ?? null
-  voucherForm.minOrder = row?.minOrder ?? 0
-  voucherForm.startDate = toDatetimeLocal(row?.startDate)
-  voucherForm.endDate = toDatetimeLocal(row?.endDate)
-  voucherForm.description = row?.description || ''
-  voucherForm.icon = row?.icon || 'badgePercent'
-  voucherForm.active = row?.active ?? true
-  voucherForm.placements = Array.isArray(row?.placements) && row.placements.length
-    ? [...row.placements]
-    : ['PROMOTION_PAGE', 'CHECKOUT']
-}
-
-function openVoucherModal(row = null) {
-  resetVoucherForm(row)
-  modal.voucher = true
-}
-
-function voucherPayload() {
-  return {
-    code: voucherForm.code.trim(),
-    name: voucherForm.name.trim(),
-    description: voucherForm.description,
-    icon: voucherForm.icon || 'badgePercent',
-    voucherType: voucherForm.voucherType,
-    discountType: voucherForm.discountType,
-    discountValue: Number(voucherForm.discountValue) || 0,
-    maxDiscount: voucherForm.maxDiscount === '' || voucherForm.maxDiscount == null ? null : Number(voucherForm.maxDiscount),
-    minOrder: voucherForm.minOrder === '' || voucherForm.minOrder == null ? null : Number(voucherForm.minOrder),
-    startDate: voucherForm.startDate || null,
-    endDate: voucherForm.endDate || null,
-    active: voucherForm.active,
-    placements: voucherForm.placements,
-  }
-}
-
-async function saveVoucher() {
-  saving.value = true
-  try {
-    const payload = voucherPayload()
-    if (editing.voucher?.id) await adminApi.updateVoucher(editing.voucher.id, payload)
-    else await adminApi.createVoucher(payload)
-    modal.voucher = false
-    notify(editing.voucher ? 'Đã cập nhật voucher' : 'Đã tạo voucher')
-    await loadVoucherData()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Không lưu được voucher')
-  } finally {
-    saving.value = false
-  }
-}
-
-async function deleteVoucher(row) {
-  if (!row?.id || !window.confirm(`Xóa voucher ${row.code}?`)) return
-  try {
-    const response = await adminApi.deleteVoucher(row.id)
-    if (response?.data?.success === false) {
-      throw new Error(response.data.message || 'Không xóa được voucher')
-    }
-    notify(`Đã xóa voucher ${row.code}.`, 'success')
-    await loadVoucherData()
-  } catch (error) {
-    notify(
-      error?.response?.data?.message || error.message || `Không thể xóa voucher ${row.code}.`,
-      'error',
-    )
-  }
-}
-
-function openPublishDrawer(row) {
-  publish.voucher = row
-  publish.segment = 'one'
-  publish.selectedUserIds = users.value[0]?.id ? [users.value[0].id] : []
-  publish.title = `Bạn vừa nhận voucher ${row.code}`
-  publish.body = `Bạn vừa nhận voucher ${row.name}. Vào mục Voucher của tôi để sử dụng ngay.`
-}
-
-function resetCampaignForm(row = null) {
-  editing.campaign = row
-  campaignForm.name = row?.name || ''
-  campaignForm.voucherId = row?.voucherId || vouchers.value[0]?.id || ''
-  campaignForm.targetType = row?.targetType || 'MANUAL'
-  campaignForm.targetUserIds = row?.targetUserIds ? [...row.targetUserIds] : (users.value[0]?.id ? [users.value[0].id] : [])
-  campaignForm.segmentKey = row?.segmentKey || 'NEW_USERS'
-  campaignForm.channels = row?.channels ? [...row.channels] : ['NOTIFICATION', 'EMAIL']
-  campaignForm.scheduleType = row?.scheduleType || 'NOW'
-  campaignForm.scheduledAt = toDatetimeLocal(row?.scheduledAt)
-  campaignForm.notificationTitle = row?.notificationTitle || ''
-  campaignForm.notificationBody = row?.notificationBody || ''
-  campaignForm.active = row?.active ?? true
-}
-
-function openCampaignModal(row = null) {
-  resetCampaignForm(row)
-  modal.campaign = true
-}
-
-function campaignPayload() {
-  return {
-    name: campaignForm.name.trim(),
-    voucherId: campaignForm.voucherId || null,
-    targetType: campaignForm.targetType,
-    targetUserIds: campaignForm.targetType === 'MANUAL' ? campaignForm.targetUserIds : [],
-    segmentKey: campaignForm.targetType === 'SEGMENT' ? campaignForm.segmentKey : null,
-    channels: campaignForm.channels,
-    scheduleType: campaignForm.scheduleType,
-    scheduledAt: campaignForm.scheduleType === 'SCHEDULED' ? campaignForm.scheduledAt : null,
-    notificationTitle: campaignForm.notificationTitle,
-    notificationBody: campaignForm.notificationBody,
-    active: campaignForm.active,
-  }
-}
-
-async function saveCampaign() {
-  const payload = campaignPayload()
-  try {
-    if (editing.campaign?.id) await adminApi.updateMarketingCampaign(editing.campaign.id, payload)
-    else await adminApi.createMarketingCampaign(payload)
-    await loadCampaigns()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Khong luu duoc chien dich')
-    return
-  }
-  notify('Đã lưu chiến dịch')
-  modal.campaign = false
-}
-
-function resetComboForm(row = null) {
-  editing.combo = row
-  comboForm.name = row?.name || ''
-  comboForm.description = row?.description || ''
-  comboForm.imageMediaId = row?.imageMediaId || ''
-  comboForm.imageUrl = row?.imageUrl || ''
-  comboForm.imageUpload = null
-  comboForm.discountType = row?.discountType || 'PERCENTAGE'
-  comboForm.discountValue = row?.discountValue ?? 15
-  comboForm.startDate = toDatetimeLocal(row?.startDate)
-  comboForm.endDate = toDatetimeLocal(row?.endDate)
-  comboForm.active = row?.active ?? true
-  comboForm.placements = Array.isArray(row?.placements) && row.placements.length
-    ? [...row.placements]
-    : ['PROMOTION_PAGE', 'HOME']
-  comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName })) : []
-}
-
-async function openComboModal(row = null) {
-  if (!products.value.length) await loadProductsForPicker()
-  resetComboForm(row)
-  modal.combo = true
-}
-
-async function uploadComboImage(file) {
-  if (!file) return
-  saving.value = true
-  try {
-    if (comboForm.imageUpload?.mediaId && !comboForm.imageUpload.persisted) {
-      await mediaApi.cancelUpload(comboForm.imageUpload.mediaId).catch(() => {})
-    }
-    const ownerId = editing.combo?.id || crypto.randomUUID()
-    const upload = await mediaApi.uploadStaged(file, {
-      ownerType: 'MARKETING',
-      ownerId,
-    })
-    comboForm.imageUpload = upload
-    comboForm.imageMediaId = upload.mediaId || ''
-    comboForm.imageUrl = upload.secureUrl || upload.secure_url || upload.url || ''
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Không tải được ảnh combo')
-  } finally {
-    saving.value = false
-  }
-}
-
-function onComboImageChange(event) {
-  const file = event.target.files?.[0]
-  event.target.value = ''
-  uploadComboImage(file)
-}
-
-async function removeComboImage() {
-  if (comboForm.imageUpload?.mediaId && !comboForm.imageUpload.persisted) {
-    await mediaApi.cancelUpload(comboForm.imageUpload.mediaId).catch(() => {})
-  }
-  comboForm.imageUpload = null
-  comboForm.imageMediaId = ''
-  comboForm.imageUrl = ''
-}
-
-async function closeComboModal() {
-  await removeComboImage()
-  modal.combo = false
-}
-
-function comboPayload() {
-  return {
-    name: comboForm.name.trim(),
-    description: comboForm.description,
-    imageMediaId: comboForm.imageMediaId || null,
-    imageUrl: comboForm.imageUrl || null,
-    discountType: comboForm.discountType,
-    discountValue: Number(comboForm.discountValue) || 0,
-    startDate: comboForm.startDate || null,
-    endDate: comboForm.endDate || null,
-    active: comboForm.active,
-    placements: comboForm.placements,
-    items: comboForm.items.map((item) => ({
-      productId: item.id,
-      variantId: item.variantId,
-      quantity: Number(item.quantity || 1),
-      productName: item.name || item.productName,
-      sku: item.sku,
-      categoryName: item.category || item.categoryName,
-      image: item.image,
-      price: Number(item.price || 0),
-    })),
-  }
-}
-
-async function saveCombo() {
-  saving.value = true
-  try {
-    if (comboForm.imageUpload && !comboForm.imageUpload.completed) {
-      comboForm.imageUpload = await mediaApi.completeStagedUpload(comboForm.imageUpload)
-      comboForm.imageMediaId = comboForm.imageUpload.mediaId || comboForm.imageMediaId
-      comboForm.imageUrl = comboForm.imageUpload.secureUrl
-        || comboForm.imageUpload.secure_url
-        || comboForm.imageUpload.url
-        || comboForm.imageUrl
-    }
-    const payload = comboPayload()
-    if (editing.combo?.id) await adminApi.updateMarketingCombo(editing.combo.id, payload)
-    else await adminApi.createMarketingCombo(payload)
-    if (comboForm.imageUpload) comboForm.imageUpload.persisted = true
-    await loadCombos()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Khong luu duoc combo')
-    return
-  } finally {
-    saving.value = false
-  }
-  notify('Đã lưu combo')
-  modal.combo = false
-}
-
-function openProductPicker() {
-  picker.selected = Object.fromEntries(comboForm.items.map((item) => [item.id, item.quantity || 1]))
-  picker.query = ''
-  picker.category = ''
-  picker.status = ''
-  picker.stock = ''
-  modal.picker = true
-}
-
-function togglePickerProduct(product, checked) {
-  if (checked) picker.selected[product.id] = picker.selected[product.id] || 1
-  else delete picker.selected[product.id]
-}
-
-function applyPickerProducts() {
-  comboForm.items = selectedPickerProducts.value.map((product) => ({ ...product }))
-  modal.picker = false
-}
-
-function removeComboItem(id) {
-  comboForm.items = comboForm.items.filter((item) => item.id !== id)
-}
-
-function resetNotifyForm(row = null) {
-  editing.notify = row
-  notifyForm.title = row?.title || ''
-  notifyForm.body = row?.body || ''
-  notifyForm.targetType = row?.targetType || 'ALL'
-  notifyForm.targetUserIds = row?.targetUserIds ? [...row.targetUserIds] : []
-  notifyForm.segmentKey = row?.segmentKey || 'VIP'
-  notifyForm.channels = row?.channels ? [...row.channels] : ['NOTIFICATION']
-  notifyForm.sendType = row?.sendType || 'NOW'
-  notifyForm.scheduledAt = toDatetimeLocal(row?.scheduledAt)
-  notifyForm.relatedVoucherId = row?.relatedVoucherId || ''
-  notifyForm.active = row?.active ?? true
-}
-
-function openNotifyModal(row = null) {
-  resetNotifyForm(row)
-  modal.notify = true
-}
-
-function notifyPayload() {
-  return {
-    title: notifyForm.title.trim(),
-    body: notifyForm.body,
-    targetType: notifyForm.targetType,
-    targetUserIds: notifyForm.targetType === 'MANUAL' ? notifyForm.targetUserIds : [],
-    segmentKey: notifyForm.targetType === 'SEGMENT' ? notifyForm.segmentKey : null,
-    channels: notifyForm.channels,
-    sendType: notifyForm.sendType,
-    scheduledAt: notifyForm.sendType === 'SCHEDULED' ? notifyForm.scheduledAt : null,
-    relatedVoucherId: notifyForm.relatedVoucherId || null,
-    active: notifyForm.active,
-  }
-}
-
-async function saveNotification() {
-  const payload = notifyPayload()
-  try {
-    if (editing.notify?.id) await adminApi.updateMarketingNotification(editing.notify.id, payload)
-    else await adminApi.createMarketingNotification(payload)
-    await loadNotifications()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Khong luu duoc thong bao')
-    return
-  }
-  notify('Đã lưu thông báo')
-  modal.notify = false
-}
-
-async function deleteMarketing(type, row) {
-  if (!row?.id || !window.confirm(`Xóa ${row.name || row.title}?`)) return
-  try {
-    if (type === 'campaign') await adminApi.deleteMarketingCampaign(row.id)
-    if (type === 'notify') await adminApi.deleteMarketingNotification(row.id)
-    await loadActiveTab()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Không xóa được.', 'error')
-  }
-}
-
-function requestComboDelete(row) {
-  comboDeleteTarget.value = row
-}
-
-function closeComboDelete() {
-  if (deletingCombo.value) return
-  comboDeleteTarget.value = null
-}
-
-async function confirmComboDelete() {
-  const combo = comboDeleteTarget.value
-  if (!combo?.id || deletingCombo.value) return
-
-  deletingCombo.value = true
-  try {
-    const response = await adminApi.deleteMarketingCombo(combo.id)
-    if (response?.data?.success === false) {
-      throw new Error(response.data.message || 'Không thể xóa combo.')
-    }
-    comboDeleteTarget.value = null
-    await loadCombos()
-    notify(`Đã xóa combo ${combo.name}.`, 'success')
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Không thể xóa combo.', 'error')
-  } finally {
-    deletingCombo.value = false
-  }
-}
-
-function publishPayload() {
-  const targetType = publish.segment === 'all' ? 'ALL' : publish.segment === 'cond' ? 'SEGMENT' : 'MANUAL'
-  return {
-    targetType,
-    targetUserIds: targetType === 'MANUAL' ? publish.selectedUserIds : [],
-    segmentKey: targetType === 'SEGMENT' ? publish.segmentKey : null,
-    channels: publish.channels,
-    title: publish.title,
-    body: publish.body,
-  }
-}
-
-async function confirmPublishVoucher() {
-  if (!publish.voucher?.id) return
-  if ((publish.segment === 'one' || publish.segment === 'many') && !publish.selectedUserIds.length) {
-    notify('Hay chon user nhan voucher')
-    return
-  }
-  publishing.value = true
-  try {
-    await adminApi.publishVoucher(publish.voucher.id, publishPayload())
-    notify('Da phat hanh voucher')
-    publish.voucher = null
-    await loadVoucherData()
-  } catch (error) {
-    notify(error?.response?.data?.message || error.message || 'Khong phat hanh duoc voucher')
-  } finally {
-    publishing.value = false
-  }
-}
-
-watch(activeTab, loadActiveTab)
-
-onMounted(async () => {
-  await Promise.all([loadVoucherData(), loadCampaigns(), loadCombos(), loadNotifications(), loadProductsForPicker(), loadUsersForTarget()])
+const {
+  activeTab,
+  activeAction,
+  kpis,
+  openPrimaryAction,
+} = useAdminPromotionShell({
+  tabs,
+  stats,
+  campaigns,
+  combos,
+  loadVoucherData,
+  loadCampaigns,
+  loadCombos,
+  loadNotifications,
+  loadProductsForPicker,
+  loadUsersForTarget,
+  openVoucherModal,
+  openCampaignModal,
+  openComboModal,
+  openNotifyModal,
 })
 </script>
 
@@ -923,7 +272,7 @@ onMounted(async () => {
               <td>{{ numberText(row.sentCount) }}</td>
               <td>{{ dateOnly(row.scheduledAt) }}</td>
               <td><span class="status-badge" :class="statusTone(row.status)"><span />{{ statusLabel(row.status) }}</span></td>
-              <td><div class="mc-actions"><button @click="openCampaignModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteMarketing('campaign', row)"><AppIcon name="trash" :size="14" /></button></div></td>
+              <td><div class="mc-actions"><button @click="openCampaignModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteCampaign(row)"><AppIcon name="trash" :size="14" /></button></div></td>
             </tr>
           </tbody>
         </table>
@@ -985,35 +334,21 @@ onMounted(async () => {
               <td>{{ dateOnly(row.scheduledAt) }}</td>
               <td>{{ dateOnly(row.createdAt) }}</td>
               <td><span class="status-badge" :class="statusTone(row.status)"><span />{{ statusLabel(row.status) }}</span></td>
-              <td><div class="mc-actions"><button @click="openNotifyModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteMarketing('notify', row)"><AppIcon name="trash" :size="14" /></button></div></td>
+              <td><div class="mc-actions"><button @click="openNotifyModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteNotification(row)"><AppIcon name="trash" :size="14" /></button></div></td>
             </tr>
           </tbody>
         </table>
       </div>
     </section>
 
-    <form v-if="modal.voucher" class="modal-backdrop" @click.self="modal.voucher = false" @submit.prevent="saveVoucher">
-      <div class="modal-card">
-        <header><h2>{{ editing.voucher ? 'Sửa' : 'Tạo' }} <em>voucher</em></h2><button type="button" @click="modal.voucher = false"><AppIcon name="x" /></button></header>
-        <div class="modal-body">
-          <div class="form-row"><label>Mã voucher *<input v-model="voucherForm.code" required placeholder="SALE10"></label><label>Tên *<input v-model="voucherForm.name" required placeholder="Giảm 10%"></label></div>
-          <label>Loại voucher<select v-model="voucherForm.voucherType"><option value="PUBLIC">PUBLIC</option><option value="PERSONAL">PERSONAL</option><option value="MARKETING">MARKETING</option></select></label>
-          <div class="form-row"><label>Loại giảm<select v-model="voucherForm.discountType"><option value="PERCENT">Phần trăm</option><option value="FIXED">Số tiền cố định</option><option value="SHIPPING_CAP">Giảm vận chuyển</option></select></label><label>Giá trị<input v-model.number="voucherForm.discountValue" type="number" min="0"></label></div>
-          <div class="form-row"><label>Giảm tối đa<input v-model="voucherForm.maxDiscount" type="number" min="0"></label><label>Đơn tối thiểu<input v-model="voucherForm.minOrder" type="number" min="0"></label></div>
-          <div class="form-row"><label>Bắt đầu<input v-model="voucherForm.startDate" type="datetime-local"></label><label>Kết thúc<input v-model="voucherForm.endDate" type="datetime-local"></label></div>
-          <label>Mô tả<textarea v-model="voucherForm.description" rows="3" /></label>
-          <div class="section-title"><AppIcon name="mapPin" />Vi tri hien thi</div>
-          <div class="checkbox-grid">
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyến mãi</label>
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="HOME">Trang chủ</label>
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CART">Giỏ hàng</label>
-            <label class="check-line"><input v-model="voucherForm.placements" type="checkbox" value="CHECKOUT">Checkout</label>
-          </div>
-          <label class="check-line"><input v-model="voucherForm.active" type="checkbox">Đang bật</label>
-        </div>
-        <footer><button type="button" class="mc-cancel" @click="modal.voucher = false">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="check" />Lưu thay đổi</button></footer>
-      </div>
-    </form>
+    <AdminVoucherForm
+      :show="modal.voucher"
+      :is-editing="editing.voucher"
+      :form="voucherForm"
+      :saving="saving"
+      @close="modal.voucher = false"
+      @submit="saveVoucher"
+    />
 
     <form v-if="modal.campaign" class="modal-backdrop" @click.self="modal.campaign = false" @submit.prevent="saveCampaign">
       <div class="modal-card modal-lg">

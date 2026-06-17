@@ -1,6 +1,5 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { createMessageServiceSocket } from '../api/messageServiceSocket'
 import { useAuthStore } from '@features/auth/store/authStore'
 import {
   createConversation,
@@ -16,13 +15,11 @@ import {
   normalizeMessagePage,
   pickLatestConversation,
 } from '../lib/chatMappers'
-import { CHAT_AGENT, CHAT_QUICK_CHIPS } from '../mock/chatMockData'
+import { appendMessage, createMessageId, upsertMessage } from '../lib/chatMessages'
+import { createChatSocketSession } from '../lib/chatSocketSession'
+import { CHAT_AGENT, CHAT_QUICK_CHIPS } from '../config/chatContent'
 
 const CHAT_CHANNEL = 'SUPPORT'
-
-function createMessageId(prefix = 'msg') {
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-}
 
 export const useChatStore = defineStore('chat', () => {
   const hydrated = ref(false)
@@ -43,8 +40,19 @@ export const useChatStore = defineStore('chat', () => {
 
   const hasUnread = computed(() => unreadCount.value > 0)
 
-  let socketClient = null
-  let subscribedConvId = null
+  const socketSession = createChatSocketSession({
+    connectionStatus,
+    conversationId,
+    onIncomingMessage: handleIncomingMessage,
+  })
+
+  const authStore = useAuthStore()
+  watch(() => authStore.isAuthenticated, (isAuth) => {
+    if (!isAuth) {
+      resetSessionState()
+      buyerId.value = null
+    }
+  })
 
   async function resolveBuyerId() {
     const authStore = useAuthStore()
@@ -58,7 +66,7 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   function resetSessionState() {
-    disconnectSocket()
+    socketSession.disconnectSocket()
     conversationId.value = null
     staffId.value = null
     messages.value = []
@@ -67,88 +75,16 @@ export const useChatStore = defineStore('chat', () => {
     error.value = null
   }
 
-  function appendMessage(message) {
-    messages.value.push({
-      id: message.id ?? createMessageId(),
-      role: message.role,
-      content: message.content ?? '',
-      products: message.products ?? [],
-      createdAt: message.createdAt ?? new Date().toISOString(),
-      clientTempId: message.clientTempId,
-    })
-  }
-
-  function upsertMessage(mapped) {
-    const byId = messages.value.findIndex((m) => m.id === mapped.id)
-    if (byId !== -1) {
-      messages.value[byId] = mapped
-      return
-    }
-
-    if (mapped.clientTempId) {
-      const byTemp = messages.value.findIndex((m) => m.clientTempId === mapped.clientTempId)
-      if (byTemp !== -1) {
-        messages.value[byTemp] = mapped
-        return
-      }
-    }
-
-    if (mapped.role === 'user') {
-      const byContent = messages.value.findIndex(
-        (m) => m.role === 'user' && m.clientTempId && m.content === mapped.content,
-      )
-      if (byContent !== -1) {
-        messages.value[byContent] = mapped
-        return
-      }
-    }
-
-    appendMessage(mapped)
-  }
-
   function handleIncomingMessage(payload) {
     if (!payload || typeof payload !== 'object' || payload.isInternal) return
 
     isTyping.value = false
     const mapped = mapMessageToCustomer(payload, buyerId.value)
-    upsertMessage(mapped)
+    upsertMessage(messages, mapped)
 
     if (mapped.role !== 'user' && !isOpen.value) {
       unreadCount.value += 1
     }
-  }
-
-  function subscribeCurrentConversation() {
-    if (!socketClient?.isConnected?.() || !conversationId.value) return
-
-    if (subscribedConvId && subscribedConvId !== conversationId.value) {
-      socketClient.unsubscribe(`/topic/conversation/${subscribedConvId}`)
-    }
-
-    subscribedConvId = conversationId.value
-    socketClient.subscribeConversation(conversationId.value, handleIncomingMessage)
-  }
-
-  function connectSocket() {
-    if (!conversationId.value) return
-
-    socketClient?.disconnect()
-
-    connectionStatus.value = 'connecting'
-    socketClient = createMessageServiceSocket({
-      onConnect: () => {
-        connectionStatus.value = 'open'
-        subscribeCurrentConversation()
-      },
-      onDisconnect: () => {
-        connectionStatus.value = 'closed'
-      },
-      onError: () => {
-        connectionStatus.value = 'error'
-      },
-    })
-
-    socketClient.connect()
   }
 
   async function loadMessages() {
@@ -205,7 +141,7 @@ export const useChatStore = defineStore('chat', () => {
         conversationId.value = existing.id
         staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
         await loadMessages()
-        connectSocket()
+        socketSession.connectSocket()
       }
 
       hydrated.value = true
@@ -232,7 +168,7 @@ export const useChatStore = defineStore('chat', () => {
       conversationId.value = existing.id
       staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
       await loadMessages()
-      connectSocket()
+      socketSession.connectSocket()
       hydrated.value = true
       return { createdWithFirstMessage: false }
     }
@@ -249,7 +185,7 @@ export const useChatStore = defineStore('chat', () => {
     conversationId.value = created.id
     staffId.value = created.staffId ?? created.assignedAdminId ?? null
     await loadMessages()
-    connectSocket()
+    socketSession.connectSocket()
     hydrated.value = true
 
     // Theo API design, message đầu tiên đã được lưu ngay trong createConversation.
@@ -301,7 +237,7 @@ export const useChatStore = defineStore('chat', () => {
       }
 
       const clientTempId = createMessageId('user')
-      appendMessage({
+      appendMessage(messages, {
         id: clientTempId,
         clientTempId,
         role: 'user',
@@ -310,8 +246,8 @@ export const useChatStore = defineStore('chat', () => {
         createdAt: new Date().toISOString(),
       })
 
-      if (!socketClient?.isConnected?.()) {
-        connectSocket()
+      if (!socketSession.isConnected()) {
+        socketSession.connectSocket()
       }
 
       const saved = await postMessage({
@@ -322,7 +258,7 @@ export const useChatStore = defineStore('chat', () => {
         messageType: 'TEXT',
         isInternal: false,
       })
-      upsertMessage(mapMessageToCustomer(saved, buyerId.value))
+      upsertMessage(messages, mapMessageToCustomer(saved, buyerId.value))
     } catch (err) {
       const authStore = useAuthStore()
       error.value = authStore.isAuthenticated
@@ -332,13 +268,6 @@ export const useChatStore = defineStore('chat', () => {
     } finally {
       loading.value = false
     }
-  }
-
-  function disconnectSocket() {
-    socketClient?.disconnect()
-    socketClient = null
-    subscribedConvId = null
-    connectionStatus.value = 'idle'
   }
 
   return {
@@ -363,6 +292,6 @@ export const useChatStore = defineStore('chat', () => {
     close,
     open,
     sendMessage,
-    disconnectSocket,
+    disconnectSocket: socketSession.disconnectSocket,
   }
 })

@@ -2,13 +2,6 @@
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { usePasswordManager } from '../../composables/usePasswordManager'
 
-const props = defineProps({
-  profile: {
-    type: Object,
-    default: null,
-  },
-})
-
 const emit = defineEmits(['notify'])
 
 const {

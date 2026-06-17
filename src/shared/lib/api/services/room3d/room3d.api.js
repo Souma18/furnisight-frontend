@@ -1,5 +1,5 @@
 import { apiClient } from '@shared/lib/api/client'
-import { ROOM_TEMPLATES } from '../core/mockData'
+import { ROOM_TEMPLATES } from '@features/room3d/core/mockData'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {

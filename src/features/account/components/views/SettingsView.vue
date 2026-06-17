@@ -1,12 +1,10 @@
 <script setup>
+import { computed } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
+import { useAccountStore } from '../../store/accountStore'
 
-defineProps({
-  settings: {
-    type: Object,
-    default: () => ({}),
-  },
-})
+const accountStore = useAccountStore()
+const settings = computed(() => accountStore.settings)
 </script>
 
 <template>

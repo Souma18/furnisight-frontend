@@ -52,9 +52,10 @@ const {
   updateLineQty,
   placeOrder,
   showToast,
+  applyVoucherByCode,
 } = useCheckout()
 
-const { applyVoucherByCode, applyVoucher, removeVoucher } = checkoutStore
+const { applyVoucher, removeVoucher } = checkoutStore
 
 const {
   voucherModalOpen,

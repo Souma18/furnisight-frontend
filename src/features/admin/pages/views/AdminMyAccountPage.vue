@@ -12,6 +12,19 @@ import { useAdminUiStore } from '../../store/adminUiStore'
 const { simUser } = useAdminLayout()
 const ui = useAdminUiStore()
 const authStore = useAuthStore()
+
+const PERMISSION_MAP = {
+  CUSTOMER_SUPPORT: { label: 'Hỗ trợ CSKH', class: 'tag-blue' },
+  PRODUCT_MANAGE: { label: 'Quản lý Sản phẩm', class: 'tag-green' },
+  ACCOUNT_MANAGE: { label: 'Quản lý Tài khoản', class: 'tag-purple' },
+  VOUCHER_MANAGE: { label: 'Quản lý Khuyến mãi', class: 'tag-orange' },
+  ORDER_MANAGE: { label: 'Quản lý Đơn hàng', class: 'tag-teal' },
+}
+
+function getPermissionDisplay(perm) {
+  return PERMISSION_MAP[perm] || { label: perm, class: 'tag-gray' }
+}
+
 const profile = reactive(createEmptyProfile())
 const originalProfile = ref(null)
 const loading = ref(false)
@@ -25,8 +38,6 @@ function createEmptyProfile() {
     id: '',
     accountId: '',
     displayName: '',
-    firstName: '',
-    lastName: '',
     email: '',
     bio: '',
     birthday: '',
@@ -59,11 +70,9 @@ function resetProfile() {
 }
 
 async function saveProfile() {
-  const firstName = profile.firstName.trim()
-  const lastName = profile.lastName.trim()
-  const displayName = profile.displayName.trim() || `${lastName} ${firstName}`.trim()
-  if (!firstName || !lastName || !displayName) {
-    ui.showToast({ icon: 'x', title: 'Thiếu thông tin', subtitle: 'Vui lòng nhập họ, tên và tên hiển thị.' })
+  const displayName = (profile.displayName || '').trim()
+  if (!displayName) {
+    ui.showToast({ icon: 'x', title: 'Thiếu thông tin', subtitle: 'Vui lòng nhập họ và tên.' })
     return
   }
 
@@ -71,10 +80,8 @@ async function saveProfile() {
   try {
     const { data } = await adminApi.updateAdminProfile({
       displayName,
-      firstName,
-      lastName,
       avatarMediaId: profile.avatarMediaId || null,
-      bio: profile.bio.trim(),
+      bio: (profile.bio || '').trim(),
       birthday: profile.birthday || null,
       gender: profile.gender || null,
     })
@@ -136,9 +143,7 @@ const menuItems = [
       <template v-else-if="activeTab === 'profile'">
         <div class="form-section-title"><AppIcon name="user" :size="16" />Thông tin cá nhân</div>
         <div class="form-grid">
-          <div class="form-group"><label class="form-label">Họ</label><input v-model="profile.lastName" class="form-input" /></div>
-          <div class="form-group"><label class="form-label">Tên</label><input v-model="profile.firstName" class="form-input" /></div>
-          <div class="form-group"><label class="form-label">Tên hiển thị</label><input v-model="profile.displayName" class="form-input" /></div>
+          <div class="form-group full"><label class="form-label">Họ và tên</label><input v-model="profile.displayName" class="form-input" /></div>
           <div class="form-group"><label class="form-label">Email</label><input v-model="profile.email" class="form-input" readonly /></div>
           <div class="form-group"><label class="form-label">Ngày sinh</label><input v-model="profile.birthday" class="form-input" type="date" /></div>
           <div class="form-group">
@@ -153,11 +158,23 @@ const menuItems = [
           <div class="form-group full"><label class="form-label">Giới thiệu</label><textarea v-model="profile.bio" class="form-input" rows="4" /></div>
         </div>
 
-        <div class="form-section-title" style="margin-top:4px"><AppIcon name="mapPin" :size="16" />Thông tin hệ thống</div>
+        <div class="form-section-title" style="margin-top:4px"><AppIcon name="shield" :size="16" />Thông tin phân quyền</div>
         <div class="acct-sys-grid">
-          <div class="acct-sys-item"><div class="acct-sys-label">ID Tài khoản</div><strong>{{ profile.accountId }}</strong></div>
-          <div class="acct-sys-item"><div class="acct-sys-label">ID Hồ sơ</div><strong>{{ profile.id }}</strong></div>
           <div class="acct-sys-item"><div class="acct-sys-label">Vai trò</div><strong>{{ simUser.roleTag }}</strong></div>
+          <div class="acct-sys-item" style="grid-column: span 2;">
+            <div class="acct-sys-label">Quyền hạn</div>
+            <div v-if="authStore.permissions?.length" class="perm-tags">
+              <span
+                v-for="perm in authStore.permissions"
+                :key="perm"
+                class="perm-tag"
+                :class="getPermissionDisplay(perm).class"
+              >
+                {{ getPermissionDisplay(perm).label }}
+              </span>
+            </div>
+            <strong v-else>Tất cả quyền hạn</strong>
+          </div>
         </div>
 
         <div class="acct-form-actions">
@@ -171,9 +188,9 @@ const menuItems = [
       <template v-else-if="activeTab === 'password'">
         <div class="form-section-title"><AppIcon name="lock" :size="16" />Đổi mật khẩu</div>
         <form class="form-grid" @submit.prevent="submitPassword">
-          <div class="form-group full password-admin-field"><label class="form-label">Mật khẩu hiện tại</label><PasswordField v-model="pwdForm.currentPassword" class="form-input" autocomplete="current-password" required /></div>
-          <div class="form-group password-admin-field"><label class="form-label">Mật khẩu mới</label><PasswordField v-model="pwdForm.newPassword" class="form-input" autocomplete="new-password" required /></div>
-          <div class="form-group password-admin-field"><label class="form-label">Xác nhận mật khẩu</label><PasswordField v-model="pwdForm.confirmPassword" class="form-input" autocomplete="new-password" required /></div>
+          <div class="form-group full password-admin-field"><label class="form-label">Mật khẩu hiện tại</label><PasswordField v-model="pwdForm.currentPassword" autocomplete="current-password" required class="admin-pwd-override" /></div>
+          <div class="form-group password-admin-field"><label class="form-label">Mật khẩu mới</label><PasswordField v-model="pwdForm.newPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
+          <div class="form-group password-admin-field"><label class="form-label">Xác nhận mật khẩu</label><PasswordField v-model="pwdForm.confirmPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
           <div class="form-group full acct-form-actions">
             <button type="submit" class="btn-add" :disabled="pwdSaving">Cập nhật mật khẩu</button>
           </div>
@@ -222,6 +239,26 @@ const menuItems = [
   color: var(--text3);
 }
 .account-state--error { color: var(--red); }
+.perm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+.perm-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+}
+.tag-blue { background: rgba(59, 130, 246, 0.15); color: #2563eb; }
+.tag-green { background: rgba(16, 185, 129, 0.15); color: #059669; }
+.tag-purple { background: rgba(139, 92, 246, 0.15); color: #7c3aed; }
+.tag-orange { background: rgba(245, 158, 11, 0.15); color: #d97706; }
+.tag-teal { background: rgba(20, 184, 166, 0.15); color: #0d9488; }
+.tag-gray { background: rgba(107, 114, 128, 0.15); color: #4b5563; }
+
 .password-admin-field {
   --auth-border: var(--border);
   --auth-radius-md: 9px;
@@ -230,6 +267,17 @@ const menuItems = [
   --auth-text-primary: var(--text);
   --auth-text-secondary: var(--text3);
   --auth-focus-ring: rgba(201, 146, 42, .16);
+}
+.admin-pwd-override:deep(input) {
+  font-size: 13px;
+  font-family: var(--sans);
+  transition: all .2s;
+  min-height: 38px;
+  border-width: 1.5px;
+}
+.admin-pwd-override:deep(input:focus) {
+  background: var(--white);
+  border-color: var(--gold);
 }
 @media (max-width: 768px) {
   .acct-sys-grid {

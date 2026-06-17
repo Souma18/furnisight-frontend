@@ -6,8 +6,9 @@ import { useOrderStore } from '@features/account/store/orderStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCheckoutStore } from '../store/checkoutStore'
+import { useCheckoutOrder } from './useCheckoutOrder'
+import { useCheckoutSession } from './useCheckoutSession'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
-import { formatVietnamAddress } from '@shared/lib/formatters'
 
 export function useCheckout() {
   const route = useRoute()
@@ -19,6 +20,7 @@ export function useCheckout() {
   const authStore = useAuthStore()
 
   const checkoutState = storeToRefs(checkoutStore)
+  const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
   const toast = ref({ show: false, icon: 'check', title: '', subtitle: '' })
 
@@ -39,6 +41,18 @@ export function useCheckout() {
   const summary = computed(() => checkoutStore.buildSummary(checkoutLines.value))
 
   const isEmpty = computed(() => checkoutLines.value.length === 0)
+  const { placeOrder } = useCheckoutOrder({
+    authStore,
+    cartStore,
+    checkoutLines,
+    checkoutState,
+    checkoutStore,
+    defaultAddress,
+    orderStore,
+    showSuccess,
+    showToast,
+    summary,
+  })
 
   let toastTimer = null
 
@@ -63,12 +77,12 @@ export function useCheckout() {
     await Promise.all([
       cartStore.ensureHydrated(),
       addressStore.fetchAddresses(),
-      checkoutStore.hydrateSession({ loadCombos: !requestedComboId.value }),
+      hydrateSession({ loadCombos: !requestedComboId.value }),
     ])
     if (requestedComboId.value) {
-      await checkoutStore.validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+      await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
     } else {
-      await checkoutStore.refreshApplicableCombo(checkoutLines.value)
+      await refreshApplicableCombo(checkoutLines.value)
     }
   }
 
@@ -82,186 +96,16 @@ export function useCheckout() {
 
   async function updateLineQty(lineId, nextQty) {
     await cartStore.updateQty(lineId, nextQty)
-    await checkoutStore.refreshApplicableCombo(checkoutLines.value)
-  }
-
-  function buildShippingAddressDetail(address = {}) {
-    return formatVietnamAddress(address)
-  }
-
-  function resolveLineImageUrl(item = {}) {
-    const imageCandidates = [
-      item.imageUrl,
-      item.productImageUrl,
-      item.image,
-      item.thumbnail,
-      item.thumbnailUrl,
-      item.coverImage,
-      item.coverImageUrl,
-      item.productSnapshot?.imageUrl,
-      item.product?.imageUrl,
-      item.product?.image,
-    ]
-
-    if (Array.isArray(item.gallery)) {
-      imageCandidates.push(...item.gallery)
-    }
-
-    if (Array.isArray(item.images)) {
-      imageCandidates.push(...item.images.map((image) => {
-        if (typeof image === 'string') return image
-        return image?.url || image?.imageUrl || image?.src || ''
-      }))
-    }
-
-    return imageCandidates.find(Boolean) || ''
-  }
-
-  function buildOrderItemPayload(item = {}) {
-    return {
-      productId: item.productId,
-      variantId: item.variantId || null,
-      categoryName: item.categoryName || item.categoryLabel || '',
-      productName: item.productName || item.name,
-      price: Number(item.price) || 0,
-      quantity: Math.max(1, Number(item.qty ?? item.quantity) || 1),
-      imageUrl: resolveLineImageUrl(item),
-    }
-  }
-
-  async function placeOrder() {
-    if (!authStore.isCustomer) {
-      showToast({
-        icon: 'shield',
-        title: 'Không có quyền đặt hàng',
-        subtitle: 'Chỉ tài khoản khách hàng mới có thể đặt hàng và thanh toán.',
-      })
-      return null
-    }
-
-    if (!checkoutState.agreedTerms.value) {
-      showToast({
-        icon: 'shield',
-        title: 'Vui lòng đồng ý điều khoản',
-        subtitle: 'Bạn cần tick đồng ý trước khi đặt hàng.',
-      })
-      return null
-    }
-
-    if (!defaultAddress.value) {
-      showToast({
-        icon: 'mapPin',
-        title: 'Chưa có địa chỉ giao hàng',
-        subtitle: 'Vui lòng thêm địa chỉ mặc định trong tài khoản.',
-      })
-      return null
-    }
-
-    if (!checkoutLines.value.length) {
-      showToast({
-        icon: 'cart',
-        title: 'Giỏ hàng trống',
-        subtitle: 'Không có sản phẩm để thanh toán.',
-      })
-      return null
-    }
-
-    const linesSnapshot = [...checkoutLines.value]
-    const address = defaultAddress.value
-    const shippingAddressDetail = buildShippingAddressDetail(address)
-    const shippingAddressName = address.fullName || address.name || ''
-
-    if (!shippingAddressName || !address.phone || !shippingAddressDetail) {
-      showToast({
-        icon: 'mapPin',
-        title: 'Địa chỉ giao hàng chưa đủ',
-        subtitle: 'Vui lòng cập nhật họ tên, số điện thoại và địa chỉ chi tiết.',
-      })
-      return null
-    }
-
-    const orderPayload = {
-      shippingAddressName,
-      shippingAddressPhone: address.phone,
-      shippingAddressDetail,
-      shippingMethod: checkoutState.selectedShipping.value?.name || checkoutState.selectedShippingId.value,
-      customerNote: checkoutState.sellerNote.value,
-      paymentMethod: checkoutState.selectedPaymentId.value,
-      shopVoucherCode: checkoutState.shopVoucher.value?.code || null,
-      shippingVoucherCode: checkoutState.shippingVoucher.value?.code || null,
-      comboId: checkoutState.selectedCombo.value?.id || null,
-      discountAmount: summary.value.shopDiscount,
-      shippingDiscount: summary.value.shippingDiscount,
-      comboDiscount: summary.value.comboDiscount,
-      shippingFee: summary.value.shipFee,
-      insuranceFee: summary.value.insuranceAmount,
-      items: linesSnapshot.map(buildOrderItemPayload),
-    }
-
-    let order = null
-    try {
-      order = await checkoutStore.placeOrder(orderPayload)
-    } catch (error) {
-      showToast({
-        icon: 'alert',
-        title: 'Không thể tạo đơn hàng',
-        subtitle: error?.response?.data?.message || error.message || 'Vui lòng kiểm tra lại thông tin thanh toán.',
-      })
-      return null
-    }
-
-    if (!order) return null
-
-    if (checkoutState.selectedPaymentId.value === 'vnpay') {
-      const paymentRes = await checkoutStore.createVnpayPayment({
-        orderId: order.orderId,
-        orderCode: order.orderCode,
-        amount: summary.value.total,
-        returnUrl: `${window.location.origin}/orders/payment/callback`,
-        cancelUrl: `${window.location.origin}/orders/payment/callback`,
-      })
-
-      if (!paymentRes.ok) {
-        showToast({
-          icon: 'alert',
-          title: 'Thanh toán VNPAY thất bại',
-          subtitle: paymentRes.message || `Mã phản hồi: ${paymentRes.status}`,
-        })
-        return null
-      }
-
-      checkoutStore.rememberPendingPayment({
-        paymentMethod: checkoutState.selectedPaymentId.value,
-        orderId: order.orderId,
-        orderCode: order.orderCode,
-        lineIds: linesSnapshot.map((line) => line.id),
-      })
-
-      window.location.href = paymentRes.paymentUrl
-      return order
-    }
-
-    orderStore.addOrderFromCheckout({
-      order,
-      lines: linesSnapshot,
-      summary: summary.value,
-      address: defaultAddress.value,
-    })
-    showSuccess.value = true
-    for (const line of linesSnapshot) {
-      await cartStore.removeItem(line.id)
-    }
-
-    return order
+    await refreshApplicableCombo(checkoutLines.value)
   }
 
   watch(
     checkoutLines,
     (lines) => {
       if (requestedComboId.value) {
-        checkoutStore.validateRequestedCombo(requestedComboId.value, lines)
+        validateRequestedCombo(requestedComboId.value, lines)
       } else {
-        checkoutStore.refreshApplicableCombo(lines)
+        refreshApplicableCombo(lines)
       }
     },
     { deep: true },
@@ -282,5 +126,6 @@ export function useCheckout() {
     updateLineQty,
     placeOrder,
     showToast,
+    applyVoucherByCode,
   }
 }

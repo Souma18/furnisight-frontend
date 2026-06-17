@@ -1,62 +1,35 @@
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
-import { useCartStore } from '@features/cart/store/cartStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
+import { useComboCart } from '@features/promotions/composables/useComboCart'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
-const comboProductImageCache = new Map()
-
-function imageLikeUrl(value) {
-  return typeof value === 'string' && (/^https?:\/\//.test(value) || value.startsWith('/'))
-}
-
-async function resolveComboProductImage(item) {
-  if (imageLikeUrl(item.imageUrl)) return item.imageUrl
-  if (imageLikeUrl(item.image)) return item.image
-  if (!item.productId) return ''
-
-  if (!comboProductImageCache.has(item.productId)) {
-    comboProductImageCache.set(item.productId, productsApi.getProductDetail(item.productId)
-      .then(({ data }) => {
-        const candidates = [
-          ...(Array.isArray(data?.gallery) ? data.gallery : []),
-          ...(Array.isArray(data?.images) ? data.images : []),
-          data?.imageUrl,
-          data?.image,
-          data?.thumbnailUrl,
-          data?.thumbnail,
-        ]
-
-        return candidates
-          .map((image) => typeof image === 'string' ? image : image?.url || image?.imageUrl || '')
-          .find(imageLikeUrl) || ''
-      })
-      .catch(() => ''))
-  }
-
-  return comboProductImageCache.get(item.productId)
-}
-
 export function useHomePage() {
-  const router = useRouter()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
-  const cartStore = useCartStore()
 
   const categories = ref([])
   const combos = ref([])
   const products = ref([])
   const activeCategoryId = ref('')
   const topReviews = ref([])
-  const comboBuyingId = ref('')
-  const comboAddingId = ref('')
   const comboMessage = ref('')
-  const pendingCombo = ref(null)
-  const pendingComboAction = ref('buy')
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
+  const {
+    addingComboId: comboAddingId,
+    buyingComboId: comboBuyingId,
+    addComboToCart,
+    buyCombo,
+    enrichComboItemImage,
+  } = useComboCart({
+    authRequired: true,
+    onAuthRequired: openAuthModal,
+    onMessage(message) {
+      comboMessage.value = message
+    },
+  })
 
   useRevealOnScroll('.fade-up')
 
@@ -109,8 +82,7 @@ export function useHomePage() {
             ? await Promise.all(combo.items
                 .filter((item) => item?.productId)
                 .map(async (item) => ({
-                  ...item,
-                  imageUrl: await resolveComboProductImage(item),
+                  ...(await enrichComboItemImage(item)),
                   quantity: Math.max(1, Number(item.quantity) || 1),
                   price: Number(item.price || 0),
                 })))
@@ -120,114 +92,6 @@ export function useHomePage() {
       console.error('Failed to load home combos:', error)
       combos.value = []
     }
-  }
-
-  function sameComboLine(line, item) {
-    return String(line.productId || '') === String(item.productId || '')
-      && String(line.variantId || '') === String(item.variantId || '')
-  }
-
-  async function ensureComboInCart(combo) {
-    if (!Array.isArray(combo.items) || !combo.items.length) {
-      throw new Error('Combo chưa có sản phẩm hợp lệ.')
-    }
-
-    await cartStore.ensureHydrated()
-
-    for (const item of combo.items || []) {
-      const requiredQuantity = Math.max(1, Number(item.quantity) || 1)
-      const existing = cartStore.items.find((line) => sameComboLine(line, item))
-      const currentQuantity = Math.max(0, Number(existing?.qty ?? existing?.quantity) || 0)
-      const productImageUrl = await resolveComboProductImage(item)
-      const hasWrongImage = existing
-        && productImageUrl
-        && existing.imageUrl !== productImageUrl
-
-      if (hasWrongImage) {
-        await cartStore.removeItem(existing.id)
-        await cartStore.addItem({
-          productId: item.productId,
-          variantId: item.variantId || null,
-          name: item.productName,
-          imageUrl: productImageUrl,
-          price: item.price,
-          quantity: Math.max(currentQuantity, requiredQuantity),
-        })
-      } else if (existing && currentQuantity < requiredQuantity) {
-        await cartStore.updateQty(existing.id, requiredQuantity)
-      } else if (!existing) {
-        await cartStore.addItem({
-          productId: item.productId,
-          variantId: item.variantId || null,
-          name: item.productName,
-          imageUrl: productImageUrl,
-          price: item.price,
-          quantity: requiredQuantity,
-        })
-      }
-    }
-
-    const lineIds = (combo.items || [])
-      .map((item) => cartStore.items.find((line) => sameComboLine(line, item))?.id)
-      .filter(Boolean)
-
-    if (!lineIds.length || lineIds.length !== (combo.items || []).length) {
-      throw new Error('Không thể chuẩn bị đầy đủ sản phẩm trong combo.')
-    }
-
-    return lineIds
-  }
-
-  async function prepareComboCheckout(combo) {
-    comboBuyingId.value = combo.id
-    comboMessage.value = ''
-
-    try {
-      const lineIds = await ensureComboInCart(combo)
-      await router.push({
-        name: 'checkout',
-        query: {
-          lines: lineIds.join(','),
-          comboId: combo.id,
-        },
-      })
-    } catch (error) {
-      comboMessage.value = error?.response?.data?.message || error.message || 'Không thể mua combo lúc này.'
-    } finally {
-      comboBuyingId.value = ''
-    }
-  }
-
-  async function addComboToCart(combo) {
-    if (!combo?.id) return
-    if (!authStore.isAuthenticated) {
-      pendingCombo.value = combo
-      pendingComboAction.value = 'add'
-      openAuthModal()
-      return
-    }
-
-    comboAddingId.value = combo.id
-    comboMessage.value = ''
-    try {
-      await ensureComboInCart(combo)
-      comboMessage.value = 'Đã thêm combo vào giỏ.'
-    } catch (error) {
-      comboMessage.value = error?.response?.data?.message || error.message || 'Không thể thêm combo lúc này.'
-    } finally {
-      comboAddingId.value = ''
-    }
-  }
-
-  async function buyCombo(combo) {
-    if (!combo?.id) return
-    if (!authStore.isAuthenticated) {
-      pendingCombo.value = combo
-      pendingComboAction.value = 'buy'
-      openAuthModal()
-      return
-    }
-    await prepareComboCheckout(combo)
   }
 
   async function loadProductsForCategory(categoryId) {
@@ -283,19 +147,6 @@ export function useHomePage() {
   }
 
   watch(activeCategoryId, loadProductsForCategory)
-  watch(() => authStore.isAuthenticated, (authenticated) => {
-    if (!authenticated || !pendingCombo.value) return
-    const combo = pendingCombo.value
-    const action = pendingComboAction.value
-    pendingCombo.value = null
-    pendingComboAction.value = 'buy'
-    if (action === 'add') {
-      addComboToCart(combo)
-      return
-    }
-    prepareComboCheckout(combo)
-  })
-
   onMounted(() => {
     loadCategories()
     loadCombos()
