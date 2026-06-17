@@ -7,15 +7,9 @@ const { form, loading, errorMessage, passwordStrength, submitRegister } = useReg
 
 <template>
   <form class="form" @submit.prevent="submitRegister">
-    <div class="two-cols">
-      <div>
-        <label>Họ</label>
-        <input v-model="form.lastName" type="text" placeholder="Nguyễn" required />
-      </div>
-      <div>
-        <label>Tên</label>
-        <input v-model="form.firstName" type="text" placeholder="Văn A" required />
-      </div>
+    <div>
+      <label>Họ và tên</label>
+      <input v-model="form.fullName" type="text" placeholder="Nguyễn Văn A" required />
     </div>
 
     <label>Email</label>

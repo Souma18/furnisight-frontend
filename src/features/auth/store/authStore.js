@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { isAdminRole } from '../utils/normalizeAuthSession'
 import { AuthProfileResponse, AuthSessionResponse } from '@shared/lib/api/services/auth/auth.model'
 import { usersApi } from '@shared/lib/api/services/users/users.api'
 
@@ -42,11 +41,30 @@ function writeStoredRoles(roles) {
   }
 }
 
+function decodeJwt(token) {
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    return JSON.parse(jsonPayload)
+  } catch {
+    return {}
+  }
+}
+
 export const useAuthStore = defineStore('auth', () => {
   const initialAccessToken = normalizeJwtToken(localStorage.getItem('access_token'))
   const initialRefreshToken = normalizeStoredToken(localStorage.getItem('refresh_token'))
   const initialProfile = initialAccessToken ? normalizeStoredProfile(readStoredProfile()) : null
   const initialRoles = initialAccessToken ? readStoredRoles() : []
+  const initialDecoded = initialAccessToken ? decodeJwt(initialAccessToken) : {}
+  const initialPermissions = initialDecoded.permissions || []
+  const initialIsAdmin = initialDecoded.isAdmin === true
 
   if (!initialAccessToken) {
     localStorage.removeItem('access_token')
@@ -59,13 +77,23 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref(initialAccessToken)
   const refreshToken = ref(initialRefreshToken)
   const roles = ref(initialRoles)
+  const permissions = ref(initialPermissions)
+  const adminFlag = ref(initialIsAdmin)
   const profileLoading = ref(false)
   let profileLoadPromise = null
 
   const isAuthenticated = computed(() => Boolean(token.value))
-  const isAdmin = computed(() => isAdminRole(roles.value.length ? roles.value : user.value?.role))
+  const isAdmin = computed(() => adminFlag.value)
   const isCustomer = computed(() => isAuthenticated.value && !isAdmin.value)
   const hasProfileIdentity = computed(() => Boolean(user.value?.id || user.value?.accountId || user.value?.email))
+
+  const hasPermission = (permission) => {
+    // Super admins always have all permissions
+    if (user.value?.role === 'ADMIN' || user.value?.role === 'ROLE_ADMIN' || roles.value.includes('ADMIN') || roles.value.includes('ROLE_ADMIN')) {
+      return true
+    }
+    return permissions.value.includes(permission)
+  }
 
   function setSession(sessionPayload = {}) {
     const session = sessionPayload instanceof AuthSessionResponse
@@ -82,8 +110,13 @@ export const useAuthStore = defineStore('auth', () => {
     
     if (normalizedAccessToken) {
       localStorage.setItem('access_token', normalizedAccessToken)
+      const decoded = decodeJwt(normalizedAccessToken)
+      permissions.value = decoded.permissions || []
+      adminFlag.value = decoded.isAdmin === true
     } else {
       localStorage.removeItem('access_token')
+      permissions.value = []
+      adminFlag.value = false
     }
 
     if (normalizedRefreshToken) {
@@ -145,6 +178,8 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     refreshToken,
     roles,
+    permissions,
+    hasPermission,
     profileLoading,
     isAuthenticated,
     isAdmin,

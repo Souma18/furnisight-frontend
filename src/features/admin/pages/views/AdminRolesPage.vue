@@ -7,36 +7,11 @@ import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminRoles } from '../../composables/useAdminRoles'
 import { useAdminUiStore } from '../../store/adminUiStore'
+import { getPermission, getPermClass, getPermLabel } from '../../config/permissionMap'
 
 const { data, loading, error, load } = useAdminRoles()
 const ui = useAdminUiStore()
 
-const permClass = {
-  dashboard: 'p-view',
-  role_manage: 'p-edit',
-  ban_manage: 'p-delete',
-  product_create: 'p-create',
-  product_edit: 'p-edit',
-  product_delete: 'p-delete',
-  order_view: 'p-view',
-  order_update: 'p-edit',
-  user_view: 'p-view',
-  inventory: 'p-edit',
-  reports: 'p-view',
-}
-const permLabels = {
-  dashboard: 'Dashboard',
-  role_manage: 'Vai trò',
-  ban_manage: 'Khóa TK',
-  product_create: 'Tạo SP',
-  product_edit: 'Sửa SP',
-  product_delete: 'Xóa SP',
-  order_view: 'Xem đơn',
-  order_update: 'Cập nhật đơn',
-  user_view: 'Người dùng',
-  inventory: 'Kho',
-  reports: 'Báo cáo',
-}
 const fallbackRoleIcon = 'shield'
 const fallbackAccountRoleIcon = 'user'
 const adminColumns = [
@@ -136,8 +111,8 @@ async function confirmDeleteAdmin() {
           <span class="role-tag role-tag--sm" :class="row.tagClass"><AppIcon :name="iconName(row.roleIcon, fallbackAccountRoleIcon)" :size="11" />{{ row.role }}</span>
         </template>
         <template #cell-perms="{ row }">
-          <div class="admin-perms-cell admin-perms-cell--compact" :title="row.perms.map((p) => permLabels[p] || p).join(', ')">
-            <span v-for="p in row.perms" :key="p" class="perm-badge perm-badge--sm" :class="permClass[p]">{{ permLabels[p] || p }}</span>
+          <div class="admin-perms-cell admin-perms-cell--compact" :title="row.perms.map((p) => getPermLabel(p)).join(', ')">
+            <span v-for="p in row.perms" :key="p" class="perm-badge perm-badge--sm" :class="getPermClass(p)"><AppIcon :name="getPermission(p).icon" :size="10" />{{ getPermLabel(p) }}</span>
           </div>
         </template>
         <template #cell-createdAt="{ row }">
@@ -180,7 +155,7 @@ async function confirmDeleteAdmin() {
             </div>
           </div>
           <div class="role-perms-wrap">
-            <span v-for="p in role.perms" :key="p" class="perm-badge" :class="permClass[p]">{{ permLabels[p] || p }}</span>
+            <span v-for="p in role.perms" :key="p" class="perm-badge" :class="getPermClass(p)"><AppIcon :name="getPermission(p).icon" :size="12" />{{ getPermLabel(p) }}</span>
           </div>
           <div class="role-user-count"><AppIcon name="users" :size="13" />{{ role.userCount }} tài khoản · {{ role.note }}</div>
         </div>

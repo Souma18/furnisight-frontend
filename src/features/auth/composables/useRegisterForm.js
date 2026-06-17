@@ -8,8 +8,7 @@ export function useRegisterForm() {
   const loading = ref(false)
   const errorMessage = ref('')
   const form = reactive({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     email: '',
     password: '',
     agree: false,
@@ -35,11 +34,9 @@ export function useRegisterForm() {
     loading.value = true
     try {
       await authApi.register({
-        firstName: form.firstName,
-        lastName: form.lastName,
+        fullName: form.fullName,
         email: form.email,
         password: form.password,
-        username: form.email.split('@')[0],
       })
       showSuccess({
         title: 'Tạo tài khoản thành công!',

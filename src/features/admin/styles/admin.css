@@ -417,6 +417,14 @@
 .admin-shell .roles-grid{display:grid;grid-template-columns:minmax(260px,0.85fr) minmax(0,1.5fr);gap:16px;margin-bottom:20px;align-items:start}
 .admin-shell .perm-badge{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;margin:2px}
 .perm-badge i{font-size:12px}
+/* ── Permission badge color variants ── */
+.perm--product{background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(5,150,105,.08));color:#059669;border:1px solid rgba(16,185,129,.18)}
+.perm--order{background:linear-gradient(135deg,rgba(245,158,11,.12),rgba(217,119,6,.08));color:#b45309;border:1px solid rgba(245,158,11,.2)}
+.perm--voucher{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(124,58,237,.08));color:#7c3aed;border:1px solid rgba(139,92,246,.18)}
+.perm--account{background:linear-gradient(135deg,rgba(244,63,94,.1),rgba(225,29,72,.07));color:#be123c;border:1px solid rgba(244,63,94,.16)}
+.perm--support{background:linear-gradient(135deg,rgba(14,165,233,.12),rgba(2,132,199,.08));color:#0284c7;border:1px solid rgba(14,165,233,.18)}
+.perm--default{background:rgba(107,114,128,.08);color:#6b7280;border:1px solid rgba(107,114,128,.12)}
+/* legacy compat */
 .p-view{background:rgba(37,99,235,.1);color:var(--blue)}
 .p-create{background:rgba(45,122,80,.1);color:var(--green)}
 .p-edit{background:rgba(201,146,42,.12);color:var(--gold-dim)}

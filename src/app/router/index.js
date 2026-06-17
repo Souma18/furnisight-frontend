@@ -87,18 +87,18 @@ const routes = [
       { path: '', redirect: { name: 'admin-dashboard' } },
       { path: 'dashboard', name: 'admin-dashboard', component: () => import('@features/admin/pages/views/AdminDashboardPage.vue') },
       { path: 'stats', name: 'admin-stats', component: () => import('@features/admin/pages/views/AdminStatsPage.vue') },
-      { path: 'users', name: 'admin-users', component: () => import('@features/admin/pages/views/AdminUsersPage.vue') },
-      { path: 'categories', name: 'admin-categories', component: () => import('@features/admin/pages/views/AdminCategoriesPage.vue') },
-      { path: 'products', name: 'admin-products', component: () => import('@features/admin/pages/views/AdminProductsPage.vue') },
-      { path: 'orders', name: 'admin-orders', component: () => import('@features/admin/pages/views/AdminOrdersPage.vue') },
-      { path: 'orders/:orderCode', name: 'admin-order-detail', component: () => import('@features/admin/pages/views/AdminOrderDetailPage.vue'), props: true },
-      { path: 'vouchers', name: 'admin-vouchers', component: () => import('@features/admin/pages/views/AdminVouchersPage.vue') },
-      { path: 'inventory', name: 'admin-inventory', component: () => import('@features/admin/pages/views/AdminInventoryPage.vue') },
-      { path: 'revenue', name: 'admin-revenue', component: () => import('@features/admin/pages/views/AdminRevenuePage.vue') },
-      { path: 'roles', name: 'admin-roles', component: () => import('@features/admin/pages/views/AdminRolesPage.vue') },
+      { path: 'users', name: 'admin-users', component: () => import('@features/admin/pages/views/AdminUsersPage.vue'), meta: { permission: 'ACCOUNT_MANAGE' } },
+      { path: 'categories', name: 'admin-categories', component: () => import('@features/admin/pages/views/AdminCategoriesPage.vue'), meta: { permission: 'PRODUCT_MANAGE' } },
+      { path: 'products', name: 'admin-products', component: () => import('@features/admin/pages/views/AdminProductsPage.vue'), meta: { permission: 'PRODUCT_MANAGE' } },
+      { path: 'orders', name: 'admin-orders', component: () => import('@features/admin/pages/views/AdminOrdersPage.vue'), meta: { permission: 'ORDER_MANAGE' } },
+      { path: 'orders/:orderCode', name: 'admin-order-detail', component: () => import('@features/admin/pages/views/AdminOrderDetailPage.vue'), props: true, meta: { permission: 'ORDER_MANAGE' } },
+      { path: 'vouchers', name: 'admin-vouchers', component: () => import('@features/admin/pages/views/AdminVouchersPage.vue'), meta: { permission: 'VOUCHER_MANAGE' } },
+      { path: 'inventory', name: 'admin-inventory', component: () => import('@features/admin/pages/views/AdminInventoryPage.vue'), meta: { permission: 'PRODUCT_MANAGE' } },
+      { path: 'revenue', name: 'admin-revenue', component: () => import('@features/admin/pages/views/AdminRevenuePage.vue'), meta: { permission: 'ORDER_MANAGE' } },
+      { path: 'roles', name: 'admin-roles', component: () => import('@features/admin/pages/views/AdminRolesPage.vue'), meta: { permission: 'ACCOUNT_MANAGE' } },
       { path: 'audit-logs', name: 'admin-audit-logs', component: () => import('@features/admin/pages/views/AdminAuditLogsPage.vue') },
       { path: 'my-account', name: 'admin-my-account', component: () => import('@features/admin/pages/views/AdminMyAccountPage.vue') },
-      { path: 'conversations', name: 'admin-conversations', component: () => import('@features/admin/pages/views/AdminConversationsPage.vue') },
+      { path: 'conversations', name: 'admin-conversations', component: () => import('@features/admin/pages/views/AdminConversationsPage.vue'), meta: { permission: 'CUSTOMER_SUPPORT' } },
     ],
   },
 ]
@@ -141,6 +141,12 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.meta.requiresCustomer && !authStore.isCustomer) {
     next({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
+    return
+  }
+
+  const requiredPermission = to.meta.permission
+  if (requiredPermission && !authStore.hasPermission(requiredPermission)) {
+    next({ name: 'admin-dashboard' })
     return
   }
 

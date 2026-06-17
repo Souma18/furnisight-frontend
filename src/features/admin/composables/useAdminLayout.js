@@ -101,8 +101,10 @@ export function useAdminLayout() {
 
   const currentAdmin = computed(() => {
     const profile = user.value || {}
-    const normalizedRole = String(profile.role || 'ADMIN').toUpperCase().replace(/^ROLE_/, '')
-    const preset = ROLE_PRESETS[normalizedRole] || ROLE_PRESETS.ADMIN
+    const rolesList = authStore.roles || []
+    const firstRole = rolesList[0] || profile.role || ''
+    const normalizedRole = String(firstRole).toUpperCase().replace(/^ROLE_/, '')
+    const preset = ROLE_PRESETS[normalizedRole] || { role: firstRole || 'Admin', roleTag: firstRole || 'Admin', rtClass: 'rt-manager', roleIcon: 'shield' }
     const fallback = ADMIN_SIM_USERS.super
     const fullName = profile.displayName || `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
 
@@ -135,8 +137,21 @@ export function useAdminLayout() {
 
   onMounted(loadNavBadges)
 
+  const filteredNavSections = computed(() => {
+    return ADMIN_NAV_SECTIONS.map(section => {
+      const filteredItems = section.items.filter(item => {
+        if (!item.permission) return true
+        return authStore.hasPermission(item.permission)
+      })
+      return {
+        ...section,
+        items: filteredItems
+      }
+    }).filter(section => section.items.length > 0)
+  })
+
   return {
-    navSections: ADMIN_NAV_SECTIONS,
+    navSections: filteredNavSections,
     simUser: currentAdmin,
     currentAdmin,
     pageTitleHtml,
