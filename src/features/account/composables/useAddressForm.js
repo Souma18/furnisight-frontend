@@ -91,15 +91,26 @@ export function useAddressForm(emit) {
     form.wardName = selected?.name ?? ''
   }
 
+  const isSubmitting = ref(false)
+
   async function submitAddress() {
+    if (isSubmitting.value) return
+
     if (!form.fullName || !form.phone || !form.detail || !form.provinceCode || !form.wardCode) {
       emit('notify', 'Vui lòng điền thông tin bắt buộc.', 'error')
       return
     }
     
-    await addressStore.addAddress({ ...form })
-    emit('notify', form.isDefault ? 'Đã lưu và đặt làm địa chỉ mặc định.' : 'Đã lưu địa chỉ mới.')
-    showModal.value = false
+    isSubmitting.value = true
+    try {
+      await addressStore.addAddress({ ...form })
+      emit('notify', form.isDefault ? 'Đã lưu và đặt làm địa chỉ mặc định.' : 'Đã lưu địa chỉ mới.')
+      showModal.value = false
+    } catch (error) {
+      emit('notify', 'Lỗi khi lưu địa chỉ.', 'error')
+    } finally {
+      isSubmitting.value = false
+    }
   }
 
   async function setAsDefault(addressId) {
@@ -130,6 +141,7 @@ export function useAddressForm(emit) {
     loadingProvince,
     loadingWard,
     addressApiUnavailable,
+    isSubmitting,
     form,
     openModal,
     loadProvinces,

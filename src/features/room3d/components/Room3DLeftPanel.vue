@@ -87,7 +87,7 @@ function runAiGenerate() {
 
 <template>
   <aside class="panel">
-    <p class="section-kicker">TRUC QUAN</p>
+    <p class="section-kicker">TRỰC QUAN</p>
 
     <div class="mode-tabs">
       <button
@@ -97,7 +97,7 @@ function runAiGenerate() {
         @click="emit('switch-mode', 'upload')"
       >
         <span class="tab-icon"><AppIcon name="image" :size="22" /></span>
-        <span>Hinh anh</span>
+        <span>Hình ảnh</span>
       </button>
       <button
         type="button"
@@ -106,12 +106,12 @@ function runAiGenerate() {
         @click="emit('switch-mode', 'room')"
       >
         <span class="tab-icon"><AppIcon name="house" :size="22" /></span>
-        <span>Phong o</span>
+        <span>Phòng ở</span>
       </button>
     </div>
 
     <div v-if="mode === 'upload'" class="upload-section">
-      <p class="label">TAI ANH PHONG LEN</p>
+      <p class="label">TẢI ẢNH PHÒNG LÊN</p>
       
       <div class="image-type-section">
         <div class="quality-row" style="grid-template-columns: 1fr 1fr;">
@@ -121,7 +121,7 @@ function runAiGenerate() {
             :class="{ active: imageType === 'normal' }"
             @click="emit('image-type-change', 'normal')"
           >
-            Anh thuong
+            Ảnh thường
           </button>
           <button
             type="button"
@@ -129,7 +129,7 @@ function runAiGenerate() {
             :class="{ active: imageType === '360' }"
             @click="emit('image-type-change', '360')"
           >
-            Anh 360
+            Ảnh 360
           </button>
         </div>
       </div>
@@ -157,7 +157,7 @@ function runAiGenerate() {
     </div>
 
     <div v-else class="room-templates">
-      <p class="label">NGUON DU LIEU PHONG</p>
+      <p class="label">NGUỒN DỮ LIỆU PHÒNG</p>
       <NSpin v-if="isLoadingTemplates" size="small">Đang tải phòng mẫu...</NSpin>
       <div v-else class="room-list">
         <button
@@ -173,7 +173,7 @@ function runAiGenerate() {
           </span>
           <span class="room-btn-content">
             <strong>{{ room.name }}</strong>
-            <small>{{ room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }} san pham phu hop</small>
+            <small>{{ room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }} sản phẩm phù hợp</small>
           </span>
         </button>
       </div>
@@ -181,46 +181,46 @@ function runAiGenerate() {
       <div class="room-mode-note" v-if="selectedRoom">
         <strong>{{ selectedRoom.name }}</strong>
         <p v-if="roomHasModel">
-          Truc quan 3D dang san sang. Co the xoay, zoom, va dat san pham.
+          Trực quan 3D đang sẵn sàng. Có thể xoay, zoom, và đặt sản phẩm.
         </p>
         <p v-else>
-          {{ selectedRoom.statusText || 'Phong nay dang duoc bo sung model.' }}
+          {{ selectedRoom.statusText || 'Phòng này đang được bổ sung model.' }}
         </p>
       </div>
     </div>
 
     <div v-if="mode === 'upload'" class="room-info">
-      <p class="label">THONG TIN PHONG</p>
+      <p class="label">THÔNG TIN PHÒNG</p>
       <p v-if="predictionStatus === 'idle'" class="note">Chưa có kết quả dự đoán.</p>
       <p v-else-if="predictionStatus === 'loading'" class="note">Đang dự đoán...</p>
-      <p v-else-if="predictionStatus === 'error'" class="note error-note">Prediction that bai.</p>
+      <p v-else-if="predictionStatus === 'error'" class="note error-note">Nhận diện thất bại.</p>
       <div v-else class="room-meta">
         <div class="tag-row">
-          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || 'Khong ro label' }}</NTag>
+          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || 'Không rõ label' }}</NTag>
           <NTag v-if="hasPredictionConfidence" type="success">
             {{ predictionConfidencePercent }}%
           </NTag>
         </div>
         <p v-if="selectedRoom && !roomHasModel">
-          {{ selectedRoom.statusText || 'Phong nay dang duoc bo sung model.' }}
+          {{ selectedRoom.statusText || 'Phòng này đang được bổ sung model.' }}
         </p>
         <p v-else-if="selectedRoom?.suggestText">{{ selectedRoom.suggestText }}</p>
       </div>
     </div>
 
     <div v-if="mode === 'upload'" class="project-name">
-      <p class="label">TEN DU AN</p>
+      <p class="label">TÊN DỰ ÁN</p>
       <input
         class="project-input"
         :value="projectName"
-        placeholder="Dat ten cho ngoi nha cua ban"
+        placeholder="Đặt tên cho ngôi nhà của bạn"
         @input="emit('project-name-change', $event.target.value)"
       />
     </div>
 
     <div v-if="mode === 'upload'" class="quality">
       <template v-if="imageType === 'normal'">
-        <p class="label">CHAT LUONG LUOI</p>
+        <p class="label">CHẤT LƯỢNG LƯỚI</p>
         <div class="quality-row" style="grid-template-columns: 1fr 1fr 1fr;">
           <button
             type="button"
@@ -228,7 +228,7 @@ function runAiGenerate() {
             :class="{ active: meshQuality === 'low' }"
             @click="emit('mesh-quality-change', 'low')"
           >
-            Thap
+            Thấp
           </button>
           <button
             type="button"
@@ -236,7 +236,7 @@ function runAiGenerate() {
             :class="{ active: meshQuality === 'medium' }"
             @click="emit('mesh-quality-change', 'medium')"
           >
-            T.Binh
+            T.Bình
           </button>
           <button
             type="button"
@@ -247,7 +247,7 @@ function runAiGenerate() {
             Cao
           </button>
         </div>
-        <small class="quality-hint">Chat luong "T.Binh" (Medium) duoc khuyen nghi de co thoi gian phan hoi tot nhat.</small>
+        <small class="quality-hint">Chất lượng "T.Bình" (Medium) được khuyến nghị để có thời gian phản hồi tốt nhất.</small>
       </template>
       <template v-else>
         <p class="label">MESH RESOLUTION</p>
@@ -285,7 +285,7 @@ function runAiGenerate() {
             1024
           </button>
         </div>
-        <small class="quality-hint">Khuyen nghi 256 hoac 512 de can bang toc do va chat luong.</small>
+        <small class="quality-hint">Khuyến nghị 256 hoặc 512 để cân bằng tốc độ và chất lượng.</small>
       </template>
     </div>
   </aside>

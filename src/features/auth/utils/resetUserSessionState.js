@@ -9,10 +9,10 @@ import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { useChatStore } from '@features/chat/store/chatStore'
 
 const USER_SESSION_STORAGE_KEYS = [
-  'luxnest-cart-store-v1',
-  'luxnest-cart-store-v2',
-  'luxnest-cart-store-v3',
-  'luxnest-cart-store-v4',
+  'furnisight-cart-store-v1',
+  'furnisight-cart-store-v2',
+  'furnisight-cart-store-v3',
+  'furnisight-cart-store-v4',
 ]
 
 export async function resetUserSessionState(options = {}) {
@@ -42,5 +42,5 @@ function clearSessionStorage() {
     window.localStorage.removeItem(key)
   }
 
-  window.sessionStorage.removeItem('luxnest-pending-payment')
+  window.sessionStorage.removeItem('furnisight-pending-payment')
 }

@@ -161,7 +161,7 @@
 }
 .tb-admin-av{
   width:26px;height:26px;border-radius:50%;
-  background:linear-gradient(135deg,#e5b84a,#c9922a);
+  background:linear-gradient(135deg,var(--brand-gold-400),var(--brand-gold-600));
   color:var(--navy);font-weight:700;font-size:11px;
   display:flex;align-items:center;justify-content:center;flex-shrink:0;
 }

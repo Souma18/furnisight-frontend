@@ -42,7 +42,7 @@ function handleAddToCart(product) {
 <template>
   <div class="chat-widget">
     <div class="chat-fab-tooltip" :class="{ show: showFabTooltip && !isOpen }">
-      💬 LUXNEST Support đang trực tuyến!
+      💬 FurniSight Support đang trực tuyến!
     </div>
 
     <button
@@ -65,7 +65,7 @@ function handleAddToCart(product) {
       class="chat-modal"
       :class="{ open: isOpen }"
       role="dialog"
-      aria-label="Chat hỗ trợ LUXNEST"
+      aria-label="Chat hỗ trợ FurniSight"
     >
       <header class="chat-header">
         <div class="chat-agent-avatar">

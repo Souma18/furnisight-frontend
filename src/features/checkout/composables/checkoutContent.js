@@ -11,6 +11,6 @@ export const CHECKOUT_STEPS = [
 ]
 
 export const CHECKOUT_SHOP = {
-  name: 'LUXNEST Official Store',
+  name: 'FurniSight Official Store',
   icon: 'store',
 }

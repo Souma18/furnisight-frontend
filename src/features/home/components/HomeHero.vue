@@ -24,15 +24,15 @@ defineProps({
         <p class="hn-hero-sub">{{ hero.subtitle }}</p>
 
         <div class="hn-hero-actions">
-          <RouterLink to="/room3d" class="hn-btn-primary">Thu truc quan 3D</RouterLink>
-          <RouterLink to="/products" class="hn-btn-outline">Kham pha san pham</RouterLink>
+          <RouterLink to="/room3d" class="hn-btn-primary">Thử trực quan 3D</RouterLink>
+          <RouterLink to="/products" class="hn-btn-outline">Khám phá sản phẩm</RouterLink>
         </div>
       </div>
 
       <div class="hn-preview-card">
         <div class="hn-preview-head">
           <div class="hn-preview-dots"><span /><span /><span /></div>
-          <span class="hn-preview-url">luxnest://room-visualizer</span>
+          <span class="hn-preview-url">furnisight://room-visualizer</span>
           <span class="hn-ai-pill">AI</span>
         </div>
         <div class="hn-preview-body">
@@ -50,8 +50,8 @@ defineProps({
           </div>
         </div>
         <div class="hn-preview-foot">
-          <p>Tai anh phong hoac chon mau san de bat dau.</p>
-          <RouterLink to="/room3d" class="hn-preview-btn">Bat dau</RouterLink>
+          <p>Tải ảnh phòng hoặc chọn mẫu sẵn để bắt đầu.</p>
+          <RouterLink to="/room3d" class="hn-preview-btn">Bắt đầu</RouterLink>
         </div>
       </div>
     </div>

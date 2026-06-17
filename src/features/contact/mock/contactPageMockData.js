@@ -7,7 +7,7 @@ export const CONTACT_HERO = {
   titleAccent: 'bạn',
   titleLine2Suffix: '',
   subtitle:
-    'Từ câu hỏi về sản phẩm đến tư vấn thiết kế toàn bộ căn nhà - đội ngũ LUXNEST luôn ở đây để đồng hành cùng bạn.',
+    'Từ câu hỏi về sản phẩm đến tư vấn thiết kế toàn bộ căn nhà - đội ngũ FurniSight luôn ở đây để đồng hành cùng bạn.',
   quickActions: [
     { label: 'Gửi tin nhắn', href: '#contact-form', variant: 'primary', icon: 'mail' },
     { label: 'Đặt lịch tư vấn', href: '#contact-booking', variant: 'ghost', icon: 'calendar' },
@@ -111,8 +111,8 @@ export const CONTACT_SIDEBAR = {
       id: 'email',
       icon: 'mail',
       label: 'Email',
-      value: 'hello@luxnest.vn',
-      href: 'mailto:hello@luxnest.vn',
+      value: 'hello@furnisight.store',
+      href: 'mailto:hello@furnisight.store',
     },
     {
       id: 'hcm',

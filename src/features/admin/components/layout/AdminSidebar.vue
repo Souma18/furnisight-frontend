@@ -10,7 +10,7 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
     <div class="sb-logo">
       <div class="sb-logo-mark"><AppIcon name="house" :size="18" /></div>
       <div class="sb-logo-info">
-        <div class="sb-logo-text">LUXNEST</div>
+        <div class="sb-logo-text">FurniSight</div>
         <div class="sb-logo-badge">Admin System</div>
       </div>
     </div>

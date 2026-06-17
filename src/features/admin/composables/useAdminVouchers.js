@@ -149,17 +149,17 @@ export function useAdminVouchers({
   async function confirmPublishVoucher() {
     if (!publish.voucher?.id) return
     if ((publish.segment === 'one' || publish.segment === 'many') && !publish.selectedUserIds.length) {
-      notify('Hay chon user nhan voucher')
+      notify('Hãy chọn user nhận voucher')
       return
     }
     publishing.value = true
     try {
       await adminApi.publishVoucher(publish.voucher.id, publishPayload())
-      notify('Da phat hanh voucher')
+      notify('Đã phát hành voucher')
       publish.voucher = null
       await loadVoucherData()
     } catch (error) {
-      notify(error?.response?.data?.message || error.message || 'Khong phat hanh duoc voucher')
+      notify(error?.response?.data?.message || error.message || 'Không phát hành được voucher')
     } finally {
       publishing.value = false
     }

@@ -8,32 +8,32 @@ export const homeHero = {
 }
 
 export const homeFeatures = [
-  { icon: 'truck', title: 'Mien phi giao hang', subtitle: 'Don tu 5 trieu VND' },
-  { icon: 'refresh', title: 'Doi tra 30 ngay', subtitle: 'Khong can ly do' },
-  { icon: 'shield', title: 'Bao hanh 2 nam', subtitle: 'Toan bo san pham' },
-  { icon: 'phone', title: 'Ho tro 24/7', subtitle: 'Tu van thiet ke' },
+  { icon: 'truck', title: 'Miễn phí giao hàng', subtitle: 'Đơn từ 5 triệu VND' },
+  { icon: 'refresh', title: 'Đổi trả 30 ngày', subtitle: 'Không cần lý do' },
+  { icon: 'shield', title: 'Bảo hành 2 năm', subtitle: 'Toàn bộ sản phẩm' },
+  { icon: 'phone', title: 'Hỗ trợ 24/7', subtitle: 'Tư vấn thiết kế' },
 ]
 
 export const homeTestimonials = [
   {
     id: 1,
-    name: 'Nguyen Thi Hoa',
+    name: 'Nguyễn Thị Hoa',
     role: 'Khách hàng tại Hà Nội',
-    text: 'Tinh nang truc quan 3D rat an tuong. Toi co the nhin thay chiec sofa phu hop truoc khi mua.',
+    text: 'Tính năng trực quan 3D rất ấn tượng. Tôi có thể nhìn thấy chiếc sofa phù hợp trước khi mua.',
     rating: 5,
   },
   {
     id: 2,
-    name: 'Tran Minh Duc',
+    name: 'Trần Minh Đức',
     role: 'Khách hàng tại TP.HCM',
-    text: 'AI goi y kha dung cho phong ngu nho, toi tiet kiem kha nhieu thoi gian khi chon do.',
+    text: 'AI gợi ý khá đúng cho phòng ngủ nhỏ, tôi tiết kiệm khá nhiều thời gian khi chọn đồ.',
     rating: 5,
   },
   {
     id: 3,
-    name: 'Le Thu Phuong',
+    name: 'Lê Thu Phương',
     role: 'Khách hàng tại Đà Nẵng',
-    text: 'Tai anh phong bep len la co ngay danh sach noi that. Trai nghiem mua sam kha muot.',
+    text: 'Tải ảnh phòng bếp lên là có ngay danh sách nội thất. Trải nghiệm mua sắm khá mượt.',
     rating: 4,
   },
 ]

@@ -26,7 +26,7 @@ defineEmits(['view-order', 'continue-shopping'])
           Đặt hàng <em>thành công!</em>
         </h2>
         <p class="checkout-success-sub">
-          Cảm ơn bạn đã tin tưởng LUXNEST. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.
+          Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.
         </p>
 
         <div class="checkout-success-steps">

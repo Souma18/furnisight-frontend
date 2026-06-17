@@ -9,11 +9,11 @@ import AppIcon from '@shared/ui/AppIcon.vue'
         <div class="brand-block">
           <a href="/" class="brand-link">
             <span class="brand-icon">🪺</span>
-            <span class="brand">LUXNEST</span>
+            <span class="brand">FurniSight</span>
           </a>
           <p class="desc">
-            Nen tang noi that thong minh dau tien tai Viet Nam ung dung AI va truc quan 3D de giup ban
-            thiet ke khong gian song ly tuong.
+            Nền tảng nội thất thông minh đầu tiên tại Việt Nam ứng dụng AI và trực quan 3D để giúp bạn
+            thiết kế không gian sống lý tưởng.
           </p>
           <div class="socials">
             <a href="#" aria-label="Facebook"><AppIcon name="facebook" :size="14" /></a>
@@ -24,35 +24,35 @@ import AppIcon from '@shared/ui/AppIcon.vue'
         </div>
         <div class="col">
           <h4>Sản phẩm</h4>
-          <a href="/products">Ghe van phong</a>
-          <a href="/products">Giuong ngu</a>
-          <a href="/products">Sofa va ghe sofa</a>
-          <a href="/products">Ban an</a>
-          <a href="/products">Ke va tu</a>
-          <a href="/products">Den trang tri</a>
+          <a href="/products">Ghế văn phòng</a>
+          <a href="/products">Giường ngủ</a>
+          <a href="/products">Sofa và ghế sofa</a>
+          <a href="/products">Bàn ăn</a>
+          <a href="/products">Kệ và tủ</a>
+          <a href="/products">Đèn trang trí</a>
         </div>
         <div class="col">
-          <h4>Tinh nang</h4>
-          <a href="/room3d">Truc quan 3D</a>
-          <a href="/room3d">AI goi y noi that</a>
-          <a href="/">Du an cua toi</a>
-          <a href="/">Kho mau phong</a>
-          <a href="/">Tu van thiet ke</a>
+          <h4>Tính năng</h4>
+          <a href="/room3d">Trực quan 3D</a>
+          <a href="/room3d">AI gợi ý nội thất</a>
+          <a href="/">Dự án của tôi</a>
+          <a href="/">Kho mẫu phòng</a>
+          <a href="/">Tư vấn thiết kế</a>
         </div>
         <div class="col">
-          <h4>Ho tro</h4>
-          <a href="/contact">Lien he</a>
-          <a href="/">Chinh sach giao hang</a>
-          <a href="/">Doi tra va Hoan tien</a>
-          <a href="/">Bao hanh san pham</a>
-          <a href="/">Cau hoi thuong gap</a>
+          <h4>Hỗ trợ</h4>
+          <a href="/contact">Liên hệ</a>
+          <a href="/">Chính sách giao hàng</a>
+          <a href="/">Đổi trả và Hoàn tiền</a>
+          <a href="/">Bảo hành sản phẩm</a>
+          <a href="/">Câu hỏi thường gặp</a>
         </div>
       </div>
       <div class="app-footer-bottom">
-        <span>© 2026 LUXNEST. All rights reserved.</span>
+        <span>© 2026 FurniSight. All rights reserved.</span>
         <div class="legal-links">
-          <a href="/">Dieu khoan dich vu</a>
-          <a href="/">Chinh sach bao mat</a>
+          <a href="/">Điều khoản dịch vụ</a>
+          <a href="/">Chính sách bảo mật</a>
           <a href="/">Cookie</a>
         </div>
       </div>

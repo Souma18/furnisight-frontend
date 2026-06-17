@@ -11,7 +11,7 @@ export function useAdminPromotionUsers({ notify }) {
       users.value = getListPayload(response?.data).map(mapUser).filter((user) => user.id)
     } catch (error) {
       users.value = []
-      notify(error?.response?.data?.message || error.message || 'Khong tai duoc user')
+      notify(error?.response?.data?.message || error.message || 'Không tải được user')
     }
   }
 

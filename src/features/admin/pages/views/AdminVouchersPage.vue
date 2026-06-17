@@ -382,7 +382,7 @@ const {
         <header><h2>{{ editing.combo ? 'Sửa' : 'Tạo' }} <em>combo</em></h2><button type="button" @click="closeComboModal"><AppIcon name="x" /></button></header>
         <div class="modal-body">
           <div class="section-title"><AppIcon name="gift" />Thông tin combo</div>
-          <div class="form-row"><label>Tên combo *<input v-model="comboForm.name" required placeholder="Combo phòng ngủ LuxNest"></label><label>Loại ưu đãi<select v-model="comboForm.discountType"><option value="PERCENTAGE">Giảm theo %</option><option value="FIXED_AMOUNT">Giảm số tiền</option><option value="FIXED_COMBO_PRICE">Giá combo cố định</option></select></label></div>
+          <div class="form-row"><label>Tên combo *<input v-model="comboForm.name" required placeholder="Combo phòng ngủ FurniSight"></label><label>Loại ưu đãi<select v-model="comboForm.discountType"><option value="PERCENTAGE">Giảm theo %</option><option value="FIXED_AMOUNT">Giảm số tiền</option><option value="FIXED_COMBO_PRICE">Giá combo cố định</option></select></label></div>
           <div class="form-row"><label>Giá trị ưu đãi<input v-model.number="comboForm.discountValue" type="number" min="0"></label><label>Trạng thái<select v-model="comboForm.active"><option :value="true">Đang bật</option><option :value="false">Bản nháp</option></select></label></div>
           <div class="form-row"><label>Bắt đầu<input v-model="comboForm.startDate" type="datetime-local"></label><label>Kết thúc<input v-model="comboForm.endDate" type="datetime-local"></label></div>
           <label>Mô tả<textarea v-model="comboForm.description" rows="2" /></label>

@@ -55,7 +55,7 @@ onBeforeUnmount(() => {
         <div class="brand-row">
           <div class="brand-icon"><AppIcon name="lock" :size="14" :stroke-width="2" /></div>
           <div>
-            <p class="brand-title">LUXNEST</p>
+            <p class="brand-title">FurniSight</p>
             <p class="brand-subtitle">Nội thất cao cấp</p>
           </div>
           <button v-if="embedded" class="close-btn" type="button" @click="$emit('close')">

@@ -24,7 +24,7 @@ export function useAdminNotifications({
       notifications.value = getListPayload(response?.data)
     } catch (error) {
       notifications.value = []
-      notify(error?.response?.data?.message || error.message || 'Khong tai duoc thong bao')
+      notify(error?.response?.data?.message || error.message || 'Không tải được thông báo')
     }
   }
 
@@ -69,7 +69,7 @@ export function useAdminNotifications({
       else await adminApi.createMarketingNotification(payload)
       await loadNotifications()
     } catch (error) {
-      notify(error?.response?.data?.message || error.message || 'Khong luu duoc thong bao')
+      notify(error?.response?.data?.message || error.message || 'Không lưu được thông báo')
       return
     }
     notify('Đã lưu thông báo')

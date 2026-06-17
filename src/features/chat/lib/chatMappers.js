@@ -112,7 +112,7 @@ export function mapConversationToAdminList(raw) {
     online: 'online-away',
     onlinePill: 'pill-away',
     pillText: 'Hỗ trợ',
-    email: raw.buyerEmail || `buyer-${buyerId}@luxnest.vn`,
+    email: raw.buyerEmail || `buyer-${buyerId}@furnisight.store`,
     priority: PRIORITY_TO_UI[raw.priority] ?? 'medium',
     vip: false,
     isAi: false,

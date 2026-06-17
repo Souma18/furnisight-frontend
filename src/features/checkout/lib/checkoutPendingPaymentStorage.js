@@ -1,4 +1,4 @@
-const PENDING_PAYMENT_KEY = 'luxnest-pending-payment'
+const PENDING_PAYMENT_KEY = 'furnisight-pending-payment'
 
 export function readPendingPayment() {
   if (typeof window === 'undefined') return null

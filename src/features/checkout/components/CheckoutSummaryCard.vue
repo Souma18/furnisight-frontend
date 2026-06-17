@@ -86,7 +86,7 @@ defineEmits(['update-agreed', 'place-order'])
           >
           <span>
             Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo
-            <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của LUXNEST.
+            <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của FurniSight.
           </span>
         </label>
         <button

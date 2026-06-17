@@ -361,7 +361,7 @@ watch(
     <template v-else-if="modal.type === 'addAdmin'">
       <div class="mform-row">
         <div class="mform-group"><label class="mfl">Họ tên *</label><input v-model="form.name" class="mfi" placeholder="Nguyễn Văn X" /></div>
-        <div class="mform-group"><label class="mfl">Email *</label><input v-model="form.email" class="mfi" type="email" placeholder="email@luxnest.vn" /></div>
+        <div class="mform-group"><label class="mfl">Email *</label><input v-model="form.email" class="mfi" type="email" placeholder="email@furnisight.store" /></div>
       </div>
       <div class="mform-row">
         <div class="mform-group">

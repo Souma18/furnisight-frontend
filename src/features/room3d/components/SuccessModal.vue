@@ -18,7 +18,7 @@ defineEmits(['update:show'])
 <template>
   <NModal :show="show" preset="card" title="Đặt hàng thành công" style="width: 420px" @update:show="$emit('update:show', $event)">
     <div class="content">
-      <p>Cảm ơn bạn đã mua sắm tại LUXNEST.</p>
+      <p>Cảm ơn bạn đã mua sắm tại FurniSight.</p>
       <p><strong>Mã đơn:</strong> {{ orderCode || 'Đang tạo...' }}</p>
       <NButton block type="primary" @click="$emit('update:show', false)">Tiếp tục khám phá</NButton>
     </div>

@@ -63,7 +63,7 @@ export function useAdminCombos({
       combos.value = getListPayload(response?.data)
     } catch (error) {
       combos.value = []
-      notify(error?.response?.data?.message || error.message || 'Khong tai duoc combo')
+      notify(error?.response?.data?.message || error.message || 'Không tải được combo')
     }
   }
 
@@ -74,7 +74,7 @@ export function useAdminCombos({
       products.value = items.map(mapProduct)
     } catch (error) {
       products.value = []
-      notify(error?.response?.data?.message || error.message || 'Khong tai duoc san pham')
+      notify(error?.response?.data?.message || error.message || 'Không tải được sản phẩm')
     }
   }
 
@@ -201,7 +201,7 @@ export function useAdminCombos({
       if (comboForm.imageUpload) comboForm.imageUpload.persisted = true
       await loadCombos()
     } catch (error) {
-      notify(error?.response?.data?.message || error.message || 'Khong luu duoc combo')
+      notify(error?.response?.data?.message || error.message || 'Không lưu được combo')
       return
     } finally {
       saving.value = false

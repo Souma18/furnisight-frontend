@@ -1,10 +1,10 @@
 .checkout-page {
-  --co-navy: #12202e;
-  --co-gold: #c9922a;
-  --co-gold-light: #e5b84a;
-  --co-cream: #faf6f0;
-  --co-cream-dark: #f0e9dd;
-  --co-cream-mid: #ece2cf;
+  --co-navy: var(--brand-navy-800);
+  --co-gold: var(--brand-gold-600);
+  --co-gold-light: var(--brand-gold-400);
+  --co-cream: var(--brand-cream-50);
+  --co-cream-dark: var(--brand-cream-100);
+  --co-cream-mid: var(--brand-cream-200);
   --co-text-mid: #555;
   --co-text-light: #888;
   --co-green: #2d9e6b;
@@ -284,7 +284,7 @@
 .co-sum-card { background: #fff; border-radius: 18px; border: 1.5px solid var(--co-cream-dark); overflow: hidden; }
 .co-sum-head {
   padding: 0.9rem 1rem; border-bottom: 1px solid var(--co-cream-dark);
-  background: linear-gradient(135deg, var(--co-navy), #1c3148); color: #fff;
+  background: linear-gradient(135deg, var(--co-navy), var(--brand-navy-700)); color: #fff;
 }
 .co-sum-title { font-size: 1.2rem; font-weight: 300; }
 .co-sum-title em { font-style: italic; color: var(--co-gold-light); }

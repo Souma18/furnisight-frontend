@@ -109,7 +109,7 @@ watch(() => route.query.otpCode, (newVal) => {
   <header class="header">
     <RouterLink to="/" class="brand">
       <span class="brand-icon">🪙</span>
-      <span class="brand-text">LUXNEST</span>
+      <span class="brand-text">FurniSight</span>
     </RouterLink>
 
     <nav class="nav" aria-label="Chinh">

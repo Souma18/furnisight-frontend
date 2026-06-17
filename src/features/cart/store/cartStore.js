@@ -4,11 +4,11 @@ import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
 
-const STORAGE_KEY = 'luxnest-cart-store-v4'
+const STORAGE_KEY = 'furnisight-cart-store-v4'
 const LEGACY_STORAGE_KEYS = [
-  'luxnest-cart-store-v1',
-  'luxnest-cart-store-v2',
-  'luxnest-cart-store-v3',
+  'furnisight-cart-store-v1',
+  'furnisight-cart-store-v2',
+  'furnisight-cart-store-v3',
 ]
 
 function cloneItems(items = []) {

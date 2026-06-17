@@ -30,7 +30,7 @@ function handleSubmitSuccess() {
 function handleBook(item) {
   showToast({
     title: `Đã nhận yêu cầu: ${item.name}`,
-    subtitle: 'Đội ngũ LUXNEST sẽ liên hệ để chốt thời gian phù hợp.',
+    subtitle: 'Đội ngũ FurniSight sẽ liên hệ để chốt thời gian phù hợp.',
   })
 }
 </script>

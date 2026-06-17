@@ -29,7 +29,7 @@ defineProps({
       <div class="preview-card">
         <div class="preview-card-header">
           <div class="preview-dots"><span></span><span></span><span></span></div>
-          <span class="preview-label">luxnest://room-visualizer</span>
+          <span class="preview-label">furnisight://room-visualizer</span>
           <span class="ai-badge">AI</span>
         </div>
         <div class="preview-scene">

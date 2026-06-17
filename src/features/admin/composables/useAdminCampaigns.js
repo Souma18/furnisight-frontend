@@ -26,7 +26,7 @@ export function useAdminCampaigns({
       campaigns.value = getListPayload(response?.data)
     } catch (error) {
       campaigns.value = []
-      notify(error?.response?.data?.message || error.message || 'Khong tai duoc chien dich')
+      notify(error?.response?.data?.message || error.message || 'Không tải được chiến dịch')
     }
   }
 
@@ -73,7 +73,7 @@ export function useAdminCampaigns({
       else await adminApi.createMarketingCampaign(payload)
       await loadCampaigns()
     } catch (error) {
-      notify(error?.response?.data?.message || error.message || 'Khong luu duoc chien dich')
+      notify(error?.response?.data?.message || error.message || 'Không lưu được chiến dịch')
       return
     }
     notify('Đã lưu chiến dịch')

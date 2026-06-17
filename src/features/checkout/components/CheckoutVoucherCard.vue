@@ -20,7 +20,7 @@ defineEmits(['open-voucher', 'remove-voucher'])
     <div class="checkout-card-head">
       <h2 class="checkout-card-title">
         <AppIcon name="badgePercent" :size="16" />
-        Voucher LUXNEST
+        Voucher FurniSight
       </h2>
     </div>
 

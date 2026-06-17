@@ -35,7 +35,7 @@ function goHome() {
   <header class="header">
     <div class="brand">
       <span class="brand-icon"><AppIcon name="sparkles" :size="15" /></span>
-      <span class="brand-text">LUXNEST</span>
+      <span class="brand-text">FurniSight</span>
     </div>
 
     <div class="center-title">

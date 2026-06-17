@@ -1,5 +1,5 @@
 export const CHAT_AGENT = {
-  name: 'LUXNEST Support',
+  name: 'FurniSight Support',
   badge: 'Hỗ trợ',
   status: 'Đang trực tuyến · phản hồi trong giờ làm việc',
 }
