@@ -1,5 +1,8 @@
 <script setup>
+import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+
+const currentYear = computed(() => new Date().getFullYear())
 </script>
 
 <template>
@@ -35,26 +38,14 @@ import AppIcon from '@shared/ui/AppIcon.vue'
           <h4>Tính năng</h4>
           <a href="/room3d">Trực quan 3D</a>
           <a href="/room3d">AI gợi ý nội thất</a>
-          <a href="/">Dự án của tôi</a>
-          <a href="/">Kho mẫu phòng</a>
-          <a href="/">Tư vấn thiết kế</a>
         </div>
         <div class="col">
           <h4>Hỗ trợ</h4>
           <a href="/contact">Liên hệ</a>
-          <a href="/">Chính sách giao hàng</a>
-          <a href="/">Đổi trả và Hoàn tiền</a>
-          <a href="/">Bảo hành sản phẩm</a>
-          <a href="/">Câu hỏi thường gặp</a>
         </div>
       </div>
       <div class="app-footer-bottom">
-        <span>© 2026 FurniSight. All rights reserved.</span>
-        <div class="legal-links">
-          <a href="/">Điều khoản dịch vụ</a>
-          <a href="/">Chính sách bảo mật</a>
-          <a href="/">Cookie</a>
-        </div>
+        <span>© {{ currentYear }} FurniSight. All rights reserved.</span>
       </div>
     </div>
   </footer>
@@ -170,19 +161,6 @@ import AppIcon from '@shared/ui/AppIcon.vue'
   gap: 1rem;
 }
 
-.legal-links {
-  display: inline-flex;
-  gap: 1rem;
-}
-
-.legal-links a {
-  color: rgba(255, 255, 255, 0.4);
-  text-decoration: none;
-}
-
-.legal-links a:hover {
-  color: rgba(255, 255, 255, 0.68);
-}
 
 @media (max-width: 900px) {
   .app-footer-top {

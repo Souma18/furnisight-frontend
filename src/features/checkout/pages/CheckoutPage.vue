@@ -84,7 +84,7 @@ onMounted(async () => {
   try {
     await initCheckout()
     if (isEmpty.value) {
-      router.replace({ path: '/account', query: { view: 'cart' } })
+      router.replace('/cart')
     }
   } catch (error) {
     showToast({
@@ -97,7 +97,7 @@ onMounted(async () => {
 
 watch(isEmpty, (empty) => {
   if (empty && !showSuccess.value && !placing.value) {
-    router.replace({ path: '/account', query: { view: 'cart' } })
+    router.replace('/cart')
   }
 })
 

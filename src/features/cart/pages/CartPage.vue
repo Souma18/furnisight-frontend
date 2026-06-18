@@ -1,6 +1,10 @@
 <script setup>
 import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, RouterLink } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import CartItemCard from '../components/CartItemCard.vue'
 import CartSummaryBar from '../components/CartSummaryBar.vue'
 import { useCart } from '../composables/useCart'
@@ -10,7 +14,9 @@ import { useCartSelection } from '../composables/useCartSelection'
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
-const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
+const { items, ensureHydrated, updateItem, updateQty, removeItem, loading, hydrated } = useCart()
 const {
   checkedIds,
   availableItemIds,
@@ -69,12 +75,25 @@ const formatPrice = PriceFormatter.format
 <template>
   <div class="cart-page">
     <div class="cart-container">
+      <div class="cart-back-link">
+        <RouterLink to="/products">
+          <AppIcon name="chevronLeft" :size="14" />
+          Tiếp tục mua sắm
+        </RouterLink>
+      </div>
       <div class="cart-header">
         <h1 class="page-title">Giỏ hàng của bạn</h1>
         <p class="page-subtitle" v-if="items.length">{{ items.length }} sản phẩm trong giỏ hàng</p>
       </div>
 
-      <div class="cart-content" v-if="items.length">
+      <!-- Loading / Hydrating state -->
+      <div v-if="loading && !hydrated" class="cart-loading">
+        <div class="cart-loading-spinner"></div>
+        <p>Đang tải giỏ hàng của bạn...</p>
+      </div>
+
+      <!-- Authenticated & Has Items -->
+      <div class="cart-content" v-else-if="items.length">
         <div class="select-all-row">
           <label class="select-all-box">
             <input
@@ -112,6 +131,15 @@ const formatPrice = PriceFormatter.format
         </div>
       </div>
       
+      <!-- Not Authenticated & Empty Cart -->
+      <div class="cart-empty" v-else-if="!isAuthenticated">
+        <div class="cart-empty-icon">🔐</div>
+        <h2>Đăng nhập để xem giỏ hàng</h2>
+        <p>Vui lòng đăng nhập để lưu trữ và xem các sản phẩm trong giỏ hàng của bạn.</p>
+        <button class="primary-btn continue-shopping" @click="openAuthModal">Đăng nhập ngay</button>
+      </div>
+
+      <!-- Authenticated & Empty Cart -->
       <div class="cart-empty" v-else>
         <div class="cart-empty-icon">🛒</div>
         <h2>Giỏ hàng trống</h2>
@@ -448,6 +476,53 @@ const formatPrice = PriceFormatter.format
 .primary-btn {
   background: linear-gradient(135deg, #e5b84a, #c9922a);
   color: #12202e;
+}
+
+.cart-loading {
+  background: #fff;
+  border-radius: 24px;
+  padding: 60px 30px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(18, 32, 46, 0.05);
+  border: 1px solid #ece2cf;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 250px;
+}
+
+.cart-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #ece2cf;
+  border-top-color: #c9922a;
+  border-radius: 50%;
+  animation: cartSpin 0.8s linear infinite;
+}
+
+@keyframes cartSpin {
+  to { transform: rotate(360deg); }
+}
+
+.cart-back-link {
+  margin-bottom: 20px;
+}
+
+.cart-back-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #7a7a7a;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.cart-back-link a:hover {
+  color: #c9922a;
 }
 
 @media (max-width: 720px) {

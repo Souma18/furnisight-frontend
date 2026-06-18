@@ -1,4 +1,5 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductListFiltersSidebar from '../components/ProductListFiltersSidebar.vue'
 import ProductListGrid from '../components/ProductListGrid.vue'
 import ProductListHeroSection from '../components/ProductListHeroSection.vue'
@@ -27,6 +28,8 @@ const {
   onApplySidebar,
   onClearFilters,
   favoriteProduct,
+  apiError,
+  reloadPage,
 } = useProductListPage()
 </script>
 
@@ -59,6 +62,11 @@ const {
         @clear="onClearFilters"
       />
       <div class="pl-products-panel">
+        <div v-if="apiError" class="pl-api-error">
+          <AppIcon name="alert" :size="18" />
+          <span>Không thể kết nối máy chủ. Dữ liệu có thể không đầy đủ.</span>
+          <button type="button" class="pl-api-error-retry" @click="reloadPage">Tải lại</button>
+        </div>
         <ProductListGrid
           :products="items"
           :total="total"

@@ -119,6 +119,7 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore(pinia)
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    sessionStorage.setItem('furnisight:intended-route', to.fullPath)
     openAuthModal()
     if (!from.name) {
       next({ name: 'home' })

@@ -216,3 +216,33 @@
   .pl-toolbar-inner { flex-wrap: wrap; }
   .pl-search { width: 100%; }
 }
+
+.pl-api-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff5f5;
+  border: 1px solid #fed7d7;
+  color: #c53030;
+  padding: 12px 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+.pl-api-error-retry {
+  margin-left: auto;
+  background: #c53030;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pl-api-error-retry:hover {
+  background: #9b2c2c;
+}

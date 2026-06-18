@@ -4,7 +4,7 @@ import { usePaymentCountdown } from './usePaymentCountdown'
 import { ORDER_STATUS_LABELS } from './orderStatusLabels'
 import {
   canRetryOrderPayment,
-  parseOrderDate,
+  isOrderPaymentExpired,
   shouldShowRetryPayment,
 } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -76,13 +76,13 @@ export function useOrdersView(notify) {
   }
 
   function retryPaymentTitle(order) {
-    return canRetryPaymentNow(order)
-      ? 'Tiếp tục thanh toán đơn hàng'
-      : 'Đơn hàng đã quá hạn thanh toán'
+    if (canRetryPaymentNow(order)) return 'Tiếp tục thanh toán đơn hàng'
+    if (isOrderPaymentExpired(order)) return 'Đơn hàng đã quá hạn thanh toán'
+    return 'Đơn hàng không thể thanh toán lại'
   }
 
   function canRetryPaymentNow(order) {
-    return canRetryOrderPayment(order) && isPaymentTimeRemaining(order)
+    return canRetryOrderPayment(order)
   }
 
   function formatDate(dateStr) {
@@ -119,7 +119,7 @@ export function useOrdersView(notify) {
   }
 
   function formatPaymentDeadline(order) {
-    if (!canRetryPaymentNow(order)) return ''
+    if (!canRetryPaymentNow(order) || !order.paymentExpiresAt || !isPaymentTimeRemaining(order)) return ''
     return `Còn ${formatCountdown(order)} để thanh toán`
   }
 

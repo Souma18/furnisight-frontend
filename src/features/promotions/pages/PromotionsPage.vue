@@ -1,4 +1,4 @@
-﻿<script setup>
+<script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -120,10 +120,21 @@ const voucherTimeOptions = [
 
 const showVoucherSection = computed(() => ['all', 'voucher', 'freeship', 'expiring', 'saved'].includes(activeFilter.value))
 const showComboSection = computed(() => activeFilter.value === 'all' || activeFilter.value === 'combo')
+const pageLoading = ref(true)
+const pageError = ref(false)
 
-onMounted(async () => {
-  await Promise.allSettled([loadVouchers(), loadCombos(true)])
+async function loadPageData() {
+  pageLoading.value = true
+  pageError.value = false
+  const results = await Promise.all([loadVouchers(), loadCombos(true)])
+  const allFailed = results.every(success => !success)
+  pageError.value = allFailed
+  pageLoading.value = false
   cartStore.ensureHydrated().catch(() => null)
+}
+
+onMounted(() => {
+  loadPageData()
 })
 
 async function useVoucherNow() {
@@ -139,6 +150,21 @@ function openCombo(combo) {
 
 <template>
   <main class="promo-page">
+    <div v-if="pageLoading" class="promo-page-state">
+      <div class="promo-page-state-spinner"></div>
+      <p>Đang tải khuyến mãi...</p>
+    </div>
+
+    <div v-else-if="pageError" class="promo-page-state">
+      <AppIcon name="alert" :size="42" />
+      <h2>Không thể tải khuyến mãi</h2>
+      <p>Đã xảy ra lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.</p>
+      <button type="button" class="promo-btn primary" @click="loadPageData">
+        <AppIcon name="refresh" :size="16" />Thử lại
+      </button>
+    </div>
+
+    <template v-else>
     <section class="promo-hero">
       <div class="promo-hero-inner">
         <p class="promo-eyebrow">Khuyến mãi nội thất tháng này</p>
@@ -359,11 +385,17 @@ function openCombo(combo) {
       <AppIcon :name="toast.icon" :size="17" />
       <span><b>{{ toast.title }}</b><small>{{ toast.subtitle }}</small></span>
     </div>
+    </template>
   </main>
 </template>
 
 <style scoped>
 .promo-page { width: 100%; background: #faf6f0; color: #1a1a1a; min-height: 100vh; }
+.promo-page-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; min-height: 60vh; padding: 60px 24px; text-align: center; color: #7a6a5a; }
+.promo-page-state h2 { margin: 0; color: #12202e; font-size: 24px; }
+.promo-page-state p { margin: 0; max-width: 400px; line-height: 1.6; }
+.promo-page-state-spinner { width: 36px; height: 36px; border: 3px solid #e8e0d0; border-top-color: #c9922a; border-radius: 50%; animation: promoSpin .7s linear infinite; }
+@keyframes promoSpin { to { transform: rotate(360deg); } }
 .promo-hero {
   position: relative;
   overflow: hidden;

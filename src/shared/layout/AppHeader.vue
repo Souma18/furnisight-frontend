@@ -107,6 +107,12 @@ watch(isAuthenticated, (newVal) => {
   }
 })
 
+const mobileMenuOpen = ref(false)
+
+watch(() => route.path, () => {
+  mobileMenuOpen.value = false
+})
+
 watch(() => route.query.otpCode, (newVal) => {
   if (newVal) {
     openAuthModal('verify')
@@ -203,6 +209,23 @@ watch(() => route.query.otpCode, (newVal) => {
       >
         <AppIcon name="user" :size="14" />
       </button>
+
+      <button
+        class="icon-btn hamburger-btn"
+        type="button"
+        :aria-label="mobileMenuOpen ? 'Đóng menu' : 'Mở menu'"
+        @click="mobileMenuOpen = !mobileMenuOpen"
+      >
+        <AppIcon :name="mobileMenuOpen ? 'close' : 'menu'" :size="14" />
+      </button>
+    </div>
+
+    <div v-if="mobileMenuOpen" class="mobile-nav">
+      <RouterLink to="/" :class="{ 'mobile-nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
+      <RouterLink to="/products" :class="{ 'mobile-nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
+      <RouterLink to="/room3d" :class="{ 'mobile-nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
+      <RouterLink to="/khuyen-mai" :class="{ 'mobile-nav-pill': activeNav === 'promotions' }">Khuyến mãi</RouterLink>
+      <RouterLink to="/contact" :class="{ 'mobile-nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
     </div>
   </header>
 </template>
@@ -516,6 +539,7 @@ watch(() => route.query.otpCode, (newVal) => {
   font-size: 12px;
   line-height: 1.55;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -579,10 +603,72 @@ watch(() => route.query.otpCode, (newVal) => {
   }
 }
 
+.hamburger-btn {
+  display: none;
+}
+
+.mobile-nav {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #0c3148 0%, #082537 100%);
+  animation: slideDown 0.25s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-nav a {
+  color: rgba(233, 244, 255, 0.88);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  transition: background 0.2s;
+}
+
+.mobile-nav a:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: #ffffff;
+}
+
+.mobile-nav .mobile-nav-pill {
+  background: rgba(255, 178, 60, 0.18);
+  color: #f2d79e;
+}
+
 @media (max-width: 980px) {
   .header {
-    grid-template-columns: 1fr;
-    justify-items: center;
+    grid-template-columns: auto 1fr;
+    justify-items: stretch;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .visualize-btn {
+    display: none;
+  }
+
+  .hamburger-btn {
+    display: inline-flex;
+  }
+
+  .actions {
+    justify-self: end;
   }
 
   .notif-dropdown {
