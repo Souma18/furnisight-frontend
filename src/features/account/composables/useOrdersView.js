@@ -8,6 +8,7 @@ import {
   shouldShowRetryPayment,
 } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter } from '@shared/lib/formatters'
+import { formatDate as formatDisplayDate } from '@shared/lib/formatters'
 
 const CANCELABLE_ORDER_STATUSES = [
   'unpaid',
@@ -60,7 +61,7 @@ export function useOrdersView(notify) {
   async function confirmCancel() {
     if (!cancelTarget.value || canceling.value) return
     canceling.value = true
-    const success = await cancelOrder(cancelTarget.value.orderCode || cancelTarget.value.id)
+    const success = await cancelOrder(cancelTarget.value.orderCode)
     canceling.value = false
     if (success) cancelTarget.value = null
   }
@@ -71,7 +72,7 @@ export function useOrdersView(notify) {
   }
 
   function isRetrying(order) {
-    return retryingOrderCode.value === (order.orderCode || order.id)
+    return retryingOrderCode.value === order.orderCode
   }
 
   function retryPaymentTitle(order) {
@@ -85,9 +86,7 @@ export function useOrdersView(notify) {
   }
 
   function formatDate(dateStr) {
-    if (!dateStr) return ''
-    const date = parseOrderDate(dateStr)
-    return date ? new Intl.DateTimeFormat('vi-VN').format(date) : dateStr
+    return formatDisplayDate(dateStr)
   }
 
   function statusClass(status) {
@@ -105,7 +104,7 @@ export function useOrdersView(notify) {
   }
 
   function displayCode(order) {
-    return order.orderCode ?? order.id
+    return order.orderCode || 'Chưa có mã đơn'
   }
 
   function hideBrokenImage(event) {

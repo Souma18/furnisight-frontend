@@ -70,13 +70,13 @@ async function removePaidCartLines() {
 }
 
 async function redirectToOrderDetail() {
-  const orderId = orderCode.value || pendingPayment.value?.orderCode || pendingPayment.value?.orderId
+  const resolvedOrderCode = orderCode.value || pendingPayment.value?.orderCode || ''
   checkoutStore.clearPendingPayment()
 
   await router.replace({
     name: 'account',
-    query: orderId
-      ? { view: 'order-detail', orderId }
+    query: resolvedOrderCode
+      ? { view: 'order-detail', orderCode: resolvedOrderCode }
       : { view: 'orders' },
   })
 }

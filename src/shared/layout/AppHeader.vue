@@ -6,6 +6,7 @@ import { storeToRefs } from 'pinia'
 import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { getApiErrorMessage } from '@shared/lib/api'
 import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
@@ -45,20 +46,28 @@ async function openAccountNotifications() {
 }
 
 async function handleNotificationClick(item) {
-  if (!item.isRead) {
-    await notificationsApi.markAsRead(item.id)
-    notifications.value = notifications.value.map((notification) =>
-      notification.id === item.id ? { ...notification, isRead: true } : notification,
-    )
-  }
+  try {
+    if (!item.isRead) {
+      await notificationsApi.markAsRead(item.id)
+      notifications.value = notifications.value.map((notification) =>
+        notification.id === item.id ? { ...notification, isRead: true } : notification,
+      )
+    }
 
-  await openAccountNotifications()
+    await openAccountNotifications()
+  } catch (error) {
+    console.warn('[Header] notification click failed:', getApiErrorMessage(error))
+  }
 }
 
 async function markAllNotificationsRead() {
   if (!unreadNotificationCount.value) return
-  await notificationsApi.markAllAsRead()
-  notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
+  try {
+    await notificationsApi.markAllAsRead()
+    notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
+  } catch (error) {
+    console.warn('[Header] mark all notifications failed:', getApiErrorMessage(error))
+  }
 }
 
 function dropdownIconClass(type) {
@@ -85,7 +94,7 @@ async function loadNotificationsOnce() {
     await loadNotifications()
     notificationsLoaded.value = true
   } catch (error) {
-    console.error('Failed to load notifications:', error)
+    console.warn('[Header] load notifications failed:', getApiErrorMessage(error))
   }
 }
 

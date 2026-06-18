@@ -5,6 +5,7 @@ import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
+import { formatDate } from '@shared/lib/formatters'
 import { useAdminRoles } from '../../composables/useAdminRoles'
 import { useAdminUiStore } from '../../store/adminUiStore'
 import { getPermission, getPermClass, getPermLabel } from '../../config/permissionMap'
@@ -123,7 +124,7 @@ async function confirmDeleteAdmin() {
           </div>
         </template>
         <template #cell-createdAt="{ row }">
-          <span class="cell-muted">{{ row.createdAt }}</span>
+          <span class="cell-muted">{{ formatDate(row.createdAt) || 'Chưa có dữ liệu' }}</span>
         </template>
         <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ accountStatusLabel(row) }}</span></template>
         <template #cell-actions="{ row }">

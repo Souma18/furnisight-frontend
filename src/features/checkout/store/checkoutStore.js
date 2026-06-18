@@ -94,7 +94,6 @@ export const useCheckoutStore = defineStore('checkout', () => {
     const next = {
       paymentMethod: payload.paymentMethod || selectedPaymentId.value,
       orderCode: payload.orderCode || '',
-      orderId: payload.orderId || '',
       lineIds: Array.isArray(payload.lineIds) ? payload.lineIds : [],
       createdAt: Date.now(),
     }

@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { useAccountStore } from '../../store/accountStore'
+import { formatDate } from '@shared/lib/formatters'
 
 const accountStore = useAccountStore()
 const projects = computed(() => accountStore.projects)
@@ -12,7 +13,7 @@ const projects = computed(() => accountStore.projects)
     <div class="grid">
       <article v-for="project in projects" :key="project.id" class="item">
         <p class="name">{{ project.name }}</p>
-        <p class="meta">Cập nhật: {{ project.updatedAt }} · {{ project.items }} sản phẩm</p>
+        <p class="meta">Cập nhật: {{ formatDate(project.updatedAt) || 'Chưa có dữ liệu' }} · {{ project.items }} sản phẩm</p>
       </article>
       <article class="item item--new">
         <p>Tạo dự án mới</p>

@@ -15,6 +15,7 @@ import CheckoutVoucherModal from '../components/CheckoutVoucherModal.vue'
 import { useCheckout } from '../composables/useCheckout'
 import { useCheckoutVoucherModal } from '../composables/useCheckoutVoucherModal'
 import { useCheckoutStore } from '../store/checkoutStore'
+import { getApiErrorMessage } from '@shared/lib/api'
 import '../styles/checkoutPage.css'
 
 const router = useRouter()
@@ -78,9 +79,17 @@ const {
 })
 
 onMounted(async () => {
-  await initCheckout()
-  if (isEmpty.value) {
-    router.replace({ path: '/account', query: { view: 'cart' } })
+  try {
+    await initCheckout()
+    if (isEmpty.value) {
+      router.replace({ path: '/account', query: { view: 'cart' } })
+    }
+  } catch (error) {
+    showToast({
+      icon: 'alert',
+      title: 'Không thể tải thanh toán',
+      subtitle: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
+    })
   }
 })
 
@@ -95,11 +104,11 @@ async function handlePlaceOrder() {
 }
 
 function handleViewOrder() {
-  const orderId = lastOrder.value?.orderId
+  const orderCode = lastOrder.value?.orderCode
   showSuccess.value = false
   router.push({
     path: '/account',
-    query: orderId ? { view: 'order-detail', orderId } : { view: 'orders' },
+    query: orderCode ? { view: 'order-detail', orderCode } : { view: 'orders' },
   })
 }
 

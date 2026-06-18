@@ -1,5 +1,6 @@
 import { onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
+import { getApiErrorMessage } from '@shared/lib/api'
 import { useAdminUiStore } from '../store/adminUiStore'
 
 export function useAdminListPage(fetcher) {
@@ -10,9 +11,17 @@ export function useAdminListPage(fetcher) {
   let searchTimer = null
 
   async function load() {
-    const params = search.value ? { query: search.value } : undefined
-    const res = await fetcher(params)
-    items.value = Array.isArray(res.data) ? res.data : res.data?.items ?? []
+    try {
+      const params = search.value ? { query: search.value } : undefined
+      const res = await fetcher(params)
+      items.value = Array.isArray(res.data) ? res.data : res.data?.items ?? []
+    } catch (error) {
+      ui.showToast({
+        icon: 'x',
+        title: 'Không thể tải dữ liệu',
+        subtitle: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
+      })
+    }
   }
 
   onMounted(load)

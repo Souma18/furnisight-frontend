@@ -52,7 +52,7 @@ const {
     </div>
 
     <div class="orders-list">
-      <article v-for="order in filteredOrders" :key="order.id" class="order-card">
+      <article v-for="order in filteredOrders" :key="order.orderCode || order.id" class="order-card">
         <div class="order-card-head">
           <div>
             <p class="order-code">{{ displayCode(order) }}</p>
@@ -97,7 +97,7 @@ const {
               <AppIcon :name="isRetrying(order) ? 'refresh' : 'creditCard'" :size="15" :class="{ 'spin-icon': isRetrying(order) }" />
               {{ isRetrying(order) ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
             </button>
-            <button type="button" class="order-detail-btn" @click="openOrderDetail(order.orderCode || order.id)">
+            <button type="button" class="order-detail-btn" :disabled="!order.orderCode" @click="openOrderDetail(order.orderCode)">
               <AppIcon name="eye" :size="15" />
               Xem chi tiết
             </button>

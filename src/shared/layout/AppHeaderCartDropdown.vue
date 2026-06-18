@@ -3,6 +3,7 @@ import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCart } from '@features/cart/composables/useCart'
 import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
+import { getApiErrorMessage } from '@shared/lib/api'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -19,7 +20,9 @@ const { items, itemCount, totalAmount, ensureHydrated, updateQty, removeItem } =
 
 function ensureCartLoaded() {
   if (!props.isAuthenticated) return
-  ensureHydrated()
+  ensureHydrated().catch((error) => {
+    console.warn('[CartDropdown] hydrate failed:', getApiErrorMessage(error))
+  })
 }
 
 function openCart() {

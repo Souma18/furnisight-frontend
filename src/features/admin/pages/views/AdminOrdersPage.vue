@@ -7,7 +7,7 @@ import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
-import { PriceFormatter } from '@shared/lib/formatters'
+import { PriceFormatter, formatDate } from '@shared/lib/formatters'
 import {
   applyOrderStatusMapping,
   canUpdateOrderStatus,
@@ -18,7 +18,7 @@ const statusFilter = ref('')
 const dateFilter = ref('')
 const { items, search, ui } = useAdminListPage((params) => adminApi.fetchOrders({ ...params, size: 500 }))
 const columns = [
-  { key: 'id', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
+  { key: 'orderCode', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },
 ]
 const badgeMap = {
@@ -43,7 +43,8 @@ const normalizedOrders = computed(() => items.value.map((item) => {
   return {
     ...mapped,
     total: mapped.totalAmount,
-    date: mapped.createdAt,
+    date: formatDate(mapped.createdAt),
+    rawDate: mapped.createdAt,
     items: mapped.itemCount,
   }
 }))
@@ -58,13 +59,12 @@ const filteredOrders = computed(() => {
   const keyword = normalizeSearch(search.value)
   return normalizedOrders.value.filter((row) => {
     const matchesSearch = !keyword || [
-      row.id,
       row.orderCode,
       row.customer,
       row.customerName,
     ].some((value) => normalizeSearch(value).includes(keyword))
     const matchesStatus = !statusFilter.value || row.statusLabel === statusFilter.value
-    const matchesDate = !dateFilter.value || toInputDate(row.date) === dateFilter.value
+    const matchesDate = !dateFilter.value || toInputDate(row.rawDate) === dateFilter.value
 
     return matchesSearch && matchesStatus && matchesDate
   })
@@ -72,7 +72,7 @@ const filteredOrders = computed(() => {
 const hasActiveFilters = computed(() => Boolean(search.value || statusFilter.value || dateFilter.value))
 
 function openDetail(row) {
-  const orderCode = row.orderCode || row.id
+  const orderCode = row.orderCode
   if (orderCode) router.push({ name: 'admin-order-detail', params: { orderCode } })
 }
 
@@ -123,8 +123,8 @@ function resetFilters() {
     </button>
   </AdminFilterBar>
   <AdminDataTable :columns="columns" :rows="filteredOrders">
-    <template #cell-id="{ row }">
-      <button type="button" class="admin-link-btn" @click="openDetail(row)">{{ row.id }}</button>
+    <template #cell-orderCode="{ row }">
+      <button type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</button>
     </template>
     <template #cell-total="{ row }"><span style="font-weight:600;color:var(--gold)">{{ formatPrice(row.total) }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span></template>

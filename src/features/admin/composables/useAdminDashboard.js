@@ -17,7 +17,7 @@ export function useAdminDashboard() {
             const mapped = applyOrderStatusMapping(order)
             return {
               ...mapped,
-              displayCode: mapped.orderCode || mapped.id,
+              displayCode: mapped.orderCode || 'Chưa có mã đơn',
               total: PriceFormatter.format(mapped.totalAmount),
             }
           })

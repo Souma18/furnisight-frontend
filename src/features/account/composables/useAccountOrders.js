@@ -15,23 +15,23 @@ export function useAccountOrders(emitNotify) {
     filter.value === 'all' ? orders.value : orders.value.filter((order) => order.status === filter.value),
   )
 
-  const selectedOrderId = computed(() => {
-    const raw = route.query.orderId
+  const selectedOrderCode = computed(() => {
+    const raw = route.query.orderCode || route.query.orderId
     return typeof raw === 'string' ? raw : ''
   })
 
   const selectedOrder = computed(() => {
-    if (!selectedOrderId.value) return null
-    return orderStore.getOrderDetail(selectedOrderId.value)
+    if (!selectedOrderCode.value) return null
+    return orderStore.getOrderDetail(selectedOrderCode.value)
   })
 
-  async function openOrderDetail(orderId) {
-    if (!orderId) return
+  async function openOrderDetail(orderCode) {
+    if (!orderCode) return
     await router.push({
       name: 'account',
       query: {
         view: 'order-detail',
-        orderId,
+        orderCode,
       },
     })
   }
@@ -43,8 +43,8 @@ export function useAccountOrders(emitNotify) {
     })
   }
 
-  async function cancelOrder(orderId) {
-    const result = await orderStore.cancelOrder(orderId)
+  async function cancelOrder(orderCode) {
+    const result = await orderStore.cancelOrder(orderCode)
     if (!result.ok) {
       if (emitNotify) emitNotify(result.message ?? 'Không thể huỷ đơn.', 'error')
       return false
@@ -59,7 +59,7 @@ export function useAccountOrders(emitNotify) {
   }
 
   async function retryPayment(order) {
-    const orderCode = order?.orderCode || order?.id || ''
+    const orderCode = order?.orderCode || ''
     if (!orderCode || retryingOrderCode.value) return false
 
     retryingOrderCode.value = orderCode
@@ -80,17 +80,18 @@ export function useAccountOrders(emitNotify) {
     orderStore.fetchOrders()
   })
 
-  watch(selectedOrderId, (orderId) => {
-    if (!orderId) return
-    const order = orderStore.getOrderDetail(orderId)
-    orderStore.fetchOrderDetail(order?.orderCode || orderId)
+  watch(selectedOrderCode, (orderCode) => {
+    if (!orderCode) return
+    const order = orderStore.getOrderDetail(orderCode)
+    orderStore.fetchOrderDetail(order?.orderCode || orderCode)
   }, { immediate: true })
 
   return {
     orders,
     filter,
     filteredOrders,
-    selectedOrderId,
+    selectedOrderId: selectedOrderCode,
+    selectedOrderCode,
     selectedOrder,
     openOrderDetail,
     backToOrders,

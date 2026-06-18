@@ -35,7 +35,7 @@ export function useOrderDetailView(notify) {
   const formatMoney = PriceFormatter.format
 
   const retryingPayment = computed(() =>
-    Boolean(order.value) && retryingOrderCode.value === (order.value.orderCode || order.value.id),
+    Boolean(order.value) && retryingOrderCode.value === order.value.orderCode,
   )
 
   const canRetryPaymentNow = computed(() =>
@@ -114,7 +114,7 @@ export function useOrderDetailView(notify) {
   async function confirmCancel() {
     if (!order.value || canceling.value) return
     canceling.value = true
-    const success = await cancelOrder(order.value.orderCode || order.value.id)
+    const success = await cancelOrder(order.value.orderCode)
     canceling.value = false
     if (success) cancelDialogOpen.value = false
   }

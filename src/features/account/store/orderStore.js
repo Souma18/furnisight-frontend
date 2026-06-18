@@ -52,24 +52,24 @@ export const useOrderStore = defineStore('accountOrder', () => {
     }
   }
 
-  function getOrderDetail(orderId) {
-    return orderDetails.value[orderId] ?? findOrder(orderId)
+  function getOrderDetail(orderRef) {
+    return orderDetails.value[orderRef] ?? findOrder(orderRef)
   }
 
   function addOrderFromCheckout(payload) {
     if (payload.order) {
       orders.value = [payload.order, ...orders.value]
-      orderDetails.value = { ...orderDetails.value, [payload.order.id || payload.order.orderCode]: payload.order }
+      orderDetails.value = { ...orderDetails.value, [payload.order.orderCode || payload.order.id]: payload.order }
     }
     return payload.order
   }
 
-  async function cancelOrder(orderId) {
-    const detail = findOrder(orderId)
+  async function cancelOrder(orderRef) {
+    const detail = findOrder(orderRef)
     if (!detail) return { ok: false, message: 'Đơn hàng không tồn tại.' }
     
     try {
-      const orderCode = detail.orderCode || orderId
+      const orderCode = detail.orderCode || orderRef
       const { data } = await ordersApi.cancelOrder(orderCode)
       delete orderDetails.value[orderCode]
       if (detail.id) delete orderDetails.value[detail.id]
@@ -128,7 +128,6 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
       checkoutStore.rememberPendingPayment({
         paymentMethod,
-        orderId: order.id,
         orderCode: order.orderCode,
         lineIds: [],
       })

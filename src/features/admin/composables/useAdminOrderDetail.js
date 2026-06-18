@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderDetailResponse } from '@shared/lib/api/services/orders/orders.model'
-import { formatVietnamAddress, PriceFormatter } from '@shared/lib/formatters'
+import { formatVietnamAddress, PriceFormatter, formatDate as formatDisplayDate, formatDateTime as formatDisplayDateTime } from '@shared/lib/formatters'
 import { getOrderStatusLabel, isCodPayment } from '@shared/lib/orders/orderStatusMapper'
 
 export function useAdminOrderDetail(orderCode) {
@@ -224,17 +224,11 @@ export function useAdminOrderDetail(orderCode) {
   const formatMoney = PriceFormatter.format
 
   function formatDate(value) {
-    if (!value) return ''
-    const date = new Date(value)
-    return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat('vi-VN').format(date)
+    return formatDisplayDate(value)
   }
 
   function formatDateTime(value) {
-    if (!value) return ''
-    const date = new Date(value)
-    return Number.isNaN(date.getTime())
-      ? value
-      : new Intl.DateTimeFormat('vi-VN', { dateStyle: 'medium', timeStyle: 'short' }).format(date)
+    return formatDisplayDateTime(value)
   }
 
   return {

@@ -51,6 +51,7 @@ export function useAccountPage() {
     }
 
     if (nextView !== 'order-detail') {
+      delete query.orderCode
       delete query.orderId
     }
 
@@ -61,9 +62,10 @@ export function useAccountPage() {
   }
 
   async function cleanOrderDetailQuery(nextView) {
-    if (nextView === 'order-detail' || !route.query.orderId) return
+    if (nextView === 'order-detail' || (!route.query.orderCode && !route.query.orderId)) return
 
     const query = { ...route.query }
+    delete query.orderCode
     delete query.orderId
     await router.replace({
       name: 'account',

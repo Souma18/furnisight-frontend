@@ -95,7 +95,6 @@ export function useCheckoutOrder({
 
   async function redirectToVnpay(order, linesSnapshot) {
     const paymentRes = await createVnpayPayment({
-      orderId: order.orderId,
       orderCode: order.orderCode,
       amount: summary.value.total,
       returnUrl: `${window.location.origin}/orders/payment/callback`,
@@ -113,7 +112,6 @@ export function useCheckoutOrder({
 
     checkoutStore.rememberPendingPayment({
       paymentMethod: checkoutState.selectedPaymentId.value,
-      orderId: order.orderId,
       orderCode: order.orderCode,
       lineIds: linesSnapshot.map((line) => line.id),
     })
