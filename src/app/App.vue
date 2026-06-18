@@ -61,6 +61,15 @@ async function closeAuthModal() {
   }
 }
 
+async function onAuthSuccess() {
+  await closeAuthModal()
+  const intendedRoute = sessionStorage.getItem('furnisight:intended-route')
+  if (intendedRoute) {
+    sessionStorage.removeItem('furnisight:intended-route')
+    await router.push(intendedRoute)
+  }
+}
+
 onMounted(async () => {
   await nextTick()
   ensureAuthProfile()
@@ -158,7 +167,7 @@ onBeforeUnmount(() => {
       :open="isAuthModalOpen"
       :initial-view="initialAuthView"
       @close="closeAuthModal"
-      @authenticated="closeAuthModal"
+      @authenticated="onAuthSuccess"
     />
   </div>
 </template>

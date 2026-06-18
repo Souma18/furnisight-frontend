@@ -22,7 +22,7 @@ const isUser = computed(() => props.message.role === 'user')
 <template>
   <div class="chat-msg" :class="{ user: isUser }">
     <div class="msg-avatar" :class="{ bot: !isUser, user: isUser }">
-      <AppIcon v-if="!isUser" name="bot" :size="14" />
+      <AppIcon v-if="!isUser" name="headset" :size="14" />
       <span v-else>NA</span>
     </div>
 

@@ -21,7 +21,7 @@ const emit = defineEmits(['update:sortBy', 'toggle-wish'])
       <div class="pl-tags">
         <span v-for="tag in activeTags" :key="tag" class="pl-tag">{{ tag }}</span>
       </div>
-      <select :value="sortBy" @change="emit('update:sortBy', $event.target.value)">
+      <select :value="sortBy" :disabled="!products.length" @change="emit('update:sortBy', $event.target.value)">
         <option value="popular">Phổ biến nhất</option>
         <option value="newest">Mới nhất</option>
         <option value="price-asc">Giá tăng dần</option>

@@ -21,13 +21,15 @@ export function canRetryOrderPayment(order = {}) {
 
   if (paymentMethodOf(order) !== 'vnpay') return false
 
-  const expiresAt = parseOrderDate(order.paymentExpiresAt)
-  const withinDeadline = expiresAt ? expiresAt.getTime() > Date.now() : false
-  if (typeof order.canRetryPayment === 'boolean') {
-    return order.canRetryPayment && withinDeadline
-  }
+  if (isOrderPaymentExpired(order)) return false
 
-  return withinDeadline
+  return true
+}
+
+export function isOrderPaymentExpired(order = {}) {
+  const expiresAt = parseOrderDate(paymentExpiresAtOf(order))
+  if (!expiresAt) return false
+  return expiresAt.getTime() <= Date.now()
 }
 
 export function shouldShowRetryPayment(order = {}) {
@@ -125,4 +127,8 @@ function paymentMethodOf(order = {}) {
       ?? order.paymentDetail?.paymentType
       ?? '',
   ).trim().toLowerCase()
+}
+
+function paymentExpiresAtOf(order = {}) {
+  return order.paymentExpiresAt ?? order.paymentTimeline?.paymentExpiresAt ?? null
 }

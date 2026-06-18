@@ -236,7 +236,7 @@ function runAiGenerate() {
             :class="{ active: meshQuality === 'medium' }"
             @click="emit('mesh-quality-change', 'medium')"
           >
-            T.Bình
+            Trung Bình
           </button>
           <button
             type="button"
@@ -247,7 +247,7 @@ function runAiGenerate() {
             Cao
           </button>
         </div>
-        <small class="quality-hint">Chất lượng "T.Bình" (Medium) được khuyến nghị để có thời gian phản hồi tốt nhất.</small>
+        <small class="quality-hint">Chất lượng "Trung Bình" (Medium) được khuyến nghị để có thời gian phản hồi tốt nhất.</small>
       </template>
       <template v-else>
         <p class="label">MESH RESOLUTION</p>

@@ -58,7 +58,7 @@ function goHome() {
         <button type="button" class="action-btn gold checkout-trigger">
           <AppIcon name="cart" :size="14" />
           <span>Thanh toán</span>
-          <span class="cart-badge">{{ cartCount }}</span>
+          <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
         </button>
 
         <div class="checkout-dropdown">

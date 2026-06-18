@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
             <p class="brand-title">FurniSight</p>
             <p class="brand-subtitle">Nội thất cao cấp</p>
           </div>
-          <button v-if="embedded" class="close-btn" type="button" @click="$emit('close')">
+          <button v-if="embedded" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
             <AppIcon name="close" :size="14" :stroke-width="2" />
           </button>
         </div>

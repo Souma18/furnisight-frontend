@@ -5,7 +5,7 @@ import { usePaymentCountdown } from './usePaymentCountdown'
 import { ORDER_STATUS_LABELS } from './orderStatusLabels'
 import {
   canRetryOrderPayment,
-  parseOrderDate,
+  isOrderPaymentExpired,
   shouldShowRetryPayment,
 } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter, formatDate, formatDateTime } from '@shared/lib/formatters'
@@ -40,8 +40,7 @@ export function useOrderDetailView(notify) {
 
   const canRetryPaymentNow = computed(() =>
     Boolean(order.value)
-      && canRetryOrderPayment(order.value)
-      && isPaymentTimeRemaining(order.value),
+      && canRetryOrderPayment(order.value),
   )
 
   const canCancelCurrentOrder = computed(() =>
@@ -97,8 +96,14 @@ export function useOrderDetailView(notify) {
   })
 
   const paymentDeadline = computed(() => {
-    if (!order.value || !canRetryPaymentNow.value) return ''
+    if (!order.value || !canRetryPaymentNow.value || !order.value.paymentExpiresAt || !isPaymentTimeRemaining(order.value)) return ''
     return `Còn ${formatCountdown(order.value)} để hoàn tất thanh toán`
+  })
+
+  const retryPaymentTitle = computed(() => {
+    if (canRetryPaymentNow.value) return 'Tiếp tục thanh toán đơn hàng'
+    if (order.value && isOrderPaymentExpired(order.value)) return 'Đơn hàng đã quá hạn thanh toán'
+    return 'Đơn hàng không thể thanh toán lại'
   })
 
   function handleCancel() {
@@ -166,6 +171,7 @@ export function useOrderDetailView(notify) {
     transactionTimeline,
     transactionRows,
     paymentDeadline,
+    retryPaymentTitle,
     shouldShowRetryPayment,
     formatMoney,
     formatDate,

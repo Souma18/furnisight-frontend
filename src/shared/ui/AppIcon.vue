@@ -25,6 +25,7 @@ import {
   Fullscreen,
   Filter,
   Globe2,
+  Headset,
   History,
   Info,
   LayoutDashboard,
@@ -103,6 +104,7 @@ import {
   X,
   Eye,
   EyeOff,
+  Menu,
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -142,6 +144,7 @@ const iconMap = {
   fullscreen: Fullscreen,
   filter: Filter,
   globe: Globe2,
+  headset: Headset,
   history: History,
   info: Info,
   layoutDashboard: LayoutDashboard,
@@ -234,6 +237,7 @@ const iconMap = {
   facebook: Facebook,
   instagram: Instagram,
   youtube: Youtube,
+  menu: Menu,
 }
 
 const iconComponent = computed(() => iconMap[props.name] ?? User)

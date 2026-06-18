@@ -16,6 +16,7 @@ const {
   transactionTimeline,
   transactionRows,
   paymentDeadline,
+  retryPaymentTitle,
   shouldShowRetryPayment,
   formatMoney,
   formatDate,
@@ -55,7 +56,7 @@ const {
           type="button"
           class="order-pay-btn"
           :disabled="!canRetryPaymentNow || retryingPayment"
-          :title="canRetryPaymentNow ? 'Tiếp tục thanh toán đơn hàng' : 'Đơn hàng đã quá hạn thanh toán'"
+          :title="retryPaymentTitle"
           @click="handleRetryPayment"
         >
           <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />

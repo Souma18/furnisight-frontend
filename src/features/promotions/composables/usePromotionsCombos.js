@@ -41,12 +41,14 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
       }))
       comboTotal.value = Number(payload.totalElements ?? payload.total ?? rows.length)
       combos.value = reset ? rows : [...combos.value, ...rows]
+      return true
     } catch (error) {
       if (reset) {
         combos.value = []
         comboTotal.value = 0
       }
       showToast('Chưa tải được combo', error.response?.data?.message || 'Vui lòng thử lại sau.', 'alert')
+      return false
     } finally {
       loading.value = false
       loadingMore.value = false

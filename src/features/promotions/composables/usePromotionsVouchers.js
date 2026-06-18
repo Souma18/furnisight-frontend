@@ -41,9 +41,11 @@ export function usePromotionsVouchers({
       if (isAuthenticated.value) {
         await mergeUserVoucherStatus()
       }
+      return true
     } catch (error) {
       vouchers.value = []
       showToast('Chưa tải được voucher', error.response?.data?.message || 'Vui lòng thử lại sau.', 'alert')
+      return false
     }
   }
 

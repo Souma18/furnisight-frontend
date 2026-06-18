@@ -42,18 +42,18 @@ function handleAddToCart(product) {
 <template>
   <div class="chat-widget">
     <div class="chat-fab-tooltip" :class="{ show: showFabTooltip && !isOpen }">
-      💬 FurniSight Support đang trực tuyến!
+      FurniSight Support đang trực tuyến!
     </div>
 
     <button
       type="button"
       class="chat-fab"
       :class="{ open: isOpen }"
-      aria-label="Mở chat hỗ trợ"
+      aria-label="Mở hỗ trợ trực tuyến"
       @click="toggleChat"
     >
       <span class="chat-fab-icon chat-fab-icon--bot">
-        <AppIcon name="bot" :size="24" />
+        <AppIcon name="headset" :size="24" />
       </span>
       <span class="chat-fab-icon chat-fab-icon--close">
         <AppIcon name="close" :size="22" />
@@ -65,11 +65,11 @@ function handleAddToCart(product) {
       class="chat-modal"
       :class="{ open: isOpen }"
       role="dialog"
-      aria-label="Chat hỗ trợ FurniSight"
+      aria-label="Hỗ trợ trực tuyến FurniSight"
     >
       <header class="chat-header">
         <div class="chat-agent-avatar">
-          <AppIcon name="bot" :size="20" />
+          <AppIcon name="headset" :size="20" />
           <span class="chat-agent-online" aria-hidden="true" />
         </div>
 
@@ -124,7 +124,7 @@ function handleAddToCart(product) {
 
         <div v-if="isTyping" class="chat-msg">
           <div class="msg-avatar bot">
-            <AppIcon name="bot" :size="14" />
+            <AppIcon name="headset" :size="14" />
           </div>
           <div class="bubble bot">
             <div class="typing-bubble">

@@ -23,6 +23,7 @@ export function useProductListPage() {
   const sortBy = ref('popular')
   const viewMode = ref('grid')
   const saleOnly = ref(false)
+  const apiError = ref(false)
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
   const dynamicQuickFilters = ref([])
   const sidebarCategories = ref([])
@@ -103,12 +104,14 @@ export function useProductListPage() {
           name: category.name,
           parentId: category.parentId,
           path: category.path,
+          productCount: category.productCount,
           count: category.productCount || 0,
         }
       })
     } catch (e) {
       console.error('Failed to load categories', e)
       allCategories.value = []
+      apiError.value = true
     }
   }
 
@@ -247,14 +250,16 @@ export function useProductListPage() {
 
   const dynamicHero = computed(() => {
     if (selectedCategory.value === 'all') {
+      const categoryCount = sidebarCategories.value.length || facets.value.categories?.length || 0
+
       return {
         breadcrumb: ['Trang chủ', 'Sản phẩm'],
         title: 'Tất cả sản phẩm',
         subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
         stats: [
           { label: 'Sản phẩm', value: total.value },
-          { label: 'Danh mục', value: facets.value.categories?.length || 0 },
-          { label: 'Đánh giá', value: facets.value.avgRating ? Number(facets.value.avgRating).toFixed(1) : '5.0' }
+          { label: 'Danh mục', value: categoryCount },
+          { label: 'Đánh giá', value: facets.value.avgRating ? Number(facets.value.avgRating).toFixed(1) : '—' }
         ]
       }
     }
@@ -278,6 +283,7 @@ export function useProductListPage() {
   onMounted(async () => {
     suppressListWatch.value = true
     suppressCategoryWatch.value = true
+    apiError.value = false
     await loadAllCategories()
     parseQueryPreset()
     await loadQuickFilters()
@@ -290,6 +296,15 @@ export function useProductListPage() {
       wishlistStore.loadWishlist().catch(() => [])
     }
   })
+
+  function reloadPage() {
+    apiError.value = false
+    loadAllCategories().then(() => {
+      loadQuickFilters()
+      loadSidebarCategories(selectedCategory.value)
+      requestList()
+    })
+  }
 
   return {
     items,
@@ -309,10 +324,12 @@ export function useProductListPage() {
     dynamicQuickFilters,
     dynamicHero,
     wishedProductIds,
+    apiError,
     toggleCategory,
     selectSidebarCategory,
     onApplySidebar,
     onClearFilters,
     favoriteProduct,
+    reloadPage,
   }
 }
