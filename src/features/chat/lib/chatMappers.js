@@ -128,12 +128,14 @@ export function mapConversationToAdminList(raw) {
 export function normalizeMessagePage(data) {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.content)) return data.content
   return []
 }
 
 export function normalizeConversationList(data) {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.items)) return data.items
+  if (Array.isArray(data?.content)) return data.content
   return []
 }
 

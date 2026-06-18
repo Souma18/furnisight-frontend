@@ -51,6 +51,7 @@ export function createMessageServiceSocket({ url, onConnect, onDisconnect, onErr
 
   function subscribe(topic, handler) {
     if (!client?.connected) return null
+    unsubscribe(topic)
     const sub = client.subscribe(topic, (frame) => {
       let payload = frame.body
       try {
