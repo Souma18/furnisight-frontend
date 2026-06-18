@@ -111,7 +111,23 @@ export function useProductListPage() {
   async function loadAllCategories() {
     try {
       const { data } = await productsApi.getCategories()
+<<<<<<< HEAD
       allCategories.value = (Array.isArray(data) ? data : []).map(mapCategoryToOption)
+=======
+      allCategories.value = (Array.isArray(data) ? data : []).map((item) => {
+        const category = new CategoryResponse(item)
+        return {
+          id: category.id,
+          slug: category.slug || category.id,
+          label: category.name,
+          name: category.name,
+          parentId: category.parentId,
+          path: category.path,
+          productCount: category.productCount,
+          count: category.productCount || 0,
+        }
+      })
+>>>>>>> refs/remotes/origin/dev
     } catch (e) {
       console.error('Failed to load categories', e)
       allCategories.value = []
