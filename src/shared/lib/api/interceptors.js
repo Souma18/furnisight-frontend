@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { attachNormalizedApiError } from './errors'
 import { pinia } from '../../../app/plugins/pinia'
 
 
@@ -81,7 +82,7 @@ export function registerApiInterceptors() {
       }
       return config
     },
-    (error) => Promise.reject(error),
+    (error) => Promise.reject(attachNormalizedApiError(error)),
   )
 
   apiClient.interceptors.response.use(
@@ -90,14 +91,14 @@ export function registerApiInterceptors() {
       const originalRequest = error.config
 
       if (!originalRequest || originalRequest.skipAuth) {
-        return Promise.reject(error)
+        return Promise.reject(attachNormalizedApiError(error))
       }
 
       // Chỉ xử lý lỗi 401 và không retry lại request nếu đã retry rồi
       if (error.response?.status === 401 && !originalRequest._retry) {
         // Tránh gọi refresh liên tục
         if (originalRequest.url?.includes('/refresh-token')) {
-          return Promise.reject(error)
+          return Promise.reject(attachNormalizedApiError(error))
         }
         // Lưu lại các request bị lỗi khi đang refresh token
         if (isRefreshing) {
@@ -109,7 +110,7 @@ export function registerApiInterceptors() {
               return apiClient(originalRequest)
             })
             .catch((err) => {
-              return Promise.reject(err)
+              return Promise.reject(attachNormalizedApiError(err))
             })
         }
 
@@ -124,7 +125,7 @@ export function registerApiInterceptors() {
             const { logout } = useAuth(pinia)
             logout({ name: 'home' }, { clearRemoteCart: false })
           }).catch(e => console.error("Could not load authStore", e))
-          return Promise.reject(error)
+          return Promise.reject(attachNormalizedApiError(error))
         }
 
         try {
@@ -148,13 +149,13 @@ export function registerApiInterceptors() {
             logout({ name: 'home' }, { clearRemoteCart: false })
           }).catch(e => console.error("Could not load authStore", e))
           
-          return Promise.reject(refreshError)
+          return Promise.reject(attachNormalizedApiError(refreshError))
         } finally {
           isRefreshing = false
         }
       }
 
-      return Promise.reject(error)
+      return Promise.reject(attachNormalizedApiError(error))
     },
   )
 }

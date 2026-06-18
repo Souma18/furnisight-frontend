@@ -1,4 +1,5 @@
 import { apiClient } from '../../client'
+import { attachNormalizedApiError } from '../../errors'
 import axios from 'axios'
 
 function unwrapData(response) {
@@ -74,6 +75,8 @@ class MediaApi {
     return axios.post(uploadUrl, formData, {
       onUploadProgress: options.onUploadProgress,
       signal: options.signal,
+    }).catch((error) => {
+      throw attachNormalizedApiError(error, 'Không thể tải tệp lên. Vui lòng thử lại.')
     })
   }
 
