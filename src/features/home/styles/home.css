@@ -85,6 +85,17 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hn-btn-3d:hover,
+.hn-btn-3d:focus-visible,
+.hn-btn-primary:hover,
+.hn-btn-primary:focus-visible {
+  background: linear-gradient(135deg, #2dd4bf, #0f766e);
+  color: #f8fffb;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(15, 118, 110, 0.28);
 }
 
 .hn-icon-btn {
@@ -201,6 +212,16 @@
   border: 1px solid rgba(255, 255, 255, 0.35);
   border-radius: 999px;
   padding: 0.65rem 1rem;
+  transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.hn-btn-outline:hover,
+.hn-btn-outline:focus-visible {
+  background: rgba(45, 212, 191, 0.16);
+  border-color: #2dd4bf;
+  color: #bffaf1;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(45, 212, 191, 0.12);
 }
 
 .hn-preview-card {

@@ -135,11 +135,14 @@ function updateReviewField(field, value) {
             type="button"
             class="star-pick"
             :class="{ active: star <= Number(reviewForm.rating || 0) }"
+            :aria-label="`Chọn ${star} sao`"
+            :aria-pressed="star === Number(reviewForm.rating || 0)"
             :disabled="!reviewRatingEnabled"
             @click="updateReviewField('rating', star)"
           >
             <AppIcon name="star" :size="22" />
           </button>
+          <span class="rating-picked-label">Đã chọn {{ Number(reviewForm.rating || 0) }} sao</span>
         </div>
         <input
           class="review-title-input"

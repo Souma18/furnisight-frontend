@@ -13,7 +13,7 @@ export const useProductStore = defineStore('product', () => {
   let listRequestId = 0
 
   function mapProductList(data) {
-    const rawItems = data?.products ?? data?.content ?? []
+    const rawItems = Array.isArray(data) ? data : data?.items ?? []
     return Array.isArray(rawItems) ? rawItems.map((item) => new ProductResponse(item)) : []
   }
 
@@ -25,7 +25,7 @@ export const useProductStore = defineStore('product', () => {
       const { data } = await productsApi.getProducts(params)
       if (requestId !== listRequestId) return
       items.value = mapProductList(data)
-      total.value = data?.total ?? data?.page?.totalElements ?? items.value.length
+      total.value = data?.totalElements ?? items.value.length
       facets.value = data?.facets ?? {}
     } catch (e) {
       if (requestId !== listRequestId) return

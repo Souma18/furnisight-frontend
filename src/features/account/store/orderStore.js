@@ -4,7 +4,6 @@ import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
-import { applyOrderStatusMapping } from '@shared/lib/orders/orderStatusMapper'
 
 export const useOrderStore = defineStore('accountOrder', () => {
   const orders = ref([])
@@ -24,7 +23,8 @@ export const useOrderStore = defineStore('accountOrder', () => {
     try {
       loading.value = true
       const { data } = await ordersApi.getOrders()
-      orders.value = Array.isArray(data) ? data.map(item => new OrderListResponse(item)) : []
+      const rawItems = Array.isArray(data) ? data : data?.items ?? []
+      orders.value = Array.isArray(rawItems) ? rawItems.map(item => new OrderListResponse(item)) : []
       return orders.value
     } catch (error) {
       console.error('Failed to fetch orders:', error)
@@ -70,33 +70,29 @@ export const useOrderStore = defineStore('accountOrder', () => {
     
     try {
       const orderCode = detail.orderCode || orderId
-      await ordersApi.cancelOrder(orderCode)
-      const paymentMethod = String(detail.paymentMethod || detail.paymentDetail?.paymentMethod || '').toLowerCase()
-      const isPaidOrder = paymentMethod !== 'cod' && (detail.status === 'paid' || detail.rawStatus === 'PAID')
-      const nextStatus = isPaidOrder ? 'refund_pending' : 'cancel'
-      const nextRawStatus = isPaidOrder ? 'REFUND_PENDING' : 'CANCELLED'
-      const updatedDetail = applyOrderStatusMapping({
-        ...detail,
-        status: nextStatus,
-        rawStatus: nextRawStatus,
-        canRetryPayment: false,
-      })
-      orders.value = orders.value.map((order) =>
-        order.id === detail.id || order.orderCode === orderCode
-          ? applyOrderStatusMapping({
-              ...order,
-              status: nextStatus,
-              rawStatus: nextRawStatus,
-              canRetryPayment: false,
-            })
-          : order,
-      )
-      orderDetails.value = {
-        ...orderDetails.value,
-        [orderCode]: updatedDetail,
-        ...(detail.id ? { [detail.id]: updatedDetail } : {}),
+      const { data } = await ordersApi.cancelOrder(orderCode)
+      delete orderDetails.value[orderCode]
+      if (detail.id) delete orderDetails.value[detail.id]
+      const updatedDetail = data && typeof data === 'object'
+        ? new OrderDetailResponse(data)
+        : await fetchOrderDetail(orderCode)
+
+      if (updatedDetail) {
+        orders.value = orders.value.map((order) =>
+          order.id === detail.id || order.orderCode === orderCode
+            ? new OrderListResponse({ ...order, ...updatedDetail })
+            : order,
+        )
+        orderDetails.value = {
+          ...orderDetails.value,
+          [orderCode]: updatedDetail,
+          ...(updatedDetail.id ? { [updatedDetail.id]: updatedDetail } : {}),
+        }
+      } else {
+        await fetchOrders()
       }
-      return { ok: true, status: nextStatus }
+
+      return { ok: true, status: updatedDetail?.status }
     } catch (error) {
       return { ok: false, message: error.response?.data?.message || 'Không thể huỷ đơn hàng lúc này.' }
     }

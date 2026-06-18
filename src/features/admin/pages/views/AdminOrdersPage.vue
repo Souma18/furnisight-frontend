@@ -38,7 +38,15 @@ const badgeMap = {
   pending: 'b-pending',
 }
 const formatPrice = PriceFormatter.format
-const normalizedOrders = computed(() => items.value.map((item) => applyOrderStatusMapping(item)))
+const normalizedOrders = computed(() => items.value.map((item) => {
+  const mapped = applyOrderStatusMapping(item)
+  return {
+    ...mapped,
+    total: mapped.totalAmount,
+    date: mapped.createdAt,
+    items: mapped.itemCount,
+  }
+}))
 const statusOptions = computed(() => {
   const labels = new Set()
   normalizedOrders.value.forEach((item) => {

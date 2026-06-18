@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { adminApi } from '@shared/lib/api/services'
 import { ADMIN_PERMISSION_OPTIONS } from '../config/adminPermissions'
 import { useAdminUiStore } from '../store/adminUiStore'
-import { isAdminAccount, isAdminRoleName, normalizeRoleName } from '../utils/adminAccountRoles'
+import { accountRoleNames, isAdminAccount, isAdminRoleName, normalizeRoleName } from '../utils/adminAccountRoles'
 
 const roleIconMap = {
   admin: 'crown',
@@ -36,10 +36,10 @@ export function useAdminRoles() {
         adminApi.fetchRoles(),
         adminApi.fetchAdminUsers({ size: 100, scope: 'ADMIN' }),
       ])
-      const adminAccounts = (userRes.data?.items ?? userRes.data?.accounts ?? userRes.data ?? [])
+      const adminAccounts = (Array.isArray(userRes.data) ? userRes.data : userRes.data?.items ?? [])
         .filter(isAdminAccount)
         .map(normalizeAdminAccount)
-      const roles = (roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? [])
+      const roles = (Array.isArray(roleRes.data) ? roleRes.data : roleRes.data?.items ?? [])
         .map((role) => normalizeRole(role, adminAccounts))
       data.value = {
         roles,
@@ -79,16 +79,17 @@ function normalizeRole(role = {}, adminAccounts = []) {
 
 function normalizeAdminAccount(account = {}) {
   const firstRole = account.roles?.[0] ?? {}
-  const role = account.role || firstRole.name || 'Admin'
+  const role = account.role || firstRole.name || accountRoleNames(account)[0] || 'Admin'
   const perms = normalizePermissions(firstRole.permissions)
   const roleKey = String(role || '').toLowerCase()
   return {
     ...account,
+    name: account.name || [account.lastName, account.firstName].filter(Boolean).join(' ') || account.username || account.email,
     role,
     perms,
     roleIcon: account.roleIcon || roleIconMap[roleKey] || 'user',
     tagClass: account.tagClass || roleToneMap[roleKey] || 'rt-manager',
-    statusLabel: account.statusLabel || 'Hoạt động',
+    statusLabel: account.statusLabel,
     avTone: account.avTone || 'blue',
     av: account.av || String(account.name || account.email || 'A').slice(0, 1).toUpperCase(),
   }

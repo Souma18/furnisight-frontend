@@ -219,7 +219,7 @@ export function useConversationManager() {
     templatesLoading.value = true
     try {
       const res = await adminApi.fetchMessageTemplates()
-      templates.value = res.data?.items ?? res.data?.content ?? res.data ?? []
+      templates.value = Array.isArray(res.data) ? res.data : res.data?.items ?? []
     } finally {
       templatesLoading.value = false
     }

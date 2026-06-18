@@ -98,7 +98,7 @@ async function loadRoleOptions() {
   loadedOptions.add('roles')
   try {
     const roleRes = await adminApi.fetchRoles()
-    roleOptions.value = roleRes.data?.roles ?? roleRes.data?.items ?? roleRes.data ?? []
+    roleOptions.value = Array.isArray(roleRes.data) ? roleRes.data : roleRes.data?.items ?? []
   } catch {
     loadedOptions.delete('roles')
     roleOptions.value = []
@@ -110,7 +110,7 @@ async function loadCategoryOptions() {
   loadedOptions.add('categories')
   try {
     const categoryRes = await adminApi.fetchCategories()
-    categoryOptions.value = categoryRes.data?.items ?? categoryRes.data?.content ?? categoryRes.data ?? []
+    categoryOptions.value = Array.isArray(categoryRes.data) ? categoryRes.data : categoryRes.data?.items ?? []
   } catch {
     loadedOptions.delete('categories')
     categoryOptions.value = []
@@ -122,7 +122,7 @@ async function loadProductOptions() {
   loadedOptions.add('products')
   try {
     const productRes = await adminApi.fetchProducts({ size: 500 })
-    productOptions.value = productRes.data?.items ?? productRes.data?.content ?? productRes.data ?? []
+    productOptions.value = Array.isArray(productRes.data) ? productRes.data : productRes.data?.items ?? []
   } catch {
     loadedOptions.delete('products')
     productOptions.value = []

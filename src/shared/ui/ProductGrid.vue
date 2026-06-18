@@ -21,7 +21,9 @@ function detailRoute(item) {
 }
 
 function categoryLabel(item) {
-  return item.categoryName || item.category || 'N/A'
+  if (item.categoryName) return item.categoryName
+  if (item.category?.name || item.category?.label) return item.category.name || item.category.label
+  return 'N/A'
 }
 
 function priceLabel(item) {

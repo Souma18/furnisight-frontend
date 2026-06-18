@@ -24,7 +24,7 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
 
     try {
       const response = await promotionsApi.getCombos({
-        placement: 'PROMOTION_PAGE',
+        placement: 'PROMOTION',
         page: comboPage.value,
         size: COMBO_PAGE_SIZE,
         sort: comboSort.value,
@@ -35,7 +35,7 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
         combo.items = await Promise.all(combo.items.map(enrichComboItemImage))
         return combo
       }))
-      comboTotal.value = Number(payload.total ?? rows.length)
+      comboTotal.value = Number(payload.totalElements ?? payload.total ?? rows.length)
       combos.value = reset ? rows : [...combos.value, ...rows]
     } catch (error) {
       if (reset) {

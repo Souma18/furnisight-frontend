@@ -9,6 +9,7 @@ import {
   shouldShowRetryPayment,
 } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter, formatDate, formatDateTime } from '@shared/lib/formatters'
+import { isCodPayment } from '@shared/lib/orders/orderStatusMapper'
 
 const CANCELABLE_ORDER_STATUSES = [
   'unpaid',
@@ -143,7 +144,7 @@ export function useOrderDetailView(notify) {
   }
 
   function isCodOrder(current = order.value) {
-    return String(current?.paymentMethod || current?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
+    return isCodPayment(current)
   }
 
   function paymentMethodLabel(current = order.value) {

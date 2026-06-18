@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { adminApi } from '@shared/lib/api/services'
+import { PriceFormatter } from '@shared/lib/formatters'
 import { applyOrderStatusMapping } from '@shared/lib/orders/orderStatusMapper'
 import { useAdminChartPage } from './useAdminChartPage'
 
@@ -12,7 +13,14 @@ export function useAdminDashboard() {
     return {
       ...rawData.value,
       recentOrders: Array.isArray(rawData.value.recentOrders)
-        ? rawData.value.recentOrders.map((order) => applyOrderStatusMapping(order))
+        ? rawData.value.recentOrders.map((order) => {
+            const mapped = applyOrderStatusMapping(order)
+            return {
+              ...mapped,
+              displayCode: mapped.orderCode || mapped.id,
+              total: PriceFormatter.format(mapped.totalAmount),
+            }
+          })
         : [],
     }
   })

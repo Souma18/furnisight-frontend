@@ -42,7 +42,7 @@ function mapChatTemplateFromApi(template) {
 }
 
 function mapChatTemplateResponse(response) {
-  const rawList = response.data?.items ?? response.data?.content ?? response.data ?? []
+  const rawList = Array.isArray(response.data) ? response.data : response.data?.items ?? []
   const list = Array.isArray(rawList) ? rawList : []
   return {
     ...response,

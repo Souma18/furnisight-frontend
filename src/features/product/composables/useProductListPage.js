@@ -24,25 +24,42 @@ export function useProductListPage() {
   const viewMode = ref('grid')
   const saleOnly = ref(false)
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
+  const dynamicQuickFilters = ref([])
+  const sidebarCategories = ref([])
 
   const appliedFilters = ref(createDefaultProductFilters())
 
-  const activeTags = computed(() => buildActiveProductTags({
-    appliedFilters: appliedFilters.value,
-    saleOnly: saleOnly.value,
-    searchKeyword: searchKeyword.value,
-    selectedCategory: selectedCategory.value,
-    selectedSubcategory: selectedSubcategory.value,
-  }))
+  function categoryDisplayName(slug) {
+    const key = String(slug ?? '').toLowerCase()
+    if (!key || key === 'all') return ''
+    const source = [...dynamicQuickFilters.value, ...sidebarCategories.value]
+    const category = source.find((item) => String(item.slug ?? item.id ?? '').toLowerCase() === key)
+    return category?.label || category?.name || ''
+  }
+
+  const activeTags = computed(() => {
+    const categoryTags = [
+      categoryDisplayName(selectedCategory.value),
+      categoryDisplayName(selectedSubcategory.value),
+    ].filter(Boolean)
+
+    return [
+      ...categoryTags,
+      ...buildActiveProductTags({
+        appliedFilters: appliedFilters.value,
+        saleOnly: saleOnly.value,
+        searchKeyword: searchKeyword.value,
+        selectedCategory: 'all',
+        selectedSubcategory: 'all',
+      }),
+    ]
+  })
 
   function parseQueryPreset() {
     const preset = parseProductListQueryPreset(route.query)
     selectedCategory.value = preset.selectedCategory
     searchKeyword.value = preset.searchKeyword
   }
-
-  const dynamicQuickFilters = ref([])
-  const sidebarCategories = ref([])
 
   async function loadQuickFilters() {
     try {
@@ -51,11 +68,10 @@ export function useProductListPage() {
         const category = new CategoryResponse(item)
         return { label: category.name, slug: category.slug ?? category.id }
       })
-      chips.push({ label: 'Sale -30%', slug: 'sale' })
-      dynamicQuickFilters.value = chips
+      dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }, ...chips]
     } catch (e) {
       console.error('Failed to load quick filters', e)
-      dynamicQuickFilters.value = []
+      dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }]
     }
   }
 
@@ -91,11 +107,6 @@ export function useProductListPage() {
   })
 
   function toggleCategory(chip) {
-    if (chip.slug === 'sale') {
-      saleOnly.value = !saleOnly.value
-      requestList()
-      return
-    }
     selectedCategory.value = selectedCategory.value === chip.slug ? 'all' : chip.slug
     selectedSubcategory.value = 'all'
     requestList()
@@ -189,8 +200,7 @@ export function useProductListPage() {
       }
     }
     
-    const catFromQuick = dynamicQuickFilters.value.find(c => c.slug === selectedCategory.value)
-    const label = catFromQuick?.label ?? selectedCategory.value
+    const label = categoryDisplayName(selectedCategory.value) || 'Sản phẩm'
     
     return {
       breadcrumb: ['Trang chủ', 'Sản phẩm', label],

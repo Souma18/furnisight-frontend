@@ -104,7 +104,7 @@ const {
       </div>
     </div>
 
-    <div class="pl-filter-block">
+    <div v-if="displayMaterials.length" class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('mat')">
         <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="box" :size="16" /> Chất liệu</div>
         <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.mat }" name="chevronDown" :size="16" />
@@ -123,7 +123,7 @@ const {
       </div>
     </div>
 
-    <div class="pl-filter-block">
+    <div v-if="displayColors.length" class="pl-filter-block">
       <div class="pl-filter-block-header" role="button" @click="toggleBlock('color')">
         <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="palette" :size="16" /> Màu sắc</div>
         <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.color }" name="chevronDown" :size="16" />

@@ -140,7 +140,11 @@ export function normalizePaymentType(orderOrPaymentType = '') {
 }
 
 export function isCodPayment(orderOrPaymentType = '') {
-  return normalizePaymentType(orderOrPaymentType) === 'cod'
+  const paymentType = normalizePaymentType(orderOrPaymentType)
+  return paymentType === 'cod'
+    || paymentType === 'cash_on_delivery'
+    || paymentType === 'cash-on-delivery'
+    || paymentType === 'cashondelivery'
 }
 
 export function getOrderStatusLabel(orderOrStatus = '', paymentType = '') {

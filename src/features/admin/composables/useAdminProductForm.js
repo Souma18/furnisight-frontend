@@ -54,6 +54,12 @@ const PRODUCT_STATUS_TO_API = {
   'Ngừng bán': 'INACTIVE',
 }
 
+const PRODUCT_STATUS_TO_LABEL = {
+  ACTIVE: 'Còn hàng',
+  INACTIVE: 'Ngừng bán',
+  OUT_OF_STOCK: 'Hết hàng',
+}
+
 export function mapProductToForm(row) {
   if (!row) return { ...PRODUCT_FORM_DEFAULTS }
   const modelUrl = row.modelUrl ?? row.model3dUrl ?? ''
@@ -64,7 +70,7 @@ export function mapProductToForm(row) {
     price: row.price ?? '',
     stock: row.stock ?? '',
     sku: row.sku ?? '',
-    status: row.statusLabel ?? 'Còn hàng',
+    status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
     modelUrl,
     modelMediaId: row.modelMediaId ?? '',
     supports3d: Boolean(row.supports3d || modelUrl),

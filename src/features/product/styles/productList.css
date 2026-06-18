@@ -25,8 +25,6 @@
 .pl-chips { display: flex; gap: 8px; flex-wrap: wrap; }
 .pl-chip { border: 1px solid var(--brand-cream-200); background: #fff; border-radius: 18px; padding: 7px 12px; font-size: 13px; cursor: pointer; }
 .pl-chip.active { background: var(--brand-navy-800); border-color: var(--brand-navy-800); color: #fff; }
-.pl-chip-sale { border-color: #ffcdd2; background: #fff5f5; color: #e53e3e; }
-.pl-chip-sale.active { background: #e53e3e; border-color: #e53e3e; color: #fff; }
 .pl-view-toggle { margin-left: auto; display: flex; gap: 4px; }
 .pl-view-toggle button { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--brand-cream-200); background: #fff; }
 .pl-view-toggle button.active { background: var(--brand-navy-800); color: #fff; }
@@ -40,7 +38,7 @@
   padding: 32px 60px 80px;
 }
 
-.pl-sidebar-filters { position: sticky; top: 120px; align-self: start; }
+.pl-sidebar-filters { position: sticky; top: 72px; align-self: start; }
 
 .pl-filter-block {
   background: #fff;

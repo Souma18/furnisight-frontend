@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '../store/orderStore'
 
@@ -75,6 +75,10 @@ export function useAccountOrders(emitNotify) {
       retryingOrderCode.value = ''
     }
   }
+
+  onMounted(() => {
+    orderStore.fetchOrders()
+  })
 
   watch(selectedOrderId, (orderId) => {
     if (!orderId) return

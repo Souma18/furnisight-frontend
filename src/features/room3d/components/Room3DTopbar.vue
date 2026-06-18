@@ -34,7 +34,9 @@ function goHome() {
 <template>
   <header class="header">
     <div class="brand">
-      <span class="brand-icon"><AppIcon name="sparkles" :size="15" /></span>
+      <span class="brand-icon" aria-hidden="true">
+        <AppIcon name="house" :size="15" :stroke-width="2.2" />
+      </span>
       <span class="brand-text">FurniSight</span>
     </div>
 
@@ -109,7 +111,14 @@ function goHome() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 178, 60, 0.2);
+  background: #c9922a;
+  color: #fff7d6;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.brand-icon svg {
+  color: inherit;
+  stroke: currentColor;
 }
 
 .brand-text {

@@ -11,13 +11,11 @@ const emit = defineEmits(['update:modelValue', 'toggle-category', 'update:view-m
 
 function chipIsActive(chip) {
   if (!chip) return false
-  if (chip.slug === 'sale') return props.saleOnly
   return props.selectedCategory.toLowerCase() === (chip.slug ?? '').toLowerCase()
 }
 
 function chipClass(chip) {
-  if (!chip) return 'pl-chip'
-  return chip.slug === 'sale' ? 'pl-chip pl-chip-sale' : 'pl-chip'
+  return 'pl-chip'
 }
 </script>
 

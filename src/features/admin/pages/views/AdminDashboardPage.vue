@@ -66,7 +66,7 @@ const badgeMap = {
           <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
           <tbody>
             <tr v-for="o in data.recentOrders" :key="o.id">
-              <td><span style="font-weight:500">{{ o.id }}</span></td>
+              <td><span style="font-weight:500">{{ o.displayCode }}</span></td>
               <td>{{ o.customer }}</td>
               <td style="font-weight:600;color:var(--gold)">{{ o.total }}</td>
               <td><span class="badge" :class="badgeMap[o.status]">{{ o.statusLabel }}</span></td>

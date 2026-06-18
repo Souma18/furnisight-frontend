@@ -101,10 +101,16 @@
 .review-login-btn,
 .review-submit-btn { border: none; border-radius: 8px; background: var(--brand-gold-600); color: #fff; font-weight: 700; padding: 10px 16px; cursor: pointer; }
 .review-submit-btn:disabled { cursor: not-allowed; opacity: 0.55; }
-.rating-picker { display: flex; gap: 6px; }
+.rating-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .star-pick { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 1px solid var(--brand-cream-200); border-radius: 8px; background: #fff; color: #c9bba4; cursor: pointer; }
 .star-pick.active { color: #f5b301; border-color: #f5d38b; background: #fff9e9; }
+.star-pick.active svg { fill: currentColor; }
+.star-pick:not(:disabled):hover,
+.star-pick:not(:disabled):focus-visible { color: #f5b301; border-color: #f5d38b; background: #fff9e9; outline: none; }
+.star-pick:not(:disabled):hover svg,
+.star-pick:not(:disabled):focus-visible svg { fill: currentColor; }
 .star-pick:disabled { cursor: not-allowed; opacity: 0.55; }
+.rating-picked-label { margin-left: 8px; font-size: 13px; font-weight: 700; color: #8a650f; }
 .review-title-input,
 .review-content-input { width: 100%; border: 1px solid var(--brand-cream-200); border-radius: 8px; padding: 12px 14px; font: inherit; color: #1a1a1a; background: #fff; box-sizing: border-box; }
 .review-content-input { resize: vertical; min-height: 110px; line-height: 1.6; }

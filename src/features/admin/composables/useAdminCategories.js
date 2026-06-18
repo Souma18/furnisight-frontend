@@ -31,8 +31,8 @@ export function useAdminCategories() {
       adminApi.fetchCategories(),
       adminApi.fetchCategoryIconOptions(),
     ])
-    items.value = catRes.data?.items ?? catRes.data?.content ?? catRes.data ?? []
-    iconOptions.value = iconRes.data?.items ?? iconRes.data ?? []
+    items.value = Array.isArray(catRes.data) ? catRes.data : catRes.data?.items ?? []
+    iconOptions.value = Array.isArray(iconRes.data) ? iconRes.data : iconRes.data?.items ?? []
   }
 
   function openAdd() {

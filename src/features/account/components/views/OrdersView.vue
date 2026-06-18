@@ -25,6 +25,7 @@ const {
   statusClass,
   displayCode,
   hideBrokenImage,
+  orderListImage,
   formatPaymentDeadline,
   canCancelOrder,
   displayStatusLabel,
@@ -72,8 +73,8 @@ const {
         <div class="order-card-foot">
           <div class="order-thumbs">
             <span class="order-thumb">
-              <img v-if="order.firstProductImage" :src="order.firstProductImage" class="order-thumb-img" alt="product" @error="hideBrokenImage" />
-              <AppIcon name="image" :size="16" />
+              <img v-if="orderListImage(order)" :src="orderListImage(order)" class="order-thumb-img" alt="product" @error="hideBrokenImage" />
+              <AppIcon v-else name="image" :size="16" />
             </span>
           </div>
           <div class="order-card-actions">

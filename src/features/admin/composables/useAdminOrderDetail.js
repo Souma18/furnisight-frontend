@@ -2,7 +2,7 @@ import { ref, computed } from 'vue'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderDetailResponse } from '@shared/lib/api/services/orders/orders.model'
 import { formatVietnamAddress, PriceFormatter } from '@shared/lib/formatters'
-import { getOrderStatusLabel } from '@shared/lib/orders/orderStatusMapper'
+import { getOrderStatusLabel, isCodPayment } from '@shared/lib/orders/orderStatusMapper'
 
 export function useAdminOrderDetail(orderCode) {
   const order = ref(null)
@@ -29,7 +29,7 @@ export function useAdminOrderDetail(orderCode) {
   })
 
   function isCodOrder(current = order.value) {
-    return String(current?.paymentMethod || current?.paymentDetail?.paymentMethod || '').toLowerCase() === 'cod'
+    return isCodPayment(current)
   }
 
   const displayStatusMeta = computed(() => {

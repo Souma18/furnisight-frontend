@@ -112,6 +112,13 @@ export function useOrdersView(notify) {
     event.target.style.display = 'none'
   }
 
+  function orderListImage(order = {}) {
+    return order.firstProductImage
+      || order.items?.[0]?.imageUrl
+      || order.items?.[0]?.productSnapshot?.imageUrl
+      || ''
+  }
+
   function formatPaymentDeadline(order) {
     if (!canRetryPaymentNow(order)) return ''
     return `Còn ${formatCountdown(order)} để thanh toán`
@@ -147,6 +154,7 @@ export function useOrdersView(notify) {
     statusClass,
     displayCode,
     hideBrokenImage,
+    orderListImage,
     formatPaymentDeadline,
     canCancelOrder,
     displayStatusLabel,

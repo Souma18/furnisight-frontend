@@ -276,11 +276,9 @@ export async function getRoomRecommendations(roomType, options = {}) {
     },
   })
 
-  const products = Array.isArray(response.data?.products)
-    ? response.data.products
-    : Array.isArray(response.data?.content)
-      ? response.data.content
-      : []
+  const products = Array.isArray(response.data)
+    ? response.data
+    : response.data?.items ?? []
 
   return {
     recommendations: products.map((item) => ({

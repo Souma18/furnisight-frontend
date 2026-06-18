@@ -27,6 +27,13 @@ function iconName(value, fallback) {
   return typeof value === 'string' && value.trim() ? value : fallback
 }
 
+function accountStatusLabel(row) {
+  if (row?.statusLabel) return row.statusLabel
+  const status = String(row?.status || '').toUpperCase()
+  if (['BANNED', 'BLOCKED', 'LOCKED'].includes(status)) return 'Đã khóa'
+  return status || ''
+}
+
 async function deleteRole(role) {
   if (!role?.id) return
   if (role.system) {
@@ -118,7 +125,7 @@ async function confirmDeleteAdmin() {
         <template #cell-createdAt="{ row }">
           <span class="cell-muted">{{ row.createdAt }}</span>
         </template>
-        <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ row.statusLabel }}</span></template>
+        <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ accountStatusLabel(row) }}</span></template>
         <template #cell-actions="{ row }">
           <div class="row-actions row-actions--sm">
             <button type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="12" /></button>

@@ -39,7 +39,7 @@ export function useHomePage() {
       const data = response?.data
       const items = Array.isArray(data)
         ? data
-        : data?.items ?? data?.content ?? data?.data ?? []
+        : data?.items ?? []
 
       categories.value = items.map((item) => {
         const category = new CategoryResponse(item)
@@ -69,7 +69,7 @@ export function useHomePage() {
       })
       const items = Array.isArray(data)
         ? data
-        : data?.items ?? data?.content ?? data?.data ?? []
+        : data?.items ?? []
       combos.value = await Promise.all(items
         .filter((combo) => combo?.id)
         .map(async (combo) => ({
@@ -104,7 +104,7 @@ export function useHomePage() {
         category: selectedCategory.slug || selectedCategory.name,
         size: 8,
       })
-      const rawProducts = data?.products ?? data?.content ?? []
+      const rawProducts = Array.isArray(data) ? data : data?.items ?? []
       products.value = rawProducts.map((item) => new ProductResponse(item))
     } catch (error) {
       console.error('Failed to load products for category:', error)

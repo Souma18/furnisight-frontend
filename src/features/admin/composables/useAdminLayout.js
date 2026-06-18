@@ -31,7 +31,6 @@ function buildInitials(firstName, lastName) {
 function unwrapList(data) {
   if (Array.isArray(data)) return data
   if (Array.isArray(data?.items)) return data.items
-  if (Array.isArray(data?.content)) return data.content
   if (data?.data && data.data !== data) return unwrapList(data.data)
   return []
 }
@@ -42,8 +41,7 @@ function normalizeStatus(value) {
 
 function isPendingOrder(order = {}) {
   const status = normalizeStatus(order.status || order.statusKey || order.rawStatus)
-  const label = normalizeStatus(order.statusLabel)
-  return PENDING_ORDER_STATUSES.has(status) || status === 'pending' || label.includes('chờ')
+  return PENDING_ORDER_STATUSES.has(status) || status === 'pending'
 }
 
 function isLowInventoryItem(item = {}) {

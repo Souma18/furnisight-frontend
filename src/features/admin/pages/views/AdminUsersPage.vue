@@ -7,12 +7,12 @@ import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
-import { isAdminAccount } from '../../utils/adminAccountRoles'
+import { accountRoleNames, isAdminAccount } from '../../utils/adminAccountRoles'
 
 const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
 const userRows = computed(() => items.value
   .filter((item) => !isAdminAccount(item))
-  .map((item, index) => ({ ...item, stt: index + 1 })))
+  .map((item, index) => ({ ...normalizeUserRow(item), stt: index + 1 })))
 const statusTarget = ref(null)
 const updatingStatus = ref(false)
 const deleteTarget = ref(null)
@@ -25,6 +25,23 @@ const columns = [
 
 function isBlocked(user) {
   return ['blocked', 'banned', 'locked'].includes(String(user?.status || '').toLowerCase())
+}
+
+function userStatusLabel(user) {
+  if (user?.statusLabel) return user.statusLabel
+  return isBlocked(user) ? 'Đã khóa' : String(user?.status || '')
+}
+
+function normalizeUserRow(user = {}) {
+  const roleNames = accountRoleNames(user)
+  return {
+    ...user,
+    name: user.name || [user.lastName, user.firstName].filter(Boolean).join(' ') || user.username || user.email,
+    role: user.role || roleNames[0] || '',
+    orders: user.orders ?? user.orderCount ?? '',
+    avTone: user.avTone || 'blue',
+    av: user.av || String(user.name || user.username || user.email || 'U').slice(0, 1).toUpperCase(),
+  }
 }
 
 function requestStatusChange(user) {
@@ -111,7 +128,7 @@ async function confirmDeleteUser() {
   <AdminDataTable :columns="columns" :rows="userRows">
     <template #cell-name="{ row }"><div class="flex-cell"><div class="av" :class="`av-${row.avTone}`">{{ row.av }}</div><div class="cell-name">{{ row.name }}</div></div></template>
     <template #cell-role="{ row }"><span class="badge" :class="row.role === 'Admin' ? 'b-gold' : 'b-navy'">{{ row.role }}</span></template>
-    <template #cell-statusLabel="{ row }"><span class="badge" :class="row.status === 'active' ? 'b-success' : 'b-cancel'">{{ row.statusLabel }}</span></template>
+    <template #cell-statusLabel="{ row }"><span class="badge" :class="isBlocked(row) ? 'b-cancel' : 'b-success'">{{ userStatusLabel(row) }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
         <button type="button" class="ra-btn ra-view" title="Xem người dùng" @click="ui.openModal('viewUser', row)"><AppIcon name="eye" :size="14" /></button>
