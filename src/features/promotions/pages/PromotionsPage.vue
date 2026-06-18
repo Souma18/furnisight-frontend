@@ -5,9 +5,11 @@ import { storeToRefs } from 'pinia'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
+import { isPurchasableLine } from '@features/cart/lib/stockGuards'
 import { useComboCart } from '../composables/useComboCart'
 import { usePromotionToast } from '../composables/usePromotionToast'
 import { usePromotionsCombos } from '../composables/usePromotionsCombos'
+import { comboStockIssue } from '../lib/comboStock'
 import { usePromotionsVouchers } from '../composables/usePromotionsVouchers'
 import { useVoucherRailDrag } from '../composables/useVoucherRailDrag'
 import {
@@ -125,7 +127,9 @@ onMounted(async () => {
 })
 
 async function useVoucherNow() {
-  await router.push(cartItems.value.length ? '/checkout' : '/products')
+  await cartStore.ensureHydrated({ force: true }).catch(() => null)
+  const hasPurchasableItem = cartItems.value.some(isPurchasableLine)
+  await router.push(hasPurchasableItem ? '/checkout' : '/products')
 }
 
 function openCombo(combo) {
@@ -338,11 +342,14 @@ function openCombo(combo) {
         </div>
         <div class="modal-actions">
           <button type="button" class="combo-btn outline" @click="selectedCombo = null">Đóng</button>
-          <button type="button" class="combo-btn dark" :disabled="addingComboId === selectedCombo.id" @click="addComboToCart(selectedCombo)">
+          <button v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
+            <AppIcon name="cart" :size="14" />Hết hàng
+          </button>
+          <button v-else type="button" class="combo-btn dark" :disabled="addingComboId === selectedCombo.id" @click="addComboToCart(selectedCombo)">
             <AppIcon name="cart" :size="14" />{{ addingComboId === selectedCombo.id ? 'Đang thêm' : 'Thêm combo' }}
           </button>
-          <button type="button" class="combo-btn dark" :disabled="buyingComboId === selectedCombo.id" @click="buyCombo(selectedCombo)">
-            <AppIcon name="cart" :size="14" />{{ buyingComboId === selectedCombo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
+          <button v-if="!comboStockIssue(selectedCombo)" type="button" class="combo-btn dark" :disabled="buyingComboId === selectedCombo.id" @click="buyCombo(selectedCombo)">
+            <AppIcon name="creditCard" :size="14" />{{ buyingComboId === selectedCombo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
           </button>
         </div>
       </div>
@@ -432,6 +439,8 @@ function openCombo(combo) {
 .combo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .combo-btn { flex: 1; min-height: 38px; padding: 9px 10px; font-size: 12px; }
 .combo-btn.dark { background: #16233b; color: #fff; }
+.combo-btn.unavailable { background: #f1e7db; color: #7b6652; }
+.combo-btn.unavailable:disabled { cursor: not-allowed; }
 .load-more-wrap { text-align: center; padding-top: 24px; }
 .load-more { padding: 12px 22px; }
 .empty-state { border: 1px dashed #d8cdbb; border-radius: 14px; padding: 34px 18px; color: #7a6a5a; text-align: center; background: #fff; }

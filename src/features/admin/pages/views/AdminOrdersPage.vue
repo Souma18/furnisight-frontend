@@ -10,13 +10,14 @@ import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter, formatDate } from '@shared/lib/formatters'
 import {
   applyOrderStatusMapping,
+  canCancelOrder,
   canUpdateOrderStatus,
 } from '@shared/lib/orders/orderStatusMapper'
 
 const router = useRouter()
 const statusFilter = ref('')
 const dateFilter = ref('')
-const { items, search, ui } = useAdminListPage((params) => adminApi.fetchOrders({ ...params, size: 500 }))
+const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchOrders({ ...params, size: 500 }))
 const columns = [
   { key: 'orderCode', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },
@@ -80,6 +81,32 @@ function canUpdateStatus(row) {
   return canUpdateOrderStatus(row)
 }
 
+async function cancelOrder(row) {
+  const orderCode = row?.orderCode
+  if (!orderCode || !canCancelOrder(row)) return
+  const confirmed = window.confirm(`Hủy đơn ${row.orderCode || row.id}? Hàng trong đơn sẽ được trả lại kho.`)
+  if (!confirmed) return
+
+  try {
+    await adminApi.updateOrder(orderCode, {
+      status: 'CANCELLED',
+      note: 'Admin hủy đơn',
+    })
+    ui.showToast({
+      icon: 'check',
+      title: 'Đã hủy đơn',
+      subtitle: 'Đơn hàng đã được cập nhật và tồn kho sẽ được hoàn lại.',
+    })
+    await load()
+  } catch (error) {
+    ui.showToast({
+      icon: 'x',
+      title: 'Không thể hủy đơn',
+      subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại sau.',
+    })
+  }
+}
+
 function normalizeSearch(value) {
   return String(value ?? '')
     .normalize('NFD')
@@ -140,6 +167,15 @@ function resetFilters() {
         >
           <AppIcon name="edit" :size="14" />
         </button>
+        <button
+          v-if="canCancelOrder(row)"
+          type="button"
+          class="ra-btn ra-cancel"
+          title="Hủy đơn"
+          @click="cancelOrder(row)"
+        >
+          <AppIcon name="ban" :size="14" />
+        </button>
       </div>
     </template>
   </AdminDataTable>
@@ -176,5 +212,12 @@ function resetFilters() {
 .filter-reset:hover {
   border-color: var(--gold);
   color: var(--gold);
+}
+.ra-cancel {
+  color: var(--red2);
+}
+.ra-cancel:hover {
+  border-color: var(--red);
+  color: var(--red2);
 }
 </style>

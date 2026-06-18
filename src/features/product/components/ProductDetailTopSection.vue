@@ -1,15 +1,19 @@
 <script setup>
+import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-defineProps({
+const props = defineProps({
   product: { type: Object, required: true },
   selectedColor: { type: String, required: false },
   selectedSize: { type: String, required: false },
+  selectedStock: { type: Number, default: 0 },
+  selectedOutOfStock: { type: Boolean, default: false },
   qty: { type: Number, required: true },
   wished: { type: Boolean, default: false },
   activeImage: { type: String, required: true },
   cartAdding: { type: Boolean, default: false },
   cartAdded: { type: Boolean, default: false },
+  cartError: { type: String, default: '' },
 })
 
 const emit = defineEmits([
@@ -17,12 +21,39 @@ const emit = defineEmits([
   'pick-color',
   'pick-size',
   'change-qty',
+  'set-qty',
   'add-cart',
   'buy-now',
   'toggle-wish',
   'open-3d',
   'go-room3d',
 ])
+
+const isOutOfStock = computed(() => props.selectedOutOfStock || Number(props.selectedStock || 0) <= 0)
+const cannotIncrease = computed(() => Number(props.qty || 1) >= Number(props.selectedStock || 0))
+const qtyDraft = ref(String(props.qty || 1))
+
+watch(
+  () => props.qty,
+  (value) => {
+    qtyDraft.value = String(value || 1)
+  },
+)
+
+function handleQtyInput(value) {
+  qtyDraft.value = String(value ?? '').replace(/[^\d]/g, '')
+  if (qtyDraft.value !== '') {
+    emit('set-qty', qtyDraft.value)
+  }
+}
+
+function commitQtyInput() {
+  if (qtyDraft.value === '') {
+    qtyDraft.value = String(props.qty || 1)
+    return
+  }
+  emit('set-qty', qtyDraft.value)
+}
 </script>
 
 <template>
@@ -106,36 +137,50 @@ const emit = defineEmits([
 
       <div class="qty-row">
         <div class="qty-ctrl">
-          <button type="button" aria-label="Giảm số lượng" @click="emit('change-qty', -1)">
+          <button type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
             <AppIcon name="minus" :size="15" />
           </button>
-          <input :value="qty" readonly />
-          <button type="button" aria-label="Tăng số lượng" @click="emit('change-qty', 1)">
+          <input
+            :value="qtyDraft"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            :max="selectedStock || undefined"
+            :disabled="isOutOfStock"
+            aria-label="Số lượng"
+            @input="handleQtyInput($event.target.value)"
+            @blur="commitQtyInput"
+            @keydown.enter.prevent="commitQtyInput"
+          />
+          <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
             <AppIcon name="plus" :size="15" />
           </button>
         </div>
-        <span>{{ product.stock > 0 ? `Còn hàng (${product.stock} sản phẩm)` : 'Tạm hết hàng' }}</span>
+        <span>{{ selectedStock > 0 ? `Còn hàng (${selectedStock} sản phẩm)` : 'Tạm hết hàng' }}</span>
       </div>
+      <p v-if="isOutOfStock || cartError" class="pd-cart-error">
+        {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
+      </p>
       <div class="actions">
         <button
           type="button"
           class="outline"
           :class="{ loading: cartAdding, added: cartAdded }"
-          :disabled="cartAdding"
+          :disabled="cartAdding || isOutOfStock"
           @click="emit('add-cart')"
         >
           <AppIcon v-if="cartAdded" name="check" :size="17" />
           <AppIcon v-else name="cart" :size="17" />
-          {{ cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
+          {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
         </button>
         <button
           type="button"
           class="solid"
-          :disabled="cartAdding"
+          :disabled="cartAdding || isOutOfStock"
           @click="emit('buy-now')"
         >
-          <AppIcon name="sparkles" :size="17" />
-          {{ cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
+          <AppIcon :name="isOutOfStock ? 'ban' : 'creditCard'" :size="17" />
+          {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
         </button>
         <button
           type="button"

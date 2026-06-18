@@ -9,6 +9,7 @@ import { useCheckoutStore } from '../store/checkoutStore'
 import { useCheckoutOrder } from './useCheckoutOrder'
 import { useCheckoutSession } from './useCheckoutSession'
 import { formatCheckoutMoney } from '../utils/checkoutPricing'
+import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/stockGuards'
 
 export function useCheckout() {
   const route = useRoute()
@@ -23,6 +24,7 @@ export function useCheckout() {
   const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
   const toast = ref({ show: false, icon: 'check', title: '', subtitle: '' })
+  const selectedAddressId = ref('')
 
   const lineIdsFromQuery = computed(() => {
     const raw = route.query.lines
@@ -32,12 +34,17 @@ export function useCheckout() {
   const requestedComboId = computed(() => String(route.query.comboId || '').trim())
 
   const checkoutLines = computed(() => {
-    const available = cartStore.items.filter((item) => !item.outOfStock)
+    const available = cartStore.items.filter(isPurchasableLine)
     if (!lineIdsFromQuery.value.length) return available
     return available.filter((item) => lineIdsFromQuery.value.includes(item.id))
   })
 
-  const defaultAddress = computed(() => addressStore.defaultAddress)
+  const addressList = computed(() => addressStore.addresses)
+  const selectedAddress = computed(() => {
+    if (!addressList.value.length) return null
+    return addressList.value.find((item) => String(item.id) === String(selectedAddressId.value))
+      ?? addressStore.defaultAddress
+  })
   const summary = computed(() => checkoutStore.buildSummary(checkoutLines.value))
 
   const isEmpty = computed(() => checkoutLines.value.length === 0)
@@ -47,7 +54,7 @@ export function useCheckout() {
     checkoutLines,
     checkoutState,
     checkoutStore,
-    defaultAddress,
+    selectedAddress,
     orderStore,
     showSuccess,
     showToast,
@@ -79,6 +86,7 @@ export function useCheckout() {
       addressStore.fetchAddresses(),
       hydrateSession({ loadCombos: !requestedComboId.value }),
     ])
+    syncSelectedAddress()
     if (requestedComboId.value) {
       await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
     } else {
@@ -90,12 +98,47 @@ export function useCheckout() {
     router.push({ path: '/account', query: { view: 'cart' } })
   }
 
-  function goChangeAddress() {
-    router.push({ path: '/account', query: { view: 'address' } })
+  function syncSelectedAddress() {
+    if (!addressList.value.length) {
+      selectedAddressId.value = ''
+      return
+    }
+    if (!selectedAddressId.value || !addressList.value.some((item) => String(item.id) === String(selectedAddressId.value))) {
+      selectedAddressId.value = addressStore.defaultAddress?.id ?? addressList.value[0]?.id ?? ''
+    }
+  }
+
+  function selectAddress(addressId) {
+    selectedAddressId.value = addressId
+  }
+
+  async function saveCheckoutAddress(payload) {
+    try {
+      const addressId = payload?.id
+      const nextAddresses = addressId
+        ? await addressStore.updateAddress(addressId, payload)
+        : await addressStore.addAddress(payload)
+      const nextSelected = addressId
+        ? addressId
+        : (nextAddresses.find((item) => item.isDefault)?.id ?? nextAddresses[0]?.id)
+      selectedAddressId.value = nextSelected ?? ''
+      showToast({
+        icon: 'mapPin',
+        title: addressId ? 'Đã cập nhật địa chỉ' : 'Đã thêm địa chỉ mới',
+        subtitle: 'Bạn có thể dùng địa chỉ này cho đơn hàng hiện tại.',
+      })
+    } catch (error) {
+      showToast({
+        icon: 'alert',
+        title: 'Không lưu được địa chỉ',
+        subtitle: error?.response?.data?.message || error.message || 'Vui lòng kiểm tra lại thông tin địa chỉ.',
+      })
+    }
   }
 
   async function updateLineQty(lineId, nextQty) {
-    await cartStore.updateQty(lineId, nextQty)
+    const line = cartStore.items.find((item) => item.id === lineId)
+    await cartStore.updateQty(lineId, clampPurchaseQuantity(nextQty, line))
     await refreshApplicableCombo(checkoutLines.value)
   }
 
@@ -111,10 +154,14 @@ export function useCheckout() {
     { deep: true },
   )
 
+  watch(addressList, syncSelectedAddress, { deep: true })
+
   return {
     ...checkoutState,
     checkoutLines,
-    defaultAddress,
+    addressList,
+    selectedAddress,
+    selectedAddressId,
     summary,
     isEmpty,
     showSuccess,
@@ -122,7 +169,8 @@ export function useCheckout() {
     formatMoney: formatCheckoutMoney,
     initCheckout,
     goBackToCart,
-    goChangeAddress,
+    selectAddress,
+    saveCheckoutAddress,
     updateLineQty,
     placeOrder,
     showToast,

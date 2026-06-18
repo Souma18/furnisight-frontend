@@ -12,6 +12,7 @@ const {
   facets,
   loading,
   searchKeyword,
+  selectedRootCategory,
   selectedCategory,
   sortBy,
   viewMode,
@@ -41,7 +42,7 @@ const {
     <ProductListToolbar
       v-model="searchKeyword"
       :quick-filters="dynamicQuickFilters"
-      :selected-category="selectedCategory"
+      :selected-category="selectedRootCategory"
       :sale-only="saleOnly"
       :view-mode="viewMode"
       @toggle-category="toggleCategory"

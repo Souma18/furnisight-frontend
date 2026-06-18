@@ -4,14 +4,19 @@ import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import { useAdminOrderDetail } from '../../composables/useAdminOrderDetail'
+import { useAdminUiStore } from '../../store/adminUiStore'
+import { adminApi } from '@shared/lib/api/services'
+import { canCancelOrder } from '@shared/lib/orders/orderStatusMapper'
 
 const props = defineProps({
   orderCode: { type: String, required: true },
 })
 
 const router = useRouter()
+const ui = useAdminUiStore()
 const orderCodeRef = computed(() => props.orderCode)
 const titleHtml = computed(() => `Chi tiết <em` + `>${orderCodeRef.value}</em` + `>`)
+const canCancelCurrentOrder = computed(() => canCancelOrder(order.value))
 
 const {
   order,
@@ -41,6 +46,31 @@ function hideBrokenImage(event) {
   event.target.style.display = 'none'
 }
 
+async function cancelCurrentOrder() {
+  if (!order.value?.orderCode || !canCancelCurrentOrder.value) return
+  const confirmed = window.confirm(`Hủy đơn ${order.value.orderCode}? Hàng trong đơn sẽ được trả lại kho.`)
+  if (!confirmed) return
+
+  try {
+    await adminApi.updateOrder(order.value.orderCode, {
+      status: 'CANCELLED',
+      note: 'Admin hủy đơn',
+    })
+    ui.showToast({
+      icon: 'check',
+      title: 'Đã hủy đơn',
+      subtitle: 'Đơn hàng đã được cập nhật và tồn kho sẽ được hoàn lại.',
+    })
+    await load()
+  } catch (error) {
+    ui.showToast({
+      icon: 'x',
+      title: 'Không thể hủy đơn',
+      subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại sau.',
+    })
+  }
+}
+
 watch(() => props.orderCode, load, { immediate: true })
 </script>
 
@@ -51,6 +81,9 @@ watch(() => props.orderCode, load, { immediate: true })
     subtitle="Thông tin sản phẩm, giao hàng và thanh toán"
   >
     <template #actions>
+      <button v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="cancelCurrentOrder">
+        <AppIcon name="ban" :size="15" />Hủy đơn
+      </button>
       <button type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
         <AppIcon name="chevronLeft" :size="15" />Quay lại
       </button>
@@ -160,6 +193,23 @@ watch(() => props.orderCode, load, { immediate: true })
   color: var(--text2);
 }
 .admin-detail-state--error { color: var(--red2); }
+.btn-cancel-order {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--red-bg);
+  border-radius: 8px;
+  background: var(--red-bg);
+  color: var(--red2);
+  font-family: var(--sans);
+  font-weight: 700;
+  cursor: pointer;
+}
+.btn-cancel-order:hover {
+  border-color: var(--red);
+}
 .admin-order-detail {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;

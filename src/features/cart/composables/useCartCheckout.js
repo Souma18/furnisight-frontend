@@ -1,5 +1,9 @@
-export function useCartCheckout(router, selectedItems, selectedCount) {
-  function handleCheckout() {
+export function useCartCheckout(router, selectedItems, selectedCount, ensureHydrated) {
+  async function handleCheckout() {
+    if (ensureHydrated) {
+      await ensureHydrated({ force: true }).catch(() => null)
+    }
+
     if (!selectedCount.value) return
 
     const lineIds = selectedItems.value.map((item) => item.id).join(',')

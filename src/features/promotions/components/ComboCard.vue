@@ -1,6 +1,7 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
+import { comboStockIssue } from '../lib/comboStock'
 
 const props = defineProps({
   combo: { type: Object, required: true },
@@ -16,6 +17,10 @@ function comboPreviewItems(combo = {}) {
 
 function comboRoomLabel(combo = {}) {
   return combo.roomLabel || combo.items?.[0]?.categoryName || 'Nội thất'
+}
+
+function stockIssue(combo = {}) {
+  return combo.stockIssue || comboStockIssue(combo)
 }
 </script>
 
@@ -63,10 +68,11 @@ function comboRoomLabel(combo = {}) {
         <button
           type="button"
           class="combo-btn dark"
-          :disabled="buyingId === combo.id"
+          :class="{ unavailable: stockIssue(combo) }"
+          :disabled="buyingId === combo.id || Boolean(stockIssue(combo))"
           @click.stop="emit('buy', combo)"
         >
-          <AppIcon name="cart" :size="14" />{{ buyingId === combo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
+          <AppIcon name="cart" :size="14" />{{ stockIssue(combo) ? 'Hết hàng' : buyingId === combo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
         </button>
       </div>
     </div>
@@ -225,9 +231,16 @@ function comboRoomLabel(combo = {}) {
   background: #16233b;
   color: #fff;
 }
+.combo-btn.unavailable {
+  background: #f1e7db;
+  color: #7b6652;
+}
 .combo-btn:disabled {
   opacity: .65;
   cursor: wait;
+}
+.combo-btn.unavailable:disabled {
+  cursor: not-allowed;
 }
 
 .combo-card--compact .combo-media {

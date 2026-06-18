@@ -23,7 +23,8 @@ const checkoutStore = useCheckoutStore()
 
 const {
   checkoutLines,
-  defaultAddress,
+  addressList,
+  selectedAddressId,
   summary,
   isEmpty,
   loading,
@@ -49,7 +50,8 @@ const {
   formatMoney,
   initCheckout,
   goBackToCart,
-  goChangeAddress,
+  selectAddress,
+  saveCheckoutAddress,
   updateLineQty,
   placeOrder,
   showToast,
@@ -131,7 +133,12 @@ function handleContinueShopping() {
     <template v-else-if="!isEmpty">
       <div class="checkout-body">
         <div>
-          <CheckoutAddressCard :address="defaultAddress" @change-address="goChangeAddress" />
+          <CheckoutAddressCard
+            :addresses="addressList"
+            :selected-address-id="selectedAddressId"
+            @select-address="selectAddress"
+            @save-address="saveCheckoutAddress"
+          />
 
           <CheckoutShopCard
             :lines="checkoutLines"

@@ -1,4 +1,5 @@
 import { formatVietnamAddress } from '@shared/lib/formatters'
+import { clampPurchaseQuantity } from '@features/cart/lib/stockGuards'
 
 export function buildShippingAddressDetail(address = {}) {
   return formatVietnamAddress(address)
@@ -39,7 +40,7 @@ export function buildOrderItemPayload(item = {}) {
     categoryName: item.categoryName || item.categoryLabel || '',
     productName: item.productName || item.name,
     price: Number(item.price) || 0,
-    quantity: Math.max(1, Number(item.qty ?? item.quantity) || 1),
+    quantity: clampPurchaseQuantity(item.qty ?? item.quantity, item),
     imageUrl: resolveLineImageUrl(item),
   }
 }

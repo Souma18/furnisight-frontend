@@ -10,12 +10,14 @@ export function useProductCart({ product, buildCartPayload }) {
   const authStore = useAuthStore()
   const cartAdding = ref(false)
   const cartAdded = ref(false)
+  const cartError = ref('')
   let cartAddedTimer = null
 
   function resetCartButtonState() {
     clearTimeout(cartAddedTimer)
     cartAdding.value = false
     cartAdded.value = false
+    cartError.value = ''
   }
 
   function findCartLine(items, payload) {
@@ -30,6 +32,7 @@ export function useProductCart({ product, buildCartPayload }) {
 
   async function addToCart() {
     if (!product.value || cartAdding.value) return null
+    cartError.value = ''
 
     if (!authStore.isAuthenticated) {
       openAuthModal()
@@ -47,6 +50,11 @@ export function useProductCart({ product, buildCartPayload }) {
 
     try {
       const payload = buildCartPayload()
+      const stockQuantity = Number(payload.stockQuantity)
+      if (payload.outOfStock || (Number.isFinite(stockQuantity) && stockQuantity <= 0)) {
+        cartError.value = 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.'
+        return null
+      }
       const items = await cartStore.addItem(payload)
       const addedLine = findCartLine(items, payload)
       cartAdded.value = true
@@ -56,6 +64,13 @@ export function useProductCart({ product, buildCartPayload }) {
       return addedLine
     } catch (e) {
       cartAdded.value = false
+      if (e?.message === 'out_of_stock') {
+        cartError.value = 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.'
+      } else if (e?.message === 'stock_limit_reached') {
+        cartError.value = 'Số lượng trong giỏ đã đạt giới hạn tồn kho.'
+      } else {
+        cartError.value = e?.response?.data?.message || 'Không thể thêm sản phẩm vào giỏ. Vui lòng thử lại.'
+      }
       console.error('Failed to add product to cart:', e)
       return null
     } finally {
@@ -78,6 +93,7 @@ export function useProductCart({ product, buildCartPayload }) {
   return {
     cartAdding,
     cartAdded,
+    cartError,
     resetCartButtonState,
     addToCart,
     buyNow,

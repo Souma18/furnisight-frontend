@@ -1,5 +1,6 @@
 import { buildOrderPayload, buildShippingAddressDetail } from '../utils/checkoutOrderPayload'
 import { ordersApi } from '@shared/lib/api/services'
+import { isPurchasableLine, stockLimitLabel } from '@features/cart/lib/stockGuards'
 
 export function useCheckoutOrder({
   authStore,
@@ -7,7 +8,7 @@ export function useCheckoutOrder({
   checkoutLines,
   checkoutState,
   checkoutStore,
-  defaultAddress,
+  selectedAddress,
   orderStore,
   showSuccess,
   showToast,
@@ -30,11 +31,11 @@ export function useCheckoutOrder({
       }
     }
 
-    if (!defaultAddress.value) {
+    if (!selectedAddress.value) {
       return {
         icon: 'mapPin',
         title: 'Chưa có địa chỉ giao hàng',
-        subtitle: 'Vui lòng thêm địa chỉ mặc định trong tài khoản.',
+        subtitle: 'Vui lòng chọn hoặc thêm địa chỉ giao hàng.',
       }
     }
 
@@ -46,7 +47,16 @@ export function useCheckoutOrder({
       }
     }
 
-    const address = defaultAddress.value
+    const invalidLine = checkoutLines.value.find((line) => !isPurchasableLine(line))
+    if (invalidLine) {
+      return {
+        icon: 'alert',
+        title: 'Số lượng vượt tồn kho',
+        subtitle: `${invalidLine.name || 'Sản phẩm'} chỉ có thể mua ${stockLimitLabel(invalidLine).toLowerCase()}.`,
+      }
+    }
+
+    const address = selectedAddress.value
     const shippingAddressDetail = buildShippingAddressDetail(address)
     const shippingAddressName = address.fullName || address.name || ''
 
@@ -135,7 +145,7 @@ export function useCheckoutOrder({
 
     const linesSnapshot = [...checkoutLines.value]
     const orderPayload = buildOrderPayload({
-      address: defaultAddress.value,
+      address: selectedAddress.value,
       checkoutState,
       lines: linesSnapshot,
       summary: summary.value,
@@ -178,7 +188,7 @@ export function useCheckoutOrder({
       order,
       lines: linesSnapshot,
       summary: summary.value,
-      address: defaultAddress.value,
+      address: selectedAddress.value,
     })
     showSuccess.value = true
     await removeOrderedLines(linesSnapshot)

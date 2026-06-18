@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { promotionsApi } from '@shared/lib/api/services'
 import { normalizeCombo, normalizeList } from '../lib/promotionNormalizers'
+import { comboStockIssue, enrichComboItemStock } from '../lib/comboStock'
 
 const COMBO_PAGE_SIZE = 6
 
@@ -32,7 +33,10 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
       const payload = response.data || {}
       const rows = await Promise.all(normalizeList(payload).map(async (rawCombo) => {
         const combo = normalizeCombo(rawCombo)
-        combo.items = await Promise.all(combo.items.map(enrichComboItemImage))
+        combo.items = await Promise.all(combo.items.map(async (item) =>
+          enrichComboItemStock(await enrichComboItemImage(item)),
+        ))
+        combo.stockIssue = comboStockIssue(combo)
         return combo
       }))
       comboTotal.value = Number(payload.totalElements ?? payload.total ?? rows.length)

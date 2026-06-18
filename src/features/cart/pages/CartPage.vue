@@ -32,8 +32,9 @@ const {
   getVariantOptions,
   applyActiveItemChanges,
   changeDraftQty,
+  setDraftQty,
 } = useCartItemEditor(items, updateItem)
-const { handleCheckout } = useCartCheckout(router, selectedItems, selectedCount)
+const { handleCheckout } = useCartCheckout(router, selectedItems, selectedCount, ensureHydrated)
 
 onMounted(async () => {
   try {
@@ -167,7 +168,15 @@ const formatPrice = PriceFormatter.format
               <span>Số lượng</span>
               <div class="modal-qty">
                 <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
-                <input :value="activeDraft.qty" readonly />
+                <input
+                  :value="activeDraft.qty"
+                  type="number"
+                  inputmode="numeric"
+                  min="1"
+                  :disabled="editorLoading"
+                  @input="setDraftQty($event.target.value)"
+                  @blur="setDraftQty($event.target.value)"
+                />
                 <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
               </div>
             </label>
@@ -320,6 +329,9 @@ const formatPrice = PriceFormatter.format
   background: rgba(255,255,255,0.45);
   color: #8b7d68;
 }
+.modal-qty input::-webkit-outer-spin-button,
+.modal-qty input::-webkit-inner-spin-button { margin: 0; appearance: none; }
+.modal-qty input[type="number"] { appearance: textfield; }
 
 .variant-modal-backdrop {
   position: fixed;

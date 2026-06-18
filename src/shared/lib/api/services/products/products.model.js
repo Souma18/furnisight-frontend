@@ -19,10 +19,15 @@ export class ProductResponse {
     this.categoryId = data.categoryId || data.category?.id || null
     this.categoryName = data.categoryName || data.category?.name || data.category?.label || ''
     this.category = data.category ? new CategoryResponse(data.category) : null
+    this.categoryTrail = Array.isArray(data.categoryTrail) ? data.categoryTrail : buildCategoryTrail(data.category)
+    this.breadcrumb = Array.isArray(data.breadcrumb) ? data.breadcrumb : []
     this.images = Array.isArray(data.images) ? data.images : []
     this.gallery = gallery
     this.image = data.image || data.imageUrl || gallery[0] || ''
     this.stockQuantity = data.stockQuantity ?? data.stock ?? primaryVariant?.stockQuantity ?? 0
+    this.outOfStock = data.outOfStock != null
+      ? Boolean(data.outOfStock)
+      : (variants.length ? variants.every((variant) => Number(variant.stockQuantity || 0) <= 0) : Number(this.stockQuantity || 0) <= 0)
     this.attributes = Array.isArray(data.attributes) ? data.attributes : []
     this.tags = Array.isArray(data.tags) ? data.tags : []
     this.rating = data.rating ?? 0
@@ -60,7 +65,7 @@ export class ProductResponse {
 
   get stock() {
     const variantStock = this.variants.reduce((total, variant) => total + (variant.stockQuantity || 0), 0)
-    return variantStock || this.fallbackStock || 0
+    return variantStock > 0 ? variantStock : this.fallbackStock || 0
   }
 
   get formattedPrice() {
@@ -78,6 +83,8 @@ export class CategoryResponse {
     this.name = data.name || data.label || ''
     this.label = data.label || data.name || ''
     this.parentId = data.parentId || null
+    this.path = data.path || ''
+    this.parentLabel = data.parentLabel || data.parentName || ''
     this.productCount = data.productCount ?? 0
     this.imageUrl = data.imageUrl || data.image || ''
     this.iconUrl = data.iconUrl || ''
@@ -145,6 +152,24 @@ export function formatReviewDateTime(value) {
     pad(date.getMonth() + 1),
     date.getFullYear(),
   ].join('/') + ` ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
+function buildCategoryTrail(category) {
+  if (!category || typeof category !== 'object') return []
+
+  const currentLabel = category.label || category.name || ''
+  const currentSlug = category.slug || category.id || ''
+  const parentLabel = category.parentLabel || category.parentName || ''
+  const parentSlug = category.parentSlug || category.parentId || ''
+
+  if (parentLabel) {
+    return [
+      { label: parentLabel, slug: parentSlug },
+      { label: currentLabel, slug: currentSlug },
+    ].filter((item) => item.label)
+  }
+
+  return []
 }
 
 function normalizeVariants(data = {}) {

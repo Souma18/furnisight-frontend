@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { resolveStockLimit } from '../lib/stockGuards'
 
 const props = defineProps({
   items: {
@@ -28,6 +29,11 @@ function lineMeta(line) {
 
 function hideBrokenImage(event) {
   event.currentTarget.style.display = 'none'
+}
+
+function cannotIncrease(line) {
+  const stockLimit = resolveStockLimit(line)
+  return stockLimit != null && Number(line.qty || 1) >= stockLimit
 }
 </script>
 
@@ -73,9 +79,9 @@ function hideBrokenImage(event) {
 
         <div class="cart-item-controls" @click.stop @keydown.stop>
           <div class="cart-item-qty-stepper">
-            <button type="button" aria-label="Giảm số lượng" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
+            <button type="button" aria-label="Giảm số lượng" :disabled="Number(line.qty || 1) <= 1" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
             <span>{{ line.qty }}</span>
-            <button type="button" aria-label="Tăng số lượng" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
+            <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease(line)" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
           </div>
         </div>
 
@@ -251,6 +257,10 @@ function hideBrokenImage(event) {
   background: transparent;
   color: #7a6a55;
   cursor: pointer;
+}
+.cart-item-qty-stepper button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 
 .cart-item-qty-stepper span {

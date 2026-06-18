@@ -1,9 +1,10 @@
 import { computed, ref, watch } from 'vue'
+import { isPurchasableLine } from '../lib/stockGuards'
 
 export function useCartSelection(items) {
   const checkedIds = ref([])
 
-  const availableItems = computed(() => items.value.filter((item) => !item.outOfStock))
+  const availableItems = computed(() => items.value.filter(isPurchasableLine))
   const availableItemIds = computed(() => availableItems.value.map((item) => item.id))
   const allAvailableChecked = computed(() =>
     availableItemIds.value.length > 0 &&
@@ -13,7 +14,7 @@ export function useCartSelection(items) {
     checkedIds.value.some((id) => availableItemIds.value.includes(id)) && !allAvailableChecked.value,
   )
   const selectedItems = computed(() =>
-    items.value.filter((item) => checkedIds.value.includes(item.id) && !item.outOfStock),
+    items.value.filter((item) => checkedIds.value.includes(item.id) && isPurchasableLine(item)),
   )
   const selectedCount = computed(() => selectedItems.value.length)
   const total = computed(() =>
@@ -23,7 +24,7 @@ export function useCartSelection(items) {
   watch(
     items,
     (nextItems) => {
-      const availableIds = nextItems.filter((item) => !item.outOfStock).map((item) => item.id)
+      const availableIds = nextItems.filter(isPurchasableLine).map((item) => item.id)
       checkedIds.value = checkedIds.value.filter((id) => availableIds.includes(id))
     },
     { deep: true },

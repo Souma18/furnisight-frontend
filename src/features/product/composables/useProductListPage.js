@@ -26,13 +26,14 @@ export function useProductListPage() {
   const wishedProductIds = computed(() => wishlistStore.wishlistProductIds)
   const dynamicQuickFilters = ref([])
   const sidebarCategories = ref([])
+  const allCategories = ref([])
 
   const appliedFilters = ref(createDefaultProductFilters())
 
   function categoryDisplayName(slug) {
     const key = String(slug ?? '').toLowerCase()
     if (!key || key === 'all') return ''
-    const source = [...dynamicQuickFilters.value, ...sidebarCategories.value]
+    const source = [...dynamicQuickFilters.value, ...sidebarCategories.value, ...allCategories.value]
     const category = source.find((item) => String(item.slug ?? item.id ?? '').toLowerCase() === key)
     return category?.label || category?.name || ''
   }
@@ -57,8 +58,58 @@ export function useProductListPage() {
 
   function parseQueryPreset() {
     const preset = parseProductListQueryPreset(route.query)
-    selectedCategory.value = preset.selectedCategory
+    applyCategorySelection(preset.selectedCategory)
     searchKeyword.value = preset.searchKeyword
+  }
+
+  function applyCategorySelection(slug) {
+    const key = String(slug || 'all').trim().toLowerCase()
+    if (!key || key === 'all') {
+      selectedCategory.value = 'all'
+      selectedSubcategory.value = 'all'
+      return
+    }
+
+    const category = findCategory(key)
+    if (category?.parentId) {
+      const parent = findCategory(category.parentId)
+      selectedCategory.value = parent?.slug || parent?.id || 'all'
+      selectedSubcategory.value = category.slug || category.id || key
+      return
+    }
+
+    selectedCategory.value = category?.slug || category?.id || key
+    selectedSubcategory.value = 'all'
+  }
+
+  function findCategory(key) {
+    const normalized = String(key ?? '').trim().toLowerCase()
+    return allCategories.value.find((item) =>
+      [item.slug, item.id, item.name, item.label]
+        .filter(Boolean)
+        .some((value) => String(value).trim().toLowerCase() === normalized),
+    )
+  }
+
+  async function loadAllCategories() {
+    try {
+      const { data } = await productsApi.getCategories()
+      allCategories.value = (Array.isArray(data) ? data : []).map((item) => {
+        const category = new CategoryResponse(item)
+        return {
+          id: category.id,
+          slug: category.slug || category.id,
+          label: category.name,
+          name: category.name,
+          parentId: category.parentId,
+          path: category.path,
+          count: category.productCount || 0,
+        }
+      })
+    } catch (e) {
+      console.error('Failed to load categories', e)
+      allCategories.value = []
+    }
   }
 
   async function loadQuickFilters() {
@@ -79,8 +130,7 @@ export function useProductListPage() {
     try {
       let data
       if (!rootSlug || rootSlug === 'all') {
-        const res = await productsApi.getCategories()
-        data = res.data.filter(c => c.parentId)
+        data = allCategories.value.filter(c => c.parentId)
       } else {
         const res = await productsApi.getSubcategories(rootSlug)
         data = res.data
@@ -107,8 +157,12 @@ export function useProductListPage() {
   })
 
   function toggleCategory(chip) {
+    suppressCategoryWatch.value = true
     selectedCategory.value = selectedCategory.value === chip.slug ? 'all' : chip.slug
     selectedSubcategory.value = 'all'
+    loadSidebarCategories(selectedCategory.value).finally(() => {
+      suppressCategoryWatch.value = false
+    })
     requestList()
   }
 
@@ -167,9 +221,11 @@ export function useProductListPage() {
   }
 
   const suppressListWatch = ref(false)
+  const suppressCategoryWatch = ref(false)
 
   // Watch root category changes to load subcategories
   watch(selectedCategory, (newCat) => {
+    if (suppressCategoryWatch.value) return
     selectedSubcategory.value = 'all'
     loadSidebarCategories(newCat)
   })
@@ -179,9 +235,12 @@ export function useProductListPage() {
     requestList()
   })
 
-  watch(() => route.query, () => {
+  watch(() => route.query, async () => {
     suppressListWatch.value = true
+    suppressCategoryWatch.value = true
     parseQueryPreset()
+    await loadSidebarCategories(selectedCategory.value)
+    suppressCategoryWatch.value = false
     suppressListWatch.value = false
     requestList()
   }, { deep: true })
@@ -200,10 +259,12 @@ export function useProductListPage() {
       }
     }
     
-    const label = categoryDisplayName(selectedCategory.value) || 'Sản phẩm'
+    const rootLabel = categoryDisplayName(selectedCategory.value) || 'Sản phẩm'
+    const subLabel = categoryDisplayName(selectedSubcategory.value)
+    const label = subLabel || rootLabel
     
     return {
-      breadcrumb: ['Trang chủ', 'Sản phẩm', label],
+      breadcrumb: ['Trang chủ', 'Sản phẩm', rootLabel, ...(subLabel ? [subLabel] : [])],
       title: label,
       subtitle: `${label} tinh tế và hiện đại`,
       stats: [
@@ -214,11 +275,14 @@ export function useProductListPage() {
     }
   })
 
-  onMounted(() => {
+  onMounted(async () => {
     suppressListWatch.value = true
+    suppressCategoryWatch.value = true
+    await loadAllCategories()
     parseQueryPreset()
-    loadQuickFilters()
-    loadSidebarCategories(selectedCategory.value)
+    await loadQuickFilters()
+    await loadSidebarCategories(selectedCategory.value)
+    suppressCategoryWatch.value = false
     suppressListWatch.value = false
     requestList()
 
@@ -233,6 +297,7 @@ export function useProductListPage() {
     facets: enrichedFacets,
     loading,
     searchKeyword,
+    selectedRootCategory: computed(() => selectedCategory.value),
     selectedCategory: computed(() =>
       selectedSubcategory.value !== 'all' ? selectedSubcategory.value : selectedCategory.value
     ),

@@ -167,6 +167,61 @@
 }
 .co-addr-street { font-size: 0.78rem; color: var(--co-text-mid); margin-top: 0.25rem; line-height: 1.5; }
 .co-empty { padding: 1rem; color: var(--co-text-mid); font-size: 0.84rem; }
+.co-address-list { display: grid; gap: 0.55rem; padding: 0.85rem 1rem; }
+.co-address-option {
+  display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 0.7rem; align-items: flex-start;
+  padding: 0.8rem; border: 1.5px solid var(--co-cream-dark); border-radius: 12px; cursor: pointer;
+  background: #fff; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.co-address-option input { margin-top: 0.7rem; accent-color: var(--co-gold); }
+.co-address-option--active {
+  border-color: rgba(201,146,42,.7);
+  background: linear-gradient(90deg, rgba(229,184,74,.12), #fff);
+  box-shadow: 0 10px 24px rgba(201,146,42,.08);
+}
+.co-address-main { min-width: 0; }
+.co-address-edit {
+  border: 1px solid var(--co-cream-mid); background: #fff; color: var(--co-navy);
+  border-radius: 8px; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+}
+.co-address-edit:hover { border-color: var(--co-gold); color: var(--co-gold); }
+.co-address-modal {
+  position: fixed; inset: 0; z-index: 150; display: grid; place-items: center;
+  padding: 1rem; background: rgba(18,32,46,.54);
+}
+.co-address-dialog {
+  width: min(620px, 100%); max-height: min(90vh, 720px); overflow: auto;
+  background: #fff; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,.28);
+}
+.co-address-dialog-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1rem 1.1rem; border-bottom: 1px solid var(--co-cream-dark);
+}
+.co-address-dialog-head h3 { margin: 0; font-size: 1rem; color: var(--co-navy); }
+.co-address-close {
+  width: 32px; height: 32px; border: 1px solid var(--co-cream-mid); border-radius: 8px;
+  background: #fff; color: var(--co-text-mid); cursor: pointer; font-size: 1.2rem;
+}
+.co-address-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; padding: 1rem 1.1rem; }
+.co-address-form label { display: grid; gap: 0.35rem; font-size: 0.76rem; color: var(--co-text-mid); font-weight: 700; }
+.co-address-form input,
+.co-address-form select {
+  width: 100%; min-height: 38px; border: 1.5px solid var(--co-cream-mid); border-radius: 9px;
+  padding: 0 0.7rem; font: inherit; font-size: 0.82rem; color: var(--co-navy); background: #fff;
+}
+.co-address-form-full { grid-column: 1 / -1; }
+.co-address-default-check { align-self: end; grid-template-columns: auto minmax(0,1fr) !important; align-items: center; }
+.co-address-default-check input { width: auto; min-height: auto; accent-color: var(--co-gold); }
+.co-address-warning { margin: 0 1.1rem; color: var(--co-red); font-size: 0.78rem; }
+.co-address-dialog-actions {
+  display: flex; justify-content: flex-end; gap: 0.65rem; padding: 1rem 1.1rem; border-top: 1px solid var(--co-cream-dark);
+}
+.co-address-secondary,
+.co-address-primary {
+  min-height: 38px; border-radius: 9px; padding: 0 1rem; font-weight: 700; cursor: pointer;
+}
+.co-address-secondary { border: 1.5px solid var(--co-cream-mid); background: #fff; color: var(--co-text-mid); }
+.co-address-primary { border: 0; background: linear-gradient(135deg, var(--co-gold-light), var(--co-gold)); color: var(--co-navy); }
 
 .co-shop-head {
   display: flex; align-items: center; gap: 0.55rem;
@@ -194,6 +249,7 @@
 }
 .co-prod-name { font-size: 0.82rem; font-weight: 500; line-height: 1.35; }
 .co-prod-variant { font-size: 0.7rem; color: var(--co-text-light); margin-top: 0.2rem; }
+.co-prod-stock { margin-top: 0.24rem; color: #b45309; font-size: 0.68rem; font-weight: 600; }
 .co-prod-variant span {
   background: var(--co-cream); padding: 0.1rem 0.4rem; border-radius: 5px;
   border: 1px solid var(--co-cream-mid); margin-right: 0.25rem;
@@ -203,6 +259,10 @@
 .co-qty { display: inline-flex; border: 1.5px solid var(--co-cream-mid); border-radius: 8px; overflow: hidden; }
 .co-qty button {
   width: 28px; height: 28px; border: none; background: var(--co-cream); cursor: pointer; color: var(--co-text-mid);
+}
+.co-qty button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 .co-qty span {
   width: 32px; height: 28px; display: grid; place-items: center; font-size: 0.78rem; font-weight: 600;
@@ -541,4 +601,8 @@
   .checkout-summary { position: static; }
   .co-prod-row { grid-template-columns: 56px minmax(0, 1fr); }
   .co-pay-grid { grid-template-columns: 1fr; }
+  .co-address-option { grid-template-columns: auto auto minmax(0, 1fr); }
+  .co-address-edit { grid-column: 3; justify-self: start; }
+  .co-address-form { grid-template-columns: 1fr; }
+  .co-address-form-full { grid-column: auto; }
 }

@@ -42,6 +42,10 @@ class UsersApi {
     return apiClient.post('/users/profile/addresses', payload)
   }
 
+  updateAddress(addressId, payload) {
+    return apiClient.put(`/users/profile/addresses/${addressId}`, payload)
+  }
+
   setDefaultAddress(addressId) {
     return apiClient.post(`/users/profile/addresses/${addressId}/default`)
   }

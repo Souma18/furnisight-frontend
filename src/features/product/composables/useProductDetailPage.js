@@ -1,4 +1,4 @@
-import { ref, watch, onMounted } from 'vue'
+import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useProducts } from './useProducts'
@@ -23,9 +23,9 @@ export function useProductDetailPage(props) {
   const activeTab = ref('desc')
   const show3DModal = ref(false)
 
-  const { buildCartPayload } = useProductVariants({ product, selectedColor, selectedSize, qty, activeImage })
+  const { resolveSelectedVariant, buildCartPayload } = useProductVariants({ product, selectedColor, selectedSize, qty, activeImage })
   const { wished, checkWishlist, addToWishlist } = useProductWishlist({ product })
-  const { cartAdding, cartAdded, resetCartButtonState, addToCart, buyNow } = useProductCart({ product, buildCartPayload })
+  const { cartAdding, cartAdded, cartError, resetCartButtonState, addToCart, buyNow } = useProductCart({ product, buildCartPayload })
   const { breadcrumbLinks, openRoom3D } = useProductNavigation({ product })
 
   const {
@@ -45,13 +45,21 @@ export function useProductDetailPage(props) {
     resetAuthenticatedReviewState,
   } = useProductReviews(product)
 
+  const selectedStock = computed(() => {
+    const variantStock = resolveSelectedVariant()?.stockQuantity
+    const stock = variantStock ?? product.value?.stock ?? 0
+    return Math.max(0, Number(stock) || 0)
+  })
+  const selectedOutOfStock = computed(() => product.value?.outOfStock || selectedStock.value <= 0)
+
   async function loadProduct(id) {
     loading.value = true
     error.value = null
     product.value = null
     try {
-      product.value = await loadDetail(id)
-      if (!product.value) throw new Error('not_found')
+      const loadedProduct = await loadDetail(id)
+      if (!loadedProduct) throw new Error('not_found')
+      product.value = loadedProduct
 
       selectedColor.value = product.value.colors?.[0] ?? ''
       selectedSize.value = product.value.sizes?.[0] ?? ''
@@ -84,8 +92,27 @@ export function useProductDetailPage(props) {
   }
 
   function changeQty(delta) {
-    qty.value = Math.max(1, Math.min(product.value?.stock ?? 99, qty.value + delta))
+    const stockLimit = selectedStock.value
+    if (stockLimit <= 0) {
+      qty.value = 1
+      return
+    }
+    qty.value = Math.max(1, Math.min(stockLimit, qty.value + delta))
   }
+
+  function setQty(value) {
+    const stockLimit = selectedStock.value
+    const nextQty = Math.max(1, Math.floor(Number(value) || 1))
+    qty.value = stockLimit > 0 ? Math.min(nextQty, stockLimit) : 1
+  }
+
+  watch([selectedColor, selectedSize, selectedStock], () => {
+    if (selectedStock.value <= 0) {
+      qty.value = 1
+      return
+    }
+    qty.value = Math.min(qty.value, selectedStock.value)
+  })
 
   watch(() => props.id, (id) => loadProduct(id))
   watch(() => route.query.tab, (tab) => {
@@ -107,6 +134,8 @@ export function useProductDetailPage(props) {
     error,
     selectedColor,
     selectedSize,
+    selectedStock,
+    selectedOutOfStock,
     qty,
     wished,
     activeImage,
@@ -114,6 +143,7 @@ export function useProductDetailPage(props) {
     show3DModal,
     cartAdding,
     cartAdded,
+    cartError,
     reviewEligibility,
     reviewForm,
     reviewSubmitting,
@@ -124,6 +154,7 @@ export function useProductDetailPage(props) {
     breadcrumbLinks,
     retry,
     changeQty,
+    setQty,
     openRoom3D,
     addToCart,
     buyNow,

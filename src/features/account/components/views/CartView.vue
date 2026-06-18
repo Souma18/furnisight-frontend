@@ -33,8 +33,9 @@ const {
   getVariantOptions,
   applyActiveItemChanges,
   changeDraftQty,
+  setDraftQty,
 } = useCartItemEditor(items, updateItem)
-const { handleCheckout } = useCartCheckout(router, selectedItems, selectedCount)
+const { handleCheckout } = useCartCheckout(router, selectedItems, selectedCount, ensureHydrated)
 
 onMounted(async () => {
   try {
@@ -151,7 +152,15 @@ const formatPrice = PriceFormatter.format
             <span>Số lượng</span>
             <div class="modal-qty">
               <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
-              <input :value="activeDraft.qty" readonly />
+              <input
+                :value="activeDraft.qty"
+                type="number"
+                inputmode="numeric"
+                min="1"
+                :disabled="editorLoading"
+                @input="setDraftQty($event.target.value)"
+                @blur="setDraftQty($event.target.value || 1)"
+              />
               <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
             </div>
           </label>

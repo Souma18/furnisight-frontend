@@ -1,5 +1,6 @@
 import { ref, watch } from 'vue'
 import { productsApi, ProductResponse } from '@shared/lib/api/services'
+import { clampPurchaseQuantity } from '../lib/stockGuards'
 
 function variantSizeLabel(variant) {
   if (!variant) return ''
@@ -165,8 +166,12 @@ export function useCartItemEditor(items, updateItem) {
   }
 
   function resolveDraftVariantId(item, draft) {
+    return resolveDraftVariant(item, draft)?.id ?? item?.variantId ?? null
+  }
+
+  function resolveDraftVariant(item, draft) {
     const variants = Array.isArray(item?.variants) ? item.variants : []
-    if (!variants.length) return item?.variantId ?? null
+    if (!variants.length) return null
 
     const selectedColor = draft?.selectedColor || ''
     const selectedSize = draft?.selectedSize || ''
@@ -179,24 +184,50 @@ export function useCartItemEditor(items, updateItem) {
       return colorMatches && sizeMatches
     })
 
-    return matched?.id ?? item?.variantId ?? null
+    return matched ?? null
   }
 
   async function applyActiveItemChanges() {
     if (!activeItem.value || !activeDraft.value) return
 
+    const draftVariant = resolveDraftVariant(activeItem.value, activeDraft.value)
+    const stockContext = {
+      ...activeItem.value,
+      stockQuantity: draftVariant?.stockQuantity ?? activeItem.value.stockQuantity,
+    }
+
     await updateItem(activeItem.value.id, {
       variantId: resolveDraftVariantId(activeItem.value, activeDraft.value),
       selectedColor: activeDraft.value.selectedColor,
       selectedSize: activeDraft.value.selectedSize,
-      qty: Math.max(1, Number(activeDraft.value.qty || 1)),
+      qty: clampPurchaseQuantity(activeDraft.value.qty, stockContext),
     })
     closeItemEditor()
   }
 
   function changeDraftQty(delta) {
     if (!activeDraft.value) return
-    activeDraft.value.qty = Math.max(1, Number(activeDraft.value.qty || 1) + delta)
+    const draftVariant = resolveDraftVariant(activeItem.value, activeDraft.value)
+    const stockContext = {
+      ...activeItem.value,
+      stockQuantity: draftVariant?.stockQuantity ?? activeItem.value?.stockQuantity,
+    }
+    activeDraft.value.qty = clampPurchaseQuantity(Number(activeDraft.value.qty || 1) + delta, stockContext)
+  }
+
+  function setDraftQty(value) {
+    if (!activeDraft.value) return
+    const normalizedValue = String(value ?? '').replace(/[^\d]/g, '')
+    if (normalizedValue === '') {
+      activeDraft.value.qty = ''
+      return
+    }
+    const draftVariant = resolveDraftVariant(activeItem.value, activeDraft.value)
+    const stockContext = {
+      ...activeItem.value,
+      stockQuantity: draftVariant?.stockQuantity ?? activeItem.value?.stockQuantity,
+    }
+    activeDraft.value.qty = clampPurchaseQuantity(normalizedValue, stockContext)
   }
 
   return {
@@ -208,5 +239,6 @@ export function useCartItemEditor(items, updateItem) {
     getVariantOptions,
     applyActiveItemChanges,
     changeDraftQty,
+    setDraftQty,
   }
 }

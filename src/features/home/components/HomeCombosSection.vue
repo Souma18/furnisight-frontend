@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 import ComboCard from '@features/promotions/components/ComboCard.vue'
+import { comboStockIssue } from '@features/promotions/lib/comboStock'
 
 defineProps({
   combos: { type: Array, default: () => [] },
@@ -74,7 +75,11 @@ function openCombo(combo) {
         </div>
         <div class="modal-actions">
           <button type="button" class="combo-btn outline" @click="selectedCombo = null">Đóng</button>
+          <button v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
+            <AppIcon name="cart" :size="14" />Hết hàng
+          </button>
           <button
+            v-else
             type="button"
             class="combo-btn dark"
             :disabled="addingId === selectedCombo.id"
@@ -83,12 +88,13 @@ function openCombo(combo) {
             <AppIcon name="cart" :size="14" />{{ addingId === selectedCombo.id ? 'Đang thêm' : 'Thêm combo' }}
           </button>
           <button
+            v-if="!comboStockIssue(selectedCombo)"
             type="button"
             class="combo-btn dark"
             :disabled="buyingId === selectedCombo.id"
             @click="$emit('buy', selectedCombo)"
           >
-            <AppIcon name="cart" :size="14" />{{ buyingId === selectedCombo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
+            <AppIcon name="creditCard" :size="14" />{{ buyingId === selectedCombo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
           </button>
         </div>
       </div>
@@ -105,7 +111,9 @@ function openCombo(combo) {
 .combo-btn { flex: 1; min-height: 34px; padding: 7px 8px; border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px; font-weight: 800; cursor: pointer; text-decoration: none; }
 .combo-btn.outline { background: #fff; border: 1px solid #e8e0d0; color: #1a2332; }
 .combo-btn.dark { background: #16233b; color: #fff; }
+.combo-btn.unavailable { background: #f1e7db; color: #7b6652; }
 .combo-btn:disabled { opacity: .65; cursor: wait; }
+.combo-btn.unavailable:disabled { cursor: not-allowed; }
 .modal-overlay { position: fixed; inset: 0; z-index: 80; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(15, 23, 36, .48); backdrop-filter: blur(4px); }
 .modal-box { width: min(560px, 100%); max-height: 90vh; overflow: auto; position: relative; background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 24px 80px rgba(18, 32, 46, .28); }
 .modal-box.wide { width: min(650px, 100%); }

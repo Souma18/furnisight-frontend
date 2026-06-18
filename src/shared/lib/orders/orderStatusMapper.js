@@ -99,6 +99,7 @@ export const ORDER_STATUS_LABEL_TO_API = Object.freeze({
   'Đang giao': ORDER_STATUS_CODES.SHIPPING,
   'Hoàn thành': ORDER_STATUS_CODES.DELIVERED,
   'Đã giao': ORDER_STATUS_CODES.DELIVERED,
+  'Đã hủy': ORDER_STATUS_CODES.CANCELLED,
   'Đã hoàn tiền': ORDER_STATUS_CODES.REFUNDED,
 })
 
@@ -162,20 +163,23 @@ export function getOrderStatusApiValue(label) {
 
 export function getOrderStatusOptions(order = {}) {
   const code = normalizeOrderStatusCode(order)
+  const options = []
 
   if (code === ORDER_STATUS_CODES.REFUND_PENDING) return ['Đã hoàn tiền']
 
   if (isCodPayment(order)) {
-    if (code === ORDER_STATUS_CODES.UNPAID) return ['Xác nhận thành công']
-    if (code === ORDER_STATUS_CODES.CONFIRMED || code === ORDER_STATUS_CODES.PAID) return ['Đang giao']
-    if (code === ORDER_STATUS_CODES.SHIPPING) return ['Hoàn thành']
-    return []
+    if (code === ORDER_STATUS_CODES.UNPAID) options.push('Xác nhận thành công')
+    if (code === ORDER_STATUS_CODES.CONFIRMED || code === ORDER_STATUS_CODES.PAID) options.push('Đang giao')
+    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Hoàn thành')
+    if (canCancelOrder(order)) options.push('Đã hủy')
+    return options
   }
 
-  if (code === ORDER_STATUS_CODES.PAID) return ['Đang vận chuyển']
-  if (code === ORDER_STATUS_CODES.IN_TRANSIT) return ['Đang giao']
-  if (code === ORDER_STATUS_CODES.SHIPPING) return ['Hoàn thành']
-  return []
+  if (code === ORDER_STATUS_CODES.PAID) options.push('Đang vận chuyển')
+  if (code === ORDER_STATUS_CODES.IN_TRANSIT) options.push('Đang giao')
+  if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Hoàn thành')
+  if (canCancelOrder(order)) options.push('Đã hủy')
+  return options
 }
 
 export function getNextOrderStatusLabel(order = {}) {
@@ -184,6 +188,17 @@ export function getNextOrderStatusLabel(order = {}) {
 
 export function canUpdateOrderStatus(order = {}) {
   return getOrderStatusOptions(order).length > 0
+}
+
+export function canCancelOrder(order = {}) {
+  const code = normalizeOrderStatusCode(order)
+  return [
+    ORDER_STATUS_CODES.UNPAID,
+    ORDER_STATUS_CODES.PAYMENT_FAILED,
+    ORDER_STATUS_CODES.CONFIRMED,
+    ORDER_STATUS_CODES.PAID,
+    ORDER_STATUS_CODES.IN_TRANSIT,
+  ].includes(code)
 }
 
 export function canEditOrderTrackingCode(order = {}, nextStatusLabel = '') {

@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { PRODUCTS_3D } from '../core/mockData'
+import { isPurchasableLine } from '@features/cart/lib/stockGuards'
 
 export function useRoomCartBridge({
   store,
@@ -20,7 +21,7 @@ export function useRoomCartBridge({
   const cartTotal = computed(() => cartState.totalAmount.value)
   const cartCount = computed(() => cartState.lineCount.value)
 
-  function addProductToCart(productOrId) {
+  async function addProductToCart(productOrId) {
     let product = productOrId
 
     if (typeof productOrId === 'number') {
@@ -35,7 +36,11 @@ export function useRoomCartBridge({
     }
 
     if (!product) return
-    cartStore.addItem(product)
+    try {
+      await cartStore.addItem(product)
+    } catch (error) {
+      console.warn('Không thể thêm sản phẩm vào giỏ:', error?.message || error)
+    }
   }
 
   function openProductDetail(product) {
@@ -55,7 +60,9 @@ export function useRoomCartBridge({
     cartStore.updateQty(lineId, nextQty)
   }
 
-  function goCheckout() {
+  async function goCheckout() {
+    await cartStore.ensureHydrated?.({ force: true }).catch(() => null)
+    if (!cartState.items.value.some(isPurchasableLine)) return
     router.push('/checkout')
   }
 

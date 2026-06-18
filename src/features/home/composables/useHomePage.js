@@ -4,6 +4,7 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useComboCart } from '@features/promotions/composables/useComboCart'
+import { comboStockIssue, enrichComboItemStock } from '@features/promotions/lib/comboStock'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
 export function useHomePage() {
@@ -81,13 +82,20 @@ export function useHomePage() {
           items: Array.isArray(combo.items)
             ? await Promise.all(combo.items
                 .filter((item) => item?.productId)
-                .map(async (item) => ({
-                  ...(await enrichComboItemImage(item)),
-                  quantity: Math.max(1, Number(item.quantity) || 1),
-                  price: Number(item.price || 0),
-                })))
+                .map(async (item) => {
+                  const enriched = await enrichComboItemStock(await enrichComboItemImage(item))
+                  return {
+                    ...enriched,
+                    quantity: Math.max(1, Number(enriched.quantity) || 1),
+                    price: Number(enriched.price || 0),
+                  }
+                }))
             : [],
         })))
+      combos.value = combos.value.map((combo) => ({
+        ...combo,
+        stockIssue: comboStockIssue(combo),
+      }))
     } catch (error) {
       console.error('Failed to load home combos:', error)
       combos.value = []

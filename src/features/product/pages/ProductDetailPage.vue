@@ -19,6 +19,8 @@ const {
   error,
   selectedColor,
   selectedSize,
+  selectedStock,
+  selectedOutOfStock,
   qty,
   wished,
   activeImage,
@@ -26,6 +28,7 @@ const {
   show3DModal,
   cartAdding,
   cartAdded,
+  cartError,
   reviewEligibility,
   reviewForm,
   reviewSubmitting,
@@ -36,6 +39,7 @@ const {
   breadcrumbLinks,
   retry,
   changeQty,
+  setQty,
   openRoom3D,
   addToCart,
   buyNow,
@@ -79,25 +83,31 @@ const {
     <!-- Product loaded -->
     <template v-else-if="product">
       <div class="pd-breadcrumb">
-        <span v-for="(crumb, idx) in breadcrumbLinks" :key="crumb.label">
-          <template v-if="idx > 0"> › </template>
-          <RouterLink class="pd-breadcrumb-link" :to="crumb.to">{{ crumb.label }}</RouterLink>
-        </span>
-        <span> › <span class="pd-breadcrumb-current">{{ product.name }}</span></span>
+        <div class="pd-breadcrumb-inner">
+          <span v-for="(crumb, idx) in breadcrumbLinks" :key="crumb.label">
+            <template v-if="idx > 0"> › </template>
+            <RouterLink class="pd-breadcrumb-link" :to="crumb.to">{{ crumb.label }}</RouterLink>
+          </span>
+          <span> › <span class="pd-breadcrumb-current">{{ product.name }}</span></span>
+        </div>
       </div>
       <ProductDetailTopSection
         :product="product"
         :selected-color="selectedColor"
         :selected-size="selectedSize"
+        :selected-stock="selectedStock"
+        :selected-out-of-stock="selectedOutOfStock"
         :qty="qty"
         :wished="wished"
         :active-image="activeImage"
         :cart-adding="cartAdding"
         :cart-added="cartAdded"
+        :cart-error="cartError"
         @pick-image="activeImage = $event"
         @pick-color="selectedColor = $event"
         @pick-size="selectedSize = $event"
         @change-qty="changeQty"
+        @set-qty="setQty"
         @add-cart="addToCart"
         @buy-now="buyNow"
         @toggle-wish="addToWishlist"

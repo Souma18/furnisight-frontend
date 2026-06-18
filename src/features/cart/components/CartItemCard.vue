@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
+import { isOverStock, resolveStockLimit, stockLimitLabel } from '../lib/stockGuards'
 
 const props = defineProps({
   item: {
@@ -36,13 +37,21 @@ const detailRoute = computed(() => {
   return detailId ? `/products/${detailId}` : ''
 })
 
+const stockLimit = computed(() => resolveStockLimit(props.item))
+const cannotIncrease = computed(() => stockLimit.value != null && Number(props.item.qty || 1) >= stockLimit.value)
+const stockWarning = computed(() => {
+  if (props.item.outOfStock || stockLimit.value === 0) return 'Hết hàng'
+  if (isOverStock(props.item) || cannotIncrease.value) return stockLimitLabel(props.item)
+  return ''
+})
+
 const formatPrice = PriceFormatter.format
 </script>
 
 <template>
   <article class="item">
     <div class="item-selection">
-      <label v-if="!item.outOfStock" class="select-box" :aria-label="`Chọn ${item.name}`">
+      <label v-if="!item.outOfStock && !isOverStock(item)" class="select-box" :aria-label="`Chọn ${item.name}`">
         <input
           class="select-box-input"
           type="checkbox"
@@ -51,7 +60,7 @@ const formatPrice = PriceFormatter.format
         >
         <span class="select-box-ui"></span>
       </label>
-      <span v-else class="stock-badge">Hết hàng</span>
+      <span v-else class="stock-badge">{{ stockWarning || 'Hết hàng' }}</span>
     </div>
 
     <RouterLink v-if="detailRoute" :to="detailRoute" class="thumb thumb-link">
@@ -68,6 +77,7 @@ const formatPrice = PriceFormatter.format
       <RouterLink v-if="detailRoute" :to="detailRoute" class="name name-link">{{ item.name }}</RouterLink>
       <p v-else class="name">{{ item.name }}</p>
       <p class="summary">{{ summaryLabel }}</p>
+      <p v-if="stockWarning" class="stock-note">{{ stockWarning }}</p>
     </div>
 
     <button type="button" class="variant-btn" @click="$emit('open-variant', item)">
@@ -76,11 +86,11 @@ const formatPrice = PriceFormatter.format
     </button>
 
     <div class="qty-wrap">
-      <button type="button" aria-label="Giảm số lượng" @click="$emit('change-qty', item, -1)">
+      <button type="button" aria-label="Giảm số lượng" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
         <AppIcon name="minus" :size="15" />
       </button>
       <span>{{ item.qty }}</span>
-      <button type="button" aria-label="Tăng số lượng" @click="$emit('change-qty', item, 1)">
+      <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
         <AppIcon name="plus" :size="15" />
       </button>
     </div>
@@ -240,6 +250,12 @@ const formatPrice = PriceFormatter.format
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.stock-note {
+  margin: 0.22rem 0 0;
+  color: #b45309;
+  font-size: 0.66rem;
+  font-weight: 600;
+}
 .variant-btn {
   min-width: 0;
   display: inline-flex;
@@ -286,6 +302,10 @@ const formatPrice = PriceFormatter.format
   background: transparent;
   color: #9a8d7a;
   cursor: pointer;
+}
+.qty-wrap button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
 }
 .qty-wrap span {
   width: 32px;

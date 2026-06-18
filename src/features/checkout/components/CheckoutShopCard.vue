@@ -2,6 +2,7 @@
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { CHECKOUT_SHOP } from '../composables/checkoutContent'
 import { calcLineTotal } from '../utils/checkoutPricing'
+import { resolveStockLimit, stockLimitLabel } from '@features/cart/lib/stockGuards'
 
 const props = defineProps({
   lines: { type: Array, default: () => [] },
@@ -27,8 +28,19 @@ function hideBrokenImage(event) {
 }
 
 function changeQty(line, delta) {
-  const next = Math.max(1, Number(line.qty || 1) + delta)
+  const stockLimit = resolveStockLimit(line)
+  const requested = Math.max(1, Number(line.qty || 1) + delta)
+  const next = stockLimit == null ? requested : Math.min(requested, Math.max(1, stockLimit))
   emit('update-qty', line.id, next)
+}
+
+function cannotIncrease(line) {
+  const stockLimit = resolveStockLimit(line)
+  return stockLimit != null && Number(line.qty || 1) >= stockLimit
+}
+
+function stockText(line) {
+  return cannotIncrease(line) ? stockLimitLabel(line) : ''
 }
 
 function selectShipping(id) {
@@ -64,14 +76,15 @@ const merchandiseSubtotal = () =>
         <p v-if="variantTags(line).length" class="co-prod-variant">
           <span v-for="tag in variantTags(line)" :key="tag">{{ tag }}</span>
         </p>
+        <p v-if="stockText(line)" class="co-prod-stock">{{ stockText(line) }}</p>
       </div>
       <div>
         <div class="co-prod-unit">{{ formatMoney(line.price) }}</div>
       </div>
       <div class="co-qty">
-        <button type="button" aria-label="Giảm" @click="changeQty(line, -1)">−</button>
+        <button type="button" aria-label="Giảm" :disabled="Number(line.qty || 1) <= 1" @click="changeQty(line, -1)">−</button>
         <span>{{ line.qty }}</span>
-        <button type="button" aria-label="Tăng" @click="changeQty(line, 1)">+</button>
+        <button type="button" aria-label="Tăng" :disabled="cannotIncrease(line)" @click="changeQty(line, 1)">+</button>
       </div>
       <div class="co-prod-total">{{ formatMoney(calcLineTotal(line)) }}</div>
     </div>

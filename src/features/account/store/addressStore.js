@@ -16,7 +16,7 @@ export const useAddressStore = defineStore('accountAddress', () => {
   function normalizeAddress(address = {}) {
     return {
       ...address,
-      isDefault: Boolean(address.isDefault ?? address.default),
+      isDefault: Boolean(address.isDefault ?? address.defaultAddress ?? address.default),
     }
   }
 
@@ -33,6 +33,11 @@ export const useAddressStore = defineStore('accountAddress', () => {
 
   async function addAddress(payload) {
     await usersApi.saveAddress(payload)
+    return await fetchAddresses()
+  }
+
+  async function updateAddress(addressId, payload) {
+    await usersApi.updateAddress(addressId, payload)
     return await fetchAddresses()
   }
 
@@ -58,6 +63,7 @@ export const useAddressStore = defineStore('accountAddress', () => {
     normalizeAddress,
     fetchAddresses,
     addAddress,
+    updateAddress,
     setDefaultAddress,
     deleteAddress,
     resetAddressState,

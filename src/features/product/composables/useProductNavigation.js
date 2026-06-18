@@ -7,12 +7,19 @@ export function useProductNavigation({ product }) {
 
   watch(product, (p) => {
     if (!p) { breadcrumbLinks.value = []; return }
-    breadcrumbLinks.value = (p.breadcrumb ?? []).map((crumb) => ({
-      label: crumb.label ?? crumb,
-      to: (crumb.id === 'home' || crumb === 'Trang chủ')
-        ? { name: 'home' }
-        : { name: 'products', query: { category: crumb.id } },
-    }))
+    const categoryTrail = Array.isArray(p.categoryTrail) ? p.categoryTrail : []
+    const fallbackCategory = p.categoryName
+      ? [{ label: p.categoryName, slug: p.category?.id || p.categoryId || '' }]
+      : []
+    const trail = categoryTrail.length ? categoryTrail : fallbackCategory
+
+    breadcrumbLinks.value = [
+      { label: 'Trang chủ', to: { name: 'home' } },
+      ...dedupeTrail(trail).map((crumb) => ({
+        label: crumb.label ?? crumb.name ?? crumb,
+        to: { name: 'products', query: { category: crumb.slug || crumb.id || crumb.label || crumb } },
+      })),
+    ]
   })
 
   function openRoom3D() {
@@ -34,4 +41,16 @@ export function useProductNavigation({ product }) {
     openRoom3D,
     getDetailRoute,
   }
+}
+
+function dedupeTrail(trail) {
+  const seen = new Set()
+  return trail.filter((crumb) => {
+    const label = String(crumb?.label ?? crumb?.name ?? crumb ?? '').trim()
+    if (!label) return false
+    const key = label.toLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
 }

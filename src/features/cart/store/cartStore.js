@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
+import { clampPurchaseQuantity, resolveStockLimit } from '../lib/stockGuards'
 
 const STORAGE_KEY = 'furnisight-cart-store-v4'
 const LEGACY_STORAGE_KEYS = [
@@ -14,6 +15,8 @@ const LEGACY_STORAGE_KEYS = [
 function cloneItems(items = []) {
   return items.map((item) => ({
     ...item,
+    qty: clampPurchaseQuantity(item.qty ?? item.quantity ?? 1, item),
+    quantity: clampPurchaseQuantity(item.qty ?? item.quantity ?? 1, item),
     colors: Array.isArray(item.colors) ? [...item.colors] : [],
     sizes: Array.isArray(item.sizes) ? [...item.sizes] : [],
     variants: Array.isArray(item.variants)
@@ -166,6 +169,26 @@ export const useCartStore = defineStore('cart', () => {
         ...(productOrLine ?? {}),
         ...(options ?? {}),
       }
+      const existingQty = items.value.find((item) =>
+        String(item.productId ?? '') === String(payload.productId ?? '') &&
+        String(item.variantId ?? '') === String(payload.variantId ?? ''),
+      )?.qty ?? 0
+      const stockLimit = resolveStockLimit(payload)
+      const requestedQty = Math.max(1, Number(payload.quantity ?? payload.qty ?? 1) || 1)
+      const allowedAddQty = stockLimit == null
+        ? requestedQty
+        : Math.max(0, stockLimit - Number(existingQty || 0))
+
+      if (payload.outOfStock || (stockLimit != null && stockLimit <= 0)) {
+        throw new Error('out_of_stock')
+      }
+
+      if (stockLimit != null && allowedAddQty <= 0) {
+        throw new Error('stock_limit_reached')
+      }
+
+      payload.quantity = stockLimit == null ? requestedQty : Math.min(requestedQty, allowedAddQty)
+      payload.qty = payload.quantity
       const response = await cartApi.addToCart(payload)
       items.value = cloneItems(response?.data?.items ?? [])
       hydrated.value = true
@@ -189,7 +212,8 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   async function updateQty(lineId, nextQty) {
-    return updateItem(lineId, { qty: Math.max(1, Number(nextQty) || 1) })
+    const line = items.value.find((item) => item.id === lineId)
+    return updateItem(lineId, { qty: clampPurchaseQuantity(nextQty, line) })
   }
 
   async function removeItem(lineId) {
