@@ -1,4 +1,6 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
 defineProps({
   selectedCount: {
     type: Number,
@@ -15,6 +17,7 @@ defineProps({
 })
 
 defineEmits(['checkout'])
+const { t } = useI18n()
 </script>
 
 <template>
@@ -25,11 +28,11 @@ defineEmits(['checkout'])
       :disabled="checkoutDisabled"
       @click="$emit('checkout')"
     >
-      Thanh toán ngay
+      {{ t('account.cart.checkoutNow') }}
     </button>
 
     <p class="total">
-      Tổng cộng{{ selectedCount ? ` (${selectedCount} sản phẩm)` : '' }}: {{ totalLabel }}
+      {{ t('account.cart.totalLabel', { count: selectedCount, total: totalLabel }) }}
     </p>
   </div>
 </template>

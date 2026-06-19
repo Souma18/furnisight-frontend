@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -20,6 +21,7 @@ defineProps({
 defineEmits(['remove', 'checkout'])
 
 const isOpen = ref(false)
+const { t } = useI18n()
 
 function itemIconName(item) {
   const raw = `${item.categoryName ?? ''} ${item.category ?? ''}`.toLowerCase()
@@ -36,7 +38,7 @@ function itemIconName(item) {
     <button type="button" class="cart-toggle" @click="isOpen = !isOpen">
       <span class="toggle-left">
         <span class="icon"><AppIcon name="cart" :size="14" /></span>
-        <span class="title">Giỏ hàng</span>
+        <span class="title">{{ t('cart.title') }}</span>
         <span class="count">{{ cartItems.length }}</span>
       </span>
       <span class="toggle-right">
@@ -48,7 +50,7 @@ function itemIconName(item) {
     </button>
 
     <div v-if="isOpen" class="cart-body">
-      <div v-if="cartItems.length === 0" class="empty">Chưa có sản phẩm nào.</div>
+      <div v-if="cartItems.length === 0" class="empty">{{ t('room3d.cart.empty') }}</div>
       <div v-else class="list">
         <article v-for="item in cartItems" :key="item.id" class="item">
           <div class="thumb">
@@ -67,7 +69,7 @@ function itemIconName(item) {
 
       <button type="button" class="checkout" :disabled="cartItems.length === 0" @click="$emit('checkout')">
         <AppIcon name="creditCard" :size="15" />
-        <span>Thanh toán ngay</span>
+        <span>{{ t('room3d.cart.checkoutNow') }}</span>
       </button>
     </div>
   </section>
@@ -75,16 +77,16 @@ function itemIconName(item) {
 
 <style scoped>
 .cart {
-  border: 1px solid #e6ded1;
-  border-radius: 0.9rem;
+  border: 1px solid var(--app-border, #e6ded1);
+  border-radius: 8px;
   overflow: hidden;
-  background: #fff;
+  background: var(--app-surface, #fff);
 }
 
 .cart-toggle {
   width: 100%;
   border: none;
-  background: #fff;
+  background: var(--app-surface, #fff);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -94,7 +96,7 @@ function itemIconName(item) {
 }
 
 .cart-toggle:hover {
-  background: #f8f5ef;
+  background: var(--app-control-hover, #f8f5ef);
 }
 
 .toggle-left {
@@ -107,11 +109,11 @@ function itemIconName(item) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #133f5c;
+  color: var(--app-gold, #133f5c);
 }
 
 .title {
-  color: #133f5c;
+  color: var(--app-heading, #133f5c);
   font-size: 0.95rem;
   font-weight: 700;
 }
@@ -120,8 +122,8 @@ function itemIconName(item) {
   min-width: 1.25rem;
   height: 1.25rem;
   border-radius: 999px;
-  background: #f6b22f;
-  color: #0f3f5c;
+  background: var(--app-gold, #f6b22f);
+  color: var(--app-bg-deep, #0f3f5c);
   font-size: 0.72rem;
   font-weight: 700;
   display: inline-flex;
@@ -137,12 +139,12 @@ function itemIconName(item) {
 }
 
 .total {
-  color: #9a744f;
+  color: var(--app-gold, #9a744f);
   font-size: 0.88rem;
 }
 
 .chevron {
-  color: #8f8f8f;
+  color: var(--app-text-muted, #8f8f8f);
   font-size: 0.72rem;
   transition: transform 0.18s ease;
 }
@@ -152,12 +154,12 @@ function itemIconName(item) {
 }
 
 .cart-body {
-  border-top: 1px solid #f0e7da;
+  border-top: 1px solid var(--app-border, #f0e7da);
   padding: 0.55rem 0.68rem 0.68rem;
 }
 
 .empty {
-  color: #8f8f8f;
+  color: var(--app-text-muted, #8f8f8f);
   font-size: 0.83rem;
   text-align: center;
   padding: 0.7rem 0 0.5rem;
@@ -173,7 +175,7 @@ function itemIconName(item) {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  border-bottom: 1px solid #f3ece1;
+  border-bottom: 1px solid var(--app-border, #f3ece1);
   padding-bottom: 0.42rem;
 }
 
@@ -186,7 +188,7 @@ function itemIconName(item) {
   width: 2rem;
   height: 2rem;
   border-radius: 0.56rem;
-  background: #f2ece2;
+  background: var(--app-surface-soft, #f2ece2);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -203,7 +205,7 @@ function itemIconName(item) {
 }
 
 .thumb-icon {
-  color: #846640;
+  color: var(--app-gold, #846640);
   display: inline-flex;
 }
 
@@ -214,14 +216,14 @@ function itemIconName(item) {
 
 .name {
   margin: 0;
-  color: #25313a;
+  color: var(--app-heading, #25313a);
   font-size: 0.77rem;
   line-height: 1.2;
 }
 
 .price {
   margin: 0.1rem 0 0;
-  color: #9a744f;
+  color: var(--app-gold, #9a744f);
   font-size: 0.77rem;
   font-weight: 700;
 }
@@ -229,7 +231,7 @@ function itemIconName(item) {
 .remove-btn {
   border: none;
   background: transparent;
-  color: #9a9a9a;
+  color: var(--app-text-muted, #9a9a9a);
   font-size: 0.86rem;
   width: 1.3rem;
   height: 1.3rem;
@@ -243,8 +245,8 @@ function itemIconName(item) {
 }
 
 .remove-btn:hover {
-  background: #f6ecec;
-  color: #d14d4d;
+  background: color-mix(in srgb, var(--app-danger) 10%, var(--app-surface));
+  color: var(--app-danger, #d14d4d);
 }
 
 .checkout {

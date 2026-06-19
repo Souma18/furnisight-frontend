@@ -1,9 +1,11 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { useOrderDetailView } from '../../composables/useOrderDetailView'
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 const {
   order,
   backToOrders,
@@ -38,15 +40,15 @@ const {
   <section v-if="order" class="order-detail">
     <button type="button" class="order-detail-back" @click="backToOrders">
       <AppIcon name="chevronLeft" :size="15" />
-      Quay lại đơn hàng
+      {{ t('account.orders.back') }}
     </button>
 
     <header class="order-detail-head">
       <div>
-        <h1 class="order-detail-title">Đơn hàng {{ order.orderCode }}</h1>
+        <h1 class="order-detail-title">{{ t('account.orders.detailTitle', { code: order.orderCode }) }}</h1>
         <p class="order-detail-meta">
           <AppIcon name="calendar" :size="14" />
-          Đặt ngày {{ formatDate(order.createdAt) }}
+          {{ t('account.orders.createdAt', { date: formatDate(order.createdAt) }) }}
         </p>
       </div>
       <div class="order-detail-head-actions">
@@ -60,11 +62,11 @@ const {
           @click="handleRetryPayment"
         >
           <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />
-          {{ retryingPayment ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
+          {{ retryingPayment ? t('account.orders.creatingPayment') : t('account.orders.retryPayment') }}
         </button>
         <button v-if="canCancelCurrentOrder" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
-          Huỷ đơn
+          {{ t('account.orders.cancel') }}
         </button>
       </div>
     </header>
@@ -74,7 +76,7 @@ const {
         <article class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="history" :size="16" />
-            Lịch sử giao dịch
+            {{ t('account.orders.transactionHistory') }}
           </h2>
           <ol class="transaction-timeline">
             <li
@@ -89,7 +91,7 @@ const {
               <div>
                 <p class="timeline-title">{{ item.title }}</p>
                 <p class="timeline-sub">{{ item.sub }}</p>
-                <p class="timeline-time">{{ formatDateTime(item.time) || 'Chưa ghi nhận thời điểm' }}</p>
+                <p class="timeline-time">{{ formatDateTime(item.time) || t('account.orders.noTime') }}</p>
               </div>
             </li>
           </ol>
@@ -98,7 +100,7 @@ const {
         <article v-if="order.timeline && order.timeline.length" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
-            Trạng thái vận chuyển
+            {{ t('account.orders.shippingStatus') }}
           </h2>
           <ol class="timeline">
             <li
@@ -120,7 +122,7 @@ const {
         <article class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="box" :size="16" />
-            Sản phẩm đặt mua
+            {{ t('account.orders.purchasedProducts') }}
           </h2>
           <div class="order-lines">
             <div v-for="(item, index) in order.items" :key="index" class="order-line">
@@ -129,7 +131,7 @@ const {
                 class="order-line-thumb"
                 :class="{ clickable: orderItemProductId(item) }"
                 :disabled="!orderItemProductId(item)"
-                :aria-label="`Xem chi tiết ${item.productSnapshot?.productName || 'sản phẩm'}`"
+                :aria-label="t('account.orders.viewProductDetail', { name: item.productSnapshot?.productName || t('account.orders.product') })"
                 @click="openProductDetail(item)"
               >
                 <img v-if="orderItemImage(item)" :src="orderItemImage(item)" alt="product" class="line-thumb-img" @error="hideBrokenImage" />
@@ -142,14 +144,14 @@ const {
                   class="order-line-name order-line-name-btn"
                   @click="openProductDetail(item)"
                 >
-                  {{ item.productSnapshot?.productName || 'Sản phẩm' }}
+                  {{ item.productSnapshot?.productName || t('account.orders.product') }}
                 </button>
-                <p v-else class="order-line-name">{{ item.productSnapshot?.productName || 'Sản phẩm' }}</p>
+                <p v-else class="order-line-name">{{ item.productSnapshot?.productName || t('account.orders.product') }}</p>
                 <p v-if="item.productSnapshot?.color || item.productSnapshot?.material" class="order-line-var">
                   {{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}
                 </p>
               </div>
-              <span class="order-line-qty">SL: {{ item.quantity }}</span>
+              <span class="order-line-qty">{{ t('account.orders.quantityShort', { count: item.quantity }) }}</span>
               <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
               <button
                 v-if="order.status === 'done' && orderItemProductId(item)"
@@ -158,7 +160,7 @@ const {
                 @click="reviewProduct(item)"
               >
                 <AppIcon name="star" :size="14" />
-                Đánh giá
+                {{ t('account.orders.review') }}
               </button>
             </div>
           </div>
@@ -169,28 +171,28 @@ const {
         <article class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="badgePercent" :size="16" />
-            Tóm tắt thanh toán
+            {{ t('account.orders.paymentSummary') }}
           </h2>
           <div class="summary-rows">
-            <div class="summary-row"><span>Tạm tính</span><span>{{ formatMoney(order.subTotal) }}</span></div>
+            <div class="summary-row"><span>{{ t('account.orders.subtotal') }}</span><span>{{ formatMoney(order.subTotal) }}</span></div>
             <div class="summary-row">
-              <span>Phí vận chuyển</span>
-              <span>{{ order.fee?.shippingFee ? formatMoney(order.fee.shippingFee) : 'Miễn phí' }}</span>
+              <span>{{ t('account.orders.shippingFee') }}</span>
+              <span>{{ order.fee?.shippingFee ? formatMoney(order.fee.shippingFee) : t('account.orders.free') }}</span>
             </div>
             <div v-if="order.fee?.shippingDiscount" class="summary-row">
-              <span>Giảm giá vận chuyển</span>
+              <span>{{ t('account.orders.shippingDiscount') }}</span>
               <span>−{{ formatMoney(order.fee.shippingDiscount) }}</span>
             </div>
             <div v-if="order.fee?.discountAmount" class="summary-row">
-              <span>Giảm giá</span>
+              <span>{{ t('account.orders.discount') }}</span>
               <span>−{{ formatMoney(order.fee.discountAmount) }}</span>
             </div>
             <div class="summary-row total">
-              <span>Tổng cộng</span>
+              <span>{{ t('account.orders.total') }}</span>
               <span>{{ formatMoney(order.totalAmount) }}</span>
             </div>
           </div>
-          <p class="payment-label">Phương thức thanh toán</p>
+          <p class="payment-label">{{ t('account.orders.paymentMethod') }}</p>
           <p class="payment-value">{{ paymentMethodLabel(order) }}</p>
           <p v-if="paymentDeadline" class="payment-deadline">{{ paymentDeadline }}</p>
         </article>
@@ -198,7 +200,7 @@ const {
         <article class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="creditCard" :size="16" />
-            Thông tin giao dịch
+            {{ t('account.orders.transactionInfo') }}
           </h2>
           <div class="transaction-rows">
             <div v-for="row in transactionRows" :key="row.label" class="transaction-row">
@@ -211,7 +213,7 @@ const {
         <article v-if="order.shippingDetail" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="mapPin" :size="16" />
-            Địa chỉ giao hàng
+            {{ t('account.orders.shippingAddress') }}
           </h2>
           <p class="address-block">
             <strong>{{ order.shippingDetail.shippingAddressName }}</strong>
@@ -223,10 +225,10 @@ const {
         <article v-if="order.shippingDetail?.shippingMethod" class="detail-card">
           <h2 class="detail-card-title">
             <AppIcon name="truck" :size="16" />
-            Thông tin vận chuyển
+            {{ t('account.orders.shippingInfo') }}
           </h2>
           <div class="summary-rows">
-            <div class="summary-row"><span>Đơn vị</span><span>{{ order.shippingDetail.shippingMethod }}</span></div>
+            <div class="summary-row"><span>{{ t('account.orders.carrier') }}</span><span>{{ order.shippingDetail.shippingMethod }}</span></div>
           </div>
         </article>
       </aside>
@@ -234,10 +236,10 @@ const {
 
     <ConfirmDialog
       :open="cancelDialogOpen"
-      title="Xác nhận hủy đơn"
-      :message="`Bạn có chắc muốn hủy đơn ${order.orderCode}? Thao tác này không thể hoàn tác.`"
-      confirm-label="Hủy đơn"
-      cancel-label="Giữ đơn"
+      :title="t('account.orders.cancelDialogTitle')"
+      :message="t('account.orders.cancelDialogMessage', { code: order.orderCode })"
+      :confirm-label="t('account.orders.cancelConfirm')"
+      :cancel-label="t('account.orders.keepOrder')"
       :loading="canceling"
       danger
       @close="closeCancelDialog"
@@ -245,7 +247,7 @@ const {
     />
   </section>
 
-  <p v-else class="order-detail-missing">Không tìm thấy đơn hàng.</p>
+  <p v-else class="order-detail-missing">{{ t('account.orders.notFound') }}</p>
 </template>
 
 <style scoped>

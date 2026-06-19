@@ -1,4 +1,5 @@
 <script setup>
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductListFiltersSidebar from '../components/ProductListFiltersSidebar.vue'
 import ProductListGrid from '../components/ProductListGrid.vue'
@@ -31,6 +32,30 @@ const {
   apiError,
   reloadPage,
 } = useProductListPage()
+
+const filterDrawerOpen = ref(false)
+const activeFilterCount = computed(() => {
+  const applied = appliedFilters.value || {}
+  return [
+    searchKeyword.value?.trim(),
+    selectedCategory.value !== 'all',
+    selectedRootCategory.value !== 'all',
+    saleOnly.value,
+    ...(applied.priceBands || []),
+    ...(applied.materials || []),
+    ...(applied.colors || []),
+    applied.minStar,
+  ].filter(Boolean).length
+})
+
+function closeFilters() {
+  filterDrawerOpen.value = false
+}
+
+function applySidebarAndClose(payload) {
+  onApplySidebar(payload)
+  closeFilters()
+}
 </script>
 
 <template>
@@ -48,19 +73,25 @@ const {
       :selected-category="selectedRootCategory"
       :sale-only="saleOnly"
       :view-mode="viewMode"
+      :active-filter-count="activeFilterCount"
       @toggle-category="toggleCategory"
       @update:view-mode="viewMode = $event"
+      @open-filters="filterDrawerOpen = true"
     />
 
-    <div class="pl-inner pl-page-body">
-      <ProductListFiltersSidebar
-        :selected-category="selectedCategory"
-        :applied="appliedFilters"
-        :facets="facets"
-        @select-category="selectSidebarCategory"
-        @apply="onApplySidebar"
-        @clear="onClearFilters"
-      />
+    <ProductListFiltersSidebar
+      mode="drawer"
+      :open="filterDrawerOpen"
+      :selected-category="selectedCategory"
+      :applied="appliedFilters"
+      :facets="facets"
+      @select-category="selectSidebarCategory"
+      @apply="applySidebarAndClose"
+      @clear="onClearFilters"
+      @close="closeFilters"
+    />
+
+    <main class="pl-inner pl-page-body">
       <div class="pl-products-panel">
         <div v-if="apiError" class="pl-api-error">
           <AppIcon name="alert" :size="18" />
@@ -71,14 +102,13 @@ const {
           :products="items"
           :total="total"
           :active-tags="activeTags"
-          :sort-by="sortBy"
           :view-mode="viewMode"
           :loading="loading"
           :wished-product-ids="wishedProductIds"
-          @update:sort-by="sortBy = $event"
           @toggle-wish="favoriteProduct"
+          @clear="onClearFilters"
         />
       </div>
-    </div>
+    </main>
   </section>
 </template>

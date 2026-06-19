@@ -1,8 +1,10 @@
 import { computed, reactive, ref, watch } from 'vue'
 
 import { useProfileStore } from '../store/profileStore'
+import { i18n } from '@shared/i18n'
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024
+const t = (key, params) => i18n.global.t(key, params)
 
 export function useProfileForm(profile, notify) {
   const profileStore = useProfileStore()
@@ -32,7 +34,7 @@ export function useProfileForm(profile, notify) {
       ...form,
       avatarMediaId: form.avatarMediaId ?? profile.value?.avatarMediaId ?? null,
     })
-    notify('Đã lưu thông tin cá nhân.')
+    notify(t('account.profile.saved'))
   }
 
   const avatarLabel = computed(() => {
@@ -50,20 +52,20 @@ export function useProfileForm(profile, notify) {
 
     try {
       if (!file.type?.startsWith('image/')) {
-        notify('Vui lòng chọn file ảnh.', 'error')
+        notify(t('account.profile.chooseImage'), 'error')
         return
       }
 
       if (file.size > MAX_AVATAR_SIZE) {
-        notify('Ảnh đại diện không được vượt quá 5MB.', 'error')
+        notify(t('account.profile.avatarTooLarge'), 'error')
         return
       }
 
       avatarUploading.value = true
       const avatarUrl = await profileStore.uploadAvatar(file)
-      notify(avatarUrl ? 'Đã cập nhật ảnh đại diện.' : 'Không lấy được URL ảnh sau khi upload.', avatarUrl ? 'success' : 'error')
+      notify(avatarUrl ? t('account.profile.avatarUpdated') : t('account.profile.avatarUrlMissing'), avatarUrl ? 'success' : 'error')
     } catch (error) {
-      notify(error?.response?.data?.message || 'Không thể cập nhật ảnh đại diện.', 'error')
+      notify(error?.response?.data?.message || t('account.profile.avatarUpdateFailed'), 'error')
     } finally {
       avatarUploading.value = false
       event.target.value = ''
@@ -73,9 +75,9 @@ export function useProfileForm(profile, notify) {
   async function removeAvatar() {
     try {
       await profileStore.removeAvatar()
-      notify('Đã xoá ảnh đại diện.')
+      notify(t('account.profile.avatarRemoved'))
     } catch (error) {
-      notify(error?.response?.data?.message || 'Không thể xoá ảnh đại diện.', 'error')
+      notify(error?.response?.data?.message || t('account.profile.avatarRemoveFailed'), 'error')
     }
   }
 

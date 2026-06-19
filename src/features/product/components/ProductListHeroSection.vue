@@ -29,17 +29,14 @@ const hasStats = computed(() => {
 
 <template>
   <div>
-    <div class="pl-breadcrumb">
-      <div class="pl-inner">
+    <div class="pl-hero">
+      <nav class="pl-breadcrumb pl-inner" aria-label="Breadcrumb">
         <template v-for="(item, idx) in crumbs" :key="`${item.label}-${idx}`">
           <RouterLink v-if="item.to" :to="item.to">{{ item.label }}</RouterLink>
           <span v-else>{{ item.label }}</span>
           <span v-if="idx < crumbs.length - 1">›</span>
         </template>
-      </div>
-    </div>
-
-    <div class="pl-hero">
+      </nav>
       <div class="pl-inner pl-hero-inner">
         <div>
           <h1 class="pl-title">{{ title }}</h1>

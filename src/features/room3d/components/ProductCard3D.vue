@@ -1,5 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 
@@ -23,12 +24,13 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['add', 'open-detail'])
+const { t } = useI18n()
 
 const productImage = computed(() => props.product.image || props.product.imageUrl || '')
 const canDragToScene = computed(() => Boolean(props.product.modelUrl))
 const priceLabel = computed(() => {
   const price = Number(props.product.price)
-  return Number.isFinite(price) && price > 0 ? PriceFormatter.format(price) : 'Liên hệ'
+  return Number.isFinite(price) && price > 0 ? PriceFormatter.format(price) : t('room3d.product.contactPrice')
 })
 const isDragging = ref(false)
 const productIconName = computed(() => {
@@ -75,7 +77,7 @@ function openDetail() {
     :draggable="canDragToScene"
     role="link"
     tabindex="0"
-    :aria-label="`Xem chi tiết ${product.name}`"
+    :aria-label="t('room3d.product.detailAria', { name: product.name })"
     @click="openDetail"
     @keydown.enter.self.prevent="openDetail"
     @keydown.space.self.prevent="openDetail"
@@ -83,7 +85,7 @@ function openDetail() {
     @dragend="onDragEnd"
   >
     <div class="preview">
-      <span v-if="product.tags?.includes?.('new')" class="new-badge">Mới</span>
+      <span v-if="product.tags?.includes?.('new')" class="new-badge">{{ t('room3d.product.new') }}</span>
       <img v-if="productImage" class="product-image" :src="productImage" :alt="product.name" />
       <div v-else class="product-icon"><AppIcon :name="productIconName" :size="34" /></div>
     </div>
@@ -100,8 +102,8 @@ function openDetail() {
         type="button"
         class="add-btn"
         :disabled="added"
-        :aria-label="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
-        :title="added ? 'Da them vao gio hang' : 'Them vao gio hang'"
+        :aria-label="added ? t('room3d.product.added') : t('room3d.product.addToCart')"
+        :title="added ? t('room3d.product.added') : t('room3d.product.addToCart')"
         @click.stop="$emit('add', product)"
       >
         <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
@@ -114,8 +116,8 @@ function openDetail() {
 <style scoped>
 .card {
   position: relative;
-  border: 2px solid #f2c36a;
-  border-radius: 1rem;
+  border: 1px solid #ddd3c6;
+  border-radius: 8px;
   overflow: hidden;
   background: #ffffff;
   display: flex;
@@ -132,7 +134,7 @@ function openDetail() {
 }
 
 .card:hover {
-  border-color: #e1ab47;
+  border-color: #c9922a;
   box-shadow: 0 6px 16px rgba(15, 63, 92, 0.13);
   transform: translateY(-2px);
 }
@@ -141,11 +143,9 @@ function openDetail() {
   transform: translateY(0);
 }
 
-.card:focus,
-.card:focus-visible,
-.card *:focus,
-.card *:focus-visible {
-  outline: none;
+.card:focus-visible {
+  outline: 2px solid rgba(201, 146, 42, 0.65);
+  outline-offset: 2px;
 }
 
 .card.added {
@@ -174,7 +174,7 @@ function openDetail() {
   top: calc(0.4rem * var(--pc-content-scale));
   background: #f6b22f;
   color: #0f3f5c;
-  border-radius: calc(0.55rem * var(--pc-content-scale));
+  border-radius: 4px;
   padding: calc(0.2rem * var(--pc-content-scale)) calc(0.45rem * var(--pc-content-scale));
   font-weight: 700;
   font-size: calc(0.58rem * var(--pc-content-scale));

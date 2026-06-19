@@ -1,22 +1,24 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { useAccountStore } from '../../store/accountStore'
 import { formatDate } from '@shared/lib/formatters'
 
 const accountStore = useAccountStore()
+const { t } = useI18n()
 const projects = computed(() => accountStore.projects)
 </script>
 
 <template>
-  <AccountSectionCard title="Dự án trực quan 3D">
+  <AccountSectionCard :title="t('account.projects.title')">
     <div class="grid">
       <article v-for="project in projects" :key="project.id" class="item">
         <p class="name">{{ project.name }}</p>
-        <p class="meta">Cập nhật: {{ formatDate(project.updatedAt) || 'Chưa có dữ liệu' }} · {{ project.items }} sản phẩm</p>
+        <p class="meta">{{ t('account.projects.updated', { date: formatDate(project.updatedAt) || t('account.projects.noData'), count: project.items }) }}</p>
       </article>
       <article class="item item--new">
-        <p>Tạo dự án mới</p>
+        <p>{{ t('account.projects.create') }}</p>
       </article>
     </div>
   </AccountSectionCard>

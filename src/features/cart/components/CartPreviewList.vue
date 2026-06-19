@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { PriceFormatter } from '@shared/lib/formatters'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { resolveStockLimit } from '../lib/stockGuards'
@@ -20,11 +21,12 @@ const props = defineProps({
 })
 
 defineEmits(['open-cart', 'update-qty', 'remove'])
+const { t } = useI18n()
 
 const visibleLines = computed(() => props.items.slice(0, 3))
 
 function lineMeta(line) {
-  return [line.selectedColor, line.selectedSize].filter(Boolean).join(' / ') || 'Phân loại mặc định'
+  return [line.selectedColor, line.selectedSize].filter(Boolean).join(' / ') || t('account.cart.defaultVariant')
 }
 
 function hideBrokenImage(event) {
@@ -43,8 +45,8 @@ function cannotIncrease(line) {
       <AppIcon name="cart" :size="18" />
     </div>
     <div>
-      <div class="cart-empty-title">Giỏ hàng đang trống</div>
-      <p>Thêm vài món để xem nhanh tại đây.</p>
+      <div class="cart-empty-title">{{ t('account.cart.emptyTitle') }}</div>
+      <p>{{ t('account.cart.emptySub') }}</p>
     </div>
   </div>
 
@@ -79,17 +81,17 @@ function cannotIncrease(line) {
 
         <div class="cart-item-controls" @click.stop @keydown.stop>
           <div class="cart-item-qty-stepper">
-            <button type="button" aria-label="Giảm số lượng" :disabled="Number(line.qty || 1) <= 1" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
+            <button type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(line.qty || 1) <= 1" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
             <span>{{ line.qty }}</span>
-            <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease(line)" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
+            <button type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease(line)" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
           </div>
         </div>
 
         <button
           type="button"
           class="cart-item-remove"
-          aria-label="Xóa sản phẩm"
-          title="Xóa sản phẩm"
+          :aria-label="t('account.cart.removeItem')"
+          :title="t('account.cart.removeItem')"
           @click.stop="$emit('remove', line.id)"
         >
           <AppIcon name="trash" :size="16" />
@@ -98,19 +100,19 @@ function cannotIncrease(line) {
     </div>
 
     <div v-if="items.length > visibleLines.length" class="cart-more">
-      +{{ items.length - visibleLines.length }} sản phẩm khác trong giỏ
+      {{ t('account.cart.moreItems', { count: items.length - visibleLines.length }) }}
     </div>
 
     <div class="cart-footer">
       <div class="cart-total">
-        <span>Tổng cộng</span>
+        <span>{{ t('account.cart.total') }}</span>
         <strong>{{ PriceFormatter.format(totalAmount) }}</strong>
       </div>
 
       <div class="cart-actions">
-        <button type="button" class="cart-secondary-btn" @click="$emit('open-cart')">Xem giỏ hàng</button>
+        <button type="button" class="cart-secondary-btn" @click="$emit('open-cart')">{{ t('account.cart.viewCart') }}</button>
         <button type="button" class="cart-primary-btn" @click="$emit('open-cart')">
-          Thanh toán {{ totalCount ? `(${totalCount})` : '' }}
+          {{ totalCount ? t('account.cart.checkoutWithCount', { count: totalCount }) : t('account.cart.checkout') }}
         </button>
       </div>
     </div>
@@ -123,23 +125,23 @@ function cannotIncrease(line) {
   align-items: center;
   gap: 12px;
   padding: 18px;
-  color: #666;
+  color: var(--app-text-muted, #666);
 }
 
 .cart-empty-icon {
   width: 42px;
   height: 42px;
-  border-radius: 12px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #faf6f0;
-  color: #c58d2f;
+  background: var(--app-surface-soft, #faf6f0);
+  color: var(--app-gold, #c58d2f);
   flex-shrink: 0;
 }
 
 .cart-empty-title {
-  color: #1a1a1a;
+  color: var(--app-heading, #1a1a1a);
   font-size: 13px;
   font-weight: 600;
 }
@@ -167,8 +169,9 @@ function cannotIncrease(line) {
   align-items: center;
   padding: 13px 16px;
   border: none;
-  border-bottom: 1px solid #f0e9dd;
-  background: #fff;
+  border-bottom: 1px solid var(--app-border, #f0e9dd);
+  background: var(--app-surface, #fff);
+  color: var(--app-text, #1a1a1a);
   cursor: pointer;
   text-align: left;
   transition: background 0.18s;
@@ -179,7 +182,7 @@ function cannotIncrease(line) {
 }
 
 .cart-item:hover {
-  background: #faf6f0;
+  background: var(--app-control-hover, #faf6f0);
 }
 
 .cart-thumb {
@@ -187,14 +190,14 @@ function cannotIncrease(line) {
   position: relative;
   width: 56px;
   height: 56px;
-  border-radius: 12px;
+  border-radius: 8px;
   display: grid;
   place-items: center;
-  background: linear-gradient(135deg, #f7f1e8, #ffffff);
-  border: 1px solid rgba(201, 146, 42, 0.15);
+  background: linear-gradient(135deg, var(--app-surface-soft, #f7f1e8), var(--app-surface, #ffffff));
+  border: 1px solid color-mix(in srgb, var(--app-gold, #c9922a) 18%, transparent);
   font-size: 24px;
   overflow: hidden;
-  color: #b89b6d;
+  color: var(--app-gold, #b89b6d);
 }
 
 .cart-thumb-image {
@@ -203,7 +206,7 @@ function cannotIncrease(line) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: #f7f1e8;
+  background: var(--app-surface-soft, #f7f1e8);
 }
 
 .cart-content {
@@ -213,7 +216,7 @@ function cannotIncrease(line) {
 }
 
 .cart-item-name {
-  color: #1a1a1a;
+  color: var(--app-heading, #1a1a1a);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.4;
@@ -224,7 +227,7 @@ function cannotIncrease(line) {
 }
 
 .cart-item-meta {
-  color: #7a7a7a;
+  color: var(--app-text-muted, #7a7a7a);
   font-size: 11px;
 }
 
@@ -243,10 +246,10 @@ function cannotIncrease(line) {
 .cart-item-qty-stepper {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #e5dcca;
+  border: 1px solid var(--app-border, #e5dcca);
   border-radius: 999px;
   overflow: hidden;
-  background: #f7f1e8;
+  background: var(--app-control-bg, #f7f1e8);
   min-width: 72px;
 }
 
@@ -255,7 +258,7 @@ function cannotIncrease(line) {
   height: 26px;
   border: none;
   background: transparent;
-  color: #7a6a55;
+  color: var(--app-text-muted, #7a6a55);
   cursor: pointer;
 }
 .cart-item-qty-stepper button:disabled {
@@ -266,7 +269,7 @@ function cannotIncrease(line) {
 .cart-item-qty-stepper span {
   min-width: 28px;
   text-align: center;
-  color: #5f5243;
+  color: var(--app-heading, #5f5243);
   font-size: 11px;
   font-weight: 700;
 }
@@ -283,16 +286,16 @@ function cannotIncrease(line) {
   border: 1px solid transparent;
   border-radius: 8px;
   background: transparent;
-  color: #8b7354;
+  color: var(--app-gold, #8b7354);
   cursor: pointer;
   padding: 0;
 }
 
 .cart-item-remove:hover,
 .cart-item-remove:focus-visible {
-  border-color: #e8c5c0;
-  background: #fdf0ee;
-  color: #c0392b;
+  border-color: color-mix(in srgb, var(--app-danger, #c0392b) 34%, transparent);
+  background: color-mix(in srgb, var(--app-danger, #c0392b) 10%, var(--app-surface, #fdf0ee));
+  color: var(--app-danger, #c0392b);
   outline: none;
 }
 
@@ -300,7 +303,7 @@ function cannotIncrease(line) {
   grid-area: price;
   justify-self: end;
   align-self: end;
-  color: #c58d2f;
+  color: var(--app-gold, #c58d2f);
   font-size: 12px;
   font-weight: 700;
   white-space: nowrap;
@@ -308,7 +311,7 @@ function cannotIncrease(line) {
 
 .cart-more {
   padding: 10px 16px 0;
-  color: #8a8a8a;
+  color: var(--app-text-muted, #8a8a8a);
   font-size: 11px;
 }
 
@@ -316,8 +319,8 @@ function cannotIncrease(line) {
   display: grid;
   gap: 12px;
   padding: 14px 16px 16px;
-  border-top: 1px solid #f0e9dd;
-  background: #fffdf9;
+  border-top: 1px solid var(--app-border, #f0e9dd);
+  background: var(--app-surface, #fffdf9);
 }
 
 .cart-total {
@@ -328,12 +331,12 @@ function cannotIncrease(line) {
 }
 
 .cart-total span {
-  color: #7a7a7a;
+  color: var(--app-text-muted, #7a7a7a);
   font-size: 12px;
 }
 
 .cart-total strong {
-  color: #12202e;
+  color: var(--app-heading, #12202e);
   font-size: 16px;
 }
 
@@ -346,25 +349,80 @@ function cannotIncrease(line) {
 .cart-secondary-btn,
 .cart-primary-btn {
   min-height: 38px;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
 
 .cart-secondary-btn {
-  border: 1px solid rgba(197, 141, 47, 0.32);
-  background: #fff;
-  color: #c58d2f;
+  border: 1px solid color-mix(in srgb, var(--app-gold, #c58d2f) 34%, transparent);
+  background: var(--app-control-bg, #fff);
+  color: var(--app-gold, #c58d2f);
 }
 
-.cart-secondary-btn:hover {
-  background: #faf6f0;
+.cart-secondary-btn:hover,
+.cart-secondary-btn:focus-visible {
+  background: var(--app-control-hover, #faf6f0);
+  outline: none;
 }
 
 .cart-primary-btn {
   border: none;
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
+  background: var(--app-navy-soft, linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end)));
+  color: var(--app-heading-inverse, #fff);
+}
+
+.cart-primary-btn:hover,
+.cart-primary-btn:focus-visible {
+  filter: brightness(1.08);
+  outline: none;
+}
+
+[data-theme='dark'] .cart-item,
+[data-theme='dark'] .cart-footer {
+  background: var(--app-surface) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme='dark'] .cart-item:hover {
+  background: var(--app-control-hover) !important;
+}
+
+[data-theme='dark'] .cart-empty,
+[data-theme='dark'] .cart-item-meta,
+[data-theme='dark'] .cart-more,
+[data-theme='dark'] .cart-total span {
+  color: var(--app-text-muted) !important;
+}
+
+[data-theme='dark'] .cart-empty-title,
+[data-theme='dark'] .cart-item-name,
+[data-theme='dark'] .cart-total strong,
+[data-theme='dark'] .cart-item-qty-stepper span {
+  color: var(--app-heading) !important;
+}
+
+[data-theme='dark'] .cart-thumb,
+[data-theme='dark'] .cart-empty-icon {
+  background: var(--app-surface-soft) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme='dark'] .cart-item-qty-stepper,
+[data-theme='dark'] .cart-secondary-btn {
+  background: var(--app-control-bg) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme='dark'] .cart-secondary-btn:hover,
+[data-theme='dark'] .cart-secondary-btn:focus-visible {
+  background: var(--app-control-hover) !important;
+  border-color: var(--app-border-strong) !important;
+}
+
+[data-theme='dark'] .cart-primary-btn {
+  background: var(--app-navy-soft) !important;
+  color: var(--app-heading-inverse) !important;
 }
 </style>

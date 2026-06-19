@@ -1,42 +1,46 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
 
 defineProps({
   products: { type: Array, default: () => [] },
   total: { type: Number, default: 0 },
   activeTags: { type: Array, default: () => [] },
-  sortBy: { type: String, default: 'popular' },
   viewMode: { type: String, default: 'grid' },
   loading: { type: Boolean, default: false },
   wishedProductIds: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['update:sortBy', 'toggle-wish'])
+const emit = defineEmits(['toggle-wish', 'clear'])
+const { t } = useI18n()
 </script>
 
 <template>
   <div class="pl-body">
-    <div class="pl-top-row">
-      <p>Tìm thấy <strong>{{ total }}</strong> sản phẩm</p>
-      <div class="pl-tags">
-        <span v-for="tag in activeTags" :key="tag" class="pl-tag">{{ tag }}</span>
+    <header class="pl-result-head">
+      <div class="pl-result-copy">
+        <span>Catalog</span>
+        <p>{{ t('products.resultCount', { count: total }) }}</p>
       </div>
-      <select :value="sortBy" :disabled="!products.length" @change="emit('update:sortBy', $event.target.value)">
-        <option value="popular">Phổ biến nhất</option>
-        <option value="newest">Mới nhất</option>
-        <option value="price-asc">Giá tăng dần</option>
-        <option value="price-desc">Giá giảm dần</option>
-        <option value="rating">Đánh giá cao nhất</option>
-      </select>
+      <div class="pl-result-controls">
+        <button v-if="activeTags.length" type="button" class="pl-clear-tags" @click="emit('clear')">{{ t('products.clearFilters') }}</button>
+      </div>
+    </header>
+
+    <div v-if="activeTags.length" class="pl-tags" aria-label="Bộ lọc đang áp dụng">
+      <span v-for="tag in activeTags" :key="tag" class="pl-tag">{{ tag }}</span>
     </div>
 
     <ProductGrid
       :products="products"
       :view-mode="viewMode"
+      layout="editorial"
       :loading="loading"
       :wished-product-ids="wishedProductIds"
-      empty-text="Không có sản phẩm phù hợp bộ lọc hiện tại."
+      :show-clear-action="activeTags.length > 0"
+      :empty-text="t('products.empty')"
       @toggle-wish="emit('toggle-wish', $event)"
+      @clear="emit('clear')"
     />
   </div>
 </template>

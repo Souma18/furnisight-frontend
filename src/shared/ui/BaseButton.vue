@@ -32,7 +32,7 @@ defineEmits(['click'])
   border-radius: var(--radius, 8px);
   padding: 0.5rem 1rem;
   background: var(--accent);
-  color: #fff;
+  color: var(--brand-navy-900);
   transition: background 0.15s ease, opacity 0.15s ease;
 }
 
@@ -45,9 +45,4 @@ defineEmits(['click'])
   cursor: not-allowed;
 }
 
-@media (prefers-color-scheme: dark) {
-  .base-button {
-    color: #111827;
-  }
-}
 </style>

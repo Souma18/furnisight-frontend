@@ -1,9 +1,11 @@
 <script setup>
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 defineProps({
   selectedRoom: {
@@ -35,40 +37,40 @@ function goHome() {
   <header class="header">
     <div class="brand">
       <span class="brand-icon" aria-hidden="true">
-        <AppIcon name="house" :size="15" :stroke-width="2.2" />
+        <img src="/brand/furnisight-logo-mark.png" alt="" />
       </span>
       <span class="brand-text">FurniSight</span>
     </div>
 
     <div class="center-title">
-      <span class="title">Trực quan hóa 3D</span>
-      <span class="ai-pill">Gợi ý thông minh</span>
+      <span class="title">{{ t('room3d.topbar.title') }}</span>
+      <span class="ai-pill">{{ t('room3d.topbar.smart') }}</span>
     </div>
 
     <div class="actions">
       <button type="button" class="action-btn ghost" @click="goHome">
         <AppIcon name="chevronLeft" :size="14" />
-        <span>Trang chủ</span>
+        <span>{{ t('nav.home') }}</span>
       </button>
       <button type="button" class="action-btn ghost" @click="$emit('toggle-fullscreen')">
         <AppIcon name="fullscreen" :size="14" />
-        <span>Toàn màn hình</span>
+        <span>{{ t('room3d.topbar.fullscreen') }}</span>
       </button>
       <div class="checkout-wrap">
         <button type="button" class="action-btn gold checkout-trigger">
           <AppIcon name="cart" :size="14" />
-          <span>Thanh toán</span>
+          <span>{{ t('room3d.cart.checkout') }}</span>
           <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
         </button>
 
         <div class="checkout-dropdown">
           <div class="cart-header">
             <div class="cart-title">
-              Giỏ hàng
+              {{ t('cart.title') }}
               <span v-if="cartCount" class="cart-count">{{ cartCount }}</span>
             </div>
             <button type="button" class="cart-head-link" @click="$emit('open-checkout')">
-              Thanh toán
+              {{ t('room3d.cart.checkout') }}
             </button>
           </div>
 
@@ -93,8 +95,9 @@ function goHome() {
   align-items: center;
   gap: 1rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.7rem 1rem;
-  background: linear-gradient(180deg, #133f5c 0%, #0c3148 100%);
+  min-height: 58px;
+  padding: 0.55rem 1rem;
+  background: #12202e;
 }
 
 .brand {
@@ -111,14 +114,18 @@ function goHome() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #c9922a;
+  background: #fffdf9;
   color: #fff7d6;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  padding: 2px;
 }
 
-.brand-icon svg {
-  color: inherit;
-  stroke: currentColor;
+.brand-icon img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .brand-text {
@@ -144,9 +151,10 @@ function goHome() {
 .ai-pill {
   display: inline-flex;
   align-items: center;
-  background: linear-gradient(180deg, #d8aa56 0%, #c58d2f 100%);
-  color: #1f3f53;
-  border-radius: 999px;
+  background: rgba(201, 146, 42, 0.16);
+  border: 1px solid rgba(229, 184, 74, 0.34);
+  color: #e5b84a;
+  border-radius: 6px;
   padding: 0.24rem 0.72rem;
   font-size: 0.75rem;
   font-weight: 700;
@@ -164,11 +172,11 @@ function goHome() {
 }
 
 .action-btn {
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
-  border-radius: 0.55rem;
-  min-height: 1.9rem;
-  padding: 0.28rem 0.7rem;
+  border-radius: 6px;
+  min-height: 34px;
+  padding: 0.35rem 0.72rem;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -177,7 +185,8 @@ function goHome() {
 }
 
 .action-btn.ghost {
-  background: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.12);
   color: #eef4f9;
 }
 
@@ -186,8 +195,8 @@ function goHome() {
 }
 
 .action-btn.gold {
-  background: linear-gradient(180deg, #d8aa56 0%, #c58d2f 100%);
-  color: #ffffff;
+  background: #c9922a;
+  color: #12202e;
 }
 
 .action-btn.gold:hover {
@@ -288,8 +297,57 @@ function goHome() {
 
 @media (max-width: 980px) {
   .header {
-    grid-template-columns: 1fr;
-    justify-items: center;
+    gap: 0.65rem;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .center-title {
+    justify-content: flex-start;
+  }
+
+  .actions {
+    gap: 0.3rem;
+  }
+
+  .action-btn {
+    min-height: 32px;
+    padding: 0.32rem 0.55rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    grid-template-columns: auto 1fr;
+  }
+
+  .center-title {
+    display: none;
+  }
+
+  .brand-text {
+    font-size: 0.9rem;
+    letter-spacing: 0.04em;
+  }
+
+  .actions {
+    justify-self: end;
+  }
+
+  .action-btn > span:not(.cart-badge) {
+    display: none;
+  }
+
+  .action-btn {
+    justify-content: center;
+    padding: 0;
+    width: 34px;
+  }
+
+  .checkout-dropdown {
+    position: fixed;
+    right: 12px;
+    top: 56px;
   }
 }
 </style>

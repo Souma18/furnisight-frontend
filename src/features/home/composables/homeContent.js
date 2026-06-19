@@ -1,10 +1,10 @@
 export const homeHero = {
-  tag: 'AI-Powered 3D Interior Design',
-  titleTop: 'Trang trí nhà với',
-  titleEmphasis: 'trí tuệ',
-  titleBottom: 'nhân tạo trực quan',
+  tag: 'Nội thất tuyển chọn · Trực quan 3D',
+  titleTop: 'Không gian sống',
+  titleEmphasis: 'tinh giản',
+  titleBottom: 'và có chiều sâu',
   subtitle:
-    'Tải ảnh phòng của bạn - AI phân tích không gian, gợi ý nội thất phù hợp và trực quan hóa ngay dạng mô hình 3D tương tác.',
+    'Khám phá nội thất theo từng căn phòng, thử phối trong không gian 3D và chọn những món đồ thật sự hợp với nhịp sống của bạn.',
 }
 
 export const homeFeatures = [

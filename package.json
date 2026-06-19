@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "i18n:check": "node scripts/i18n-check.mjs",
+    "i18n:translate:en": "node scripts/i18n-translate.mjs",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
@@ -22,6 +24,7 @@
     "three": "^0.180.0",
     "troisjs": "^0.3.0",
     "vue": "^3.5.32",
+    "vue-i18n": "^11.4.6",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

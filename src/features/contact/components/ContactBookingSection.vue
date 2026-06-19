@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -13,6 +14,7 @@ defineProps({
 })
 
 const emit = defineEmits(['book'])
+const { t } = useI18n()
 </script>
 
 <template>
@@ -32,7 +34,7 @@ const emit = defineEmits(['book'])
 
       <div class="ct-booking-cards ct-fade-up">
         <article v-for="item in items" :key="item.id" class="ct-booking-card">
-          <div v-if="item.popular" class="ct-bc-popular">Phổ biến</div>
+          <div v-if="item.popular" class="ct-bc-popular">{{ t('contact.booking.popular') }}</div>
           <div class="ct-bc-icon-wrap">
             <AppIcon :name="item.icon" :size="24" />
           </div>

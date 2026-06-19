@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   AmbientLight,
   Box,
@@ -26,6 +27,8 @@ import Room3DBadge from './Room3DBadge.vue'
 import Room3DBottomControls from './Room3DBottomControls.vue'
 import Room3DFurniturePanel from './Room3DFurniturePanel.vue'
 import Room3DOverlay from './Room3DOverlay.vue'
+
+const { t } = useI18n()
 
 const props = defineProps({
   mode: {
@@ -184,7 +187,7 @@ const {
 
 const isCanvasBusy = computed(() => props.isAnalyzing || isModelLoading.value)
 const busyText = computed(() =>
-  props.isAnalyzing ? 'Đang xử lý ảnh...' : 'Đang tải mô hình, vui lòng chờ...',
+  props.isAnalyzing ? t('room3d.canvas.processing') : t('room3d.canvas.loadingModel'),
 )
 
 watch(

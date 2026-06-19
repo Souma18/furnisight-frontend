@@ -49,8 +49,8 @@ function updateReviewField(field, value) {
 </script>
 
 <template>
-  <section class="pd-tabs">
-    <div class="nav">
+  <section class="pd-tabs" aria-label="Thông tin chi tiết sản phẩm">
+    <div class="nav" aria-label="Chuyển nội dung sản phẩm">
       <button type="button" :class="{ active: activeTab === 'desc' }" @click="emit('switch-tab', 'desc')">
         Mô tả sản phẩm
       </button>
@@ -61,15 +61,16 @@ function updateReviewField(field, value) {
         Đánh giá ({{ reviewCountLabel }})
       </button>
     </div>
-    <div v-if="activeTab === 'desc'" class="desc-grid">
-      <div class="content">
+    <div v-if="activeTab === 'desc'" class="pd-section-layout desc-grid">
+      <div class="content pd-story-panel">
+        <span class="pd-section-eyebrow">Tổng quan</span>
         <h2>Mô tả sản phẩm</h2>
-        <p style="white-space: pre-line;">{{ product.description }}</p>
+        <p class="pd-description-text">{{ product.description }}</p>
         <ul>
           <li v-for="item in product.features" :key="item">{{ item }}</li>
         </ul>
       </div>
-      <div class="spec-table">
+      <div class="spec-table pd-spec-summary">
         <div class="spec-head">Thông số cơ bản</div>
         <div v-for="row in specsRows.slice(0, 4)" :key="`sum-desc-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
@@ -77,7 +78,7 @@ function updateReviewField(field, value) {
         </div>
       </div>
     </div>
-    <div v-else-if="activeTab === 'spec'" class="pd-spec">
+    <div v-else-if="activeTab === 'spec'" class="pd-section-layout pd-spec">
       <div class="spec-table">
         <div class="spec-head">Chi tiết kỹ thuật đầy đủ</div>
         <div v-for="row in specsRows" :key="`det-${row.key}`" class="spec-row">
@@ -86,7 +87,7 @@ function updateReviewField(field, value) {
         </div>
       </div>
     </div>
-    <div v-else-if="activeTab === 'review'" class="pd-review">
+    <div v-else-if="activeTab === 'review'" class="pd-section-layout pd-review">
       <div class="review-summary">
         <div class="review-score">
           <p class="score">{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</p>

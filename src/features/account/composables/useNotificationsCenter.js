@@ -1,11 +1,8 @@
 import { computed, onMounted, ref, unref } from 'vue'
 import { notificationsApi } from '@shared/lib/api/services'
+import { i18n } from '@shared/i18n'
 
-const STATUS_OPTIONS = [
-  { value: 'all', label: 'Tất cả' },
-  { value: 'unread', label: 'Chưa đọc' },
-  { value: 'read', label: 'Đã đọc' },
-]
+const t = (key, params) => i18n.global.t(key, params)
 
 const typeMap = {
   ORDER: 'order',
@@ -25,13 +22,13 @@ const iconMap = {
   SOCIAL: 'star',
 }
 
-const tagLabelMap = {
-  ORDER: 'Đơn hàng',
-  PROMOTION: 'Khuyến mãi',
-  SYSTEM: 'Hệ thống',
-  MEDIA: 'Hệ thống',
-  WALLET: 'Khuyến mãi',
-  SOCIAL: 'Đánh giá',
+const tagLabelKeyMap = {
+  ORDER: 'order',
+  PROMOTION: 'promo',
+  SYSTEM: 'system',
+  MEDIA: 'system',
+  WALLET: 'promo',
+  SOCIAL: 'review',
 }
 
 const tagToneMap = {
@@ -53,34 +50,39 @@ function formatTimeAgo(dateStr) {
   const diffMin = Math.floor(diffSec / 60)
   const diffHrs = Math.floor(diffMin / 60)
 
-  if (diffSec < 60) return 'Vừa xong'
-  if (diffMin < 60) return `${diffMin} phút trước`
-  if (diffHrs < 24) return `${diffHrs} giờ trước`
+  if (diffSec < 60) return t('account.notifications.time.justNow')
+  if (diffMin < 60) return t('account.notifications.time.minutesAgo', { count: diffMin })
+  if (diffHrs < 24) return t('account.notifications.time.hoursAgo', { count: diffHrs })
 
   const pad = (n) => String(n).padStart(2, '0')
   return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 
 function getDateLabel(dateStr) {
-  if (!dateStr) return 'Khác'
+  if (!dateStr) return t('account.notifications.groups.other')
   const date = new Date(dateStr)
-  if (isNaN(date.getTime())) return 'Khác'
+  if (isNaN(date.getTime())) return t('account.notifications.groups.other')
   const now = new Date()
 
   const dDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const dNow = new Date(now.getFullYear(), now.getMonth(), now.getDate())
   const diffDays = Math.floor((dNow.getTime() - dDate.getTime()) / (1000 * 60 * 60 * 24))
 
-  if (diffDays === 0) return 'Hôm nay'
-  if (diffDays === 1) return 'Hôm qua'
-  if (diffDays < 7) return 'Tuần này'
-  return 'Trước đó'
+  if (diffDays === 0) return t('account.notifications.groups.today')
+  if (diffDays === 1) return t('account.notifications.groups.yesterday')
+  if (diffDays < 7) return t('account.notifications.groups.thisWeek')
+  return t('account.notifications.groups.earlier')
+}
+
+function tagLabel(type) {
+  const key = tagLabelKeyMap[type] || 'system'
+  return t(`account.notifications.categories.${key}`)
 }
 
 function getDetail(item) {
   return {
-    'Thời gian': formatTimeAgo(item.createdAt),
-    'Loại thông báo': tagLabelMap[item.type] || 'Thông báo',
+    [t('account.notifications.detail.time')]: formatTimeAgo(item.createdAt),
+    [t('account.notifications.detail.type')]: tagLabel(item.type) || t('account.notifications.detail.notification'),
   }
 }
 
@@ -92,7 +94,7 @@ export function mapInboxMessageToFrontend(item) {
     time: formatTimeAgo(item.createdAt),
     dateLabel: getDateLabel(item.createdAt),
     icon: iconMap[item.type] || 'bell',
-    tagLabel: tagLabelMap[item.type] || 'Hệ thống',
+    tagLabel: tagLabel(item.type),
     tagTone: tagToneMap[item.type] || 'info',
     detail: getDetail(item),
   }
@@ -108,6 +110,11 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
   const totalCount = computed(() => notifications.value.length)
   const unreadCount = computed(() => notifications.value.filter((item) => !item.isRead).length)
   const activeCategory = computed(() => unref(selectedCategory) || 'all')
+  const statusOptions = computed(() => [
+    { value: 'all', label: t('account.notifications.status.all') },
+    { value: 'unread', label: t('account.notifications.status.unread') },
+    { value: 'read', label: t('account.notifications.status.read') },
+  ])
 
   const filteredNotifications = computed(() =>
     notifications.value.filter((item) => {
@@ -141,7 +148,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
       const data = response.data?.items ?? response.data ?? []
       notifications.value = data.map(mapInboxMessageToFrontend)
     } catch (error) {
-      errorMessage.value = error.response?.data?.message || error.message || 'Không thể tải thông báo.'
+      errorMessage.value = error.response?.data?.message || error.message || t('account.notifications.loadError')
     } finally {
       loading.value = false
     }
@@ -170,9 +177,9 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
       notifications.value = notifications.value.map((item) =>
         item.id === notificationId ? { ...item, isRead: true } : item,
       )
-      if (notify) emit('notify', 'Đã đánh dấu thông báo là đã đọc.')
+      if (notify) emit('notify', t('account.notifications.markedRead'))
     } catch (error) {
-      emit('notify', error.response?.data?.message || 'Không thể cập nhật thông báo.', 'error')
+      emit('notify', error.response?.data?.message || t('account.notifications.updateError'), 'error')
     }
   }
 
@@ -182,14 +189,14 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
     try {
       await notificationsApi.markAllAsRead()
       notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
-      emit('notify', 'Đã đánh dấu tất cả thông báo là đã đọc.')
+      emit('notify', t('account.notifications.markedAllRead'))
     } catch (error) {
-      emit('notify', error.response?.data?.message || 'Không thể cập nhật thông báo.', 'error')
+      emit('notify', error.response?.data?.message || t('account.notifications.updateError'), 'error')
     }
   }
 
   function handleAction(action) {
-    emit('notify', `Đã chọn: ${action.label}.`)
+    emit('notify', t('account.notifications.actionSelected', { label: action.label }))
   }
 
   onMounted(loadNotifications)
@@ -203,7 +210,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
     readStatus,
     totalCount,
     unreadCount,
-    statusOptions: STATUS_OPTIONS,
+    statusOptions,
     isExpanded,
     toggleExpanded,
     markAllRead,

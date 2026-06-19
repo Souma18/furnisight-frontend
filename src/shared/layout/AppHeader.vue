@@ -3,16 +3,20 @@ import { RouterLink } from 'vue-router'
 import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { getApiErrorMessage } from '@shared/lib/api'
 import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ThemeToggle from '@shared/ui/ThemeToggle.vue'
+import LanguageToggle from '@shared/ui/LanguageToggle.vue'
 import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authStore)
 const notifications = ref([])
@@ -124,29 +128,31 @@ watch(() => route.query.otpCode, (newVal) => {
   <header class="header">
     <RouterLink to="/" class="brand">
       <span class="brand-icon" aria-hidden="true">
-        <AppIcon name="house" :size="15" :stroke-width="2.2" />
+        <img src="/brand/furnisight-logo-mark.png" alt="" />
       </span>
       <span class="brand-text">FurniSight</span>
     </RouterLink>
 
-    <nav class="nav" aria-label="Chinh">
-      <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
-      <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
-      <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
-      <RouterLink to="/khuyen-mai" :class="{ 'nav-pill': activeNav === 'promotions' }">Khuyến mãi</RouterLink>
-      <RouterLink to="/contact" :class="{ 'nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
+    <nav class="nav" :aria-label="t('nav.main')">
+      <RouterLink to="/" :class="{ 'nav-pill': activeNav === 'home' }">{{ t('nav.home') }}</RouterLink>
+      <RouterLink to="/products" :class="{ 'nav-pill': activeNav === 'products' }">{{ t('nav.products') }}</RouterLink>
+      <RouterLink to="/room3d" :class="{ 'nav-pill': activeNav === 'room3d' }">{{ t('nav.room3d') }}</RouterLink>
+      <RouterLink to="/khuyen-mai" :class="{ 'nav-pill': activeNav === 'promotions' }">{{ t('nav.promotions') }}</RouterLink>
+      <RouterLink to="/contact" :class="{ 'nav-pill': activeNav === 'contact' }">{{ t('nav.contact') }}</RouterLink>
     </nav>
 
     <div class="actions">
+      <LanguageToggle compact />
+      <ThemeToggle variant="icon" />
       <RouterLink to="/room3d" class="visualize-btn">
         <AppIcon name="map" :size="14" />
-        Trực quan 3D
+        {{ t('header.visualize') }}
       </RouterLink>
       <div class="notif-wrap" @mouseenter="loadNotificationsOnce" @click="loadNotificationsOnce">
         <button
           class="icon-btn"
           type="button"
-          aria-label="Thong bao"
+          :aria-label="t('header.notifications')"
           @click="openAccountNotifications"
         >
           <AppIcon name="bell" :size="14" />
@@ -156,11 +162,11 @@ watch(() => route.query.otpCode, (newVal) => {
         <div class="notif-dropdown">
           <div class="nd-header">
             <div class="nd-title">
-              Thông báo
+              {{ t('header.notifications') }}
               <span v-if="unreadNotificationCount" class="nd-unread-count">{{ unreadNotificationCount }}</span>
             </div>
             <button type="button" class="nd-mark-all" @click="markAllNotificationsRead">
-              Đọc tất cả
+              {{ t('header.markAllRead') }}
             </button>
           </div>
 
@@ -187,12 +193,12 @@ watch(() => route.query.otpCode, (newVal) => {
               </div>
             </button>
 
-            <div v-if="!previewNotifications.length" class="nd-empty">Không có thông báo nào.</div>
+            <div v-if="!previewNotifications.length" class="nd-empty">{{ t('header.emptyNotifications') }}</div>
           </div>
 
           <div class="nd-footer">
             <button type="button" class="nd-see-all" @click="openAccountNotifications">
-              Xem tất cả
+              {{ t('common.viewAll') }}
             </button>
           </div>
         </div>
@@ -204,7 +210,7 @@ watch(() => route.query.otpCode, (newVal) => {
       <button
         class="icon-btn user"
         type="button"
-        :aria-label="isAuthenticated ? 'Tài khoản' : 'Đăng nhập'"
+        :aria-label="isAuthenticated ? t('header.account') : t('header.login')"
         @click="handleUserAction"
       >
         <AppIcon name="user" :size="14" />
@@ -213,7 +219,7 @@ watch(() => route.query.otpCode, (newVal) => {
       <button
         class="icon-btn hamburger-btn"
         type="button"
-        :aria-label="mobileMenuOpen ? 'Đóng menu' : 'Mở menu'"
+        :aria-label="mobileMenuOpen ? t('header.closeMenu') : t('header.openMenu')"
         @click="mobileMenuOpen = !mobileMenuOpen"
       >
         <AppIcon :name="mobileMenuOpen ? 'close' : 'menu'" :size="14" />
@@ -221,93 +227,124 @@ watch(() => route.query.otpCode, (newVal) => {
     </div>
 
     <div v-if="mobileMenuOpen" class="mobile-nav">
-      <RouterLink to="/" :class="{ 'mobile-nav-pill': activeNav === 'home' }">Trang Chủ</RouterLink>
-      <RouterLink to="/products" :class="{ 'mobile-nav-pill': activeNav === 'products' }">Sản phẩm</RouterLink>
-      <RouterLink to="/room3d" :class="{ 'mobile-nav-pill': activeNav === 'room3d' }">Trực quan 3D</RouterLink>
-      <RouterLink to="/khuyen-mai" :class="{ 'mobile-nav-pill': activeNav === 'promotions' }">Khuyến mãi</RouterLink>
-      <RouterLink to="/contact" :class="{ 'mobile-nav-pill': activeNav === 'contact' }">Liên hệ</RouterLink>
+      <RouterLink to="/" :class="{ 'mobile-nav-pill': activeNav === 'home' }">{{ t('nav.home') }}</RouterLink>
+      <RouterLink to="/products" :class="{ 'mobile-nav-pill': activeNav === 'products' }">{{ t('nav.products') }}</RouterLink>
+      <RouterLink to="/room3d" :class="{ 'mobile-nav-pill': activeNav === 'room3d' }">{{ t('nav.room3d') }}</RouterLink>
+      <RouterLink to="/khuyen-mai" :class="{ 'mobile-nav-pill': activeNav === 'promotions' }">{{ t('nav.promotions') }}</RouterLink>
+      <RouterLink to="/contact" :class="{ 'mobile-nav-pill': activeNav === 'contact' }">{{ t('nav.contact') }}</RouterLink>
     </div>
   </header>
 </template>
 
 <style scoped>
 .header {
+  --header-ink: #12202e;
+  --header-navy: #0f2f45;
+  --header-gold: #c9922a;
+  --header-gold-bright: #e5b84a;
+  --header-cream: #fffaf1;
+  --header-muted: rgba(255, 250, 241, 0.76);
   position: fixed;
   top: 0;
   left: 0;
   right: var(--app-main-scrollbar-width, 0px);
   z-index: 120;
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
-  padding: 0.7rem 1rem;
-  background: linear-gradient(180deg, #133f5c 0%, #0c3148 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  min-height: 58px;
+  padding: 0.55rem clamp(0.85rem, 2vw, 1.35rem);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(229, 184, 74, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(18, 32, 46, 0.98) 0%, rgba(13, 42, 61, 0.98) 100%);
+  border-bottom: 1px solid rgba(229, 184, 74, 0.18);
+  box-shadow: 0 12px 32px rgba(18, 32, 46, 0.16);
   box-sizing: border-box;
+  backdrop-filter: blur(14px);
 }
 
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   text-decoration: none;
+  min-width: 0;
 }
 
 .brand-icon {
-  width: 1.6rem;
-  height: 1.6rem;
-  border-radius: 0.45rem;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #c9922a;
-  color: #fff7d6;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  background: #fffdf9;
+  color: var(--header-ink);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+  overflow: hidden;
+  padding: 2px;
 }
 
-.brand-icon svg {
-  color: inherit;
-  stroke: currentColor;
+.brand-icon img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .brand-text {
-  color: #efe6d7;
-  letter-spacing: 0.08em;
-  font-weight: 600;
+  color: var(--header-cream);
+  letter-spacing: 0.06em;
+  font-weight: 760;
 }
 
 .nav {
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  justify-self: center;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.2rem;
+  border: 1px solid rgba(255, 250, 241, 0.08);
+  border-radius: 8px;
+  background: rgba(255, 250, 241, 0.045);
+  flex-wrap: nowrap;
 }
 
 .nav a {
-  color: rgba(233, 244, 255, 0.88);
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  color: var(--header-muted);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.92rem;
-  padding: 0.4rem 0.7rem;
-  border-radius: 0.5rem;
+  font-weight: 650;
+  font-size: 0.9rem;
+  padding: 0 0.72rem;
+  border-radius: 7px;
+  white-space: nowrap;
+  transition: background 0.18s ease, color 0.18s ease, transform 0.18s ease;
 }
 
-.nav a:hover {
-  background: rgba(255, 255, 255, 0.07);
+.nav a:hover,
+.nav a:focus-visible {
+  background: rgba(255, 250, 241, 0.12);
   color: #ffffff;
+  outline: none;
 }
 
 .nav .nav-pill {
-  background: rgba(255, 178, 60, 0.18);
-  color: #f2d79e;
+  background: var(--header-cream);
+  color: var(--header-ink);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .actions {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-self: end;
+  gap: 0.42rem;
 }
 
 .notif-wrap {
@@ -317,35 +354,63 @@ watch(() => route.query.otpCode, (newVal) => {
 .visualize-btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  background: linear-gradient(180deg, #d8aa56 0%, #c58d2f 100%);
-  color: #fff;
+  min-height: 36px;
+  background: linear-gradient(135deg, var(--header-gold-bright), var(--header-gold));
+  color: var(--header-ink);
   text-decoration: none;
-  padding: 0.45rem 0.8rem;
-  border-radius: 0.55rem;
+  padding: 0 0.82rem;
+  border: 1px solid rgba(255, 250, 241, 0.14);
+  border-radius: 8px;
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 760;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14);
+  transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+}
+
+.visualize-btn:hover,
+.visualize-btn:focus-visible {
+  background: linear-gradient(135deg, #f1d47a, #d6a13a);
+  color: var(--header-ink);
+  transform: translateY(-1px);
+  outline: none;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+}
+
+.visualize-btn:active {
+  transform: translateY(0);
 }
 
 .icon-btn {
-  border: none;
+  border: 1px solid rgba(255, 250, 241, 0.12);
   cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.55rem;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f5f7f8;
+  background: rgba(255, 250, 241, 0.07);
+  color: rgba(255, 250, 241, 0.9);
   text-decoration: none;
   font-size: 0.9rem;
   position: relative;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
 .icon-btn:hover,
-.user:hover {
-  background: rgba(255, 255, 255, 0.16);
+.icon-btn:focus-visible,
+.user:hover,
+.user:focus-visible {
+  border-color: var(--header-cream);
+  background: var(--header-cream);
+  color: var(--header-ink);
+  outline: none;
+}
+
+.icon-btn:active {
+  transform: translateY(1px);
 }
 
 .notif-badge {
@@ -354,9 +419,9 @@ watch(() => route.query.otpCode, (newVal) => {
   right: 0.28rem;
   width: 0.5rem;
   height: 0.5rem;
-  border: 2px solid #0c3148;
+  border: 2px solid var(--header-ink);
   border-radius: 999px;
-  background: #e53e3e;
+  background: #df4d42;
   animation: badgePulse 2s ease-in-out infinite;
 }
 
@@ -366,10 +431,10 @@ watch(() => route.query.otpCode, (newVal) => {
   right: -10px;
   width: 380px;
   overflow: hidden;
-  border: 1px solid #ece2cf;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(18, 32, 46, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px) scale(0.97);
@@ -391,9 +456,9 @@ watch(() => route.query.otpCode, (newVal) => {
   width: 12px;
   height: 12px;
   transform: rotate(45deg);
-  border-top: 1px solid #ece2cf;
-  border-left: 1px solid #ece2cf;
-  background: #fff;
+  border-top: 1px solid var(--app-border);
+  border-left: 1px solid var(--app-border);
+  background: var(--app-surface);
   z-index: 1;
 }
 
@@ -403,22 +468,22 @@ watch(() => route.query.otpCode, (newVal) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid #f0e9dd;
-  background: #fff;
+  padding: 15px 16px 12px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
 .nd-title {
   font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-weight: 760;
+  color: var(--app-heading);
 }
 
 .nd-unread-count {
   margin-left: 6px;
   padding: 2px 7px;
-  border-radius: 10px;
-  background: #e53e3e;
+  border-radius: 8px;
+  background: var(--app-danger);
   color: #fff;
   font-size: 10px;
   font-weight: 700;
@@ -427,15 +492,20 @@ watch(() => route.query.otpCode, (newVal) => {
 .nd-mark-all {
   border: none;
   background: none;
-  color: #c58d2f;
+  color: var(--app-gold);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 650;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
 }
 
-.nd-mark-all:hover {
-  color: #e5b84a;
+.nd-mark-all:hover,
+.nd-mark-all:focus-visible {
+  color: var(--brand-gold-700);
+  outline: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 .nd-list {
@@ -456,10 +526,10 @@ watch(() => route.query.otpCode, (newVal) => {
   gap: 11px;
   padding: 13px 16px;
   border: none;
-  border-bottom: 1px solid #f0e9dd;
-  background: #fff;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
   cursor: pointer;
-  transition: background 0.18s;
+  transition: background 0.18s ease;
   position: relative;
   text-align: left;
 }
@@ -468,12 +538,14 @@ watch(() => route.query.otpCode, (newVal) => {
   border-bottom: none;
 }
 
-.nd-item:hover {
-  background: #faf6f0;
+.nd-item:hover,
+.nd-item:focus-visible {
+  background: var(--app-control-hover);
+  outline: none;
 }
 
 .nd-item.unread {
-  background: #fffbf4;
+  background: var(--app-surface-soft);
 }
 
 .nd-item.unread::before {
@@ -484,7 +556,7 @@ watch(() => route.query.otpCode, (newVal) => {
   bottom: 0;
   width: 3px;
   border-radius: 0 2px 2px 0;
-  background: linear-gradient(180deg, #e5b84a, #c9922a);
+  background: linear-gradient(180deg, var(--brand-gold-400), var(--app-gold));
 }
 
 .nd-icon-wrap {
@@ -495,27 +567,27 @@ watch(() => route.query.otpCode, (newVal) => {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .nd-icon-wrap--order {
-  background: #e3f2fd;
-  color: #2563eb;
+  background: color-mix(in srgb, var(--app-navy-soft) 14%, var(--app-surface));
+  color: var(--app-gold);
 }
 
 .nd-icon-wrap--promo {
-  background: #fff3e0;
-  color: #c58d2f;
+  background: var(--app-gold-soft);
+  color: var(--app-gold);
 }
 
 .nd-icon-wrap--system {
-  background: #e8f5e9;
-  color: #15803d;
+  background: color-mix(in srgb, var(--app-success) 14%, var(--app-surface));
+  color: var(--app-success);
 }
 
 .nd-icon-wrap--review {
-  background: #ede9fe;
-  color: #6d28d9;
+  background: var(--app-surface-soft);
+  color: var(--app-gold);
 }
 
 .nd-content {
@@ -524,18 +596,18 @@ watch(() => route.query.otpCode, (newVal) => {
 
 .nd-item-title {
   margin-bottom: 3px;
-  color: #1a1a1a;
+  color: var(--app-heading);
   font-size: 13px;
   font-weight: 600;
   line-height: 1.35;
 }
 
 .nd-item.unread .nd-item-title {
-  color: #12202e;
+  color: var(--app-heading);
 }
 
 .nd-item-body {
-  color: #555;
+  color: var(--app-text-muted);
   font-size: 12px;
   line-height: 1.55;
   display: -webkit-box;
@@ -550,7 +622,7 @@ watch(() => route.query.otpCode, (newVal) => {
   align-items: center;
   gap: 4px;
   margin-top: 5px;
-  color: #888;
+  color: var(--app-text-muted);
   font-size: 11px;
 }
 
@@ -559,12 +631,12 @@ watch(() => route.query.otpCode, (newVal) => {
   height: 6px;
   flex-shrink: 0;
   border-radius: 999px;
-  background: #c9922a;
+  background: var(--app-gold);
 }
 
 .nd-empty {
   padding: 18px 16px;
-  color: #888;
+  color: var(--app-text-muted);
   font-size: 12px;
   text-align: center;
 }
@@ -574,20 +646,24 @@ watch(() => route.query.otpCode, (newVal) => {
   align-items: center;
   justify-content: center;
   padding: 12px 16px;
-  border-top: 1px solid #f0e9dd;
+  border-top: 1px solid #efe4d3;
 }
 
 .nd-see-all {
   border: none;
   background: none;
-  color: #c58d2f;
+  color: #9a6a21;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 720;
   cursor: pointer;
 }
 
-.nd-see-all:hover {
-  color: #e5b84a;
+.nd-see-all:hover,
+.nd-see-all:focus-visible {
+  color: #6d4912;
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @keyframes badgePulse {
@@ -611,10 +687,13 @@ watch(() => route.query.otpCode, (newVal) => {
   grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  padding: 1rem 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  background: linear-gradient(180deg, #0c3148 0%, #082537 100%);
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+  padding: 0.65rem;
+  border: 1px solid rgba(255, 250, 241, 0.1);
+  border-radius: 8px;
+  background: rgba(9, 31, 46, 0.98);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   animation: slideDown 0.25s ease-out forwards;
 }
 
@@ -630,29 +709,35 @@ watch(() => route.query.otpCode, (newVal) => {
 }
 
 .mobile-nav a {
-  color: rgba(233, 244, 255, 0.88);
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  color: var(--header-muted);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  transition: background 0.2s;
+  font-weight: 650;
+  font-size: 0.98rem;
+  padding: 0 0.85rem;
+  border-radius: 7px;
+  transition: background 0.18s ease, color 0.18s ease;
 }
 
-.mobile-nav a:hover {
-  background: rgba(255, 255, 255, 0.07);
+.mobile-nav a:hover,
+.mobile-nav a:focus-visible {
+  background: rgba(255, 250, 241, 0.12);
   color: #ffffff;
+  outline: none;
 }
 
 .mobile-nav .mobile-nav-pill {
-  background: rgba(255, 178, 60, 0.18);
-  color: #f2d79e;
+  background: var(--header-cream);
+  color: var(--header-ink);
 }
 
 @media (max-width: 980px) {
   .header {
     grid-template-columns: auto 1fr;
     justify-items: stretch;
+    gap: 0.75rem;
   }
 
   .nav {
@@ -674,6 +759,26 @@ watch(() => route.query.otpCode, (newVal) => {
   .notif-dropdown {
     width: min(92vw, 380px);
     right: 0;
+  }
+}
+
+@media (max-width: 520px) {
+  .header {
+    padding-inline: 0.75rem;
+  }
+
+  .brand-text {
+    font-size: 0.95rem;
+    letter-spacing: 0.035em;
+  }
+
+  .actions {
+    gap: 0.32rem;
+  }
+
+  .icon-btn {
+    width: 2rem;
+    height: 2rem;
   }
 }
 </style>

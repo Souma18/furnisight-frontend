@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAccountVouchers } from '../../composables/useAccountVouchers'
 import {
@@ -11,6 +12,7 @@ import {
 } from '@features/promotions/lib/voucherPresentation'
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 const {
   loading,
   typeFilter,
@@ -28,17 +30,17 @@ const {
     <header class="vouchers-head">
       <h2>
         <AppIcon name="badgePercent" :size="20" />
-        Voucher của tôi
+        {{ t('account.vouchers.title') }}
       </h2>
       <button type="button" class="refresh-btn" :disabled="loading" @click="fetchVouchers">
         <AppIcon name="refresh" :size="15" />
-        Làm mới
+        {{ t('account.vouchers.refresh') }}
       </button>
     </header>
 
     <div class="voucher-filters">
       <label>
-        <span>Loại voucher</span>
+        <span>{{ t('account.vouchers.type') }}</span>
         <select v-model="typeFilter">
           <option v-for="option in typeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
@@ -46,7 +48,7 @@ const {
         </select>
       </label>
       <label>
-        <span>Thời gian</span>
+        <span>{{ t('account.vouchers.time') }}</span>
         <select v-model="timeFilter">
           <option v-for="option in timeOptions" :key="option.value" :value="option.value">
             {{ option.label }}
@@ -57,7 +59,7 @@ const {
 
     <div v-if="loading" class="voucher-state">
       <AppIcon name="refresh" :size="16" />
-      Đang tải voucher...
+      {{ t('account.vouchers.loading') }}
     </div>
 
     <div v-else class="voucher-list">
@@ -73,18 +75,18 @@ const {
           <p class="voucher-code">{{ voucher.code }}</p>
           <p class="voucher-discount">{{ discountLabel(voucher) }}</p>
           <p class="voucher-meta">
-            {{ conditionText(voucher) }} · HSD {{ formatDate(voucher.endDate) }}
+            {{ conditionText(voucher) }} · {{ t('account.vouchers.expiryShort') }} {{ formatDate(voucher.endDate) }}
           </p>
         </div>
         <button type="button" class="copy-btn" @click="copyCode(voucher.code)">
           <AppIcon name="copy" :size="15" />
-          Sao chép
+          {{ t('account.vouchers.copy') }}
         </button>
       </article>
 
       <p v-if="!filteredVouchers.length" class="voucher-state">
         <AppIcon name="badgePercent" :size="16" />
-        Không có voucher phù hợp bộ lọc.
+        {{ t('account.vouchers.empty') }}
       </p>
     </div>
   </section>

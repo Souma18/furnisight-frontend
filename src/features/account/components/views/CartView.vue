@@ -1,5 +1,6 @@
 <script setup>
 import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import CartItemCard from '@features/cart/components/CartItemCard.vue'
@@ -11,6 +12,7 @@ import { useCartSelection } from '@features/cart/composables/useCartSelection'
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
+const { t } = useI18n()
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
 const {
   checkedIds,
@@ -68,7 +70,7 @@ const formatPrice = PriceFormatter.format
 </script>
 
 <template>
-  <AccountSectionCard title="Giỏ hàng">
+  <AccountSectionCard :title="t('account.cart.title')">
     <div v-if="items.length" class="select-all-row">
       <label class="select-all-box">
         <input
@@ -78,9 +80,9 @@ const formatPrice = PriceFormatter.format
           :disabled="!availableItemIds.length"
           @change="toggleAllChecked"
         >
-        <span>Chọn tất cả</span>
+        <span>{{ t('account.cart.selectAll') }}</span>
       </label>
-      <span>{{ selectedCount }} / {{ availableItemIds.length }} sản phẩm</span>
+      <span>{{ t('account.cart.selectedCount', { selected: selectedCount, total: availableItemIds.length }) }}</span>
     </div>
 
     <div class="list">
@@ -109,7 +111,7 @@ const formatPrice = PriceFormatter.format
       <div class="variant-modal">
         <div class="variant-modal-head">
           <div>
-            <p class="variant-modal-kicker">Chọn phân loại</p>
+            <p class="variant-modal-kicker">{{ t('account.cart.chooseVariant') }}</p>
             <h3>{{ activeItem.name }}</h3>
           </div>
           <button type="button" class="close-btn" @click="closeItemEditor">×</button>
@@ -117,10 +119,10 @@ const formatPrice = PriceFormatter.format
 
         <div class="variant-modal-body">
           <label>
-            <span>Màu</span>
+            <span>{{ t('account.cart.color') }}</span>
             <select v-model="activeDraft.selectedColor" :disabled="editorLoading || !getVariantOptions(activeItem, 'colors').length">
               <option v-if="!getVariantOptions(activeItem, 'colors').length" value="">
-                Không có dữ liệu màu
+                {{ t('account.cart.noColorData') }}
               </option>
               <option v-for="color in getVariantOptions(activeItem, 'colors')" :key="color" :value="color">
                 {{ color }}
@@ -129,14 +131,14 @@ const formatPrice = PriceFormatter.format
           </label>
 
           <p v-if="activeItem.variantLoadFailed" class="variant-modal-hint">
-            Không tải được dữ liệu phân loại cho sản phẩm này. Vui lòng xóa sản phẩm và thêm lại từ trang chi tiết nếu cần đổi phân loại.
+            {{ t('account.cart.variantLoadFailed') }}
           </p>
 
           <label>
-            <span>Kích thước</span>
+            <span>{{ t('account.cart.size') }}</span>
             <select v-model="activeDraft.selectedSize" :disabled="editorLoading || !getVariantOptions(activeItem, 'sizes').length">
               <option v-if="!getVariantOptions(activeItem, 'sizes').length" value="">
-                Không có dữ liệu kích thước
+                {{ t('account.cart.noSizeData') }}
               </option>
               <option
                 v-for="size in getVariantOptions(activeItem, 'sizes')"
@@ -149,7 +151,7 @@ const formatPrice = PriceFormatter.format
           </label>
 
           <label>
-            <span>Số lượng</span>
+            <span>{{ t('account.cart.quantity') }}</span>
             <div class="modal-qty">
               <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
               <input
@@ -167,8 +169,8 @@ const formatPrice = PriceFormatter.format
         </div>
 
         <div class="variant-modal-actions">
-          <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">Hủy</button>
-          <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">Lưu</button>
+          <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">{{ t('common.cancel') }}</button>
+          <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">{{ t('common.save') }}</button>
         </div>
       </div>
     </div>

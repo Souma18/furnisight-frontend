@@ -1,14 +1,14 @@
 .checkout-page {
-  --co-navy: var(--brand-navy-800);
-  --co-gold: var(--brand-gold-600);
+  --co-navy: var(--app-navy);
+  --co-gold: var(--app-gold);
   --co-gold-light: var(--brand-gold-400);
-  --co-cream: var(--brand-cream-50);
-  --co-cream-dark: var(--brand-cream-100);
-  --co-cream-mid: var(--brand-cream-200);
-  --co-text-mid: #555;
-  --co-text-light: #888;
-  --co-green: #2d9e6b;
-  --co-red: #e53e3e;
+  --co-cream: var(--app-bg);
+  --co-cream-dark: var(--app-surface-soft);
+  --co-cream-mid: var(--app-border);
+  --co-text-mid: var(--app-text);
+  --co-text-light: var(--app-text-muted);
+  --co-green: var(--app-success);
+  --co-red: var(--app-danger);
   background: var(--co-cream);
   min-height: 100%;
 }
@@ -75,7 +75,7 @@
 }
 
 .checkout-bc {
-  background: #fff;
+  background: var(--app-surface);
   border-bottom: 1px solid var(--co-cream-dark);
 }
 
@@ -605,4 +605,42 @@
   .co-address-edit { grid-column: 3; justify-self: start; }
   .co-address-form { grid-template-columns: 1fr; }
   .co-address-form-full { grid-column: auto; }
+}
+
+[data-theme='dark'] .checkout-page {
+  color: var(--app-text);
+}
+
+[data-theme='dark'] .checkout-bc,
+[data-theme='dark'] .co-card,
+[data-theme='dark'] .co-address-card,
+[data-theme='dark'] .co-address-secondary,
+[data-theme='dark'] .co-shop-card,
+[data-theme='dark'] .co-item-card,
+[data-theme='dark'] .co-sum-card,
+[data-theme='dark'] .co-modal,
+[data-theme='dark'] .co-voucher-card,
+[data-theme='dark'] .co-toolbar,
+[data-theme='dark'] .checkout-success-overlay .success-card {
+  background: var(--app-surface);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+[data-theme='dark'] .co-item-line,
+[data-theme='dark'] .co-payment-method,
+[data-theme='dark'] .co-note,
+[data-theme='dark'] .co-input,
+[data-theme='dark'] .co-select,
+[data-theme='dark'] .checkout-success-overlay .success-btn-home {
+  background: var(--app-control-bg);
+  border-color: var(--app-border);
+  color: var(--app-text) !important;
+}
+
+[data-theme='dark'] .co-muted,
+[data-theme='dark'] .co-item-meta,
+[data-theme='dark'] .co-address-detail,
+[data-theme='dark'] .co-help {
+  color: var(--app-text-muted);
 }

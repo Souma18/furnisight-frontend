@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
 
 defineProps({
@@ -7,14 +8,15 @@ defineProps({
 })
 
 const emit = defineEmits(['toggle-wish'])
+const { t } = useI18n()
 </script>
 
 <template>
   <section id="products" class="fade-up">
     <div class="section-head">
       <div>
-        <div class="section-label">Sản phẩm bán chạy</div>
-        <h2 class="section-title">Được yêu thích <em>nhất tuần</em></h2>
+        <div class="section-label">{{ t('home.products.label') }}</div>
+        <h2 class="section-title">{{ t('home.products.titlePrefix') }} <em>{{ t('home.products.titleEmphasis') }}</em></h2>
       </div>
     </div>
 
@@ -22,7 +24,7 @@ const emit = defineEmits(['toggle-wish'])
       :products="products"
       :wished-product-ids="wishedProductIds"
       :columns="4"
-      empty-text="Chưa có sản phẩm nổi bật."
+      :empty-text="t('home.products.empty')"
       @toggle-wish="emit('toggle-wish', $event)"
     />
   </section>

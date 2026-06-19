@@ -10,26 +10,24 @@ const props = defineProps({
 })
 
 function isLink(item) {
-  return Boolean(item?.to)
+  return Boolean(item?.to || item?.href)
 }
 </script>
 
 <template>
   <div>
-    <div class="ct-breadcrumb">
-      <div class="ct-inner">
-        <template v-for="(item, idx) in breadcrumb" :key="`${item.label}-${idx}`">
-          <RouterLink v-if="isLink(item)" :to="item.to">{{ item.label }}</RouterLink>
-          <span :class="{ 'ct-breadcrumb-current': !isLink(item) }">{{ item.label }}</span>
-          <span v-if="idx < breadcrumb.length - 1">›</span>
-        </template>
-      </div>
-    </div>
-
     <section class="ct-hero">
       <div class="ct-hero-bg"></div>
       <div class="ct-orb ct-orb-a"></div>
       <div class="ct-orb ct-orb-b"></div>
+
+      <nav class="ct-breadcrumb ct-breadcrumb-inner" aria-label="Breadcrumb">
+        <template v-for="(item, idx) in breadcrumb" :key="`${item.label}-${idx}`">
+          <RouterLink v-if="isLink(item)" :to="item.to || item.href">{{ item.label }}</RouterLink>
+          <span v-else class="ct-breadcrumb-current">{{ item.label }}</span>
+          <span v-if="idx < breadcrumb.length - 1">›</span>
+        </template>
+      </nav>
 
       <div class="ct-inner ct-hero-inner">
         <div>

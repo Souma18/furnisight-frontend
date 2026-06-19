@@ -1,5 +1,6 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -17,336 +18,181 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['change-view', 'logout'])
+defineEmits(['change-view', 'logout'])
 
-const navGroups = [
-  {
-    title: 'Tài khoản',
-    items: [
-      { key: 'profile', label: 'Thông tin cá nhân', icon: 'user' },
-      { key: 'address', label: 'Địa chỉ giao hàng', icon: 'mapPin' },
-      { key: 'security', label: 'Bảo mật', icon: 'shield' },
-    ],
-  },
-  {
-    title: 'Mua sắm',
-    items: [
-      { key: 'cart', label: 'Giỏ hàng', icon: 'cart' },
-      { key: 'orders', label: 'Đơn hàng', icon: 'box' },
-      { key: 'wishlist', label: 'Yêu thích', icon: 'heart' },
-    ],
-  },
-  {
-    title: 'Khác',
-    items: [
-      { key: 'settings', label: 'Cài đặt', icon: 'settings' },
-      { key: 'ar', label: 'Dự án 3D', icon: 'cube' },
-    ],
-  },
-]
+const { t } = useI18n()
 
-const notificationItems = [
-  { key: 'bell', label: 'Tất cả', icon: 'list' },
-  { key: 'bell-order', label: 'Đơn hàng', icon: 'box' },
-  { key: 'bell-promo', label: 'Khuyến mãi', icon: 'gift' },
-  { key: 'bell-system', label: 'Hệ thống', icon: 'settings' },
-  { key: 'bell-review', label: 'Đánh giá', icon: 'star' },
-]
+const navItems = computed(() => [
+  { key: 'profile', label: t('account.nav.profile'), icon: 'user' },
+  { key: 'address', label: t('account.nav.address'), icon: 'mapPin' },
+  { key: 'bell', label: t('account.nav.notifications'), icon: 'bell' },
+  { key: 'cart', label: t('account.nav.cart'), icon: 'cart' },
+  { key: 'orders', label: t('account.nav.orders'), icon: 'box' },
+  { key: 'wishlist', label: t('account.nav.wishlist'), icon: 'heart' },
+  { key: 'security', label: t('account.nav.security'), icon: 'shield' },
+  { key: 'settings', label: t('account.nav.settings'), icon: 'settings' },
+  { key: 'ar', label: t('account.nav.room3d'), icon: 'cube' },
+])
 
-const notificationMenuOpen = ref(false)
-const isNotificationView = computed(() => String(props.activeView).startsWith('bell'))
-const profileName = computed(() => {
-  const nameParts = [props.profile?.lastName, props.profile?.firstName]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-
-  return nameParts.join(' ') || props.profile?.displayName || props.profile?.email || 'Khách hàng'
-})
-
-watch(
-  () => props.activeView,
-  (nextView) => {
-    if (String(nextView).startsWith('bell')) notificationMenuOpen.value = true
-  },
-  { immediate: true },
-)
-
-function toggleNotificationMenu() {
-  if (isNotificationView.value) {
-    notificationMenuOpen.value = !notificationMenuOpen.value
-    return
-  }
-
-  notificationMenuOpen.value = true
-  emit('change-view', 'bell')
+function isActive(key) {
+  if (key === 'bell') return String(props.activeView).startsWith('bell')
+  return props.activeView === key
 }
 </script>
 
 <template>
-  <aside class="sidebar">
-    <div class="user-box">
-      <div class="avatar">
-        <img v-if="profile?.avatarUrl" :src="profile.avatarUrl" alt="Avatar" />
-        <span v-else>{{ profile?.initials ?? 'NA' }}</span>
-      </div>
-      <p class="name" :title="profileName">{{ profileName }}</p>
-      <p class="email">{{ profile?.email }}</p>
+  <nav class="account-nav" :aria-label="t('account.nav.aria')">
+    <div class="nav-scroll">
+      <button
+        v-for="item in navItems"
+        :key="item.key"
+        type="button"
+        class="nav-tab"
+        :class="{ active: isActive(item.key) }"
+        @click="$emit('change-view', item.key)"
+      >
+        <AppIcon :name="item.icon" :size="16" />
+        <span>{{ item.label }}</span>
+      </button>
     </div>
-    <div class="stats">
-      <div class="stat stat-orders">
-        <strong>{{ stats.totalOrders }}</strong>
-        <span>Đơn hàng</span>
-      </div>
-      <div class="stat stat-delivering">
-        <strong>{{ stats.deliveringOrders }}</strong>
-        <span>Đang giao</span>
-      </div>
-      <div class="stat stat-wishlist">
-        <strong>{{ stats.wishlistCount }}</strong>
-        <span>Yêu thích</span>
-      </div>
-    </div>
-
-    <nav class="nav">
-      <section v-for="group in navGroups" :key="group.title" class="nav-group">
-        <p class="nav-group-title">{{ group.title }}</p>
-        <button
-          v-for="item in group.items"
-          :key="item.key"
-          type="button"
-          class="nav-btn"
-          :class="{ active: activeView === item.key }"
-          @click="$emit('change-view', item.key)"
-        >
-          <AppIcon :name="item.icon" :size="16" />
-          {{ item.label }}
-        </button>
-
-        <div v-if="group.title === 'Tài khoản'" class="nav-submenu-wrap" :class="{ active: isNotificationView }">
-          <button
-            type="button"
-            class="nav-btn nav-parent"
-            :class="{ active: isNotificationView }"
-            @click="toggleNotificationMenu"
-          >
-            <span class="nav-parent-main">
-              <AppIcon name="bell" :size="16" />
-              Thông báo
-            </span>
-          </button>
-
-          <div class="nav-submenu" :class="{ open: notificationMenuOpen }">
-            <button
-              v-for="item in notificationItems"
-              :key="item.key"
-              type="button"
-              class="nav-submenu-item"
-              :class="{ active: activeView === item.key }"
-              @click="$emit('change-view', item.key)"
-            >
-              <AppIcon :name="item.icon" :size="15" />
-              {{ item.label }}
-            </button>
-          </div>
-        </div>
-      </section>
-    </nav>
 
     <button type="button" class="logout-btn" @click="$emit('logout')">
       <AppIcon name="logout" :size="16" />
-      Đăng xuất
+      <span>{{ t('account.nav.logout') }}</span>
     </button>
-  </aside>
+  </nav>
 </template>
 
 <style scoped>
-.sidebar {
-  width: 260px;
-  height: 100%;
-  overflow-y: auto;
-  background: var(--account-surface);
+.account-nav {
+  align-items: center;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface, #fffdf9) 94%, transparent), color-mix(in srgb, var(--app-surface-soft, #f7f1e7) 84%, transparent)),
+    var(--app-surface, var(--account-surface, #fffdf9));
+  border: 1px solid var(--app-border, rgba(224, 210, 184, 0.82));
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  padding: 8px;
+}
+
+.nav-scroll {
   display: flex;
-  flex-direction: column;
-  box-shadow: none;
-  filter: none;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.sidebar::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+
+.nav-scroll::-webkit-scrollbar {
+  display: none;
 }
-.user-box {
-  padding: 1rem;
-  border-bottom: 1px solid var(--auth-border);
-}
-.avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 999px;
-  overflow: hidden;
-  display: grid;
-  place-items: center;
-  color: var(--color-white);
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  font-weight: 600;
-}
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.name {
-  margin: 0.7rem 0 0.2rem;
-  max-width: 100%;
-  overflow: hidden;
-  color: var(--account-text-strong);
-  font-size: 0.94rem;
-  font-weight: 600;
-  line-height: 1.3;
-  text-overflow: ellipsis;
+
+.nav-tab,
+.logout-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 720;
+  gap: 7px;
+  justify-content: center;
+  line-height: 1;
+  min-height: 38px;
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
   white-space: nowrap;
 }
-.email {
-  margin: 0;
-  color: var(--auth-text-secondary);
-  font-size: 0.82rem;
-}
-.stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  border-bottom: 1px solid var(--auth-border);
-}
-.stats div {
-  text-align: center;
-  padding: 0.7rem 0.4rem;
-  display: grid;
-  grid-template-rows: 24px 34px;
-  align-items: center;
-  justify-items: center;
-}
-.stats strong {
-  display: block;
-  color: var(--account-stat-default);
-  line-height: 1.1;
-  min-height: 24px;
-}
 
-.stat-delivering strong {
-  color: var(--account-stat-delivering);
-}
-
-.stat-wishlist strong {
-  color: var(--account-stat-success);
-}
-
-.stats span {
-  font-size: 0.72rem;
-  color: var(--auth-text-secondary);
-  min-height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.nav {
-  display: grid;
-  gap: 0.7rem;
-  padding: 0.7rem;
-  flex: 1;
-}
-.nav-group {
-  display: grid;
-  gap: 0.28rem;
-}
-.nav-group-title {
-  margin: 0;
-  padding: 0 0.62rem 0.2rem;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  font-weight: 700;
-  color: var(--account-text-muted);
-}
-.nav-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 0.56rem 0.62rem;
+.nav-tab {
   background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  color: var(--account-text-strong);
+  border: 1px solid transparent;
+  color: var(--app-text-muted, #4d5a65);
+  flex: 0 0 auto;
+  padding: 0 12px;
 }
-.nav-btn.active {
-  background: color-mix(in srgb, var(--auth-brand-start) 12%, transparent);
-  color: var(--auth-brand-start);
+
+.nav-tab:hover,
+.nav-tab:focus-visible {
+  background: color-mix(in srgb, var(--app-gold, #c9922a) 10%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--app-gold, #c9922a) 24%, transparent);
+  color: var(--app-gold, #8a601c);
+  outline: none;
 }
-.nav-parent {
-  width: 100%;
+
+.nav-tab.active {
+  background: var(--app-navy-soft, #12202e);
+  border-color: var(--app-navy-soft, #12202e);
+  color: var(--app-heading-inverse, #fffdf9);
 }
-.nav-parent-main {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-.nav-submenu-wrap {
-  display: grid;
-  gap: 0.28rem;
-}
-.nav-submenu {
-  display: grid;
-  gap: 0.28rem;
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  padding-left: 0.55rem;
-  transition: max-height 0.3s ease, opacity 0.25s ease;
-}
-.nav-submenu.open {
-  max-height: 16rem;
-  opacity: 1;
-}
-.nav-submenu-item {
-  border: none;
-  border-radius: 10px;
-  padding: 0.52rem 0.62rem;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  cursor: pointer;
-  color: var(--account-text-strong);
-  font-size: 0.84rem;
-  font-weight: 500;
-  text-align: left;
-}
-.nav-submenu-item:hover {
-  background: color-mix(in srgb, var(--auth-brand-start) 6%, transparent);
-  color: var(--auth-brand-start);
-}
-.nav-submenu-item.active {
-  background: color-mix(in srgb, var(--auth-brand-start) 12%, transparent);
-  color: var(--auth-brand-start);
-  font-weight: 500;
-}
+
 .logout-btn {
-  margin: 0.2rem 0.7rem 0.8rem;
-  min-height: 2.35rem;
-  border-radius: 10px;
-  border: 1px solid color-mix(in srgb, var(--account-stat-danger) 60%, var(--auth-border));
-  background: var(--account-surface);
-  color: color-mix(in srgb, var(--account-stat-danger) 60%, var(--auth-border));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45rem;
-  cursor: pointer;
+  background: var(--app-control-bg, #fffdf9);
+  border: 1px solid color-mix(in srgb, var(--app-danger, #b7352d) 26%, transparent);
+  color: var(--app-danger, #b7352d);
+  padding: 0 12px;
 }
-.logout-btn:hover {
-  background: color-mix(in srgb, var(--account-stat-danger) 10%, var(--account-surface));
-  color: var(--account-stat-danger);
+
+.logout-btn:hover,
+.logout-btn:focus-visible {
+  background: color-mix(in srgb, var(--app-danger, #b7352d) 10%, var(--app-surface));
+  border-color: color-mix(in srgb, var(--app-danger, #b7352d) 42%, transparent);
+  outline: none;
+}
+
+[data-theme='dark'] .account-nav {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--app-surface-soft) 74%, transparent), color-mix(in srgb, var(--app-surface) 94%, transparent)),
+    var(--app-surface) !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme='dark'] .nav-tab {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: var(--app-text-muted) !important;
+}
+
+[data-theme='dark'] .nav-tab:hover,
+[data-theme='dark'] .nav-tab:focus-visible {
+  background: var(--app-control-hover) !important;
+  border-color: var(--app-border-strong) !important;
+  color: var(--app-heading) !important;
+}
+
+[data-theme='dark'] .nav-tab.active {
+  background: color-mix(in srgb, var(--app-gold) 20%, var(--app-surface-soft)) !important;
+  border-color: color-mix(in srgb, var(--app-gold) 52%, var(--app-border)) !important;
+  color: var(--app-heading) !important;
+}
+
+[data-theme='dark'] .logout-btn {
+  background: var(--app-control-bg) !important;
+  border-color: color-mix(in srgb, var(--app-danger) 34%, var(--app-border)) !important;
+  color: var(--app-danger) !important;
+}
+
+.nav-tab:active,
+.logout-btn:active {
+  transform: translateY(1px);
+}
+
+@media (max-width: 760px) {
+  .account-nav {
+    grid-template-columns: 1fr;
+  }
+
+  .logout-btn {
+    justify-self: stretch;
+  }
 }
 </style>

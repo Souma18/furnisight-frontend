@@ -1,16 +1,13 @@
 import { reactive, ref } from 'vue'
 import { getProvinces, getWardsByProvince } from '@shared/lib/publicApis/vietnamAddressApi'
 import { useAddressStore } from '../store/addressStore'
+import { i18n } from '@shared/i18n'
 
-const ADDRESS_TYPE_LABELS = {
-  home: 'nhà riêng',
-  office: 'văn phòng',
-  other: 'khác',
-}
+const t = (key, params) => i18n.global.t(key, params)
 
 function capitalizeFirst(value) {
-  const text = String(value || '').trim().toLocaleLowerCase('vi-VN')
-  return text ? text.charAt(0).toLocaleUpperCase('vi-VN') + text.slice(1) : ''
+  const text = String(value || '').trim()
+  return text ? text.charAt(0).toLocaleUpperCase(i18n.global.locale.value) + text.slice(1) : ''
 }
 
 function normalizeAddressType(type) {
@@ -57,7 +54,7 @@ export function useAddressForm(emit) {
       addressApiUnavailable.value = false
     } catch (_error) {
       addressApiUnavailable.value = true
-      emit('notify', 'Không tải được dữ liệu địa chỉ. Vui lòng thử lại.', 'error')
+      emit('notify', t('account.address.addressDataError'), 'error')
     } finally {
       loadingProvince.value = false
     }
@@ -80,7 +77,7 @@ export function useAddressForm(emit) {
     try {
       wards.value = await getWardsByProvince(form.provinceCode)
     } catch (_error) {
-      emit('notify', 'Không tải được danh sách phường/xã. Vui lòng chọn lại tỉnh/thành.', 'error')
+      emit('notify', t('account.address.wardLoadError'), 'error')
     } finally {
       loadingWard.value = false
     }
@@ -97,17 +94,17 @@ export function useAddressForm(emit) {
     if (isSubmitting.value) return
 
     if (!form.fullName || !form.phone || !form.detail || !form.provinceCode || !form.wardCode) {
-      emit('notify', 'Vui lòng điền thông tin bắt buộc.', 'error')
+      emit('notify', t('account.address.requiredError'), 'error')
       return
     }
     
     isSubmitting.value = true
     try {
       await addressStore.addAddress({ ...form })
-      emit('notify', form.isDefault ? 'Đã lưu và đặt làm địa chỉ mặc định.' : 'Đã lưu địa chỉ mới.')
+      emit('notify', form.isDefault ? t('account.address.savedDefault') : t('account.address.saved'))
       showModal.value = false
     } catch (error) {
-      emit('notify', 'Lỗi khi lưu địa chỉ.', 'error')
+      emit('notify', t('account.address.saveError'), 'error')
     } finally {
       isSubmitting.value = false
     }
@@ -116,21 +113,23 @@ export function useAddressForm(emit) {
   async function setAsDefault(addressId) {
     try {
       await addressStore.setDefaultAddress(addressId)
-      emit('notify', 'Đã cập nhật địa chỉ mặc định.')
+      emit('notify', t('account.address.defaultUpdated'))
     } catch (error) {
-      emit('notify', error.response?.data?.message || 'Không thể đặt địa chỉ mặc định.', 'error')
+      emit('notify', error.response?.data?.message || t('account.address.defaultError'), 'error')
     }
   }
 
   async function deleteAddress(addressId) {
-    if (!confirm('Bạn có chắc chắn muốn xóa địa chỉ này?')) return
+    if (!confirm(t('account.address.deleteConfirm'))) return
     await addressStore.deleteAddress(addressId)
-    emit('notify', 'Đã xóa địa chỉ.')
+    emit('notify', t('account.address.deleted'))
   }
 
   function getTypeLabel(type) {
     const normalized = normalizeAddressType(type)
-    const label = ADDRESS_TYPE_LABELS[normalized] ?? type ?? ADDRESS_TYPE_LABELS.other
+    const label = ['home', 'office', 'other'].includes(normalized)
+      ? t(`account.address.types.${normalized}`)
+      : type || t('account.address.types.other')
     return capitalizeFirst(label)
   }
 

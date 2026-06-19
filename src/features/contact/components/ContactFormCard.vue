@@ -1,6 +1,7 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { computed, onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps({
   config: {
@@ -10,6 +11,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['submit-success'])
+const { t } = useI18n()
 
 const activeIntentId = ref(props.config.intents[0]?.id ?? 'general')
 const selectedBudget = ref(props.config.initialBudget ?? '')
@@ -107,11 +109,11 @@ onBeforeUnmount(() => {
     <form @submit.prevent="handleSubmit">
       <div class="ct-form-row">
         <div class="ct-form-group">
-          <label class="ct-fl">Họ và tên <span>*</span></label>
+          <label class="ct-fl">{{ t('contact.form.fullName') }} <span>*</span></label>
           <input v-model.trim="form.fullName" class="ct-fi" type="text" placeholder="Nguyễn Văn A" required>
         </div>
         <div class="ct-form-group">
-          <label class="ct-fl">Số điện thoại <span>*</span></label>
+          <label class="ct-fl">{{ t('contact.form.phone') }} <span>*</span></label>
           <input v-model.trim="form.phone" class="ct-fi" type="tel" placeholder="090 xxx xxxx" required>
         </div>
       </div>
@@ -124,9 +126,9 @@ onBeforeUnmount(() => {
       <div v-show="showDesignFields">
         <div class="ct-form-row">
           <div class="ct-form-group">
-            <label class="ct-fl">Loại phòng</label>
+            <label class="ct-fl">{{ t('contact.form.roomType') }}</label>
             <select v-model="form.roomType" class="ct-fi">
-              <option value="">Chọn loại phòng</option>
+              <option value="">{{ t('contact.form.chooseRoomType') }}</option>
               <option v-for="roomType in config.roomTypes" :key="roomType" :value="roomType">
                 {{ roomType }}
               </option>
@@ -134,9 +136,9 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="ct-form-group">
-            <label class="ct-fl">Diện tích ước tính</label>
+            <label class="ct-fl">{{ t('contact.form.area') }}</label>
             <select v-model="form.area" class="ct-fi">
-              <option value="">Chọn diện tích</option>
+              <option value="">{{ t('contact.form.chooseArea') }}</option>
               <option v-for="area in config.areaOptions" :key="area" :value="area">
                 {{ area }}
               </option>
@@ -145,7 +147,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="ct-form-group">
-          <label class="ct-fl">Ngân sách dự kiến</label>
+          <label class="ct-fl">{{ t('contact.form.budget') }}</label>
           <div class="ct-budget-pills">
             <button
               v-for="option in config.budgetOptions"
@@ -161,7 +163,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="ct-form-group">
-          <label class="ct-fl">Tải ảnh phòng (để AI phân tích)</label>
+          <label class="ct-fl">{{ t('contact.form.uploadRoom') }}</label>
 
           <div
             class="ct-file-drop"
@@ -174,9 +176,9 @@ onBeforeUnmount(() => {
             <div class="ct-fd-icon">
               <AppIcon name="camera" :size="28" />
             </div>
-            <div class="ct-fd-title">Kéo thả ảnh hoặc nhấn để chọn</div>
+            <div class="ct-fd-title">{{ t('contact.form.dropTitle') }}</div>
             <div class="ct-fd-sub">
-              JPG, PNG, WEBP · Tối đa 20MB · <span>AI sẽ phân tích và tư vấn phù hợp hơn</span>
+              {{ t('contact.form.dropSub') }} · <span>{{ t('contact.form.dropAi') }}</span>
             </div>
             <input
               ref="fileInputRef"
@@ -200,7 +202,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="ct-form-group">
-        <label class="ct-fl">Nội dung <span>*</span></label>
+        <label class="ct-fl">{{ t('contact.form.message') }} <span>*</span></label>
         <textarea
           v-model.trim="form.message"
           class="ct-fi ct-textarea"
@@ -211,7 +213,7 @@ onBeforeUnmount(() => {
 
       <button class="ct-form-submit" type="submit">
         <AppIcon name="mail" :size="18" />
-        Gửi yêu cầu ngay
+        {{ t('contact.form.submit') }}
       </button>
       <div class="ct-form-note">{{ config.note }}</div>
     </form>

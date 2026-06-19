@@ -1,9 +1,11 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
+import { useLocaleStore } from '@shared/stores/localeStore'
 import {
   buildActiveProductTags,
   buildProductListParams,
@@ -32,6 +34,8 @@ export function useProductListPage() {
   const route = useRoute()
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const { items, total, facets, loading, loadList } = useProducts()
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
@@ -243,13 +247,25 @@ export function useProductListPage() {
     requestList()
   }, { deep: true })
 
+  watch(locale, async () => {
+    suppressListWatch.value = true
+    suppressCategoryWatch.value = true
+    await loadAllCategories()
+    applyCategorySelection(selectedSubcategory.value !== 'all' ? selectedSubcategory.value : selectedCategory.value)
+    await loadQuickFilters()
+    await loadSidebarCategories(selectedCategory.value)
+    suppressCategoryWatch.value = false
+    suppressListWatch.value = false
+    requestList()
+  })
+
   const dynamicHero = computed(() => {
     if (selectedCategory.value === 'all') {
       const categoryCount = sidebarCategories.value.length || facets.value.categories?.length || 0
 
       return {
         breadcrumb: ['Trang chủ', 'Sản phẩm'],
-        title: 'Tất cả sản phẩm',
+        title: 'Bộ sưu tập nội thất',
         subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
         stats: [
           { label: 'Sản phẩm', value: total.value },

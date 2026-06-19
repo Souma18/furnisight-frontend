@@ -82,7 +82,7 @@ const {
 
     <!-- Product loaded -->
     <template v-else-if="product">
-      <div class="pd-breadcrumb">
+      <nav class="pd-breadcrumb" aria-label="Breadcrumb">
         <div class="pd-breadcrumb-inner">
           <span v-for="(crumb, idx) in breadcrumbLinks" :key="crumb.label">
             <template v-if="idx > 0"> › </template>
@@ -90,7 +90,7 @@ const {
           </span>
           <span> › <span class="pd-breadcrumb-current">{{ product.name }}</span></span>
         </div>
-      </div>
+      </nav>
       <ProductDetailTopSection
         :product="product"
         :selected-color="selectedColor"

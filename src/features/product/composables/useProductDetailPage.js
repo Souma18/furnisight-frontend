@@ -1,6 +1,8 @@
 import { computed, ref, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useLocaleStore } from '@shared/stores/localeStore'
 import { useProducts } from './useProducts'
 import { useProductReviews } from './useProductReviews'
 import { useProductVariants } from './useProductVariants'
@@ -11,6 +13,8 @@ import { useProductNavigation } from './useProductNavigation'
 export function useProductDetailPage(props) {
   const route = useRoute()
   const authStore = useAuthStore()
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const { loadDetail } = useProducts()
 
   const product = ref(null)
@@ -115,6 +119,7 @@ export function useProductDetailPage(props) {
   })
 
   watch(() => props.id, (id) => loadProduct(id))
+  watch(locale, () => loadProduct(props.id))
   watch(() => route.query.tab, (tab) => {
     if (tab === 'review') activeTab.value = 'review'
   })

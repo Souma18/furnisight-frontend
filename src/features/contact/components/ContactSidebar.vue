@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -7,6 +8,8 @@ defineProps({
     required: true,
   },
 })
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -51,7 +54,7 @@ defineProps({
         <span class="ct-ib-title-icon">
           <AppIcon name="mapPin" :size="16" />
         </span>
-        Thông tin liên hệ
+        {{ t('contact.sidebar.contactInfo') }}
       </div>
       <div class="ct-info-rows">
         <div v-for="row in sidebar.contactInfo" :key="row.id" class="ct-info-row">
@@ -69,7 +72,7 @@ defineProps({
       </div>
 
       <div class="ct-social-wrap">
-        <div class="ct-ir-label ct-social-label">Mạng xã hội</div>
+        <div class="ct-ir-label ct-social-label">{{ t('contact.sidebar.social') }}</div>
         <div class="ct-social-row">
           <a
             v-for="social in sidebar.socials"
@@ -90,7 +93,7 @@ defineProps({
         <span class="ct-ib-title-icon">
           <AppIcon name="clock3" :size="16" />
         </span>
-        Giờ làm việc
+        {{ t('contact.sidebar.hours') }}
       </div>
       <div class="ct-hours-grid">
         <div v-for="row in sidebar.hours" :key="row.id" class="ct-hours-row">

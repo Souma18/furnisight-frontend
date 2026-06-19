@@ -1,7 +1,7 @@
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useAccountOrders } from './useAccountOrders'
 import { usePaymentCountdown } from './usePaymentCountdown'
-import { ORDER_STATUS_LABELS } from './orderStatusLabels'
+import { i18n } from '@shared/i18n'
 import {
   canRetryOrderPayment,
   isOrderPaymentExpired,
@@ -17,6 +17,9 @@ const CANCELABLE_ORDER_STATUSES = [
   'cod_pending_confirmation',
   'cod_confirmed',
 ]
+
+const t = (key, params) => i18n.global.t(key, params)
+const statusLabel = (status) => t(`account.orders.status.${status}`)
 
 export const ORDER_FILTER_OPTIONS = [
   'all',
@@ -47,6 +50,9 @@ export function useOrdersView(notify) {
   const canceling = ref(false)
   const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
   const formatMoney = PriceFormatter.format
+  const statusLabels = computed(() => Object.fromEntries(
+    ORDER_FILTER_OPTIONS.map((status) => [status, statusLabel(status)]),
+  ))
 
   function handleCancel(order, event) {
     event?.stopPropagation?.()
@@ -76,9 +82,9 @@ export function useOrdersView(notify) {
   }
 
   function retryPaymentTitle(order) {
-    if (canRetryPaymentNow(order)) return 'Tiếp tục thanh toán đơn hàng'
-    if (isOrderPaymentExpired(order)) return 'Đơn hàng đã quá hạn thanh toán'
-    return 'Đơn hàng không thể thanh toán lại'
+    if (canRetryPaymentNow(order)) return t('account.orders.retryTitle.available')
+    if (isOrderPaymentExpired(order)) return t('account.orders.retryTitle.expired')
+    return t('account.orders.retryTitle.unavailable')
   }
 
   function canRetryPaymentNow(order) {
@@ -104,7 +110,7 @@ export function useOrdersView(notify) {
   }
 
   function displayCode(order) {
-    return order.orderCode || 'Chưa có mã đơn'
+    return order.orderCode || t('account.orders.noCode')
   }
 
   function hideBrokenImage(event) {
@@ -120,7 +126,7 @@ export function useOrdersView(notify) {
 
   function formatPaymentDeadline(order) {
     if (!canRetryPaymentNow(order) || !order.paymentExpiresAt || !isPaymentTimeRemaining(order)) return ''
-    return `Còn ${formatCountdown(order)} để thanh toán`
+    return t('account.orders.deadlineList', { time: formatCountdown(order) })
   }
 
   function canCancelOrder(order) {
@@ -129,7 +135,7 @@ export function useOrdersView(notify) {
 
   function displayStatusLabel(order) {
     if (order?.statusLabel) return order.statusLabel
-    return ORDER_STATUS_LABELS[order.status] ?? order.status
+    return statusLabels.value[order.status] ?? order.status
   }
 
   return {
@@ -138,7 +144,7 @@ export function useOrdersView(notify) {
     cancelTarget,
     canceling,
     filterOptions: ORDER_FILTER_OPTIONS,
-    statusLabels: ORDER_STATUS_LABELS,
+    statusLabels,
     shouldShowRetryPayment,
     openOrderDetail,
     handleCancel,

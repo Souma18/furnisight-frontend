@@ -1,10 +1,12 @@
 <script setup>
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
 import { useWishlistStore } from '../../store/wishlistStore'
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 const wishlistStore = useWishlistStore()
 
 const items = computed(() => wishlistStore.wishlist)
@@ -15,22 +17,22 @@ async function removeFavorite(productId) {
   if (!productId) return
   try {
     await wishlistStore.removeFavorite(productId)
-    emit('notify', 'Đã bỏ sản phẩm khỏi danh sách yêu thích.')
+    emit('notify', t('account.wishlist.removed'))
   } catch (error) {
-    emit('notify', error?.response?.data?.message || 'Không thể bỏ yêu thích sản phẩm. Vui lòng thử lại.', 'error')
+    emit('notify', error?.response?.data?.message || t('account.wishlist.removeError'), 'error')
   }
 }
 
 onMounted(() => {
   wishlistStore.loadWishlist().catch((error) => {
-    emit('notify', error?.response?.data?.message || 'Không tải được danh sách yêu thích.', 'error')
+    emit('notify', error?.response?.data?.message || t('account.wishlist.loadError'), 'error')
   })
 })
 </script>
 
 <template>
-  <AccountSectionCard title="Sản phẩm yêu thích">
-    <div v-if="!items.length" class="empty-state">Chưa có sản phẩm nào trong danh sách yêu thích.</div>
+  <AccountSectionCard :title="t('account.wishlist.title')">
+    <div v-if="!items.length" class="empty-state">{{ t('account.wishlist.empty') }}</div>
 
     <ProductGrid
       v-else

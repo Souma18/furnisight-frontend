@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -17,19 +18,20 @@ const props = defineProps({
 })
 
 defineEmits(['toggle-check', 'open-variant', 'change-qty', 'remove'])
+const { t } = useI18n()
 
 const variantLabel = computed(() => {
   const color = props.item.selectedColor ?? ''
   const size = props.item.selectedSize ?? ''
   if (color && size) return `${color} / ${size}`
-  return color || size || 'Chọn phân loại'
+  return color || size || t('account.cart.chooseVariant')
 })
 
 const summaryLabel = computed(() => {
   const color = props.item.selectedColor ?? ''
   const size = props.item.selectedSize ?? ''
   if (color && size) return `${color} / ${size}`
-  return color || size || 'Phân loại mặc định'
+  return color || size || t('account.cart.defaultVariant')
 })
 
 const detailRoute = computed(() => {
@@ -40,7 +42,7 @@ const detailRoute = computed(() => {
 const stockLimit = computed(() => resolveStockLimit(props.item))
 const cannotIncrease = computed(() => stockLimit.value != null && Number(props.item.qty || 1) >= stockLimit.value)
 const stockWarning = computed(() => {
-  if (props.item.outOfStock || stockLimit.value === 0) return 'Hết hàng'
+  if (props.item.outOfStock || stockLimit.value === 0) return t('account.cart.outOfStock')
   if (isOverStock(props.item) || cannotIncrease.value) return stockLimitLabel(props.item)
   return ''
 })
@@ -51,7 +53,7 @@ const formatPrice = PriceFormatter.format
 <template>
   <article class="item">
     <div class="item-selection">
-      <label v-if="!item.outOfStock && !isOverStock(item)" class="select-box" :aria-label="`Chọn ${item.name}`">
+      <label v-if="!item.outOfStock && !isOverStock(item)" class="select-box" :aria-label="t('account.cart.selectItem', { name: item.name })">
         <input
           class="select-box-input"
           type="checkbox"
@@ -60,7 +62,7 @@ const formatPrice = PriceFormatter.format
         >
         <span class="select-box-ui"></span>
       </label>
-      <span v-else class="stock-badge">{{ stockWarning || 'Hết hàng' }}</span>
+      <span v-else class="stock-badge">{{ stockWarning || t('account.cart.outOfStock') }}</span>
     </div>
 
     <RouterLink v-if="detailRoute" :to="detailRoute" class="thumb thumb-link">
@@ -73,7 +75,7 @@ const formatPrice = PriceFormatter.format
     </div>
 
     <div class="name-wrap">
-      <p class="category">{{ item.categoryLabel || 'Sản phẩm' }}</p>
+      <p class="category">{{ item.categoryLabel || t('account.cart.product') }}</p>
       <RouterLink v-if="detailRoute" :to="detailRoute" class="name name-link">{{ item.name }}</RouterLink>
       <p v-else class="name">{{ item.name }}</p>
       <p class="summary">{{ summaryLabel }}</p>
@@ -81,23 +83,23 @@ const formatPrice = PriceFormatter.format
     </div>
 
     <button type="button" class="variant-btn" @click="$emit('open-variant', item)">
-      <span class="variant-btn-label">Phân loại: {{ variantLabel }}</span>
+      <span class="variant-btn-label">{{ t('account.cart.variantLabel', { value: variantLabel }) }}</span>
       <AppIcon name="chevronDown" :size="15" />
     </button>
 
     <div class="qty-wrap">
-      <button type="button" aria-label="Giảm số lượng" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
+      <button type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
         <AppIcon name="minus" :size="15" />
       </button>
       <span>{{ item.qty }}</span>
-      <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
+      <button type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
         <AppIcon name="plus" :size="15" />
       </button>
     </div>
 
     <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
 
-    <button type="button" class="delete-btn" aria-label="Xóa sản phẩm" @click="$emit('remove', item.id)">
+    <button type="button" class="delete-btn" :aria-label="t('account.cart.removeItem')" @click="$emit('remove', item.id)">
       <AppIcon name="trash" :size="22" />
     </button>
   </article>

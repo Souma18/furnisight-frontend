@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -34,6 +35,8 @@ defineEmits([
   'add-to-cart',
   'remove-product',
 ])
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -46,7 +49,7 @@ defineEmits([
     </div>
 
     <div class="panel-row">
-      <label>Rộng</label>
+      <label>{{ t('room3d.furniture.width') }}</label>
       <input
         type="range"
         min="0.5"
@@ -57,7 +60,7 @@ defineEmits([
       />
     </div>
     <div class="panel-row">
-      <label>Cao</label>
+      <label>{{ t('room3d.furniture.height') }}</label>
       <input
         type="range"
         min="0.5"
@@ -68,7 +71,7 @@ defineEmits([
       />
     </div>
     <div class="panel-row">
-      <label>Sâu</label>
+      <label>{{ t('room3d.furniture.depth') }}</label>
       <input
         type="range"
         min="0.5"
@@ -79,11 +82,11 @@ defineEmits([
       />
     </div>
     <div class="panel-row">
-      <label>Màu</label>
+      <label>{{ t('room3d.furniture.color') }}</label>
       <input type="color" :value="selectedColor" @input="$emit('update-color', $event.target.value)" />
     </div>
     <div class="panel-row">
-      <label>Xoay</label>
+      <label>{{ t('room3d.furniture.rotate') }}</label>
       <input
         type="range"
         min="-3.1416"
@@ -103,19 +106,19 @@ defineEmits([
         <span>+15°</span>
       </button>
     </div>
-    <p class="drag-hint">Kéo thả trực tiếp trên sàn để đặt vật thể vào vị trí mong muốn.</p>
+    <p class="drag-hint">{{ t('room3d.furniture.dragHint') }}</p>
 
     <div class="panel-actions">
-      <button type="button" class="action-btn ghost" @click="$emit('reset-color')">Màu mặc định</button>
+      <button type="button" class="action-btn ghost" @click="$emit('reset-color')">{{ t('room3d.furniture.defaultColor') }}</button>
       <button
         type="button"
         class="action-btn primary"
         :disabled="isSelectedInCart"
         @click="$emit('add-to-cart')"
       >
-        {{ isSelectedInCart ? 'Đã có trong giỏ' : 'Thêm vào giỏ' }}
+        {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
       </button>
-      <button type="button" class="action-btn danger" @click="$emit('remove-product')">Xóa khỏi phòng</button>
+      <button type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</button>
     </div>
   </div>
 </template>

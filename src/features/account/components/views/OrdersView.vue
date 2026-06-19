@@ -1,9 +1,11 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { useOrdersView } from '../../composables/useOrdersView'
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 const {
   filter,
   filteredOrders,
@@ -36,7 +38,7 @@ const {
   <section class="orders-view">
     <h2 class="orders-title">
       <AppIcon name="box" :size="20" />
-      Đơn hàng của tôi
+      {{ t('account.orders.title') }}
     </h2>
 
     <div class="orders-filters">
@@ -84,7 +86,7 @@ const {
               class="order-cancel-btn"
               @click="handleCancel(order, $event)"
             >
-              Huỷ đơn
+              {{ t('account.orders.cancel') }}
             </button>
             <button
               v-if="shouldShowRetryPayment(order)"
@@ -95,11 +97,11 @@ const {
               @click="handleRetryPayment(order, $event)"
             >
               <AppIcon :name="isRetrying(order) ? 'refresh' : 'creditCard'" :size="15" :class="{ 'spin-icon': isRetrying(order) }" />
-              {{ isRetrying(order) ? 'Đang tạo thanh toán...' : 'Thanh toán lại' }}
+              {{ isRetrying(order) ? t('account.orders.creatingPayment') : t('account.orders.retryPayment') }}
             </button>
             <button type="button" class="order-detail-btn" :disabled="!order.orderCode" @click="openOrderDetail(order.orderCode)">
               <AppIcon name="eye" :size="15" />
-              Xem chi tiết
+              {{ t('account.orders.viewDetail') }}
             </button>
           </div>
         </div>
@@ -107,16 +109,16 @@ const {
 
       <p v-if="!filteredOrders.length" class="orders-empty">
         <AppIcon name="box" :size="14" />
-        Không có đơn hàng ở trạng thái này.
+        {{ t('account.orders.empty') }}
       </p>
     </div>
 
     <ConfirmDialog
       :open="Boolean(cancelTarget)"
-      title="Xác nhận hủy đơn"
-      :message="`Bạn có chắc muốn hủy đơn ${cancelTarget ? displayCode(cancelTarget) : ''}? Thao tác này không thể hoàn tác.`"
-      confirm-label="Hủy đơn"
-      cancel-label="Giữ đơn"
+      :title="t('account.orders.cancelDialogTitle')"
+      :message="t('account.orders.cancelDialogMessage', { code: cancelTarget ? displayCode(cancelTarget) : '' })"
+      :confirm-label="t('account.orders.cancelConfirm')"
+      :cancel-label="t('account.orders.keepOrder')"
       :loading="canceling"
       danger
       @close="closeCancelDialog"

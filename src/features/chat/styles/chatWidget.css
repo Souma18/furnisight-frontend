@@ -1,8 +1,8 @@
 /* FAB */
 .chat-fab-tooltip {
   position: fixed;
-  bottom: 34px;
-  right: 100px;
+  bottom: var(--chat-tooltip-bottom, 34px);
+  right: var(--chat-tooltip-right, 100px);
   z-index: 1198;
   padding: 8px 14px;
   border-radius: 8px;
@@ -39,8 +39,8 @@
 
 .chat-fab {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  bottom: var(--chat-bottom, 32px);
+  right: var(--chat-right, 32px);
   z-index: 1200;
   width: 56px;
   height: 56px;
@@ -53,8 +53,16 @@
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.22), 0 0 0 0 rgba(201, 146, 42, 0.4);
   color: var(--brand-gold-400);
   cursor: pointer;
+  touch-action: none;
+  user-select: none;
   transition: transform 0.2s, box-shadow 0.2s;
   animation: chatFabPulse 3s ease-in-out infinite;
+}
+
+.chat-fab.dragging {
+  animation: none;
+  cursor: grabbing;
+  transform: scale(1.04);
 }
 
 .chat-fab:hover {
@@ -107,8 +115,8 @@
 /* Modal */
 .chat-modal {
   position: fixed;
-  bottom: 104px;
-  right: 32px;
+  bottom: var(--chat-modal-bottom, 104px);
+  right: var(--chat-modal-right, 32px);
   z-index: 1199;
   width: 420px;
   height: 580px;
@@ -667,12 +675,12 @@
   }
 
   .chat-fab {
-    right: 16px;
-    bottom: 20px;
+    bottom: var(--chat-bottom, 20px);
+    right: var(--chat-right, 16px);
   }
 
   .chat-fab-tooltip {
-    right: 84px;
-    bottom: 22px;
+    bottom: var(--chat-tooltip-bottom, 22px);
+    right: var(--chat-tooltip-right, 84px);
   }
 }

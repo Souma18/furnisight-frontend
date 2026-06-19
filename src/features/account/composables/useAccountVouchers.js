@@ -1,32 +1,35 @@
 import { computed, onMounted, ref } from 'vue'
 import { ordersApi } from '@shared/lib/api/services'
+import { i18n } from '@shared/i18n'
 import {
   matchesVoucherTime,
   matchesVoucherType,
 } from '@features/promotions/lib/voucherPresentation'
 
-export const VOUCHER_TYPE_OPTIONS = [
-  { value: 'all', label: 'Tất cả loại' },
-  { value: 'shop', label: 'Voucher đơn hàng' },
-  { value: 'ship', label: 'Voucher vận chuyển' },
-  { value: 'PUBLIC', label: 'Công khai' },
-  { value: 'PERSONAL', label: 'Cá nhân' },
-  { value: 'MARKETING', label: 'Marketing' },
-]
-
-export const VOUCHER_TIME_OPTIONS = [
-  { value: 'all', label: 'Tất cả thời gian' },
-  { value: 'active', label: 'Đang dùng được' },
-  { value: 'expiring', label: 'Sắp hết hạn' },
-  { value: 'upcoming', label: 'Sắp diễn ra' },
-  { value: 'expired', label: 'Đã hết hạn' },
-]
+const t = (key, params) => i18n.global.t(key, params)
 
 export function useAccountVouchers(notify) {
   const loading = ref(false)
   const vouchers = ref([])
   const typeFilter = ref('all')
   const timeFilter = ref('all')
+
+  const typeOptions = computed(() => [
+    { value: 'all', label: t('promotions.filters.allTypes') },
+    { value: 'shop', label: t('promotions.filters.shopVoucher') },
+    { value: 'ship', label: t('promotions.filters.shippingVoucher') },
+    { value: 'PUBLIC', label: t('promotions.filters.public') },
+    { value: 'PERSONAL', label: t('promotions.filters.personal') },
+    { value: 'MARKETING', label: t('promotions.filters.marketing') },
+  ])
+
+  const timeOptions = computed(() => [
+    { value: 'all', label: t('promotions.filters.allTimes') },
+    { value: 'active', label: t('promotions.filters.active') },
+    { value: 'expiring', label: t('promotions.filters.expiring') },
+    { value: 'upcoming', label: t('promotions.filters.upcoming') },
+    { value: 'expired', label: t('promotions.filters.expired') },
+  ])
 
   const filteredVouchers = computed(() => vouchers.value
     .filter((voucher) => matchesVoucherType(voucher, typeFilter.value))
@@ -41,7 +44,7 @@ export function useAccountVouchers(notify) {
       vouchers.value = Array.isArray(data) ? data : data?.items ?? []
     } catch (error) {
       console.error('Failed to load account vouchers:', error)
-      notify('Không tải được danh sách voucher.', 'error')
+      notify(t('account.vouchers.loadError'), 'error')
     } finally {
       loading.value = false
     }
@@ -50,9 +53,9 @@ export function useAccountVouchers(notify) {
   async function copyCode(code) {
     try {
       await navigator.clipboard?.writeText(code)
-      notify(`Đã sao chép mã ${code}.`)
+      notify(t('account.vouchers.copied', { code }))
     } catch {
-      notify('Không sao chép được mã voucher.', 'error')
+      notify(t('account.vouchers.copyError'), 'error')
     }
   }
 
@@ -60,8 +63,8 @@ export function useAccountVouchers(notify) {
     loading,
     typeFilter,
     timeFilter,
-    typeOptions: VOUCHER_TYPE_OPTIONS,
-    timeOptions: VOUCHER_TIME_OPTIONS,
+    typeOptions,
+    timeOptions,
     filteredVouchers,
     fetchVouchers,
     copyCode,

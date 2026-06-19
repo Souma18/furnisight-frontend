@@ -1,3 +1,7 @@
+import { i18n } from '@shared/i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
+
 export function resolveStockLimit(item = {}) {
   const value = item?.stockQuantity ?? item?.stock ?? item?.availableStock
   if (value == null || value === '') return null
@@ -32,6 +36,6 @@ export function isPurchasableLine(item = {}) {
 export function stockLimitLabel(item = {}) {
   const stockLimit = resolveStockLimit(item)
   if (stockLimit == null) return ''
-  if (stockLimit <= 0) return 'Hết hàng'
-  return `Tối đa ${stockLimit} sản phẩm`
+  if (stockLimit <= 0) return t('account.cart.outOfStock')
+  return t('account.cart.maxStock', { count: stockLimit })
 }

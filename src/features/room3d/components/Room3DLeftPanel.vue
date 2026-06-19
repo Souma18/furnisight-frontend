@@ -1,6 +1,7 @@
 <script setup>
 import { NSpin, NTag } from 'naive-ui'
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const props = defineProps({
@@ -54,6 +55,7 @@ const emit = defineEmits([
   'quality-change',
   'project-name-change',
 ])
+const { t } = useI18n()
 
 function onFileChange(event) {
   const file = event.target.files?.[0]
@@ -87,7 +89,10 @@ function runAiGenerate() {
 
 <template>
   <aside class="panel">
-    <p class="section-kicker">TRỰC QUAN</p>
+    <div class="panel-heading">
+      <p class="section-kicker">{{ t('room3d.setup.kicker') }}</p>
+      <strong>{{ t('room3d.setup.title') }}</strong>
+    </div>
 
     <div class="mode-tabs">
       <button
@@ -97,7 +102,7 @@ function runAiGenerate() {
         @click="emit('switch-mode', 'upload')"
       >
         <span class="tab-icon"><AppIcon name="image" :size="22" /></span>
-        <span>Hình ảnh</span>
+        <span>{{ t('room3d.setup.imageMode') }}</span>
       </button>
       <button
         type="button"
@@ -106,22 +111,22 @@ function runAiGenerate() {
         @click="emit('switch-mode', 'room')"
       >
         <span class="tab-icon"><AppIcon name="house" :size="22" /></span>
-        <span>Phòng ở</span>
+        <span>{{ t('room3d.setup.roomMode') }}</span>
       </button>
     </div>
 
     <div v-if="mode === 'upload'" class="upload-section">
-      <p class="label">TẢI ẢNH PHÒNG LÊN</p>
+      <p class="label">{{ t('room3d.setup.uploadLabel') }}</p>
       
       <div class="image-type-section">
-        <div class="quality-row" style="grid-template-columns: 1fr 1fr;">
+        <div class="quality-row quality-row--two">
           <button
             type="button"
             class="quality-btn"
             :class="{ active: imageType === 'normal' }"
             @click="emit('image-type-change', 'normal')"
           >
-            Ảnh thường
+            {{ t('room3d.setup.normalImage') }}
           </button>
           <button
             type="button"
@@ -129,7 +134,7 @@ function runAiGenerate() {
             :class="{ active: imageType === '360' }"
             @click="emit('image-type-change', '360')"
           >
-            Ảnh 360
+            {{ t('room3d.setup.image360') }}
           </button>
         </div>
       </div>
@@ -137,12 +142,12 @@ function runAiGenerate() {
       <label class="upload-zone">
         <input class="file-input" type="file" accept="image/*" @change="onFileChange" />
         <span class="upload-icon"><AppIcon name="cloudUpload" :size="26" /></span>
-        <strong>Nhập / Kéo Thả / Dán Hình Ảnh</strong>
-        <small>JPG, PNG, WEBP · Tối đa 50MB</small>
-        <small>AI sẽ tự nhận diện loại phòng</small>
+        <strong>{{ t('room3d.setup.dropTitle') }}</strong>
+        <small>{{ t('room3d.setup.dropSub') }}</small>
+        <small>{{ t('room3d.setup.aiDetect') }}</small>
       </label>
       <p v-if="selectedFileName" class="selected-file" :title="selectedFile?.name">
-        Đã chọn: <strong>{{ selectedFileName }}</strong>
+        {{ t('room3d.setup.selectedFile') }}: <strong>{{ selectedFileName }}</strong>
       </p>
       <button
         type="button"
@@ -150,15 +155,15 @@ function runAiGenerate() {
         :disabled="!selectedFile || isAnalyzing"
         @click="runAiGenerate"
       >
-        {{ isAnalyzing ? 'Đang tạo mô hình...' : 'Sử dụng AI' }}
+        {{ isAnalyzing ? t('room3d.setup.generating') : t('room3d.setup.useAi') }}
       </button>
       <!-- <NSpin v-if="isAnalyzing" size="small">AI dang phan tich...</NSpin> -->
       <p v-if="uploadError" class="upload-error">{{ uploadError }}</p>
     </div>
 
     <div v-else class="room-templates">
-      <p class="label">NGUỒN DỮ LIỆU PHÒNG</p>
-      <NSpin v-if="isLoadingTemplates" size="small">Đang tải phòng mẫu...</NSpin>
+      <p class="label">{{ t('room3d.setup.roomSource') }}</p>
+      <NSpin v-if="isLoadingTemplates" size="small">{{ t('room3d.setup.loadingTemplates') }}</NSpin>
       <div v-else class="room-list">
         <button
           v-for="room in roomTemplates"
@@ -173,7 +178,7 @@ function runAiGenerate() {
           </span>
           <span class="room-btn-content">
             <strong>{{ room.name }}</strong>
-            <small>{{ room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }} sản phẩm phù hợp</small>
+            <small>{{ t('room3d.products.count', { count: room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }) }}</small>
           </span>
         </button>
       </div>
@@ -181,54 +186,54 @@ function runAiGenerate() {
       <div class="room-mode-note" v-if="selectedRoom">
         <strong>{{ selectedRoom.name }}</strong>
         <p v-if="roomHasModel">
-          Trực quan 3D đang sẵn sàng. Có thể xoay, zoom, và đặt sản phẩm.
+          {{ t('room3d.setup.roomReady') }}
         </p>
         <p v-else>
-          {{ selectedRoom.statusText || 'Phòng này đang được bổ sung model.' }}
+          {{ selectedRoom.statusText || t('room3d.setup.modelPending') }}
         </p>
       </div>
     </div>
 
     <div v-if="mode === 'upload'" class="room-info">
-      <p class="label">THÔNG TIN PHÒNG</p>
-      <p v-if="predictionStatus === 'idle'" class="note">Chưa có kết quả dự đoán.</p>
-      <p v-else-if="predictionStatus === 'loading'" class="note">Đang dự đoán...</p>
-      <p v-else-if="predictionStatus === 'error'" class="note error-note">Nhận diện thất bại.</p>
+      <p class="label">{{ t('room3d.setup.roomInfo') }}</p>
+      <p v-if="predictionStatus === 'idle'" class="note">{{ t('room3d.setup.noPrediction') }}</p>
+      <p v-else-if="predictionStatus === 'loading'" class="note">{{ t('room3d.setup.predicting') }}</p>
+      <p v-else-if="predictionStatus === 'error'" class="note error-note">{{ t('room3d.setup.predictFailed') }}</p>
       <div v-else class="room-meta">
         <div class="tag-row">
-          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || 'Không rõ label' }}</NTag>
+          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || t('room3d.setup.unknownLabel') }}</NTag>
           <NTag v-if="hasPredictionConfidence" type="success">
             {{ predictionConfidencePercent }}%
           </NTag>
         </div>
         <p v-if="selectedRoom && !roomHasModel">
-          {{ selectedRoom.statusText || 'Phòng này đang được bổ sung model.' }}
+          {{ selectedRoom.statusText || t('room3d.setup.modelPending') }}
         </p>
         <p v-else-if="selectedRoom?.suggestText">{{ selectedRoom.suggestText }}</p>
       </div>
     </div>
 
     <div v-if="mode === 'upload'" class="project-name">
-      <p class="label">TÊN DỰ ÁN</p>
+      <p class="label">{{ t('room3d.setup.projectName') }}</p>
       <input
         class="project-input"
         :value="projectName"
-        placeholder="Đặt tên cho ngôi nhà của bạn"
+        :placeholder="t('room3d.setup.projectPlaceholder')"
         @input="emit('project-name-change', $event.target.value)"
       />
     </div>
 
     <div v-if="mode === 'upload'" class="quality">
       <template v-if="imageType === 'normal'">
-        <p class="label">CHẤT LƯỢNG LƯỚI</p>
-        <div class="quality-row" style="grid-template-columns: 1fr 1fr 1fr;">
+        <p class="label">{{ t('room3d.setup.meshQuality') }}</p>
+        <div class="quality-row quality-row--three">
           <button
             type="button"
             class="quality-btn"
             :class="{ active: meshQuality === 'low' }"
             @click="emit('mesh-quality-change', 'low')"
           >
-            Thấp
+            {{ t('room3d.setup.low') }}
           </button>
           <button
             type="button"
@@ -236,7 +241,7 @@ function runAiGenerate() {
             :class="{ active: meshQuality === 'medium' }"
             @click="emit('mesh-quality-change', 'medium')"
           >
-            Trung Bình
+            {{ t('room3d.setup.medium') }}
           </button>
           <button
             type="button"
@@ -244,10 +249,10 @@ function runAiGenerate() {
             :class="{ active: meshQuality === 'high' }"
             @click="emit('mesh-quality-change', 'high')"
           >
-            Cao
+            {{ t('room3d.setup.high') }}
           </button>
         </div>
-        <small class="quality-hint">Chất lượng "Trung Bình" (Medium) được khuyến nghị để có thời gian phản hồi tốt nhất.</small>
+        <small class="quality-hint">{{ t('room3d.setup.meshHint') }}</small>
       </template>
       <template v-else>
         <p class="label">MESH RESOLUTION</p>
@@ -285,7 +290,7 @@ function runAiGenerate() {
             1024
           </button>
         </div>
-        <small class="quality-hint">Khuyến nghị 256 hoặc 512 để cân bằng tốc độ và chất lượng.</small>
+        <small class="quality-hint">{{ t('room3d.setup.resolutionHint') }}</small>
       </template>
     </div>
   </aside>
@@ -295,12 +300,12 @@ function runAiGenerate() {
 .panel {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
-  padding: 0.75rem 0.7rem 1rem;
+  gap: 0.9rem;
+  padding: 0.9rem 0.8rem 1rem;
   border-right: 1px solid #ddd3c6;
   height: 100%;
   overflow: auto;
-  background: #efede9;
+  background: #f7f3ed;
   /* An thanh scrollbar nhung van giu kha nang scroll */
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -310,13 +315,26 @@ function runAiGenerate() {
   display: none;
 }
 
+.panel-heading {
+  display: grid;
+  gap: 2px;
+  padding: 0 2px;
+}
+
+.panel-heading strong {
+  color: #172532;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 .section-kicker {
   margin: 0;
-  color: #9f9b95;
-  font-size: 0.8rem;
+  color: #a07320;
+  font-size: 0.67rem;
   font-weight: 700;
-  letter-spacing: 0.2em;
-  padding: 0.3rem 0.2rem;
+  letter-spacing: 0.12em;
+  padding: 0;
+  text-transform: uppercase;
 }
 
 .mode-tabs {
@@ -326,24 +344,36 @@ function runAiGenerate() {
 }
 
 .mode-tab {
-  border: 2px solid #d7cfc3;
-  background: #f4f1ec;
+  border: 1px solid #d8cec1;
+  background: #fffdf9;
   color: #5f5d58;
-  border-radius: 1rem;
-  min-height: 5.4rem;
-  font-size: 1rem;
+  border-radius: 8px;
+  min-height: 48px;
+  font-size: 0.84rem;
   font-weight: 600;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
   cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
 }
+.mode-tab:hover { border-color: #c9aa78; transform: translateY(-1px); }
 .mode-tab.active {
-  background: #0f3f5c;
-  border-color: #0f3f5c;
+  background: #12202e;
+  border-color: #12202e;
   color: #fff;
+}
+
+.mode-tab:focus-visible,
+.quality-btn:focus-visible,
+.room-btn:focus-visible,
+.run-ai-btn:focus-visible,
+.project-input:focus-visible,
+.upload-zone:focus-within {
+  outline: 2px solid rgba(201, 146, 42, 0.6);
+  outline-offset: 2px;
 }
 
 .tab-icon {
@@ -356,8 +386,8 @@ function runAiGenerate() {
   margin: 0;
   color: #a29d96;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
 }
 
 .upload-section,
@@ -372,16 +402,17 @@ function runAiGenerate() {
 }
 
 .upload-zone {
-  border: 3px dashed #d6cabe;
-  border-radius: 1rem;
-  min-height: 12.5rem;
+  border: 1px dashed #cdbda8;
+  border-radius: 8px;
+  min-height: 150px;
   padding: 1rem 0.7rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  color: #8e887f;
+  background: rgba(255, 253, 249, 0.7);
+  color: #7d776e;
   gap: 0.2rem;
   cursor: pointer;
 }
@@ -414,9 +445,9 @@ function runAiGenerate() {
 .room-btn {
   width: 100%;
   border: 1px solid #d8cec1;
-  border-radius: 0.95rem;
-  background: #f3f0eb;
-  min-height: 4.1rem;
+  border-radius: 8px;
+  background: #fffdf9;
+  min-height: 3.8rem;
   display: flex;
   align-items: center;
   gap: 0.72rem;
@@ -467,7 +498,7 @@ function runAiGenerate() {
 .room-mode-note {
   margin-top: 0.2rem;
   border: 1px solid #d8cec1;
-  border-radius: 0.8rem;
+  border-radius: 8px;
   padding: 0.6rem 0.7rem;
   background: #f4f1ec;
 }
@@ -524,10 +555,13 @@ function runAiGenerate() {
   gap: 0.35rem;
 }
 
+.quality-row--two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.quality-row--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
 .quality-btn {
   border: 1px solid #d8cec1;
-  border-radius: 0.75rem;
-  background: #f3f0eb;
+  border-radius: 6px;
+  background: #fffdf9;
   color: #68655f;
   min-height: 2.25rem;
   font-weight: 700;
@@ -549,8 +583,8 @@ function runAiGenerate() {
   width: 100%;
   min-height: 2.45rem;
   border: 1px solid #d8cec1;
-  border-radius: 0.95rem;
-  background: #f3f0eb;
+  border-radius: 8px;
+  background: #fffdf9;
   color: #68655f;
   padding: 0.55rem 0.9rem;
   font: inherit;
@@ -586,8 +620,8 @@ function runAiGenerate() {
 .run-ai-btn {
   width: 100%;
   border: none;
-  border-radius: 0.82rem;
-  background: linear-gradient(180deg, #134764 0%, #0d3751 100%);
+  border-radius: 8px;
+  background: #12202e;
   color: #f8fafb;
   min-height: 2.45rem;
   font-weight: 700;

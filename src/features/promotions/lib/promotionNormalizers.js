@@ -1,5 +1,10 @@
 import { imageLikeUrl } from './comboProductImages'
 import { comboStockIssue } from './comboStock'
+import { i18n } from '@shared/i18n'
+
+function t(key) {
+  return i18n.global.t(key)
+}
 
 export function normalizeList(data) {
   if (Array.isArray(data)) return data
@@ -43,7 +48,7 @@ export function normalizeCombo(raw = {}) {
   const normalized = {
     ...raw,
     id: raw.id,
-    name: raw.name || 'Combo nội thất',
+    name: raw.name || t('promotions.combo.defaultName'),
     description: raw.description || '',
     imageUrl: raw.imageUrl || '',
     items,
@@ -51,7 +56,7 @@ export function normalizeCombo(raw = {}) {
     originalAmount: Number(raw.originalAmount) || 0,
     finalAmount: Number(raw.finalAmount) || 0,
     savedAmount: Number(raw.savedAmount) || 0,
-    roomLabel: items[0]?.categoryName || 'Nội thất',
+    roomLabel: items[0]?.categoryName || t('promotions.combo.defaultRoom'),
   }
 
   return {

@@ -1,9 +1,12 @@
 <script setup>
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 defineProps({
   categories: { type: Array, default: () => [] },
 })
+
+const { t } = useI18n()
 
 function categoryRoute(category) {
   return {
@@ -22,8 +25,8 @@ function categoryImage(category) {
     <div class="rooms-inner">
       <div class="rooms-head">
         <div>
-          <div class="section-label">Danh mục sản phẩm</div>
-          <h2 class="section-title">Khám phá <em>không gian</em> sống</h2>
+          <div class="section-label">{{ t('home.categories.label') }}</div>
+          <h2 class="section-title">{{ t('home.categories.titlePrefix') }} <em>{{ t('home.categories.titleEmphasis') }}</em></h2>
         </div>
       </div>
 
@@ -41,7 +44,7 @@ function categoryImage(category) {
               @error="$event.target.src = '/home/rooms/livingroom.jpeg'"
             >
             <div class="room-overlay">
-              <span class="room-badge">Danh mục</span>
+              <span class="room-badge">{{ t('home.categories.badge') }}</span>
               <div class="room-info">
                 <div class="room-name">{{ category.name }}</div>
                 <div class="room-count">{{ category.count }}</div>
@@ -56,32 +59,34 @@ function categoryImage(category) {
 
 <style scoped>
 .rooms-bg {
-  background: #12202e;
-  padding: 80px 0;
+  background:
+    linear-gradient(180deg, rgba(255, 253, 249, 0.72), rgba(242, 234, 223, 0.78)),
+    #faf6f0;
+  padding: clamp(46px, 6vw, 76px) 0;
 }
 
 .rooms-inner {
-  max-width: 1300px;
+  max-width: 1220px;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 clamp(20px, 4vw, 48px);
 }
 
 .rooms-head .section-title {
-  color: #fff;
+  color: #17212d;
 }
 
 .rooms-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr;
-  grid-template-rows: 240px 240px;
-  gap: 14px;
+  grid-template-columns: 1.25fr 0.9fr 0.9fr;
+  grid-template-rows: 210px 210px;
+  gap: 12px;
 }
 
 .room-card {
-  position: relative;
+  background: #e8dfd2;
+  border-radius: 8px;
   overflow: hidden;
-  border-radius: 16px;
-  background: #1a2535;
+  position: relative;
 }
 
 .room-card.big {
@@ -100,10 +105,13 @@ function categoryImage(category) {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform .35s ease;
+  transition:
+    filter 0.3s ease,
+    transform 0.35s ease;
 }
 
 .room-card:hover img {
+  filter: saturate(1.04);
   transform: scale(1.035);
 }
 
@@ -112,17 +120,17 @@ function categoryImage(category) {
   inset: 0;
   display: flex;
   align-items: flex-end;
-  padding: 22px;
-  background: linear-gradient(to top, rgba(0, 0, 0, .75), transparent 55%);
+  background: linear-gradient(to top, rgba(18, 32, 46, 0.78), transparent 58%);
+  padding: 18px;
 }
 
 .room-badge {
-  padding: 4px 10px;
   border-radius: 8px;
-  background: #c9922a;
+  background: #e5b84a;
   color: #12202e;
   font-size: 10px;
   font-weight: 700;
+  padding: 4px 10px;
   text-transform: uppercase;
 }
 
@@ -132,23 +140,20 @@ function categoryImage(category) {
 
 .room-name {
   color: #fff;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: clamp(0.96rem, 1.6vw, 1.16rem);
+  font-weight: 760;
 }
 
 .room-count {
-  color: rgba(255, 255, 255, .65);
+  color: rgba(255, 255, 255, 0.7);
   font-size: 12px;
+  margin-top: 3px;
 }
 
 @media (max-width: 1100px) {
-  .rooms-inner {
-    padding: 0 24px;
-  }
-
   .rooms-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: 220px 220px auto;
+    grid-template-rows: 190px 190px auto;
   }
 
   .room-card.big {
@@ -158,7 +163,7 @@ function categoryImage(category) {
 
 @media (max-width: 720px) {
   .rooms-bg {
-    padding: 56px 0;
+    padding: 44px 0;
   }
 
   .rooms-grid {
@@ -167,7 +172,7 @@ function categoryImage(category) {
   }
 
   .room-card {
-    min-height: 230px;
+    min-height: 190px;
   }
 }
 </style>

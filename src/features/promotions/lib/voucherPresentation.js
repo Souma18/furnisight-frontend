@@ -1,9 +1,21 @@
+import { i18n } from '@shared/i18n'
+
+function t(key, params = {}) {
+  return i18n.global.t(key, params)
+}
+
+function currentLocale() {
+  return i18n.global.locale.value || 'vi'
+}
+
 export function discountLabel(voucher) {
-  if (isShippingVoucher(voucher)) return `Giảm ship ${formatCurrency(voucher.discountValue)}`
+  if (isShippingVoucher(voucher)) return t('promotions.voucher.discountShipping', { amount: formatCurrency(voucher.discountValue) })
   if (voucher.discountType === 'PERCENT') {
-    return `Giảm ${voucher.discountValue}%${voucher.maxDiscount ? ` tối đa ${formatCurrency(voucher.maxDiscount)}` : ''}`
+    return voucher.maxDiscount
+      ? t('promotions.voucher.discountPercentMax', { percent: voucher.discountValue, amount: formatCurrency(voucher.maxDiscount) })
+      : t('promotions.voucher.discountPercent', { percent: voucher.discountValue })
   }
-  return `Giảm ${formatCurrency(voucher.discountValue)}`
+  return t('promotions.voucher.discountAmount', { amount: formatCurrency(voucher.discountValue) })
 }
 
 export function isShippingVoucher(voucher) {
@@ -31,8 +43,8 @@ export function matchesVoucherTime(voucher, filter) {
 }
 
 export function conditionText(voucher) {
-  if (!voucher.minOrder) return 'Không yêu cầu đơn tối thiểu'
-  return `Đơn tối thiểu ${formatCurrency(voucher.minOrder)}`
+  if (!voucher.minOrder) return t('promotions.voucher.noMinOrder')
+  return t('promotions.voucher.minOrder', { amount: formatCurrency(voucher.minOrder) })
 }
 
 export function voucherStatusClass(voucher) {
@@ -48,18 +60,14 @@ export function voucherStatusClass(voucher) {
 
 export function voucherStatusLabel(voucher) {
   const status = voucherStatusClass(voucher)
-  if (status === 'off') return 'Đang tắt'
-  if (status === 'upcoming') return 'Sắp diễn ra'
-  if (status === 'expired') return 'Đã hết hạn'
-  if (status === 'expiring') return 'Sắp hết hạn'
-  return 'Đang dùng được'
+  return t(`promotions.voucher.status.${status}`)
 }
 
 export function formatDate(value) {
-  if (!value) return 'Không giới hạn'
+  if (!value) return t('promotions.voucher.unlimited')
   const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return 'Không giới hạn'
-  return new Intl.DateTimeFormat('vi-VN').format(date)
+  if (Number.isNaN(date.getTime())) return t('promotions.voucher.unlimited')
+  return new Intl.DateTimeFormat(currentLocale() === 'en' ? 'en-US' : 'vi-VN').format(date)
 }
 
 export function isExpiring(value) {
@@ -69,7 +77,7 @@ export function isExpiring(value) {
 }
 
 export function formatCurrency(value) {
-  return new Intl.NumberFormat('vi-VN', {
+  return new Intl.NumberFormat(currentLocale() === 'en' ? 'en-US' : 'vi-VN', {
     style: 'currency',
     currency: 'VND',
     maximumFractionDigits: 0,

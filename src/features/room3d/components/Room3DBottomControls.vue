@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -17,20 +18,22 @@ defineProps({
 })
 
 defineEmits(['focus-camera', 'set-top-view', 'set-front-view', 'toggle-fullscreen'])
+
+const { t } = useI18n()
 </script>
 
 <template>
   <div v-if="hasRoom" class="bottom-controls">
     <div class="view-tabs">
       <button type="button" :class="{ active: viewMode === '3d' }" @click="$emit('focus-camera')">3D</button>
-      <button type="button" :class="{ active: viewMode === 'top' }" @click="$emit('set-top-view')">Mặt bằng</button>
+      <button type="button" :class="{ active: viewMode === 'top' }" @click="$emit('set-top-view')">{{ t('room3d.controls.top') }}</button>
       <button type="button" :class="{ active: viewMode === 'front' }" @click="$emit('set-front-view')">
-        Mặt đứng
+        {{ t('room3d.controls.front') }}
       </button>
     </div>
     <button type="button" class="fullscreen-btn" @click="$emit('toggle-fullscreen')">
       <AppIcon name="fullscreen" :size="14" />
-      <span>Xem toàn cảnh 3D</span>
+      <span>{{ t('room3d.controls.panorama') }}</span>
     </button>
   </div>
 </template>
@@ -53,7 +56,7 @@ defineEmits(['focus-camera', 'set-top-view', 'set-front-view', 'toggle-fullscree
   gap: 0.25rem;
   padding: 0.24rem;
   border: 1px solid #e5dfd4;
-  border-radius: 999px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.9);
 }
 
@@ -62,7 +65,7 @@ defineEmits(['focus-camera', 'set-top-view', 'set-front-view', 'toggle-fullscree
   background: transparent;
   color: #0f3954;
   padding: 0.35rem 0.72rem;
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 0.78rem;
   cursor: pointer;
 }
@@ -82,7 +85,7 @@ defineEmits(['focus-camera', 'set-top-view', 'set-front-view', 'toggle-fullscree
   background: #103952;
   color: #f7f9fb;
   padding: 0.52rem 0.95rem;
-  border-radius: 999px;
+  border-radius: 8px;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;

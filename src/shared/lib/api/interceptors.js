@@ -2,9 +2,10 @@ import { apiClient } from './client'
 import { attachNormalizedApiError } from './errors'
 import { pinia } from '../../../app/plugins/pinia'
 
-
 let isRefreshing = false
 let failedQueue = []
+const LOCALE_STORAGE_KEY = 'furnisight:locale'
+const SUPPORTED_REQUEST_LOCALES = ['vi', 'en']
 
 const processQueue = (error, token = null) => {
   failedQueue.forEach((prom) => {
@@ -62,6 +63,13 @@ const setHeader = (headers = {}, name, value) => {
   return headers
 }
 
+const getRequestLocale = () => {
+  if (typeof window === 'undefined') return 'vi'
+
+  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+  return SUPPORTED_REQUEST_LOCALES.includes(storedLocale) ? storedLocale : 'vi'
+}
+
 export function registerApiInterceptors() {
   apiClient.interceptors.request.use(
     (config) => {
@@ -69,6 +77,10 @@ export function registerApiInterceptors() {
 
       if (config.useIdempotencyKey && !hasHeader(config.headers, 'Idempotency-Key')) {
         config.headers = setHeader(config.headers, 'Idempotency-Key', createIdempotencyKey())
+      }
+
+      if (!hasHeader(config.headers, 'Accept-Language')) {
+        config.headers = setHeader(config.headers, 'Accept-Language', getRequestLocale())
       }
 
       if (config.skipAuth) {

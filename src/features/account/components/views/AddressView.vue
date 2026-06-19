@@ -1,5 +1,6 @@
 <script setup>
 import { computed, onMounted } from "vue";
+import { useI18n } from "vue-i18n";
 import AccountSectionCard from "../AccountSectionCard.vue";
 import AppIcon from "@shared/ui/AppIcon.vue";
 import { formatVietnamAddress } from "@shared/lib/formatters";
@@ -7,6 +8,7 @@ import { useAddressForm } from "../../composables/useAddressForm";
 import { useAddressStore } from "../../store/addressStore";
 
 const emit = defineEmits(["notify"]);
+const { t } = useI18n();
 const addressStore = useAddressStore();
 const addresses = computed(() => addressStore.addresses);
 
@@ -30,21 +32,21 @@ const {
 
 onMounted(() => {
   addressStore.fetchAddresses().catch((error) => {
-    emit("notify", error?.response?.data?.message || "Không tải được danh sách địa chỉ.", "error");
+    emit("notify", error?.response?.data?.message || t("account.address.loadError"), "error");
   });
 });
 </script>
 
 <template>
-  <AccountSectionCard class="address-card" title="Địa chỉ giao hàng">
+  <AccountSectionCard class="address-card" :title="t('account.address.title')">
     <template #head>
       <button class="primary" type="button" @click="openModal">
-        Thêm địa chỉ mới
+        {{ t('account.address.addNew') }}
       </button>
     </template>
 
     <div v-if="!addresses.length" class="empty">
-      Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.
+      {{ t('account.address.empty') }}
     </div>
 
     <div v-else class="list">
@@ -72,15 +74,15 @@ onMounted(() => {
               @click="setAsDefault(address.id)"
             >
               <AppIcon name="pin" :size="13" />
-              Đặt làm mặc định
+              {{ t('account.address.setDefault') }}
             </button>
             <button
               type="button"
               class="delete-btn"
               @click="deleteAddress(address.id)"
-              title="Xóa địa chỉ"
+              :title="t('account.address.deleteTitle')"
             >
-              Xóa
+              {{ t('account.address.delete') }}
             </button>
           </div>
         </div>
@@ -94,25 +96,25 @@ onMounted(() => {
 
   <div v-if="showModal" class="overlay" @click.self="showModal = false">
     <div class="modal">
-      <h4>Thêm địa chỉ</h4>
+      <h4>{{ t('account.address.modalTitle') }}</h4>
       <div class="form-grid">
         <label
-          >Họ tên
-          <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A"
+          >{{ t('account.address.fullName') }}
+          <input v-model.trim="form.fullName" :placeholder="t('account.address.fullNamePlaceholder')"
         /></label>
         <label
-          >Số điện thoại
+          >{{ t('account.address.phone') }}
           <input v-model.trim="form.phone" placeholder="0123456789"
         /></label>
         <label>
-          Tỉnh/Thành
+          {{ t('account.address.province') }}
           <select
             v-model="form.provinceCode"
             :disabled="loadingProvince || addressApiUnavailable"
             @change="onProvinceChange"
           >
             <option value="">
-              {{ loadingProvince ? "Đang tải..." : "Chọn tỉnh thành" }}
+              {{ loadingProvince ? t('common.loading') : t('account.address.chooseProvince') }}
             </option>
             <option
               v-for="province in provinces"
@@ -124,14 +126,14 @@ onMounted(() => {
           </select>
         </label>
         <label>
-          Phường/Xã
+          {{ t('account.address.ward') }}
           <select
             v-model="form.wardCode"
             :disabled="loadingWard || !wards.length"
             @change="onWardChange"
           >
             <option value="">
-              {{ loadingWard ? "Đang tải..." : "Chọn phường xã" }}
+              {{ loadingWard ? t('common.loading') : t('account.address.chooseWard') }}
             </option>
             <option v-for="ward in wards" :key="ward.code" :value="ward.code">
               {{ ward.name }}
@@ -142,25 +144,25 @@ onMounted(() => {
           v-if="addressApiUnavailable"
           class="address-api-error detail-field"
         >
-          <span>Không tải được dữ liệu tỉnh/thành.</span>
+          <span>{{ t('account.address.provinceLoadError') }}</span>
           <button
             type="button"
             class="ghost"
             :disabled="loadingProvince"
             @click="loadProvinces"
           >
-            {{ loadingProvince ? "Đang thử lại..." : "Thử lại" }}
+            {{ loadingProvince ? t('account.address.retrying') : t('common.retry') }}
           </button>
         </div>
         <label class="detail-field">
-          Địa chỉ cụ thể
+          {{ t('account.address.detail') }}
           <input
             v-model.trim="form.detail"
-            placeholder="Số nhà, tên đường..."
+            :placeholder="t('account.address.detailPlaceholder')"
           />
         </label>
         <label>
-          Loại địa chỉ
+          {{ t('account.address.type') }}
           <select v-model="form.type">
             <option value="home">{{ getTypeLabel("home") }}</option>
             <option value="office">{{ getTypeLabel("office") }}</option>
@@ -168,15 +170,15 @@ onMounted(() => {
         </label>
         <label class="default-check">
           <input v-model="form.isDefault" type="checkbox" />
-          <span>Đặt làm địa chỉ mặc định</span>
+          <span>{{ t('account.address.defaultAddress') }}</span>
         </label>
       </div>
       <div class="actions">
         <button type="button" class="ghost" @click="showModal = false">
-          Huỷ
+          {{ t('common.cancel') }}
         </button>
         <button type="button" class="primary" @click="submitAddress">
-          Lưu địa chỉ
+          {{ t('account.address.save') }}
         </button>
       </div>
     </div>

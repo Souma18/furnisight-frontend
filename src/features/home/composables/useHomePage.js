@@ -1,8 +1,11 @@
 import { computed, onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
+import { useLocaleStore } from '@shared/stores/localeStore'
 import { useComboCart } from '@features/promotions/composables/useComboCart'
 import { comboStockIssue, enrichComboItemStock } from '@features/promotions/lib/comboStock'
 import { useRevealOnScroll } from './useRevealOnScroll'
@@ -10,6 +13,9 @@ import { useRevealOnScroll } from './useRevealOnScroll'
 export function useHomePage() {
   const wishlistStore = useWishlistStore()
   const authStore = useAuthStore()
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
+  const { t } = useI18n()
 
   const categories = ref([])
   const combos = ref([])
@@ -47,7 +53,7 @@ export function useHomePage() {
         return {
           ...category,
           icon: category.iconUrl || 'sofa',
-          count: `${category.productCount || 0} sản phẩm`,
+          count: t('home.categories.count', { count: category.productCount || 0 }),
         }
       })
 
@@ -124,7 +130,7 @@ export function useHomePage() {
       const { data } = await productsApi.getTopRandomReviews(3)
       topReviews.value = (data || []).map((review) => ({
         id: review.id,
-        name: review.userName || 'Khách hàng ẩn danh',
+        name: review.userName || t('home.testimonials.anonymous'),
         role: '',
         avatar: review.userAvatarUrl || null,
         text: review.content,
@@ -155,6 +161,12 @@ export function useHomePage() {
   }
 
   watch(activeCategoryId, loadProductsForCategory)
+  watch(locale, async () => {
+    await loadCategories()
+    await loadProductsForCategory(activeCategoryId.value)
+    await loadTopReviews()
+  })
+
   onMounted(() => {
     loadCategories()
     loadCombos()

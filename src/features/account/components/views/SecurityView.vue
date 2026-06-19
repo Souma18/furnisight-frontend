@@ -1,8 +1,10 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { usePasswordManager } from '../../composables/usePasswordManager'
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 
 const {
   form: passwordForm,
@@ -12,15 +14,15 @@ const {
 </script>
 
 <template>
-  <AccountSectionCard title="Bảo mật tài khoản">
+  <AccountSectionCard :title="t('account.security.title')">
     <section class="security-layout">
       <article class="security-card">
-        <header class="security-card-head">Thay đổi mật khẩu</header>
+        <header class="security-card-head">{{ t('account.security.changePassword') }}</header>
         <form class="security-card-body" @submit.prevent="submitPassword">
-          <label>Mật khẩu hiện tại <input v-model="passwordForm.currentPassword" type="password" required :disabled="isPasswordLoading" /></label>
-          <label>Mật khẩu mới <input v-model="passwordForm.newPassword" type="password" required :disabled="isPasswordLoading" /></label>
-          <label>Xác nhận mật khẩu <input v-model="passwordForm.confirmPassword" type="password" required :disabled="isPasswordLoading" /></label>
-          <button class="primary" type="submit" :disabled="isPasswordLoading">Cập nhật mật khẩu</button>
+          <label>{{ t('account.security.currentPassword') }} <input v-model="passwordForm.currentPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <label>{{ t('account.security.newPassword') }} <input v-model="passwordForm.newPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <label>{{ t('account.security.confirmPassword') }} <input v-model="passwordForm.confirmPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <button class="primary" type="submit" :disabled="isPasswordLoading">{{ t('account.security.updatePassword') }}</button>
         </form>
       </article>
 

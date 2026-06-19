@@ -1,7 +1,8 @@
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
@@ -25,6 +26,7 @@ import ComboCard from '../components/ComboCard.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const { isAuthenticated } = storeToRefs(authStore)
@@ -54,7 +56,7 @@ const {
   onMessage(message, error, combo) {
     if (!message) return
     if (error) {
-      showToast('Không thể xử lý combo', message, 'alert')
+      showToast(t('promotions.toast.comboError'), message, 'alert')
       return
     }
     showToast(message, combo?.name || '', 'cart')
@@ -92,31 +94,31 @@ const {
   showToast,
 })
 
-const filterTabs = [
-  { key: 'all', label: 'Tất cả', icon: 'list' },
-  { key: 'voucher', label: 'Voucher', icon: 'badgePercent' },
-  { key: 'combo', label: 'Combo nội thất', icon: 'armchair' },
-  { key: 'freeship', label: 'Freeship', icon: 'truck' },
-  { key: 'expiring', label: 'Sắp hết hạn', icon: 'clock3' },
-  { key: 'saved', label: 'Đã lưu', icon: 'wallet' },
-]
+const filterTabs = computed(() => [
+  { key: 'all', label: t('promotions.tabs.all'), icon: 'list' },
+  { key: 'voucher', label: t('promotions.tabs.voucher'), icon: 'badgePercent' },
+  { key: 'combo', label: t('promotions.tabs.combo'), icon: 'armchair' },
+  { key: 'freeship', label: t('promotions.tabs.freeship'), icon: 'truck' },
+  { key: 'expiring', label: t('promotions.tabs.expiring'), icon: 'clock3' },
+  { key: 'saved', label: t('promotions.tabs.saved'), icon: 'wallet' },
+])
 
-const voucherTypeOptions = [
-  { value: 'all', label: 'Tất cả loại' },
-  { value: 'shop', label: 'Voucher đơn hàng' },
-  { value: 'ship', label: 'Voucher vận chuyển' },
-  { value: 'PUBLIC', label: 'Công khai' },
-  { value: 'PERSONAL', label: 'Cá nhân' },
-  { value: 'MARKETING', label: 'Marketing' },
-]
+const voucherTypeOptions = computed(() => [
+  { value: 'all', label: t('promotions.filters.allTypes') },
+  { value: 'shop', label: t('promotions.filters.shopVoucher') },
+  { value: 'ship', label: t('promotions.filters.shippingVoucher') },
+  { value: 'PUBLIC', label: t('promotions.filters.public') },
+  { value: 'PERSONAL', label: t('promotions.filters.personal') },
+  { value: 'MARKETING', label: t('promotions.filters.marketing') },
+])
 
-const voucherTimeOptions = [
-  { value: 'all', label: 'Tất cả thời gian' },
-  { value: 'active', label: 'Đang dùng được' },
-  { value: 'expiring', label: 'Sắp hết hạn' },
-  { value: 'upcoming', label: 'Sắp diễn ra' },
-  { value: 'expired', label: 'Đã hết hạn' },
-]
+const voucherTimeOptions = computed(() => [
+  { value: 'all', label: t('promotions.filters.allTimes') },
+  { value: 'active', label: t('promotions.filters.active') },
+  { value: 'expiring', label: t('promotions.filters.expiring') },
+  { value: 'upcoming', label: t('promotions.filters.upcoming') },
+  { value: 'expired', label: t('promotions.filters.expired') },
+])
 
 const showVoucherSection = computed(() => ['all', 'voucher', 'freeship', 'expiring', 'saved'].includes(activeFilter.value))
 const showComboSection = computed(() => activeFilter.value === 'all' || activeFilter.value === 'combo')
@@ -146,41 +148,69 @@ async function useVoucherNow() {
 function openCombo(combo) {
   selectedCombo.value = combo
 }
+
+async function scrollToPromotionSection(sectionId) {
+  if (sectionId === 'voucher-section' && !showVoucherSection.value) activeFilter.value = 'all'
+  if (sectionId === 'combo-section' && !showComboSection.value) activeFilter.value = 'all'
+  await nextTick()
+
+  const target = document.getElementById(sectionId)
+  if (!target) return
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.history.replaceState(null, '', `#${sectionId}`)
+  target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+}
 </script>
 
 <template>
   <main class="promo-page">
     <div v-if="pageLoading" class="promo-page-state">
       <div class="promo-page-state-spinner"></div>
-      <p>Đang tải khuyến mãi...</p>
+      <p>{{ t('promotions.loading') }}</p>
     </div>
 
     <div v-else-if="pageError" class="promo-page-state">
       <AppIcon name="alert" :size="42" />
-      <h2>Không thể tải khuyến mãi</h2>
-      <p>Đã xảy ra lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.</p>
+      <h2>{{ t('promotions.errorTitle') }}</h2>
+      <p>{{ t('promotions.errorCopy') }}</p>
       <button type="button" class="promo-btn primary" @click="loadPageData">
-        <AppIcon name="refresh" :size="16" />Thử lại
+        <AppIcon name="refresh" :size="16" />{{ t('common.retry') }}
       </button>
     </div>
 
     <template v-else>
     <section class="promo-hero">
+      <nav class="promo-breadcrumb" aria-label="Breadcrumb">
+        <RouterLink to="/">{{ t('nav.home') }}</RouterLink>
+        <span>›</span>
+        <span>{{ t('nav.promotions') }}</span>
+      </nav>
       <div class="promo-hero-inner">
-        <p class="promo-eyebrow">Khuyến mãi nội thất tháng này</p>
-        <h1>Nhận voucher, sắm combo <em>tiết kiệm hơn</em></h1>
-        <p class="promo-desc">
-          Lưu voucher vào tài khoản để dùng khi thanh toán, hoặc chọn combo nội thất được phối sẵn theo phòng.
-        </p>
-        <div class="promo-actions">
-          <a class="promo-btn primary" href="#voucher-section"><AppIcon name="badgePercent" :size="16" />Nhận voucher ngay</a>
-          <a class="promo-btn ghost" href="#combo-section"><AppIcon name="armchair" :size="16" />Xem combo nội thất</a>
+        <div class="promo-hero-copy">
+          <p class="promo-eyebrow">{{ t('promotions.hero.eyebrow') }}</p>
+          <h1>{{ t('promotions.hero.titlePrefix') }} <em>{{ t('promotions.hero.titleEmphasis') }}</em></h1>
+          <p class="promo-desc">
+            {{ t('promotions.hero.subtitle') }}
+          </p>
+          <div class="promo-actions">
+            <button type="button" class="promo-btn primary" @click="scrollToPromotionSection('voucher-section')">
+              <AppIcon name="badgePercent" :size="16" />{{ t('promotions.hero.claimVoucher') }}
+            </button>
+            <button type="button" class="promo-btn ghost" @click="scrollToPromotionSection('combo-section')">
+              <AppIcon name="armchair" :size="16" />{{ t('promotions.hero.viewCombos') }}
+            </button>
+          </div>
         </div>
-        <div class="promo-stats">
-          <span><b>{{ activeVoucherCount }}</b> voucher đang mở</span>
-          <span><b>{{ comboTotal }}</b> combo ưu đãi</span>
-          <span><b>{{ formatCurrency(combos[0]?.savedAmount || 0) }}</b> tiết kiệm nổi bật</span>
-        </div>
+
+        <aside class="promo-overview" :aria-label="t('promotions.hero.overviewAria')">
+          <p class="promo-overview-label">{{ t('promotions.hero.overviewLabel') }}</p>
+          <div class="promo-stats">
+            <span><b>{{ activeVoucherCount }}</b><small>{{ t('promotions.hero.availableVouchers') }}</small></span>
+            <span><b>{{ comboTotal }}</b><small>{{ t('promotions.hero.comboDeals') }}</small></span>
+            <span><b>{{ formatCurrency(combos[0]?.savedAmount || 0) }}</b><small>{{ t('promotions.hero.highlightSaving') }}</small></span>
+          </div>
+          <p class="promo-overview-note">{{ t('promotions.hero.overviewNote') }}</p>
+        </aside>
       </div>
     </section>
 
@@ -199,10 +229,10 @@ function openCombo(combo) {
     <section v-if="showVoucherSection" id="voucher-section" class="promo-section">
       <div class="promo-section-head">
         <div>
-          <p>Ưu đãi dành cho bạn</p>
-          <h2>Voucher nổi bật</h2>
+          <p>{{ t('promotions.sections.voucherKicker') }}</p>
+          <h2>{{ t('promotions.sections.voucherTitle') }}</h2>
         </div>
-        <span class="promo-count">{{ filteredVouchers.length }} voucher</span>
+        <span class="promo-count">{{ t('promotions.voucher.count', { count: filteredVouchers.length }) }}</span>
       </div>
 
       <div
@@ -221,18 +251,18 @@ function openCombo(combo) {
             <strong>{{ voucher.code }}</strong>
           </div>
           <div class="voucher-body">
-            <button type="button" class="info-btn" @click="selectedVoucher = voucher" aria-label="Chi tiết voucher">
+            <button type="button" class="info-btn" @click="selectedVoucher = voucher" :aria-label="t('promotions.voucher.detail')">
               <AppIcon name="info" :size="14" />
             </button>
             <h3>{{ discountLabel(voucher) }}</h3>
             <p>{{ voucher.description || conditionText(voucher) }}</p>
             <div class="voucher-meta">
               <span><AppIcon name="creditCard" :size="13" />{{ conditionText(voucher) }}</span>
-              <span :class="{ danger: isExpiring(voucher.endDate) }"><AppIcon name="calendar" :size="13" />Hết hạn {{ formatDate(voucher.endDate) }}</span>
+              <span :class="{ danger: isExpiring(voucher.endDate) }"><AppIcon name="calendar" :size="13" />{{ t('promotions.voucher.expires', { date: formatDate(voucher.endDate) }) }}</span>
             </div>
             <div class="voucher-footer">
               <span class="status" :class="{ saved: voucher.saved, used: voucher.used }">
-                {{ voucher.used ? 'Đã dùng' : voucher.saved ? 'Đã lưu' : 'Chưa nhận' }}
+                {{ voucher.used ? t('promotions.voucher.used') : voucher.saved ? t('promotions.voucher.saved') : t('promotions.voucher.notClaimed') }}
               </span>
               <button
                 v-if="!voucher.saved && !voucher.used"
@@ -241,32 +271,32 @@ function openCombo(combo) {
                 :disabled="claimingCode === voucher.code"
                 @click="claimVoucher(voucher)"
               >
-                <AppIcon name="download" :size="14" />Nhận
+                <AppIcon name="download" :size="14" />{{ t('promotions.voucher.claim') }}
               </button>
               <button v-else-if="!voucher.used" type="button" class="claim-btn outline" @click="useVoucherNow">
-                <AppIcon name="cart" :size="14" />Dùng ngay
+                <AppIcon name="cart" :size="14" />{{ t('promotions.voucher.useNow') }}
               </button>
-              <button v-else type="button" class="claim-btn muted" disabled>Đã dùng</button>
+              <button v-else type="button" class="claim-btn muted" disabled>{{ t('promotions.voucher.used') }}</button>
             </div>
           </div>
         </article>
       </div>
-      <div v-else class="empty-state">Chưa có voucher phù hợp với bộ lọc này.</div>
+      <div v-else class="empty-state">{{ t('promotions.empty.vouchers') }}</div>
     </section>
 
     <section v-if="showComboSection" id="combo-section" class="promo-section">
       <div class="promo-section-head">
         <div>
-          <p>Phối sẵn, tiết kiệm hơn</p>
-          <h2>Combo nội thất đang ưu đãi</h2>
+          <p>{{ t('promotions.sections.comboKicker') }}</p>
+          <h2>{{ t('promotions.sections.comboTitle') }}</h2>
         </div>
         <div class="combo-tools">
-          <span class="promo-count">{{ comboTotal }} combo</span>
+          <span class="promo-count">{{ t('promotions.combo.count', { count: comboTotal }) }}</span>
           <select :value="comboSort" @change="changeComboSort">
-            <option value="save-desc">Tiết kiệm nhiều nhất</option>
-            <option value="price-asc">Giá thấp đến cao</option>
-            <option value="price-desc">Giá cao đến thấp</option>
-            <option value="default">Mới nhất</option>
+            <option value="save-desc">{{ t('promotions.sort.saveDesc') }}</option>
+            <option value="price-asc">{{ t('promotions.sort.priceAsc') }}</option>
+            <option value="price-desc">{{ t('promotions.sort.priceDesc') }}</option>
+            <option value="default">{{ t('promotions.sort.newest') }}</option>
           </select>
         </div>
       </div>
@@ -284,7 +314,7 @@ function openCombo(combo) {
 
       <div class="load-more-wrap">
         <button v-if="hasMoreCombos" type="button" class="load-more" :disabled="loadingMore" @click="loadMoreCombos">
-          {{ loadingMore ? 'Đang tải...' : 'Xem thêm combo' }}
+          {{ loadingMore ? t('common.loading') : t('promotions.combo.loadMore') }}
         </button>
       </div>
     </section>
@@ -292,17 +322,17 @@ function openCombo(combo) {
     <section class="promo-section">
       <div class="promo-section-head">
         <div>
-          <p>Tài khoản của bạn</p>
-          <h2>Voucher của tôi</h2>
+          <p>{{ t('promotions.sections.mineKicker') }}</p>
+          <h2>{{ t('promotions.sections.mineTitle') }}</h2>
         </div>
         <div class="mine-tools">
           <span class="promo-count">{{ filteredSavedVouchers.length }} / {{ savedVouchers.length }} voucher</span>
-          <select v-model="mineVoucherTypeFilter" aria-label="Lọc loại voucher của tôi">
+          <select v-model="mineVoucherTypeFilter" :aria-label="t('promotions.filters.mineTypeAria')">
             <option v-for="option in voucherTypeOptions" :key="`mine-type-${option.value}`" :value="option.value">
               {{ option.label }}
             </option>
           </select>
-          <select v-model="mineVoucherTimeFilter" aria-label="Lọc thời gian voucher của tôi">
+          <select v-model="mineVoucherTimeFilter" :aria-label="t('promotions.filters.mineTimeAria')">
             <option v-for="option in voucherTimeOptions" :key="`mine-time-${option.value}`" :value="option.value">
               {{ option.label }}
             </option>
@@ -313,12 +343,12 @@ function openCombo(combo) {
         <article v-for="voucher in filteredSavedVouchers" :key="`mine-${voucher.id}`" class="mine-row">
           <strong>{{ voucher.code }}</strong>
           <span>{{ discountLabel(voucher) }}</span>
-          <small>Hết hạn {{ formatDate(voucher.endDate) }}</small>
-          <button type="button" class="claim-btn outline" @click="useVoucherNow">Dùng ngay</button>
+          <small>{{ t('promotions.voucher.expires', { date: formatDate(voucher.endDate) }) }}</small>
+          <button type="button" class="claim-btn outline" @click="useVoucherNow">{{ t('promotions.voucher.useNow') }}</button>
         </article>
       </div>
       <div v-else class="empty-state">
-        {{ isAuthenticated ? (savedVouchers.length ? 'Không có voucher phù hợp bộ lọc.' : 'Bạn chưa lưu voucher nào.') : 'Đăng nhập để lưu voucher và sử dụng khi thanh toán.' }}
+        {{ isAuthenticated ? (savedVouchers.length ? t('promotions.empty.savedFiltered') : t('promotions.empty.savedNone')) : t('promotions.empty.loginToSave') }}
       </div>
     </section>
 
@@ -328,16 +358,16 @@ function openCombo(combo) {
         <h3>{{ discountLabel(selectedVoucher) }}</h3>
         <p>{{ selectedVoucher.description || conditionText(selectedVoucher) }}</p>
         <ul>
-          <li>Mã voucher: {{ selectedVoucher.code }}</li>
+          <li>{{ t('promotions.voucher.code', { code: selectedVoucher.code }) }}</li>
           <li>{{ conditionText(selectedVoucher) }}</li>
-          <li>Hết hạn {{ formatDate(selectedVoucher.endDate) }}</li>
-          <li>Loại giảm: {{ isShippingVoucher(selectedVoucher) ? 'Vận chuyển' : 'Voucher shop' }}</li>
+          <li>{{ t('promotions.voucher.expires', { date: formatDate(selectedVoucher.endDate) }) }}</li>
+          <li>{{ t('promotions.voucher.discountType', { type: isShippingVoucher(selectedVoucher) ? t('promotions.voucher.shipping') : t('promotions.voucher.shop') }) }}</li>
         </ul>
       </div>
     </div>
 
     <div v-if="selectedCombo" class="modal-overlay" @click.self="selectedCombo = null">
-      <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="`Chi tiết ${selectedCombo.name}`">
+      <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="t('promotions.combo.detailAria', { name: selectedCombo.name })">
         <button class="modal-close" type="button" @click="selectedCombo = null"><AppIcon name="close" :size="16" /></button>
         <h3>{{ selectedCombo.name }}</h3>
         <p>{{ selectedCombo.description }}</p>
@@ -360,22 +390,22 @@ function openCombo(combo) {
             </span>
             <span class="combo-product-info">
               <strong>{{ item.productName }}</strong>
-              <small>{{ item.categoryName || 'Sản phẩm nội thất' }} · x{{ item.quantity || 1 }}</small>
+              <small>{{ item.categoryName || t('promotions.combo.defaultProduct') }} · x{{ item.quantity || 1 }}</small>
             </span>
             <b>{{ formatCurrency(item.price) }}</b>
             <AppIcon class="combo-product-arrow" name="chevronRight" :size="18" />
           </RouterLink>
         </div>
         <div class="modal-actions">
-          <button type="button" class="combo-btn outline" @click="selectedCombo = null">Đóng</button>
+          <button type="button" class="combo-btn outline" @click="selectedCombo = null">{{ t('common.close') }}</button>
           <button v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
-            <AppIcon name="cart" :size="14" />Hết hàng
+            <AppIcon name="cart" :size="14" />{{ t('promotions.combo.soldOut') }}
           </button>
           <button v-else type="button" class="combo-btn dark" :disabled="addingComboId === selectedCombo.id" @click="addComboToCart(selectedCombo)">
-            <AppIcon name="cart" :size="14" />{{ addingComboId === selectedCombo.id ? 'Đang thêm' : 'Thêm combo' }}
+            <AppIcon name="cart" :size="14" />{{ addingComboId === selectedCombo.id ? t('promotions.combo.adding') : t('promotions.combo.add') }}
           </button>
           <button v-if="!comboStockIssue(selectedCombo)" type="button" class="combo-btn dark" :disabled="buyingComboId === selectedCombo.id" @click="buyCombo(selectedCombo)">
-            <AppIcon name="creditCard" :size="14" />{{ buyingComboId === selectedCombo.id ? 'Đang chuẩn bị' : 'Mua combo' }}
+            <AppIcon name="creditCard" :size="14" />{{ buyingComboId === selectedCombo.id ? t('promotions.combo.preparing') : t('promotions.combo.buy') }}
           </button>
         </div>
       </div>
@@ -404,8 +434,31 @@ function openCombo(combo) {
     radial-gradient(ellipse 42% 52% at 18% 82%, rgba(28,49,72,.8) 0%, transparent 60%),
     #12202e;
   color: #fff;
+  padding-top: 26px;
 }
-.promo-hero-inner { width: 100%; max-width: 1300px; margin: 0 auto; padding: 80px 60px 72px; box-sizing: border-box; }
+.promo-breadcrumb {
+  align-items: center;
+  color: rgba(255, 255, 255, 0.54);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+  margin: 0 auto;
+  max-width: 1440px;
+  padding: 0 60px 18px;
+  box-sizing: border-box;
+}
+.promo-breadcrumb a,
+.promo-breadcrumb span {
+  color: inherit;
+  text-decoration: none;
+}
+.promo-breadcrumb a:hover,
+.promo-breadcrumb a:focus-visible {
+  color: #e5b84a;
+  outline: none;
+}
+.promo-hero-inner { align-items: end; box-sizing: border-box; display: grid; gap: clamp(44px, 7vw, 100px); grid-template-columns: minmax(0, 1fr) minmax(310px, .62fr); margin: 0 auto; max-width: 1300px; padding: 18px 60px 64px; width: 100%; }
+.promo-hero-copy { max-width: 690px; }
 .promo-eyebrow, .promo-section-head p, .combo-count { margin: 0 0 8px; color: #c9953a; font-size: 12px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; }
 .promo-hero .promo-eyebrow {
   display: inline-flex;
@@ -417,27 +470,40 @@ function openCombo(combo) {
   margin-bottom: 24px;
 }
 .promo-hero h1 {
-  max-width: 760px;
+  max-width: 680px;
   margin: 0;
   color: #fff;
   font-family: var(--sans);
-  font-size: 58px;
-  line-height: 1.1;
-  font-weight: 300;
+  font-size: clamp(40px, 4.4vw, 58px);
+  line-height: 1.06;
+  font-weight: 480;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
-.promo-hero h1 em { color: #e5b84a; font-style: normal; }
-.promo-desc { max-width: 560px; color: rgba(255,255,255,.68); font-size: 15px; line-height: 1.7; }
-.promo-actions, .promo-stats, .combo-actions, .modal-actions, .combo-tools, .mine-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.promo-btn, .claim-btn, .combo-btn, .load-more { border: 0; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-weight: 800; cursor: pointer; text-decoration: none; }
+.promo-hero h1 em { color: #e5b84a; display: block; font-style: normal; }
+.promo-desc { max-width: 590px; color: rgba(255,255,255,.68); font-size: 15px; line-height: 1.7; margin: 18px 0 0; }
+.promo-actions, .combo-actions, .modal-actions, .combo-tools, .mine-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.promo-actions { margin-top: 24px; }
+.promo-btn, .claim-btn, .combo-btn, .load-more { border: 0; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; font-weight: 800; cursor: pointer; text-decoration: none; }
 .promo-btn { padding: 13px 22px; }
 .promo-btn.primary, .claim-btn, .load-more { background: #c9953a; color: #17233b; }
 .promo-btn.ghost { border: 1px solid rgba(255,255,255,.36); color: #fff; background: transparent; }
-.promo-stats { margin-top: 28px; color: rgba(255,255,255,.68); }
-.promo-stats b { display: block; color: #fff; font-size: 22px; }
+.promo-btn { transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease; }
+.promo-btn.primary:hover, .promo-btn.primary:focus-visible { background: #e5b84a; color: #12202e; transform: translateY(-1px); }
+.promo-btn.ghost:hover, .promo-btn.ghost:focus-visible { background: #fffdf9; border-color: #fffdf9; color: #12202e; transform: translateY(-1px); }
+.promo-btn:focus-visible { outline: 2px solid #e5b84a; outline-offset: 3px; }
+.promo-btn:active { transform: translateY(0); }
+.promo-overview { border-left: 1px solid rgba(255,255,255,.16); padding: 4px 0 4px clamp(24px, 4vw, 46px); }
+.promo-overview-label { color: #e5b84a; font-size: 11px; font-weight: 760; letter-spacing: 1.8px; margin: 0 0 8px; text-transform: uppercase; }
+.promo-stats { color: rgba(255,255,255,.62); display: grid; }
+.promo-stats span { align-items: baseline; border-bottom: 1px solid rgba(255,255,255,.1); display: grid; gap: 2px 16px; grid-template-columns: minmax(92px, auto) 1fr; padding: 13px 0; }
+.promo-stats b { color: #fff; font-size: 25px; font-variant-numeric: tabular-nums; font-weight: 620; white-space: nowrap; }
+.promo-stats small { font-size: 12px; line-height: 1.45; }
+.promo-overview-note { color: rgba(255,255,255,.44); font-size: 11px; line-height: 1.55; margin: 14px 0 0; }
 .promo-tabs { width: 100%; max-width: 1300px; margin: 0 auto; padding: 28px 60px 0; box-sizing: border-box; display: flex; gap: 10px; overflow-x: auto; }
 .promo-tab { flex: 0 0 auto; border: 1px solid #e8e0d0; background: #fff; border-radius: 24px; padding: 9px 16px; color: #5a4a3a; font-weight: 800; display: inline-flex; align-items: center; gap: 7px; }
 .promo-tab.active { background: #16233b; color: #fff; border-color: #16233b; }
-.promo-section { width: 100%; max-width: 1300px; margin: 0 auto; padding: 56px 60px; box-sizing: border-box; }
+.promo-section { width: 100%; max-width: 1300px; margin: 0 auto; padding: 56px 60px; box-sizing: border-box; scroll-margin-top: 76px; }
 .promo-section-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 18px; margin-bottom: 22px; }
 .promo-section-head h2 { margin: 0; font-family: 'Cormorant Garamond', serif; font-size: 34px; font-weight: 600; }
 .promo-count { border: 1px solid #e8e0d0; border-radius: 999px; padding: 8px 13px; background: #fff; color: #665846; font-size: 12px; font-weight: 800; white-space: nowrap; }
@@ -498,20 +564,33 @@ function openCombo(combo) {
 .promo-toast.show { opacity: 1; transform: translateY(0); }
 .promo-toast small { display: block; color: #d7deeb; }
 @media (max-width: 980px) {
-  .promo-hero-inner, .promo-section, .promo-tabs { padding-left: 24px; padding-right: 24px; }
+  .promo-breadcrumb, .promo-hero-inner, .promo-section, .promo-tabs { padding-left: 24px; padding-right: 24px; }
+  .promo-hero-inner { gap: 34px; grid-template-columns: 1fr; }
+  .promo-overview { border-left: 0; border-top: 1px solid rgba(255,255,255,.16); padding: 20px 0 0; }
+  .promo-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .promo-stats span { align-content: start; border-bottom: 0; border-left: 1px solid rgba(255,255,255,.1); display: grid; grid-template-columns: 1fr; padding: 8px 18px; }
+  .promo-stats span:first-child { border-left: 0; padding-left: 0; }
   .promo-hero h1 { font-size: 40px; }
   .combo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .mine-row { grid-template-columns: 1fr; }
 }
 @media (max-width: 640px) {
-  .promo-hero-inner { padding-top: 56px; padding-bottom: 52px; }
+  .promo-hero-inner { padding-top: 18px; padding-bottom: 52px; }
   .promo-section { padding-top: 44px; padding-bottom: 44px; }
   .voucher-card { flex-basis: 310px; }
   .combo-grid { grid-template-columns: 1fr; }
   .promo-section-head { align-items: flex-start; flex-direction: column; }
+  .promo-actions { align-items: stretch; flex-direction: column; }
+  .promo-actions .promo-btn { width: 100%; }
+  .promo-stats { grid-template-columns: 1fr; }
+  .promo-stats span { border-left: 0; border-top: 1px solid rgba(255,255,255,.1); grid-template-columns: 110px 1fr; padding: 12px 0; }
+  .promo-stats span:first-child { border-top: 0; padding-left: 0; }
   .combo-modal-row { grid-template-columns: 56px minmax(0, 1fr) 18px; }
   .combo-product-image { width: 56px; height: 52px; }
   .combo-modal-row > b { grid-column: 2; }
   .combo-product-arrow { grid-column: 3; grid-row: 1 / span 2; }
+}
+@media (max-width: 560px) {
+  .promo-breadcrumb { padding-left: 16px; padding-right: 16px; }
 }
 </style>

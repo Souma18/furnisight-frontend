@@ -1,4 +1,5 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
 import ProductCard3D from './ProductCard3D.vue'
 import Room3DCartSection from './Room3DCartSection.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -62,17 +63,27 @@ defineEmits([
   'remove-product',
   'open-checkout',
 ])
+
+const { t } = useI18n()
 </script>
 
 <template>
   <aside class="panel">
     <div class="panel-top">
+      <div class="panel-heading">
+        <div>
+          <span>{{ t('room3d.products.kicker') }}</span>
+          <strong>{{ t('room3d.products.title') }}</strong>
+        </div>
+        <small>{{ t('room3d.products.count', { count: filteredProducts.length }) }}</small>
+      </div>
+
       <div class="search-wrap">
         <span class="search-icon"><AppIcon name="search" :size="16" /></span>
         <input
           class="search-input"
           :value="searchKeyword"
-          placeholder="Tìm kiếm nội thất..."
+          :placeholder="t('room3d.products.search')"
           @input="$emit('search-change', $event.target.value)"
         />
       </div>
@@ -91,9 +102,9 @@ defineEmits([
       </div>
 
       <div v-if="filteredProducts.length > 0" class="ai-strip">
-        <p class="ai-label">GỢI Ý NỘI THẤT <span class="smart">PHÙ HỢP</span></p>
+        <p class="ai-label">{{ t('room3d.products.aiLabel') }} <span class="smart">{{ t('room3d.products.aiSmart') }}</span></p>
         <p class="ai-text">
-          Chọn sản phẩm để thêm vào giỏ hàng hoặc kéo vào không gian 3D.
+          {{ t('room3d.products.aiText') }}
         </p>
       </div>
     </div>
@@ -103,7 +114,7 @@ defineEmits([
         {{ recommendationError }}
       </div>
       <div v-else-if="filteredProducts.length === 0" class="products-empty">
-        Chưa có sản phẩm nào phù hợp.
+        {{ t('room3d.products.empty') }}
       </div>
       <div v-else class="grid" :style="{ '--product-columns': productColumns }">
         <ProductCard3D
@@ -140,26 +151,60 @@ defineEmits([
   border-left: 1px solid #e6ded1;
   height: 100%;
   overflow: hidden;
-  padding: 0.6rem;
+  padding: 0.9rem 0.8rem 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  background: #ffffff;
+  background: #fbf8f3;
 }
 
 .panel-top {
   display: flex;
   flex-direction: column;
-  gap: 0.55rem;
+  gap: 0.7rem;
   flex: 0 0 auto;
+}
+
+.panel-heading {
+  align-items: end;
+  display: flex;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.panel-heading div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.panel-heading span {
+  color: #a07320;
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.panel-heading strong {
+  color: #172532;
+  font-size: 1rem;
+}
+
+.panel-heading small {
+  color: #81786e;
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .search-wrap {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  background: #0f3f5c;
-  border-radius: 0.8rem;
+  background: #fffdf9;
+  border: 1px solid #d8cec1;
+  border-radius: 8px;
   padding: 0 0.7rem;
   min-height: 2.35rem;
   transition: box-shadow 0.18s ease;
@@ -171,33 +216,33 @@ defineEmits([
 
 .search-icon {
   opacity: 0.75;
-  color: #d7e8f7;
+  color: #8b775e;
 }
 
 .search-input {
   border: none;
   outline: none;
   background: transparent;
-  color: #eef6ff;
+  color: #172532;
   width: 100%;
   font: inherit;
   font-size: 0.86rem;
 }
 
 .search-input::placeholder {
-  color: rgba(221, 235, 247, 0.55);
+  color: #9a9288;
 }
 
 .filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.35rem;
 }
 
 .filter-btn {
   border: 1px solid #d8cec1;
-  border-radius: 0.7rem;
-  background: #f3f0eb;
+  border-radius: 6px;
+  background: #fffdf9;
   color: #5f5d58;
   min-height: 2.25rem;
   font-size: 0.82rem;
@@ -218,9 +263,15 @@ defineEmits([
 }
 
 .filter-btn.active {
-  border-color: #0f3f5c;
-  background: #0f3f5c;
-  color: #ffba45;
+  border-color: #12202e;
+  background: #12202e;
+  color: #e5b84a;
+}
+
+.filter-btn:focus-visible,
+.search-input:focus-visible {
+  outline: 2px solid rgba(201, 146, 42, 0.55);
+  outline-offset: 2px;
 }
 
 .ai-strip {
@@ -238,9 +289,9 @@ defineEmits([
 }
 
 .smart {
-  background: #f6b22f;
-  color: #0f3f5c;
-  border-radius: 0.7rem;
+  background: rgba(201, 146, 42, 0.14);
+  color: #8d641d;
+  border-radius: 4px;
   padding: 0.08rem 0.42rem;
   margin-left: 0.25rem;
 }
@@ -295,6 +346,6 @@ defineEmits([
   flex: 0 0 auto;
   border-top: 1px solid #ece5da;
   padding-top: 0.45rem;
-  background: #ffffff;
+  background: #fbf8f3;
 }
 </style>

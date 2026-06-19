@@ -1,6 +1,9 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '../store/orderStore'
+import { i18n } from '@shared/i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 export function useAccountOrders(emitNotify) {
   const route = useRoute()
@@ -46,12 +49,12 @@ export function useAccountOrders(emitNotify) {
   async function cancelOrder(orderCode) {
     const result = await orderStore.cancelOrder(orderCode)
     if (!result.ok) {
-      if (emitNotify) emitNotify(result.message ?? 'Không thể huỷ đơn.', 'error')
+      if (emitNotify) emitNotify(result.message ?? t('account.orders.cancelError'), 'error')
       return false
     }
     if (emitNotify) {
       emitNotify(
-        result.status === 'refund_pending' ? 'Đã hủy đơn. Đơn đang chờ hoàn tiền.' : 'Đã huỷ đơn hàng.',
+        result.status === 'refund_pending' ? t('account.orders.cancelRefundPending') : t('account.orders.cancelSuccess'),
         'success',
       )
     }
@@ -66,10 +69,10 @@ export function useAccountOrders(emitNotify) {
     try {
       const result = await orderStore.retryPayment(order)
       if (!result.ok) {
-        if (emitNotify) emitNotify(result.message ?? 'Không thể thanh toán lại.', 'error')
+        if (emitNotify) emitNotify(result.message ?? t('account.orders.retryError'), 'error')
         return false
       }
-      if (emitNotify) emitNotify('Đang chuyển sang cổng thanh toán.', 'success')
+      if (emitNotify) emitNotify(t('account.orders.redirectPayment'), 'success')
       return true
     } finally {
       retryingOrderCode.value = ''

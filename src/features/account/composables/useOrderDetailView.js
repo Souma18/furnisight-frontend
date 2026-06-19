@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountOrders } from './useAccountOrders'
 import { usePaymentCountdown } from './usePaymentCountdown'
-import { ORDER_STATUS_LABELS } from './orderStatusLabels'
+import { i18n } from '@shared/i18n'
 import {
   canRetryOrderPayment,
   isOrderPaymentExpired,
@@ -18,6 +18,9 @@ const CANCELABLE_ORDER_STATUSES = [
   'cod_pending_confirmation',
   'cod_confirmed',
 ]
+
+const t = (key, params) => i18n.global.t(key, params)
+const orderStatusLabel = (status) => t(`account.orders.status.${status}`)
 
 export function useOrderDetailView(notify) {
   const router = useRouter()
@@ -48,18 +51,18 @@ export function useOrderDetailView(notify) {
   )
 
   const statusLabel = computed(() => {
-    return order.value?.statusLabel || ORDER_STATUS_LABELS[order.value?.status] || order.value?.status || ''
+    return order.value?.status ? orderStatusLabel(order.value.status) : (order.value?.statusLabel || '')
   })
 
   const paymentStatusLabel = computed(() => {
-    if (isCodOrder()) return 'Thanh toán khi nhận hàng'
+    if (isCodOrder()) return t('account.orders.payment.cod')
     const rawStatus = String(order.value?.paymentDetail?.paymentStatus || order.value?.rawStatus || '').toUpperCase()
-    if (rawStatus === 'PAID') return 'Đã thanh toán'
-    if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return 'Thanh toán thất bại'
-    if (order.value?.status === 'unpaid') return 'Chờ thanh toán'
-    if (order.value?.status === 'refund_pending') return 'Chờ hoàn tiền'
-    if (order.value?.status === 'refunded') return 'Đã hoàn tiền'
-    return rawStatus || 'Chưa ghi nhận'
+    if (rawStatus === 'PAID') return t('account.orders.payment.paid')
+    if (['FAILED', 'PAYMENT_FAILED'].includes(rawStatus)) return t('account.orders.payment.failed')
+    if (order.value?.status === 'unpaid') return t('account.orders.payment.pending')
+    if (order.value?.status === 'refund_pending') return t('account.orders.payment.refundPending')
+    if (order.value?.status === 'refunded') return t('account.orders.payment.refunded')
+    return rawStatus || t('account.orders.notRecorded')
   })
 
   const transactionTimeline = computed(() => buildTransactionTimeline(order.value, {
@@ -76,34 +79,34 @@ export function useOrderDetailView(notify) {
     const payment = current.paymentDetail || {}
     const timeline = current.paymentTimeline || {}
     return [
-      { label: 'Mã giao dịch', value: payment.transactionCode || current.orderCode || 'Chưa có' },
-      { label: 'Trạng thái', value: paymentStatusLabel.value },
+      { label: t('account.orders.transaction.code'), value: payment.transactionCode || current.orderCode || t('account.orders.none') },
+      { label: t('account.orders.transaction.status'), value: paymentStatusLabel.value },
       {
-        label: isCodOrder(current) ? 'Số tiền cần thu' : 'Số tiền ghi nhận',
+        label: isCodOrder(current) ? t('account.orders.transaction.codAmount') : t('account.orders.transaction.paidAmount'),
         value: formatMoney(isCodOrder(current) ? current.totalAmount : (payment.paidAmount || 0)),
       },
       {
-        label: 'Thời điểm thanh toán',
+        label: t('account.orders.transaction.paymentTime'),
         value: isCodOrder(current)
-          ? 'Khi nhận hàng'
-          : (formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || 'Chưa ghi nhận'),
+          ? t('account.orders.payment.whenReceived')
+          : (formatDateTime(payment.paidAt || timeline.paymentCompletedAt) || t('account.orders.notRecorded')),
       },
       {
-        label: 'Hạn thanh toán',
-        value: formatDateTime(timeline.paymentExpiresAt || current.paymentExpiresAt) || 'Không áp dụng',
+        label: t('account.orders.transaction.paymentDeadline'),
+        value: formatDateTime(timeline.paymentExpiresAt || current.paymentExpiresAt) || t('account.orders.notApplicable'),
       },
     ]
   })
 
   const paymentDeadline = computed(() => {
     if (!order.value || !canRetryPaymentNow.value || !order.value.paymentExpiresAt || !isPaymentTimeRemaining(order.value)) return ''
-    return `Còn ${formatCountdown(order.value)} để hoàn tất thanh toán`
+    return t('account.orders.deadlineDetail', { time: formatCountdown(order.value) })
   })
 
   const retryPaymentTitle = computed(() => {
-    if (canRetryPaymentNow.value) return 'Tiếp tục thanh toán đơn hàng'
-    if (order.value && isOrderPaymentExpired(order.value)) return 'Đơn hàng đã quá hạn thanh toán'
-    return 'Đơn hàng không thể thanh toán lại'
+    if (canRetryPaymentNow.value) return t('account.orders.retryTitle.available')
+    if (order.value && isOrderPaymentExpired(order.value)) return t('account.orders.retryTitle.expired')
+    return t('account.orders.retryTitle.unavailable')
   })
 
   function handleCancel() {
@@ -154,8 +157,8 @@ export function useOrderDetailView(notify) {
 
   function paymentMethodLabel(current = order.value) {
     return isCodOrder(current)
-      ? 'Thanh toán khi nhận hàng'
-      : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || 'Chưa rõ')
+      ? t('account.orders.payment.cod')
+      : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || t('account.orders.unknown'))
   }
 
   return {
@@ -210,8 +213,8 @@ function buildTransactionTimeline(current, helpers) {
   const items = [
     {
       key: 'created',
-      title: 'Đơn hàng được tạo',
-      sub: 'Hệ thống đã ghi nhận đơn hàng.',
+      title: t('account.orders.timeline.createdTitle'),
+      sub: t('account.orders.timeline.createdSub'),
       time: timeline.orderCreatedAt || current.createdAt,
       state: 'done',
       icon: 'clipboardList',
@@ -221,8 +224,8 @@ function buildTransactionTimeline(current, helpers) {
   if (timeline.paymentInitiatedAt) {
     items.push({
       key: 'initiated',
-      title: 'Khởi tạo thanh toán',
-      sub: `Phương thức ${helpers.paymentMethodLabel(current)}.`,
+      title: t('account.orders.timeline.initiatedTitle'),
+      sub: t('account.orders.timeline.initiatedSub', { method: helpers.paymentMethodLabel(current) }),
       time: timeline.paymentInitiatedAt,
       state: 'done',
       icon: 'creditCard',
@@ -232,8 +235,8 @@ function buildTransactionTimeline(current, helpers) {
   if (helpers.isCodOrder(current)) {
     items.push({
       key: 'cod',
-      title: 'Thanh toán khi nhận hàng',
-      sub: 'Khách sẽ thanh toán tiền mặt khi nhận hàng.',
+      title: t('account.orders.timeline.codTitle'),
+      sub: t('account.orders.timeline.codSub'),
       time: timeline.orderCreatedAt || current.createdAt,
       state: 'active',
       icon: 'cash',
@@ -241,8 +244,8 @@ function buildTransactionTimeline(current, helpers) {
   } else if (timeline.paymentCompletedAt || current.paymentDetail?.paidAt) {
     items.push({
       key: 'completed',
-      title: 'Thanh toán thành công',
-      sub: `Đã ghi nhận ${helpers.formatMoney(current.paymentDetail?.paidAmount || current.totalAmount)}.`,
+      title: t('account.orders.timeline.completedTitle'),
+      sub: t('account.orders.timeline.completedSub', { amount: helpers.formatMoney(current.paymentDetail?.paidAmount || current.totalAmount) }),
       time: timeline.paymentCompletedAt || current.paymentDetail?.paidAt,
       state: 'done',
       icon: 'check',
@@ -250,8 +253,8 @@ function buildTransactionTimeline(current, helpers) {
   } else if (timeline.paymentFailedAt || current.status === 'payment_failed') {
     items.push({
       key: 'failed',
-      title: 'Thanh toán thất bại',
-      sub: 'Giao dịch chưa được cổng thanh toán chấp nhận.',
+      title: t('account.orders.timeline.failedTitle'),
+      sub: t('account.orders.timeline.failedSub'),
       time: timeline.paymentFailedAt,
       state: 'failed',
       icon: 'ban',
@@ -259,10 +262,10 @@ function buildTransactionTimeline(current, helpers) {
   } else {
     items.push({
       key: 'pending',
-      title: 'Chờ thanh toán',
+      title: t('account.orders.timeline.pendingTitle'),
       sub: helpers.canRetryPaymentNow
-        ? 'Bạn vẫn có thể tiếp tục thanh toán đơn hàng.'
-        : 'Đơn hàng đã hết thời gian thanh toán.',
+        ? t('account.orders.timeline.pendingCanPay')
+        : t('account.orders.timeline.pendingExpired'),
       time: timeline.paymentExpiresAt || current.paymentExpiresAt,
       state: helpers.canRetryPaymentNow ? 'active' : 'pending',
       icon: 'clock',
@@ -272,8 +275,8 @@ function buildTransactionTimeline(current, helpers) {
   if (current.status === 'refund_pending') {
     items.push({
       key: 'refund_pending',
-      title: 'Chờ hoàn tiền',
-      sub: 'Đơn đã thanh toán được hủy trước khi giao và đang chờ xử lý hoàn tiền.',
+      title: t('account.orders.timeline.refundPendingTitle'),
+      sub: t('account.orders.timeline.refundPendingSub'),
       time: null,
       state: 'active',
       icon: 'refresh',
@@ -283,8 +286,8 @@ function buildTransactionTimeline(current, helpers) {
   if (current.status === 'refunded') {
     items.push({
       key: 'refunded',
-      title: 'Đã hoàn tiền',
-      sub: 'Admin đã xác nhận hoàn tiền cho đơn hàng.',
+      title: t('account.orders.timeline.refundedTitle'),
+      sub: t('account.orders.timeline.refundedSub'),
       time: null,
       state: 'done',
       icon: 'checkCheck',

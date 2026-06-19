@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useCart } from '@features/cart/composables/useCart'
 import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
 import { getApiErrorMessage } from '@shared/lib/api'
@@ -16,6 +17,7 @@ const props = defineProps({
 const emit = defineEmits(['require-auth'])
 
 const router = useRouter()
+const { t } = useI18n()
 const { items, itemCount, totalAmount, ensureHydrated, updateQty, removeItem } = useCart()
 
 function ensureCartLoaded() {
@@ -74,7 +76,7 @@ watch(
 
 <template>
   <div class="cart-wrap">
-    <button class="cart-trigger" type="button" aria-label="Giỏ hàng" @click="openCart">
+    <button class="cart-trigger" type="button" :aria-label="t('cart.open')" @click="openCart">
       <AppIcon name="cart" :size="14" />
       <span v-if="itemCount" class="cart-badge">{{ itemCount }}</span>
     </button>
@@ -82,10 +84,10 @@ watch(
     <div class="cart-dropdown">
       <div class="cart-header">
         <div class="cart-title">
-          Giỏ hàng
+          {{ t('cart.title') }}
           <span v-if="itemCount" class="cart-count">{{ itemCount }}</span>
         </div>
-        <button type="button" class="cart-head-link" @click="openCart">Xem giỏ</button>
+        <button type="button" class="cart-head-link" @click="openCart">{{ t('cart.view') }}</button>
       </div>
 
       <CartPreviewList
@@ -106,21 +108,30 @@ watch(
 }
 
 .cart-trigger {
-  border: none;
+  border: 1px solid rgba(255, 250, 241, 0.12);
   cursor: pointer;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 0.55rem;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  color: #f5f7f8;
+  background: rgba(255, 250, 241, 0.07);
+  color: rgba(255, 250, 241, 0.9);
   position: relative;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
-.cart-trigger:hover {
-  background: rgba(255, 255, 255, 0.16);
+.cart-trigger:hover,
+.cart-trigger:focus-visible {
+  border-color: var(--header-cream, var(--app-surface));
+  background: var(--header-cream, var(--app-surface));
+  color: var(--header-ink, var(--app-heading));
+  outline: none;
+}
+
+.cart-trigger:active {
+  transform: translateY(1px);
 }
 
 .cart-badge {
@@ -131,8 +142,8 @@ watch(
   height: 1rem;
   padding: 0 0.22rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #e5b84a, #c9922a);
-  color: #12202e;
+  background: linear-gradient(135deg, var(--brand-gold-400), var(--app-gold));
+  color: var(--brand-navy-900);
   font-size: 0.62rem;
   font-weight: 700;
   display: inline-flex;
@@ -147,10 +158,10 @@ watch(
   right: -10px;
   width: 396px;
   overflow: hidden;
-  border: 1px solid #ece2cf;
-  border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(18, 32, 46, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  box-shadow: var(--app-shadow);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px) scale(0.97);
@@ -172,9 +183,9 @@ watch(
   width: 12px;
   height: 12px;
   transform: rotate(45deg);
-  border-top: 1px solid #ece2cf;
-  border-left: 1px solid #ece2cf;
-  background: #fff;
+  border-top: 1px solid var(--app-border);
+  border-left: 1px solid var(--app-border);
+  background: var(--app-surface);
   z-index: 1;
 }
 
@@ -184,23 +195,23 @@ watch(
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 18px 12px;
-  border-bottom: 1px solid #f0e9dd;
-  background: #fff;
+  padding: 15px 16px 12px;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
 .cart-title {
   font-size: 14px;
-  font-weight: 700;
-  color: #1a1a1a;
+  font-weight: 760;
+  color: var(--app-heading);
 }
 
 .cart-count {
   margin-left: 6px;
   padding: 2px 7px;
-  border-radius: 10px;
-  background: #12202e;
-  color: #fff;
+  border-radius: 8px;
+  background: var(--app-navy);
+  color: var(--app-heading-inverse);
   font-size: 10px;
   font-weight: 700;
 }
@@ -208,20 +219,30 @@ watch(
 .cart-head-link {
   border: none;
   background: none;
-  color: #c58d2f;
+  color: var(--app-gold);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 650;
   cursor: pointer;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
 }
 
-.cart-head-link:hover {
-  color: #e5b84a;
+.cart-head-link:hover,
+.cart-head-link:focus-visible {
+  color: var(--brand-gold-400);
+  outline: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 @media (max-width: 980px) {
   .cart-dropdown {
     width: min(92vw, 396px);
     right: 0;
+  }
+
+  .cart-trigger {
+    width: 2rem;
+    height: 2rem;
   }
 }
 </style>

@@ -4,16 +4,21 @@ import { RouterLink } from 'vue-router'
 defineProps({
   hero: { type: Object, required: true },
 })
+
+function scrollToVisualizer() {
+  const target = document.getElementById('home-room-visualizer')
+  if (!target) return
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.history.replaceState(null, '', '#home-room-visualizer')
+  target.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' })
+}
 </script>
 
 <template>
   <div class="hero">
-    <div class="hero-bg"></div>
-    <div class="orb orb1"></div>
-    <div class="orb orb2"></div>
-    <div class="orb orb3"></div>
     <div class="hero-content">
-      <div>
+      <div class="hero-copy">
         <div class="hero-tag">{{ hero.tag }}</div>
         <h1 class="hero-title">
           {{ hero.titleTop }}<br />
@@ -22,34 +27,22 @@ defineProps({
         </h1>
         <p class="hero-sub">{{ hero.subtitle }}</p>
         <div class="hero-actions">
-          <RouterLink to="/room3d" class="btn-primary">Thử trực quan 3D</RouterLink>
-          <RouterLink to="/products" class="btn-outline">Khám phá sản phẩm</RouterLink>
+          <RouterLink to="/room3d" class="btn-primary">{{ hero.try3d }}</RouterLink>
+          <RouterLink to="/products" class="btn-outline">{{ hero.exploreProducts }}</RouterLink>
         </div>
       </div>
-      <div class="preview-card">
-        <div class="preview-card-header">
-          <div class="preview-dots"><span></span><span></span><span></span></div>
-          <span class="preview-label">furnisight://room-visualizer</span>
-          <span class="ai-badge">AI</span>
-        </div>
-        <div class="preview-scene">
-          <div class="scan-line"></div>
-          <div class="grid-floor"></div>
-          <div class="cube-wrap">
-            <div class="cube">
-              <div class="face front"></div>
-              <div class="face back"></div>
-              <div class="face left"></div>
-              <div class="face right"></div>
-              <div class="face top"></div>
-              <div class="face bottom"></div>
-            </div>
-          </div>
-        </div>
-        <div class="preview-footer">
-          <div class="preview-text">Tải ảnh phòng hoặc chọn phòng có sẵn để bắt đầu.</div>
-          <RouterLink to="/room3d" class="preview-start">Bắt đầu</RouterLink>
-        </div>
+
+      <div class="hero-gallery" :aria-label="hero.galleryAria">
+        <figure class="hero-image hero-image-main">
+          <img src="/home/rooms/livingroom.jpeg" :alt="hero.mainAlt" />
+        </figure>
+        <figure class="hero-image hero-image-small">
+          <img src="/home/rooms/bedroom.jpg" :alt="hero.smallAlt" />
+        </figure>
+        <a class="hero-note" href="#home-room-visualizer" @click.prevent="scrollToVisualizer">
+          <span>{{ hero.noteLabel }}</span>
+          <strong>{{ hero.noteText }}</strong>
+        </a>
       </div>
     </div>
   </div>

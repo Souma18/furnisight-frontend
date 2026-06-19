@@ -1,5 +1,6 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import { useNotificationsCenter } from '../../composables/useNotificationsCenter'
@@ -12,6 +13,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['notify'])
+const { t } = useI18n()
 
 const {
   loading,
@@ -29,13 +31,13 @@ const {
   reload,
 } = useNotificationsCenter(emit, computed(() => props.notificationCategory))
 
-const categoryLabelMap = {
-  all: 'Tất cả',
-  order: 'Đơn hàng',
-  promo: 'Khuyến mãi',
-  system: 'Hệ thống',
-  review: 'Đánh giá',
-}
+const categoryLabelMap = computed(() => ({
+  all: t('account.notifications.categories.all'),
+  order: t('account.notifications.categories.order'),
+  promo: t('account.notifications.categories.promo'),
+  system: t('account.notifications.categories.system'),
+  review: t('account.notifications.categories.review'),
+}))
 
 function tagClass(tone) {
   return tone ? `tag-${tone}` : 'tag-info'
@@ -43,13 +45,13 @@ function tagClass(tone) {
 </script>
 
 <template>
-  <AccountSectionCard title="Trung tâm thông báo">
+  <AccountSectionCard :title="t('account.notifications.title')">
     <div class="intro">
       <p>
-        Theo dõi hoạt động tài khoản theo nhóm
-        <strong>{{ categoryLabelMap[activeCategory] ?? 'Tất cả' }}</strong>.
+        {{ t('account.notifications.introPrefix') }}
+        <strong>{{ categoryLabelMap[activeCategory] ?? t('account.notifications.categories.all') }}</strong>.
       </p>
-      <strong>{{ totalCount }} thông báo</strong>
+      <strong>{{ t('account.notifications.total', { count: totalCount }) }}</strong>
     </div>
 
     <div class="toolbar">
@@ -67,23 +69,23 @@ function tagClass(tone) {
       </div>
 
       <button type="button" class="mark-all-btn" :disabled="!unreadCount" @click="markAllRead">
-        {{ unreadCount ? 'Đánh dấu tất cả đã đọc' : 'Đã đọc hết' }}
+        {{ unreadCount ? t('account.notifications.markAllRead') : t('account.notifications.allRead') }}
       </button>
     </div>
 
     <p v-if="errorMessage" class="error">
       {{ errorMessage }}
-      <button type="button" class="text-btn" @click="reload">Tải lại</button>
+      <button type="button" class="text-btn" @click="reload">{{ t('common.retry') }}</button>
     </p>
 
-    <div v-else-if="loading" class="state-card">Đang tải thông báo...</div>
+    <div v-else-if="loading" class="state-card">{{ t('account.notifications.loading') }}</div>
 
     <div v-else-if="!groupedNotifications.length" class="state-card">
       <div class="empty-icon">
         <AppIcon name="bell" :size="28" />
       </div>
-      <strong>Không có thông báo nào</strong>
-      <p>Khi có hoạt động mới, chúng sẽ hiển thị ở đây.</p>
+      <strong>{{ t('account.notifications.emptyTitle') }}</strong>
+      <p>{{ t('account.notifications.emptySub') }}</p>
     </div>
 
     <div v-else class="groups">
@@ -111,7 +113,7 @@ function tagClass(tone) {
             <div class="item-footer">
               <span class="item-tag" :class="tagClass(item.tagTone)">{{ item.tagLabel }}</span>
               <button type="button" class="text-btn" @click="toggleExpanded(item)">
-                {{ isExpanded(item.id) ? 'Ẩn chi tiết' : 'Xem chi tiết' }}
+                {{ isExpanded(item.id) ? t('account.notifications.hideDetail') : t('account.notifications.viewDetail') }}
               </button>
             </div>
 

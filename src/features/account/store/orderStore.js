@@ -4,6 +4,9 @@ import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+import { i18n } from '@shared/i18n'
+
+const t = (key, params) => i18n.global.t(key, params)
 
 export const useOrderStore = defineStore('accountOrder', () => {
   const orders = ref([])
@@ -66,7 +69,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
   async function cancelOrder(orderRef) {
     const detail = findOrder(orderRef)
-    if (!detail) return { ok: false, message: 'Đơn hàng không tồn tại.' }
+    if (!detail) return { ok: false, message: t('account.orders.notFound') }
     
     try {
       const orderCode = detail.orderCode || orderRef
@@ -94,23 +97,23 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
       return { ok: true, status: updatedDetail?.status }
     } catch (error) {
-      return { ok: false, message: error.response?.data?.message || 'Không thể huỷ đơn hàng lúc này.' }
+      return { ok: false, message: error.response?.data?.message || t('account.orders.cancelNowError') }
     }
   }
 
   async function retryPayment(orderRef) {
     const order = findOrder(orderRef)
     if (!order?.orderCode) {
-      return { ok: false, message: 'Không tìm thấy mã đơn hàng để thanh toán lại.' }
+      return { ok: false, message: t('account.orders.retryNoCode') }
     }
 
     if (!canRetryOrderPayment(order)) {
-      return { ok: false, message: 'Đơn hàng đã quá hạn thanh toán hoặc không thể thanh toán lại.' }
+      return { ok: false, message: t('account.orders.retryExpiredOrUnavailable') }
     }
 
     const paymentMethod = String(order.paymentMethod || order.paymentDetail?.paymentMethod || 'vnpay').toLowerCase()
     if (paymentMethod !== 'vnpay') {
-      return { ok: false, message: 'Phương thức thanh toán này chưa hỗ trợ thanh toán lại.' }
+      return { ok: false, message: t('account.orders.retryMethodUnsupported') }
     }
 
     try {
@@ -123,7 +126,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
       const paymentUrl = typeof response?.data === 'string' ? response.data : response?.data?.paymentUrl
 
       if (!paymentUrl) {
-        return { ok: false, message: 'Không nhận được liên kết thanh toán.' }
+        return { ok: false, message: t('account.orders.paymentUrlMissing') }
       }
 
       checkoutStore.rememberPendingPayment({
@@ -137,7 +140,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
     } catch (error) {
       return {
         ok: false,
-        message: error.response?.data?.message || 'Không thể tạo lại thanh toán lúc này.',
+        message: error.response?.data?.message || t('account.orders.paymentCreateError'),
       }
     }
   }

@@ -31,6 +31,7 @@ import {
   LayoutDashboard,
   MessageSquare,
   Monitor,
+  Moon,
   MoreHorizontal,
   Package,
   PanelRight,
@@ -54,6 +55,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronUp,
   Copy,
   Ban,
   RefreshCw,
@@ -90,6 +92,7 @@ import {
   Star,
   Sofa,
   Store,
+  Sun,
   Table,
   Trash2,
   Truck,
@@ -151,6 +154,7 @@ const iconMap = {
   messageSquare: MessageSquare,
   messages: MessagesSquare,
   monitor: Monitor,
+  moon: Moon,
   moreHorizontal: MoreHorizontal,
   panelRight: PanelRight,
   palette: Palette,
@@ -214,6 +218,7 @@ const iconMap = {
   settings: Settings,
   gift: Gift,
   star: Star,
+  sun: Sun,
   store: Store,
   table: Table,
   trash: Trash2,
@@ -238,6 +243,7 @@ const iconMap = {
   instagram: Instagram,
   youtube: Youtube,
   menu: Menu,
+  chevronUp: ChevronUp,
 }
 
 const iconComponent = computed(() => iconMap[props.name] ?? User)

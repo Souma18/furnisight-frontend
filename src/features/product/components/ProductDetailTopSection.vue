@@ -64,7 +64,7 @@ function commitQtyInput() {
           <img
             v-if="activeImage || product.image"
             :src="activeImage || product.image"
-            alt="Hình ảnh sản phẩm"
+            :alt="product.name || 'Hình ảnh sản phẩm'"
             class="pd-main-img"
           />
         </div>
@@ -81,117 +81,127 @@ function commitQtyInput() {
           :class="['thumb', { active: activeImage === imgUrl }]"
           @click="emit('pick-image', imgUrl)"
         >
-          <img :src="imgUrl" alt="Thumbnail" />
+          <img :src="imgUrl" :alt="`Ảnh ${product.name}`" />
         </button>
       </div>
     </div>
 
-    <div class="pd-info">
-      <h1 class="name">{{ product.name }}</h1>
-      <div class="rating">
-        <span class="rating-stars" aria-label="Đánh giá sản phẩm">
-          <AppIcon
-            v-for="star in 5"
-            :key="`detail-star-${star}`"
-            name="star"
-            :size="15"
-            :class="{ active: star <= Math.round(product.rating || 5) }"
-          />
-        </span>
-        <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
-        <small>({{ product.ratingCount || 0 }} đánh giá)</small>
-        <small>Đã bán {{ product.soldCount || 0 }}</small>
-      </div>
-      <div class="price-box">
-        <div>
+    <aside class="pd-buy-panel">
+      <div class="pd-info">
+        <p class="pd-kicker">{{ product.categoryName || product.category?.name || 'FurniSight collection' }}</p>
+        <h1 class="name">{{ product.name }}</h1>
+        <div class="rating">
+          <span class="rating-stars" aria-label="Đánh giá sản phẩm">
+            <AppIcon
+              v-for="star in 5"
+              :key="`detail-star-${star}`"
+              name="star"
+              :size="15"
+              :class="{ active: star <= Math.round(product.rating || 5) }"
+            />
+          </span>
+          <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
+          <small>({{ product.ratingCount || 0 }} đánh giá)</small>
+          <small>Đã bán {{ product.soldCount || 0 }}</small>
+        </div>
+        <div class="price-box">
+          <span>Giá niêm yết</span>
           <p class="price">{{ product.formattedPrice }}</p>
         </div>
+        <p v-if="product.description" class="pd-short-desc">{{ product.description }}</p>
       </div>
-      <p v-if="product.colors?.length" class="opt-label">Màu sắc: <span>{{ selectedColor }}</span></p>
-      <div v-if="product.colors?.length" class="colors">
-        <button
-          v-for="color in product.colors"
-          :key="color"
-          type="button"
-          :class="['color-btn', { active: selectedColor === color }]"
-          @click="emit('pick-color', color)"
-        >
-          {{ color }}
-        </button>
-      </div>
-      
-      <div v-if="product.sizes?.length">
-        <p class="opt-label">Kích thước: <span>{{ selectedSize }}</span></p>
-        <div class="sizes">
-          <button
-            v-for="size in product.sizes"
-            :key="size"
-            type="button"
-            :class="['size-btn', { active: selectedSize === size }]"
-            @click="emit('pick-size', size)"
-          >
-            {{ size }}
-          </button>
+
+      <div class="pd-purchase-options">
+        <div v-if="product.colors?.length" class="pd-option-group">
+          <p class="opt-label">Màu sắc <span>{{ selectedColor }}</span></p>
+          <div class="colors">
+            <button
+              v-for="color in product.colors"
+              :key="color"
+              type="button"
+              :class="['color-btn', { active: selectedColor === color }]"
+              @click="emit('pick-color', color)"
+            >
+              {{ color }}
+            </button>
+          </div>
+        </div>
+
+        <div v-if="product.sizes?.length" class="pd-option-group">
+          <p class="opt-label">Kích thước <span>{{ selectedSize }}</span></p>
+          <div class="sizes">
+            <button
+              v-for="size in product.sizes"
+              :key="size"
+              type="button"
+              :class="['size-btn', { active: selectedSize === size }]"
+              @click="emit('pick-size', size)"
+            >
+              {{ size }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="qty-row">
-        <div class="qty-ctrl">
-          <button type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
-            <AppIcon name="minus" :size="15" />
+      <div class="pd-buy-actions">
+        <div class="qty-row">
+          <div class="qty-ctrl">
+            <button type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
+              <AppIcon name="minus" :size="15" />
+            </button>
+            <input
+              :value="qtyDraft"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              :max="selectedStock || undefined"
+              :disabled="isOutOfStock"
+              aria-label="Số lượng"
+              @input="handleQtyInput($event.target.value)"
+              @blur="commitQtyInput"
+              @keydown.enter.prevent="commitQtyInput"
+            />
+            <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
+              <AppIcon name="plus" :size="15" />
+            </button>
+          </div>
+          <span>{{ selectedStock > 0 ? `Còn hàng (${selectedStock} sản phẩm)` : 'Tạm hết hàng' }}</span>
+        </div>
+        <p v-if="isOutOfStock || cartError" class="pd-cart-error">
+          {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
+        </p>
+        <div class="actions">
+          <button
+            type="button"
+            class="outline"
+            :class="{ loading: cartAdding, added: cartAdded }"
+            :disabled="cartAdding || isOutOfStock"
+            @click="emit('add-cart')"
+          >
+            <AppIcon v-if="cartAdded" name="check" :size="17" />
+            <AppIcon v-else name="cart" :size="17" />
+            {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
           </button>
-          <input
-            :value="qtyDraft"
-            type="number"
-            inputmode="numeric"
-            min="1"
-            :max="selectedStock || undefined"
-            :disabled="isOutOfStock"
-            aria-label="Số lượng"
-            @input="handleQtyInput($event.target.value)"
-            @blur="commitQtyInput"
-            @keydown.enter.prevent="commitQtyInput"
-          />
-          <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
-            <AppIcon name="plus" :size="15" />
+          <button
+            type="button"
+            class="solid"
+            :disabled="cartAdding || isOutOfStock"
+            @click="emit('buy-now')"
+          >
+            <AppIcon :name="isOutOfStock ? 'ban' : 'creditCard'" :size="17" />
+            {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
+          </button>
+          <button
+            type="button"
+            class="wish"
+            :class="{ active: wished }"
+            :aria-label="wished ? 'Bỏ yêu thích' : 'Yêu thích'"
+            @click="emit('toggle-wish')"
+          >
+            <AppIcon name="heart" :size="18" />
           </button>
         </div>
-        <span>{{ selectedStock > 0 ? `Còn hàng (${selectedStock} sản phẩm)` : 'Tạm hết hàng' }}</span>
       </div>
-      <p v-if="isOutOfStock || cartError" class="pd-cart-error">
-        {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
-      </p>
-      <div class="actions">
-        <button
-          type="button"
-          class="outline"
-          :class="{ loading: cartAdding, added: cartAdded }"
-          :disabled="cartAdding || isOutOfStock"
-          @click="emit('add-cart')"
-        >
-          <AppIcon v-if="cartAdded" name="check" :size="17" />
-          <AppIcon v-else name="cart" :size="17" />
-          {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
-        </button>
-        <button
-          type="button"
-          class="solid"
-          :disabled="cartAdding || isOutOfStock"
-          @click="emit('buy-now')"
-        >
-          <AppIcon :name="isOutOfStock ? 'ban' : 'creditCard'" :size="17" />
-          {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
-        </button>
-        <button
-          type="button"
-          class="wish"
-          :class="{ active: wished }"
-          :aria-label="wished ? 'Bỏ yêu thích' : 'Yêu thích'"
-          @click="emit('toggle-wish')"
-        >
-          <AppIcon name="heart" :size="18" />
-        </button>
-      </div>
-    </div>
+    </aside>
   </div>
 </template>

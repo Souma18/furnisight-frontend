@@ -13,40 +13,45 @@
 }
 
 .ct-breadcrumb {
-  background: #ffffff;
-  border-bottom: 1px solid var(--brand-cream-100);
-  padding: 11px 0;
+  color: rgba(255, 255, 255, 0.54);
+  display: flex;
+  gap: 8px;
+  padding-bottom: 18px;
+  position: relative;
+  z-index: 2;
 }
 
-.ct-breadcrumb .ct-inner {
-  display: flex;
+.ct-breadcrumb-inner {
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #888;
+  margin: 0 auto;
+  max-width: 1440px;
+  padding-left: 60px;
+  padding-right: 60px;
 }
 
 .ct-breadcrumb a,
 .ct-breadcrumb span {
-  color: #888;
+  color: inherit;
+  font-size: 12px;
   text-decoration: none;
 }
 
-.ct-breadcrumb a:hover {
-  color: var(--brand-gold-600);
+.ct-breadcrumb a:hover,
+.ct-breadcrumb a:focus-visible {
+  color: var(--brand-gold-400);
+  outline: none;
 }
 
 .ct-breadcrumb-current {
-  color: #1a1a1a;
-  font-weight: 500;
+  color: inherit;
+  font-weight: 400;
 }
 
 .ct-hero {
   position: relative;
   overflow: hidden;
   min-height: 300px;
-  display: flex;
-  align-items: center;
+  padding-top: 26px;
   background: var(--brand-navy-800);
 }
 
@@ -91,7 +96,7 @@
   grid-template-columns: 1fr 1fr;
   gap: 80px;
   align-items: center;
-  padding-top: 56px;
+  padding-top: 18px;
   padding-bottom: 56px;
 }
 
@@ -931,7 +936,7 @@ select.ct-fi {
 
 .ct-sec-title {
   font-size: 38px;
-  color: #1a1a1a;
+  color: var(--app-heading, #1a1a1a);
 }
 
 .ct-faq-grid {
@@ -942,18 +947,24 @@ select.ct-fi {
 
 .ct-faq-item {
   overflow: hidden;
-  border: 1.5px solid var(--brand-cream-100);
-  border-radius: 12px;
-  background: #ffffff;
-  transition: border-color 0.2s;
+  border: 1px solid var(--app-border, var(--brand-cream-100));
+  border-radius: 8px;
+  background: var(--app-surface, #ffffff);
+  color: var(--app-text, #1a1a1a);
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .ct-faq-item:hover {
-  border-color: var(--brand-cream-200);
+  border-color: var(--app-border-strong, var(--brand-cream-200));
+  background: var(--app-control-hover, var(--app-surface, #ffffff));
+  transform: translateY(-1px);
 }
 
 .ct-faq-item.open {
-  border-color: #f5e6c8;
+  border-color: color-mix(in srgb, var(--app-gold, #c9922a) 42%, var(--app-border));
 }
 
 .ct-faq-q {
@@ -965,20 +976,26 @@ select.ct-fi {
   padding: 18px 22px;
   border: none;
   background: transparent;
+  color: var(--app-heading, #1a1a1a);
   text-align: left;
   cursor: pointer;
+}
+
+.ct-faq-q:focus-visible {
+  outline: 2px solid var(--app-focus-ring, rgba(201, 146, 42, 0.46));
+  outline-offset: -2px;
 }
 
 .ct-faq-q-text {
   font-size: 14px;
   font-weight: 500;
   line-height: 1.45;
-  color: #1a1a1a;
+  color: var(--app-heading, #1a1a1a);
 }
 
 .ct-faq-toggle {
   flex-shrink: 0;
-  color: var(--brand-gold-600);
+  color: var(--app-gold, var(--brand-gold-600));
   font-size: 18px;
   font-weight: 300;
   transition: transform 0.3s;
@@ -992,7 +1009,33 @@ select.ct-fi {
   padding: 0 22px 18px;
   font-size: 13px;
   line-height: 1.75;
-  color: #555;
+  color: var(--app-text-muted, #555);
+}
+
+[data-theme='dark'] .ct-faq-section .ct-sec-title,
+[data-theme='dark'] .ct-faq-q,
+[data-theme='dark'] .ct-faq-q-text {
+  color: var(--app-heading) !important;
+}
+
+[data-theme='dark'] .ct-faq-item {
+  background: var(--app-surface) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+
+[data-theme='dark'] .ct-faq-item:hover,
+[data-theme='dark'] .ct-faq-item.open {
+  background: var(--app-control-hover) !important;
+  border-color: var(--app-border-strong) !important;
+}
+
+[data-theme='dark'] .ct-faq-toggle {
+  color: var(--app-gold) !important;
+}
+
+[data-theme='dark'] .ct-faq-a {
+  color: var(--app-text-muted) !important;
 }
 
 .ct-toast {
@@ -1085,6 +1128,13 @@ select.ct-fi {
   }
 }
 
+@media (max-width: 980px) {
+  .ct-breadcrumb-inner {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
 @media (max-width: 768px) {
   .ct-inner,
   .ct-faq-section {
@@ -1093,8 +1143,13 @@ select.ct-fi {
   }
 
   .ct-hero-inner {
-    padding-top: 40px;
+    padding-top: 18px;
     padding-bottom: 40px;
+  }
+
+  .ct-breadcrumb-inner {
+    padding-left: 24px;
+    padding-right: 24px;
   }
 
   .ct-h-title {
@@ -1123,5 +1178,12 @@ select.ct-fi {
     right: 20px;
     left: 20px;
     bottom: 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .ct-breadcrumb-inner {
+    padding-left: 16px;
+    padding-right: 16px;
   }
 }

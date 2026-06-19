@@ -1,15 +1,19 @@
 <script setup>
+import { useI18n } from 'vue-i18n'
+
 defineProps({
   testimonials: { type: Array, default: () => [] },
 })
+
+const { t } = useI18n()
 </script>
 
 <template>
   <section class="fade-up">
     <div class="section-head">
       <div>
-        <div class="section-label">Danh gia</div>
-        <h2 class="section-title">Khách hàng <em>nói gì</em></h2>
+        <div class="section-label">{{ t('home.testimonials.label') }}</div>
+        <h2 class="section-title">{{ t('home.testimonials.title') }}</h2>
       </div>
     </div>
     <div class="testimonials-grid">
@@ -20,7 +24,9 @@ defineProps({
             <div class="testi-name">{{ item.name }}</div>
             <div v-if="item.role" class="testi-role">{{ item.role }}</div>
           </div>
-          <div class="testi-stars">{{ item.stars }}</div>
+          <div class="testi-stars" :aria-label="t('home.testimonials.stars', { count: Math.round(item.rating || 5) })">
+            {{ '★'.repeat(Math.round(item.rating || 5)) }}
+          </div>
         </div>
       </article>
     </div>

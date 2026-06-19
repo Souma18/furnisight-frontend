@@ -12,15 +12,16 @@ export class ProductResponse {
     this.id = data.id || null
     this.shopId = data.shopId || null
     this.slug = data.slug || ''
-    this.name = data.name || ''
-    this.description = data.description || ''
+    this.name = resolveLocalizedValue(data, 'name')
+    this.description = resolveLocalizedValue(data, 'description')
     this.status = data.status || ''
     this.price = resolvePrice(data, primaryVariant)
     this.categoryId = data.categoryId || data.category?.id || null
-    this.categoryName = data.categoryName || data.category?.name || data.category?.label || ''
+    this.categoryName = resolveLocalizedValue(data, 'categoryName')
+      || resolveLocalizedValue(data.category, 'name', ['label'])
     this.category = data.category ? new CategoryResponse(data.category) : null
-    this.categoryTrail = Array.isArray(data.categoryTrail) ? data.categoryTrail : buildCategoryTrail(data.category)
-    this.breadcrumb = Array.isArray(data.breadcrumb) ? data.breadcrumb : []
+    this.categoryTrail = normalizeCategoryTrail(data.categoryTrail, data.category)
+    this.breadcrumb = normalizeBreadcrumb(data.breadcrumb)
     this.images = Array.isArray(data.images) ? data.images : []
     this.gallery = gallery
     this.image = data.image || data.imageUrl || gallery[0] || ''
@@ -34,16 +35,16 @@ export class ProductResponse {
     this.ratingCount = data.ratingCount ?? 0
     this.soldCount = data.soldCount ?? data.soldQuantity ?? data.sold ?? 0
     this.supports3d = Boolean(data.supports3d)
-    this.features = Array.isArray(data.features) ? data.features : []
+    this.features = normalizeLocalizedArray(data, 'features')
     this.modelUrl = data.modelUrl || ''
-    this.roomTypeHint = data.roomTypeHint || ''
+    this.roomTypeHint = resolveLocalizedValue(data, 'roomTypeHint')
     this.reviews = Array.isArray(data.reviews)
       ? data.reviews.map((review) => new ReviewResponse(review))
       : []
     this.variants = variants
-    this.fallbackColor = data.color || primaryVariant?.color || ''
-    this.fallbackMaterial = data.material || primaryVariant?.material || ''
-    this.fallbackWarranty = data.warranty || primaryVariant?.warranty || ''
+    this.fallbackColor = resolveLocalizedValue(data, 'color') || primaryVariant?.color || ''
+    this.fallbackMaterial = resolveLocalizedValue(data, 'material') || primaryVariant?.material || ''
+    this.fallbackWarranty = resolveLocalizedValue(data, 'warranty') || primaryVariant?.warranty || ''
     this.fallbackStock = data.stockQuantity ?? data.stock ?? primaryVariant?.stockQuantity ?? 0
   }
 
@@ -80,11 +81,11 @@ export class CategoryResponse {
   constructor(data = {}) {
     this.id = data.id || null
     this.slug = data.slug || ''
-    this.name = data.name || data.label || ''
-    this.label = data.label || data.name || ''
+    this.name = resolveLocalizedValue(data, 'name', ['label'])
+    this.label = resolveLocalizedValue(data, 'label', ['name']) || this.name
     this.parentId = data.parentId || null
     this.path = data.path || ''
-    this.parentLabel = data.parentLabel || data.parentName || ''
+    this.parentLabel = resolveLocalizedValue(data, 'parentLabel', ['parentName'])
     this.productCount = data.productCount ?? 0
     this.imageUrl = data.imageUrl || data.image || ''
     this.iconUrl = data.iconUrl || ''
@@ -125,9 +126,9 @@ export class ProductVariantResponse {
     this.width = data.width ?? data.dimensions?.width ?? null
     this.height = data.height ?? data.dimensions?.height ?? null
     this.weight = data.weight ?? data.dimensions?.weight ?? null
-    this.material = data.material || ''
-    this.color = data.color || ''
-    this.warranty = data.warranty || ''
+    this.material = resolveLocalizedValue(data, 'material')
+    this.color = resolveLocalizedValue(data, 'color')
+    this.warranty = resolveLocalizedValue(data, 'warranty')
   }
 
   get dimensionText() {
@@ -157,9 +158,9 @@ export function formatReviewDateTime(value) {
 function buildCategoryTrail(category) {
   if (!category || typeof category !== 'object') return []
 
-  const currentLabel = category.label || category.name || ''
+  const currentLabel = resolveLocalizedValue(category, 'label', ['name'])
   const currentSlug = category.slug || category.id || ''
-  const parentLabel = category.parentLabel || category.parentName || ''
+  const parentLabel = resolveLocalizedValue(category, 'parentLabel', ['parentName'])
   const parentSlug = category.parentSlug || category.parentId || ''
 
   if (parentLabel) {
@@ -185,9 +186,9 @@ function normalizeVariants(data = {}) {
     width: data.width ?? data.dimensions?.width ?? null,
     height: data.height ?? data.dimensions?.height ?? null,
     weight: data.weight ?? data.dimensions?.weight ?? null,
-    material: data.material || '',
-    color: data.color || '',
-    warranty: data.warranty || '',
+    material: resolveLocalizedValue(data, 'material'),
+    color: resolveLocalizedValue(data, 'color'),
+    warranty: resolveLocalizedValue(data, 'warranty'),
   }
 
   const hasFallbackVariant = Object.values(fallbackVariant).some((value) => {
@@ -229,4 +230,104 @@ function resolvePrice(data = {}, primaryVariant = null) {
   if (typeof data.price === 'number' && data.price > 0) return data.price
   if (typeof primaryVariant?.price === 'number' && primaryVariant.price > 0) return primaryVariant.price
   return data.price ?? primaryVariant?.price ?? 0
+}
+
+const LOCALE_STORAGE_KEY = 'furnisight:locale'
+const SUPPORTED_LOCALES = ['vi', 'en']
+
+function getCurrentLocale() {
+  if (typeof window === 'undefined') return 'vi'
+  return normalizeLocale(window.localStorage.getItem(LOCALE_STORAGE_KEY))
+}
+
+function normalizeLocale(value) {
+  return SUPPORTED_LOCALES.includes(value) ? value : 'vi'
+}
+
+function localeSuffix(locale = getCurrentLocale()) {
+  return locale === 'en' ? 'En' : 'Vi'
+}
+
+function localizedKeyCandidates(baseKey, locale = getCurrentLocale()) {
+  const suffix = localeSuffix(locale)
+  return [
+    `${baseKey}${suffix}`,
+    `${baseKey}_${locale}`,
+    `${baseKey}${locale.toUpperCase()}`,
+  ]
+}
+
+function isPresent(value) {
+  if (value == null) return false
+  if (typeof value === 'string') return value.trim() !== ''
+  return true
+}
+
+function firstPresent(...values) {
+  return values.find(isPresent)
+}
+
+function readLocalizedTranslation(data = {}, baseKey, locale = getCurrentLocale()) {
+  const translations = data.translations
+  if (!translations) return undefined
+
+  if (Array.isArray(translations)) {
+    const match = translations.find((item) => normalizeLocale(item?.locale || item?.language) === locale)
+    return match ? firstPresent(match[baseKey], ...localizedKeyCandidates(baseKey, locale).map((key) => match[key])) : undefined
+  }
+
+  const localeGroup = translations[locale]
+  if (localeGroup && typeof localeGroup === 'object') {
+    return firstPresent(localeGroup[baseKey], ...localizedKeyCandidates(baseKey, locale).map((key) => localeGroup[key]))
+  }
+
+  return firstPresent(translations[baseKey], ...localizedKeyCandidates(baseKey, locale).map((key) => translations[key]))
+}
+
+function resolveLocalizedValue(data = {}, baseKey, fallbackKeys = []) {
+  if (!data || typeof data !== 'object') return ''
+
+  const locale = getCurrentLocale()
+  const directLocalized = firstPresent(...localizedKeyCandidates(baseKey, locale).map((key) => data[key]))
+  const translated = readLocalizedTranslation(data, baseKey, locale)
+  const fallbackValues = fallbackKeys.map((key) => data[key])
+
+  return firstPresent(
+    directLocalized,
+    translated,
+    data[baseKey],
+    ...fallbackValues,
+    '',
+  )
+}
+
+function normalizeLocalizedArray(data = {}, baseKey) {
+  const value = resolveLocalizedValue(data, baseKey)
+  if (Array.isArray(value)) return value
+  return Array.isArray(data[baseKey]) ? data[baseKey] : []
+}
+
+function normalizeBreadcrumb(items = []) {
+  if (!Array.isArray(items)) return []
+  return items.map((item) => {
+    if (!item || typeof item !== 'object') return item
+    return {
+      ...item,
+      label: resolveLocalizedValue(item, 'label', ['name', 'title']),
+      name: resolveLocalizedValue(item, 'name', ['label', 'title']),
+    }
+  })
+}
+
+function normalizeCategoryTrail(items = [], fallbackCategory = null) {
+  if (!Array.isArray(items) || !items.length) return buildCategoryTrail(fallbackCategory)
+  return items.map((item) => {
+    if (!item || typeof item !== 'object') return item
+
+    return {
+      ...item,
+      label: resolveLocalizedValue(item, 'label', ['name']),
+      name: resolveLocalizedValue(item, 'name', ['label']),
+    }
+  })
 }

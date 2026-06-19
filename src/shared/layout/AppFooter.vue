@@ -1,7 +1,9 @@
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
+const { t } = useI18n()
 const currentYear = computed(() => new Date().getFullYear())
 </script>
 
@@ -11,12 +13,13 @@ const currentYear = computed(() => new Date().getFullYear())
       <div class="app-footer-top">
         <div class="brand-block">
           <a href="/" class="brand-link">
-            <span class="brand-icon">🪺</span>
+            <span class="brand-icon" aria-hidden="true">
+              <img src="/brand/furnisight-logo-mark.png" alt="" />
+            </span>
             <span class="brand">FurniSight</span>
           </a>
           <p class="desc">
-            Nền tảng nội thất thông minh đầu tiên tại Việt Nam ứng dụng AI và trực quan 3D để giúp bạn
-            thiết kế không gian sống lý tưởng.
+            {{ t('footer.description') }}
           </p>
           <div class="socials">
             <a href="#" aria-label="Facebook"><AppIcon name="facebook" :size="14" /></a>
@@ -26,26 +29,26 @@ const currentYear = computed(() => new Date().getFullYear())
           </div>
         </div>
         <div class="col">
-          <h4>Sản phẩm</h4>
-          <a href="/products">Ghế văn phòng</a>
-          <a href="/products">Giường ngủ</a>
-          <a href="/products">Sofa và ghế sofa</a>
-          <a href="/products">Bàn ăn</a>
-          <a href="/products">Kệ và tủ</a>
-          <a href="/products">Đèn trang trí</a>
+          <h4>{{ t('footer.products') }}</h4>
+          <a href="/products">{{ t('footer.officeChair') }}</a>
+          <a href="/products">{{ t('footer.bed') }}</a>
+          <a href="/products">{{ t('footer.sofa') }}</a>
+          <a href="/products">{{ t('footer.diningTable') }}</a>
+          <a href="/products">{{ t('footer.cabinet') }}</a>
+          <a href="/products">{{ t('footer.decorLight') }}</a>
         </div>
         <div class="col">
-          <h4>Tính năng</h4>
-          <a href="/room3d">Trực quan 3D</a>
-          <a href="/room3d">AI gợi ý nội thất</a>
+          <h4>{{ t('footer.features') }}</h4>
+          <a href="/room3d">{{ t('nav.room3d') }}</a>
+          <a href="/room3d">{{ t('footer.aiSuggest') }}</a>
         </div>
         <div class="col">
-          <h4>Hỗ trợ</h4>
-          <a href="/contact">Liên hệ</a>
+          <h4>{{ t('footer.support') }}</h4>
+          <a href="/contact">{{ t('nav.contact') }}</a>
         </div>
       </div>
       <div class="app-footer-bottom">
-        <span>© {{ currentYear }} FurniSight. All rights reserved.</span>
+        <span>{{ t('footer.copyright', { year: currentYear }) }}</span>
       </div>
     </div>
   </footer>
@@ -53,7 +56,7 @@ const currentYear = computed(() => new Date().getFullYear())
 
 <style scoped>
 .app-footer {
-  background: #12202e;
+  background: var(--app-bg-deep);
   color: rgba(255, 255, 255, 0.72);
   padding: 2.5rem 1.25rem 1.25rem;
 }
@@ -81,17 +84,26 @@ const currentYear = computed(() => new Date().getFullYear())
 .brand-icon {
   width: 2rem;
   height: 2rem;
-  border-radius: 999px;
+  border-radius: 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #e5b84a, #c9922a);
+  background: var(--app-surface);
+  overflow: hidden;
+  padding: 2px;
+}
+
+.brand-icon img {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
 }
 
 .brand {
   margin: 0;
   font-size: 1.1rem;
-  color: #fff;
+  color: var(--app-heading-inverse);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
@@ -123,8 +135,8 @@ const currentYear = computed(() => new Date().getFullYear())
 }
 
 .socials a:hover {
-  background: #c9922a;
-  color: #12202e;
+  background: var(--app-gold);
+  color: var(--brand-navy-900);
 }
 
 .col {
@@ -148,7 +160,7 @@ const currentYear = computed(() => new Date().getFullYear())
 }
 
 .col a:hover {
-  color: #e5b84a;
+  color: var(--brand-gold-400);
 }
 
 .app-footer-bottom {
