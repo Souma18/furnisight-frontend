@@ -105,9 +105,6 @@ export function useAdminCombos({
     comboForm.startDate = toDatetimeLocal(row?.startDate)
     comboForm.endDate = toDatetimeLocal(row?.endDate)
     comboForm.active = row?.active ?? true
-    comboForm.placements = Array.isArray(row?.placements) && row.placements.length
-      ? [...row.placements]
-      : ['PROMOTION_PAGE', 'HOME']
     comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName })) : []
   }
 
@@ -170,7 +167,6 @@ export function useAdminCombos({
       startDate: comboForm.startDate || null,
       endDate: comboForm.endDate || null,
       active: comboForm.active,
-      placements: comboForm.placements,
       items: comboForm.items.map((item) => ({
         productId: item.id,
         variantId: item.variantId,

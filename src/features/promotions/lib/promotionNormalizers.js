@@ -42,7 +42,7 @@ export function normalizeCombo(raw = {}) {
             ? item.image
             : '',
         stockQuantity: item.stockQuantity ?? item.stock ?? item.availableStock ?? null,
-        outOfStock: Boolean(item.outOfStock),
+        outOfStock: item.available === false || Boolean(item.outOfStock),
       }))
     : []
   const normalized = {

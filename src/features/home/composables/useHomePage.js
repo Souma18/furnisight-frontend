@@ -7,7 +7,7 @@ import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useLocaleStore } from '@shared/stores/localeStore'
 import { useComboCart } from '@features/promotions/composables/useComboCart'
-import { comboStockIssue, enrichComboItemStock } from '@features/promotions/lib/comboStock'
+import { comboStockIssue } from '@features/promotions/lib/comboStock'
 import { useRevealOnScroll } from './useRevealOnScroll'
 
 export function useHomePage() {
@@ -69,7 +69,7 @@ export function useHomePage() {
   async function loadCombos() {
     try {
       const { data } = await promotionsApi.getCombos({
-        placement: 'HOME',
+        availableOnly: true,
         page: 0,
         size: 3,
         sort: 'save-desc',
@@ -89,7 +89,7 @@ export function useHomePage() {
             ? await Promise.all(combo.items
                 .filter((item) => item?.productId)
                 .map(async (item) => {
-                  const enriched = await enrichComboItemStock(await enrichComboItemImage(item))
+                  const enriched = await enrichComboItemImage(item)
                   return {
                     ...enriched,
                     quantity: Math.max(1, Number(enriched.quantity) || 1),
@@ -98,10 +98,7 @@ export function useHomePage() {
                 }))
             : [],
         })))
-      combos.value = combos.value.map((combo) => ({
-        ...combo,
-        stockIssue: comboStockIssue(combo),
-      }))
+      combos.value = combos.value.map((combo) => ({ ...combo, stockIssue: combo.available === false ? 'unavailable' : comboStockIssue(combo) }))
     } catch (error) {
       console.error('Failed to load home combos:', error)
       combos.value = []

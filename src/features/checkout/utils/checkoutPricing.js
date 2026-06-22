@@ -59,6 +59,7 @@ export function buildCheckoutSummary({
 
   return {
     subtotal: merchandiseSubtotal,
+    voucherSubtotal: subtotal,
     shipFee,
     comboDiscount,
     shopDiscount,

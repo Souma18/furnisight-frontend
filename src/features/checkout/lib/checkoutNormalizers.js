@@ -48,7 +48,6 @@ export function normalizeCheckoutCombo(raw = {}) {
     id: raw.id || raw.comboId || '',
     name: raw.name || raw.comboName || 'Combo khuyến mãi',
     items: Array.isArray(raw.items) ? raw.items : [],
-    placements: Array.isArray(raw.placements) ? raw.placements : [],
     appliedDiscount: Number(raw.appliedDiscount ?? raw.comboDiscount ?? raw.savedAmount) || 0,
   }
 }

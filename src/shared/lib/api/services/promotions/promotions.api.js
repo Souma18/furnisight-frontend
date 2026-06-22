@@ -4,7 +4,7 @@ const baseUrl = '/promotions'
 
 class PromotionsApi {
   getPublicVouchers(params) {
-    return apiClient.get(`${baseUrl}/vouchers/public`, { params, skipAuth: true })
+    return apiClient.get(`${baseUrl}/vouchers/public`, { params })
   }
 
   getUserVouchers(params) {
@@ -15,6 +15,10 @@ class PromotionsApi {
     return apiClient.post(`${baseUrl}/vouchers/save`, null, {
       params: { code },
     })
+  }
+
+  recommendVouchers(payload) {
+    return apiClient.post(`${baseUrl}/vouchers/recommend`, payload)
   }
 
   getCombos(params) {

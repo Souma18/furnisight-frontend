@@ -66,7 +66,6 @@ export function createVoucherFormState() {
     description: '',
     icon: 'badgePercent',
     active: true,
-    placements: ['PROMOTION_PAGE', 'CHECKOUT'],
   }
 }
 
@@ -98,7 +97,6 @@ export function createComboFormState() {
     startDate: '',
     endDate: '',
     active: true,
-    placements: ['PROMOTION_PAGE', 'HOME'],
     items: [],
   }
 }

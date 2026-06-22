@@ -23,6 +23,7 @@ import {
 } from '../lib/voucherPresentation'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ComboCard from '../components/ComboCard.vue'
+import { writeVoucherIntent } from '@features/checkout/lib/checkoutVoucherIntentStorage'
 
 const route = useRoute()
 const router = useRouter()
@@ -69,7 +70,11 @@ const {
   savedVouchers,
   filteredSavedVouchers,
   activeVoucherCount,
+  voucherTotal,
+  loadingMoreVouchers,
+  hasMoreVouchers,
   loadVouchers,
+  loadMoreVouchers,
   claimVoucher,
 } = usePromotionsVouchers({
   activeFilter,
@@ -139,10 +144,16 @@ onMounted(() => {
   loadPageData()
 })
 
-async function useVoucherNow() {
+async function useVoucherNow(voucher) {
+  if (!voucher?.code) return
   await cartStore.ensureHydrated({ force: true }).catch(() => null)
   const hasPurchasableItem = cartItems.value.some(isPurchasableLine)
-  await router.push(hasPurchasableItem ? '/checkout' : '/products')
+  if (hasPurchasableItem) {
+    await router.push({ path: '/checkout', query: { voucherCode: voucher.code } })
+    return
+  }
+  writeVoucherIntent(voucher.code)
+  await router.push('/products')
 }
 
 function openCombo(combo) {
@@ -232,7 +243,7 @@ async function scrollToPromotionSection(sectionId) {
           <p>{{ t('promotions.sections.voucherKicker') }}</p>
           <h2>{{ t('promotions.sections.voucherTitle') }}</h2>
         </div>
-        <span class="promo-count">{{ t('promotions.voucher.count', { count: filteredVouchers.length }) }}</span>
+        <span class="promo-count">{{ t('promotions.voucher.count', { count: activeFilter === 'saved' ? filteredVouchers.length : voucherTotal }) }}</span>
       </div>
 
       <div
@@ -273,7 +284,7 @@ async function scrollToPromotionSection(sectionId) {
               >
                 <AppIcon name="download" :size="14" />{{ t('promotions.voucher.claim') }}
               </button>
-              <button v-else-if="!voucher.used" type="button" class="claim-btn outline" @click="useVoucherNow">
+              <button v-else-if="!voucher.used" type="button" class="claim-btn outline" @click="useVoucherNow(voucher)">
                 <AppIcon name="cart" :size="14" />{{ t('promotions.voucher.useNow') }}
               </button>
               <button v-else type="button" class="claim-btn muted" disabled>{{ t('promotions.voucher.used') }}</button>
@@ -282,6 +293,11 @@ async function scrollToPromotionSection(sectionId) {
         </article>
       </div>
       <div v-else class="empty-state">{{ t('promotions.empty.vouchers') }}</div>
+      <div v-if="activeFilter !== 'saved' && hasMoreVouchers" class="load-more-wrap">
+        <button type="button" class="load-more" :disabled="loadingMoreVouchers" @click="loadMoreVouchers">
+          {{ loadingMoreVouchers ? t('common.loading') : t('promotions.voucher.loadMore') }}
+        </button>
+      </div>
     </section>
 
     <section v-if="showComboSection" id="combo-section" class="promo-section">
@@ -344,7 +360,7 @@ async function scrollToPromotionSection(sectionId) {
           <strong>{{ voucher.code }}</strong>
           <span>{{ discountLabel(voucher) }}</span>
           <small>{{ t('promotions.voucher.expires', { date: formatDate(voucher.endDate) }) }}</small>
-          <button type="button" class="claim-btn outline" @click="useVoucherNow">{{ t('promotions.voucher.useNow') }}</button>
+          <button type="button" class="claim-btn outline" @click="useVoucherNow(voucher)">{{ t('promotions.voucher.useNow') }}</button>
         </article>
       </div>
       <div v-else class="empty-state">

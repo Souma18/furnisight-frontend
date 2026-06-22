@@ -65,9 +65,6 @@ export function useAdminVouchers({
     voucherForm.description = row?.description || ''
     voucherForm.icon = row?.icon || 'badgePercent'
     voucherForm.active = row?.active ?? true
-    voucherForm.placements = Array.isArray(row?.placements) && row.placements.length
-      ? [...row.placements]
-      : ['PROMOTION_PAGE', 'CHECKOUT']
   }
 
   function openVoucherModal(row = null) {
@@ -89,7 +86,6 @@ export function useAdminVouchers({
       startDate: voucherForm.startDate || null,
       endDate: voucherForm.endDate || null,
       active: voucherForm.active,
-      placements: voucherForm.placements,
     }
   }
 

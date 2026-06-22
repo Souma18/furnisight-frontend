@@ -405,7 +405,6 @@ const {
             <label><span>SL</span><input v-model.number="item.quantity" type="number" min="1"></label>
             <button type="button" @click="removeComboItem(item.id)"><AppIcon name="trash" /></button>
           </div>
-          <div class="checkbox-grid"><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyến mãi</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="HOME">Trang chủ</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="PRODUCT_DETAIL">Trang sản phẩm</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CART">Giỏ hàng</label><label class="check-line"><input v-model="comboForm.placements" type="checkbox" value="CHECKOUT">Thanh toán</label></div>
           <div class="combo-summary"><div><span>Giá gốc</span><b>{{ money(comboOriginalAmount) }}</b></div><div><span>Giá combo</span><b>{{ money(comboFinalAmount) }}</b></div><div class="save"><span>Khách tiết kiệm</span><b>{{ money(comboSavedAmount) }}</b></div></div>
         </div>
         <footer><button type="button" class="mc-cancel" @click="closeComboModal">Hủy</button><button class="mc-primary" :disabled="saving"><AppIcon name="save" />Lưu combo</button></footer>

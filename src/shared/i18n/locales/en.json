@@ -557,6 +557,7 @@
       "noMinOrder": "No minimum order required",
       "minOrder": "Minimum order {amount}",
       "unlimited": "Unlimited",
+      "loadMore": "Load more",
       "status": {
         "off": "Disabled",
         "upcoming": "Upcoming",

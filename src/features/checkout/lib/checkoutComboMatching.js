@@ -11,8 +11,7 @@ function lineQuantity(line = {}) {
 }
 
 function comboSupportsCheckout(combo = {}) {
-  const placements = Array.isArray(combo.placements) ? combo.placements : []
-  return placements.length === 0 || placements.includes('CHECKOUT')
+  return combo.available !== false
 }
 
 export function comboMatchesLines(combo = {}, lines = []) {

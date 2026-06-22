@@ -63,13 +63,6 @@ defineEmits(['close', 'submit'])
           <label>Kết thúc<input v-model="form.endDate" type="datetime-local"></label>
         </div>
         <label>Mô tả<textarea v-model="form.description" rows="3" /></label>
-        <div class="section-title"><AppIcon name="mapPin" />Vi tri hien thi</div>
-        <div class="checkbox-grid">
-          <label class="check-line"><input v-model="form.placements" type="checkbox" value="PROMOTION_PAGE">Trang khuyến mãi</label>
-          <label class="check-line"><input v-model="form.placements" type="checkbox" value="HOME">Trang chủ</label>
-          <label class="check-line"><input v-model="form.placements" type="checkbox" value="CART">Giỏ hàng</label>
-          <label class="check-line"><input v-model="form.placements" type="checkbox" value="CHECKOUT">Checkout</label>
-        </div>
         <label class="check-line"><input v-model="form.active" type="checkbox">Đang bật</label>
       </div>
       <footer>

@@ -94,8 +94,8 @@ class OrdersApi {
   }
 
   getActiveCombos(params) {
-    return apiClient.get('/promotions/combos/active', {
-      params,
+    return apiClient.get('/promotions/combos', {
+      params: { availableOnly: true, size: 24, sort: 'save-desc', ...params },
       skipAuth: true,
     })
   }

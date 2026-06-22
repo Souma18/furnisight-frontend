@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { promotionsApi } from '@shared/lib/api/services'
 import { normalizeCombo, normalizeList } from '../lib/promotionNormalizers'
-import { comboStockIssue, enrichComboItemStock } from '../lib/comboStock'
+import { comboStockIssue } from '../lib/comboStock'
 
 const COMBO_PAGE_SIZE = 6
 
@@ -25,7 +25,6 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
 
     try {
       const response = await promotionsApi.getCombos({
-        placement: 'PROMOTION',
         page: comboPage.value,
         size: COMBO_PAGE_SIZE,
         sort: comboSort.value,
@@ -34,9 +33,9 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
       const rows = await Promise.all(normalizeList(payload).map(async (rawCombo) => {
         const combo = normalizeCombo(rawCombo)
         combo.items = await Promise.all(combo.items.map(async (item) =>
-          enrichComboItemStock(await enrichComboItemImage(item)),
+          enrichComboItemImage(item),
         ))
-        combo.stockIssue = comboStockIssue(combo)
+        combo.stockIssue = combo.available === false ? 'unavailable' : comboStockIssue(combo)
         return combo
       }))
       comboTotal.value = Number(payload.totalElements ?? payload.total ?? rows.length)

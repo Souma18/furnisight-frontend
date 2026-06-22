@@ -557,6 +557,7 @@
       "noMinOrder": "Không yêu cầu đơn tối thiểu",
       "minOrder": "Đơn tối thiểu {amount}",
       "unlimited": "Không giới hạn",
+      "loadMore": "Xem thêm",
       "status": {
         "off": "Đang tắt",
         "upcoming": "Sắp diễn ra",

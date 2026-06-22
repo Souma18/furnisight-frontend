@@ -8,8 +8,9 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import { useCheckoutOrder } from './useCheckoutOrder'
 import { useCheckoutSession } from './useCheckoutSession'
-import { formatCheckoutMoney } from '../utils/checkoutPricing'
+import { calcLineTotal, formatCheckoutMoney } from '../utils/checkoutPricing'
 import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/stockGuards'
+import { consumeVoucherIntent } from '../lib/checkoutVoucherIntentStorage'
 
 export function useCheckout() {
   const route = useRoute()
@@ -21,7 +22,7 @@ export function useCheckout() {
   const authStore = useAuthStore()
 
   const checkoutState = storeToRefs(checkoutStore)
-  const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode } = useCheckoutSession(checkoutStore)
+  const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode, revalidateVouchers } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
   const toast = ref({ show: false, icon: 'check', title: '', subtitle: '' })
   const selectedAddressId = ref('')
@@ -32,6 +33,7 @@ export function useCheckout() {
     return raw.split(',').map((id) => id.trim()).filter(Boolean)
   })
   const requestedComboId = computed(() => String(route.query.comboId || '').trim())
+  const requestedVoucherCode = computed(() => String(route.query.voucherCode || '').trim())
 
   const checkoutLines = computed(() => {
     const available = cartStore.items.filter(isPurchasableLine)
@@ -46,6 +48,7 @@ export function useCheckout() {
       ?? addressStore.defaultAddress
   })
   const summary = computed(() => checkoutStore.buildSummary(checkoutLines.value))
+  const voucherSubtotal = computed(() => checkoutLines.value.reduce((sum, line) => sum + calcLineTotal(line), 0))
 
   const isEmpty = computed(() => checkoutLines.value.length === 0)
   const { placeOrder } = useCheckoutOrder({
@@ -81,6 +84,7 @@ export function useCheckout() {
       await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
       return
     }
+    checkoutStore.beginVoucherSession()
     await Promise.all([
       cartStore.ensureHydrated(),
       addressStore.fetchAddresses(),
@@ -92,6 +96,25 @@ export function useCheckout() {
     } else {
       await refreshApplicableCombo(checkoutLines.value)
     }
+    const intentCode = consumeVoucherIntent()
+    const preferredCode = requestedVoucherCode.value || intentCode
+    try {
+      await revalidateVouchers({
+        subtotal: voucherSubtotal.value,
+        shippingFee: checkoutStore.shipFee,
+        preferredVoucherCode: preferredCode,
+      })
+    } catch {
+      checkoutStore.shopVoucher = null
+      checkoutStore.shippingVoucher = null
+    } finally {
+      if (requestedVoucherCode.value) {
+        const query = { ...route.query }
+        delete query.voucherCode
+        await router.replace({ query })
+      }
+    }
+    voucherSessionReady = true
   }
 
   function goBackToCart() {
@@ -142,6 +165,18 @@ export function useCheckout() {
     await refreshApplicableCombo(checkoutLines.value)
   }
 
+  let voucherSessionReady = false
+  let voucherRequestId = 0
+  async function refreshVoucherSelection() {
+    if (!voucherSessionReady) return
+    const requestId = ++voucherRequestId
+    const result = await revalidateVouchers({
+      subtotal: voucherSubtotal.value,
+      shippingFee: checkoutStore.shipFee,
+    }).catch(() => null)
+    return requestId === voucherRequestId ? result : null
+  }
+
   watch(
     checkoutLines,
     (lines) => {
@@ -150,11 +185,13 @@ export function useCheckout() {
       } else {
         refreshApplicableCombo(lines)
       }
+      refreshVoucherSelection()
     },
     { deep: true },
   )
 
   watch(addressList, syncSelectedAddress, { deep: true })
+  watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)
 
   return {
     ...checkoutState,

@@ -65,6 +65,13 @@ export const useCheckoutStore = defineStore('checkout', () => {
     else shopVoucher.value = null
   }
 
+  function beginVoucherSession() {
+    shopVoucher.value = null
+    shippingVoucher.value = null
+    shopVouchers.value = []
+    shippingVouchers.value = []
+  }
+
   function resetCheckoutState() {
     loading.value = false
     placing.value = false
@@ -135,6 +142,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     buildSummary,
     applyVoucher,
     removeVoucher,
+    beginVoucherSession,
     rememberPendingPayment,
     clearPendingPayment,
     resetCheckoutState,

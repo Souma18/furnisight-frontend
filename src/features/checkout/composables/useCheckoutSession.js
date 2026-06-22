@@ -1,4 +1,4 @@
-import { ordersApi } from '@shared/lib/api/services'
+import { ordersApi, promotionsApi } from '@shared/lib/api/services'
 import { normalizeCheckoutCombo, normalizeCheckoutVoucher } from '../lib/checkoutNormalizers'
 import { comboMatchesLines, comboValidateItems } from '../lib/checkoutComboMatching'
 
@@ -33,10 +33,17 @@ export function useCheckoutSession(checkoutStore) {
       ]
       await refreshVouchers()
       if (loadCombos) {
-        const comboResponse = await ordersApi.getActiveCombos().catch(() => ({ data: [] }))
-        checkoutStore.activeCombos = Array.isArray(comboResponse?.data)
-          ? comboResponse.data.map(normalizeCheckoutCombo).filter((combo) => combo.active !== false)
-          : []
+        const allCombos = []
+        let page = 0
+        let totalPages = 1
+        while (page < totalPages) {
+          const comboResponse = await ordersApi.getActiveCombos({ page }).catch(() => ({ data: { items: [] } }))
+          const payload = comboResponse?.data ?? {}
+          allCombos.push(...(Array.isArray(payload) ? payload : payload.items ?? []))
+          totalPages = Math.max(1, Number(payload.totalPages) || 1)
+          page += 1
+        }
+        checkoutStore.activeCombos = allCombos.map(normalizeCheckoutCombo).filter((combo) => combo.active !== false && combo.available !== false)
         checkoutStore.combosHydrated = true
       } else {
         checkoutStore.activeCombos = []
@@ -47,6 +54,7 @@ export function useCheckoutSession(checkoutStore) {
 
       checkoutStore.selectedShippingId = 'standard'
       checkoutStore.selectedPaymentId = 'vnpay'
+      checkoutStore.shopVoucher = null
       checkoutStore.shippingVoucher = null
 
       checkoutStore.hydrated = true
@@ -138,11 +146,64 @@ export function useCheckoutSession(checkoutStore) {
     return { ok: true, voucher: normalized, discount: data.discount ?? 0 }
   }
 
+  async function recommendVouchers(subtotal, shippingFee, preferredVoucherCode = '') {
+    const { data = {} } = await promotionsApi.recommendVouchers({
+      subtotal,
+      shippingFee,
+      preferredVoucherCode: preferredVoucherCode || null,
+    })
+    return {
+      shopVoucher: data.shopVoucher
+        ? normalizeCheckoutVoucher({ ...data.shopVoucher, appliedDiscount: data.shopDiscount }) : null,
+      shippingVoucher: data.shippingVoucher
+        ? normalizeCheckoutVoucher({ ...data.shippingVoucher, appliedDiscount: data.shippingDiscount }) : null,
+    }
+  }
+
+  async function revalidateVouchers({ subtotal, shippingFee, preferredVoucherCode = '' }) {
+    if (preferredVoucherCode) {
+      const recommended = await recommendVouchers(subtotal, shippingFee, preferredVoucherCode)
+      checkoutStore.shopVoucher = recommended.shopVoucher
+      checkoutStore.shippingVoucher = recommended.shippingVoucher
+      return recommended
+    }
+
+    const validateSelected = async (voucher, type) => {
+      if (!voucher?.code) return null
+      try {
+        const response = await ordersApi.validateCheckoutVoucher({
+          code: voucher.code, type, subtotal, shippingFee,
+        })
+        const data = response?.data ?? {}
+        return data.valid
+          ? normalizeCheckoutVoucher({ ...(data.voucher || voucher), appliedDiscount: data.discount })
+          : null
+      } catch {
+        return null
+      }
+    }
+
+    const [shop, shipping] = await Promise.all([
+      validateSelected(checkoutStore.shopVoucher, 'shop'),
+      validateSelected(checkoutStore.shippingVoucher, 'ship'),
+    ])
+    if (shop && shipping) {
+      checkoutStore.shopVoucher = shop
+      checkoutStore.shippingVoucher = shipping
+      return { shopVoucher: shop, shippingVoucher: shipping }
+    }
+    const recommended = await recommendVouchers(subtotal, shippingFee)
+    checkoutStore.shopVoucher = shop || recommended.shopVoucher
+    checkoutStore.shippingVoucher = shipping || recommended.shippingVoucher
+    return { shopVoucher: checkoutStore.shopVoucher, shippingVoucher: checkoutStore.shippingVoucher }
+  }
+
   return {
     refreshVouchers,
     hydrateSession,
     refreshApplicableCombo,
     validateRequestedCombo,
     applyVoucherByCode,
+    revalidateVouchers,
   }
 }
