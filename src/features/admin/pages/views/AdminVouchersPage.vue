@@ -25,6 +25,7 @@ import {
 import { useAdminCampaigns } from '../../composables/useAdminCampaigns'
 import { useAdminCombos } from '../../composables/useAdminCombos'
 import { useAdminNotifications } from '../../composables/useAdminNotifications'
+import { useAdminTemplates } from '../../composables/useAdminTemplates'
 import { useAdminPromotionShell } from '../../composables/useAdminPromotionShell'
 import { useAdminPromotionToast } from '../../composables/useAdminPromotionToast'
 import { useAdminPromotionUsers } from '../../composables/useAdminPromotionUsers'
@@ -138,6 +139,45 @@ const {
 })
 
 const {
+  templates,
+  templateForm,
+  filteredTemplates,
+  loadTemplates,
+  openTemplateModal,
+  openPreviewModal,
+  openUnlayerEditor,
+  saveUnlayerDesign,
+  saveTemplate,
+  deleteTemplate,
+} = useAdminTemplates({
+  filters,
+  modal,
+  editing,
+  notify,
+})
+
+function applyTemplateToForm(templateId, formTarget) {
+  if (!templateId) return
+  const t = templates.value.find(x => x.id === templateId)
+  if (t) {
+    if (formTarget === 'campaign') {
+      campaignForm.notificationTitle = t.titleTemplate
+      campaignForm.notificationBody = t.bodyTemplate
+    } else if (formTarget === 'notify') {
+      notifyForm.title = t.titleTemplate
+      notifyForm.body = t.bodyTemplate
+    } else if (formTarget === 'publish') {
+      publish.value.title = t.titleTemplate
+      publish.value.body = t.bodyTemplate
+    }
+  }
+}
+
+const showCampaignUserPicker = ref(false)
+const showNotifyUserPicker = ref(false)
+const showPublishUserPicker = ref(false)
+
+const {
   activeTab,
   activeAction,
   kpis,
@@ -157,6 +197,8 @@ const {
   openCampaignModal,
   openComboModal,
   openNotifyModal,
+  loadTemplates,
+  openTemplateModal,
 })
 </script>
 
@@ -347,6 +389,33 @@ const {
       </div>
     </section>
 
+    <section v-if="activeTab === 'template'" class="mc-card">
+      <div class="mc-filter">
+        <input v-model="filters.template.query" class="mc-input" placeholder="Tìm tên hoặc mã mẫu thông báo..." @keyup.enter="loadTemplates">
+        <button type="button" class="mc-outline" @click="loadTemplates"><AppIcon name="search" :size="14" />Lọc</button>
+      </div>
+      <div class="mc-table-wrap">
+        <table class="mc-table">
+          <thead><tr><th>Mã mẫu</th><th>Tên mẫu</th><th>Tiêu đề (Template)</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr v-if="!filteredTemplates.length"><td colspan="4" class="mc-empty">Chưa có mẫu thông báo nào.</td></tr>
+            <tr v-for="row in filteredTemplates" :key="row.id">
+              <td><span class="code-badge">{{ row.code }}</span></td>
+              <td class="mc-name">{{ row.name }}</td>
+              <td>{{ row.titleTemplate }}</td>
+              <td>
+                <div class="mc-actions">
+                  <button title="Xem trước" @click="openPreviewModal(row)"><AppIcon name="eye" :size="14" /></button>
+                  <button title="Chỉnh sửa" @click="openTemplateModal(row)"><AppIcon name="edit" :size="14" /></button>
+                  <button title="Xóa" class="danger" @click="deleteTemplate(row)"><AppIcon name="trash" :size="14" /></button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
     <AdminVoucherForm
       :show="modal.voucher"
       :is-editing="editing.voucher"
@@ -369,10 +438,16 @@ const {
             <button type="button" :class="{ selected: campaignForm.targetType === 'SEGMENT' }" @click="campaignForm.targetType = 'SEGMENT'">Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></button>
           </div>
           <template v-if="campaignForm.targetType === 'MANUAL'">
-            <label>Tìm người dùng<input v-model="campaignUserQuery" placeholder="Tên hoặc email..."></label>
-            <div class="user-pick-list">
-              <label v-for="user in filteredCampaignUsers" :key="user.id" class="user-pick-item"><input v-model="campaignForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
-              <div v-if="!filteredCampaignUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+            <button type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showCampaignUserPicker = !showCampaignUserPicker">
+              <AppIcon :name="showCampaignUserPicker ? 'chevronUp' : 'chevronDown'" :size="16" />
+              {{ showCampaignUserPicker ? 'Ẩn danh sách tìm kiếm' : 'Hiển thị tìm người dùng' }}
+            </button>
+            <div v-show="showCampaignUserPicker" class="user-picker-wrapper">
+              <label>Tìm người dùng<input v-model="campaignUserQuery" placeholder="Tên hoặc email..."></label>
+              <div class="user-pick-list">
+                <label v-for="user in filteredCampaignUsers" :key="user.id" class="user-pick-item"><input v-model="campaignForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
+                <div v-if="!filteredCampaignUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+              </div>
             </div>
           </template>
           <label v-if="campaignForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="campaignForm.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
@@ -380,8 +455,14 @@ const {
           <div class="checkbox-grid"><label class="check-line"><input v-model="campaignForm.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="campaignForm.channels" type="checkbox" value="EMAIL">Email</label></div>
           <div class="choice-grid"><button type="button" :class="{ selected: campaignForm.scheduleType === 'NOW' }" @click="campaignForm.scheduleType = 'NOW'">Gửi ngay</button><button type="button" :class="{ selected: campaignForm.scheduleType === 'SCHEDULED' }" @click="campaignForm.scheduleType = 'SCHEDULED'">Hẹn lịch</button></div>
           <label v-if="campaignForm.scheduleType === 'SCHEDULED'">Thời gian gửi<input v-model="campaignForm.scheduledAt" type="datetime-local"></label>
-          <div class="form-row"><label>Tiêu đề thông báo<input v-model="campaignForm.notificationTitle" placeholder="Bạn vừa nhận voucher mới"></label><label>Trạng thái<select v-model="campaignForm.active"><option :value="true">Đang bật</option><option :value="false">Bản nháp</option></select></label></div>
-          <label>Nội dung<textarea v-model="campaignForm.notificationBody" rows="3" /></label>
+          <label>Áp dụng Mẫu thông báo (Tùy chọn)
+            <select @change="applyTemplateToForm($event.target.value, 'campaign')">
+              <option value="">-- Chọn mẫu thông báo --</option>
+              <option v-for="t in templates" :key="t.id" :value="t.id">{{ t.code }} - {{ t.name }}</option>
+            </select>
+          </label>
+          <div class="form-row"><label>Tiêu đề thông báo<input v-model="campaignForm.notificationTitle" placeholder="Bạn vừa nhận voucher mới" class="large-input"></label><label>Trạng thái<select v-model="campaignForm.active"><option :value="true">Đang bật</option><option :value="false">Bản nháp</option></select></label></div>
+          <label>Nội dung<textarea v-model="campaignForm.notificationBody" rows="12" class="large-textarea" /></label>
         </div>
         <footer><button type="button" class="mc-cancel" @click="modal.campaign = false">Hủy</button><button class="mc-primary"><AppIcon name="save" />Lưu chiến dịch</button></footer>
       </div>
@@ -452,16 +533,28 @@ const {
       <div class="modal-card">
         <header><h2>{{ editing.notify ? 'Sửa' : 'Tạo' }} <em>thông báo</em></h2><button type="button" @click="modal.notify = false"><AppIcon name="x" /></button></header>
         <div class="modal-body">
-          <label>Tiêu đề *<input v-model="notifyForm.title" required placeholder="Bạn vừa nhận voucher mới"></label>
-          <label>Nội dung<textarea v-model="notifyForm.body" required rows="4" /></label>
+          <label>Áp dụng Mẫu thông báo (Tùy chọn)
+            <select @change="applyTemplateToForm($event.target.value, 'notify')">
+              <option value="">-- Chọn mẫu thông báo --</option>
+              <option v-for="t in templates" :key="t.id" :value="t.id">{{ t.code }} - {{ t.name }}</option>
+            </select>
+          </label>
+          <label>Tiêu đề *<input v-model="notifyForm.title" required placeholder="Bạn vừa nhận voucher mới" class="large-input"></label>
+          <label>Nội dung<textarea v-model="notifyForm.body" required rows="12" class="large-textarea" /></label>
           <div class="form-row"><label>Voucher liên quan<select v-model="notifyForm.relatedVoucherId"><option value="">Không gắn voucher</option><option v-for="voucher in vouchers" :key="voucher.id" :value="voucher.id">{{ voucher.code }} - {{ voucher.name }}</option></select></label><label>Kiểu gửi<select v-model="notifyForm.sendType"><option value="NOW">Gửi ngay</option><option value="SCHEDULED">Hẹn lịch</option><option value="DRAFT">Lưu nháp</option></select></label></div>
           <label v-if="notifyForm.sendType === 'SCHEDULED'">Thời gian gửi<input v-model="notifyForm.scheduledAt" type="datetime-local"></label>
           <div class="choice-grid"><button type="button" :class="{ selected: notifyForm.targetType === 'MANUAL' }" @click="notifyForm.targetType = 'MANUAL'">Chọn user</button><button type="button" :class="{ selected: notifyForm.targetType === 'ALL' }" @click="notifyForm.targetType = 'ALL'">Toàn bộ</button><button type="button" :class="{ selected: notifyForm.targetType === 'SEGMENT' }" @click="notifyForm.targetType = 'SEGMENT'">Theo điều kiện</button></div>
           <template v-if="notifyForm.targetType === 'MANUAL'">
-            <label>Tìm người dùng<input v-model="notifyUserQuery" placeholder="Tên hoặc email..."></label>
-            <div class="user-pick-list">
-              <label v-for="user in filteredNotificationUsers" :key="user.id" class="user-pick-item"><input v-model="notifyForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
-              <div v-if="!filteredNotificationUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+            <button type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showNotifyUserPicker = !showNotifyUserPicker">
+              <AppIcon :name="showNotifyUserPicker ? 'chevronUp' : 'chevronDown'" :size="16" />
+              {{ showNotifyUserPicker ? 'Ẩn danh sách tìm kiếm' : 'Hiển thị tìm người dùng' }}
+            </button>
+            <div v-show="showNotifyUserPicker" class="user-picker-wrapper">
+              <label>Tìm người dùng<input v-model="notifyUserQuery" placeholder="Tên hoặc email..."></label>
+              <div class="user-pick-list">
+                <label v-for="user in filteredNotificationUsers" :key="user.id" class="user-pick-item"><input v-model="notifyForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
+                <div v-if="!filteredNotificationUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+              </div>
             </div>
           </template>
           <label v-if="notifyForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="notifyForm.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
@@ -470,6 +563,54 @@ const {
         <footer><button type="button" class="mc-cancel" @click="modal.notify = false">Hủy</button><button class="mc-primary"><AppIcon name="send" />Lưu thông báo</button></footer>
       </div>
     </form>
+
+    <form v-if="modal.template" class="modal-backdrop" @click.self="modal.template = false" @submit.prevent="saveTemplate">
+      <div class="modal-card">
+        <header><h2>{{ editing.template ? 'Sửa' : 'Tạo' }} <em>mẫu thông báo</em></h2><button type="button" @click="modal.template = false"><AppIcon name="x" /></button></header>
+        <div class="modal-body">
+          <div class="form-row">
+            <label>Tên mẫu *<input v-model="templateForm.name" required placeholder="Gửi mã giảm giá ngày lễ"></label>
+            <label>Mã mẫu *<input v-model="templateForm.code" required placeholder="HOLIDAY_COUPON_01"></label>
+          </div>
+          <label>Tiêu đề mẫu (Template)<input v-model="templateForm.titleTemplate" placeholder="Tặng bạn mã ưu đãi {{coupon_code}}"></label>
+          <label>Nội dung mẫu (Template)
+            <textarea v-model="templateForm.bodyTemplate" rows="4" placeholder="Nhập nội dung mẫu. Có thể chứa biến như {{user_name}}..." />
+          </label>
+          <button type="button" class="mc-outline" style="width:100%; justify-content:center; margin-top: 10px;" @click="openUnlayerEditor"><AppIcon name="layout" /> Thiết kế Email (Kéo thả)</button>
+        </div>
+        <footer><button type="button" class="mc-cancel" @click="modal.template = false">Hủy</button><button class="mc-primary"><AppIcon name="save" />Lưu mẫu thông báo</button></footer>
+      </div>
+    </form>
+
+    <div v-if="modal.unlayer" class="modal-backdrop unlayer-layer">
+      <div class="modal-card modal-unlayer">
+        <header><h2>Thiết kế Email</h2><div class="actions"><button class="mc-cancel" @click="modal.unlayer = false">Hủy</button><button class="mc-primary" @click="saveUnlayerDesign"><AppIcon name="save" />Hoàn tất & Lấy mã HTML</button></div></header>
+        <div class="modal-body unlayer-body">
+          <div id="unlayer-editor-container" style="height: 100%; width: 100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="modal.previewTemplate" class="modal-backdrop" @click.self="modal.previewTemplate = false">
+      <div class="modal-card">
+        <header><h2>Xem trước <em>{{ editing.previewTemplate?.name }}</em></h2><button type="button" @click="modal.previewTemplate = false"><AppIcon name="x" /></button></header>
+        <div class="modal-body preview-body">
+          <div class="preview-title">
+            <AppIcon name="bell" :size="18" />
+            <span>{{ editing.previewTemplate?.titleTemplate }}</span>
+          </div>
+          <!-- Khung wrapper hỗ trợ kéo thả resize để test responsive (tối thiểu 320px, tối đa 100%) -->
+          <div class="preview-iframe-wrapper">
+            <iframe 
+              class="preview-content-iframe" 
+              :srcdoc="editing.previewTemplate?.bodyTemplate"
+              frameborder="0"
+            ></iframe>
+          </div>
+        </div>
+        <footer><button type="button" class="mc-cancel" @click="modal.previewTemplate = false">Đóng</button></footer>
+      </div>
+    </div>
 
     <aside v-if="publish.voucher" class="drawer-backdrop" @click.self="publish.voucher = null">
       <div class="publish-drawer">
@@ -499,8 +640,14 @@ const {
           <div v-if="publish.segment === 'all'" class="warn-box">Bạn sắp phát voucher cho toàn bộ người dùng đủ điều kiện nhận.</div>
           <label v-if="publish.segment === 'cond'">Nhóm người dùng<select v-model="publish.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
           <div class="checkbox-grid"><label class="check-line"><input v-model="publish.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="publish.channels" type="checkbox" value="EMAIL">Email</label></div>
-          <label>Tiêu đề<input v-model="publish.title"></label>
-          <label>Nội dung<textarea v-model="publish.body" rows="3" /></label>
+          <label>Áp dụng Mẫu thông báo (Tùy chọn)
+            <select @change="applyTemplateToForm($event.target.value, 'publish')">
+              <option value="">-- Chọn mẫu thông báo --</option>
+              <option v-for="t in templates" :key="t.id" :value="t.id">{{ t.code }} - {{ t.name }}</option>
+            </select>
+          </label>
+          <label>Tiêu đề<input v-model="publish.title" class="large-input"></label>
+          <label>Nội dung<textarea v-model="publish.body" rows="12" class="large-textarea" /></label>
           <button type="button" class="mc-primary" :disabled="publishing" @click="confirmPublishVoucher"><AppIcon name="send" />Xác nhận phát hành</button>
         </div>
       </div>
@@ -642,6 +789,18 @@ const {
 .mc-toast { position: fixed; right: 22px; bottom: 22px; z-index: 920; background: #1a2332; color: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); display: inline-flex; align-items: center; gap: 8px; }
 .mc-toast--success { background: #176b4d; }
 .mc-toast--error { background: #a83232; }
+.preview-body { background: #faf7f2; padding: 24px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; }
+.preview-title { width: 100%; display: flex; align-items: center; gap: 10px; font-weight: 800; color: #1a2332; font-size: 16px; margin-bottom: 12px; flex-shrink: 0; }
+.preview-iframe-wrapper { width: 100%; min-width: 320px; max-width: 100%; height: 500px; min-height: 300px; max-height: 75vh; resize: both; overflow: hidden; background: #fff; border: 1px solid #e0d8cc; border-radius: 8px; }
+.preview-content-iframe { width: 100%; height: 100%; display: block; border: none; }
+.unlayer-layer { z-index: 1000; }
+.modal-unlayer { width: 100%; max-width: 1400px; height: 95vh; display: flex; flex-direction: column; }
+.modal-unlayer header { display: flex; justify-content: space-between; align-items: center; }
+.modal-unlayer .actions { display: flex; gap: 10px; }
+.unlayer-body { padding: 0 !important; overflow: hidden; background: #f4f4f4; flex-grow: 1; }
+.large-input { font-size: 16px; padding: 12px; font-weight: 600; }
+.large-textarea { font-size: 15px; padding: 12px; line-height: 1.6; resize: vertical; }
+.user-picker-wrapper { background: #f4f6f8; padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid #e1e4e8; }
 @media (max-width: 900px) {
   .mc-stats { grid-template-columns: repeat(2, 1fr); }
   .choice-grid { grid-template-columns: 1fr; }

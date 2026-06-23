@@ -239,6 +239,29 @@ class AdminApi {
     return apiClient.delete(`/admin/marketing/notifications/${id}`)
   }
 
+  fetchNotificationTemplates(params) {
+    return apiClient.get('/notifications/notification-templates', { params }).then(response => {
+      const rawList = Array.isArray(response.data) ? response.data : response.data?.items ?? []
+      const list = Array.isArray(rawList) ? rawList : []
+      return {
+        ...response,
+        data: list.filter(t => !isChatTemplate(t)),
+      }
+    })
+  }
+
+  createNotificationTemplate(payload) {
+    return apiClient.post('/notifications/notification-templates', payload)
+  }
+
+  updateNotificationTemplate(id, payload) {
+    return apiClient.put(`/notifications/notification-templates/${id}`, payload)
+  }
+
+  deleteNotificationTemplate(id) {
+    return apiClient.delete(`/notifications/notification-templates/${id}`)
+  }
+
   fetchRevenue(params) {
     return apiClient.get('/admin/revenue', { params })
   }

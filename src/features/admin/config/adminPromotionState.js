@@ -36,6 +36,7 @@ export function createAdminPromotionFilters() {
     campaign: { query: '', status: '' },
     combo: { query: '', status: '' },
     notify: { query: '', status: '' },
+    template: { query: '' },
   }
 }
 
@@ -45,6 +46,9 @@ export function createAdminPromotionModalState() {
     campaign: false,
     combo: false,
     notify: false,
+    template: false,
+    previewTemplate: false,
+    unlayer: false,
     picker: false,
   }
 }
@@ -55,6 +59,8 @@ export function createAdminPromotionEditingState() {
     campaign: null,
     combo: null,
     notify: null,
+    template: null,
+    previewTemplate: null,
   }
 }
 
@@ -133,6 +139,15 @@ export function createNotifyFormState() {
     scheduledAt: '',
     relatedVoucherId: '',
     active: true,
+  }
+}
+
+export function createTemplateFormState() {
+  return {
+    code: '',
+    name: '',
+    titleTemplate: '',
+    bodyTemplate: '',
   }
 }
 

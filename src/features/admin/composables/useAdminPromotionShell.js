@@ -15,6 +15,8 @@ export function useAdminPromotionShell({
   openCampaignModal,
   openComboModal,
   openNotifyModal,
+  loadTemplates,
+  openTemplateModal,
 }) {
   const activeTab = ref('voucher')
 
@@ -55,13 +57,15 @@ export function useAdminPromotionShell({
     if (activeTab.value === 'campaign') await loadCampaigns()
     if (activeTab.value === 'combo') await Promise.all([loadCombos(), loadProductsForPicker()])
     if (activeTab.value === 'notify') await loadNotifications()
+    if (activeTab.value === 'template') await loadTemplates()
   }
 
   function openPrimaryAction() {
     if (activeTab.value === 'voucher') return openVoucherModal()
     if (activeTab.value === 'campaign') return openCampaignModal()
     if (activeTab.value === 'combo') return openComboModal()
-    return openNotifyModal()
+    if (activeTab.value === 'notify') return openNotifyModal()
+    return openTemplateModal()
   }
 
   watch(activeTab, loadActiveTab)
@@ -72,6 +76,7 @@ export function useAdminPromotionShell({
       loadCampaigns(),
       loadCombos(),
       loadNotifications(),
+      loadTemplates(),
       loadProductsForPicker(),
       loadUsersForTarget(),
     ])
