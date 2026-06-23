@@ -7,7 +7,15 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
   const templates = ref([])
   const templateForm = reactive(createTemplateFormState())
 
-  const filteredTemplates = computed(() => filterLocal(templates.value, filters.template, ['name', 'code']))
+  const filteredTemplates = computed(() => {
+    let list = filterLocal(templates.value, filters.template, ['name', 'code'])
+    if (filters.template.type) {
+      list = list.filter(t => t.type === filters.template.type)
+    }
+    return list
+  })
+  const promotionTemplates = computed(() => templates.value.filter(t => t.type === 'PROMOTION'))
+
 
   let unlayerInstance = null
 
@@ -39,48 +47,66 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     modal.previewTemplate = true
   }
 
+  let unlayerInitialized = false
+  let unlayerCallback = null
+  let unlayerContent = ''
+
+  function loadCurrentDesign() {
+    if (!window.unlayer) return
+    const body = unlayerContent || ''
+    const match = body.match(/<!--\s*UNLAYER_DESIGN_START\s*([\s\S]*?)\s*UNLAYER_DESIGN_END\s*-->/)
+    if (match && match[1]) {
+      try {
+        const designJSON = JSON.parse(match[1])
+        window.unlayer.loadDesign(designJSON)
+      } catch (e) {
+        console.error('Failed to parse Unlayer design', e)
+        if (typeof notify === 'function') notify('Không thể nạp lại thiết kế (Lỗi dữ liệu JSON)', 'error')
+        window.unlayer.loadBlank({ backgroundColor: '#e7e7e7' })
+      }
+    } else {
+      if (body.trim().length > 0 && typeof notify === 'function') {
+        notify('Không tìm thấy dữ liệu thiết kế trong nội dung này', 'error')
+      }
+      window.unlayer.loadBlank({ backgroundColor: '#e7e7e7' })
+    }
+  }
+
   function initUnlayer() {
     if (!window.unlayer) {
-      notify('Không thể tải công cụ kéo thả. Vui lòng kiểm tra kết nối mạng.', 'error')
+      if (typeof notify === 'function') notify('Không thể tải công cụ kéo thả. Vui lòng kiểm tra kết nối mạng.', 'error')
       return
     }
     
-    // Khởi tạo editor
+    // Luôn khởi tạo lại iframe mới mỗi khi mở modal
     window.unlayer.init({
       id: 'unlayer-editor-container',
       displayMode: 'email',
     })
-    
-    // Nạp lại design JSON nếu có trong thẻ comment của bodyTemplate
-    window.unlayer.addEventListener('editor:ready', () => {
-      const body = templateForm.bodyTemplate || ''
-      const match = body.match(/<!--\s*UNLAYER_DESIGN_START\s*({.*?})\s*UNLAYER_DESIGN_END\s*-->/)
-      if (match && match[1]) {
-        try {
-          const designJSON = JSON.parse(match[1])
-          window.unlayer.loadDesign(designJSON)
-        } catch (e) {
-          console.error('Failed to parse Unlayer design', e)
-        }
-      }
-    })
+
+    if (!unlayerReadyHandlerAdded) {
+      window.unlayer.addEventListener('editor:ready', () => {
+        loadCurrentDesign()
+      })
+      unlayerReadyHandlerAdded = true
+    }
   }
 
-  function openUnlayerEditor() {
+  function openUnlayerEditor(initialContent, onSave) {
+    unlayerContent = initialContent || ''
+    unlayerCallback = onSave
     modal.unlayer = true
-    // Đảm bảo DOM render xong div #unlayer-editor-container
+    // Đảm bảo DOM update, tăng timeout để iframe kịp render
     setTimeout(() => {
       if (window.unlayer) {
-        // Nếu unlayer đã tải thì init luôn
         initUnlayer()
       } else {
-        // Tải script nhúng của unlayer
         const script = document.createElement('script')
         script.src = 'https://editor.unlayer.com/embed.js'
         script.onload = initUnlayer
         document.head.appendChild(script)
       }
-    }, 100)
+    }, 300)
   }
 
   function saveUnlayerDesign() {
@@ -88,7 +114,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     window.unlayer.exportHtml((data) => {
       const designJson = JSON.stringify(data.design)
       const packedHtml = `<!-- UNLAYER_DESIGN_START ${designJson} UNLAYER_DESIGN_END -->\n${data.html}`
-      templateForm.bodyTemplate = packedHtml
+      if (unlayerCallback) unlayerCallback(packedHtml)
       modal.unlayer = false
       notify('Đã lấy mã HTML từ bảng thiết kế.')
     })
@@ -142,5 +168,6 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     saveUnlayerDesign,
     saveTemplate,
     deleteTemplate,
+    promotionTemplates,
   }
 }

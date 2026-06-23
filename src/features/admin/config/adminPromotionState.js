@@ -36,7 +36,7 @@ export function createAdminPromotionFilters() {
     campaign: { query: '', status: '' },
     combo: { query: '', status: '' },
     notify: { query: '', status: '' },
-    template: { query: '' },
+    template: { query: '', type: '' },
   }
 }
 
