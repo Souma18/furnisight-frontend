@@ -1,3 +1,23 @@
+export const PROMOTION_SEGMENTS = Object.freeze([
+  { value: 'NEW_USERS', label: 'Khách mới đăng ký' },
+  { value: 'ABANDONED_CART', label: 'Giỏ hàng chưa checkout' },
+  { value: 'INACTIVE_30D', label: 'Chưa mua hàng 30 ngày' },
+])
+
+export const PROMOTION_CHANNELS = Object.freeze(['NOTIFICATION', 'EMAIL'])
+
+const PROMOTION_SEGMENT_KEYS = new Set(PROMOTION_SEGMENTS.map((segment) => segment.value))
+const PROMOTION_CHANNEL_KEYS = new Set(PROMOTION_CHANNELS)
+
+export function normalizePromotionSegment(value) {
+  return PROMOTION_SEGMENT_KEYS.has(value) ? value : PROMOTION_SEGMENTS[0].value
+}
+
+export function sanitizePromotionChannels(channels) {
+  if (!Array.isArray(channels)) return []
+  return [...new Set(channels.filter((channel) => PROMOTION_CHANNEL_KEYS.has(channel)))]
+}
+
 export function createAdminPromotionStats() {
   return {
     totalVouchers: 0,
@@ -107,7 +127,7 @@ export function createNotifyFormState() {
     body: '',
     targetType: 'ALL',
     targetUserIds: [],
-    segmentKey: 'VIP',
+    segmentKey: 'NEW_USERS',
     channels: ['NOTIFICATION'],
     sendType: 'NOW',
     scheduledAt: '',

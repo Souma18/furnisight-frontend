@@ -7,6 +7,7 @@ import {
   createAdminPromotionEditingState,
   createAdminPromotionFilters,
   createAdminPromotionModalState,
+  PROMOTION_SEGMENTS,
 } from '../../config/adminPromotionState'
 import {
   channelText,
@@ -67,7 +68,9 @@ const {
 const {
   campaigns,
   campaignForm,
+  campaignUserQuery,
   filteredCampaigns,
+  filteredCampaignUsers,
   loadCampaigns,
   openCampaignModal,
   saveCampaign,
@@ -119,7 +122,9 @@ const {
 const {
   notifications,
   notifyForm,
+  notifyUserQuery,
   filteredNotifications,
+  filteredNotificationUsers,
   loadNotifications,
   openNotifyModal,
   saveNotification,
@@ -128,6 +133,7 @@ const {
   filters,
   modal,
   editing,
+  users,
   notify,
 })
 
@@ -355,17 +361,21 @@ const {
         <header><h2>{{ editing.campaign ? 'Sửa' : 'Tạo' }} <em>chiến dịch</em></h2><button type="button" @click="modal.campaign = false"><AppIcon name="x" /></button></header>
         <div class="modal-body">
           <div class="section-title"><AppIcon name="calendar" />Thông tin chiến dịch</div>
-          <div class="form-row"><label>Tên chiến dịch *<input v-model="campaignForm.name" required placeholder="Phát SALE8/8 cho khách VIP"></label><label>Voucher<select v-model="campaignForm.voucherId"><option value="">Chọn voucher</option><option v-for="voucher in vouchers" :key="voucher.id" :value="voucher.id">{{ voucher.code }} - {{ voucher.name }}</option></select></label></div>
+          <div class="form-row"><label>Tên chiến dịch *<input v-model="campaignForm.name" required placeholder="Phát voucher cho khách mới"></label><label>Voucher<select v-model="campaignForm.voucherId"><option value="">Chọn voucher</option><option v-for="voucher in vouchers" :key="voucher.id" :value="voucher.id">{{ voucher.code }} - {{ voucher.name }}</option></select></label></div>
           <div class="section-title"><AppIcon name="users" />Tệp người nhận</div>
           <div class="choice-grid">
             <button type="button" :class="{ selected: campaignForm.targetType === 'MANUAL' }" @click="campaignForm.targetType = 'MANUAL'">Chọn thủ công<small>{{ campaignForm.targetUserIds.length }} user</small></button>
             <button type="button" :class="{ selected: campaignForm.targetType === 'ALL' }" @click="campaignForm.targetType = 'ALL'">Toàn bộ<small>1.243 user</small></button>
-            <button type="button" :class="{ selected: campaignForm.targetType === 'SEGMENT' }" @click="campaignForm.targetType = 'SEGMENT'">Theo điều kiện<small>VIP, giỏ bỏ quên</small></button>
+            <button type="button" :class="{ selected: campaignForm.targetType === 'SEGMENT' }" @click="campaignForm.targetType = 'SEGMENT'">Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></button>
           </div>
-          <div v-if="campaignForm.targetType === 'MANUAL'" class="user-pick-list">
-            <label v-for="user in users" :key="user.id" class="user-pick-item"><input v-model="campaignForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
-          </div>
-          <label v-if="campaignForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="campaignForm.segmentKey"><option value="NEW_USERS">Khách mới đăng ký</option><option value="VIP">Khách VIP</option><option value="INACTIVE_30D">Chưa mua hàng 30 ngày</option><option value="ABANDONED_CART">Giỏ hàng chưa checkout</option><option value="HIGH_SPEND">Chi tiêu &gt; 5.000.000đ</option></select></label>
+          <template v-if="campaignForm.targetType === 'MANUAL'">
+            <label>Tìm người dùng<input v-model="campaignUserQuery" placeholder="Tên hoặc email..."></label>
+            <div class="user-pick-list">
+              <label v-for="user in filteredCampaignUsers" :key="user.id" class="user-pick-item"><input v-model="campaignForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
+              <div v-if="!filteredCampaignUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+            </div>
+          </template>
+          <label v-if="campaignForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="campaignForm.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
           <div class="section-title"><AppIcon name="send" />Kênh gửi và lịch</div>
           <div class="checkbox-grid"><label class="check-line"><input v-model="campaignForm.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="campaignForm.channels" type="checkbox" value="EMAIL">Email</label></div>
           <div class="choice-grid"><button type="button" :class="{ selected: campaignForm.scheduleType === 'NOW' }" @click="campaignForm.scheduleType = 'NOW'">Gửi ngay</button><button type="button" :class="{ selected: campaignForm.scheduleType === 'SCHEDULED' }" @click="campaignForm.scheduleType = 'SCHEDULED'">Hẹn lịch</button></div>
@@ -447,8 +457,14 @@ const {
           <div class="form-row"><label>Voucher liên quan<select v-model="notifyForm.relatedVoucherId"><option value="">Không gắn voucher</option><option v-for="voucher in vouchers" :key="voucher.id" :value="voucher.id">{{ voucher.code }} - {{ voucher.name }}</option></select></label><label>Kiểu gửi<select v-model="notifyForm.sendType"><option value="NOW">Gửi ngay</option><option value="SCHEDULED">Hẹn lịch</option><option value="DRAFT">Lưu nháp</option></select></label></div>
           <label v-if="notifyForm.sendType === 'SCHEDULED'">Thời gian gửi<input v-model="notifyForm.scheduledAt" type="datetime-local"></label>
           <div class="choice-grid"><button type="button" :class="{ selected: notifyForm.targetType === 'MANUAL' }" @click="notifyForm.targetType = 'MANUAL'">Chọn user</button><button type="button" :class="{ selected: notifyForm.targetType === 'ALL' }" @click="notifyForm.targetType = 'ALL'">Toàn bộ</button><button type="button" :class="{ selected: notifyForm.targetType === 'SEGMENT' }" @click="notifyForm.targetType = 'SEGMENT'">Theo điều kiện</button></div>
-          <div v-if="notifyForm.targetType === 'MANUAL'" class="user-pick-list"><label v-for="user in users" :key="user.id" class="user-pick-item"><input v-model="notifyForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label></div>
-          <label v-if="notifyForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="notifyForm.segmentKey"><option value="VIP">Khách VIP</option><option value="NEW_USERS">Khách mới đăng ký</option><option value="ABANDONED_CART">Giỏ hàng chưa checkout</option></select></label>
+          <template v-if="notifyForm.targetType === 'MANUAL'">
+            <label>Tìm người dùng<input v-model="notifyUserQuery" placeholder="Tên hoặc email..."></label>
+            <div class="user-pick-list">
+              <label v-for="user in filteredNotificationUsers" :key="user.id" class="user-pick-item"><input v-model="notifyForm.targetUserIds" type="checkbox" :value="user.id"><span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small></label>
+              <div v-if="!filteredNotificationUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
+            </div>
+          </template>
+          <label v-if="notifyForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="notifyForm.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
           <div class="checkbox-grid"><label class="check-line"><input v-model="notifyForm.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="notifyForm.channels" type="checkbox" value="EMAIL">Email</label></div>
         </div>
         <footer><button type="button" class="mc-cancel" @click="modal.notify = false">Hủy</button><button class="mc-primary"><AppIcon name="send" />Lưu thông báo</button></footer>
@@ -463,7 +479,7 @@ const {
             <button :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'"><AppIcon name="user" /><span>Một người<small>Tìm và cấp cho 1 user cụ thể</small></span></button>
             <button :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'"><AppIcon name="users" /><span>Nhiều người<small>Chọn danh sách user</small></span></button>
             <button :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'"><AppIcon name="globe" /><span>Toàn bộ người dùng<small>Phát hàng loạt</small></span></button>
-            <button :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'"><AppIcon name="filter" /><span>Theo điều kiện<small>Khách VIP, giỏ hàng bỏ quên</small></span></button>
+            <button :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'"><AppIcon name="filter" /><span>Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></span></button>
           </div>
           <label v-if="publish.segment === 'one' || publish.segment === 'many'">Tìm người dùng<input v-model="publish.userQuery" placeholder="Email hoặc tên..."></label>
           <div v-if="publish.segment === 'one' || publish.segment === 'many'" class="user-pick-list compact-users">
@@ -478,9 +494,10 @@ const {
               <input v-else v-model="publish.selectedUserIds" type="checkbox" :value="user.id">
               <span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small>
             </label>
+            <div v-if="!filteredUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
           </div>
           <div v-if="publish.segment === 'all'" class="warn-box">Bạn sắp phát voucher cho toàn bộ người dùng đủ điều kiện nhận.</div>
-          <label v-if="publish.segment === 'cond'">Nhóm người dùng<select v-model="publish.segmentKey"><option value="NEW_USERS">Khách mới đăng ký</option><option value="VIP">Khách VIP</option><option value="ABANDONED_CART">Giỏ hàng chưa checkout</option></select></label>
+          <label v-if="publish.segment === 'cond'">Nhóm người dùng<select v-model="publish.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
           <div class="checkbox-grid"><label class="check-line"><input v-model="publish.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="publish.channels" type="checkbox" value="EMAIL">Email</label></div>
           <label>Tiêu đề<input v-model="publish.title"></label>
           <label>Nội dung<textarea v-model="publish.body" rows="3" /></label>
@@ -568,8 +585,8 @@ const {
 .mc-empty { text-align: center; color: #8a7a68; padding: 28px; }
 .pagination { border-top: 1px solid #f0e8dc; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; color: #8a7a68; font-size: 11px; }
 .pagination button { width: 28px; height: 28px; border-radius: 6px; border: 1px solid #e0d8cc; background: #fff; margin-left: 5px; }
-.modal-backdrop, .drawer-backdrop { position: fixed; inset: 0; background: rgba(20,30,45,.5); z-index: 80; display: flex; align-items: center; justify-content: center; padding: 18px; }
-.picker-layer { z-index: 110; }
+.modal-backdrop, .drawer-backdrop { position: fixed; inset: 0; background: rgba(20,30,45,.5); z-index: 900; display: flex; align-items: center; justify-content: center; padding: 18px; }
+.picker-layer { z-index: 910; }
 .modal-card { width: min(560px, calc(100vw - 24px)); max-height: calc(100vh - 36px); overflow: auto; background: #fff; border-radius: 12px; box-shadow: 0 14px 45px rgba(0,0,0,.18); }
 .modal-lg { width: min(820px, calc(100vw - 24px)); }
 .modal-card header, .modal-card footer, .publish-drawer header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f0e8dc; gap: 10px; }
@@ -596,6 +613,7 @@ const {
 .user-pick-item span, .prod-thumb { width: 30px; height: 30px; border-radius: 7px; background: #f5f0e8; border: 1px solid #e8e0d0; display: inline-flex; align-items: center; justify-content: center; color: #c9953a; font-weight: 800; }
 .prod-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
 .user-pick-item small { grid-column: 3; color: #8a7a68; }
+.user-pick-empty { padding: 18px 12px; color: #8a7a68; font-size: 12px; text-align: center; }
 .add-product { background: #fff; border: 1.5px dashed #c9953a; color: #c9953a; border-radius: 8px; padding: 10px 14px; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
 .empty-box { border: 1.5px dashed #e0d8cc; border-radius: 8px; padding: 20px; color: #8a7a68; text-align: center; background: #faf7f2; }
 .combo-item-card { display: grid; grid-template-columns: 38px 1fr 64px 32px; gap: 12px; align-items: center; background: #f5f0e8; border: 1px solid #e8e0d0; border-radius: 8px; padding: 9px 12px; }
@@ -621,7 +639,7 @@ const {
 .segment-choice button { flex-direction: row; align-items: center; }
 .segment-choice span { display: flex; flex-direction: column; }
 .warn-box { background: #fef9ee; border: 1px solid #f5d38a; border-radius: 8px; padding: 11px 13px; color: #92400e; font-size: 12px; }
-.mc-toast { position: fixed; right: 22px; bottom: 22px; z-index: 120; background: #1a2332; color: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); display: inline-flex; align-items: center; gap: 8px; }
+.mc-toast { position: fixed; right: 22px; bottom: 22px; z-index: 920; background: #1a2332; color: #fff; border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 28px rgba(0,0,0,.18); display: inline-flex; align-items: center; gap: 8px; }
 .mc-toast--success { background: #176b4d; }
 .mc-toast--error { background: #a83232; }
 @media (max-width: 900px) {

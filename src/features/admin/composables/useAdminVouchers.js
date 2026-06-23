@@ -4,12 +4,18 @@ import {
   createAdminPromotionStats,
   createVoucherFormState,
   createVoucherPublishState,
+  normalizePromotionSegment,
+  sanitizePromotionChannels,
 } from '../config/adminPromotionState'
 import {
   getListPayload,
   sortByCreatedAtDesc,
   toDatetimeLocal,
 } from '../lib/adminPromotionFormatters'
+import {
+  filterPromotionRecipientIds,
+  filterPromotionRecipients,
+} from '../utils/adminPromotionRecipients'
 
 export function useAdminVouchers({
   filters,
@@ -28,8 +34,7 @@ export function useAdminVouchers({
 
   const filteredUsers = computed(() => {
     const query = publish.userQuery.trim().toLowerCase()
-    if (!query) return users.value
-    return users.value.filter((user) => `${user.name} ${user.email}`.toLowerCase().includes(query))
+    return filterPromotionRecipients(users.value, query)
   })
 
   async function loadVoucherData() {
@@ -126,6 +131,9 @@ export function useAdminVouchers({
     publish.voucher = row
     publish.segment = 'one'
     publish.selectedUserIds = users.value[0]?.id ? [users.value[0].id] : []
+    publish.userQuery = ''
+    publish.segmentKey = 'NEW_USERS'
+    publish.channels = ['NOTIFICATION', 'EMAIL']
     publish.title = `Bạn vừa nhận voucher ${row.code}`
     publish.body = `Bạn vừa nhận voucher ${row.name}. Vào mục Voucher của tôi để sử dụng ngay.`
   }
@@ -134,9 +142,13 @@ export function useAdminVouchers({
     const targetType = publish.segment === 'all' ? 'ALL' : publish.segment === 'cond' ? 'SEGMENT' : 'MANUAL'
     return {
       targetType,
-      targetUserIds: targetType === 'MANUAL' ? publish.selectedUserIds : [],
-      segmentKey: targetType === 'SEGMENT' ? publish.segmentKey : null,
-      channels: publish.channels,
+      targetUserIds: targetType === 'MANUAL'
+        ? filterPromotionRecipientIds(publish.selectedUserIds, users.value)
+        : [],
+      segmentKey: targetType === 'SEGMENT'
+        ? normalizePromotionSegment(publish.segmentKey)
+        : null,
+      channels: sanitizePromotionChannels(publish.channels),
       title: publish.title,
       body: publish.body,
     }
@@ -144,13 +156,18 @@ export function useAdminVouchers({
 
   async function confirmPublishVoucher() {
     if (!publish.voucher?.id) return
-    if ((publish.segment === 'one' || publish.segment === 'many') && !publish.selectedUserIds.length) {
+    const payload = publishPayload()
+    if (payload.targetType === 'MANUAL' && !payload.targetUserIds.length) {
       notify('Hãy chọn user nhận voucher')
+      return
+    }
+    if (!payload.channels.length) {
+      notify('Hãy chọn ít nhất một kênh gửi', 'error')
       return
     }
     publishing.value = true
     try {
-      await adminApi.publishVoucher(publish.voucher.id, publishPayload())
+      await adminApi.publishVoucher(publish.voucher.id, payload)
       notify('Đã phát hành voucher')
       publish.voucher = null
       await loadVoucherData()

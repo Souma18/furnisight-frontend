@@ -57,10 +57,8 @@ export function targetText(type, segmentKey, userIds) {
 export function segmentLabel(key) {
   return {
     NEW_USERS: 'Khách mới đăng ký',
-    VIP: 'Khách VIP',
     INACTIVE_30D: 'Chưa mua hàng 30 ngày',
     ABANDONED_CART: 'Giỏ hàng chưa checkout',
-    HIGH_SPEND: 'Chi tiêu > 5.000.000đ',
   }[key] || 'Theo điều kiện'
 }
 
