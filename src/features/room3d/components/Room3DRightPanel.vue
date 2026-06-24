@@ -4,7 +4,7 @@ import ProductCard3D from './ProductCard3D.vue'
 import Room3DCartSection from './Room3DCartSection.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-defineProps({
+const props = defineProps({
   selectedRoom: {
     type: Object,
     default: null,
@@ -65,6 +65,12 @@ defineEmits([
 ])
 
 const { t } = useI18n()
+
+function getCartQty(productId) {
+  return props.cartItems
+    .filter((item) => String(item.productId ?? item.id ?? '').split('::')[0] === String(productId))
+    .reduce((sum, item) => sum + (item.quantity || 1), 0)
+}
 </script>
 
 <template>
@@ -128,6 +134,7 @@ const { t } = useI18n()
               : false
           "
           :shape-step="productCardStep"
+          :cart-qty="getCartQty(product.id)"
           @add="$emit('add-product', $event)"
           @open-detail="$emit('open-product', $event)"
         />

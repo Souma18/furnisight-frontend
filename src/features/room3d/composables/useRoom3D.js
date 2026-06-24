@@ -68,7 +68,7 @@ export function useRoom3D() {
 
   function addProductToScene(payload) {
     if (!payload) return
-    if (typeof payload === 'number') {
+    if (typeof payload === 'number' || typeof payload === 'string') {
       store.addToScene(payload)
       return
     }

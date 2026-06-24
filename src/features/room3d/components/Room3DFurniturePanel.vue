@@ -23,6 +23,10 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  screenPos: {
+    type: Object,
+    default: () => ({ left: 0, top: 0, visible: false })
+  }
 })
 
 defineEmits([
@@ -34,96 +38,77 @@ defineEmits([
   'reset-color',
   'add-to-cart',
   'remove-product',
+  'nudge-selected',
 ])
 
+const PRESET_COLORS = ['#ffffff', '#333333', '#888888', '#8b5a2b', '#0f3f5c', '#d8aa56']
 const { t } = useI18n()
 </script>
 
 <template>
-  <div v-if="selectedProduct" class="item-quick-panel">
-    <div class="panel-head">
-      <strong>{{ selectedProduct.name }}</strong>
-      <button type="button" class="close-btn" @click="$emit('close')">
-        <AppIcon name="close" :size="14" />
-      </button>
+  <div v-if="selectedProduct">
+    <!-- Fixed Panel (Top Right) -->
+    <div class="item-quick-panel">
+      <div class="panel-head">
+        <strong>{{ selectedProduct.name }}</strong>
+        <button type="button" class="close-btn" @click="$emit('close')">
+          <AppIcon name="close" :size="14" />
+        </button>
+      </div>
+
+      <div class="panel-row">
+        <label>{{ t('room3d.furniture.color') }}</label>
+        <div class="color-swatches">
+          <button
+            v-for="c in PRESET_COLORS"
+            :key="c"
+            type="button"
+            class="swatch-btn"
+            :class="{ active: selectedColor === c }"
+            :style="{ backgroundColor: c }"
+            @click="$emit('update-color', c)"
+          ></button>
+        </div>
+      </div>
+
+      <div class="panel-actions">
+        <button
+          type="button"
+          class="action-btn primary"
+          :disabled="isSelectedInCart"
+          @click="$emit('add-to-cart')"
+        >
+          {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
+        </button>
+        <button type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</button>
+      </div>
     </div>
 
-    <div class="panel-row">
-      <label>{{ t('room3d.furniture.width') }}</label>
-      <input
-        type="range"
-        min="0.5"
-        max="1.8"
-        step="0.05"
-        :value="selectedScale.x"
-        @input="$emit('update-scale', 'x', Number($event.target.value))"
-      />
-    </div>
-    <div class="panel-row">
-      <label>{{ t('room3d.furniture.height') }}</label>
-      <input
-        type="range"
-        min="0.5"
-        max="1.8"
-        step="0.05"
-        :value="selectedScale.y"
-        @input="$emit('update-scale', 'y', Number($event.target.value))"
-      />
-    </div>
-    <div class="panel-row">
-      <label>{{ t('room3d.furniture.depth') }}</label>
-      <input
-        type="range"
-        min="0.5"
-        max="1.8"
-        step="0.05"
-        :value="selectedScale.z"
-        @input="$emit('update-scale', 'z', Number($event.target.value))"
-      />
-    </div>
-    <div class="panel-row">
-      <label>{{ t('room3d.furniture.color') }}</label>
-      <input type="color" :value="selectedColor" @input="$emit('update-color', $event.target.value)" />
-    </div>
-    <div class="panel-row">
-      <label>{{ t('room3d.furniture.rotate') }}</label>
-      <input
-        type="range"
-        min="-3.1416"
-        max="3.1416"
-        step="0.02"
-        :value="selectedRotationY"
-        @input="$emit('update-rotation', Number($event.target.value))"
-      />
-    </div>
-    <div class="rotate-actions">
-      <button type="button" class="action-btn ghost" @click="$emit('rotate-selected', -0.2618)">
-        <AppIcon name="rotateCcw" :size="14" />
-        <span>-15°</span>
-      </button>
-      <button type="button" class="action-btn ghost" @click="$emit('rotate-selected', 0.2618)">
-        <AppIcon name="rotateCw" :size="14" />
-        <span>+15°</span>
-      </button>
-    </div>
-    <p class="drag-hint">{{ t('room3d.furniture.dragHint') }}</p>
+    <!-- Floating HUD -->
+    <div
+      v-if="screenPos?.visible"
+      class="hud-container"
+      :style="{ left: screenPos.left + 'px', top: screenPos.top + 'px' }"
+    >
+      <button class="hud-nudge up" @click="$emit('nudge-selected', 0, -0.05)" title="Lên"><AppIcon name="chevronUp" :size="24"/></button>
+      <button class="hud-nudge down" @click="$emit('nudge-selected', 0, 0.05)" title="Xuống"><AppIcon name="chevronDown" :size="24"/></button>
+      <button class="hud-nudge left" @click="$emit('nudge-selected', -0.05, 0)" title="Trái"><AppIcon name="chevronLeft" :size="24"/></button>
+      <button class="hud-nudge right" @click="$emit('nudge-selected', 0.05, 0)" title="Phải"><AppIcon name="chevronRight" :size="24"/></button>
 
-    <div class="panel-actions">
-      <button type="button" class="action-btn ghost" @click="$emit('reset-color')">{{ t('room3d.furniture.defaultColor') }}</button>
-      <button
-        type="button"
-        class="action-btn primary"
-        :disabled="isSelectedInCart"
-        @click="$emit('add-to-cart')"
-      >
-        {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
-      </button>
-      <button type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</button>
+      <div class="hud-rotate">
+        <button type="button" @click="$emit('rotate-selected', -0.2618)">
+          <AppIcon name="rotateCcw" :size="16" /> Xoay trái
+        </button>
+        <button type="button" @click="$emit('rotate-selected', 0.2618)">
+          Xoay phải <AppIcon name="rotateCw" :size="16" />
+        </button>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* FIXED PANEL STYLES */
 .item-quick-panel {
   position: absolute;
   right: 1rem;
@@ -177,36 +162,8 @@ const { t } = useI18n()
   color: #596572;
 }
 
-.panel-row input[type='range'] {
-  width: 100%;
-}
-
-.panel-row input[type='color'] {
-  width: 100%;
-  height: 1.5rem;
-  border: 1px solid #d8cec1;
-  border-radius: 0.35rem;
-  background: #fff;
-  padding: 0.1rem;
-  cursor: pointer;
-}
-
-.rotate-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem;
-  margin-top: 0.2rem;
-}
-
-.drag-hint {
-  margin: 0.35rem 0 0;
-  color: #65727e;
-  font-size: 0.72rem;
-  line-height: 1.3;
-}
-
 .panel-actions {
-  margin-top: 0.45rem;
+  margin-top: 0.65rem;
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.35rem;
@@ -253,13 +210,104 @@ const { t } = useI18n()
   border-color: #d13c3c;
 }
 
-.action-btn.ghost {
-  background: transparent;
-  color: #1a496b;
-  border: 1px solid rgba(26, 73, 107, 0.25);
+.color-swatches {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
 }
 
-.action-btn.ghost:hover {
-  background: #f0f4f8;
+.swatch-btn {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.swatch-btn:hover {
+  transform: scale(1.1);
+}
+
+.swatch-btn.active {
+  border-color: #c9922a;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #c9922a;
+}
+
+/* FLOATING HUD STYLES */
+.hud-container {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+.hud-container > * {
+  pointer-events: auto;
+}
+
+.hud-nudge {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(4px);
+  color: #1a496b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  transition: all 0.2s ease;
+}
+
+.hud-nudge:hover {
+  background: rgba(255, 255, 255, 0.95);
+  transform: scale(1.15);
+  color: #c9922a;
+}
+
+.hud-nudge.up { top: -70px; left: -16px; }
+.hud-nudge.down { bottom: -70px; left: -16px; }
+.hud-nudge.left { left: -70px; top: -16px; }
+.hud-nudge.right { right: -70px; top: -16px; }
+
+.hud-rotate {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(4px);
+  padding: 6px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.hud-rotate button {
+  border: none;
+  background: transparent;
+  padding: 4px 12px;
+  border-radius: 14px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #1a496b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.hud-rotate button:hover {
+  background: rgba(15, 63, 92, 0.1);
+  color: #c9922a;
 }
 </style>

@@ -132,7 +132,7 @@ const {
       <ProductDetail3DModal
         v-if="show3DModal"
         :open="show3DModal"
-        :model-url="product.modelUrl"
+        :model-url="product.modelUrl || product.modelurl || product.model_url"
         :product-name="product.name"
         :supports3d="product.supports3d"
         :room-type-hint="product.roomTypeHint"

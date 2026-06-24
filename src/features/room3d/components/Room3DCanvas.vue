@@ -125,6 +125,8 @@ const {
   resetSelectedColor,
   updateSelectedRotation,
   rotateSelected,
+  nudgeSelected,
+  selectedScreenPos,
 } = useRoomFurnitureInteraction({
   emit,
   shellRef,
@@ -373,11 +375,13 @@ defineExpose({
       :selected-color="selectedColor"
       :selected-rotation-y="selectedRotationY"
       :is-selected-in-cart="isSelectedInCart"
+      :screen-pos="selectedScreenPos"
       @close="selectedSceneItemId = null"
       @update-scale="updateSelectedScale"
       @update-color="updateSelectedColor"
       @update-rotation="updateSelectedRotation"
       @rotate-selected="rotateSelected"
+      @nudge-selected="nudgeSelected"
       @reset-color="resetSelectedColor"
       @add-to-cart="addSelectedProductToCart"
       @remove-product="removeSelectedProduct"

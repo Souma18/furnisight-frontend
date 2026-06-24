@@ -1,5 +1,6 @@
-import { ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
 import {
+  Box3,
   Plane as MathPlane,
   Raycaster,
   Vector2,
@@ -28,7 +29,7 @@ function parseDraggedProductId(event) {
   } catch {
     // fallthrough
   }
-  
+
   const trimmed = String(raw).trim()
   return trimmed ? trimmed : null
 }
@@ -65,6 +66,54 @@ export function useRoomFurnitureInteraction({
   const productOverrides = ref({})
   const isDraggingProduct = ref(false)
   const isDragOverCanvas = ref(false)
+  const selectedScreenPos = ref({ left: 0, top: 0, visible: false })
+
+  let rafId = null
+  function updateScreenPos() {
+    rafId = requestAnimationFrame(updateScreenPos)
+    if (!selectedSceneItemId.value || isDraggingProduct.value) {
+      if (selectedScreenPos.value.visible) selectedScreenPos.value.visible = false
+      return
+    }
+    const model = findSelectedModel()
+    const renderer = rendererRef.value?.renderer
+    const camera = cameraRef.value?.camera
+    if (!model || !renderer?.domElement || !camera) {
+      if (selectedScreenPos.value.visible) selectedScreenPos.value.visible = false
+      return
+    }
+
+    const box = new Box3().setFromObject(model)
+    const center = new Vector3()
+    box.getCenter(center)
+
+    // Nâng center lên giữa để dễ nhìn hơn
+    center.y = (box.max.y + box.min.y) / 2
+
+    center.project(camera)
+    if (center.z > 1) {
+      if (selectedScreenPos.value.visible) selectedScreenPos.value.visible = false
+      return
+    }
+
+    const rect = renderer.domElement.getBoundingClientRect()
+    const x = (center.x * 0.5 + 0.5) * rect.width
+    const y = (-(center.y * 0.5) + 0.5) * rect.height
+
+    selectedScreenPos.value = {
+      left: x,
+      top: y,
+      visible: true,
+    }
+  }
+
+  onMounted(() => {
+    rafId = requestAnimationFrame(updateScreenPos)
+  })
+
+  onBeforeUnmount(() => {
+    if (rafId) cancelAnimationFrame(rafId)
+  })
 
   const raycaster = new Raycaster()
   const pointer = new Vector2()
@@ -274,6 +323,45 @@ export function useRoomFurnitureInteraction({
     updateSelectedRotation(selectedRotationY.value + deltaRadians)
   }
 
+  function nudgeSelected(screenDx, screenDy) {
+    if (!selectedSceneItemId.value) return
+    const camera = cameraRef.value?.camera
+    if (!camera) return
+
+    const forward = new Vector3()
+    camera.getWorldDirection(forward)
+    forward.y = 0
+    if (forward.lengthSq() < 0.001) {
+      forward.set(0, 0, -1)
+    } else {
+      forward.normalize()
+    }
+
+    const right = new Vector3()
+    right.crossVectors(forward, new Vector3(0, 1, 0)).normalize()
+
+    const moveVector = new Vector3()
+    moveVector.addScaledVector(forward, -screenDy)
+    moveVector.addScaledVector(right, screenDx)
+
+    const currentPos = productOverrides.value[selectedSceneItemId.value]?.position || { x: selectedPosition.value.x, z: selectedPosition.value.z }
+    const nextX = currentPos.x + moveVector.x
+    const nextZ = currentPos.z + moveVector.z
+    const next = clampToRoomBounds(roomBoundsRef.value, nextX, nextZ)
+    selectedPosition.value = next
+
+    productOverrides.value = {
+      ...productOverrides.value,
+      [selectedSceneItemId.value]: {
+        ...(productOverrides.value[selectedSceneItemId.value] ?? {}),
+        position: next,
+      },
+    }
+
+    const model = findSelectedModel()
+    if (model) applyUserOverrides(model)
+  }
+
   return {
     selectedSceneItemId,
     selectedScale,
@@ -295,5 +383,7 @@ export function useRoomFurnitureInteraction({
     resetSelectedColor,
     updateSelectedRotation,
     rotateSelected,
+    nudgeSelected,
+    selectedScreenPos,
   }
 }

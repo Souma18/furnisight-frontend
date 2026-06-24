@@ -27,10 +27,10 @@ export function useRoomModelLoader({
 }) {
   const isModelLoading = ref(false)
   const productMap = computed(() => {
-    const map = new Map(PRODUCTS_3D.map((item) => [item.id, item]))
+    const map = new Map(PRODUCTS_3D.map((item) => [String(item.id), item]))
     if (Array.isArray(props.availableProducts)) {
       props.availableProducts.forEach((item) => {
-        map.set(item.id, item)
+        map.set(String(item.id), item)
       })
     }
     return map
@@ -53,7 +53,7 @@ export function useRoomModelLoader({
   )
 
   function normalizeFurnitureModel(model, sceneItem, index) {
-    const product = productMap.value.get(sceneItem.productId)
+    const product = productMap.value.get(String(sceneItem.productId))
     const fallback = product?.fallback ?? { width: 0.9, height: 0.9, depth: 0.9 }
     const originalBox = new Box3().setFromObject(model)
     const size = originalBox.getSize(new Vector3())
@@ -150,12 +150,13 @@ export function useRoomModelLoader({
 
     await Promise.all(
       props.sceneItems.map(async (sceneItem, index) => {
-        const product = productMap.value.get(sceneItem.productId)
-        if (!product?.modelUrl) return
+        const product = productMap.value.get(String(sceneItem.productId))
+        const modelUrl = product?.modelUrl || product?.modelurl || product?.model_url
+        if (!modelUrl) return
 
         try {
           const loader = await getLoader()
-          const gltf = await loader.loadAsync(product.modelUrl)
+          const gltf = await loader.loadAsync(modelUrl)
           if (currentToken !== furnitureLoadToken) return
           const model = gltf.scene
           normalizeFurnitureModel(model, sceneItem, index)
