@@ -13,15 +13,12 @@ export const ORDER_STATUS_CODES = Object.freeze({
 
 export const ORDER_STATUS_LABELS = Object.freeze({
   all: 'Tất cả',
-  unpaid: 'Chờ thanh toán',
-  payment_failed: 'Thanh toán thất bại',
+  unpaid: 'Đã đặt đơn',
+  payment_failed: 'Chưa thanh toán',
   paid: 'Đã thanh toán',
-  cod_pending_confirmation: 'Chờ xác nhận',
-  cod_confirmed: 'Xác nhận thành công',
   in_transit: 'Đang vận chuyển',
-  pending: 'Chờ xác nhận',
   delivering: 'Đang giao',
-  done: 'Hoàn thành',
+  done: 'Đã nhận',
   cancel: 'Đã hủy',
   refund_pending: 'Chờ hoàn tiền',
   refunded: 'Đã hoàn tiền',
@@ -50,7 +47,6 @@ const RAW_STATUS_TO_CODE = Object.freeze({
 
 const STATUS_CODE_TO_UI_KEY = Object.freeze({
   [ORDER_STATUS_CODES.UNPAID]: 'unpaid',
-  [ORDER_STATUS_CODES.CONFIRMED]: 'cod_confirmed',
   [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'payment_failed',
   [ORDER_STATUS_CODES.PAID]: 'paid',
   [ORDER_STATUS_CODES.IN_TRANSIT]: 'in_transit',
@@ -61,42 +57,32 @@ const STATUS_CODE_TO_UI_KEY = Object.freeze({
   [ORDER_STATUS_CODES.REFUNDED]: 'refunded',
 })
 
-const COD_STATUS_CODE_TO_UI_KEY = Object.freeze({
-  [ORDER_STATUS_CODES.UNPAID]: 'cod_pending_confirmation',
-  [ORDER_STATUS_CODES.CONFIRMED]: 'cod_confirmed',
-  [ORDER_STATUS_CODES.PAID]: 'cod_confirmed',
-})
-
 const COD_STATUS_LABELS = Object.freeze({
-  [ORDER_STATUS_CODES.UNPAID]: 'Chờ xác nhận',
-  [ORDER_STATUS_CODES.CONFIRMED]: 'Xác nhận thành công',
-  [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'Thanh toán thất bại',
-  [ORDER_STATUS_CODES.PAID]: 'Xác nhận thành công',
+  [ORDER_STATUS_CODES.UNPAID]: 'Đã đặt đơn',
   [ORDER_STATUS_CODES.IN_TRANSIT]: 'Đang vận chuyển',
   [ORDER_STATUS_CODES.SHIPPING]: 'Đang giao',
-  [ORDER_STATUS_CODES.DELIVERED]: 'Hoàn thành',
+  [ORDER_STATUS_CODES.DELIVERED]: 'Đã nhận',
   [ORDER_STATUS_CODES.CANCELLED]: 'Đã hủy',
   [ORDER_STATUS_CODES.REFUND_PENDING]: 'Chờ hoàn tiền',
   [ORDER_STATUS_CODES.REFUNDED]: 'Đã hoàn tiền',
 })
 
 const ONLINE_PAYMENT_STATUS_LABELS = Object.freeze({
-  [ORDER_STATUS_CODES.CONFIRMED]: 'Xác nhận thành công',
-  [ORDER_STATUS_CODES.UNPAID]: 'Chờ thanh toán',
-  [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'Thanh toán thất bại',
+  [ORDER_STATUS_CODES.UNPAID]: 'Đã đặt đơn',
+  [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'Chưa thanh toán',
   [ORDER_STATUS_CODES.PAID]: 'Đã thanh toán',
   [ORDER_STATUS_CODES.IN_TRANSIT]: 'Đang vận chuyển',
   [ORDER_STATUS_CODES.SHIPPING]: 'Đang giao',
-  [ORDER_STATUS_CODES.DELIVERED]: 'Hoàn thành',
+  [ORDER_STATUS_CODES.DELIVERED]: 'Đã nhận',
   [ORDER_STATUS_CODES.CANCELLED]: 'Đã hủy',
   [ORDER_STATUS_CODES.REFUND_PENDING]: 'Chờ hoàn tiền',
   [ORDER_STATUS_CODES.REFUNDED]: 'Đã hoàn tiền',
 })
 
 export const ORDER_STATUS_LABEL_TO_API = Object.freeze({
-  'Xác nhận thành công': ORDER_STATUS_CODES.CONFIRMED,
   'Đang vận chuyển': ORDER_STATUS_CODES.IN_TRANSIT,
   'Đang giao': ORDER_STATUS_CODES.SHIPPING,
+  'Đã nhận': ORDER_STATUS_CODES.DELIVERED,
   'Hoàn thành': ORDER_STATUS_CODES.DELIVERED,
   'Đã giao': ORDER_STATUS_CODES.DELIVERED,
   'Đã hủy': ORDER_STATUS_CODES.CANCELLED,
@@ -122,10 +108,6 @@ export function normalizeOrderStatus(status) {
 
 export function normalizeOrderUiStatus(orderOrStatus = '', paymentType = '') {
   const code = normalizeOrderStatusCode(orderOrStatus)
-  if (isCodPayment((orderOrStatus && typeof orderOrStatus === 'object') ? orderOrStatus : paymentType)) {
-    return COD_STATUS_CODE_TO_UI_KEY[code] || STATUS_CODE_TO_UI_KEY[code] || String(orderOrStatus || '').toLowerCase()
-  }
-
   return STATUS_CODE_TO_UI_KEY[code] || String(orderOrStatus || 'unpaid').toLowerCase()
 }
 
@@ -168,16 +150,18 @@ export function getOrderStatusOptions(order = {}) {
   if (code === ORDER_STATUS_CODES.REFUND_PENDING) return ['Đã hoàn tiền']
 
   if (isCodPayment(order)) {
-    if (code === ORDER_STATUS_CODES.UNPAID) options.push('Xác nhận thành công')
-    if (code === ORDER_STATUS_CODES.CONFIRMED || code === ORDER_STATUS_CODES.PAID) options.push('Đang giao')
-    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Hoàn thành')
+    if (code === ORDER_STATUS_CODES.UNPAID) options.push('Đang vận chuyển')
+    if (code === ORDER_STATUS_CODES.IN_TRANSIT) options.push('Đang giao')
+    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đã nhận')
     if (canCancelOrder(order)) options.push('Đã hủy')
     return options
   }
 
-  if (code === ORDER_STATUS_CODES.PAID) options.push('Đang vận chuyển')
+  if (code === ORDER_STATUS_CODES.UNPAID || code === ORDER_STATUS_CODES.PAYMENT_FAILED || code === ORDER_STATUS_CODES.PAID) {
+    options.push('Đang vận chuyển')
+  }
   if (code === ORDER_STATUS_CODES.IN_TRANSIT) options.push('Đang giao')
-  if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Hoàn thành')
+  if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đã nhận')
   if (canCancelOrder(order)) options.push('Đã hủy')
   return options
 }
@@ -203,7 +187,7 @@ export function canCancelOrder(order = {}) {
 
 export function canEditOrderTrackingCode(order = {}, nextStatusLabel = '') {
   return normalizeOrderStatusCode(order) !== ORDER_STATUS_CODES.DELIVERED
-    && nextStatusLabel === 'Đang giao'
+    && nextStatusLabel === 'Đang vận chuyển'
 }
 
 export function applyOrderStatusMapping(order = {}) {

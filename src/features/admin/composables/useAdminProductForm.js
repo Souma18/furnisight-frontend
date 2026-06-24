@@ -7,8 +7,6 @@ export const PRODUCT_MODEL_MAX_SIZE = 100 * 1024 * 1024
 export const PRODUCT_FORM_DEFAULTS = {
   name: '',
   category: 'Phòng ngủ',
-  price: '',
-  stock: '',
   sku: '',
   status: 'Còn hàng',
   modelUrl: '',
@@ -67,8 +65,6 @@ export function mapProductToForm(row) {
     ...PRODUCT_FORM_DEFAULTS,
     name: row.name ?? '',
     category: row.category ?? 'Phòng ngủ',
-    price: row.price ?? '',
-    stock: row.stock ?? '',
     sku: row.sku ?? '',
     status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
     modelUrl,
@@ -298,26 +294,30 @@ function fileNameFromUrl(url) {
 
 export function buildProductPayload(form) {
   validateProductVariants(form)
-  const variants = normalizeVariants(form.variants, form).map((variant) => ({
-    id: variant.id || '',
-    sku: variant.sku.trim().toUpperCase(),
-    color: variant.color || '',
-    material: variant.material || 'N/A',
-    warranty: variant.warranty || '',
-    price: Number(variant.price) || 0,
-    stock: Number(variant.stock) || 0,
-    weight: Number(variant.weight) || 1,
-    length: Number(variant.length) || 1,
-    width: Number(variant.width) || 1,
-    height: Number(variant.height) || 1,
-    lowStockThreshold: Number(variant.lowStockThreshold) || 5,
-  }))
-  const primary = variants[0] ?? {}
+  const productSku = String(form.sku || '').trim().toUpperCase()
+  const variants = normalizeVariants(form.variants, form).map((variant) => {
+    let variantSku = variant.sku.trim().toUpperCase()
+    if (productSku && variantSku && !variantSku.startsWith(`${productSku}-`)) {
+      variantSku = `${productSku}-${variantSku}`
+    }
+    return {
+      id: variant.id || '',
+      sku: variantSku,
+      color: variant.color || '',
+      material: variant.material || 'N/A',
+      warranty: variant.warranty || '',
+      price: Number(variant.price) || 0,
+      stock: Number(variant.stock) || 0,
+      weight: Number(variant.weight) || 1,
+      length: Number(variant.length) || 1,
+      width: Number(variant.width) || 1,
+      height: Number(variant.height) || 1,
+      lowStockThreshold: Number(variant.lowStockThreshold) || 5,
+    }
+  })
   return {
     name: form.name,
     category: form.category,
-    price: Number(primary.price ?? form.price) || 0,
-    stock: Number(primary.stock ?? form.stock) || 0,
     sku: form.sku,
     status: PRODUCT_STATUS_TO_API[form.status] ?? form.status,
     statusLabel: form.status,
@@ -350,15 +350,19 @@ export function validateProductVariants(form) {
   const variants = normalizeVariants(form.variants, form)
   const seen = new Set()
   const errors = {}
+  const productSku = String(form.sku || '').trim().toUpperCase()
   variants.forEach((variant, index) => {
-    const sku = String(variant.sku || '').trim().toUpperCase()
-    variant.sku = sku
-    if (!sku) {
-      errors[index] = 'SKU variant là bắt buộc.'
-    } else if (seen.has(sku)) {
-      errors[index] = `SKU ${sku} bị trùng trong sản phẩm.`
+    let variantSku = String(variant.sku || '').trim().toUpperCase()
+    if (productSku && variantSku && !variantSku.startsWith(`${productSku}-`)) {
+      variantSku = `${productSku}-${variantSku}`
     }
-    seen.add(sku)
+    variant.sku = variantSku
+    if (!variantSku) {
+      errors[index] = 'SKU variant là bắt buộc.'
+    } else if (seen.has(variantSku)) {
+      errors[index] = `SKU ${variantSku} bị trùng trong sản phẩm.`
+    }
+    seen.add(variantSku)
     const threshold = Number(variant.lowStockThreshold)
     if (!Number.isInteger(threshold) || threshold < 1 || threshold > 9999) {
       errors[index] = errors[index] || 'Ngưỡng cảnh báo phải từ 1 đến 9999.'
@@ -381,7 +385,5 @@ export function normalizeVariants(variants, fallback = {}) {
   }
   return [createEmptyVariant({
     sku: fallback.sku ?? '',
-    price: fallback.price ?? '',
-    stock: fallback.stock ?? '',
   })]
 }

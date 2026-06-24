@@ -1,86 +1,7 @@
 import { apiClient } from '../../client'
 
-const CHAT_TEMPLATE_BASE_URL = '/notifications/notification-templates'
-const CHAT_TEMPLATE_CODE_PREFIX = 'CHAT_'
-const DEFAULT_CHAT_TEMPLATE_CATEGORY = 'GREETING'
-
-function normalizeTemplateCategory(value) {
-  const normalized = String(value || DEFAULT_CHAT_TEMPLATE_CATEGORY).trim().toUpperCase()
-  return normalized || DEFAULT_CHAT_TEMPLATE_CATEGORY
-}
-
-function extractChatTemplateCategory(template) {
-  const nameMatch = String(template?.name || '').match(/^\[([A-Z_]+)]\s*(.*)$/)
-  if (nameMatch?.[1]) return nameMatch[1]
-
-  const codeMatch = String(template?.code || '').match(/^CHAT_([A-Z_]+)_/)
-  if (codeMatch?.[1]) return codeMatch[1]
-
-  return DEFAULT_CHAT_TEMPLATE_CATEGORY
-}
-
-function stripChatTemplateName(name) {
-  return String(name || '').replace(/^\[[A-Z_]+]\s*/, '')
-}
-
-function isChatTemplate(template) {
-  const code = String(template?.code || '').toUpperCase()
-  const name = String(template?.name || '')
-  return code.startsWith(CHAT_TEMPLATE_CODE_PREFIX) || /^\[[A-Z_]+]\s*/.test(name)
-}
-
-function mapChatTemplateFromApi(template) {
-  const category = extractChatTemplateCategory(template)
-  return {
-    ...template,
-    id: template.id,
-    title: stripChatTemplateName(template.name || template.titleTemplate || ''),
-    content: template.bodyTemplate || '',
-    category,
-    active: true,
-  }
-}
-
-function mapChatTemplateResponse(response) {
-  const rawList = Array.isArray(response.data) ? response.data : response.data?.items ?? []
-  const list = Array.isArray(rawList) ? rawList : []
-  return {
-    ...response,
-    data: list.filter(isChatTemplate).map(mapChatTemplateFromApi),
-  }
-}
-
-function mapSingleChatTemplateResponse(response) {
-  return {
-    ...response,
-    data: mapChatTemplateFromApi(response.data || {}),
-  }
-}
-
-function buildChatTemplateCreatePayload(template) {
-  const category = normalizeTemplateCategory(template.category)
-  const title = String(template.title || '').trim()
-  return {
-    code: `${CHAT_TEMPLATE_CODE_PREFIX}${category}_${Date.now()}`,
-    name: `[${category}] ${title}`,
-    titleTemplate: title,
-    bodyTemplate: String(template.content || '').trim(),
-    type: 'SYSTEM',
-    channel: 'IN_APP',
-    defaultImage: '',
-    defaultActionUrl: '',
-  }
-}
-
-function buildChatTemplateUpdatePayload(template) {
-  const category = normalizeTemplateCategory(template.category)
-  const title = String(template.title || '').trim()
-  return {
-    name: `[${category}] ${title}`,
-    titleTemplate: title,
-    bodyTemplate: String(template.content || '').trim(),
-  }
-}
+// Chat templates are now handled directly by message-service
+const CHAT_TEMPLATE_BASE_URL = '/messages/message-templates'
 
 class AdminApi {
   fetchDashboard(params) {
@@ -240,14 +161,7 @@ class AdminApi {
   }
 
   fetchNotificationTemplates(params) {
-    return apiClient.get('/notifications/notification-templates', { params }).then(response => {
-      const rawList = Array.isArray(response.data) ? response.data : response.data?.items ?? []
-      const list = Array.isArray(rawList) ? rawList : []
-      return {
-        ...response,
-        data: list.filter(t => !isChatTemplate(t)),
-      }
-    })
+    return apiClient.get('/notifications/notification-templates', { params })
   }
 
   createNotificationTemplate(payload) {
@@ -303,21 +217,33 @@ class AdminApi {
   }
 
   fetchMessageTemplates(params) {
-    return apiClient
-      .get(CHAT_TEMPLATE_BASE_URL, { params })
-      .then(mapChatTemplateResponse)
+    return apiClient.get(CHAT_TEMPLATE_BASE_URL, { params }).then(res => {
+      const payload = res.data;
+      if (payload && payload.data) {
+        return { ...res, data: payload.data };
+      }
+      return res;
+    });
   }
 
   createMessageTemplate(payload) {
-    return apiClient
-      .post(CHAT_TEMPLATE_BASE_URL, buildChatTemplateCreatePayload(payload))
-      .then(mapSingleChatTemplateResponse)
+    return apiClient.post(CHAT_TEMPLATE_BASE_URL, payload).then(res => {
+      const payloadObj = res.data;
+      if (payloadObj && payloadObj.data) {
+        return { ...res, data: payloadObj.data };
+      }
+      return res;
+    });
   }
 
   updateMessageTemplate(id, payload) {
-    return apiClient
-      .put(`${CHAT_TEMPLATE_BASE_URL}/${id}`, buildChatTemplateUpdatePayload(payload))
-      .then(mapSingleChatTemplateResponse)
+    return apiClient.put(`${CHAT_TEMPLATE_BASE_URL}/${id}`, payload).then(res => {
+      const payloadObj = res.data;
+      if (payloadObj && payloadObj.data) {
+        return { ...res, data: payloadObj.data };
+      }
+      return res;
+    });
   }
 
   deleteMessageTemplate(id) {

@@ -250,13 +250,12 @@ watch(
         </div>
       </div>
       <div class="mform-row">
-        <div class="mform-group" style="flex:1"><label class="mfl">Giá bán (đ)</label><input v-model="form.price" class="mfi" type="number" /></div>
+        <div class="mform-group"><label class="mfl">SKU Sản phẩm *</label><input v-model="form.sku" class="mfi" /></div>
       </div>
       <div class="mform-note">
         <AppIcon name="warehouse" :size="13" style="margin-right:5px;opacity:.7" />
         Tồn kho được quản lý tại trang <strong>Kho hàng</strong> · thêm hàng bằng chức năng &ldquo;Nhập kho&rdquo;
       </div>
-      <div class="mform-group"><label class="mfl">SKU</label><input v-model="form.sku" class="mfi" /></div>
       <div class="mform-group">
         <div class="variant-head">
           <label class="mfl">Biến thể sản phẩm</label>
