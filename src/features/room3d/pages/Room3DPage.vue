@@ -123,6 +123,7 @@ onMounted(() => {
             :selected-room="selectedRoom"
             :scene-items="sceneItems"
             :cart-product-ids="placedProductIds"
+            :available-products="vm.recommendations"
             @add-product="vm.addProductToCart"
             @add-scene-product="vm.addProductToScene"
             @remove-scene-item="vm.removeProductFromScene"

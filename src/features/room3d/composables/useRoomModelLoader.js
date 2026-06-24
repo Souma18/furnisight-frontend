@@ -26,7 +26,15 @@ export function useRoomModelLoader({
   resizeRendererToShell,
 }) {
   const isModelLoading = ref(false)
-  const productMap = new Map(PRODUCTS_3D.map((item) => [item.id, item]))
+  const productMap = computed(() => {
+    const map = new Map(PRODUCTS_3D.map((item) => [item.id, item]))
+    if (Array.isArray(props.availableProducts)) {
+      props.availableProducts.forEach((item) => {
+        map.set(item.id, item)
+      })
+    }
+    return map
+  })
   let loaderInstance = null
   let furnitureLoadToken = 0
 
@@ -45,7 +53,7 @@ export function useRoomModelLoader({
   )
 
   function normalizeFurnitureModel(model, sceneItem, index) {
-    const product = productMap.get(sceneItem.productId)
+    const product = productMap.value.get(sceneItem.productId)
     const fallback = product?.fallback ?? { width: 0.9, height: 0.9, depth: 0.9 }
     const originalBox = new Box3().setFromObject(model)
     const size = originalBox.getSize(new Vector3())
@@ -142,7 +150,7 @@ export function useRoomModelLoader({
 
     await Promise.all(
       props.sceneItems.map(async (sceneItem, index) => {
-        const product = productMap.get(sceneItem.productId)
+        const product = productMap.value.get(sceneItem.productId)
         if (!product?.modelUrl) return
 
         try {

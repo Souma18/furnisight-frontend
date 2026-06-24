@@ -24,11 +24,13 @@ function parseDraggedProductId(event) {
 
   try {
     const parsed = JSON.parse(raw)
-    return Number.isFinite(parsed?.productId) ? parsed.productId : null
+    if (parsed?.productId) return parsed.productId
   } catch {
-    const asNumber = Number.parseInt(String(raw).trim(), 10)
-    return Number.isFinite(asNumber) ? asNumber : null
+    // fallthrough
   }
+  
+  const trimmed = String(raw).trim()
+  return trimmed ? trimmed : null
 }
 
 function hasDraggedProductData(event) {
@@ -171,10 +173,10 @@ export function useRoomFurnitureInteraction({
   }
 
   function onCanvasDrop(event) {
+    isDragOverCanvas.value = false
     const productId = parseDraggedProductId(event)
     if (!productId || !hasRoom.value || !isRoomAvailable.value) return
     event.preventDefault()
-    isDragOverCanvas.value = false
 
     const renderer = rendererRef.value?.renderer
     const camera = cameraRef.value?.camera

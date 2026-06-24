@@ -51,6 +51,10 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
+  availableProducts: {
+    type: Array,
+    default: () => [],
+  },
 })
 
 const hasRoom = computed(() => Boolean(props.selectedRoom))
@@ -73,6 +77,7 @@ const selectedSceneItem = computed(
   () => props.sceneItems.find((item) => item.instanceId === selectedSceneItemId.value) ?? null,
 )
 const selectedProduct = computed(() =>
+  props.availableProducts.find((product) => product.id === selectedSceneItem.value?.productId) ??
   PRODUCTS_3D.find((product) => product.id === selectedSceneItem.value?.productId) ?? null,
 )
 const isSelectedInCart = computed(() =>
