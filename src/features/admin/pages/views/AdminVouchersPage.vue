@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { ADMIN_PROMOTION_TABS } from '../../config/adminPromotionContent'
@@ -227,6 +227,34 @@ const showPublishUserPicker = ref(false)
 
 const isHtmlContent = (str) => typeof str === 'string' && (str.includes('<!DOCTYPE html>') || str.includes('<html') || str.includes('UNLAYER_DESIGN_START'))
 
+// --- Voucher Preview ---
+const selectedPublishVoucher = computed(() =>
+  publish.value?.voucher ? publish.value.voucher : null
+)
+const selectedNotifyVoucher = computed(() =>
+  notifyForm.relatedVoucherId ? vouchers.value.find(v => v.id === notifyForm.relatedVoucherId) : null
+)
+const selectedCampaignVoucher = computed(() =>
+  campaignForm.voucherId ? vouchers.value.find(v => v.id === campaignForm.voucherId) : null
+)
+
+function discountPreviewLabel(voucher) {
+  if (!voucher) return ''
+  const valStr = String(voucher.discountValue || '').replace(/\.0$/, '')
+  if (voucher.discountType === 'PERCENTAGE' || voucher.discountType === 'PERCENT') return `-${valStr}%`
+  if (voucher.discountType === 'FIXED_AMOUNT' || voucher.discountType === 'FIXED') return `-${Number(voucher.discountValue || 0).toLocaleString('vi-VN')}đ`
+  if (voucher.discountType === 'FREE_SHIPPING' || voucher.discountType === 'SHIPPING_CAP') return 'Miễn phí vận chuyển'
+  return valStr
+}
+function minOrderLabel(voucher) {
+  if (!voucher || !voucher.minOrder) return 'Không yêu cầu'
+  return `Đơn tối thiểu ${Number(voucher.minOrder).toLocaleString('vi-VN')}đ`
+}
+function expireDateLabel(voucher) {
+  if (!voucher?.endDate) return ''
+  return new Date(voucher.endDate).toLocaleDateString('vi-VN')
+}
+
 function openPreviewHtml(title, body) {
   editing.previewTemplate = { name: 'Xem trước nội dung', titleTemplate: title, bodyTemplate: body }
   modal.previewTemplate = true
@@ -380,7 +408,7 @@ const {
               <td>{{ numberText(row.sentCount) }}</td>
               <td>{{ dateOnly(row.scheduledAt) }}</td>
               <td><span class="status-badge" :class="statusTone(row.status)"><span />{{ statusLabel(row.status) }}</span></td>
-              <td><div class="mc-actions"><button @click="openCampaignModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteCampaign(row)"><AppIcon name="trash" :size="14" /></button></div></td>
+              <td><div class="mc-actions"><button @click="openCampaignModal(row)" :title="row.status === 'SENT' ? 'Xem chi tiết' : 'Sửa'"><AppIcon :name="row.status === 'SENT' ? 'eye' : 'edit'" :size="14" /></button><button class="danger" @click="deleteCampaign(row)" :disabled="row.status === 'SENT'"><AppIcon name="trash" :size="14" /></button></div></td>
             </tr>
           </tbody>
         </table>
@@ -442,7 +470,7 @@ const {
               <td>{{ dateOnly(row.scheduledAt) }}</td>
               <td>{{ dateOnly(row.createdAt) }}</td>
               <td><span class="status-badge" :class="statusTone(row.status)"><span />{{ statusLabel(row.status) }}</span></td>
-              <td><div class="mc-actions"><button @click="openNotifyModal(row)"><AppIcon name="edit" :size="14" /></button><button class="danger" @click="deleteNotification(row)"><AppIcon name="trash" :size="14" /></button></div></td>
+              <td><div class="mc-actions"><button @click="openNotifyModal(row)" :title="row.status === 'SENT' ? 'Xem chi tiết' : 'Sửa'"><AppIcon :name="row.status === 'SENT' ? 'eye' : 'edit'" :size="14" /></button><button class="danger" @click="deleteNotification(row)" :disabled="row.status === 'SENT'"><AppIcon name="trash" :size="14" /></button></div></td>
             </tr>
           </tbody>
         </table>
@@ -541,8 +569,25 @@ const {
             </div>
             <textarea v-else v-model="campaignForm.notificationBody" rows="12" class="large-textarea" />
           </label>
+
+          <!-- VOUCHER PREVIEW CARD -->
+          <div v-if="selectedCampaignVoucher" class="voucher-preview-wrap">
+            <div class="vp-label"><AppIcon name="eye" :size="14" /> Xem trước thẻ Voucher (hiển thị với người nhận)</div>
+            <div class="vp-card">
+              <div class="vp-left"><AppIcon name="badgePercent" :size="26" /></div>
+              <div class="vp-info">
+                <div class="vp-name">{{ selectedCampaignVoucher.name }}</div>
+                <div class="vp-code">{{ selectedCampaignVoucher.code }}</div>
+                <div class="vp-discount">{{ discountPreviewLabel(selectedCampaignVoucher) }}</div>
+                <div class="vp-meta">{{ minOrderLabel(selectedCampaignVoucher) }}</div>
+                <div v-if="selectedCampaignVoucher.endDate" class="vp-expiry">HSD: {{ expireDateLabel(selectedCampaignVoucher) }}</div>
+              </div>
+              <div class="vp-badge">VOUCHER</div>
+            </div>
+          </div>
+
         </div>
-        <footer><button type="button" class="mc-cancel" @click="modal.campaign = false">Hủy</button><button class="mc-primary"><AppIcon name="save" />Lưu chiến dịch</button></footer>
+        <footer><button type="button" class="mc-cancel" @click="modal.campaign = false">{{ editing.campaign?.status === 'SENT' ? 'Đóng' : 'Hủy' }}</button><button v-if="editing.campaign?.status !== 'SENT'" class="mc-primary"><AppIcon name="save" />Lưu chiến dịch</button></footer>
       </div>
     </form>
 
@@ -648,7 +693,7 @@ const {
           <label v-if="notifyForm.targetType === 'SEGMENT'">Nhóm người dùng<select v-model="notifyForm.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
           <div class="checkbox-grid"><label class="check-line"><input v-model="notifyForm.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="notifyForm.channels" type="checkbox" value="EMAIL">Email</label></div>
         </div>
-        <footer><button type="button" class="mc-cancel" @click="modal.notify = false">Hủy</button><button class="mc-primary"><AppIcon name="send" />Lưu thông báo</button></footer>
+        <footer><button type="button" class="mc-cancel" @click="modal.notify = false">{{ editing.notify?.status === 'SENT' ? 'Đóng' : 'Hủy' }}</button><button v-if="editing.notify?.status !== 'SENT'" class="mc-primary"><AppIcon name="send" />Lưu thông báo</button></footer>
       </div>
     </form>
 
@@ -754,6 +799,25 @@ const {
             </div>
             <textarea v-else v-model="publish.body" rows="12" class="large-textarea" />
           </label>
+
+          <!-- VOUCHER PREVIEW CARD -->
+          <div v-if="selectedPublishVoucher" class="voucher-preview-wrap">
+            <div class="vp-label"><AppIcon name="eye" :size="14" /> Xem trước thẻ Voucher (hiển thị với người nhận)</div>
+            <div class="vp-card">
+              <div class="vp-left">
+                <AppIcon name="badgePercent" :size="26" />
+              </div>
+              <div class="vp-info">
+                <div class="vp-name">{{ selectedPublishVoucher.name }}</div>
+                <div class="vp-code">{{ selectedPublishVoucher.code }}</div>
+                <div class="vp-discount">{{ discountPreviewLabel(selectedPublishVoucher) }}</div>
+                <div class="vp-meta">{{ minOrderLabel(selectedPublishVoucher) }}</div>
+                <div v-if="selectedPublishVoucher.endDate" class="vp-expiry">HSD: {{ expireDateLabel(selectedPublishVoucher) }}</div>
+              </div>
+              <div class="vp-badge">VOUCHER</div>
+            </div>
+          </div>
+
           <button type="button" class="mc-primary" :disabled="publishing" @click="confirmPublishVoucher"><AppIcon name="send" />Xác nhận phát hành</button>
         </div>
       </div>
@@ -919,5 +983,55 @@ const {
   .modal-backdrop { align-items: flex-start; padding: 12px; }
   .combo-item-card { grid-template-columns: 34px 1fr; }
   .combo-item-card label, .combo-item-card button { grid-column: 2; }
+}
+
+/* ---- VOUCHER PREVIEW CARD ---- */
+.voucher-preview-wrap { margin: 8px 0 4px; }
+.vp-label { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #8a7a68; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+.vp-card {
+  display: grid;
+  grid-template-columns: 60px 1fr 56px;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(135deg, #fffbf2 0%, #fff8ea 100%);
+  border: 1.5px dashed #c9953a;
+  border-radius: 14px;
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+.vp-card::before {
+  content: '';
+  position: absolute;
+  left: 59px;
+  top: 0; bottom: 0;
+  width: 1px;
+  border-left: 2px dashed #e8d4aa;
+}
+.vp-left {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #c9953a 18%, #fff);
+  color: #8a5c00;
+}
+.vp-info { min-width: 0; }
+.vp-name { font-size: 0.95rem; font-weight: 700; color: #1a2332; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vp-code { font-size: 0.85rem; font-weight: 800; color: #c9953a; letter-spacing: .08em; margin-top: 2px; }
+.vp-discount { font-size: 1.1rem; font-weight: 800; color: #b8630a; margin-top: 4px; }
+.vp-meta { font-size: 0.75rem; color: #8a7a68; margin-top: 2px; }
+.vp-expiry { font-size: 0.72rem; color: #be123c; margin-top: 2px; font-weight: 600; }
+.vp-badge {
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: .12em;
+  color: #c9953a;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  opacity: 0.45;
+  user-select: none;
 }
 </style>
