@@ -225,8 +225,8 @@ export const useRoom3DStore = defineStore('room3d', () => {
   }
 
   function addToScene(productOrId, options = {}) {
-    const productId = typeof productOrId === 'number' ? productOrId : productOrId?.id
-    if (!Number.isFinite(productId)) return null
+    const productId = typeof productOrId === 'object' ? productOrId?.id : productOrId
+    if (!productId) return null
 
     const instanceId = `scene-${productId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
     const sceneItem = {

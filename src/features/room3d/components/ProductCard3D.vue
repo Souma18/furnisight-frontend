@@ -21,13 +21,17 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  cartQty: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const emit = defineEmits(['add', 'open-detail'])
 const { t } = useI18n()
 
 const productImage = computed(() => props.product.image || props.product.imageUrl || '')
-const canDragToScene = computed(() => Boolean(props.product.modelUrl))
+const canDragToScene = computed(() => Boolean(props.product.modelUrl || props.product.modelurl || props.product.model_url))
 const priceLabel = computed(() => {
   const price = Number(props.product.price)
   return Number.isFinite(price) && price > 0 ? PriceFormatter.format(price) : t('room3d.product.contactPrice')
@@ -86,6 +90,7 @@ function openDetail() {
   >
     <div class="preview">
       <span v-if="product.tags?.includes?.('new')" class="new-badge">{{ t('room3d.product.new') }}</span>
+      <span v-if="cartQty > 0" class="cart-badge">{{ cartQty }}</span>
       <img v-if="productImage" class="product-image" :src="productImage" :alt="product.name" />
       <div v-else class="product-icon"><AppIcon :name="productIconName" :size="34" /></div>
     </div>
@@ -101,13 +106,11 @@ function openDetail() {
       <button
         type="button"
         class="add-btn"
-        :disabled="added"
-        :aria-label="added ? t('room3d.product.added') : t('room3d.product.addToCart')"
-        :title="added ? t('room3d.product.added') : t('room3d.product.addToCart')"
+        :aria-label="t('room3d.product.addToCart')"
+        :title="t('room3d.product.addToCart')"
         @click.stop="$emit('add', product)"
       >
-        <AppIcon v-if="added" name="check" :size="15" :stroke-width="2.4" />
-        <AppIcon v-else name="cart" :size="15" :stroke-width="2.4" />
+        <AppIcon name="cart" :size="15" :stroke-width="2.4" />
       </button>
     </div>
   </article>
@@ -179,14 +182,33 @@ function openDetail() {
   font-weight: 700;
   font-size: calc(0.58rem * var(--pc-content-scale));
   letter-spacing: 0.02em;
+  z-index: 2;
 }
-
 .product-icon {
   width: 100%;
   color: #876844;
   text-align: center;
   line-height: 1;
   transition: transform 0.2s ease;
+  color: #c9922a;
+}
+
+.cart-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #0f3f5c;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(15, 63, 92, 0.3);
 }
 
 .product-image {
