@@ -61,6 +61,16 @@ export function useAccountOrders(emitNotify) {
     return true
   }
 
+  async function confirmOrderReceived(orderCode) {
+    const result = await orderStore.confirmOrderReceived(orderCode)
+    if (!result.ok) {
+      if (emitNotify) emitNotify(result.message ?? t('account.orders.confirmError'), 'error')
+      return false
+    }
+    if (emitNotify) emitNotify(t('account.orders.confirmSuccess'), 'success')
+    return true
+  }
+
   async function retryPayment(order) {
     const orderCode = order?.orderCode || ''
     if (!orderCode || retryingOrderCode.value) return false
@@ -99,6 +109,7 @@ export function useAccountOrders(emitNotify) {
     openOrderDetail,
     backToOrders,
     cancelOrder,
+    confirmOrderReceived,
     retryPayment,
     retryingOrderCode,
   }

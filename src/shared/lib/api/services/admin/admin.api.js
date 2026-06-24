@@ -1,7 +1,7 @@
 import { apiClient } from '../../client'
 
-// Chat templates are now handled directly by message-service
-const CHAT_TEMPLATE_BASE_URL = '/messages/message-templates'
+// Chat templates are managed via admin-service
+const CHAT_TEMPLATE_BASE_URL = '/admin/message-templates'
 
 class AdminApi {
   fetchDashboard(params) {
@@ -217,33 +217,15 @@ class AdminApi {
   }
 
   fetchMessageTemplates(params) {
-    return apiClient.get(CHAT_TEMPLATE_BASE_URL, { params }).then(res => {
-      const payload = res.data;
-      if (payload && payload.data) {
-        return { ...res, data: payload.data };
-      }
-      return res;
-    });
+    return apiClient.get(CHAT_TEMPLATE_BASE_URL, { params })
   }
 
   createMessageTemplate(payload) {
-    return apiClient.post(CHAT_TEMPLATE_BASE_URL, payload).then(res => {
-      const payloadObj = res.data;
-      if (payloadObj && payloadObj.data) {
-        return { ...res, data: payloadObj.data };
-      }
-      return res;
-    });
+    return apiClient.post(CHAT_TEMPLATE_BASE_URL, payload)
   }
 
   updateMessageTemplate(id, payload) {
-    return apiClient.put(`${CHAT_TEMPLATE_BASE_URL}/${id}`, payload).then(res => {
-      const payloadObj = res.data;
-      if (payloadObj && payloadObj.data) {
-        return { ...res, data: payloadObj.data };
-      }
-      return res;
-    });
+    return apiClient.put(`${CHAT_TEMPLATE_BASE_URL}/${id}`, payload)
   }
 
   deleteMessageTemplate(id) {

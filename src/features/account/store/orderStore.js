@@ -61,8 +61,10 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
   function addOrderFromCheckout(payload) {
     if (payload.order) {
-      orders.value = [payload.order, ...orders.value]
-      orderDetails.value = { ...orderDetails.value, [payload.order.orderCode || payload.order.id]: payload.order }
+      const parsedOrder = new OrderDetailResponse(payload.order)
+      orders.value = [parsedOrder, ...orders.value]
+      orderDetails.value = { ...orderDetails.value, [parsedOrder.orderCode || parsedOrder.id]: parsedOrder }
+      return parsedOrder
     }
     return payload.order
   }
@@ -98,6 +100,31 @@ export const useOrderStore = defineStore('accountOrder', () => {
       return { ok: true, status: updatedDetail?.status }
     } catch (error) {
       return { ok: false, message: error.response?.data?.message || t('account.orders.cancelNowError') }
+    }
+  }
+
+  async function confirmOrderReceived(orderRef) {
+    const detail = findOrder(orderRef)
+    if (!detail) return { ok: false, message: t('account.orders.notFound') }
+    
+    try {
+      const orderCode = detail.orderCode || orderRef
+      await ordersApi.confirmOrderReceived(orderCode)
+      const updatedDetail = await fetchOrderDetail(orderCode)
+      
+      if (updatedDetail) {
+        orders.value = orders.value.map((order) =>
+          order.id === detail.id || order.orderCode === orderCode
+            ? new OrderListResponse({ ...order, ...updatedDetail })
+            : order,
+        )
+      } else {
+        await fetchOrders()
+      }
+
+      return { ok: true }
+    } catch (error) {
+      return { ok: false, message: error.response?.data?.message || t('account.orders.confirmError') }
     }
   }
 
@@ -159,6 +186,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
     addOrderFromCheckout,
     getOrderDetail,
     cancelOrder,
+    confirmOrderReceived,
     retryPayment,
     resetOrderState,
   }

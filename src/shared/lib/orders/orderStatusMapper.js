@@ -1,39 +1,62 @@
+/**
+ * Order Status Flow (matches backend OrderStatus enum exactly):
+ *
+ * VNPAY:
+ *   UNPAID  → PAID | PAYMENT_FAILED | CANCELLED
+ *   PAYMENT_FAILED → PAID | CANCELLED
+ *   PAID    → SHIPPING | REFUND_PENDING
+ *   SHIPPING → IN_TRANSIT | CANCELLED | REFUND_PENDING
+ *   IN_TRANSIT → DELIVERED  (customer confirms receipt)
+ *   CANCELLED  → REFUND_PENDING  (admin, for paid orders)
+ *   REFUND_PENDING → REFUNDED
+ *   DELIVERED, REFUNDED → (terminal)
+ *
+ * COD:
+ *   UNPAID  → SHIPPING | CANCELLED
+ *   SHIPPING → IN_TRANSIT | CANCELLED
+ *   IN_TRANSIT → DELIVERED  (customer confirms receipt)
+ *   DELIVERED, CANCELLED → (terminal, no payment/refund steps)
+ */
+
+// Canonical status codes matching backend OrderStatus enum exactly
 export const ORDER_STATUS_CODES = Object.freeze({
   UNPAID: 'UNPAID',
-  CONFIRMED: 'CONFIRMED',
   PAYMENT_FAILED: 'PAYMENT_FAILED',
   PAID: 'PAID',
-  IN_TRANSIT: 'IN_TRANSIT',
   SHIPPING: 'SHIPPING',
+  IN_TRANSIT: 'IN_TRANSIT',
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED',
   REFUND_PENDING: 'REFUND_PENDING',
   REFUNDED: 'REFUNDED',
 })
 
+// UI key → human label defaults (VNPAY context)
 export const ORDER_STATUS_LABELS = Object.freeze({
   all: 'Tất cả',
-  unpaid: 'Đã đặt đơn',
-  payment_failed: 'Chưa thanh toán',
+  unpaid: 'Chờ thanh toán',       // VNPAY default
+  unpaid_cod: 'Đã đặt đơn',          // COD: no payment needed
+  payment_failed: 'Thanh toán thất bại',
   paid: 'Đã thanh toán',
-  in_transit: 'Đang vận chuyển',
-  delivering: 'Đang giao',
-  done: 'Đã nhận',
-  cancel: 'Đã hủy',
+  shipping: 'Đang vận chuyển',
+  in_transit: 'Đang giao',
+  delivered: 'Đã nhận',
+  cancelled: 'Đã hủy',
   refund_pending: 'Chờ hoàn tiền',
   refunded: 'Đã hoàn tiền',
 })
 
+// Raw BE string → canonical code  (handles old/alias values gracefully)
 const RAW_STATUS_TO_CODE = Object.freeze({
   UNPAID: ORDER_STATUS_CODES.UNPAID,
   PENDING: ORDER_STATUS_CODES.UNPAID,
-  CONFIRMED: ORDER_STATUS_CODES.CONFIRMED,
   PAYMENT_FAILED: ORDER_STATUS_CODES.PAYMENT_FAILED,
   FAILED: ORDER_STATUS_CODES.PAYMENT_FAILED,
   PAID: ORDER_STATUS_CODES.PAID,
-  IN_TRANSIT: ORDER_STATUS_CODES.IN_TRANSIT,
+  CONFIRMED: ORDER_STATUS_CODES.PAID, // legacy alias → treat as paid
   SHIPPING: ORDER_STATUS_CODES.SHIPPING,
-  DELIVERING: ORDER_STATUS_CODES.SHIPPING,
+  IN_TRANSIT: ORDER_STATUS_CODES.IN_TRANSIT,
+  DELIVERING: ORDER_STATUS_CODES.IN_TRANSIT,
   DELIVERED: ORDER_STATUS_CODES.DELIVERED,
   DONE: ORDER_STATUS_CODES.DELIVERED,
   SUCCESS: ORDER_STATUS_CODES.DELIVERED,
@@ -45,49 +68,29 @@ const RAW_STATUS_TO_CODE = Object.freeze({
   REFUNDED: ORDER_STATUS_CODES.REFUNDED,
 })
 
+// Canonical code → UI key (snake_case for i18n lookup)
 const STATUS_CODE_TO_UI_KEY = Object.freeze({
   [ORDER_STATUS_CODES.UNPAID]: 'unpaid',
   [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'payment_failed',
   [ORDER_STATUS_CODES.PAID]: 'paid',
+  [ORDER_STATUS_CODES.SHIPPING]: 'shipping',
   [ORDER_STATUS_CODES.IN_TRANSIT]: 'in_transit',
-  [ORDER_STATUS_CODES.SHIPPING]: 'delivering',
-  [ORDER_STATUS_CODES.DELIVERED]: 'done',
-  [ORDER_STATUS_CODES.CANCELLED]: 'cancel',
+  [ORDER_STATUS_CODES.DELIVERED]: 'delivered',
+  [ORDER_STATUS_CODES.CANCELLED]: 'cancelled',
   [ORDER_STATUS_CODES.REFUND_PENDING]: 'refund_pending',
   [ORDER_STATUS_CODES.REFUNDED]: 'refunded',
 })
 
-const COD_STATUS_LABELS = Object.freeze({
-  [ORDER_STATUS_CODES.UNPAID]: 'Đã đặt đơn',
-  [ORDER_STATUS_CODES.IN_TRANSIT]: 'Đang vận chuyển',
-  [ORDER_STATUS_CODES.SHIPPING]: 'Đang giao',
-  [ORDER_STATUS_CODES.DELIVERED]: 'Đã nhận',
-  [ORDER_STATUS_CODES.CANCELLED]: 'Đã hủy',
-  [ORDER_STATUS_CODES.REFUND_PENDING]: 'Chờ hoàn tiền',
-  [ORDER_STATUS_CODES.REFUNDED]: 'Đã hoàn tiền',
-})
-
-const ONLINE_PAYMENT_STATUS_LABELS = Object.freeze({
-  [ORDER_STATUS_CODES.UNPAID]: 'Đã đặt đơn',
-  [ORDER_STATUS_CODES.PAYMENT_FAILED]: 'Chưa thanh toán',
-  [ORDER_STATUS_CODES.PAID]: 'Đã thanh toán',
-  [ORDER_STATUS_CODES.IN_TRANSIT]: 'Đang vận chuyển',
-  [ORDER_STATUS_CODES.SHIPPING]: 'Đang giao',
-  [ORDER_STATUS_CODES.DELIVERED]: 'Đã nhận',
-  [ORDER_STATUS_CODES.CANCELLED]: 'Đã hủy',
-  [ORDER_STATUS_CODES.REFUND_PENDING]: 'Chờ hoàn tiền',
-  [ORDER_STATUS_CODES.REFUNDED]: 'Đã hoàn tiền',
-})
-
+// Admin action label → BE enum value (for updateOrder API)
 export const ORDER_STATUS_LABEL_TO_API = Object.freeze({
-  'Đang vận chuyển': ORDER_STATUS_CODES.IN_TRANSIT,
-  'Đang giao': ORDER_STATUS_CODES.SHIPPING,
-  'Đã nhận': ORDER_STATUS_CODES.DELIVERED,
-  'Hoàn thành': ORDER_STATUS_CODES.DELIVERED,
-  'Đã giao': ORDER_STATUS_CODES.DELIVERED,
+  'Đang vận chuyển': ORDER_STATUS_CODES.SHIPPING,
+  'Đang giao': ORDER_STATUS_CODES.IN_TRANSIT,
   'Đã hủy': ORDER_STATUS_CODES.CANCELLED,
+  'Chờ hoàn tiền': ORDER_STATUS_CODES.REFUND_PENDING,
   'Đã hoàn tiền': ORDER_STATUS_CODES.REFUNDED,
 })
+
+// ─── Normalizers ──────────────────────────────────────────────────────────────
 
 function normalizeRawStatus(value) {
   return String(value || '').trim().toUpperCase()
@@ -106,7 +109,7 @@ export function normalizeOrderStatus(status) {
   return STATUS_CODE_TO_UI_KEY[code] || String(status || 'unpaid').toLowerCase()
 }
 
-export function normalizeOrderUiStatus(orderOrStatus = '', paymentType = '') {
+export function normalizeOrderUiStatus(orderOrStatus = '') {
   const code = normalizeOrderStatusCode(orderOrStatus)
   return STATUS_CODE_TO_UI_KEY[code] || String(orderOrStatus || 'unpaid').toLowerCase()
 }
@@ -118,7 +121,6 @@ export function normalizePaymentType(orderOrPaymentType = '') {
       || orderOrPaymentType.paymentDetail?.paymentMethod
       || orderOrPaymentType.paymentDetail?.paymentType
     : orderOrPaymentType
-
   return String(value || 'vnpay').trim().toLowerCase()
 }
 
@@ -130,39 +132,66 @@ export function isCodPayment(orderOrPaymentType = '') {
     || paymentType === 'cashondelivery'
 }
 
-export function getOrderStatusLabel(orderOrStatus = '', paymentType = '') {
-  const code = normalizeOrderStatusCode(orderOrStatus)
-  const labels = isCodPayment((orderOrStatus && typeof orderOrStatus === 'object') ? orderOrStatus : paymentType)
-    ? COD_STATUS_LABELS
-    : ONLINE_PAYMENT_STATUS_LABELS
+// ─── Label Helpers ────────────────────────────────────────────────────────────
 
-  return labels[code] || ORDER_STATUS_LABELS[normalizeOrderStatus(code)] || String(orderOrStatus || '')
+/**
+ * Returns the human-readable status label for an order.
+ * UNPAID is payment-method-aware:
+ *   - COD  → "Đã đặt đơn"  (no online payment required)
+ *   - VNPAY → "Chờ thanh toán"
+ */
+export function getOrderStatusLabel(orderOrStatus = '') {
+  const code = normalizeOrderStatusCode(orderOrStatus)
+  const uiKey = STATUS_CODE_TO_UI_KEY[code]
+  if (code === ORDER_STATUS_CODES.UNPAID && typeof orderOrStatus === 'object') {
+    return isCodPayment(orderOrStatus)
+      ? ORDER_STATUS_LABELS.unpaid_cod
+      : ORDER_STATUS_LABELS.unpaid
+  }
+  return ORDER_STATUS_LABELS[uiKey] || uiKey || String(orderOrStatus || '')
 }
 
 export function getOrderStatusApiValue(label) {
   return ORDER_STATUS_LABEL_TO_API[label] || ''
 }
 
+// ─── Admin Status Transition Options ─────────────────────────────────────────
+/**
+ * Returns list of human-readable next-status options for admin.
+ * Mirrors backend handler allowedTargets() exactly for each status.
+ */
 export function getOrderStatusOptions(order = {}) {
   const code = normalizeOrderStatusCode(order)
-  const options = []
+  const cod = isCodPayment(order)
+
+  // Terminal or user-only transitions
+  if ([ORDER_STATUS_CODES.DELIVERED, ORDER_STATUS_CODES.REFUNDED, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)) {
+    return []
+  }
 
   if (code === ORDER_STATUS_CODES.REFUND_PENDING) return ['Đã hoàn tiền']
 
-  if (isCodPayment(order)) {
+  const options = []
+
+  if (cod) {
+    // COD: no payment, no refund
     if (code === ORDER_STATUS_CODES.UNPAID) options.push('Đang vận chuyển')
-    if (code === ORDER_STATUS_CODES.IN_TRANSIT) options.push('Đang giao')
-    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đã nhận')
-    if (canCancelOrder(order)) options.push('Đã hủy')
-    return options
+    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đang giao')
+    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING].includes(code)) options.push('Đã hủy')
+  } else {
+    // VNPAY
+    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID].includes(code)) {
+      options.push('Đang vận chuyển')
+    }
+    if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đang giao')
+    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING].includes(code)) {
+      options.push('Đã hủy')
+    }
+    if ([ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.CANCELLED].includes(code)) {
+      options.push('Chờ hoàn tiền')
+    }
   }
 
-  if (code === ORDER_STATUS_CODES.UNPAID || code === ORDER_STATUS_CODES.PAYMENT_FAILED || code === ORDER_STATUS_CODES.PAID) {
-    options.push('Đang vận chuyển')
-  }
-  if (code === ORDER_STATUS_CODES.IN_TRANSIT) options.push('Đang giao')
-  if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đã nhận')
-  if (canCancelOrder(order)) options.push('Đã hủy')
   return options
 }
 
@@ -176,18 +205,13 @@ export function canUpdateOrderStatus(order = {}) {
 
 export function canCancelOrder(order = {}) {
   const code = normalizeOrderStatusCode(order)
-  return [
-    ORDER_STATUS_CODES.UNPAID,
-    ORDER_STATUS_CODES.PAYMENT_FAILED,
-    ORDER_STATUS_CODES.CONFIRMED,
-    ORDER_STATUS_CODES.PAID,
-    ORDER_STATUS_CODES.IN_TRANSIT,
-  ].includes(code)
+  const cod = isCodPayment(order)
+  if (cod) return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING].includes(code)
+  return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING].includes(code)
 }
 
 export function canEditOrderTrackingCode(order = {}, nextStatusLabel = '') {
-  return normalizeOrderStatusCode(order) !== ORDER_STATUS_CODES.DELIVERED
-    && nextStatusLabel === 'Đang vận chuyển'
+  return nextStatusLabel === 'Đang vận chuyển'
 }
 
 export function applyOrderStatusMapping(order = {}) {

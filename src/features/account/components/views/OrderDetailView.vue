@@ -11,9 +11,12 @@ const {
   backToOrders,
   cancelDialogOpen,
   canceling,
+  confirmDialogOpen,
+  confirming,
   retryingPayment,
   canRetryPaymentNow,
   canCancelCurrentOrder,
+  canConfirmReceived,
   statusLabel,
   transactionTimeline,
   transactionRows,
@@ -32,6 +35,9 @@ const {
   handleCancel,
   closeCancelDialog,
   confirmCancel,
+  handleConfirmReceived,
+  closeConfirmDialog,
+  executeConfirmReceived,
   handleRetryPayment,
 } = useOrderDetailView((msg, type) => emit('notify', msg, type))
 </script>
@@ -63,6 +69,10 @@ const {
         >
           <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />
           {{ retryingPayment ? t('account.orders.creatingPayment') : t('account.orders.retryPayment') }}
+        </button>
+        <button v-if="canConfirmReceived" type="button" class="order-confirm-btn" @click="handleConfirmReceived">
+          <AppIcon name="check" :size="14" />
+          {{ t('account.orders.confirmReceived') }}
         </button>
         <button v-if="canCancelCurrentOrder" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
@@ -245,6 +255,17 @@ const {
       @close="closeCancelDialog"
       @confirm="confirmCancel"
     />
+
+    <ConfirmDialog
+      :open="confirmDialogOpen"
+      :title="t('account.orders.confirmReceivedDialogTitle')"
+      :message="t('account.orders.confirmReceivedDialogMessage')"
+      :confirm-label="t('account.orders.confirmReceived')"
+      :cancel-label="t('account.orders.close')"
+      :loading="confirming"
+      @close="closeConfirmDialog"
+      @confirm="executeConfirmReceived"
+    />
   </section>
 
   <p v-else class="order-detail-missing">{{ t('account.orders.notFound') }}</p>
@@ -354,6 +375,23 @@ const {
 
 .order-cancel-btn:hover {
   background: #fdf0ee;
+}
+
+.order-confirm-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 0.45rem 0.75rem;
+  background: #2a7a50;
+  color: #fff;
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.order-confirm-btn:hover {
+  background: #205c3d;
 }
 
 .order-pay-btn {

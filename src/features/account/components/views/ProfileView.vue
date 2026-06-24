@@ -3,6 +3,8 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AddressView from './AddressView.vue'
+import SecurityView from './SecurityView.vue'
 
 import { useProfileForm } from '../../composables/useProfileForm'
 import { useProfileStore } from '../../store/profileStore'
@@ -101,7 +103,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <AccountSectionCard :title="t('account.profile.title')">
+  <div class="profile-layout">
+    <AccountSectionCard :title="t('account.profile.title')">
     <template #head>
       <button v-if="!editing" type="button" class="edit-btn" @click="startEditing">
         <AppIcon name="pencil" :size="14" />
@@ -209,10 +212,20 @@ onMounted(() => {
 
       <input ref="avatarInput" type="file" accept="image/*" class="hidden-input" @change="onAvatarSelected" />
     </div>
-  </AccountSectionCard>
+    </AccountSectionCard>
+
+    <AddressView @notify="(m, t) => emit('notify', m, t)" />
+    <SecurityView @notify="(m, t) => emit('notify', m, t)" />
+  </div>
 </template>
 
 <style scoped>
+.profile-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
 .edit-btn,
 .edit-state,
 .avatar-action,

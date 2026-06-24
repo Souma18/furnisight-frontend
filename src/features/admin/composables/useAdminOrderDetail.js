@@ -10,15 +10,13 @@ export function useAdminOrderDetail(orderCode) {
   const error = ref('')
 
   const statusMap = {
-    unpaid: { label: 'Chờ thanh toán', className: 'b-pending' },
-    payment_failed: { label: 'Thanh toán lỗi', className: 'b-cancel' },
+    unpaid: { label: 'Đã đặt đơn', className: 'b-pending' },
+    payment_failed: { label: 'Thanh toán thất bại', className: 'b-cancel' },
     paid: { label: 'Đã thanh toán', className: 'b-success' },
-    cod_pending_confirmation: { label: 'Chờ xác nhận', className: 'b-pending' },
-    cod_confirmed: { label: 'Xác nhận thành công', className: 'b-success' },
-    in_transit: { label: 'Đang vận chuyển', className: 'b-shipping' },
-    delivering: { label: 'Đang giao', className: 'b-shipping' },
-    done: { label: 'Hoàn thành', className: 'b-success' },
-    cancel: { label: 'Đã hủy', className: 'b-cancel' },
+    shipping: { label: 'Đang vận chuyển', className: 'b-shipping' },
+    in_transit: { label: 'Đang giao', className: 'b-shipping' },
+    delivered: { label: 'Đã nhận', className: 'b-success' },
+    cancelled: { label: 'Đã hủy', className: 'b-cancel' },
     refund_pending: { label: 'Chờ hoàn tiền', className: 'b-pending' },
     refunded: { label: 'Đã hoàn tiền', className: 'b-success' },
   }

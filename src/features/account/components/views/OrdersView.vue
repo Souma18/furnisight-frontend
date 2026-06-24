@@ -65,7 +65,7 @@ const {
           </div>
           <div class="order-card-right">
             <span class="status-badge" :class="statusClass(order.status)">
-              <AppIcon v-if="order.status === 'delivering'" name="truck" :size="14" />
+              <AppIcon v-if="order.status === 'shipping' || order.status === 'in_transit'" name="truck" :size="14" />
               {{ displayStatusLabel(order) }}
             </span>
             <strong class="order-total">{{ formatMoney(order.totalAmount) }}</strong>

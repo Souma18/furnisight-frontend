@@ -24,14 +24,11 @@ const { t } = useI18n()
 
 const navItems = computed(() => [
   { key: 'profile', label: t('account.nav.profile'), icon: 'user' },
-  { key: 'address', label: t('account.nav.address'), icon: 'mapPin' },
   { key: 'bell', label: t('account.nav.notifications'), icon: 'bell' },
   { key: 'cart', label: t('account.nav.cart'), icon: 'cart' },
   { key: 'orders', label: t('account.nav.orders'), icon: 'box' },
   { key: 'wishlist', label: t('account.nav.wishlist'), icon: 'heart' },
-  { key: 'security', label: t('account.nav.security'), icon: 'shield' },
   { key: 'settings', label: t('account.nav.settings'), icon: 'settings' },
-  { key: 'ar', label: t('account.nav.room3d'), icon: 'cube' },
 ])
 
 function isActive(key) {

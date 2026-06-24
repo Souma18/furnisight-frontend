@@ -346,7 +346,7 @@ watch(
           :placeholder="trackingCodeLocked ? '' : 'Nhập mã vận đơn'"
           @input="form.trackingCode = $event.target.value"
         />
-        <small v-if="trackingCodeLocked" class="mform-hint">Chỉ nhập mã vận đơn khi chuyển đơn sang Đang giao.</small>
+        <small v-if="trackingCodeLocked" class="mform-hint">Chỉ nhập mã vận đơn khi chuyển đơn sang Đang vận chuyển.</small>
       </div>
       <div class="mform-group"><label class="mfl">Ghi chú nội bộ</label><textarea v-model="form.note" class="mfi" rows="3" /></div>
     </template>

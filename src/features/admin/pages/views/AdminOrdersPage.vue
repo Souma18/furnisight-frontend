@@ -26,17 +26,12 @@ const badgeMap = {
   unpaid: 'b-pending',
   payment_failed: 'b-cancel',
   paid: 'b-success',
-  cod_pending_confirmation: 'b-pending',
-  cod_confirmed: 'b-success',
+  shipping: 'b-shipping',
   in_transit: 'b-shipping',
-  delivering: 'b-shipping',
-  done: 'b-success',
-  cancel: 'b-cancel',
+  delivered: 'b-success',
+  cancelled: 'b-cancel',
   refund_pending: 'b-pending',
   refunded: 'b-success',
-  shipping: 'b-shipping',
-  success: 'b-success',
-  pending: 'b-pending',
 }
 const formatPrice = PriceFormatter.format
 const normalizedOrders = computed(() => items.value.map((item) => {

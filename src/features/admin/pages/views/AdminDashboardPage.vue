@@ -8,20 +8,15 @@ const { data, revenueCanvas, orderCanvas } = useAdminDashboard()
 const { simUser } = useAdminLayout()
 
 const badgeMap = {
-  success: 'b-success',
-  shipping: 'b-shipping',
-  pending: 'b-pending',
   unpaid: 'b-pending',
   payment_failed: 'b-cancel',
   paid: 'b-success',
-  cod_pending_confirmation: 'b-pending',
-  cod_confirmed: 'b-success',
+  shipping: 'b-shipping',
   in_transit: 'b-shipping',
-  delivering: 'b-shipping',
-  done: 'b-success',
+  delivered: 'b-success',
+  cancelled: 'b-cancel',
   refund_pending: 'b-pending',
   refunded: 'b-success',
-  cancel: 'b-cancel',
   low: 'b-low',
 }
 </script>

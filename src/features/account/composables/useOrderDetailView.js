@@ -9,18 +9,14 @@ import {
   shouldShowRetryPayment,
 } from '@shared/lib/api/services/orders/orders.model'
 import { PriceFormatter, formatDate, formatDateTime } from '@shared/lib/formatters'
-import { isCodPayment } from '@shared/lib/orders/orderStatusMapper'
+import { isCodPayment, getOrderStatusLabel } from '@shared/lib/orders/orderStatusMapper'
 
-const CANCELABLE_ORDER_STATUSES = [
-  'unpaid',
-  'payment_failed',
-  'paid',
-  'cod_pending_confirmation',
-  'cod_confirmed',
-]
+// Statuses from which user can cancel (mirrors BE canCancelOrder; COD: UNPAID/SHIPPING; VNPAY: UNPAID/PAYMENT_FAILED/PAID/SHIPPING)
+const CANCELABLE_ORDER_STATUSES = ['unpaid', 'payment_failed', 'paid', 'shipping']
 
 const t = (key, params) => i18n.global.t(key, params)
-const orderStatusLabel = (status) => t(`account.orders.status.${status}`)
+// Fallback for non-UNPAID statuses via i18n key
+const orderStatusLabel = (status) => t(`account.orders.status.${String(status || 'unpaid').toLowerCase()}`)
 
 export function useOrderDetailView(notify) {
   const router = useRouter()
@@ -28,12 +24,17 @@ export function useOrderDetailView(notify) {
     selectedOrder: order,
     backToOrders,
     cancelOrder,
+    confirmOrderReceived,
     retryPayment,
     retryingOrderCode,
   } = useAccountOrders(notify)
 
   const cancelDialogOpen = ref(false)
   const canceling = ref(false)
+  
+  const confirmDialogOpen = ref(false)
+  const confirming = ref(false)
+
   const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
   const formatMoney = PriceFormatter.format
 
@@ -50,8 +51,13 @@ export function useOrderDetailView(notify) {
     CANCELABLE_ORDER_STATUSES.includes(order.value?.status),
   )
 
+  const canConfirmReceived = computed(() => order.value?.status === 'in_transit')
+
   const statusLabel = computed(() => {
-    return order.value?.status ? orderStatusLabel(order.value.status) : (order.value?.statusLabel || '')
+    if (!order.value) return ''
+    // For UNPAID: differentiate COD ("Đã đặt đơn") vs VNPAY ("Chờ thanh toán")
+    if (order.value.status === 'unpaid') return getOrderStatusLabel(order.value)
+    return order.value.status ? orderStatusLabel(order.value.status) : (order.value.statusLabel || '')
   })
 
   const paymentStatusLabel = computed(() => {
@@ -127,6 +133,24 @@ export function useOrderDetailView(notify) {
     if (success) cancelDialogOpen.value = false
   }
 
+  function handleConfirmReceived() {
+    if (!canConfirmReceived.value) return
+    confirmDialogOpen.value = true
+  }
+
+  function closeConfirmDialog() {
+    if (confirming.value) return
+    confirmDialogOpen.value = false
+  }
+
+  async function executeConfirmReceived() {
+    if (!order.value || confirming.value) return
+    confirming.value = true
+    const success = await confirmOrderReceived(order.value.orderCode)
+    confirming.value = false
+    if (success) confirmDialogOpen.value = false
+  }
+
   function handleRetryPayment() {
     if (!order.value) return
     retryPayment(order.value)
@@ -143,7 +167,7 @@ export function useOrderDetailView(notify) {
 
   function reviewProduct(item) {
     const productId = orderItemProductId(item)
-    if (!productId || order.value?.status !== 'done') return
+    if (!productId || order.value?.status !== 'delivered') return
     router.push({
       name: 'product-detail',
       params: { id: productId },
@@ -166,9 +190,12 @@ export function useOrderDetailView(notify) {
     backToOrders,
     cancelDialogOpen,
     canceling,
+    confirmDialogOpen,
+    confirming,
     retryingPayment,
     canRetryPaymentNow,
     canCancelCurrentOrder,
+    canConfirmReceived,
     statusLabel,
     paymentStatusLabel,
     transactionTimeline,
@@ -188,6 +215,9 @@ export function useOrderDetailView(notify) {
     handleCancel,
     closeCancelDialog,
     confirmCancel,
+    handleConfirmReceived,
+    closeConfirmDialog,
+    executeConfirmReceived,
     handleRetryPayment,
   }
 }

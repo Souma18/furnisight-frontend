@@ -10,30 +10,24 @@ import {
 import { PriceFormatter } from '@shared/lib/formatters'
 import { formatDate as formatDisplayDate } from '@shared/lib/formatters'
 
-const CANCELABLE_ORDER_STATUSES = [
-  'unpaid',
-  'payment_failed',
-  'paid',
-  'cod_pending_confirmation',
-  'cod_confirmed',
-]
+// Mirrors BE canCancelOrder() — VNPAY: UNPAID/PAYMENT_FAILED/PAID/SHIPPING; COD adds SHIPPING
+const CANCELABLE_ORDER_STATUSES = ['unpaid', 'payment_failed', 'paid', 'shipping']
+
 
 const t = (key, params) => i18n.global.t(key, params)
-const statusLabel = (status) => t(`account.orders.status.${status}`)
+const statusLabel = (status) => t(`account.orders.status.${String(status || 'unpaid').toLowerCase()}`)
 
 export const ORDER_FILTER_OPTIONS = [
   'all',
-  'cod_pending_confirmation',
-  'cod_confirmed',
   'unpaid',
   'payment_failed',
   'paid',
+  'shipping',
   'in_transit',
-  'delivering',
-  'done',
+  'delivered',
+  'cancelled',
   'refund_pending',
   'refunded',
-  'cancel',
 ]
 
 export function useOrdersView(notify) {
@@ -96,17 +90,13 @@ export function useOrdersView(notify) {
   }
 
   function statusClass(status) {
-    if (status === 'delivering') return 'shipping'
-    if (status === 'in_transit') return 'shipping'
-    if (status === 'done') return 'done'
-    if (status === 'cancel') return 'cancel'
+    if (status === 'shipping' || status === 'in_transit') return 'shipping'
+    if (status === 'delivered' || status === 'refunded') return 'done'
+    if (status === 'cancelled') return 'cancel'
     if (status === 'refund_pending') return 'refund'
-    if (status === 'refunded') return 'done'
     if (status === 'payment_failed') return 'failed'
-    if (status === 'cod_confirmed') return 'paid'
-    if (status === 'cod_pending_confirmation') return 'pending'
     if (status === 'paid') return 'paid'
-    return 'pending'
+    return 'pending' // unpaid
   }
 
   function displayCode(order) {
@@ -135,7 +125,8 @@ export function useOrdersView(notify) {
 
   function displayStatusLabel(order) {
     if (order?.statusLabel) return order.statusLabel
-    return statusLabels.value[order.status] ?? order.status
+    const rawStatus = String(order.status || 'unpaid').toLowerCase()
+    return statusLabels.value[rawStatus] ?? order.status
   }
 
   return {

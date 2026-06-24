@@ -296,6 +296,12 @@
       "cancelDialogMessage": "Bạn có chắc muốn hủy đơn {code}? Thao tác này không thể hoàn tác.",
       "cancelConfirm": "Hủy đơn",
       "keepOrder": "Giữ đơn",
+      "confirmReceived": "Đã nhận được hàng",
+      "confirmReceivedDialogTitle": "Xác nhận đã nhận hàng",
+      "confirmReceivedDialogMessage": "Vui lòng chỉ xác nhận khi bạn đã kiểm tra và nhận được sản phẩm nguyên vẹn. Thao tác này không thể hoàn tác.",
+      "confirmSuccess": "Xác nhận nhận hàng thành công.",
+      "confirmError": "Không thể xác nhận nhận hàng lúc này.",
+      "close": "Đóng",
       "transactionHistory": "Lịch sử giao dịch",
       "shippingStatus": "Trạng thái vận chuyển",
       "purchasedProducts": "Sản phẩm đặt mua",
@@ -378,17 +384,16 @@
       },
       "status": {
         "all": "Tất cả",
-        "cod_pending_confirmation": "Chờ xác nhận COD",
-        "cod_confirmed": "Đã xác nhận COD",
         "unpaid": "Chờ thanh toán",
+        "unpaid_cod": "Đã đặt đơn",
         "payment_failed": "Thanh toán thất bại",
         "paid": "Đã thanh toán",
-        "in_transit": "Đang vận chuyển",
-        "delivering": "Đang giao",
-        "done": "Hoàn tất",
+        "shipping": "Đang vận chuyển",
+        "in_transit": "Đang giao",
+        "delivered": "Đã nhận",
+        "cancelled": "Đã hủy",
         "refund_pending": "Chờ hoàn tiền",
-        "refunded": "Đã hoàn tiền",
-        "cancel": "Đã hủy"
+        "refunded": "Đã hoàn tiền"
       }
     }
   },

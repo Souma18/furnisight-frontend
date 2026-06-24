@@ -7,7 +7,6 @@ import { normalizeOrderUiStatus } from '@shared/lib/orders/orderStatusMapper'
 
 const VIEWS = [
   'profile',
-  'address',
   'bell',
   'bell-order',
   'bell-promo',
@@ -17,9 +16,7 @@ const VIEWS = [
   'order-detail',
   'cart',
   'wishlist',
-  'security',
   'settings',
-  'ar',
 ]
 
 export function useAccountPage() {

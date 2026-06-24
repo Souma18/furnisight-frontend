@@ -47,6 +47,10 @@ class OrdersApi {
     return apiClient.post(`/orders/${orderCode}/cancel`)
   }
 
+  confirmOrderReceived(orderCode) {
+    return apiClient.post(`/orders/${orderCode}/confirm-receive`)
+  }
+
   // ─── PAYMENTS ────────────────────────────────────────────────────────
   
   /**

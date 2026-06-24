@@ -357,6 +357,9 @@ export function useAdminModal() {
         const status = getOrderStatusApiValue(form.orderStatus)
         if (!status) throw new Error('Trạng thái này chưa được backend hỗ trợ cập nhật từ admin.')
         const canEditTracking = canEditOrderTrackingCode(modal.value.payload, form.orderStatus)
+        if (canEditTracking && !form.trackingCode?.trim()) {
+          throw new Error('Vui lòng nhập mã vận đơn khi chuyển sang trạng thái Đang vận chuyển.')
+        }
         assertActionResult(await adminApi.updateOrder(modal.value.payload.orderCode, {
           status,
           trackingCode: canEditTracking ? form.trackingCode : null,

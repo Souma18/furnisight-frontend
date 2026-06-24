@@ -4,15 +4,12 @@ import { useI18n } from 'vue-i18n'
 import AccountSidebar from '../components/AccountSidebar.vue'
 import AccountToast from '../components/AccountToast.vue'
 import ProfileView from '../components/views/ProfileView.vue'
-import AddressView from '../components/views/AddressView.vue'
 import OrdersView from '../components/views/OrdersView.vue'
 import OrderDetailView from '../components/views/OrderDetailView.vue'
 import CartView from '../components/views/CartView.vue'
 import WishlistView from '../components/views/WishlistView.vue'
 import NotificationsView from '../components/views/NotificationsView.vue'
-import SecurityView from '../components/views/SecurityView.vue'
 import SettingsView from '../components/views/SettingsView.vue'
-import Projects3DView from '../components/views/Projects3DView.vue'
 import { useAccountPage } from '../composables/useAccountPage'
 import { useAuth } from '@features/auth/composables/useAuth'
 
@@ -61,10 +58,6 @@ async function handleLogout() {
         v-if="activeView === 'profile'"
         @notify="showToast"
       />
-      <AddressView
-        v-else-if="activeView === 'address'"
-        @notify="showToast"
-      />
       <NotificationsView
         v-else-if="String(activeView).startsWith('bell')"
         :notification-category="notificationCategory"
@@ -77,12 +70,7 @@ async function handleLogout() {
         v-else-if="activeView === 'wishlist'"
         @notify="showToast"
       />
-      <SecurityView
-        v-else-if="activeView === 'security'"
-        @notify="showToast"
-      />
       <SettingsView v-else-if="activeView === 'settings'" />
-      <Projects3DView v-else />
     </main>
 
     <AccountToast :show="toast.open" :message="toast.message" :type="toast.type" />
