@@ -49,7 +49,6 @@ export async function getAdminInbox(params = {}) {
     }
   }
   const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : ''
-  console.log('[API getAdminInbox] Gửi URL:', msUrl('/conversation/admin/inbox') + queryString)
   const res = await apiClient.get(`${msUrl('/conversation/admin/inbox')}${queryString}`)
   return unwrapMessageService(res)
 }
