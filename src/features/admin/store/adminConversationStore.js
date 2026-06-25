@@ -92,6 +92,59 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     return filtered
   })
 
+  // --- Polling ---
+  let pollingInterval = null
+
+  function startPollingInbox() {
+    stopPollingInbox()
+    pollingInterval = setInterval(() => {
+      // Silent polling: keep current page structure, but fetch latest page 0 to see if unread counts changed
+      // To keep it simple, we just reload the inbox silently (no loading spinner).
+      // Since it resets to page 0, it might disrupt infinite scroll if the admin scrolled far down.
+      // A better way is to call a specific lightweight endpoint, but getAdminInbox is all we have.
+      // We will only do this if they are on page 0 or we just fetch page 0 and merge unread counts.
+      if (inbox.page <= 1) {
+        _silentPollInbox()
+      }
+    }, 20000)
+  }
+
+  function stopPollingInbox() {
+    if (pollingInterval) {
+      clearInterval(pollingInterval)
+      pollingInterval = null
+    }
+  }
+
+  async function _silentPollInbox() {
+    try {
+      const params = buildInboxParams()
+      params.page = 0 // always poll the first page
+      const data = await getAdminInbox(params)
+      const items = Array.isArray(data) ? data : data?.content ?? data?.items ?? []
+      const mapped = normalizeConversationList(items).map(mapConversationToAdminList)
+      
+      mapped.forEach(newConv => {
+        const existing = inbox.items.find(c => c.id === newConv.id)
+        if (existing) {
+          existing.unreadCount = newConv.unreadCount
+          existing.unread = newConv.unread
+          existing.statusKey = newConv.statusKey
+          existing.preview = newConv.preview
+          existing.updatedAt = newConv.updatedAt
+        } else {
+          // If it's a completely new conversation, prepend it
+          inbox.items.unshift(newConv)
+        }
+      })
+      
+      // Sort by updated time
+      inbox.items.sort((a, b) => new Date(b.updatedAt || 0).getTime() - new Date(a.updatedAt || 0).getTime())
+    } catch (error) {
+      console.error('[adminConversationStore] Silent poll failed', error)
+    }
+  }
+
   // --- Actions: Socket ---
   function subscribeAdminTopics(id) {
     if (!socket.client?.isConnected?.() || !id) return
@@ -113,6 +166,21 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       })
       if (!workspace.messages.some((m) => m.id === mapped.id)) {
         workspace.messages.push(mapped)
+        
+        // Auto mark as read because admin is looking at it
+        if (mapped.type === 'customer') {
+          markConversationAsReadAdmin(id).catch(console.error)
+        }
+
+        // Update inbox preview and move to top
+        if (conv) {
+          conv.preview = mapped.text
+          conv.updatedAt = new Date().toISOString()
+          conv.unread = false
+          conv.unreadCount = 0
+          // move to top
+          inbox.items = [conv, ...inbox.items.filter(c => c.id !== id)]
+        }
       }
     })
 
@@ -128,6 +196,14 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       )
       if (!workspace.messages.some((m) => m.id === mapped.id)) {
         workspace.messages.push(mapped)
+        
+        // Update inbox preview and move to top
+        if (conv) {
+          conv.preview = `[Ghi chú] ${mapped.text}`
+          conv.updatedAt = new Date().toISOString()
+          // move to top
+          inbox.items = [conv, ...inbox.items.filter(c => c.id !== id)]
+        }
       }
     })
   }
@@ -164,16 +240,37 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   // --- Actions: Inbox ---
   function buildInboxParams() {
     const params = { channel: INBOX_CHANNEL }
-    if (filters.status === 'unread') params.unreadOnly = true
-    if (filters.status === 'urgent') params.priority = 'URGENT'
-    if (filters.status === 'waiting') params.statuses = 'WAITING_CUSTOMER'
 
+    // --- Tab filter: define base status pool ---
+    let tabStatuses = null
     if (filters.tab === 'new') {
-      params.statuses = 'OPEN'
+      tabStatuses = ['OPEN']
     } else if (filters.tab === 'pending') {
-      params.statuses = 'ASSIGNED,IN_PROGRESS'
+      tabStatuses = ['ASSIGNED', 'IN_PROGRESS']
     } else if (filters.tab === 'resolved') {
-      params.statuses = 'RESOLVED,CLOSED'
+      tabStatuses = ['RESOLVED', 'CLOSED']
+    }
+    // 'all' tab → tabStatuses stays null (no status filter)
+
+    // --- Chip filter: layered on top of tab ---
+    if (filters.status === 'unread') {
+      params.unreadOnly = true
+      if (tabStatuses) params.statuses = tabStatuses
+    } else if (filters.status === 'urgent') {
+      params.priority = 'URGENT'
+      if (tabStatuses) params.statuses = tabStatuses
+    } else if (filters.status === 'waiting') {
+      // 'waiting' means WAITING_CUSTOMER — intersect with tab if possible
+      const waitingStatus = ['WAITING_CUSTOMER']
+      if (tabStatuses) {
+        const intersect = tabStatuses.filter(s => waitingStatus.includes(s))
+        params.statuses = intersect.length > 0 ? intersect : waitingStatus
+      } else {
+        params.statuses = waitingStatus
+      }
+    } else {
+      // No chip filter → use tab statuses directly
+      if (tabStatuses) params.statuses = tabStatuses
     }
 
     params.page = inbox.page
@@ -185,6 +282,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     if (inbox.loading || inbox.loadingMore) return
 
     if (reset) {
+      inbox.items = [] // Clear immediately to reset UI
       inbox.page = 0
       inbox.hasMore = true
       inbox.loading = true
@@ -336,19 +434,19 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     )
     if (!workspace.messages.some((m) => m.id === mapped.id)) {
       workspace.messages.push(mapped)
+      
+      // Update inbox preview
+      if (conv) {
+        conv.preview = isInternal ? `[Ghi chú] ${mapped.text}` : `Bạn: ${mapped.text}`
+        conv.updatedAt = new Date().toISOString()
+        inbox.items = [conv, ...inbox.items.filter(c => c.id !== conv.id)]
+      }
     }
   }
 
   function _ensureSocketConnected(convId) {
     if (!socket.client?.isConnected?.()) {
       connectSocketForConversation(convId)
-    }
-  }
-
-  function _optimisticStatusUpdate(conv) {
-    if (conv && conv.statusKey === 'new') {
-      conv.status = 'IN_PROGRESS'
-      conv.statusKey = 'pending'
     }
   }
 
@@ -396,7 +494,13 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     try {
       const saved = await postMessage(dto)
       _appendMessageToTimeline(saved, false)
-      _optimisticStatusUpdate(conv)
+      
+      // Update status on backend to IN_PROGRESS if it was OPEN or WAITING_CUSTOMER
+      if (conv && (conv.statusKey === 'new' || conv.statusKey === 'waiting')) {
+        await patchStatus(workspace.convId, 'IN_PROGRESS')
+        conv.status = 'IN_PROGRESS'
+        conv.statusKey = 'pending'
+      }
     } catch (error) {
       uiStore.showToast({
         icon: 'alert',
@@ -427,5 +531,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     sendCustomerReply,
     sendInternalNote,
     disconnectSocket,
+    startPollingInbox,
+    stopPollingInbox,
   }
 })

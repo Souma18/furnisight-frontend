@@ -37,7 +37,20 @@ export async function getConversation(conversationId) {
 }
 
 export async function getAdminInbox(params = {}) {
-  const res = await apiClient.get(msUrl('/conversation/admin/inbox'), { params })
+  const queryParts = []
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '') continue
+    if (Array.isArray(v)) {
+      v.forEach(item => {
+        queryParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`)
+      })
+    } else {
+      queryParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    }
+  }
+  const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : ''
+  console.log('[API getAdminInbox] Gửi URL:', msUrl('/conversation/admin/inbox') + queryString)
+  const res = await apiClient.get(`${msUrl('/conversation/admin/inbox')}${queryString}`)
   return unwrapMessageService(res)
 }
 

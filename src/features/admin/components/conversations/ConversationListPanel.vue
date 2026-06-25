@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -20,10 +20,12 @@ function isActive(id) {
 
 function filterChip(type) {
   store.filters.status = type
+  store.loadInbox(true)
 }
 
 function switchTab(tab) {
   store.filters.tab = tab
+  store.loadInbox(true)
 }
 
 function formatTime(conv) {
@@ -49,6 +51,14 @@ function handleScroll(e) {
     }
   }
 }
+
+onMounted(() => {
+  store.startPollingInbox()
+})
+
+onUnmounted(() => {
+  store.stopPollingInbox()
+})
 </script>
 
 <template>

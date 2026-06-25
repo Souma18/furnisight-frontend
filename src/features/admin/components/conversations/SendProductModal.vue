@@ -1,8 +1,8 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
-import { productsApi } from '@shared/lib/api/services'
+import { useProductSearch } from '../../composables/useProductSearch'
 
 const props = defineProps({
   manager: {
@@ -15,78 +15,19 @@ const props = defineProps({
 const emit = defineEmits(['close', 'send-product'])
 const mgr = props.manager
 
-const searchQuery = ref('')
-const activeCat = ref('all')
-const categories = ref([{ id: 'all', name: 'Tất cả' }])
-
-const products = ref([])
-const page = ref(0)
-const loading = ref(false)
-const hasMore = ref(true)
+const { 
+  searchQuery, 
+  activeCat, 
+  categories, 
+  products, 
+  loading, 
+  hasMore, 
+  loadCategories, 
+  fetchProducts, 
+  resetSearch 
+} = useProductSearch()
 
 const selectedProduct = computed(() => products.value.find((p) => p.id === mgr.selectedProdId.value))
-
-async function loadCategories() {
-  try {
-    const res = await productsApi.getRootCategories()
-    const list = Array.isArray(res.data) ? res.data : res.data?.items ?? res.data?.content ?? []
-    categories.value = [
-      { id: 'all', name: 'Tất cả' },
-      ...list.map(c => ({ id: c.slug || c.id, name: c.name }))
-    ]
-  } catch (error) {
-    console.error('Failed to load categories', error)
-  }
-}
-
-async function fetchProducts(reset = false) {
-  if (loading.value) return
-  if (reset) {
-    page.value = 0
-    products.value = []
-    hasMore.value = true
-    mgr.selectedProdId.value = null
-  }
-
-  if (!hasMore.value) return
-  loading.value = true
-
-  try {
-    const params = { size: 20, page: page.value }
-    if (activeCat.value !== 'all') {
-      params.category = activeCat.value
-    }
-    if (searchQuery.value) {
-      params.q = searchQuery.value
-    }
-
-    const res = await productsApi.getProducts(params)
-    const items = Array.isArray(res.data) ? res.data : res.data?.content ?? res.data?.items ?? []
-    
-    if (items.length < 20) {
-      hasMore.value = false
-    }
-
-    products.value = reset ? items : [...products.value, ...items]
-    page.value++
-  } catch (error) {
-    console.error('Failed to fetch products', error)
-  } finally {
-    loading.value = false
-  }
-}
-
-let searchTimeout = null
-watch(searchQuery, () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    fetchProducts(true)
-  }, 500)
-})
-
-watch(activeCat, () => {
-  fetchProducts(true)
-})
 
 watch(
   () => props.isOpen,
@@ -99,8 +40,8 @@ watch(
         fetchProducts(true)
       }
     } else {
-      searchQuery.value = ''
-      activeCat.value = 'all'
+      resetSearch()
+      mgr.selectedProdId.value = null
     }
   },
 )
@@ -136,7 +77,7 @@ function getProductPrice(p) {
 }
 
 function getProductStock(p) {
-  return p.stock || p.variants?.[0]?.stock || 0
+  return p.variants?.[0]?.stockQuantity ?? p.stock ?? 0
 }
 </script>
 

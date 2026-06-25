@@ -5,7 +5,6 @@ import { TEMPLATE_CATEGORIES } from '../../config/adminConversationContent'
 export function useMessageTemplates(uiStore) {
   const templates = ref([])
   const templatesLoading = ref(false)
-  const cannedPickerOpen = ref(false)
   const pendingInsertText = ref('')
 
   async function loadTemplates() {
@@ -66,7 +65,6 @@ export function useMessageTemplates(uiStore) {
   return {
     templates,
     templatesLoading,
-    cannedPickerOpen,
     pendingInsertText,
     templateCategories: TEMPLATE_CATEGORIES,
     loadTemplates,

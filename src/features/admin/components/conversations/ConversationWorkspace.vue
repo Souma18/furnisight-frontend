@@ -20,8 +20,7 @@ const messageText = ref('')
 const timelineRef = ref(null)
 const inputWrapClasses = ref('')
 
-const cannedFilter = ref('')
-const filteredCanned = ref([])
+
 
 const messages = computed(() => store.workspace.messages)
 
@@ -54,11 +53,11 @@ watch(
 )
 
 watch(
-  () => templateMgr.pendingInsertText,
+  () => templateMgr.pendingInsertText.value,
   (text) => {
     if (text) {
       messageText.value = text
-      templateMgr.pendingInsertText = ''
+      templateMgr.pendingInsertText.value = ''
       store.workspace.msgType = 'reply'
     }
   },
@@ -84,31 +83,7 @@ function handleKeydown(e) {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault()
     sendMsg()
-  } else if (e.key === '/' && messageText.value === '') {
-    templateMgr.cannedPickerOpen = true
-    filterCanned()
-  } else if (e.key === 'Escape') {
-    templateMgr.cannedPickerOpen = false
   }
-}
-
-function filterCanned() {
-  const q = cannedFilter.value.toLowerCase()
-  filteredCanned.value = templateMgr.templates.filter((t) => {
-    if (!t.active) return false
-    return t.title.toLowerCase().includes(q) || t.content.toLowerCase().includes(q)
-  })
-}
-
-function selectCanned(content) {
-  messageText.value = content
-  templateMgr.cannedPickerOpen = false
-  cannedFilter.value = ''
-}
-
-function toggleCannedPicker() {
-  templateMgr.cannedPickerOpen = !templateMgr.cannedPickerOpen
-  if (templateMgr.cannedPickerOpen) filterCanned()
 }
 </script>
 
@@ -246,10 +221,6 @@ function toggleCannedPicker() {
         <button class="cw-tool-btn" title="Chọn template (mở danh sách)" @click="emit('open-templates')">
           <AppIcon name="fileText" />
         </button>
-        <button class="cw-tool-btn" title="Template nhanh (phím /)" @click="toggleCannedPicker">
-          <AppIcon name="alignLeft" />
-          <div class="cw-tool-tag">/</div>
-        </button>
         <button class="cw-tool-btn" title="Chèn Emoji"><AppIcon name="smile" /></button>
       </div>
 
@@ -273,21 +244,7 @@ function toggleCannedPicker() {
           </button>
         </div>
 
-        <div class="cw-canned-picker" v-if="templateMgr.cannedPickerOpen">
-          <div class="canned-search">
-            <AppIcon name="search" />
-            <input type="text" v-model="cannedFilter" @input="filterCanned" placeholder="Tìm template (Tên, nội dung...)" />
-          </div>
-          <div class="canned-list">
-            <div v-for="t in filteredCanned" :key="t.id" class="canned-item" @click="selectCanned(t.content)">
-              <div class="canned-item-title">{{ t.title }}</div>
-              <div class="canned-item-preview">{{ t.content }}</div>
-            </div>
-            <div v-if="filteredCanned.length === 0" style="padding: 10px; text-align: center; font-size: 11px; color: var(--text4)">
-              Không tìm thấy.
-            </div>
-          </div>
-        </div>
+
       </div>
 
       <div class="cw-footer-bar">
