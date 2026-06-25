@@ -26,6 +26,8 @@ export const PRODUCT_FORM_DEFAULTS = {
       width: 1,
       height: 1,
       lowStockThreshold: 5,
+      imageUrls: [],
+      imageUploads: [],
     },
   ],
 }
@@ -184,6 +186,14 @@ export function markProductModelPersisted(variant) {
 }
 
 export async function applyProductImageFiles(form, files) {
+  await applyImageFiles(form, files)
+}
+
+export async function applyVariantImageFiles(variant, files) {
+  await applyImageFiles(variant, files)
+}
+
+async function applyImageFiles(target, files) {
   const ownerId = crypto.randomUUID()
   const uploads = await Promise.all(files.map((file) => mediaApi.uploadStaged(file, {
     ownerType: 'PRODUCT',
@@ -192,8 +202,8 @@ export async function applyProductImageFiles(form, files) {
   const nextUrls = uploads
     .map((item) => item.secureUrl || item.secure_url || item.url)
     .filter(Boolean)
-  form.imageUrls = [...new Set([...(form.imageUrls ?? []), ...nextUrls])]
-  form.imageUploads = [...(form.imageUploads ?? []), ...uploads]
+  target.imageUrls = [...new Set([...(target.imageUrls ?? []), ...nextUrls])]
+  target.imageUploads = [...(target.imageUploads ?? []), ...uploads]
 }
 
 export async function removeProductImage(form, url) {
@@ -213,6 +223,10 @@ export function moveProductImage(form, fromIndex, toIndex) {
   form.imageUrls = images
 }
 
+export function moveVariantImage(variant, fromIndex, toIndex) {
+  moveProductImage(variant, fromIndex, toIndex)
+}
+
 export async function completePendingProductImages(form) {
   const uploads = form.imageUploads ?? []
   for (let index = 0; index < uploads.length; index += 1) {
@@ -221,6 +235,10 @@ export async function completePendingProductImages(form) {
     }
   }
   form.imageUploads = uploads
+}
+
+export async function completePendingVariantImages(variant) {
+  await completePendingProductImages(variant)
 }
 
 export async function cancelUnpersistedProductImages(form) {
@@ -238,6 +256,10 @@ export function markProductImagesPersisted(form) {
     ...upload,
     persisted: true,
   }))
+}
+
+export function markVariantImagesPersisted(variant) {
+  markProductImagesPersisted(variant)
 }
 
 function imageUploadUrl(upload) {
@@ -283,6 +305,7 @@ export function buildProductPayload(form) {
       width: Number(variant.width) || 1,
       height: Number(variant.height) || 1,
       lowStockThreshold: Number(variant.lowStockThreshold) || 5,
+      imageUrls: variant.imageUrls ?? [],
       modelUrl: variant.modelUrl || '',
       modelMediaId: variant.modelMediaId || '',
       supports3d: Boolean(variant.modelUrl && variant.supports3d),
@@ -313,21 +336,27 @@ export function createEmptyVariant(seed = {}) {
     width: seed.width ?? 1,
     height: seed.height ?? 1,
     lowStockThreshold: seed.lowStockThreshold ?? 5,
+    imageUrls: Array.isArray(seed.imageUrls)
+      ? [...seed.imageUrls]
+      : Array.isArray(seed.image_urls)
+        ? [...seed.image_urls]
+        : [],
+    imageUploads: seed.imageUploads ?? [],
     modelUrl: seed.modelUrl ?? seed.model_url ?? '',
     modelMediaId: seed.modelMediaId ?? seed.model_media_id ?? '',
-    supports3d: seed.supports3d ?? false,
+    supports3d: seed.supports3d ?? seed.supports3D ?? false,
     modelFileName: seed.modelFileName ?? fileNameFromUrl(seed.modelUrl ?? seed.model_url),
     modelFileSize: seed.modelFileSize ?? 0,
-    modelFile: null,
-    modelUpload: null,
-    modelUploadController: null,
-    modelPreviewUrl: seed.modelUrl ?? seed.model_url ?? '',
-    modelPreviewObjectUrl: '',
-    modelPreviewError: '',
-    modelPreviewLoading: false,
-    modelUploadProgress: 0,
-    modelUploading: false,
-    modelUploadError: '',
+    modelFile: seed.modelFile ?? null,
+    modelUpload: seed.modelUpload ?? null,
+    modelUploadController: seed.modelUploadController ?? null,
+    modelPreviewUrl: seed.modelPreviewUrl ?? seed.modelUrl ?? seed.model_url ?? '',
+    modelPreviewObjectUrl: seed.modelPreviewObjectUrl ?? '',
+    modelPreviewError: seed.modelPreviewError ?? '',
+    modelPreviewLoading: seed.modelPreviewLoading ?? false,
+    modelUploadProgress: seed.modelUploadProgress ?? 0,
+    modelUploading: seed.modelUploading ?? false,
+    modelUploadError: seed.modelUploadError ?? '',
   }
 }
 

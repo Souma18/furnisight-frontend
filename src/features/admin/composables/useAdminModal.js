@@ -10,16 +10,20 @@ import { buildCategoryPayload, mapCategoryToForm } from './useAdminCategoryForm'
 import {
   applyProductImageFiles,
   applyProductModelFile,
+  applyVariantImageFiles,
   buildProductPayload,
   cancelUnpersistedProductImages,
   cancelUnpersistedProductModel,
   completePendingProductImages,
   completePendingProductModel,
+  completePendingVariantImages,
   createEmptyVariant,
   mapProductToForm,
   markProductImagesPersisted,
   markProductModelPersisted,
+  markVariantImagesPersisted,
   moveProductImage,
+  moveVariantImage,
   releaseProductModelPreview,
   removeProductImage,
   removeProductModel,
@@ -247,6 +251,38 @@ export function useAdminModal() {
     moveProductImage(form, fromIndex, toIndex)
   }
 
+  async function onVariantImages(files, variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (!variant) return
+    saving.value = true
+    try {
+      await applyVariantImageFiles(variant, files)
+    } catch (e) {
+      ui.showToast({ icon: 'x', title: 'Lỗi tải ảnh', subtitle: e?.response?.data?.message ?? e.message })
+    } finally {
+      saving.value = false
+    }
+  }
+
+  async function removeVariantImage(url, variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (!variant) return
+    saving.value = true
+    try {
+      await removeProductImage(variant, url)
+    } catch (e) {
+      ui.showToast({ icon: 'x', title: 'Lỗi xóa ảnh', subtitle: e?.response?.data?.message ?? e.message })
+    } finally {
+      saving.value = false
+    }
+  }
+
+  function moveVariantImageAt(fromIndex, toIndex, variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (!variant) return
+    moveVariantImage(variant, fromIndex, toIndex)
+  }
+
   function addVariant() {
     form.variants = [...(form.variants ?? []), createEmptyVariant({ sku: form.sku })]
     form.activeVariantIndex = form.variants.length - 1
@@ -294,6 +330,7 @@ export function useAdminModal() {
       saving.value = true
       try {
         await cancelUnpersistedProductImages(form)
+        for (const v of form.variants || []) await cancelUnpersistedProductImages(v)
         for (const v of form.variants || []) await cancelUnpersistedProductModel(v)
         for (const v of form.variants || []) releaseProductModelPreview(v)
       } finally {
@@ -338,12 +375,14 @@ export function useAdminModal() {
       if (type === 'addProd' || type === 'editProd') {
         validateProductVariants(form)
         await completePendingProductImages(form)
+        for (const v of form.variants || []) await completePendingVariantImages(v)
         for (const v of form.variants || []) await completePendingProductModel(v)
         const payload = buildProductPayload(form)
         if (type === 'addProd') await adminApi.createProduct(payload)
         else if (modal.value.payload?.id) await adminApi.updateProduct(modal.value.payload.id, payload)
         markProductImagesPersisted(form)
         for (const v of form.variants || []) {
+          markVariantImagesPersisted(v)
           markProductModelPersisted(v)
           releaseProductModelPreview(v)
         }
@@ -433,6 +472,9 @@ export function useAdminModal() {
     onProductImages,
     removeImage,
     moveImage,
+    onVariantImages,
+    removeVariantImage,
+    moveVariantImageAt,
     addVariant,
     removeVariant,
     selectVariant,
