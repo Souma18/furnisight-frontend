@@ -1,37 +1,29 @@
 <script setup>
 import { computed } from 'vue'
+import { useAdminConversationStore } from '../../store/adminConversationStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-const props = defineProps({
-  manager: {
-    type: Object,
-    required: true,
-  },
-})
-
-const mgr = props.manager
+const store = useAdminConversationStore()
 const emit = defineEmits(['open-templates', 'add-template'])
-const filteredConversations = mgr.filteredConversations
 
-const todayCount = computed(() => {
-  const today = new Date().toDateString()
-  return mgr.conversations.value.filter((c) => c.createdAt && new Date(c.createdAt).toDateString() === today).length
+const newCount = computed(() => {
+  return store.inbox.items.filter((c) => c.statusKey === 'new').length
 })
 
 function selectConversation(id) {
-  mgr.loadConversation(id)
+  store.loadConversation(id)
 }
 
 function isActive(id) {
-  return mgr.currentConvId.value === id
+  return store.workspace.convId === id
 }
 
 function filterChip(type) {
-  mgr.activeFilter.value = type
+  store.filters.status = type
 }
 
 function switchTab(tab) {
-  mgr.activeTab.value = tab
+  store.filters.tab = tab
 }
 
 function formatTime(conv) {
@@ -47,6 +39,15 @@ function priorityClass(priority) {
 function priorityLabel(priority) {
   const map = { urgent: 'Khẩn cấp', high: 'Cao', medium: 'Vừa', low: 'Thấp' }
   return map[priority] || priority
+}
+
+function handleScroll(e) {
+  const el = e.target
+  if (el.scrollHeight - el.scrollTop - el.clientHeight < 50) {
+    if (store.inbox.hasMore && !store.inbox.loadingMore) {
+      store.loadInbox(false)
+    }
+  }
 }
 </script>
 
@@ -69,27 +70,27 @@ function priorityLabel(priority) {
       </div>
       <div class="clp-search">
         <AppIcon name="search" />
-        <input v-model="mgr.searchQuery.value" type="text" placeholder="Tìm tên, email..." />
+        <input v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
       </div>
       <div class="clp-filter-row">
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'all' }" @click="filterChip('all')">Tất cả</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'urgent' }" @click="filterChip('urgent')">Khẩn cấp</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'unread' }" @click="filterChip('unread')">Chưa đọc</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'waiting' }" @click="filterChip('waiting')">Chờ khách</button>
+        <button class="clf-chip" :class="{ active: store.filters.status === 'all' }" @click="filterChip('all')">Tất cả</button>
+        <button class="clf-chip" :class="{ active: store.filters.status === 'urgent' }" @click="filterChip('urgent')">Khẩn cấp</button>
+        <button class="clf-chip" :class="{ active: store.filters.status === 'unread' }" @click="filterChip('unread')">Chưa đọc</button>
+        <button class="clf-chip" :class="{ active: store.filters.status === 'waiting' }" @click="filterChip('waiting')">Chờ khách</button>
       </div>
     </div>
 
     <div class="clp-tabs">
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'all' }" @click="switchTab('all')">
-        Tất cả <span class="clp-tab-badge" v-if="mgr.activeTab.value !== 'all'">{{ mgr.conversations.value.length }}</span>
+      <div class="clp-tab" :class="{ active: store.filters.tab === 'all' }" @click="switchTab('all')">
+        Tất cả <span class="clp-tab-badge" v-if="store.filters.tab !== 'all'">{{ store.inbox.items.length }}</span>
       </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'new' }" @click="switchTab('new')">
-        Mới <span class="clp-tab-badge">{{ todayCount }}</span>
+      <div class="clp-tab" :class="{ active: store.filters.tab === 'new' }" @click="switchTab('new')">
+        Mới <span class="clp-tab-badge" v-if="newCount > 0">{{ newCount }}</span>
       </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'pending' }" @click="switchTab('pending')">
+      <div class="clp-tab" :class="{ active: store.filters.tab === 'pending' }" @click="switchTab('pending')">
         Đang xử lý
       </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'resolved' }" @click="switchTab('resolved')">
+      <div class="clp-tab" :class="{ active: store.filters.tab === 'resolved' }" @click="switchTab('resolved')">
         Đã xong
       </div>
     </div>
@@ -101,9 +102,9 @@ function priorityLabel(priority) {
       </button>
     </div>
 
-    <div class="clp-list">
+    <div class="clp-list" @scroll="handleScroll">
       <div
-        v-for="conv in filteredConversations"
+        v-for="conv in store.filteredConversations"
         :key="conv.id"
         class="cm-conv-item"
         :class="{ active: isActive(conv.id), unread: conv.unread }"
@@ -112,7 +113,8 @@ function priorityLabel(priority) {
         <div class="cm-ci-av-wrap">
           <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">{{ conv.av }}</div>
           <div class="cm-ci-online" :class="conv.online"></div>
-          <div v-if="conv.unread" class="cm-conv-unread-dot"></div>
+          <div v-if="conv.unreadCount > 0" class="cm-conv-unread-badge">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</div>
+          <div v-else-if="conv.unread" class="cm-conv-unread-dot"></div>
         </div>
 
         <div class="cm-ci-body">
@@ -131,8 +133,11 @@ function priorityLabel(priority) {
           </div>
         </div>
       </div>
-      <div v-if="filteredConversations.length === 0" style="padding: 20px; text-align: center; color: var(--text4); font-size: 12px;">
+      <div v-if="store.filteredConversations.length === 0 && !store.inbox.loading" style="padding: 20px; text-align: center; color: var(--text4); font-size: 12px;">
         Không tìm thấy hội thoại nào.
+      </div>
+      <div v-if="store.inbox.loadingMore" style="padding: 10px; text-align: center; color: var(--text4); font-size: 12px;">
+        Đang tải thêm...
       </div>
     </div>
   </div>

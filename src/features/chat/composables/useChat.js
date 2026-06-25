@@ -1,13 +1,22 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import { storeToRefs } from 'pinia'
 import { useChatStore } from '../store/chatStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 
 export function useChat() {
   const chatStore = useChatStore()
   const authStore = useAuthStore()
-  const { isOpen, isTyping, unreadCount, messages, draft, hasUnread, loading, error, connectionStatus } =
-    storeToRefs(chatStore)
+  const isOpen = computed(() => chatStore.session.isOpen)
+  const isTyping = computed(() => chatStore.workspace.isTyping)
+  const unreadCount = computed(() => chatStore.socket.unreadCount)
+  const messages = computed(() => chatStore.workspace.messages)
+  const draft = computed({
+    get: () => chatStore.workspace.draft,
+    set: (val) => { chatStore.workspace.draft = val },
+  })
+  const hasUnread = computed(() => chatStore.hasUnread)
+  const loading = computed(() => chatStore.session.loading)
+  const error = computed(() => chatStore.session.error)
+  const connectionStatus = computed(() => chatStore.socket.connectionStatus)
 
   // Static config — không phải ref nên không dùng storeToRefs
   const agent = chatStore.agent

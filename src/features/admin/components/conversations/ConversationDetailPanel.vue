@@ -2,15 +2,9 @@
 import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminUiStore } from '../../store/adminUiStore'
+import { useAdminConversationStore } from '../../store/adminConversationStore'
 
-const props = defineProps({
-  manager: {
-    type: Object,
-    required: true,
-  },
-})
-
-const mgr = props.manager
+const store = useAdminConversationStore()
 const uiStore = useAdminUiStore()
 
 const noteText = ref('')
@@ -24,19 +18,19 @@ function saveNote() {
 </script>
 
 <template>
-  <div class="cm-detail-panel" :class="{ collapsed: !mgr.detailPanelVisible.value }">
-    <div class="cdp-scroll" v-if="mgr.currentConv.value">
+  <div class="cm-detail-panel" :class="{ collapsed: !store.workspace.detailVisible }">
+    <div class="cdp-scroll" v-if="store.currentConv">
       <!-- Customer Card: avatar + name + email only -->
       <div class="cdp-cust-card">
         <div
           class="cdp-cust-av"
-          :class="mgr.currentConv.value.avClass"
-          :style="{ background: mgr.currentConv.value.avColor, color: mgr.currentConv.value.textColor }"
+          :class="store.currentConv.avClass"
+          :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
         >
-          {{ mgr.currentConv.value.av }}
+          {{ store.currentConv.av }}
         </div>
-        <div class="cdp-cust-name">{{ mgr.currentConv.value.name }}</div>
-        <div class="cdp-cust-email">{{ mgr.currentConv.value.email || 'Chưa cập nhật email' }}</div>
+        <div class="cdp-cust-name">{{ store.currentConv.name }}</div>
+        <div class="cdp-cust-email">{{ store.currentConv.email || 'Chưa cập nhật email' }}</div>
       </div>
 
       <!-- Conversation Info: priority only -->
@@ -45,7 +39,7 @@ function saveNote() {
 
         <div>
           <div class="cdp-info-label" style="margin-bottom: 4px">Độ ưu tiên</div>
-          <select class="cdp-priority-select" :value="mgr.currentConv.value.priority">
+          <select class="cdp-priority-select" :value="store.currentConv.priority">
             <option value="low">Thấp</option>
             <option value="medium">Trung bình</option>
             <option value="high">Cao</option>

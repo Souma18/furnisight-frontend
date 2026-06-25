@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, watch, toRefs } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import {
@@ -22,27 +22,51 @@ import { CHAT_AGENT, CHAT_QUICK_CHIPS } from '../config/chatContent'
 const CHAT_CHANNEL = 'SUPPORT'
 
 export const useChatStore = defineStore('chat', () => {
-  const hydrated = ref(false)
-  const isOpen = ref(false)
-  const isTyping = ref(false)
-  const unreadCount = ref(0)
-  const messages = ref([])
-  const draft = ref('')
-  const connectionStatus = ref('idle')
-  const conversationId = ref(null)
-  const staffId = ref(null)
-  const buyerId = ref(getBuyerId())
-  const loading = ref(false)
-  const error = ref(null)
+  // --- Domain State ---
+  const session = reactive({
+    hydrated: false,
+    isOpen: false,
+    loading: false,
+    error: null,
+  })
+
+  const workspace = reactive({
+    conversationId: null,
+    messages: [],
+    draft: '',
+    isTyping: false,
+  })
+
+  const user = reactive({
+    buyerId: getBuyerId(),
+    staffId: null,
+  })
+
+  const socket = reactive({
+    connectionStatus: 'idle',
+    unreadCount: 0,
+  })
+
+  // Provide backward compatibility for chatSocketSession bindings
+  const sessionBindings = {
+    connectionStatus: computed({
+      get: () => socket.connectionStatus,
+      set: (val) => { socket.connectionStatus = val },
+    }),
+    conversationId: computed({
+      get: () => workspace.conversationId,
+      set: (val) => { workspace.conversationId = val },
+    }),
+  }
 
   const agent = CHAT_AGENT
   const quickChips = CHAT_QUICK_CHIPS
 
-  const hasUnread = computed(() => unreadCount.value > 0)
+  const hasUnread = computed(() => socket.unreadCount > 0)
 
   const socketSession = createChatSocketSession({
-    connectionStatus,
-    conversationId,
+    connectionStatus: sessionBindings.connectionStatus,
+    conversationId: sessionBindings.conversationId,
     onIncomingMessage: handleIncomingMessage,
   })
 
@@ -50,7 +74,7 @@ export const useChatStore = defineStore('chat', () => {
   watch(() => authStore.isAuthenticated, (isAuth) => {
     if (!isAuth) {
       resetSessionState()
-      buyerId.value = null
+      user.buyerId = null
     }
   })
 
@@ -67,44 +91,54 @@ export const useChatStore = defineStore('chat', () => {
 
   function resetSessionState() {
     socketSession.disconnectSocket()
-    conversationId.value = null
-    staffId.value = null
-    messages.value = []
-    unreadCount.value = 0
-    hydrated.value = false
-    error.value = null
+    Object.assign(session, {
+      hydrated: false,
+      loading: false,
+      error: null,
+    })
+    Object.assign(workspace, {
+      conversationId: null,
+      messages: [],
+    })
+    user.staffId = null
+    socket.unreadCount = 0
   }
 
   function handleIncomingMessage(payload) {
     if (!payload || typeof payload !== 'object' || payload.isInternal) return
 
-    isTyping.value = false
-    const mapped = mapMessageToCustomer(payload, buyerId.value)
-    upsertMessage(messages, mapped)
+    workspace.isTyping = false
+    const mapped = mapMessageToCustomer(payload, user.buyerId)
+    // Pass `.messages` array to the helper
+    const messagesRefProxy = computed({
+      get: () => workspace.messages,
+      set: (val) => { workspace.messages = val }
+    })
+    upsertMessage(messagesRefProxy, mapped)
 
-    if (mapped.role !== 'user' && !isOpen.value) {
-      unreadCount.value += 1
+    if (mapped.role !== 'user' && !session.isOpen) {
+      socket.unreadCount += 1
     }
   }
 
   async function loadMessages() {
-    if (!conversationId.value) {
-      messages.value = []
+    if (!workspace.conversationId) {
+      workspace.messages = []
       return
     }
 
-    const page = await getMessages({ conversationId: conversationId.value, size: 50 })
+    const page = await getMessages({ conversationId: workspace.conversationId, size: 50 })
     const items = normalizeMessagePage(page)
-    messages.value = items
+    workspace.messages = items
       .filter((m) => !m.isInternal)
-      .map((m) => mapMessageToCustomer(m, buyerId.value))
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((m) => mapMessageToCustomer(m, user.buyerId))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
   }
 
   async function markIncomingAsRead() {
-    if (!conversationId.value || !isOpen.value) return
+    if (!workspace.conversationId || !session.isOpen) return
 
-    const unreadFromOthers = messages.value.filter(
+    const unreadFromOthers = workspace.messages.filter(
       (m) => m.role === 'assistant' && typeof m.id === 'number',
     )
 
@@ -112,69 +146,69 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   async function hydrateSession(force = false) {
-    loading.value = true
-    error.value = null
+    session.loading = true
+    session.error = null
 
     try {
       const nextBuyerId = await resolveBuyerId()
-      const userChanged = buyerId.value !== nextBuyerId
+      const userChanged = user.buyerId !== nextBuyerId
 
       if (userChanged) {
         resetSessionState()
-        buyerId.value = nextBuyerId
+        user.buyerId = nextBuyerId
       } else if (force) {
         resetSessionState()
-        buyerId.value = nextBuyerId
-      } else if (hydrated.value) {
+        user.buyerId = nextBuyerId
+      } else if (session.hydrated) {
         return
       }
 
-      if (!buyerId.value) {
-        hydrated.value = true
+      if (!user.buyerId) {
+        session.hydrated = true
         return
       }
 
-      const list = await getConversationsByUser(buyerId.value)
+      const list = await getConversationsByUser(user.buyerId)
       const existing = pickLatestConversation(list, CHAT_CHANNEL)
 
       if (existing?.id) {
-        conversationId.value = existing.id
-        staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+        workspace.conversationId = existing.id
+        user.staffId = existing.staffId ?? existing.assignedAdminId ?? null
         await loadMessages()
         socketSession.connectSocket()
       }
 
-      hydrated.value = true
+      session.hydrated = true
     } catch (err) {
       const authStore = useAuthStore()
-      error.value = authStore.isAuthenticated
+      session.error = authStore.isAuthenticated
         ? (err.message || 'Không thể tải hội thoại')
         : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] hydrateSession', err)
     } finally {
-      loading.value = false
+      session.loading = false
     }
   }
 
   async function ensureConversationForFirstMessage(firstMessage) {
-    if (conversationId.value) return { createdWithFirstMessage: false }
-    if (!buyerId.value) {
+    if (workspace.conversationId) return { createdWithFirstMessage: false }
+    if (!user.buyerId) {
       throw new Error('Vui lòng đăng nhập để sử dụng chat hỗ trợ.')
     }
 
-    const list = await getConversationsByUser(buyerId.value)
+    const list = await getConversationsByUser(user.buyerId)
     const existing = pickLatestConversation(list, CHAT_CHANNEL)
     if (existing?.id) {
-      conversationId.value = existing.id
-      staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+      workspace.conversationId = existing.id
+      user.staffId = existing.staffId ?? existing.assignedAdminId ?? null
       await loadMessages()
       socketSession.connectSocket()
-      hydrated.value = true
+      session.hydrated = true
       return { createdWithFirstMessage: false }
     }
 
     const created = await createConversation({
-      buyerId: buyerId.value,
+      buyerId: user.buyerId,
       staffId: null,
       message: firstMessage,
       messageType: 'TEXT',
@@ -182,110 +216,116 @@ export const useChatStore = defineStore('chat', () => {
       fileId: null,
     })
 
-    conversationId.value = created.id
-    staffId.value = created.staffId ?? created.assignedAdminId ?? null
+    workspace.conversationId = created.id
+    user.staffId = created.staffId ?? created.assignedAdminId ?? null
     await loadMessages()
     socketSession.connectSocket()
-    hydrated.value = true
+    session.hydrated = true
 
     // Theo API design, message đầu tiên đã được lưu ngay trong createConversation.
     return { createdWithFirstMessage: true }
   }
 
   function toggleOpen() {
-    isOpen.value = !isOpen.value
-    if (isOpen.value) {
-      unreadCount.value = 0
+    session.isOpen = !session.isOpen
+    if (session.isOpen) {
+      socket.unreadCount = 0
       markIncomingAsRead()
     }
   }
 
   function close() {
-    isOpen.value = false
+    session.isOpen = false
   }
 
   function open() {
-    isOpen.value = true
-    unreadCount.value = 0
+    session.isOpen = true
+    socket.unreadCount = 0
+  }
+
+  async function _ensureBuyerAuth() {
+    const nextBuyerId = await resolveBuyerId()
+    if (!nextBuyerId) {
+      session.error = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
+      return false
+    }
+    user.buyerId = nextBuyerId
+    return true
+  }
+
+  async function _ensureActiveConversation(content) {
+    if (!workspace.conversationId) {
+      const result = await ensureConversationForFirstMessage(content)
+      return result
+    }
+    return { createdWithFirstMessage: false }
+  }
+
+  function _ensureSocketConnected() {
+    if (!socketSession.isConnected()) {
+      socketSession.connectSocket()
+    }
+  }
+
+  function _appendMessageToTimeline(payload) {
+    const messagesRefProxy = computed({
+      get: () => workspace.messages,
+      set: (val) => { workspace.messages = val }
+    })
+    upsertMessage(messagesRefProxy, mapMessageToCustomer(payload, user.buyerId))
   }
 
   async function sendMessage(text) {
-    const content = String(text ?? draft.value).trim()
+    const content = String(text ?? workspace.draft).trim()
     if (!content) return
 
-    draft.value = ''
-    error.value = null
-    loading.value = true
+    workspace.draft = ''
+    session.error = null
+    session.loading = true
 
     try {
-      const nextBuyerId = await resolveBuyerId()
-      if (!nextBuyerId) {
-        error.value = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
-        return
-      }
-      buyerId.value = nextBuyerId
+      const hasAuth = await _ensureBuyerAuth()
+      if (!hasAuth) return
 
-      if (!conversationId.value) {
-        const { createdWithFirstMessage } = await ensureConversationForFirstMessage(content)
-        if (createdWithFirstMessage) {
-          return
-        }
-      }
+      const convStatus = await _ensureActiveConversation(content)
+      if (convStatus.createdWithFirstMessage) return
+      if (!workspace.conversationId) return
 
-      if (!conversationId.value) {
-        return
-      }
-
-      const clientTempId = createMessageId('user')
-      appendMessage(messages, {
-        id: clientTempId,
-        clientTempId,
-        role: 'user',
-        content,
-        products: [],
-        createdAt: new Date().toISOString(),
-      })
-
-      if (!socketSession.isConnected()) {
-        socketSession.connectSocket()
-      }
+      _ensureSocketConnected()
 
       const saved = await postMessage({
-        conversationId: conversationId.value,
-        senderId: buyerId.value,
-        receiverId: staffId.value,
+        conversationId: workspace.conversationId,
+        senderId: user.buyerId,
+        receiverId: user.staffId,
         content,
         messageType: 'TEXT',
         isInternal: false,
       })
-      upsertMessage(messages, mapMessageToCustomer(saved, buyerId.value))
+      
+      _appendMessageToTimeline(saved)
     } catch (err) {
       const authStore = useAuthStore()
-      error.value = authStore.isAuthenticated
+      session.error = authStore.isAuthenticated
         ? (err.message || 'Gửi tin nhắn thất bại')
         : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] sendMessage', err)
     } finally {
-      loading.value = false
+      session.loading = false
     }
   }
 
   return {
-    hydrated,
-    isOpen,
-    isTyping,
-    unreadCount,
-    messages,
-    draft,
-    connectionStatus,
-    conversationId,
-    loading,
-    error,
-      buyerId,
+    // Domains
+    session,
+    workspace,
+    user,
+    socket,
+    // Original static properties and getters
     agent,
     quickChips,
     hasUnread,
     formatTimeLabel,
+    // Actions
     hydrateSession,
     resetSession: resetSessionState,
     toggleOpen,

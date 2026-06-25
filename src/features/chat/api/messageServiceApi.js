@@ -87,3 +87,9 @@ export async function closeConversation(conversationId) {
   const res = await apiClient.patch(msUrl(`/conversation/${conversationId}/close`))
   return unwrapMessageService(res)
 }
+
+export async function markConversationAsReadAdmin(conversationId) {
+  const res = await apiClient.patch(msUrl(`/conversation/${conversationId}/read-admin`))
+  return unwrapMessageService(res)
+}
+

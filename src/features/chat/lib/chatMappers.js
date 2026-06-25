@@ -6,7 +6,7 @@ const AVATAR_PALETTE = [
 ]
 
 const STATUS_TO_KEY = {
-  OPEN: 'pending',
+  OPEN: 'new',
   ASSIGNED: 'pending',
   IN_PROGRESS: 'pending',
   WAITING_CUSTOMER: 'waiting',
@@ -108,7 +108,7 @@ export function mapConversationToAdminList(raw) {
     av: initials || 'KH',
     ...palette,
     status: raw.status || 'OPEN',
-    statusKey: STATUS_TO_KEY[raw.status] ?? 'pending',
+    statusKey: STATUS_TO_KEY[raw.status || 'OPEN'] ?? 'pending',
     online: 'online-away',
     onlinePill: 'pill-away',
     pillText: 'Hỗ trợ',
@@ -116,7 +116,8 @@ export function mapConversationToAdminList(raw) {
     priority: PRIORITY_TO_UI[raw.priority] ?? 'medium',
     vip: false,
     isAi: false,
-    unread: Boolean(raw.unread ?? raw.hasUnread),
+    unreadCount: raw.adminUnreadCount || 0,
+    unread: (raw.adminUnreadCount || 0) > 0 || Boolean(raw.unread ?? raw.hasUnread),
     lastMessage: raw.lastMessageContent || '',
     preview: raw.lastMessageContent || '',
     createdAt: raw.createdAt,

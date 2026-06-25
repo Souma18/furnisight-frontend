@@ -1,6 +1,10 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { useConversationManager } from '../../composables/useConversationManager'
+import { useAdminConversationStore } from '../../store/adminConversationStore'
+import { useMessageTemplates } from '../../composables/conversations/useMessageTemplates'
+import { useChatProducts } from '../../composables/conversations/useChatProducts'
+import { useAdminUiStore } from '../../store/adminUiStore'
+
 import ConversationListPanel from '../../components/conversations/ConversationListPanel.vue'
 import ConversationWorkspace from '../../components/conversations/ConversationWorkspace.vue'
 import ConversationDetailPanel from '../../components/conversations/ConversationDetailPanel.vue'
@@ -8,7 +12,22 @@ import ConversationTemplateModal from '../../components/conversations/Conversati
 import SendProductModal from '../../components/conversations/SendProductModal.vue'
 import '../../styles/admin-conversations.css'
 
-const mgr = useConversationManager()
+const store = useAdminConversationStore()
+const uiStore = useAdminUiStore()
+
+// These composables will manage their own internal state (like products, templates)
+const templateMgr = useMessageTemplates(uiStore)
+const productMgr = useChatProducts(uiStore)
+
+onMounted(() => {
+  store.loadInbox()
+  templateMgr.loadTemplates()
+  productMgr.loadProducts()
+})
+
+onUnmounted(() => {
+  store.disconnectSocket()
+})
 
 const templateModalOpen = ref(false)
 const templateModalEditOnOpen = ref(false)
@@ -25,11 +44,11 @@ function openTemplateCreate() {
 }
 
 function handleUseTemplate(content) {
-  mgr.insertSuggestion(content, null)
+  templateMgr.insertSuggestion(content, null)
 }
 
 function handleSendProduct(product) {
-  mgr.sendProductToChat(product)
+  productMgr.sendProductToChat(product)
 }
 
 // Layout override: 
@@ -57,20 +76,19 @@ onUnmounted(() => {
 <template>
   <div class="cm-root">
     <ConversationListPanel
-      :manager="mgr"
       @open-templates="openTemplateList"
       @add-template="openTemplateCreate"
     />
     <ConversationWorkspace
-      :manager="mgr"
+      :templateMgr="templateMgr"
       @open-templates="openTemplateList"
       @open-products="productModalOpen = true"
     />
-    <ConversationDetailPanel :manager="mgr" />
+    <ConversationDetailPanel />
 
     <ConversationTemplateModal
       :is-open="templateModalOpen"
-      :manager="mgr"
+      :manager="templateMgr"
       :default-editing="templateModalEditOnOpen"
       @close="templateModalOpen = false"
       @use-template="handleUseTemplate"
@@ -78,7 +96,7 @@ onUnmounted(() => {
 
     <SendProductModal
       :is-open="productModalOpen"
-      :manager="mgr"
+      :manager="productMgr"
       @close="productModalOpen = false"
       @send-product="handleSendProduct"
     />
