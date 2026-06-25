@@ -77,6 +77,7 @@ export function useRoomUpload({ store, state }) {
       if (predictionResult.status === 'fulfilled') {
         const prediction = predictionResult.value
         const detectedRoomType = mapLabelToRoomType(prediction?.label)
+        
         store.applyPredictionResult(prediction)
 
         if (meshResult.status === 'fulfilled') {

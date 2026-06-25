@@ -1183,3 +1183,5 @@
 [data-theme='dark'] .review-submit-msg.error {
   color: var(--app-danger) !important;
 }
+
+.color-btn.unavailable, .size-btn.unavailable { opacity: 0.5; background: #fdfdfd; color: #adb5bd; border-color: #e9ecef; border-style: dashed; }

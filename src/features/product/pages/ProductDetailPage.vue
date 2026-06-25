@@ -37,6 +37,9 @@ const {
   reviewCanSubmit,
   reviewIsAuthenticated,
   breadcrumbLinks,
+  activeVariant,
+  has3dModel,
+  activeModelUrl,
   retry,
   changeQty,
   setQty,
@@ -132,9 +135,9 @@ const {
       <ProductDetail3DModal
         v-if="show3DModal"
         :open="show3DModal"
-        :model-url="product.modelUrl || product.modelurl || product.model_url"
+        :model-url="activeModelUrl"
         :product-name="product.name"
-        :supports3d="product.supports3d"
+        :supports3d="has3dModel"
         :room-type-hint="product.roomTypeHint"
         @close="show3DModal = false"
         @go-room3d="openRoom3D"

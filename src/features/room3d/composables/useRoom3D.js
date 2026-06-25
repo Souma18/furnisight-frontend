@@ -74,8 +74,17 @@ export function useRoom3D() {
     }
 
     if (typeof payload === 'object') {
+      let defaultVariantId = payload.variantId ?? undefined;
+      if (!defaultVariantId && payload.variants?.length) {
+        const validVariant = payload.variants.find(v => v.modelUrl)
+        if (validVariant) {
+          defaultVariantId = validVariant.id
+        }
+      }
+
       store.addToScene(payload.productId ?? payload.id, {
         initialPosition: payload.initialPosition ?? null,
+        variantId: defaultVariantId,
       })
     }
   }
@@ -120,5 +129,6 @@ export function useRoom3D() {
     updateCartQty,
     removeProductFromScene,
     submitCheckoutMock,
+    handleUpdateVariant: store.updateSceneItemVariant,
   }
 }

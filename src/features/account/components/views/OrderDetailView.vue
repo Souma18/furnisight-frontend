@@ -164,7 +164,7 @@ const {
               <span class="order-line-qty">{{ t('account.orders.quantityShort', { count: item.quantity }) }}</span>
               <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
               <button
-                v-if="order.status === 'done' && orderItemProductId(item)"
+                v-if="order.status === 'delivered' && orderItemProductId(item)"
                 type="button"
                 class="order-review-btn"
                 @click="reviewProduct(item)"
@@ -350,7 +350,7 @@ const {
   color: #2a7a50;
 }
 
-.status-badge.done {
+.status-badge.delivered {
   background: #f0f0f0;
   color: #555;
 }

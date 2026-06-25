@@ -35,7 +35,7 @@ function goHome() {
 
 <template>
   <header class="header">
-    <div class="brand">
+    <div class="brand" @click="goHome" style="cursor: pointer;">
       <span class="brand-icon" aria-hidden="true">
         <img src="/brand/furnisight-logo-mark.png" alt="" />
       </span>

@@ -49,12 +49,15 @@ export function useProductDetailPage(props) {
     resetAuthenticatedReviewState,
   } = useProductReviews(product)
 
+  const activeVariant = computed(() => resolveSelectedVariant())
   const selectedStock = computed(() => {
-    const variantStock = resolveSelectedVariant()?.stockQuantity
+    const variantStock = activeVariant.value?.stockQuantity
     const stock = variantStock ?? product.value?.stock ?? 0
     return Math.max(0, Number(stock) || 0)
   })
   const selectedOutOfStock = computed(() => product.value?.outOfStock || selectedStock.value <= 0)
+  const has3dModel = computed(() => activeVariant.value?.supports3d ?? false)
+  const activeModelUrl = computed(() => activeVariant.value?.modelUrl || '')
 
   async function loadProduct(id) {
     loading.value = true
@@ -157,6 +160,9 @@ export function useProductDetailPage(props) {
     reviewCanSubmit,
     reviewIsAuthenticated,
     breadcrumbLinks,
+    activeVariant,
+    has3dModel,
+    activeModelUrl,
     retry,
     changeQty,
     setQty,

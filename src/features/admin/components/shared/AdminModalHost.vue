@@ -304,6 +304,21 @@ watch(
                 <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
                 <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
               </div>
+              <AdminModel3dUpload
+                :file-name="variant.modelFileName"
+                :file-size="variant.modelFileSize"
+                :preview-url="variant.modelPreviewUrl"
+                :uploading="variant.modelUploading"
+                :progress="variant.modelUploadProgress"
+                :error="variant.modelUploadError"
+                :retryable="Boolean(variant.modelFile && !variant.modelUpload)"
+                @select="file => onModelFile(file, index)"
+                @retry="() => retryModelUpload(index)"
+                @remove="() => removeModel(index)"
+                @preview-error="err => onModelPreviewError(err, index)"
+                @preview-ready="() => onModelPreviewReady(index)"
+                @preview-loading="loading => onModelPreviewLoading(loading, index)"
+              />
               <button type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
                 <AppIcon name="trash2" :size="13" />Xóa biến thể
               </button>
@@ -312,21 +327,6 @@ watch(
         </div>
       </div>
       <AdminProductImagesUpload :images="form.imageUrls" :uploading="saving" @select="onProductImages" @remove="removeImage" @move="moveImage" />
-      <AdminModel3dUpload
-        :file-name="form.modelFileName"
-        :file-size="form.modelFileSize"
-        :preview-url="form.modelPreviewUrl"
-        :uploading="form.modelUploading"
-        :progress="form.modelUploadProgress"
-        :error="form.modelUploadError"
-        :retryable="Boolean(form.modelFile && !form.modelUpload)"
-        @select="onModelFile"
-        @retry="retryModelUpload"
-        @remove="removeModel"
-        @preview-error="onModelPreviewError"
-        @preview-ready="onModelPreviewReady"
-        @preview-loading="onModelPreviewLoading"
-      />
       <div class="mform-group"><label class="mfl">Trạng thái</label><select v-model="form.status" class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>
     </template>
 

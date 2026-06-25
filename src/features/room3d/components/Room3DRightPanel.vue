@@ -1,5 +1,6 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
+import { computed, ref } from 'vue'
 import ProductCard3D from './ProductCard3D.vue'
 import Room3DCartSection from './Room3DCartSection.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -66,6 +67,37 @@ defineEmits([
 
 const { t } = useI18n()
 
+const searchKeywordLower = computed(() => (props.searchKeyword || '').trim().toLowerCase())
+
+const searchResults = computed(() => {
+  if (!searchKeywordLower.value) return []
+  return props.filteredProducts.filter(p => p.name.toLowerCase().includes(searchKeywordLower.value))
+})
+
+const subCategories = computed(() => {
+  const groups = new Map()
+  for (const product of props.filteredProducts) {
+    const cat = product.categoryName || 'Khác'
+    if (!groups.has(cat)) groups.set(cat, [])
+    groups.get(cat).push(product)
+  }
+  return Array.from(groups, ([name, items]) => ({ name, items }))
+})
+
+const openGroups = ref(['search', 'all'])
+
+function toggleGroup(id) {
+  if (openGroups.value.includes(id)) {
+    openGroups.value = openGroups.value.filter(g => g !== id)
+  } else {
+    openGroups.value.push(id)
+  }
+}
+
+function isGroupOpen(id) {
+  return openGroups.value.includes(id)
+}
+
 function getCartQty(productId) {
   return props.cartItems
     .filter((item) => String(item.productId ?? item.id ?? '').split('::')[0] === String(productId))
@@ -94,18 +126,7 @@ function getCartQty(productId) {
         />
       </div>
 
-      <div class="filters">
-        <button
-          v-for="filter in productFilters"
-          :key="filter.value"
-          type="button"
-          class="filter-btn"
-          :class="{ active: selectedCategory === filter.value }"
-          @click="$emit('category-change', filter.value)"
-        >
-          {{ filter.label }}
-        </button>
-      </div>
+      <!-- Filters removed as per new accordion design -->
 
       <div v-if="filteredProducts.length > 0" class="ai-strip">
         <p class="ai-label">{{ t('room3d.products.aiLabel') }} <span class="smart">{{ t('room3d.products.aiSmart') }}</span></p>
@@ -122,22 +143,86 @@ function getCartQty(productId) {
       <div v-else-if="filteredProducts.length === 0" class="products-empty">
         {{ t('room3d.products.empty') }}
       </div>
-      <div v-else class="grid" :style="{ '--product-columns': productColumns }">
-        <ProductCard3D
-          v-for="product in filteredProducts"
-          :key="product.id"
-          :product="product"
-          :added="placedProductIds.includes(String(product.id))"
-          :suggested="
-            selectedRoom && Array.isArray(product.roomTypes)
-              ? product.roomTypes.includes(selectedRoom.type)
-              : false
-          "
-          :shape-step="productCardStep"
-          :cart-qty="getCartQty(product.id)"
-          @add="$emit('add-product', $event)"
-          @open-detail="$emit('open-product', $event)"
-        />
+      <div v-else class="accordion-container">
+        
+        <!-- Nhóm 1: Kết quả tìm kiếm -->
+        <div v-if="searchKeywordLower" class="product-group">
+          <div class="group-header" @click="toggleGroup('search')">
+            <div class="group-title">
+              <AppIcon name="search" :size="16" />
+              <strong>Sản phẩm khớp với tìm kiếm</strong>
+              <small>({{ searchResults.length }})</small>
+            </div>
+            <AppIcon :name="isGroupOpen('search') ? 'chevronUp' : 'chevronDown'" :size="16" class="toggle-icon" />
+          </div>
+          <div v-show="isGroupOpen('search')" class="group-content grid" :style="{ '--product-columns': productColumns }">
+            <div v-if="searchResults.length === 0" class="products-empty" style="min-height: 4rem;">
+              Không tìm thấy sản phẩm nào khớp.
+            </div>
+            <ProductCard3D
+              v-for="product in searchResults"
+              :key="product.id"
+              :product="product"
+              :added="placedProductIds.includes(String(product.id))"
+              :suggested="selectedRoom && Array.isArray(product.roomTypes) ? product.roomTypes.includes(selectedRoom.type) : false"
+              :shape-step="productCardStep"
+              :cart-qty="getCartQty(product.id)"
+              @add="$emit('add-product', $event)"
+              @open-detail="$emit('open-product', $event)"
+            />
+          </div>
+        </div>
+
+        <!-- Nhóm 2: Tất cả -->
+        <div class="product-group">
+          <div class="group-header" @click="toggleGroup('all')">
+            <div class="group-title">
+              <AppIcon name="box" :size="16" />
+              <strong>Tất cả</strong>
+              <small>({{ filteredProducts.length }})</small>
+            </div>
+            <AppIcon :name="isGroupOpen('all') ? 'chevronUp' : 'chevronDown'" :size="16" class="toggle-icon" />
+          </div>
+          <div v-show="isGroupOpen('all')" class="group-content grid" :style="{ '--product-columns': productColumns }">
+            <ProductCard3D
+              v-for="product in filteredProducts"
+              :key="'all-' + product.id"
+              :product="product"
+              :added="placedProductIds.includes(String(product.id))"
+              :suggested="selectedRoom && Array.isArray(product.roomTypes) ? product.roomTypes.includes(selectedRoom.type) : false"
+              :shape-step="productCardStep"
+              :cart-qty="getCartQty(product.id)"
+              @add="$emit('add-product', $event)"
+              @open-detail="$emit('open-product', $event)"
+            />
+          </div>
+        </div>
+
+        <!-- Nhóm 3: Danh mục con -->
+        <div v-for="group in subCategories" :key="group.name" class="product-group">
+          <div class="group-header" @click="toggleGroup('cat-' + group.name)">
+            <div class="group-title">
+              <AppIcon name="folder" :size="16" />
+              <strong>{{ group.name }}</strong>
+              <small>({{ group.items.length }})</small>
+            </div>
+            <AppIcon :name="isGroupOpen('cat-' + group.name) ? 'chevronUp' : 'chevronDown'" :size="16" class="toggle-icon" />
+          </div>
+          <div v-show="isGroupOpen('cat-' + group.name)" class="group-content grid" :style="{ '--product-columns': productColumns }">
+            <ProductCard3D
+              v-for="product in group.items"
+              :key="'sub-' + product.id"
+              :product="product"
+              :added="placedProductIds.includes(String(product.id))"
+              :suggested="selectedRoom && Array.isArray(product.roomTypes) ? product.roomTypes.includes(selectedRoom.type) : false"
+              :shape-step="productCardStep"
+              :cart-qty="getCartQty(product.id)"
+              @add="$emit('add-product', $event)"
+              @open-detail="$emit('open-product', $event)"
+            />
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -354,5 +439,62 @@ function getCartQty(productId) {
   border-top: 1px solid #ece5da;
   padding-top: 0.45rem;
   background: #fbf8f3;
+}
+
+/* Accordion Styles */
+.accordion-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding-bottom: 1rem;
+}
+
+.product-group {
+  background: #fffdf9;
+  border: 1px solid #d8cec1;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.group-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.65rem 0.8rem;
+  cursor: pointer;
+  user-select: none;
+  background: #fdfbf7;
+  transition: background 0.2s;
+}
+
+.group-header:hover {
+  background: #f4efeb;
+}
+
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #172532;
+}
+
+.group-title strong {
+  font-size: 0.85rem;
+}
+
+.group-title small {
+  color: #8b775e;
+  font-size: 0.75rem;
+}
+
+.toggle-icon {
+  color: #8b775e;
+  opacity: 0.8;
+}
+
+.group-content {
+  padding: 0.6rem;
+  border-top: 1px solid #efeae2;
+  background: #fffdf9;
 }
 </style>

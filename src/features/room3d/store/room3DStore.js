@@ -232,6 +232,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     const sceneItem = {
       instanceId,
       productId,
+      variantId: options.variantId ?? undefined,
       initialPosition: options.initialPosition ?? null,
     }
     sceneItems.value.push(sceneItem)
@@ -240,6 +241,13 @@ export const useRoom3DStore = defineStore('room3d', () => {
 
   function removeFromScene(instanceId) {
     sceneItems.value = sceneItems.value.filter((item) => item.instanceId !== instanceId)
+  }
+
+  function updateSceneItemVariant(instanceId, variantId) {
+    const item = sceneItems.value.find((i) => i.instanceId === instanceId)
+    if (item) {
+      item.variantId = variantId
+    }
   }
 
   watch(
@@ -314,6 +322,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     setCategory,
     addToScene,
     removeFromScene,
+    updateSceneItemVariant,
     toggleCart,
     openCheckout,
     closeCheckout,

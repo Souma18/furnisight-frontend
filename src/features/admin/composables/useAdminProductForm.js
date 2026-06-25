@@ -9,21 +9,6 @@ export const PRODUCT_FORM_DEFAULTS = {
   category: 'Phòng ngủ',
   sku: '',
   status: 'Còn hàng',
-  modelUrl: '',
-  modelMediaId: '',
-  supports3d: false,
-  modelFileName: '',
-  modelFileSize: 0,
-  modelFile: null,
-  modelUpload: null,
-  modelUploadController: null,
-  modelPreviewUrl: '',
-  modelPreviewObjectUrl: '',
-  modelPreviewError: '',
-  modelPreviewLoading: false,
-  modelUploadProgress: 0,
-  modelUploading: false,
-  modelUploadError: '',
   imageUrls: [],
   imageUploads: [],
   variantErrors: {},
@@ -60,28 +45,13 @@ const PRODUCT_STATUS_TO_LABEL = {
 
 export function mapProductToForm(row) {
   if (!row) return { ...PRODUCT_FORM_DEFAULTS }
-  const modelUrl = row.modelUrl ?? row.model3dUrl ?? ''
+  if (!row) return { ...PRODUCT_FORM_DEFAULTS }
   return {
     ...PRODUCT_FORM_DEFAULTS,
     name: row.name ?? '',
     category: row.category ?? 'Phòng ngủ',
     sku: row.sku ?? '',
     status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
-    modelUrl,
-    modelMediaId: row.modelMediaId ?? '',
-    supports3d: Boolean(row.supports3d || modelUrl),
-    modelFileName: row.modelFileName ?? row.model3dFileName ?? fileNameFromUrl(modelUrl),
-    modelFileSize: row.modelFileSize ?? row.model3dSize ?? 0,
-    modelFile: null,
-    modelUpload: null,
-    modelUploadController: null,
-    modelPreviewUrl: modelUrl,
-    modelPreviewObjectUrl: '',
-    modelPreviewError: '',
-    modelPreviewLoading: false,
-    modelUploadProgress: 0,
-    modelUploading: false,
-    modelUploadError: '',
     imageUrls: Array.isArray(row.imageUrls) ? [...row.imageUrls] : [],
     imageUploads: [],
     variantErrors: {},
@@ -89,45 +59,45 @@ export function mapProductToForm(row) {
   }
 }
 
-export async function applyProductModelFile(form, file) {
+export async function applyProductModelFile(variant, file) {
   validateProductModelFile(file)
-  await cancelUnpersistedProductModel(form)
-  releaseProductModelPreview(form)
+  await cancelUnpersistedProductModel(variant)
+  releaseProductModelPreview(variant)
 
   const previewUrl = URL.createObjectURL(file)
-  form.modelFile = file
-  form.modelFileName = file.name
-  form.modelFileSize = file.size
-  form.modelPreviewUrl = previewUrl
-  form.modelPreviewObjectUrl = previewUrl
-  form.modelPreviewError = ''
-  form.modelPreviewLoading = true
-  form.modelUpload = null
-  form.modelUploadController = new AbortController()
-  form.modelUploadProgress = 0
-  form.modelUploadError = ''
-  form.modelUploading = true
+  variant.modelFile = file
+  variant.modelFileName = file.name
+  variant.modelFileSize = file.size
+  variant.modelPreviewUrl = previewUrl
+  variant.modelPreviewObjectUrl = previewUrl
+  variant.modelPreviewError = ''
+  variant.modelPreviewLoading = true
+  variant.modelUpload = null
+  variant.modelUploadController = new AbortController()
+  variant.modelUploadProgress = 0
+  variant.modelUploadError = ''
+  variant.modelUploading = true
 
   try {
-    form.modelUpload = await mediaApi.uploadStaged(file, {
+    variant.modelUpload = await mediaApi.uploadStaged(file, {
       ownerType: 'PRODUCT_MODEL',
       ownerId: crypto.randomUUID(),
       contentType: file.type || 'model/gltf-binary',
-      signal: form.modelUploadController.signal,
+      signal: variant.modelUploadController.signal,
       onUploadProgress: (event) => {
         if (!event.total) return
-        form.modelUploadProgress = Math.min(100, Math.round((event.loaded / event.total) * 100))
+        variant.modelUploadProgress = Math.min(100, Math.round((event.loaded / event.total) * 100))
       },
     })
-    form.modelUploadProgress = 100
+    variant.modelUploadProgress = 100
   } catch (error) {
     if (error?.code === 'ERR_CANCELED') return
-    form.modelUploadProgress = 0
-    form.modelUploadError = error?.response?.data?.message || error.message || 'Không thể tải model 3D.'
+    variant.modelUploadProgress = 0
+    variant.modelUploadError = error?.response?.data?.message || error.message || 'Không thể tải model 3D.'
     throw error
   } finally {
-    form.modelUploading = false
-    form.modelUploadController = null
+    variant.modelUploading = false
+    variant.modelUploadController = null
   }
 }
 
@@ -146,70 +116,70 @@ export function validateProductModelFile(file) {
   }
 }
 
-export async function completePendingProductModel(form) {
-  if (form.modelUploading) throw new Error('Model 3D vẫn đang được tải lên.')
-  if (form.modelFile && form.modelPreviewLoading) {
+export async function completePendingProductModel(variant) {
+  if (variant.modelUploading) throw new Error('Model 3D vẫn đang được tải lên.')
+  if (variant.modelFile && variant.modelPreviewLoading) {
     throw new Error('Model 3D vẫn đang được kiểm tra preview.')
   }
-  if (form.modelFile && !form.modelUpload) {
-    throw new Error(form.modelUploadError || 'Model 3D chưa được tải lên thành công.')
+  if (variant.modelFile && !variant.modelUpload) {
+    throw new Error(variant.modelUploadError || 'Model 3D chưa được tải lên thành công.')
   }
-  if (form.modelFile && form.modelPreviewError) {
+  if (variant.modelFile && variant.modelPreviewError) {
     throw new Error('File GLB không thể render preview. Vui lòng chọn model hợp lệ khác.')
   }
-  if (!form.modelUpload) return
+  if (!variant.modelUpload) return
 
-  if (!form.modelUpload.completed) {
-    form.modelUpload = await mediaApi.completeStagedUpload(form.modelUpload)
+  if (!variant.modelUpload.completed) {
+    variant.modelUpload = await mediaApi.completeStagedUpload(variant.modelUpload)
   }
-  const url = mediaUploadUrl(form.modelUpload)
+  const url = mediaUploadUrl(variant.modelUpload)
   if (!url) throw new Error('Media service không trả về URL cho model 3D.')
-  form.modelUrl = url
-  form.modelMediaId = form.modelUpload.mediaId || form.modelUpload.id || ''
-  form.supports3d = true
+  variant.modelUrl = url
+  variant.modelMediaId = variant.modelUpload.mediaId || variant.modelUpload.id || ''
+  variant.supports3d = true
 }
 
-export async function removeProductModel(form) {
-  await cancelUnpersistedProductModel(form)
-  releaseProductModelPreview(form)
-  form.modelUrl = ''
-  form.modelMediaId = ''
-  form.supports3d = false
-  form.modelPreviewUrl = ''
-  form.modelPreviewError = ''
-  form.modelPreviewLoading = false
-  form.modelFileName = ''
-  form.modelFileSize = 0
-  form.modelFile = null
-  form.modelUpload = null
-  form.modelUploadController = null
-  form.modelUploadProgress = 0
-  form.modelUploadError = ''
-  form.modelUploading = false
+export async function removeProductModel(variant) {
+  await cancelUnpersistedProductModel(variant)
+  releaseProductModelPreview(variant)
+  variant.modelUrl = ''
+  variant.modelMediaId = ''
+  variant.supports3d = false
+  variant.modelPreviewUrl = ''
+  variant.modelPreviewError = ''
+  variant.modelPreviewLoading = false
+  variant.modelFileName = ''
+  variant.modelFileSize = 0
+  variant.modelFile = null
+  variant.modelUpload = null
+  variant.modelUploadController = null
+  variant.modelUploadProgress = 0
+  variant.modelUploadError = ''
+  variant.modelUploading = false
 }
 
-export async function cancelUnpersistedProductModel(form) {
-  form.modelUploadController?.abort()
-  form.modelUploadController = null
-  if (form.modelUpload?.mediaId && !form.modelUpload.persisted) {
-    await mediaApi.cancelUpload(form.modelUpload.mediaId).catch(() => {})
+export async function cancelUnpersistedProductModel(variant) {
+  variant.modelUploadController?.abort()
+  variant.modelUploadController = null
+  if (variant.modelUpload?.mediaId && !variant.modelUpload.persisted) {
+    await mediaApi.cancelUpload(variant.modelUpload.mediaId).catch(() => {})
   }
-  form.modelUpload = null
+  variant.modelUpload = null
 }
 
-export function releaseProductModelPreview(form) {
-  if (form.modelPreviewObjectUrl) {
-    URL.revokeObjectURL(form.modelPreviewObjectUrl)
+export function releaseProductModelPreview(variant) {
+  if (variant.modelPreviewObjectUrl) {
+    URL.revokeObjectURL(variant.modelPreviewObjectUrl)
   }
-  form.modelPreviewObjectUrl = ''
-  if (form.modelPreviewUrl?.startsWith('blob:')) {
-    form.modelPreviewUrl = ''
+  variant.modelPreviewObjectUrl = ''
+  if (variant.modelPreviewUrl?.startsWith('blob:')) {
+    variant.modelPreviewUrl = ''
   }
 }
 
-export function markProductModelPersisted(form) {
-  if (form.modelUpload) {
-    form.modelUpload = { ...form.modelUpload, persisted: true }
+export function markProductModelPersisted(variant) {
+  if (variant.modelUpload) {
+    variant.modelUpload = { ...variant.modelUpload, persisted: true }
   }
 }
 
@@ -313,6 +283,9 @@ export function buildProductPayload(form) {
       width: Number(variant.width) || 1,
       height: Number(variant.height) || 1,
       lowStockThreshold: Number(variant.lowStockThreshold) || 5,
+      modelUrl: variant.modelUrl || '',
+      modelMediaId: variant.modelMediaId || '',
+      supports3d: Boolean(variant.modelUrl && variant.supports3d),
     }
   })
   return {
@@ -321,9 +294,6 @@ export function buildProductPayload(form) {
     sku: form.sku,
     status: PRODUCT_STATUS_TO_API[form.status] ?? form.status,
     statusLabel: form.status,
-    modelUrl: form.modelUrl || '',
-    modelMediaId: form.modelMediaId || '',
-    supports3d: Boolean(form.modelUrl && form.supports3d),
     imageUrls: form.imageUrls ?? [],
     variants,
   }
@@ -343,6 +313,21 @@ export function createEmptyVariant(seed = {}) {
     width: seed.width ?? 1,
     height: seed.height ?? 1,
     lowStockThreshold: seed.lowStockThreshold ?? 5,
+    modelUrl: seed.modelUrl ?? seed.model_url ?? '',
+    modelMediaId: seed.modelMediaId ?? seed.model_media_id ?? '',
+    supports3d: seed.supports3d ?? false,
+    modelFileName: seed.modelFileName ?? fileNameFromUrl(seed.modelUrl ?? seed.model_url),
+    modelFileSize: seed.modelFileSize ?? 0,
+    modelFile: null,
+    modelUpload: null,
+    modelUploadController: null,
+    modelPreviewUrl: seed.modelUrl ?? seed.model_url ?? '',
+    modelPreviewObjectUrl: '',
+    modelPreviewError: '',
+    modelPreviewLoading: false,
+    modelUploadProgress: 0,
+    modelUploading: false,
+    modelUploadError: '',
   }
 }
 

@@ -129,6 +129,8 @@ export class ProductVariantResponse {
     this.material = resolveLocalizedValue(data, 'material')
     this.color = resolveLocalizedValue(data, 'color')
     this.warranty = resolveLocalizedValue(data, 'warranty')
+    this.supports3d = Boolean(data.supports3d)
+    this.modelUrl = data.modelUrl || ''
   }
 
   get dimensionText() {
@@ -189,6 +191,8 @@ function normalizeVariants(data = {}) {
     material: resolveLocalizedValue(data, 'material'),
     color: resolveLocalizedValue(data, 'color'),
     warranty: resolveLocalizedValue(data, 'warranty'),
+    supports3d: data.supports3d,
+    modelUrl: data.modelUrl,
   }
 
   const hasFallbackVariant = Object.values(fallbackVariant).some((value) => {

@@ -1,6 +1,8 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppToast from '@shared/ui/AppToast.vue'
+import { useAppToast } from '@shared/composables/useAppToast'
 
 const props = defineProps({
   product: { type: Object, required: true },
@@ -29,6 +31,8 @@ const emit = defineEmits([
   'go-room3d',
 ])
 
+const { toastMessage, showToast, notify } = useAppToast()
+
 const isOutOfStock = computed(() => props.selectedOutOfStock || Number(props.selectedStock || 0) <= 0)
 const cannotIncrease = computed(() => Number(props.qty || 1) >= Number(props.selectedStock || 0))
 const qtyDraft = ref(String(props.qty || 1))
@@ -54,6 +58,50 @@ function commitQtyInput() {
   }
   emit('set-qty', qtyDraft.value)
 }
+
+const variants = computed(() => props.product?.variants || [])
+
+function isValidColor(color) {
+  return variants.value.some(v => v.color === color && (!props.selectedSize || v.dimensionText === props.selectedSize))
+}
+
+function isValidSize(size) {
+  return variants.value.some(v => v.dimensionText === size && (!props.selectedColor || v.color === props.selectedColor))
+}
+
+function handlePickColor(color) {
+  emit('pick-color', color)
+  if (props.selectedSize && !variants.value.some(v => v.color === color && v.dimensionText === props.selectedSize)) {
+    const validVariant = variants.value.find(v => v.color === color)
+    if (validVariant && validVariant.dimensionText) {
+      emit('pick-size', validVariant.dimensionText)
+    }
+  }
+}
+
+function handlePickSize(size) {
+  emit('pick-size', size)
+  if (props.selectedColor && !variants.value.some(v => v.dimensionText === size && v.color === props.selectedColor)) {
+    const validVariant = variants.value.find(v => v.dimensionText === size)
+    if (validVariant && validVariant.color) {
+      emit('pick-color', validVariant.color)
+    }
+  }
+}
+
+function handleOpen3D() {
+  const matched = variants.value.find((v) => {
+    const matchesColor = !props.selectedColor || v.color === props.selectedColor
+    const matchesSize = !props.selectedSize || v.dimensionText === props.selectedSize
+    return matchesColor && matchesSize
+  }) || variants.value.find((v) => !props.selectedColor || v.color === props.selectedColor) || variants.value[0]
+
+  if (matched && !matched.supports3d && !matched.modelUrl) {
+    notify('Phiên bản này chưa có mô hình 3D.')
+    return
+  }
+  emit('open-3d')
+}
 </script>
 
 <template>
@@ -68,7 +116,7 @@ function commitQtyInput() {
             class="pd-main-img"
           />
         </div>
-        <button type="button" class="pd-btn-3d" @click="emit('open-3d')">
+        <button type="button" class="pd-btn-3d" @click="handleOpen3D">
           <AppIcon name="box" :size="16" />
           Xem mô hình 3D
         </button>
@@ -119,8 +167,8 @@ function commitQtyInput() {
               v-for="color in product.colors"
               :key="color"
               type="button"
-              :class="['color-btn', { active: selectedColor === color }]"
-              @click="emit('pick-color', color)"
+              :class="['color-btn', { active: selectedColor === color, unavailable: !isValidColor(color) }]"
+              @click="handlePickColor(color)"
             >
               {{ color }}
             </button>
@@ -134,8 +182,8 @@ function commitQtyInput() {
               v-for="size in product.sizes"
               :key="size"
               type="button"
-              :class="['size-btn', { active: selectedSize === size }]"
-              @click="emit('pick-size', size)"
+              :class="['size-btn', { active: selectedSize === size, unavailable: !isValidSize(size) }]"
+              @click="handlePickSize(size)"
             >
               {{ size }}
             </button>
@@ -203,5 +251,7 @@ function commitQtyInput() {
         </div>
       </div>
     </aside>
+
+    <AppToast :show="showToast" :message="toastMessage" />
   </div>
 </template>

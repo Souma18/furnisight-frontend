@@ -37,8 +37,8 @@ function toCartResponse(response) {
 }
 
 class CartApi {
-  async getCart(params) {
-    const response = await apiClient.get(baseUrl, { params })
+  async getCart(params, config = {}) {
+    const response = await apiClient.get(baseUrl, { params, ...config })
     return toCartResponse(response)
   }
 

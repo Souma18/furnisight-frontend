@@ -18,6 +18,11 @@ import { useRoomCameraControls } from '../composables/useRoomCameraControls'
 import { useRoomFurnitureInteraction } from '../composables/useRoomFurnitureInteraction'
 import { useRoomModelLoader } from '../composables/useRoomModelLoader'
 import {
+  productsApi,
+  room3dApi,
+} from '@shared/lib/api/services'
+import { ProductResponse } from '@shared/lib/api/services/products/products.model'
+import {
   applyColorToModel,
   restoreOriginalModelColors,
 } from '../lib/room3DMaterials'
@@ -59,7 +64,7 @@ const props = defineProps({
 
 const hasRoom = computed(() => Boolean(props.selectedRoom))
 const isRoomAvailable = computed(() => Boolean(props.selectedRoom?.modelUrl))
-const emit = defineEmits(['remove-scene-item', 'add-scene-product', 'add-product'])
+const emit = defineEmits(['remove-scene-item', 'add-scene-product', 'add-product', 'update-variant'])
 const shellRef = ref(null)
 const rendererRef = ref(null)
 const sceneRef = ref(null)
@@ -73,10 +78,14 @@ const roomBoundsRef = ref({ minX: -3.2, maxX: 3.2, minZ: -3.2, maxZ: 3.2, floorY
 const shouldRenderRoomFallback = computed(
   () => hasRoom.value && isRoomAvailable.value && !roomModelGroup.value,
 )
+const fullSelectedProduct = ref(null)
+
 const selectedSceneItem = computed(
   () => props.sceneItems.find((item) => item.instanceId === selectedSceneItemId.value) ?? null,
 )
+
 const selectedProduct = computed(() =>
+  (fullSelectedProduct.value?.id === selectedSceneItem.value?.productId ? fullSelectedProduct.value : null) ??
   props.availableProducts.find((product) => product.id === selectedSceneItem.value?.productId) ??
   PRODUCTS_3D.find((product) => product.id === selectedSceneItem.value?.productId) ?? null,
 )
@@ -143,6 +152,22 @@ const {
   setOrbitEnabled,
 })
 
+watch(selectedSceneItemId, async (newId) => {
+  if (!newId) {
+    fullSelectedProduct.value = null
+    return
+  }
+  const item = props.sceneItems.find((i) => i.instanceId === newId)
+  if (!item) return
+  
+  try {
+    const res = await productsApi.getProductDetail(item.productId)
+    fullSelectedProduct.value = new ProductResponse(res.data ?? res)
+  } catch (err) {
+    console.error('Failed to fetch full product details for variant selection', err)
+  }
+})
+
 function applyUserOverrides(model) {
   const instanceId = model?.userData?.instanceId
   if (!instanceId) return
@@ -178,6 +203,7 @@ const {
   loadRoomModel,
   loadFurnitureModels,
   cleanupModels,
+  reloadFurnitureModel,
 } = useRoomModelLoader({
   props,
   sceneRef,
@@ -190,6 +216,7 @@ const {
   applyUserOverrides,
   focusCameraToRoom,
   resizeRendererToShell,
+  fullSelectedProduct,
 })
 
 const isCanvasBusy = computed(() => props.isAnalyzing || isModelLoading.value)
@@ -371,12 +398,16 @@ defineExpose({
 
     <Room3DFurniturePanel
       :selected-product="selectedProduct"
+      :selected-scene-item="selectedSceneItem"
       :selected-scale="selectedScale"
       :selected-color="selectedColor"
       :selected-rotation-y="selectedRotationY"
       :is-selected-in-cart="isSelectedInCart"
       :screen-pos="selectedScreenPos"
       @close="selectedSceneItemId = null"
+      @update-variant="(instanceId, variantId) => { 
+        $emit('update-variant', instanceId, variantId);
+      }"
       @update-scale="updateSelectedScale"
       @update-color="updateSelectedColor"
       @update-rotation="updateSelectedRotation"

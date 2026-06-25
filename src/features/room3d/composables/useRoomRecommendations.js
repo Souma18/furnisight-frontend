@@ -23,24 +23,14 @@ export function useRoomRecommendations({ store, state }) {
     ]
   })
 
-  const filteredProducts = computed(() => {
-    if (state.predictionResponseType.value !== 'full') return []
-
-    let result = state.recommendations.value
-
-    if (state.selectedCategory.value !== 'all') {
-      result = result.filter(
-        (item) => item.categorySlug === state.selectedCategory.value,
-      )
-    }
-
-    const keyword = state.searchKeyword.value.trim().toLowerCase()
-    if (keyword) {
-      result = result.filter((item) => item.name.toLowerCase().includes(keyword))
-    }
-
-    return result
-  })
+    const filteredProducts = computed(() => {
+      if (state.predictionResponseType.value !== 'full') return []
+      let result = state.recommendations.value
+      if (state.selectedCategory.value !== 'all') {
+        result = result.filter(item => item.categorySlug === state.selectedCategory.value)
+      }
+      return result
+    })
 
   async function selectRoomType(type) {
     const requestId = ++manualRecommendationRequestId

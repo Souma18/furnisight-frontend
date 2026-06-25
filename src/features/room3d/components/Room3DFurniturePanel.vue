@@ -1,9 +1,16 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppToast from '@shared/ui/AppToast.vue'
+import { useAppToast } from '@shared/composables/useAppToast'
+import { computed, ref, watch } from 'vue'
 
-defineProps({
+const props = defineProps({
   selectedProduct: {
+    type: Object,
+    default: null,
+  },
+  selectedSceneItem: {
     type: Object,
     default: null,
   },
@@ -29,8 +36,9 @@ defineProps({
   }
 })
 
-defineEmits([
+const emit = defineEmits([
   'close',
+  'update-variant',
   'update-scale',
   'update-color',
   'update-rotation',
@@ -43,6 +51,29 @@ defineEmits([
 
 const PRESET_COLORS = ['#ffffff', '#333333', '#888888', '#8b5a2b', '#0f3f5c', '#d8aa56']
 const { t } = useI18n()
+const { toastMessage, showToast, notify } = useAppToast()
+
+const variants = computed(() => props.selectedProduct?.variants || [])
+
+const availableColors = computed(() => {
+  const colors = new Set()
+  variants.value.forEach((v) => { if (v.color) colors.add(v.color) })
+  return Array.from(colors)
+})
+
+const currentVariant = computed(() => {
+  return variants.value.find((v) => v.id === props.selectedSceneItem?.variantId) || variants.value[0] || null
+})
+
+function pickVariant(variant) {
+  if (!variant.supports3d && !variant.modelUrl) {
+    notify('Phiên bản này chưa có mô hình 3D.')
+    return
+  }
+  if (currentVariant.value?.id !== variant.id) {
+    emit('update-variant', props.selectedSceneItem?.instanceId, variant.id)
+  }
+}
 </script>
 
 <template>
@@ -56,18 +87,19 @@ const { t } = useI18n()
         </button>
       </div>
 
-      <div class="panel-row">
-        <label>{{ t('room3d.furniture.color') }}</label>
-        <div class="color-swatches">
+      <div v-if="variants.length > 0" class="panel-row variants-row">
+        <label>Phiên bản</label>
+        <div class="variant-pills">
           <button
-            v-for="c in PRESET_COLORS"
-            :key="c"
+            v-for="v in variants"
+            :key="v.id"
             type="button"
-            class="swatch-btn"
-            :class="{ active: selectedColor === c }"
-            :style="{ backgroundColor: c }"
-            @click="$emit('update-color', c)"
-          ></button>
+            class="pill-btn"
+            :class="{ active: currentVariant?.id === v.id, unavailable: !v.supports3d && !v.modelUrl }"
+            @click="pickVariant(v)"
+          >
+            {{ v.color || '' }}{{ v.color && v.dimensionText ? ' - ' : '' }}{{ v.dimensionText || '' }}{{ (!v.color && !v.dimensionText) ? 'Mặc định' : '' }}
+          </button>
         </div>
       </div>
 
@@ -104,6 +136,7 @@ const { t } = useI18n()
         </button>
       </div>
     </div>
+    <AppToast :show="showToast" :message="toastMessage" />
   </div>
 </template>
 
@@ -235,6 +268,52 @@ const { t } = useI18n()
   border-color: #c9922a;
   transform: scale(1.1);
   box-shadow: 0 0 0 2px #fff, 0 0 0 4px #c9922a;
+}
+
+.variants-row {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.variants-row label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.variant-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill-btn {
+  border: 1.5px solid #f3efe8;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #5a6772;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pill-btn:hover {
+  border-color: #c9922a;
+}
+
+.pill-btn.active {
+  border-color: #c9922a;
+  background: #fdfaf5;
+  color: #7a542a;
+  font-weight: 600;
+}
+
+.pill-btn.unavailable {
+  opacity: 0.5;
+  background: #fdfdfd;
+  color: #adb5bd;
+  border-color: #e9ecef;
+  border-style: dashed;
 }
 
 /* FLOATING HUD STYLES */

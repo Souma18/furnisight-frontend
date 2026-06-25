@@ -100,21 +100,6 @@ export function useAdminModal() {
     orderStatus: 'Chờ xác nhận',
     trackingCode: '',
     note: '',
-    modelUrl: '',
-    modelMediaId: '',
-    supports3d: false,
-    modelFileName: '',
-    modelFileSize: 0,
-    modelFile: null,
-    modelUpload: null,
-    modelUploadController: null,
-    modelPreviewUrl: '',
-    modelPreviewObjectUrl: '',
-    modelPreviewError: '',
-    modelPreviewLoading: false,
-    modelUploadProgress: 0,
-    modelUploading: false,
-    modelUploadError: '',
     imageUrls: [],
     imageUploads: [],
     roleDescription: '',
@@ -197,35 +182,43 @@ export function useAdminModal() {
     resetForm(modal.value.payload)
   }
 
-  async function onModelFile(file) {
+  async function onModelFile(file, variantIndex) {
     try {
-      await applyProductModelFile(form, file)
+      const variant = form.variants[variantIndex]
+      if (!variant) return
+      await applyProductModelFile(variant, file)
     } catch (e) {
-      form.modelUploadError = e?.response?.data?.message ?? e.message
+      const variant = form.variants[variantIndex]
+      if (variant) variant.modelUploadError = e?.response?.data?.message ?? e.message
       ui.showToast({ icon: 'x', title: 'Lỗi tải model 3D', subtitle: e?.response?.data?.message ?? e.message })
     }
   }
 
-  async function retryModelUpload() {
-    if (!form.modelFile || form.modelUploading) return
-    await onModelFile(form.modelFile)
+  async function retryModelUpload(variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (!variant || !variant.modelFile || variant.modelUploading) return
+    await onModelFile(variant.modelFile, variantIndex)
   }
 
-  async function removeModel() {
-    if (form.modelUploading) return
-    await removeProductModel(form)
+  async function removeModel(variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (!variant || variant.modelUploading) return
+    await removeProductModel(variant)
   }
 
-  function onModelPreviewError(message) {
-    form.modelPreviewError = message || 'Không thể render model GLB.'
+  function onModelPreviewError(message, variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (variant) variant.modelPreviewError = message || 'Không thể render model GLB.'
   }
 
-  function onModelPreviewReady() {
-    form.modelPreviewError = ''
+  function onModelPreviewReady(variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (variant) variant.modelPreviewError = ''
   }
 
-  function onModelPreviewLoading(loading) {
-    form.modelPreviewLoading = loading
+  function onModelPreviewLoading(loading, variantIndex) {
+    const variant = form.variants[variantIndex]
+    if (variant) variant.modelPreviewLoading = loading
   }
 
   async function onProductImages(files) {
@@ -301,8 +294,8 @@ export function useAdminModal() {
       saving.value = true
       try {
         await cancelUnpersistedProductImages(form)
-        await cancelUnpersistedProductModel(form)
-        releaseProductModelPreview(form)
+        for (const v of form.variants || []) await cancelUnpersistedProductModel(v)
+        for (const v of form.variants || []) releaseProductModelPreview(v)
       } finally {
         saving.value = false
       }
@@ -345,13 +338,15 @@ export function useAdminModal() {
       if (type === 'addProd' || type === 'editProd') {
         validateProductVariants(form)
         await completePendingProductImages(form)
-        await completePendingProductModel(form)
+        for (const v of form.variants || []) await completePendingProductModel(v)
         const payload = buildProductPayload(form)
         if (type === 'addProd') await adminApi.createProduct(payload)
         else if (modal.value.payload?.id) await adminApi.updateProduct(modal.value.payload.id, payload)
         markProductImagesPersisted(form)
-        markProductModelPersisted(form)
-        releaseProductModelPreview(form)
+        for (const v of form.variants || []) {
+          markProductModelPersisted(v)
+          releaseProductModelPreview(v)
+        }
       }
       if (type === 'editOrder' && modal.value.payload?.orderCode) {
         const status = getOrderStatusApiValue(form.orderStatus)

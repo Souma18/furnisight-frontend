@@ -135,14 +135,16 @@ export const useCartStore = defineStore('cart', () => {
       loading.value = true
 
       try {
-        const response = await cartApi.getCart()
+        const response = await cartApi.getCart(undefined, authStore.isAdmin ? { skipAuth: true } : {})
         items.value = cloneItems(response?.data?.items ?? [])
         hydrated.value = true
         return items.value
       } catch (error) {
         if (typeof window !== 'undefined' && error?.response?.status === 401) {
           resetCartState()
-          authStore.logout()
+          if (!authStore.isAdmin) {
+            authStore.logout()
+          }
           return items.value
         }
 

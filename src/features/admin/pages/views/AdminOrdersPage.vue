@@ -5,6 +5,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter, formatDate } from '@shared/lib/formatters'
@@ -76,12 +77,20 @@ function canUpdateStatus(row) {
   return canUpdateOrderStatus(row)
 }
 
-async function cancelOrder(row) {
-  const orderCode = row?.orderCode
-  if (!orderCode || !canCancelOrder(row)) return
-  const confirmed = window.confirm(`Hủy đơn ${row.orderCode || row.id}? Hàng trong đơn sẽ được trả lại kho.`)
-  if (!confirmed) return
+const cancelTarget = ref(null)
+const isCanceling = ref(false)
 
+function promptCancelOrder(row) {
+  cancelTarget.value = row
+}
+
+async function confirmCancelOrder() {
+  const row = cancelTarget.value
+  if (!row) return
+  const orderCode = row.orderCode
+  if (!orderCode || !canCancelOrder(row)) return
+
+  isCanceling.value = true
   try {
     await adminApi.updateOrder(orderCode, {
       status: 'CANCELLED',
@@ -93,12 +102,15 @@ async function cancelOrder(row) {
       subtitle: 'Đơn hàng đã được cập nhật và tồn kho sẽ được hoàn lại.',
     })
     await load()
+    cancelTarget.value = null
   } catch (error) {
     ui.showToast({
       icon: 'x',
       title: 'Không thể hủy đơn',
       subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại sau.',
     })
+  } finally {
+    isCanceling.value = false
   }
 }
 
@@ -167,13 +179,23 @@ function resetFilters() {
           type="button"
           class="ra-btn ra-cancel"
           title="Hủy đơn"
-          @click="cancelOrder(row)"
+          @click="promptCancelOrder(row)"
         >
           <AppIcon name="ban" :size="14" />
         </button>
       </div>
     </template>
   </AdminDataTable>
+
+  <ConfirmDialog
+    :open="!!cancelTarget"
+    :title="`Hủy đơn ${cancelTarget?.orderCode || cancelTarget?.id}?`"
+    message="Hàng trong đơn sẽ được trả lại kho."
+    :loading="isCanceling"
+    danger
+    @close="cancelTarget = null"
+    @confirm="confirmCancelOrder"
+  />
 </template>
 
 <style scoped>

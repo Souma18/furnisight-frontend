@@ -127,6 +127,7 @@ onMounted(() => {
             @add-product="vm.addProductToCart"
             @add-scene-product="vm.addProductToScene"
             @remove-scene-item="vm.removeProductFromScene"
+            @update-variant="vm.handleUpdateVariant"
           />
         </div>
 

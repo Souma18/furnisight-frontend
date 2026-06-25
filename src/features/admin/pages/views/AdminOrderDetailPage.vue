@@ -5,8 +5,10 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import { useAdminOrderDetail } from '../../composables/useAdminOrderDetail'
 import { useAdminUiStore } from '../../store/adminUiStore'
+import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { canCancelOrder } from '@shared/lib/orders/orderStatusMapper'
+import { ref } from 'vue'
 
 const props = defineProps({
   orderCode: { type: String, required: true },
@@ -46,11 +48,17 @@ function hideBrokenImage(event) {
   event.target.style.display = 'none'
 }
 
-async function cancelCurrentOrder() {
-  if (!order.value?.orderCode || !canCancelCurrentOrder.value) return
-  const confirmed = window.confirm(`Hủy đơn ${order.value.orderCode}? Hàng trong đơn sẽ được trả lại kho.`)
-  if (!confirmed) return
+const isCanceling = ref(false)
+const showCancelConfirm = ref(false)
 
+function promptCancelOrder() {
+  showCancelConfirm.value = true
+}
+
+async function confirmCancelCurrentOrder() {
+  if (!order.value?.orderCode || !canCancelCurrentOrder.value) return
+
+  isCanceling.value = true
   try {
     await adminApi.updateOrder(order.value.orderCode, {
       status: 'CANCELLED',
@@ -62,12 +70,15 @@ async function cancelCurrentOrder() {
       subtitle: 'Đơn hàng đã được cập nhật và tồn kho sẽ được hoàn lại.',
     })
     await load()
+    showCancelConfirm.value = false
   } catch (error) {
     ui.showToast({
       icon: 'x',
       title: 'Không thể hủy đơn',
       subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại sau.',
     })
+  } finally {
+    isCanceling.value = false
   }
 }
 
@@ -81,7 +92,7 @@ watch(() => props.orderCode, load, { immediate: true })
     subtitle="Thông tin sản phẩm, giao hàng và thanh toán"
   >
     <template #actions>
-      <button v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="cancelCurrentOrder">
+      <button v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="promptCancelOrder">
         <AppIcon name="ban" :size="15" />Hủy đơn
       </button>
       <button type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
@@ -182,6 +193,16 @@ watch(() => props.orderCode, load, { immediate: true })
       </article>
     </aside>
   </section>
+
+  <ConfirmDialog
+    :open="showCancelConfirm"
+    :title="`Hủy đơn ${order?.orderCode}?`"
+    message="Hàng trong đơn sẽ được trả lại kho."
+    :loading="isCanceling"
+    danger
+    @close="showCancelConfirm = false"
+    @confirm="confirmCancelCurrentOrder"
+  />
 </template>
 
 <style scoped>

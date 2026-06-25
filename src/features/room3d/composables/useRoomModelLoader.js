@@ -24,6 +24,7 @@ export function useRoomModelLoader({
   applyUserOverrides,
   focusCameraToRoom,
   resizeRendererToShell,
+  fullSelectedProduct,
 }) {
   const isModelLoading = ref(false)
   const productMap = computed(() => {
@@ -32,6 +33,9 @@ export function useRoomModelLoader({
       props.availableProducts.forEach((item) => {
         map.set(String(item.id), item)
       })
+    }
+    if (fullSelectedProduct?.value?.id) {
+      map.set(String(fullSelectedProduct.value.id), fullSelectedProduct.value)
     }
     return map
   })
@@ -151,7 +155,8 @@ export function useRoomModelLoader({
     await Promise.all(
       props.sceneItems.map(async (sceneItem, index) => {
         const product = productMap.value.get(String(sceneItem.productId))
-        const modelUrl = product?.modelUrl || product?.modelurl || product?.model_url
+        const variant = product?.variants?.find(v => v.id === sceneItem.variantId) || product?.variants?.find(v => v.modelUrl || v.supports3d)
+        const modelUrl = variant?.modelUrl
         if (!modelUrl) return
 
         try {
@@ -184,11 +189,59 @@ export function useRoomModelLoader({
     loadedFurnitureIds.value = []
   }
 
+  async function reloadFurnitureModel(instanceId, overrideModelUrl = null) {
+    if (!sceneRef.value?.scene) return
+
+    const sceneItem = props.sceneItems.find((i) => i.instanceId === instanceId)
+    if (!sceneItem) return
+    const index = props.sceneItems.findIndex((i) => i.instanceId === instanceId)
+
+    let modelUrl = overrideModelUrl
+    if (!modelUrl) {
+      const product = productMap.value.get(String(sceneItem.productId))
+      const variant = product?.variants?.find(v => v.id === sceneItem.variantId) || product?.variants?.find(v => v.modelUrl || v.supports3d)
+      modelUrl = variant?.modelUrl
+    }
+    
+    if (!modelUrl) return
+
+    const oldModelIndex = furnitureGroups.value.findIndex(m => m.userData.instanceId === instanceId)
+    
+    let oldPosition, oldRotation
+    if (oldModelIndex !== -1) {
+      const oldModel = furnitureGroups.value[oldModelIndex]
+      oldPosition = oldModel.position.clone()
+      oldRotation = oldModel.rotation.clone()
+      removeObject3D(oldModel)
+      furnitureGroups.value.splice(oldModelIndex, 1)
+    }
+
+    try {
+      const loader = await getLoader()
+      const gltf = await loader.loadAsync(modelUrl)
+      const model = gltf.scene
+      
+      normalizeFurnitureModel(model, sceneItem, index)
+      applyUserOverrides(model)
+      
+      if (oldPosition) {
+        model.position.copy(oldPosition)
+        model.rotation.copy(oldRotation)
+      }
+      
+      sceneRef.value.scene.add(model)
+      furnitureGroups.value.push(model)
+    } catch {
+      console.warn('[Room3D] Failed to reload furniture model:', modelUrl)
+    }
+  }
+
   return {
     isModelLoading,
     fallbackProductIds,
     loadRoomModel,
     loadFurnitureModels,
     cleanupModels,
+    reloadFurnitureModel,
   }
 }

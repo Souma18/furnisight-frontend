@@ -31,7 +31,7 @@ const emit = defineEmits(['add', 'open-detail'])
 const { t } = useI18n()
 
 const productImage = computed(() => props.product.image || props.product.imageUrl || '')
-const canDragToScene = computed(() => Boolean(props.product.modelUrl || props.product.modelurl || props.product.model_url))
+const canDragToScene = computed(() => Boolean(props.product.variants?.some(v => v.modelUrl || v.supports3d)))
 const priceLabel = computed(() => {
   const price = Number(props.product.price)
   return Number.isFinite(price) && price > 0 ? PriceFormatter.format(price) : t('room3d.product.contactPrice')
@@ -89,7 +89,6 @@ function openDetail() {
     @dragend="onDragEnd"
   >
     <div class="preview">
-      <span v-if="product.tags?.includes?.('new')" class="new-badge">{{ t('room3d.product.new') }}</span>
       <span v-if="cartQty > 0" class="cart-badge">{{ cartQty }}</span>
       <img v-if="productImage" class="product-image" :src="productImage" :alt="product.name" />
       <div v-else class="product-icon"><AppIcon :name="productIconName" :size="34" /></div>
@@ -171,19 +170,6 @@ function openDetail() {
   background: #f2ede5;
 }
 
-.new-badge {
-  position: absolute;
-  left: calc(0.45rem * var(--pc-content-scale));
-  top: calc(0.4rem * var(--pc-content-scale));
-  background: #f6b22f;
-  color: #0f3f5c;
-  border-radius: 4px;
-  padding: calc(0.2rem * var(--pc-content-scale)) calc(0.45rem * var(--pc-content-scale));
-  font-weight: 700;
-  font-size: calc(0.58rem * var(--pc-content-scale));
-  letter-spacing: 0.02em;
-  z-index: 2;
-}
 .product-icon {
   width: 100%;
   color: #876844;
