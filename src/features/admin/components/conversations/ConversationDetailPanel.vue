@@ -36,7 +36,8 @@ function saveNote() {
           :class="store.currentConv.avClass"
           :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
         >
-          {{ store.currentConv.av }}
+          <img v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name" />
+          <span v-else>{{ store.currentConv.av }}</span>
         </div>
         <div class="cdp-cust-name">{{ store.currentConv.name }}</div>
         <div class="cdp-cust-email">{{ store.currentConv.email || 'Chưa cập nhật email' }}</div>

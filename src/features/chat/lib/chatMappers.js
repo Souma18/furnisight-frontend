@@ -103,6 +103,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
       text: messageContent(raw),
       attachment: mapAttachment(raw),
       time: formatTimeLabel(raw.createdAt),
+      createdAt: raw.createdAt ?? new Date().toISOString(),
       senderName: staffName || `Admin #${raw.senderId}`,
     }
   }
@@ -116,6 +117,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
     text: messageContent(raw),
     attachment: mapAttachment(raw),
     time: formatTimeLabel(raw.createdAt),
+    createdAt: raw.createdAt ?? new Date().toISOString(),
     senderName: isCustomer ? `Khách #${buyerId}` : staffName || `Admin #${staffId}`,
     senderRole: isCustomer ? undefined : 'AD',
   }
@@ -125,6 +127,7 @@ export function mapConversationToAdminList(raw) {
   const buyerId = raw.buyerId
   const palette = pickAvatarPalette(buyerId)
   const name = raw.buyerName || `Khách #${buyerId}`
+  const avatarUrl = raw.buyerAvatarUrl || raw.avatarUrl || raw.buyer?.avatarUrl || ''
   const initials = name
     .split(/\s+/)
     .map((w) => w[0])
@@ -141,6 +144,7 @@ export function mapConversationToAdminList(raw) {
     assigneeRole: raw.assigneeRole ?? raw.staffRole ?? '',
     name,
     av: initials || 'KH',
+    avatarUrl,
     ...palette,
     status: raw.status || 'OPEN',
     statusKey: STATUS_TO_KEY[raw.status || 'OPEN'] ?? 'pending',
@@ -157,6 +161,7 @@ export function mapConversationToAdminList(raw) {
     preview: raw.lastMessageContent || '',
     lastSenderId: raw.senderId ?? raw.lastSenderId ?? null,
     lastMessageId: raw.messageId ?? raw.lastMessageId ?? null,
+    closedAt: raw.closedAt ?? null,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
     channel: raw.channel || 'SUPPORT',

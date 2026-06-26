@@ -28,14 +28,14 @@ function hashStableNumericId(value, offset = 100_000, span = 1_400_000_000) {
 export function profileNumericId(profile, offset, span) {
   if (!profile) return null
 
-  const direct = parseNumericId(profile.id)
-    ?? parseNumericId(profile.accountId)
+  const direct = parseNumericId(profile.accountId)
+    ?? parseNumericId(profile.id)
     ?? parseNumericId(profile.userId)
   if (direct != null) return direct
 
   return hashStableNumericId(
-    profile.id
-      ?? profile.accountId
+    profile.accountId
+      ?? profile.id
       ?? profile.email
       ?? profile.displayName,
     offset,

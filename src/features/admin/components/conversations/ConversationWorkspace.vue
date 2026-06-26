@@ -2,6 +2,9 @@
 import { computed, ref, watch, nextTick } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
+import { useAdminUiStore } from '../../store/adminUiStore'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { mediaApi } from '@shared/lib/api/services'
 
 const props = defineProps({
   templateMgr: {
@@ -11,14 +14,21 @@ const props = defineProps({
 })
 
 const store = useAdminConversationStore()
+const uiStore = useAdminUiStore()
+const authStore = useAuthStore()
 const templateMgr = props.templateMgr
 const emit = defineEmits(['open-templates', 'open-products'])
 
 const currentAdmin = computed(() => store.currentAdmin)
+const closedLine = computed(() => formatClosedLine(store.currentConv?.closedAt))
 
 const messageText = ref('')
 const timelineRef = ref(null)
 const inputWrapClasses = ref('')
+const fileInputRef = ref(null)
+const imageInputRef = ref(null)
+const selectedAttachment = ref(null)
+const uploadingAttachment = ref(false)
 
 const quickReplies = [
   'Xin chào 👋',
@@ -28,6 +38,7 @@ const quickReplies = [
 ]
 
 const messages = computed(() => store.workspace.messages)
+const timelineItems = computed(() => insertClosedLine(messages.value, store.currentConv?.closedAt, closedLine.value))
 
 function updateInputMode() {
   inputWrapClasses.value =
@@ -46,6 +57,7 @@ function scrollToBottom() {
 
 watch(() => store.workspace.convId, () => {
   messageText.value = ''
+  clearAttachment()
   scrollToBottom()
 })
 
@@ -69,19 +81,29 @@ watch(
 )
 
 async function sendMsg() {
-  if (!messageText.value.trim()) return
+  if (!messageText.value.trim() && !selectedAttachment.value) return
 
   const text = messageText.value
   const type = store.workspace.msgType
-  messageText.value = ''
-  
-  if (type === 'note') {
-    await store.sendInternalNote(text)
-  } else {
-    await store.sendCustomerReply(text)
+  uploadingAttachment.value = true
+  try {
+    const attachment = await uploadAttachment()
+    messageText.value = ''
+    clearAttachment()
+
+    if (type === 'note') {
+      await store.sendInternalNote(text, attachment)
+    } else {
+      await store.sendCustomerReply(text, attachment)
+    }
+    
+    scrollToBottom()
+  } catch (error) {
+    uiStore.showToast({ icon: 'alert', title: 'Không thể gửi đính kèm', subtitle: error.message || '' })
+    console.error('[ConversationWorkspace] attachment send failed', error)
+  } finally {
+    uploadingAttachment.value = false
   }
-  
-  scrollToBottom()
 }
 
 function handleKeydown(e) {
@@ -95,6 +117,110 @@ function insertQuickReply(text) {
   messageText.value = text
   store.setMsgType('reply')
 }
+
+function isUuid(value) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{12}$/i.test(String(value || ''))
+}
+
+function formatBytes(bytes = 0) {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function formatClosedLine(value) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  const time = date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+  const day = date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  return `Hội thoại đã đóng lúc ${time} ${day}`
+}
+
+function insertClosedLine(items, closedAt, label) {
+  if (!closedAt || !label) return items
+
+  const closedTime = new Date(closedAt).getTime()
+  if (Number.isNaN(closedTime)) return items
+
+  const line = {
+    id: `closed-line-${closedAt}`,
+    type: 'closed-line',
+    text: label,
+    createdAt: closedAt,
+  }
+  const result = []
+  let inserted = false
+
+  for (const item of items) {
+    const itemTime = new Date(item.createdAt || 0).getTime()
+    if (!inserted && !Number.isNaN(itemTime) && itemTime > closedTime) {
+      result.push(line)
+      inserted = true
+    }
+    result.push(item)
+  }
+
+  if (!inserted) {
+    result.push(line)
+  }
+
+  return result
+}
+
+function chooseFile() {
+  fileInputRef.value?.click()
+}
+
+function chooseImage() {
+  imageInputRef.value?.click()
+}
+
+function onAttachmentSelected(event, forceImage = false) {
+  const file = event.target.files?.[0]
+  event.target.value = ''
+  if (!file) return
+
+  clearAttachment()
+  const isImage = forceImage || file.type.startsWith('image/')
+  selectedAttachment.value = {
+    file,
+    name: file.name,
+    type: file.type || 'application/octet-stream',
+    size: file.size,
+    isImage,
+    previewUrl: isImage ? URL.createObjectURL(file) : '',
+  }
+}
+
+function clearAttachment() {
+  if (selectedAttachment.value?.previewUrl) {
+    URL.revokeObjectURL(selectedAttachment.value.previewUrl)
+  }
+  selectedAttachment.value = null
+}
+
+async function uploadAttachment() {
+  if (!selectedAttachment.value?.file) return null
+  const ownerId = authStore.user?.id || authStore.user?.accountId
+  if (!isUuid(ownerId)) {
+    throw new Error('Không xác định được tài khoản để tải tệp lên.')
+  }
+
+  const uploaded = await mediaApi.uploadDirect(selectedAttachment.value.file, {
+    ownerType: 'CHAT',
+    ownerId,
+  })
+  return {
+    mediaId: uploaded.mediaId || uploaded.id || '',
+    url: uploaded.secureUrl || uploaded.secure_url || uploaded.url || '',
+    name: selectedAttachment.value.name,
+    type: selectedAttachment.value.type,
+    size: selectedAttachment.value.size,
+    isImage: selectedAttachment.value.isImage,
+  }
+}
 </script>
 
 <template>
@@ -106,7 +232,8 @@ function insertQuickReply(text) {
         :class="store.currentConv.avClass"
         :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
       >
-        {{ store.currentConv.av }}
+        <img v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name" />
+        <span v-else>{{ store.currentConv.av }}</span>
         <div class="cm-ci-online" :class="store.currentConv.online"></div>
       </div>
       <div class="cw-hdr-info">
@@ -154,24 +281,47 @@ function insertQuickReply(text) {
       <div v-if="store.workspace.loading" class="tl-date-sep">Đang tải tin nhắn...</div>
       <div v-else class="tl-date-sep">Hôm nay</div>
 
-      <div v-for="msg in messages" :key="msg.id" class="tl-msg-row" :class="`msg-${msg.type}`">
+      <template v-for="msg in timelineItems" :key="msg.id">
+      <div v-if="msg.type === 'closed-line'" class="tl-date-sep tl-date-sep--closed">{{ msg.text }}</div>
+      <div v-else class="tl-msg-row" :class="`msg-${msg.type}`">
         <template v-if="msg.type === 'customer'">
           <div
             class="tl-av"
             :class="store.currentConv.avClass"
             :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
           >
-            {{ store.currentConv.av }}
+            <img v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name" />
+            <span v-else>{{ store.currentConv.av }}</span>
           </div>
           <div class="tl-msg-group">
-            <div class="tl-bubble customer">{{ msg.text }}</div>
+            <div class="tl-bubble customer">
+              <div v-if="msg.text">{{ msg.text }}</div>
+              <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+                <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+              </a>
+              <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+                <AppIcon name="paperclip" />
+                <span>{{ msg.attachment.name }}</span>
+                <small>{{ formatBytes(msg.attachment.size) }}</small>
+              </a>
+            </div>
             <div class="tl-msg-meta">{{ msg.time }}</div>
           </div>
         </template>
 
         <template v-if="msg.type === 'admin'">
           <div class="tl-msg-group">
-            <div class="tl-bubble admin">{{ msg.text }}</div>
+            <div class="tl-bubble admin">
+              <div v-if="msg.text">{{ msg.text }}</div>
+              <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+                <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+              </a>
+              <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+                <AppIcon name="paperclip" />
+                <span>{{ msg.attachment.name }}</span>
+                <small>{{ formatBytes(msg.attachment.size) }}</small>
+              </a>
+            </div>
             <div class="tl-msg-meta">
               <span>{{ msg.time }}</span> <AppIcon name="checkCheck" :size="11" class="read" />
             </div>
@@ -188,10 +338,19 @@ function insertQuickReply(text) {
             <div class="tl-note-header">
               <AppIcon name="lock" /> Ghi chú nội bộ - {{ msg.senderName || currentAdmin.name }}
             </div>
-            {{ msg.text }}
+            <div v-if="msg.text">{{ msg.text }}</div>
+            <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+              <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+            </a>
+            <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+              <AppIcon name="paperclip" />
+              <span>{{ msg.attachment.name }}</span>
+              <small>{{ formatBytes(msg.attachment.size) }}</small>
+            </a>
           </div>
         </template>
       </div>
+      </template>
     </div>
 
     <!-- Quick replies -->
@@ -230,8 +389,10 @@ function insertQuickReply(text) {
       </div>
 
       <div class="cw-toolbar">
-        <button class="cw-tool-btn" title="Đính kèm file"><AppIcon name="paperclip" /></button>
-        <button class="cw-tool-btn" title="Gửi ảnh"><AppIcon name="image" /></button>
+        <input ref="fileInputRef" type="file" class="cw-file-input" @change="(e) => onAttachmentSelected(e, false)" />
+        <input ref="imageInputRef" type="file" class="cw-file-input" accept="image/*" @change="(e) => onAttachmentSelected(e, true)" />
+        <button class="cw-tool-btn" title="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile"><AppIcon name="paperclip" /></button>
+        <button class="cw-tool-btn" title="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage"><AppIcon name="image" /></button>
         <div class="cw-tool-sep"></div>
         <button class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" @click="emit('open-products')">
           <AppIcon name="armchair" />
@@ -243,6 +404,17 @@ function insertQuickReply(text) {
       </div>
 
       <div class="cw-input-area-wrap">
+        <div v-if="selectedAttachment" class="cw-attachment-preview">
+          <img v-if="selectedAttachment.isImage" :src="selectedAttachment.previewUrl" alt="" class="cw-attachment-thumb" />
+          <div v-else class="cw-attachment-file"><AppIcon name="paperclip" /></div>
+          <div class="cw-attachment-meta">
+            <div class="cw-attachment-name">{{ selectedAttachment.name }}</div>
+            <div class="cw-attachment-size">{{ formatBytes(selectedAttachment.size) }}</div>
+          </div>
+          <button type="button" class="cw-attachment-remove" title="Bỏ đính kèm" @click="clearAttachment">
+            <AppIcon name="x" />
+          </button>
+        </div>
         <div class="cw-input-row">
           <div class="cw-input-wrap" :class="inputWrapClasses">
             <textarea
@@ -257,8 +429,8 @@ function insertQuickReply(text) {
             ></textarea>
             <div class="cw-char-count">{{ messageText.length }}</div>
           </div>
-          <button class="cw-send-btn" @click="sendMsg" title="Gửi (Enter)">
-            <AppIcon name="send" />
+          <button class="cw-send-btn" @click="sendMsg" title="Gửi (Enter)" :disabled="uploadingAttachment">
+            <AppIcon :name="uploadingAttachment ? 'loader' : 'send'" />
           </button>
         </div>
 

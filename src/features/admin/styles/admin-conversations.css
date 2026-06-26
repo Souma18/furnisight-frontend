@@ -604,6 +604,17 @@
   position: relative;
 }
 
+.cm-ci-av img,
+.cw-hdr-av img,
+.tl-av img,
+.cdp-cust-av img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+  display: block;
+}
+
 .cw-hdr-info {
   flex: 1;
   min-width: 0;
@@ -829,6 +840,10 @@
   flex: 1;
   height: 1px;
   background: var(--border);
+}
+
+.tl-date-sep--closed {
+  color: var(--text3);
 }
 
 /* Message row types */

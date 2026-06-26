@@ -222,8 +222,17 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
           existing.unreadCount = newConv.unreadCount
           existing.unread = newConv.unread
           existing.statusKey = newConv.statusKey
+          existing.status = newConv.status
+          existing.name = newConv.name
+          existing.email = newConv.email
+          existing.av = newConv.av
+          existing.avatarUrl = newConv.avatarUrl
+          existing.avClass = newConv.avClass
+          existing.avColor = newConv.avColor
+          existing.textColor = newConv.textColor
           existing.preview = newConv.preview
           existing.priority = newConv.priority
+          existing.closedAt = newConv.closedAt
           existing.updatedAt = newConv.updatedAt
         } else {
           // If it's a completely new conversation, prepend it
@@ -651,10 +660,12 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     if (!workspace.convId) return
 
     try {
-      await patchStatus(workspace.convId, mapStatusToApi(statusKey))
+      const updated = await patchStatus(workspace.convId, mapStatusToApi(statusKey))
       const conv = inbox.items.find((c) => c.id === workspace.convId)
       if (conv) {
+        conv.status = updated?.status || mapStatusToApi(statusKey)
         conv.statusKey = statusKey
+        conv.closedAt = updated?.closedAt || (statusKey === 'closed' ? new Date().toISOString() : conv.closedAt)
       }
       uiStore.showToast({ icon: 'info', title: 'Cập nhật trạng thái', subtitle: '→ ' + statusKey })
     } catch (error) {
@@ -695,10 +706,12 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     if (!workspace.convId) return
 
     try {
-      await patchStatus(workspace.convId, 'RESOLVED')
+      const updated = await patchStatus(workspace.convId, 'RESOLVED')
       const conv = inbox.items.find((c) => c.id === workspace.convId)
       if (conv) {
+        conv.status = updated?.status || 'RESOLVED'
         conv.statusKey = 'resolved'
+        conv.closedAt = updated?.closedAt || conv.closedAt
       }
       uiStore.showToast({ icon: 'check', title: 'Hội thoại đã giải quyết', subtitle: 'Có thể đóng hẳn bằng trạng thái Đã đóng.' })
     } catch (error) {

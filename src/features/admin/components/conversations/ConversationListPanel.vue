@@ -157,7 +157,10 @@ onUnmounted(() => {
         @click="selectConversation(conv.id)"
       >
         <div class="cm-ci-av-wrap">
-          <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">{{ conv.av }}</div>
+          <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">
+            <img v-if="conv.avatarUrl" :src="conv.avatarUrl" :alt="conv.name" />
+            <span v-else>{{ conv.av }}</span>
+          </div>
           <div class="cm-ci-online" :class="conv.online"></div>
           <div v-if="conv.unreadCount > 0" class="cm-conv-unread-badge">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</div>
           <div v-else-if="conv.unread" class="cm-conv-unread-dot"></div>
