@@ -1,21 +1,50 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
+import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter } from '@shared/lib/formatters'
+import { buildProductPayload, mapProductToForm } from '../../composables/useAdminProductForm'
 
 const { items, search, load, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi))
 const deleteTarget = ref(null)
 const deleting = ref(false)
+const statusTarget = ref(null)
+const updatingStatus = ref(false)
 const formatPrice = PriceFormatter.format
 const badgeMap = { success: 'b-success', low: 'b-low', cancel: 'b-cancel' }
+const columns = [
+  { key: 'stt', label: 'STT' },
+  { key: 'name', label: 'Sản phẩm' },
+  { key: 'sku', label: 'SKU' },
+  { key: 'category', label: 'Danh mục' },
+  { key: 'price', label: 'Giá' },
+  { key: 'stock', label: 'Tồn kho' },
+  { key: 'statusLabel', label: 'Trạng thái' },
+  { key: 'actions', label: 'Hành động' },
+]
+
+const productRows = computed(() => items.value.map((item, index) => ({
+  ...item,
+  stt: index + 1,
+  variantCount: Array.isArray(item.variants) ? item.variants.length : Number(item.variantCount || 0),
+})))
+
+function isInactiveProduct(product) {
+  return String(product?.status || '').toUpperCase() === 'INACTIVE'
+    || String(product?.statusLabel || '').toLowerCase().includes('ngừng')
+}
 
 function requestDelete(row) {
   deleteTarget.value = row
+}
+
+function requestStatusChange(row) {
+  statusTarget.value = row
 }
 
 async function requestEdit(row) {
@@ -24,14 +53,23 @@ async function requestEdit(row) {
     const response = await adminApi.fetchProduct(row.id)
     const productDetail = response?.data ?? response ?? row
     ui.openModal('editProd', productDetail)
-  } catch (error) {
-    ui.openModal('editProd', row) // fallback
+  } catch {
+    ui.openModal('editProd', row)
   }
+}
+
+async function requestView(row) {
+  await requestEdit(row)
 }
 
 function closeDeleteDialog() {
   if (deleting.value) return
   deleteTarget.value = null
+}
+
+function closeStatusDialog() {
+  if (updatingStatus.value) return
+  statusTarget.value = null
 }
 
 async function confirmDelete() {
@@ -62,6 +100,41 @@ async function confirmDelete() {
     deleting.value = false
   }
 }
+
+async function confirmStatusChange() {
+  const product = statusTarget.value
+  if (!product?.id || updatingStatus.value) return
+
+  const nextInactive = !isInactiveProduct(product)
+  updatingStatus.value = true
+  try {
+    const response = await adminApi.fetchProduct(product.id)
+    const detail = response?.data ?? response
+    const form = mapProductToForm(detail)
+    form.status = nextInactive ? 'Ngừng bán' : 'Còn hàng'
+    const payload = buildProductPayload(form)
+    const updateResponse = await adminApi.updateProduct(product.id, payload)
+    if (updateResponse?.data?.success === false) {
+      throw new Error(updateResponse.data.message || 'Không thể cập nhật trạng thái sản phẩm.')
+    }
+
+    statusTarget.value = null
+    await load()
+    ui.showToast({
+      icon: nextInactive ? 'ban' : 'refresh',
+      title: nextInactive ? 'Đã ngừng bán sản phẩm' : 'Đã mở bán lại sản phẩm',
+      subtitle: product.name,
+    })
+  } catch (error) {
+    ui.showToast({
+      icon: 'alert',
+      title: nextInactive ? 'Không thể ngừng bán' : 'Không thể mở bán lại',
+      subtitle: error?.response?.data?.message || error.message || 'Vui lòng thử lại.',
+    })
+  } finally {
+    updatingStatus.value = false
+  }
+}
 </script>
 
 <template>
@@ -70,42 +143,87 @@ async function confirmDelete() {
       <button type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</button>
     </template>
   </AdminPageHeader>
-  <AdminFilterBar v-model:search="search" />
-  <div class="admin-product-grid">
-    <div v-for="row in items" :key="row.id" class="ap-card" @click="requestEdit(row)">
-      <div class="ap-card-img">
-        <img v-if="row.imageUrls?.[0]" :src="row.imageUrls[0]" alt="" />
-        <AppIcon v-else name="box" :size="32" class="ap-card-placeholder" />
-        <div class="ap-card-badges">
-          <span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span>
+  <AdminFilterBar v-model:search="search" placeholder="Tìm sản phẩm theo tên hoặc SKU..." />
+
+  <AdminDataTable :columns="columns" :rows="productRows">
+    <template #cell-name="{ row }">
+      <div class="flex-cell">
+        <span class="product-thumb">
+          <img v-if="row.imageUrls?.[0]" :src="row.imageUrls[0]" alt="" />
+          <AppIcon v-else name="box" :size="18" />
+        </span>
+        <div>
+          <div class="cell-name">{{ row.name || 'Sản phẩm không tên' }}</div>
+          <div class="cell-sub">
+            {{ row.variantCount > 0 ? `${row.variantCount} biến thể` : 'Chưa có biến thể' }}
+          </div>
         </div>
       </div>
-      <div class="ap-card-body">
-        <div class="ap-card-meta">
-          <span class="ap-card-sku">{{ row.sku || 'N/A' }}</span>
-          <span class="ap-card-cat">{{ row.category || 'Không phân loại' }}</span>
-        </div>
-        <h3 class="ap-card-title">{{ row.name || 'Sản phẩm không tên' }}</h3>
-        <div class="ap-card-footer">
-          <span class="ap-card-price">{{ formatPrice(row.price) }}</span>
-          <span class="ap-card-stock" :class="{ 'out-of-stock': row.stock <= 0 }">
-            Tồn kho: {{ row.stock || 0 }}
-          </span>
-        </div>
-      </div>
-      <div class="ap-card-actions">
-        <button type="button" class="ra-btn ra-edit" @click.stop="requestEdit(row)"><AppIcon name="edit" :size="14" /></button>
+    </template>
+
+    <template #cell-sku="{ row }">
+      <code class="product-code">{{ row.sku || 'N/A' }}</code>
+    </template>
+
+    <template #cell-category="{ row }">
+      <span>{{ row.category || 'Không phân loại' }}</span>
+    </template>
+
+    <template #cell-price="{ row }">
+      <strong class="product-price">{{ formatPrice(row.price) }}</strong>
+    </template>
+
+    <template #cell-stock="{ row }">
+      <span :class="{ 'stock-low': Number(row.stock || 0) <= 0 }">{{ row.stock || 0 }}</span>
+    </template>
+
+    <template #cell-statusLabel="{ row }">
+      <span class="badge" :class="badgeMap[row.status] || (isInactiveProduct(row) ? 'b-cancel' : 'b-success')">
+        {{ row.statusLabel }}
+      </span>
+    </template>
+
+    <template #cell-actions="{ row }">
+      <div class="row-actions">
+        <button type="button" class="ra-btn ra-view" title="Xem chi tiết" @click="requestView(row)">
+          <AppIcon name="eye" :size="14" />
+        </button>
+        <button type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
+          <AppIcon name="edit" :size="14" />
+        </button>
+        <button
+          type="button"
+          class="ra-btn ra-lock"
+          :title="isInactiveProduct(row) ? 'Mở bán lại sản phẩm' : 'Ngừng bán sản phẩm'"
+          @click="requestStatusChange(row)"
+        >
+          <AppIcon :name="isInactiveProduct(row) ? 'refresh' : 'ban'" :size="14" />
+        </button>
         <button
           type="button"
           class="ra-btn ra-del"
           :aria-label="`Xóa sản phẩm ${row.name}`"
-          @click.stop="requestDelete(row)"
+          @click="requestDelete(row)"
         >
           <AppIcon name="trash2" :size="14" />
         </button>
       </div>
-    </div>
-  </div>
+    </template>
+  </AdminDataTable>
+
+  <ConfirmDialog
+    :open="Boolean(statusTarget)"
+    :title="statusTarget && isInactiveProduct(statusTarget) ? 'Mở bán lại sản phẩm?' : 'Ngừng bán sản phẩm?'"
+    :message="statusTarget
+      ? `${isInactiveProduct(statusTarget) ? 'Mở bán lại' : 'Ngừng bán'} sản phẩm “${statusTarget.name}”?`
+      : ''"
+    :confirm-label="statusTarget && isInactiveProduct(statusTarget) ? 'Mở bán lại' : 'Ngừng bán'"
+    cancel-label="Hủy"
+    :loading="updatingStatus"
+    :danger="Boolean(statusTarget && !isInactiveProduct(statusTarget))"
+    @close="closeStatusDialog"
+    @confirm="confirmStatusChange"
+  />
 
   <ConfirmDialog
     :open="Boolean(deleteTarget)"
@@ -123,146 +241,38 @@ async function confirmDelete() {
 </template>
 
 <style scoped>
-.admin-product-grid {
+.product-thumb {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-  padding-bottom: 30px;
-}
-.ap-card {
-  background: var(--white);
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  position: relative;
-}
-.ap-card:hover {
-  border-color: var(--gold3);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.06);
-  transform: translateY(-2px);
-}
-.ap-card-img {
-  aspect-ratio: 4/3;
-  position: relative;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
   background: var(--cream);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  color: var(--gold);
+  flex: 0 0 auto;
 }
-.ap-card-img img {
+
+.product-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.ap-card-placeholder {
-  color: var(--text4);
-}
-.ap-card-badges {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  display: flex;
-  gap: 6px;
-}
-.ap-card-badges .badge {
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.ap-card-body {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-.ap-card-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
+
+.product-code {
   font-size: 11px;
-}
-.ap-card-sku {
-  font-family: monospace;
   color: var(--text3);
-  background: var(--cream2);
+  background: var(--cream);
   padding: 2px 6px;
   border-radius: 4px;
 }
-.ap-card-cat {
-  color: var(--text3);
-  font-weight: 500;
-}
-.ap-card-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 16px;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.ap-card-footer {
-  margin-top: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-}
-.ap-card-price {
-  font-size: 16px;
-  font-weight: 700;
+
+.product-price {
   color: var(--gold);
 }
-.ap-card-stock {
-  font-size: 12px;
-  color: var(--text3);
-}
-.ap-card-stock.out-of-stock {
+
+.stock-low {
   color: var(--red);
   font-weight: 600;
-}
-.ap-card-actions {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  opacity: 0;
-  transform: translateX(10px);
-  transition: all 0.2s ease;
-}
-.ap-card:hover .ap-card-actions {
-  opacity: 1;
-  transform: translateX(0);
-}
-.ap-card-actions .ra-btn {
-  background: var(--white);
-  border: 1px solid var(--border);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text2);
-  transition: all 0.2s;
-  cursor: pointer;
-}
-.ap-card-actions .ra-btn:hover {
-  background: var(--cream);
-  color: var(--text);
-  transform: scale(1.05);
-}
-.ap-card-actions .ra-del:hover {
-  color: var(--red);
-  background: var(--red-bg);
-  border-color: var(--red-bg);
 }
 </style>

@@ -7,6 +7,7 @@ defineProps({
   label: { type: String, default: 'Ảnh sản phẩm' },
   hint: { type: String, default: 'Chọn một hoặc nhiều ảnh sản phẩm' },
   uploadingText: { type: String, default: 'Đang tải ảnh lên Cloudinary...' },
+  multiple: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['select', 'remove', 'move'])
@@ -33,7 +34,7 @@ function onDrop(index) {
   <div class="mform-group">
     <label class="mfl">{{ label }}</label>
     <label class="model-upload-box" :class="{ 'has-file': images.length }">
-      <input type="file" accept="image/*" multiple hidden @change="onChange" />
+      <input type="file" accept="image/*" :multiple="multiple" hidden @change="onChange" />
       <AppIcon name="image-plus" :size="28" style="margin-bottom:8px;color:var(--gold)" />
       <div style="font-size:12px;color:var(--text3)">
         {{ uploading ? uploadingText : hint }}
@@ -50,7 +51,7 @@ function onDrop(index) {
         @drop.prevent="onDrop(index)"
       >
         <img :src="url" alt="" />
-        <div class="product-image-order">
+        <div v-if="multiple" class="product-image-order">
           <button type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
             <AppIcon name="chevron-left" :size="12" />
           </button>

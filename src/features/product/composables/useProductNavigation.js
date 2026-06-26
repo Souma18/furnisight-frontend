@@ -1,8 +1,11 @@
 import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
 
 export function useProductNavigation({ product }) {
   const router = useRouter()
+  const authStore = useAuthStore()
   const breadcrumbLinks = ref([])
 
   watch(product, (p) => {
@@ -23,6 +26,11 @@ export function useProductNavigation({ product }) {
   })
 
   function openRoom3D() {
+    if (!authStore.isAuthenticated) {
+      openAuthModal('login')
+      return
+    }
+
     router.push({
       name: 'room3d',
       query: {

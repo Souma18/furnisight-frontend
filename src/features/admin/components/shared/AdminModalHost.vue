@@ -338,7 +338,16 @@ watch(
           </div>
         </div>
       </div>
-      <AdminProductImagesUpload :images="form.imageUrls" :uploading="saving" @select="onProductImages" @remove="removeImage" @move="moveImage" />
+      <AdminProductImagesUpload
+        :images="form.imageUrls"
+        :uploading="saving"
+        label="Ảnh sản phẩm"
+        hint="Chọn 1 ảnh đại diện cho sản phẩm"
+        :multiple="false"
+        @select="onProductImages"
+        @remove="removeImage"
+        @move="moveImage"
+      />
       <div class="mform-group"><label class="mfl">Trạng thái</label><select v-model="form.status" class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>
     </template>
 

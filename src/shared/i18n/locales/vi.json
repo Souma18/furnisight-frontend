@@ -799,7 +799,11 @@
     "controls": {
       "top": "Mặt bằng",
       "front": "Mặt đứng",
-      "panorama": "Xem toàn cảnh 3D"
+      "panorama": "Xem toàn cảnh 3D",
+      "scale": "Kích thước phòng",
+      "scaleAria": "Điều chỉnh kích thước phòng",
+      "scaleDown": "Giảm kích thước phòng",
+      "scaleUp": "Tăng kích thước phòng"
     },
     "product": {
       "contactPrice": "Liên hệ",

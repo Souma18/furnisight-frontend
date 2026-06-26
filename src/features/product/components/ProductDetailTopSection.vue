@@ -13,6 +13,7 @@ const props = defineProps({
   qty: { type: Number, required: true },
   wished: { type: Boolean, default: false },
   activeImage: { type: String, required: true },
+  displayGallery: { type: Array, default: () => [] },
   cartAdding: { type: Boolean, default: false },
   cartAdded: { type: Boolean, default: false },
   cartError: { type: String, default: '' },
@@ -123,7 +124,7 @@ function handleOpen3D() {
       </div>
       <div class="pd-thumbs">
         <button
-          v-for="imgUrl in product.gallery"
+          v-for="imgUrl in displayGallery"
           :key="imgUrl"
           type="button"
           :class="['thumb', { active: activeImage === imgUrl }]"

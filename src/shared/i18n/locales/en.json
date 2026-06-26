@@ -794,7 +794,11 @@
     "controls": {
       "top": "Floor plan",
       "front": "Front view",
-      "panorama": "View 3D panorama"
+      "panorama": "View 3D panorama",
+      "scale": "Room size",
+      "scaleAria": "Adjust room size",
+      "scaleDown": "Decrease room size",
+      "scaleUp": "Increase room size"
     },
     "product": {
       "contactPrice": "Contact",

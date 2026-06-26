@@ -39,6 +39,10 @@ const props = defineProps({
     default: null,
   },
   isLoadingTemplates: Boolean,
+  isRoomModelLoading: {
+    type: Boolean,
+    default: false,
+  },
   projectName: String,
   uploadError: {
     type: String,
@@ -72,6 +76,9 @@ const hasPredictionConfidence = computed(
 )
 const predictionConfidencePercent = computed(() =>
   hasPredictionConfidence.value ? Math.round(props.predictionConfidence * 100) : null,
+)
+const isRoomSelectionLocked = computed(
+  () => props.isLoadingTemplates || props.isAnalyzing || props.isRoomModelLoading,
 )
 function truncateFileName(name) {
   if (!name || name.length <= 24) return name
@@ -170,7 +177,8 @@ function runAiGenerate() {
           :key="room.id"
           type="button"
           class="room-btn"
-          :class="{ active: selectedRoomType === room.type }"
+          :class="{ active: selectedRoomType === room.type, disabled: isRoomSelectionLocked }"
+          :disabled="isRoomSelectionLocked"
           @click="emit('select-room-type', room.type)"
         >
           <span class="room-btn-icon">
@@ -466,6 +474,13 @@ function runAiGenerate() {
 .room-btn.active {
   border-color: #c89f65;
   box-shadow: inset 0 0 0 1px rgba(200, 159, 101, 0.28);
+}
+
+.room-btn.disabled,
+.room-btn:disabled {
+  cursor: wait;
+  opacity: 0.62;
+  transform: none;
 }
 
 .room-btn-icon {

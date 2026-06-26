@@ -738,9 +738,9 @@
 .pl-page-body.pl-inner {
   display: block;
   padding-bottom: 90px;
-  padding-left: 60px;
-  padding-right: 60px;
-  padding-top: 42px;
+  padding-left: clamp(20px, 4vw, 48px);
+  padding-right: clamp(20px, 4vw, 48px);
+  padding-top: 38px;
 }
 
 .pl-products-panel {
@@ -1014,8 +1014,8 @@
 
   .pl-page-body,
   .pl-page-body.pl-inner {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-left: clamp(20px, 4vw, 48px);
+    padding-right: clamp(20px, 4vw, 48px);
   }
 
   .pl-result-head {
@@ -1038,14 +1038,14 @@
 
 @media (max-width: 560px) {
   .pl-inner {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
   }
 
   .pl-page-body,
   .pl-page-body.pl-inner {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
   }
 
   .pl-toolbar-inner {
@@ -1245,21 +1245,21 @@
 
 /* Shared product container alignment */
 .pl-inner {
-  max-width: 1440px;
-  padding-left: 60px;
-  padding-right: 60px;
+  max-width: 1220px;
+  padding-left: clamp(20px, 4vw, 48px);
+  padding-right: clamp(20px, 4vw, 48px);
 }
 
 @media (max-width: 980px) {
   .pl-inner {
-    padding-left: 24px;
-    padding-right: 24px;
+    padding-left: clamp(20px, 4vw, 48px);
+    padding-right: clamp(20px, 4vw, 48px);
   }
 }
 
 @media (max-width: 560px) {
   .pl-inner {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 18px;
+    padding-right: 18px;
   }
 }

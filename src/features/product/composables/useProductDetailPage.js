@@ -50,6 +50,15 @@ export function useProductDetailPage(props) {
   } = useProductReviews(product)
 
   const activeVariant = computed(() => resolveSelectedVariant())
+  const activeGallery = computed(() => {
+    const imageCandidates = [
+      ...(Array.isArray(activeVariant.value?.imageUrls) ? activeVariant.value.imageUrls : []),
+      ...(Array.isArray(product.value?.gallery) ? product.value.gallery : []),
+    ]
+    if (activeVariant.value?.image) imageCandidates.push(activeVariant.value.image)
+    if (product.value?.image) imageCandidates.push(product.value.image)
+    return [...new Set(imageCandidates.filter(Boolean))]
+  })
   const selectedStock = computed(() => {
     const variantStock = activeVariant.value?.stockQuantity
     const stock = variantStock ?? product.value?.stock ?? 0
@@ -70,7 +79,7 @@ export function useProductDetailPage(props) {
 
       selectedColor.value = product.value.colors?.[0] ?? ''
       selectedSize.value = product.value.sizes?.[0] ?? ''
-      activeImage.value = product.value.gallery?.[0] ?? product.value.image ?? ''
+      activeImage.value = activeGallery.value[0] ?? ''
       qty.value = 1
       activeTab.value = route.query.tab === 'review' ? 'review' : 'desc'
       show3DModal.value = false
@@ -120,6 +129,16 @@ export function useProductDetailPage(props) {
     }
     qty.value = Math.min(qty.value, selectedStock.value)
   })
+  watch(activeGallery, (gallery) => {
+    const nextGallery = Array.isArray(gallery) ? gallery : []
+    if (!nextGallery.length) {
+      activeImage.value = ''
+      return
+    }
+    if (!nextGallery.includes(activeImage.value)) {
+      activeImage.value = nextGallery[0]
+    }
+  })
 
   watch(() => props.id, (id) => loadProduct(id))
   watch(locale, () => loadProduct(props.id))
@@ -161,6 +180,7 @@ export function useProductDetailPage(props) {
     reviewIsAuthenticated,
     breadcrumbLinks,
     activeVariant,
+    activeGallery,
     has3dModel,
     activeModelUrl,
     retry,
