@@ -131,6 +131,8 @@ export class ProductVariantResponse {
     this.warranty = resolveLocalizedValue(data, 'warranty')
     this.supports3d = Boolean(data.supports3d)
     this.modelUrl = data.modelUrl || ''
+    this.imageUrls = normalizeGallery(data)
+    this.image = this.imageUrls[0] || ''
   }
 
   get dimensionText() {
@@ -193,6 +195,7 @@ function normalizeVariants(data = {}) {
     warranty: resolveLocalizedValue(data, 'warranty'),
     supports3d: data.supports3d,
     modelUrl: data.modelUrl,
+    imageUrls: normalizeGallery(data),
   }
 
   const hasFallbackVariant = Object.values(fallbackVariant).some((value) => {
@@ -206,6 +209,14 @@ function normalizeVariants(data = {}) {
 
 function normalizeGallery(data = {}) {
   const imageCandidates = []
+
+  if (Array.isArray(data.imageUrls)) {
+    imageCandidates.push(...data.imageUrls)
+  }
+
+  if (Array.isArray(data.image_urls)) {
+    imageCandidates.push(...data.image_urls)
+  }
 
   if (Array.isArray(data.gallery)) {
     imageCandidates.push(...data.gallery)

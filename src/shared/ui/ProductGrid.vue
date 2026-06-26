@@ -136,6 +136,74 @@ function roundedRating(rating) {
   grid-template-columns: 1fr;
 }
 
+.shared-product-grid--catalog {
+  gap: 16px;
+}
+
+.shared-product-grid--catalog .shared-product-card__media {
+  aspect-ratio: 1 / 1;
+}
+
+.shared-product-grid--catalog .shared-product-card__body {
+  min-height: 150px;
+  padding: 13px 13px 14px;
+}
+
+.shared-product-grid--catalog .shared-product-card__cat {
+  font-size: 10px;
+  margin-bottom: 5px;
+}
+
+.shared-product-grid--catalog .shared-product-card__name {
+  font-size: 14px;
+  line-height: 1.35;
+  margin-bottom: 7px;
+  min-height: 38px;
+}
+
+.shared-product-grid--catalog .shared-product-card__rating {
+  gap: 5px;
+  margin-bottom: 10px;
+}
+
+.shared-product-grid--catalog .shared-product-card__rating strong,
+.shared-product-grid--catalog .shared-product-card__rating small {
+  font-size: 11px;
+}
+
+.shared-product-grid--catalog .shared-product-card__price {
+  font-size: 17px;
+}
+
+.shared-product-grid--catalog .shared-product-card__sold {
+  font-size: 11px;
+}
+
+.shared-product-grid--catalog .shared-product-card__wish {
+  height: 32px;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+}
+
+.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__link {
+  grid-template-columns: minmax(180px, 23%) 1fr;
+}
+
+.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__media {
+  min-height: 150px;
+}
+
+.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__body {
+  min-height: 0;
+  padding: 14px 16px;
+}
+
+.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__desc {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .shared-product-grid--editorial:not(.shared-product-grid--list) {
   gap: clamp(18px, 2vw, 26px);
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -489,6 +557,11 @@ function roundedRating(rating) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .shared-product-grid--catalog {
+    gap: 14px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .shared-product-grid--editorial:not(.shared-product-grid--list) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -503,6 +576,14 @@ function roundedRating(rating) {
 @media (max-width: 680px) {
   .shared-product-grid,
   .shared-product-grid--list {
+    grid-template-columns: 1fr;
+  }
+
+  .shared-product-grid--catalog {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .shared-product-grid--catalog.shared-product-grid--list {
     grid-template-columns: 1fr;
   }
 

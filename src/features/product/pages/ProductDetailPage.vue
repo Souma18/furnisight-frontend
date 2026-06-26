@@ -38,6 +38,7 @@ const {
   reviewIsAuthenticated,
   breadcrumbLinks,
   activeVariant,
+  activeGallery,
   has3dModel,
   activeModelUrl,
   retry,
@@ -103,6 +104,7 @@ const {
         :qty="qty"
         :wished="wished"
         :active-image="activeImage"
+        :display-gallery="activeGallery"
         :cart-adding="cartAdding"
         :cart-added="cartAdded"
         :cart-error="cartError"
@@ -119,6 +121,7 @@ const {
       />
       <ProductDetailTabsSection
         :product="product"
+        :active-variant="activeVariant"
         :active-tab="activeTab"
         :review-eligibility="reviewEligibility"
         :review-form="reviewForm"

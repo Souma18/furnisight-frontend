@@ -4,6 +4,10 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 defineProps({
   images: { type: Array, default: () => [] },
   uploading: { type: Boolean, default: false },
+  label: { type: String, default: 'Ảnh sản phẩm' },
+  hint: { type: String, default: 'Chọn một hoặc nhiều ảnh sản phẩm' },
+  uploadingText: { type: String, default: 'Đang tải ảnh lên Cloudinary...' },
+  multiple: { type: Boolean, default: true },
 })
 
 const emit = defineEmits(['select', 'remove', 'move'])
@@ -28,12 +32,12 @@ function onDrop(index) {
 
 <template>
   <div class="mform-group">
-    <label class="mfl">Ảnh sản phẩm</label>
+    <label class="mfl">{{ label }}</label>
     <label class="model-upload-box" :class="{ 'has-file': images.length }">
-      <input type="file" accept="image/*" multiple hidden @change="onChange" />
+      <input type="file" accept="image/*" :multiple="multiple" hidden @change="onChange" />
       <AppIcon name="image-plus" :size="28" style="margin-bottom:8px;color:var(--gold)" />
       <div style="font-size:12px;color:var(--text3)">
-        {{ uploading ? 'Đang tải ảnh lên Cloudinary...' : 'Chọn một hoặc nhiều ảnh sản phẩm' }}
+        {{ uploading ? uploadingText : hint }}
       </div>
     </label>
     <div v-if="images.length" class="product-image-grid">
@@ -47,7 +51,7 @@ function onDrop(index) {
         @drop.prevent="onDrop(index)"
       >
         <img :src="url" alt="" />
-        <div class="product-image-order">
+        <div v-if="multiple" class="product-image-order">
           <button type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
             <AppIcon name="chevron-left" :size="12" />
           </button>

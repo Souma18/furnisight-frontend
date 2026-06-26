@@ -43,7 +43,11 @@ const {
 
 const canvasRef = ref(null)
 const mobileView = ref('canvas')
+const isRoomModelLoading = ref(false)
 const isLoadingTemplatesValue = computed(() => Boolean(unref(isLoadingTemplates)))
+const isRoomSelectionLocked = computed(
+  () => Boolean(unref(isLoadingTemplates)) || Boolean(unref(isAnalyzing)) || isRoomModelLoading.value,
+)
 
 const workspaceViews = computed(() => [
   { key: 'setup', label: t('room3d.workspace.setup'), icon: 'settings' },
@@ -53,6 +57,11 @@ const workspaceViews = computed(() => [
 
 function toggleFullscreen() {
   canvasRef.value?.toggleFullscreen?.()
+}
+
+function handleSelectRoomType(roomType) {
+  if (isRoomSelectionLocked.value) return
+  vm.selectRoomType(roomType)
 }
 
 onMounted(() => {
@@ -103,11 +112,12 @@ onMounted(() => {
           :prediction-label="aiRecognitionLabel"
           :prediction-confidence="aiRecognitionConfidence"
           :is-loading-templates="isLoadingTemplatesValue"
+          :is-room-model-loading="isRoomModelLoading"
           :project-name="projectName"
           :upload-error="uploadError"
           @switch-mode="vm.setMode"
           @upload-image="vm.handleUploadImage"
-          @select-room-type="vm.selectRoomType"
+          @select-room-type="handleSelectRoomType"
           @image-type-change="vm.setImageType"
           @mesh-quality-change="vm.setMeshQuality"
           @quality-change="vm.setQuality"
@@ -128,6 +138,7 @@ onMounted(() => {
             @add-scene-product="vm.addProductToScene"
             @remove-scene-item="vm.removeProductFromScene"
             @update-variant="vm.handleUpdateVariant"
+            @room-loading-change="isRoomModelLoading = $event"
           />
         </div>
 

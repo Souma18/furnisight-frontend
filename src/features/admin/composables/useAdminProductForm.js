@@ -1,7 +1,5 @@
 import { mediaApi } from '@shared/lib/api/services'
 
-/** Product form defaults & 3D model upload for admin modals. */
-
 export const PRODUCT_MODEL_MAX_SIZE = 100 * 1024 * 1024
 
 export const PRODUCT_FORM_DEFAULTS = {
@@ -26,6 +24,8 @@ export const PRODUCT_FORM_DEFAULTS = {
       width: 1,
       height: 1,
       lowStockThreshold: 5,
+      imageUrls: [],
+      imageUploads: [],
     },
   ],
 }
@@ -45,14 +45,14 @@ const PRODUCT_STATUS_TO_LABEL = {
 
 export function mapProductToForm(row) {
   if (!row) return { ...PRODUCT_FORM_DEFAULTS }
-  if (!row) return { ...PRODUCT_FORM_DEFAULTS }
+  const productImages = normalizeImageUrls(row).slice(0, 1)
   return {
     ...PRODUCT_FORM_DEFAULTS,
     name: row.name ?? '',
     category: row.category ?? 'Phòng ngủ',
     sku: row.sku ?? '',
     status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
-    imageUrls: Array.isArray(row.imageUrls) ? [...row.imageUrls] : [],
+    imageUrls: productImages,
     imageUploads: [],
     variantErrors: {},
     variants: normalizeVariants(row.variants, row),
@@ -184,16 +184,41 @@ export function markProductModelPersisted(variant) {
 }
 
 export async function applyProductImageFiles(form, files) {
+  await applyImageFiles(form, files, { replaceExisting: true, maxCount: 1 })
+}
+
+export async function applyVariantImageFiles(variant, files) {
+  await applyImageFiles(variant, files)
+}
+
+async function applyImageFiles(target, files, options = {}) {
+  const { replaceExisting = false, maxCount = null } = options
+  const selectedFiles = Array.isArray(files) ? files : []
+  if (!selectedFiles.length) return
+
+  if (replaceExisting) {
+    await cancelUnpersistedProductImages(target)
+  }
+
   const ownerId = crypto.randomUUID()
-  const uploads = await Promise.all(files.map((file) => mediaApi.uploadStaged(file, {
+  const uploads = await Promise.all(selectedFiles.map((file) => mediaApi.uploadStaged(file, {
     ownerType: 'PRODUCT',
     ownerId,
   })))
+
   const nextUrls = uploads
     .map((item) => item.secureUrl || item.secure_url || item.url)
     .filter(Boolean)
-  form.imageUrls = [...new Set([...(form.imageUrls ?? []), ...nextUrls])]
-  form.imageUploads = [...(form.imageUploads ?? []), ...uploads]
+
+  const mergedUrls = replaceExisting
+    ? nextUrls
+    : [...new Set([...(target.imageUrls ?? []), ...nextUrls])]
+  const mergedUploads = replaceExisting
+    ? uploads
+    : [...(target.imageUploads ?? []), ...uploads]
+
+  target.imageUrls = typeof maxCount === 'number' ? mergedUrls.slice(0, maxCount) : mergedUrls
+  target.imageUploads = typeof maxCount === 'number' ? mergedUploads.slice(0, maxCount) : mergedUploads
 }
 
 export async function removeProductImage(form, url) {
@@ -206,11 +231,16 @@ export async function removeProductImage(form, url) {
 }
 
 export function moveProductImage(form, fromIndex, toIndex) {
+  if ((form.imageUrls ?? []).length <= 1) return
   const images = [...(form.imageUrls ?? [])]
   if (fromIndex < 0 || toIndex < 0 || fromIndex >= images.length || toIndex >= images.length) return
   const [item] = images.splice(fromIndex, 1)
   images.splice(toIndex, 0, item)
   form.imageUrls = images
+}
+
+export function moveVariantImage(variant, fromIndex, toIndex) {
+  moveProductImage(variant, fromIndex, toIndex)
 }
 
 export async function completePendingProductImages(form) {
@@ -221,6 +251,10 @@ export async function completePendingProductImages(form) {
     }
   }
   form.imageUploads = uploads
+}
+
+export async function completePendingVariantImages(variant) {
+  await completePendingProductImages(variant)
 }
 
 export async function cancelUnpersistedProductImages(form) {
@@ -238,6 +272,10 @@ export function markProductImagesPersisted(form) {
     ...upload,
     persisted: true,
   }))
+}
+
+export function markVariantImagesPersisted(variant) {
+  markProductImagesPersisted(variant)
 }
 
 function imageUploadUrl(upload) {
@@ -283,6 +321,7 @@ export function buildProductPayload(form) {
       width: Number(variant.width) || 1,
       height: Number(variant.height) || 1,
       lowStockThreshold: Number(variant.lowStockThreshold) || 5,
+      imageUrls: variant.imageUrls ?? [],
       modelUrl: variant.modelUrl || '',
       modelMediaId: variant.modelMediaId || '',
       supports3d: Boolean(variant.modelUrl && variant.supports3d),
@@ -294,7 +333,7 @@ export function buildProductPayload(form) {
     sku: form.sku,
     status: PRODUCT_STATUS_TO_API[form.status] ?? form.status,
     statusLabel: form.status,
-    imageUrls: form.imageUrls ?? [],
+    imageUrls: (form.imageUrls ?? []).slice(0, 1),
     variants,
   }
 }
@@ -313,21 +352,23 @@ export function createEmptyVariant(seed = {}) {
     width: seed.width ?? 1,
     height: seed.height ?? 1,
     lowStockThreshold: seed.lowStockThreshold ?? 5,
+    imageUrls: normalizeImageUrls(seed),
+    imageUploads: seed.imageUploads ?? [],
     modelUrl: seed.modelUrl ?? seed.model_url ?? '',
     modelMediaId: seed.modelMediaId ?? seed.model_media_id ?? '',
-    supports3d: seed.supports3d ?? false,
+    supports3d: seed.supports3d ?? seed.supports3D ?? false,
     modelFileName: seed.modelFileName ?? fileNameFromUrl(seed.modelUrl ?? seed.model_url),
     modelFileSize: seed.modelFileSize ?? 0,
-    modelFile: null,
-    modelUpload: null,
-    modelUploadController: null,
-    modelPreviewUrl: seed.modelUrl ?? seed.model_url ?? '',
-    modelPreviewObjectUrl: '',
-    modelPreviewError: '',
-    modelPreviewLoading: false,
-    modelUploadProgress: 0,
-    modelUploading: false,
-    modelUploadError: '',
+    modelFile: seed.modelFile ?? null,
+    modelUpload: seed.modelUpload ?? null,
+    modelUploadController: seed.modelUploadController ?? null,
+    modelPreviewUrl: seed.modelPreviewUrl ?? seed.modelUrl ?? seed.model_url ?? '',
+    modelPreviewObjectUrl: seed.modelPreviewObjectUrl ?? '',
+    modelPreviewError: seed.modelPreviewError ?? '',
+    modelPreviewLoading: seed.modelPreviewLoading ?? false,
+    modelUploadProgress: seed.modelUploadProgress ?? 0,
+    modelUploading: seed.modelUploading ?? false,
+    modelUploadError: seed.modelUploadError ?? '',
   }
 }
 
@@ -371,4 +412,19 @@ export function normalizeVariants(variants, fallback = {}) {
   return [createEmptyVariant({
     sku: fallback.sku ?? '',
   })]
+}
+
+function normalizeImageUrls(data = {}) {
+  const candidates = []
+  if (Array.isArray(data.imageUrls)) candidates.push(...data.imageUrls)
+  if (Array.isArray(data.image_urls)) candidates.push(...data.image_urls)
+  if (Array.isArray(data.gallery)) candidates.push(...data.gallery)
+  if (Array.isArray(data.images)) {
+    candidates.push(...data.images.map((item) => {
+      if (typeof item === 'string') return item
+      return item?.url || item?.imageUrl || item?.src || ''
+    }))
+  }
+  candidates.push(data.image, data.imageUrl, data.thumbnail, data.thumbnailUrl)
+  return [...new Set(candidates.filter(Boolean))]
 }

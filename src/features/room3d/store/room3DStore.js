@@ -229,11 +229,15 @@ export const useRoom3DStore = defineStore('room3d', () => {
     if (!productId) return null
 
     const instanceId = `scene-${productId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const nextPlacementIndex = sceneItems.value.length
+      ? Math.max(...sceneItems.value.map((item) => item.placementIndex ?? 0)) + 1
+      : 0
     const sceneItem = {
       instanceId,
       productId,
       variantId: options.variantId ?? undefined,
       initialPosition: options.initialPosition ?? null,
+      placementIndex: options.placementIndex ?? nextPlacementIndex,
     }
     sceneItems.value.push(sceneItem)
     return sceneItem

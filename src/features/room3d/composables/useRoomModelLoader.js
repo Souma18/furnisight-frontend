@@ -27,6 +27,7 @@ export function useRoomModelLoader({
   fullSelectedProduct,
 }) {
   const isModelLoading = ref(false)
+  let roomLoadToken = 0
   const productMap = computed(() => {
     const map = new Map(PRODUCTS_3D.map((item) => [String(item.id), item]))
     if (Array.isArray(props.availableProducts)) {
@@ -59,6 +60,7 @@ export function useRoomModelLoader({
   function normalizeFurnitureModel(model, sceneItem, index) {
     const product = productMap.value.get(String(sceneItem.productId))
     const fallback = product?.fallback ?? { width: 0.9, height: 0.9, depth: 0.9 }
+    const existingOverride = productOverrides.value[sceneItem.instanceId] ?? {}
     const originalBox = new Box3().setFromObject(model)
     const size = originalBox.getSize(new Vector3())
     const sx = fallback.width / Math.max(size.x || 1, 0.001)
@@ -73,9 +75,13 @@ export function useRoomModelLoader({
     captureOriginalMaterialColors(model)
     model.userData.isNeutralGray = modelLooksNeutralGray(model)
 
-    const pos = sceneItem.initialPosition ?? getPlacementPosition(roomBoundsRef.value, index)
+    const placementIndex = sceneItem.placementIndex ?? index
+    const pos =
+      existingOverride.position ??
+      sceneItem.initialPosition ??
+      getPlacementPosition(roomBoundsRef.value, placementIndex)
     model.position.set(pos.x, 0, pos.z)
-    model.rotation.set(0, 0, 0)
+    model.rotation.set(0, existingOverride.rotationY ?? 0, 0)
 
     const floorY = roomBoundsRef.value.floorY ?? 0
     const fittedBox = new Box3().setFromObject(model)
@@ -89,9 +95,9 @@ export function useRoomModelLoader({
     productOverrides.value = {
       ...productOverrides.value,
       [sceneItem.instanceId]: {
-        ...(productOverrides.value[sceneItem.instanceId] ?? {}),
+        ...existingOverride,
         position: { x: pos.x, z: pos.z },
-        rotationY: 0,
+        rotationY: existingOverride.rotationY ?? 0,
       },
     }
   }
@@ -99,6 +105,7 @@ export function useRoomModelLoader({
   async function loadRoomModel() {
     if (!sceneRef.value?.scene) return
 
+    const currentToken = ++roomLoadToken
     isModelLoading.value = true
     removeObject3D(roomModelGroup.value)
     roomModelGroup.value = null
@@ -112,6 +119,10 @@ export function useRoomModelLoader({
     try {
       const loader = await getLoader()
       const gltf = await loader.loadAsync(props.selectedRoom.modelUrl)
+      if (currentToken !== roomLoadToken) {
+        removeObject3D(gltf.scene)
+        return
+      }
       const model = gltf.scene
       centerRoomModelOnXYGrid(model, 0.9)
       sceneRef.value.scene.add(model)
@@ -138,7 +149,9 @@ export function useRoomModelLoader({
       console.warn('[Room3D] Failed to load room model:', props.selectedRoom.modelUrl)
       roomModelGroup.value = null
     } finally {
-      isModelLoading.value = false
+      if (currentToken === roomLoadToken) {
+        isModelLoading.value = false
+      }
     }
   }
 

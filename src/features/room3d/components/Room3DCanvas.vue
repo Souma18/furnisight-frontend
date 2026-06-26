@@ -27,6 +27,8 @@ import {
   restoreOriginalModelColors,
 } from '../lib/room3DMaterials'
 import { LIGHTING_PRESET, setupSceneVisuals } from '../lib/room3DSceneVisuals'
+import { clampToRoomBounds } from '../lib/room3DPlacement'
+import { centerRoomModelOnXYGrid } from '../lib/room3DObjects'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import Room3DBadge from './Room3DBadge.vue'
 import Room3DBottomControls from './Room3DBottomControls.vue'
@@ -64,7 +66,13 @@ const props = defineProps({
 
 const hasRoom = computed(() => Boolean(props.selectedRoom))
 const isRoomAvailable = computed(() => Boolean(props.selectedRoom?.modelUrl))
-const emit = defineEmits(['remove-scene-item', 'add-scene-product', 'add-product', 'update-variant'])
+const emit = defineEmits([
+  'remove-scene-item',
+  'add-scene-product',
+  'add-product',
+  'update-variant',
+  'room-loading-change',
+])
 const shellRef = ref(null)
 const rendererRef = ref(null)
 const sceneRef = ref(null)
@@ -79,6 +87,17 @@ const shouldRenderRoomFallback = computed(
   () => hasRoom.value && isRoomAvailable.value && !roomModelGroup.value,
 )
 const fullSelectedProduct = ref(null)
+const roomScaleStep = ref(0)
+const ROOM_SCALE_LEVELS = {
+  '-3': 0.7,
+  '-2': 0.82,
+  '-1': 0.92,
+  '0': 1,
+  '1': 1.12,
+  '2': 1.24,
+  '3': 1.36,
+}
+const ROOM_BASE_SCALE = 0.9
 
 const selectedSceneItem = computed(
   () => props.sceneItems.find((item) => item.instanceId === selectedSceneItemId.value) ?? null,
@@ -92,6 +111,13 @@ const selectedProduct = computed(() =>
 const isSelectedInCart = computed(() =>
   selectedProduct.value ? props.cartProductIds.includes(selectedProduct.value.id) : false,
 )
+const roomScaleMultiplier = computed(() => ROOM_SCALE_LEVELS[String(roomScaleStep.value)] ?? 1)
+const roomScaleLabel = computed(() => {
+  if (roomScaleStep.value > 0) return `+${roomScaleStep.value}`
+  return String(roomScaleStep.value)
+})
+const canDecreaseRoomScale = computed(() => roomScaleStep.value > -3)
+const canIncreaseRoomScale = computed(() => roomScaleStep.value < 3)
 
 const {
   viewMode,
@@ -197,6 +223,83 @@ function applyUserOverrides(model) {
   model.position.y += floorY - box.min.y + 0.005
 }
 
+function syncRoomBoundsFromModel() {
+  if (!roomModelGroup.value) {
+    roomBoundsRef.value = { minX: -3.2, maxX: 3.2, minZ: -3.2, maxZ: 3.2, floorY: 0 }
+    return
+  }
+
+  const box = new Box3().setFromObject(roomModelGroup.value)
+  const floorY = Number.isFinite(box.min.y) ? box.min.y : 0
+  roomBoundsRef.value = {
+    minX: Number.isFinite(box.min.x) ? box.min.x : -3.2,
+    maxX: Number.isFinite(box.max.x) ? box.max.x : 3.2,
+    minZ: Number.isFinite(box.min.z) ? box.min.z : -3.2,
+    maxZ: Number.isFinite(box.max.z) ? box.max.z : 3.2,
+    floorY,
+  }
+
+  if (floorGridRef.value) {
+    floorGridRef.value.position.y = floorY - 0.03
+  }
+}
+
+function clampFurnitureToScaledRoom() {
+  if (!furnitureGroups.value.length) return
+
+  furnitureGroups.value.forEach((model) => {
+    const instanceId = model.userData?.instanceId
+    if (!instanceId) return
+
+    const currentOverride = productOverrides.value[instanceId] ?? {}
+    const currentPosition = currentOverride.position ?? {
+      x: model.position.x,
+      z: model.position.z,
+    }
+    const nextPosition = clampToRoomBounds(
+      roomBoundsRef.value,
+      currentPosition.x,
+      currentPosition.z,
+    )
+
+    productOverrides.value = {
+      ...productOverrides.value,
+      [instanceId]: {
+        ...currentOverride,
+        position: nextPosition,
+      },
+    }
+
+    applyUserOverrides(model)
+  })
+}
+
+function applyRoomScale() {
+  if (!roomModelGroup.value) return
+
+  centerRoomModelOnXYGrid(roomModelGroup.value, ROOM_BASE_SCALE * roomScaleMultiplier.value)
+  syncRoomBoundsFromModel()
+  clampFurnitureToScaledRoom()
+
+  requestAnimationFrame(() => {
+    resizeRendererToShell()
+  })
+}
+
+function increaseRoomScale() {
+  if (!canIncreaseRoomScale.value) return
+  roomScaleStep.value += 1
+}
+
+function decreaseRoomScale() {
+  if (!canDecreaseRoomScale.value) return
+  roomScaleStep.value -= 1
+}
+
+function resetRoomScale() {
+  roomScaleStep.value = 0
+}
+
 const {
   isModelLoading,
   fallbackProductIds,
@@ -225,8 +328,16 @@ const busyText = computed(() =>
 )
 
 watch(
+  isModelLoading,
+  (value) => {
+    emit('room-loading-change', value)
+  },
+  { immediate: true },
+)
+
+watch(
   () => sceneRef.value?.scene,
-  (scene) => {
+  async (scene) => {
     if (scene) {
       setupSceneVisuals({ sceneRef, rendererRef, floorGridRef })
       setupOrbitControls({
@@ -234,7 +345,8 @@ watch(
         onPointerMove: onCanvasPointerMove,
         onPointerUp: onCanvasPointerUp,
       })
-      loadRoomModel()
+      await loadRoomModel()
+      applyRoomScale()
       loadFurnitureModels()
     }
   },
@@ -242,8 +354,12 @@ watch(
 
 watch(
   () => props.selectedRoom?.modelUrl,
-  () => {
-    loadRoomModel()
+  async (nextModelUrl, previousModelUrl) => {
+    if (previousModelUrl && nextModelUrl !== previousModelUrl) {
+      roomScaleStep.value = 0
+    }
+    await loadRoomModel()
+    applyRoomScale()
   },
 )
 
@@ -297,6 +413,10 @@ watch(
     })
   },
 )
+
+watch(roomScaleStep, () => {
+  applyRoomScale()
+})
 
 watch(
   () => props.mode,
@@ -373,9 +493,9 @@ defineExpose({
           :height="0.8"
           :depth="0.8"
           :position="{
-            x: sceneItem.initialPosition?.x ?? (index % 4 - 1.5) * 1.3,
+            x: sceneItem.initialPosition?.x ?? ((sceneItem.placementIndex ?? index) % 4 - 1.5) * 1.3,
             y: 0.4,
-            z: sceneItem.initialPosition?.z ?? Math.floor(index / 4) * 1.3 - 1.3,
+            z: sceneItem.initialPosition?.z ?? Math.floor((sceneItem.placementIndex ?? index) / 4) * 1.3 - 1.3,
           }"
         />
       </Scene>
@@ -390,9 +510,15 @@ defineExpose({
       :has-room="hasRoom"
       :view-mode="viewMode"
       :is-fullscreen="isFullscreen"
+      :room-scale-label="roomScaleLabel"
+      :can-decrease-room-scale="canDecreaseRoomScale"
+      :can-increase-room-scale="canIncreaseRoomScale"
       @focus-camera="focusCameraToRoom"
       @set-top-view="setTopView"
       @set-front-view="setFrontView"
+      @decrease-room-scale="decreaseRoomScale"
+      @increase-room-scale="increaseRoomScale"
+      @reset-room-scale="resetRoomScale"
       @toggle-fullscreen="toggleFullscreen"
     />
 

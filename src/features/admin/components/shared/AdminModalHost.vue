@@ -39,6 +39,9 @@ const {
   onProductImages,
   removeImage,
   moveImage,
+  onVariantImages,
+  removeVariantImage,
+  moveVariantImageAt,
   addVariant,
   removeVariant,
   selectVariant,
@@ -304,6 +307,15 @@ watch(
                 <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
                 <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
               </div>
+              <AdminProductImagesUpload
+                :images="variant.imageUrls"
+                :uploading="saving"
+                label="Ảnh biến thể"
+                hint="Chọn ảnh riêng cho biến thể này"
+                @select="files => onVariantImages(files, index)"
+                @remove="url => removeVariantImage(url, index)"
+                @move="(fromIndex, toIndex) => moveVariantImageAt(fromIndex, toIndex, index)"
+              />
               <AdminModel3dUpload
                 :file-name="variant.modelFileName"
                 :file-size="variant.modelFileSize"
@@ -326,7 +338,16 @@ watch(
           </div>
         </div>
       </div>
-      <AdminProductImagesUpload :images="form.imageUrls" :uploading="saving" @select="onProductImages" @remove="removeImage" @move="moveImage" />
+      <AdminProductImagesUpload
+        :images="form.imageUrls"
+        :uploading="saving"
+        label="Ảnh sản phẩm"
+        hint="Chọn 1 ảnh đại diện cho sản phẩm"
+        :multiple="false"
+        @select="onProductImages"
+        @remove="removeImage"
+        @move="moveImage"
+      />
       <div class="mform-group"><label class="mfl">Trạng thái</label><select v-model="form.status" class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>
     </template>
 

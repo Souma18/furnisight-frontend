@@ -78,6 +78,7 @@ const routes = [
     path: '/room3d',
     name: 'room3d',
     component: () => import('@features/room3d/pages/Room3DPage.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/admin',
@@ -120,7 +121,7 @@ router.beforeEach(async (to, from, next) => {
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     sessionStorage.setItem('furnisight:intended-route', to.fullPath)
-    openAuthModal()
+    openAuthModal('login')
     if (!from.name) {
       next({ name: 'home' })
       return

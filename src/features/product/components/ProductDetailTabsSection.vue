@@ -6,6 +6,7 @@ import { useProductTabs } from '../composables/useProductTabs'
 const emit = defineEmits(['switch-tab', 'update-review-field', 'submit-review', 'open-login'])
 const props = defineProps({
   product: { type: Object, required: true },
+  activeVariant: { type: Object, default: null },
   activeTab: { type: String, required: true },
   reviewEligibility: { type: Object, required: true },
   reviewForm: { type: Object, required: true },
@@ -20,7 +21,7 @@ const {
   reviewCountLabel,
   specsRows,
   reviewBars,
-} = useProductTabs(toRef(props, 'product'))
+} = useProductTabs(toRef(props, 'product'), toRef(props, 'activeVariant'))
 
 const reviewGateMessage = computed(() => {
   if (props.reviewEligibility.loading) return 'Đang kiểm tra điều kiện đánh giá...'
