@@ -32,6 +32,7 @@ const store = useAdminConversationStore()
         @change="(e) => store.updateStatus(e.target.value)"
       >
         <option value="new">Mới</option>
+        <option value="assigned">Đã giao</option>
         <option value="pending">Đang xử lý</option>
         <option value="waiting">Chờ khách</option>
         <option value="resolved">Đã giải quyết</option>

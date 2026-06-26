@@ -5,30 +5,74 @@ import {
   getMessages,
   postMessage,
   postInternalNote,
+  patchAssign,
   patchStatus,
-  closeConversation,
-  markConversationAsReadAdmin,
+  patchPriority,
 } from '@features/chat/api/messageServiceApi'
 import { createMessageServiceSocket } from '@features/chat/api/messageServiceSocket'
-import { getStaffId } from '@features/chat/lib/chatUserIds'
+import { getStaffId, profileNumericId } from '@features/chat/lib/chatUserIds'
 import {
   mapConversationToAdminList,
   mapMessageToAdminTimeline,
+  mapPriorityToApi,
   mapStatusToApi,
   normalizeConversationList,
   normalizeMessagePage,
 } from '@features/chat/lib/chatMappers'
 import { useAdminUiStore } from './adminUiStore'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { adminApi } from '@shared/lib/api/services'
 import { ADMIN_SIM_USERS } from '../config/adminLayoutContent'
+import { accountRoleNames, normalizeRoleName } from '../utils/adminAccountRoles'
 
 const INBOX_CHANNEL = 'SUPPORT'
+const SUPPORT_PERMISSION = 'CUSTOMER_SUPPORT'
+
+const ROLE_RANKS = {
+  staff: 1,
+  manager: 2,
+  admin: 3,
+  super: 3,
+  'super admin': 3,
+}
 
 function buildInitials(firstName, lastName) {
   const a = (firstName || '').trim()[0] || ''
   const b = (lastName || '').trim()[0] || ''
   const initials = (a + b).toUpperCase()
   return initials || 'AD'
+}
+
+function normalizePermission(permission) {
+  return String(permission || '').trim().replace(/[-\s]+/g, '_').toUpperCase()
+}
+
+function normalizePermissions(permissions = []) {
+  return [...new Set((permissions || []).map(normalizePermission).filter(Boolean))]
+}
+
+function roleRank(roleName) {
+  return ROLE_RANKS[normalizeRoleName(roleName)] || 0
+}
+
+function supportRoleRank(roleName, permissions = []) {
+  const rank = roleRank(roleName)
+  if (rank > 0) return rank
+  return permissions.includes(SUPPORT_PERMISSION) ? ROLE_RANKS.staff : 0
+}
+
+function bestRoleName(account = {}) {
+  return accountRoleNames(account)
+    .sort((a, b) => roleRank(b) - roleRank(a))[0] || ''
+}
+
+function accountDisplayName(account = {}) {
+  return account.name
+    || account.displayName
+    || [account.lastName, account.firstName].filter(Boolean).join(' ')
+    || account.username
+    || account.email
+    || 'Admin'
 }
 
 export const useAdminConversationStore = defineStore('adminConversation', () => {
@@ -47,7 +91,20 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   const filters = reactive({
     query: '',
     status: 'all',
-    tab: 'all'
+    tab: 'all',
+    priority: 'all',
+    assignment: 'all',
+  })
+
+  const realtimeUnread = reactive({
+    byConversationId: {},
+  })
+
+  const assignableAdmins = reactive({
+    items: [],
+    loading: false,
+    loaded: false,
+    error: '',
   })
 
   const workspace = reactive({
@@ -83,11 +140,45 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
   const filteredConversations = computed(() => {
     let filtered = inbox.items
+    if (filters.status === 'new' || filters.tab === 'new') {
+      filtered = filtered.filter((c) => c.statusKey === 'new')
+    } else if (filters.status === 'assigned') {
+      filtered = filtered.filter((c) => c.statusKey === 'assigned')
+    } else if (filters.status === 'pending') {
+      filtered = filtered.filter((c) => c.statusKey === 'pending')
+    } else if (filters.tab === 'pending') {
+      filtered = filtered.filter((c) => c.statusKey === 'assigned' || c.statusKey === 'pending')
+    } else if (filters.status === 'resolved') {
+      filtered = filtered.filter((c) => c.statusKey === 'resolved')
+    } else if (filters.status === 'closed') {
+      filtered = filtered.filter((c) => c.statusKey === 'closed')
+    } else if (filters.tab === 'resolved') {
+      filtered = filtered.filter((c) => c.statusKey === 'resolved' || c.statusKey === 'closed')
+    }
+    if (filters.status === 'waiting') {
+      filtered = filtered.filter((c) => c.statusKey === 'waiting')
+    }
     if (filters.query) {
       const q = filters.query.toLowerCase()
       filtered = filtered.filter(
         (c) => c.name.toLowerCase().includes(q) || (c.email && c.email.toLowerCase().includes(q)),
       )
+    }
+    if (filters.status === 'unread') {
+      filtered = filtered.filter((c) => c.unread)
+    }
+    if (filters.priority !== 'all') {
+      filtered = filtered.filter((c) => c.priority === filters.priority)
+    }
+    if (filters.assignment !== 'all') {
+      const ownStaffId = Number(getStaffId())
+      filtered = filtered.filter((c) => {
+        const assignedStaffId = Number(c.assignedAdminId ?? c.staffId ?? 0)
+        if (filters.assignment === 'unassigned') return !assignedStaffId
+        if (filters.assignment === 'mine') return assignedStaffId > 0 && assignedStaffId === ownStaffId
+        if (filters.assignment === 'assigned') return assignedStaffId > 0
+        return true
+      })
     }
     return filtered
   })
@@ -98,7 +189,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   function startPollingInbox() {
     stopPollingInbox()
     pollingInterval = setInterval(() => {
-      // Silent polling: keep current page structure, but fetch latest page 0 to see if unread counts changed
+      // Silent polling keeps conversation metadata fresh; unread is session-local via websocket.
       // To keep it simple, we just reload the inbox silently (no loading spinner).
       // Since it resets to page 0, it might disrupt infinite scroll if the admin scrolled far down.
       // A better way is to call a specific lightweight endpoint, but getAdminInbox is all we have.
@@ -126,11 +217,13 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       
       mapped.forEach(newConv => {
         const existing = inbox.items.find(c => c.id === newConv.id)
+        applyRealtimeUnread(newConv)
         if (existing) {
           existing.unreadCount = newConv.unreadCount
           existing.unread = newConv.unread
           existing.statusKey = newConv.statusKey
           existing.preview = newConv.preview
+          existing.priority = newConv.priority
           existing.updatedAt = newConv.updatedAt
         } else {
           // If it's a completely new conversation, prepend it
@@ -147,7 +240,11 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
   // --- Actions: Socket ---
   function subscribeAdminTopics(id) {
-    if (!socket.client?.isConnected?.() || !id) return
+    if (!socket.client?.isConnected?.()) return
+
+    socket.client.subscribeAdminInbox(handleAdminInboxEvent)
+
+    if (!id) return
 
     if (socket.subscribedId && socket.subscribedId !== id) {
       socket.client.unsubscribe(`/topic/conversation/${socket.subscribedId}`)
@@ -167,17 +264,11 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       if (!workspace.messages.some((m) => m.id === mapped.id)) {
         workspace.messages.push(mapped)
         
-        // Auto mark as read because admin is looking at it
-        if (mapped.type === 'customer') {
-          markConversationAsReadAdmin(id).catch(console.error)
-        }
-
         // Update inbox preview and move to top
         if (conv) {
           conv.preview = mapped.text
           conv.updatedAt = new Date().toISOString()
-          conv.unread = false
-          conv.unreadCount = 0
+          clearRealtimeUnread(id)
           // move to top
           inbox.items = [conv, ...inbox.items.filter(c => c.id !== id)]
         }
@@ -209,8 +300,6 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   }
 
   function connectSocketForConversation(id) {
-    if (!id) return
-
     socket.client?.disconnect()
     socket.connected = false
 
@@ -238,12 +327,73 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   }
 
   // --- Actions: Inbox ---
+  function applyRealtimeUnread(conv) {
+    const count = realtimeUnread.byConversationId[conv.id] || 0
+    conv.unreadCount = count
+    conv.unread = count > 0
+    return conv
+  }
+
+  function clearRealtimeUnread(id) {
+    if (!id) return
+    realtimeUnread.byConversationId[id] = 0
+    const conv = inbox.items.find((c) => c.id === id)
+    if (conv) {
+      conv.unread = false
+      conv.unreadCount = 0
+    }
+  }
+
+  function incrementRealtimeUnread(id) {
+    if (!id) return
+    realtimeUnread.byConversationId[id] = (realtimeUnread.byConversationId[id] || 0) + 1
+  }
+
+  function handleAdminInboxEvent(payload) {
+    if (!payload || payload.internal) return
+
+    const mapped = applyRealtimeUnread(mapConversationToAdminList(payload))
+    const existing = inbox.items.find((c) => c.id === mapped.id)
+    const isCurrentConversation = workspace.convId === mapped.id
+    const isCustomerMessage = Number(payload.senderId) === Number(mapped.buyerId)
+
+    if (isCurrentConversation) {
+      clearRealtimeUnread(mapped.id)
+      mapped.unread = false
+      mapped.unreadCount = 0
+    } else if (isCustomerMessage) {
+      incrementRealtimeUnread(mapped.id)
+      applyRealtimeUnread(mapped)
+    }
+
+    if (existing) {
+      Object.assign(existing, {
+        ...mapped,
+        unreadCount: realtimeUnread.byConversationId[mapped.id] || 0,
+        unread: (realtimeUnread.byConversationId[mapped.id] || 0) > 0,
+      })
+      inbox.items = [existing, ...inbox.items.filter((c) => c.id !== existing.id)]
+    } else {
+      inbox.items.unshift(mapped)
+    }
+  }
+
   function buildInboxParams() {
     const params = { channel: INBOX_CHANNEL }
 
     // --- Tab filter: define base status pool ---
     let tabStatuses = null
-    if (filters.tab === 'new') {
+    if (filters.status === 'new') {
+      tabStatuses = ['OPEN']
+    } else if (filters.status === 'assigned') {
+      tabStatuses = ['ASSIGNED']
+    } else if (filters.status === 'pending') {
+      tabStatuses = ['IN_PROGRESS']
+    } else if (filters.status === 'resolved') {
+      tabStatuses = ['RESOLVED']
+    } else if (filters.status === 'closed') {
+      tabStatuses = ['CLOSED']
+    } else if (filters.tab === 'new') {
       tabStatuses = ['OPEN']
     } else if (filters.tab === 'pending') {
       tabStatuses = ['ASSIGNED', 'IN_PROGRESS']
@@ -253,13 +403,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     // 'all' tab → tabStatuses stays null (no status filter)
 
     // --- Chip filter: layered on top of tab ---
-    if (filters.status === 'unread') {
-      params.unreadOnly = true
-      if (tabStatuses) params.statuses = tabStatuses
-    } else if (filters.status === 'urgent') {
-      params.priority = 'URGENT'
-      if (tabStatuses) params.statuses = tabStatuses
-    } else if (filters.status === 'waiting') {
+    if (filters.status === 'waiting') {
       // 'waiting' means WAITING_CUSTOMER — intersect with tab if possible
       const waitingStatus = ['WAITING_CUSTOMER']
       if (tabStatuses) {
@@ -271,6 +415,10 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     } else {
       // No chip filter → use tab statuses directly
       if (tabStatuses) params.statuses = tabStatuses
+    }
+
+    if (filters.priority !== 'all') {
+      params.priority = mapPriorityToApi(filters.priority)
     }
 
     params.page = inbox.page
@@ -294,7 +442,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     try {
       const data = await getAdminInbox(buildInboxParams())
       const items = Array.isArray(data) ? data : data?.content ?? data?.items ?? []
-      const mapped = normalizeConversationList(items).map(mapConversationToAdminList)
+      const mapped = normalizeConversationList(items).map((item) => applyRealtimeUnread(mapConversationToAdminList(item)))
 
       if (items.length < 20) {
         inbox.hasMore = false
@@ -311,7 +459,10 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
             await loadMessages(workspace.convId)
           } else {
             workspace.messages = []
+            connectSocketForConversation(null)
           }
+        } else if (!inbox.items.length) {
+          connectSocketForConversation(null)
         }
       } else {
         inbox.items.push(...mapped)
@@ -370,11 +521,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     workspace.convId = id
     const conv = inbox.items.find((c) => c.id === id)
     if (conv) {
-      if (conv.unreadCount > 0 || conv.unread) {
-        markConversationAsReadAdmin(id).catch(console.error)
-      }
-      conv.unread = false
-      conv.unreadCount = 0
+      clearRealtimeUnread(id)
     }
     await loadMessages(id)
   }
@@ -385,6 +532,119 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
   function setMsgType(type) {
     workspace.msgType = type
+  }
+
+  function currentAdminRank() {
+    const roleNames = [
+      ...(authStore.roles || []),
+      authStore.user?.role,
+      ...(Array.isArray(authStore.user?.roles)
+        ? authStore.user.roles.map((role) => (typeof role === 'string' ? role : role?.name))
+        : []),
+    ].filter(Boolean)
+    return Math.max(...roleNames.map(roleRank), authStore.isAdmin ? ROLE_RANKS.admin : 0)
+  }
+
+  function accountPermissions(account = {}, roleLookup = new Map()) {
+    const fromAccount = normalizePermissions(account.permissions)
+    const fromRoles = (account.roles || []).flatMap((role) => {
+      if (typeof role === 'string') {
+        return roleLookup.get(normalizeRoleName(role))?.permissions || []
+      }
+      return role.permissions || roleLookup.get(normalizeRoleName(role?.name))?.permissions || []
+    })
+    const fromSingleRole = roleLookup.get(normalizeRoleName(account.role))?.permissions || []
+    return normalizePermissions([...fromAccount, ...fromRoles, ...fromSingleRole])
+  }
+
+  function normalizeAssignableAdmin(account = {}, roleLookup = new Map()) {
+    const role = bestRoleName(account)
+    const permissions = accountPermissions(account, roleLookup)
+    const rank = supportRoleRank(role, permissions)
+    const staffId = profileNumericId(account, 1_500_000_000, 600_000_000)
+    const name = accountDisplayName(account)
+
+    return {
+      id: account.id ?? account.accountId ?? staffId,
+      staffId,
+      name,
+      email: account.email || '',
+      role,
+      rank,
+      permissions,
+      av: account.av || String(name || account.email || 'A').slice(0, 1).toUpperCase(),
+      canSupport: permissions.includes(SUPPORT_PERMISSION),
+      active: !['banned', 'blocked', 'locked', 'inactive', 'disabled'].includes(String(account.status || '').toLowerCase()),
+    }
+  }
+
+  async function loadAssignableAdmins(force = false) {
+    if (assignableAdmins.loading || (assignableAdmins.loaded && !force)) return
+
+    assignableAdmins.loading = true
+    assignableAdmins.error = ''
+    try {
+      const [userRes, roleRes] = await Promise.all([
+        adminApi.fetchAdminUsers({ size: 500 }),
+        adminApi.fetchRoles(),
+      ])
+      const accounts = Array.isArray(userRes.data) ? userRes.data : userRes.data?.items ?? []
+      const roles = Array.isArray(roleRes.data) ? roleRes.data : roleRes.data?.items ?? []
+      const roleLookup = new Map(
+        roles.map((role) => [
+          normalizeRoleName(role.name),
+          { ...role, permissions: normalizePermissions(role.permissions) },
+        ]),
+      )
+      const ownRank = currentAdminRank()
+      const ownStaffId = getStaffId()
+
+      assignableAdmins.items = accounts
+        .map((account) => normalizeAssignableAdmin(account, roleLookup))
+        .filter((account) => account.staffId && account.active && account.canSupport)
+        .filter((account) => {
+          if (ownRank <= ROLE_RANKS.staff) return account.staffId === ownStaffId
+          return account.rank > 0 && account.rank < ownRank
+        })
+        .sort((a, b) => b.rank - a.rank || a.name.localeCompare(b.name))
+      assignableAdmins.loaded = true
+    } catch (error) {
+      assignableAdmins.error = error?.response?.data?.message || error.message || 'Không tải được danh sách hỗ trợ.'
+      assignableAdmins.items = []
+    } finally {
+      assignableAdmins.loading = false
+    }
+  }
+
+  async function assignConversation(staffId) {
+    const nextStaffId = Number(staffId)
+    if (!workspace.convId || !Number.isInteger(nextStaffId) || nextStaffId <= 0) return
+
+    const assignee = assignableAdmins.items.find((item) => item.staffId === nextStaffId)
+    if (!assignee) {
+      uiStore.showToast({ icon: 'alert', title: 'Không thể giao hội thoại', subtitle: 'Người nhận không hợp lệ.' })
+      return
+    }
+
+    try {
+      await patchAssign(workspace.convId, nextStaffId)
+      const conv = inbox.items.find((c) => c.id === workspace.convId)
+      if (conv) {
+        conv.staffId = nextStaffId
+        conv.assignedAdminId = nextStaffId
+        conv.assigneeName = assignee.name
+        conv.assigneeRole = assignee.role
+        conv.status = 'ASSIGNED'
+        conv.statusKey = 'assigned'
+      }
+      uiStore.showToast({ icon: 'userCheck', title: 'Đã giao hội thoại', subtitle: assignee.name })
+    } catch (error) {
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Giao hội thoại thất bại',
+        subtitle: error?.response?.data?.message || error.message || '',
+      })
+    }
   }
 
   async function updateStatus(statusKey) {
@@ -406,17 +666,41 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     }
   }
 
+  async function updatePriority(priorityKey) {
+    if (!workspace.convId) return
+
+    const conv = inbox.items.find((c) => c.id === workspace.convId)
+    const previousPriority = conv?.priority
+
+    if (conv) {
+      conv.priority = priorityKey
+    }
+
+    try {
+      await patchPriority(workspace.convId, mapPriorityToApi(priorityKey))
+      uiStore.showToast({ icon: 'flag', title: 'Cập nhật độ ưu tiên', subtitle: '→ ' + priorityKey })
+    } catch (error) {
+      if (conv) {
+        conv.priority = previousPriority
+      }
+      uiStore.showToast({
+        icon: 'alert',
+        title: 'Cập nhật độ ưu tiên thất bại',
+        subtitle: error.message || '',
+      })
+    }
+  }
+
   async function resolveConversation() {
     if (!workspace.convId) return
 
     try {
       await patchStatus(workspace.convId, 'RESOLVED')
-      await closeConversation(workspace.convId)
       const conv = inbox.items.find((c) => c.id === workspace.convId)
       if (conv) {
         conv.statusKey = 'resolved'
       }
-      uiStore.showToast({ icon: 'check', title: 'Hội thoại đã giải quyết', subtitle: 'Đã lưu và đóng hội thoại này.' })
+      uiStore.showToast({ icon: 'check', title: 'Hội thoại đã giải quyết', subtitle: 'Có thể đóng hẳn bằng trạng thái Đã đóng.' })
     } catch (error) {
       uiStore.showToast({
         icon: 'alert',
@@ -450,17 +734,30 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     }
   }
 
-  async function sendInternalNote(text) {
+  async function sendInternalNote(text, attachment = null) {
     const trimmed = String(text ?? '').trim()
-    if (!trimmed || !workspace.convId) return
+    if ((!trimmed && !attachment) || !workspace.convId) return
 
     try {
+      const content = trimmed || attachment?.name || 'Đính kèm'
       const note = await postInternalNote(workspace.convId, {
         senderId: getStaffId(),
-        content: trimmed,
-        messageType: 'TEXT',
+        content,
+        messageType: attachment?.isImage ? 'IMAGE' : attachment ? 'FILE' : 'TEXT',
+        mediaId: attachment?.mediaId || undefined,
+        attachmentUrl: attachment?.url || undefined,
+        attachmentName: attachment?.name || undefined,
+        attachmentType: attachment?.type || undefined,
+        attachmentSize: attachment?.size || undefined,
       })
-      _appendMessageToTimeline(note, true)
+      _appendMessageToTimeline({
+        ...note,
+        attachmentUrl: note?.attachmentUrl || attachment?.url,
+        attachmentName: note?.attachmentName || attachment?.name,
+        attachmentType: note?.attachmentType || attachment?.type,
+        attachmentSize: note?.attachmentSize || attachment?.size,
+        mediaId: note?.mediaId || attachment?.mediaId,
+      }, true)
       uiStore.showToast({
         icon: 'lock',
         title: 'Ghi chú đã lưu',
@@ -475,17 +772,23 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     }
   }
 
-  async function sendCustomerReply(text) {
+  async function sendCustomerReply(text, attachment = null) {
     const trimmed = String(text ?? '').trim()
-    if (!trimmed || !workspace.convId) return
+    if ((!trimmed && !attachment) || !workspace.convId) return
 
     const conv = currentConv.value
+    const content = trimmed || attachment?.name || 'Đính kèm'
     const dto = {
       conversationId: workspace.convId,
       senderId: getStaffId(),
       receiverId: conv?.buyerId ?? null,
-      content: trimmed,
-      messageType: 'TEXT',
+      content,
+      messageType: attachment?.isImage ? 'IMAGE' : attachment ? 'FILE' : 'TEXT',
+      mediaId: attachment?.mediaId || undefined,
+      attachmentUrl: attachment?.url || undefined,
+      attachmentName: attachment?.name || undefined,
+      attachmentType: attachment?.type || undefined,
+      attachmentSize: attachment?.size || undefined,
       isInternal: false,
     }
 
@@ -493,13 +796,19 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
     try {
       const saved = await postMessage(dto)
-      _appendMessageToTimeline(saved, false)
+      _appendMessageToTimeline({
+        ...dto,
+        ...saved,
+        attachmentUrl: saved?.attachmentUrl || dto.attachmentUrl,
+        attachmentName: saved?.attachmentName || dto.attachmentName,
+        attachmentType: saved?.attachmentType || dto.attachmentType,
+        attachmentSize: saved?.attachmentSize || dto.attachmentSize,
+        mediaId: saved?.mediaId || dto.mediaId,
+      }, false)
       
-      // Update status on backend to IN_PROGRESS if it was OPEN or WAITING_CUSTOMER
-      if (conv && (conv.statusKey === 'new' || conv.statusKey === 'waiting')) {
-        await patchStatus(workspace.convId, 'IN_PROGRESS')
-        conv.status = 'IN_PROGRESS'
-        conv.statusKey = 'pending'
+      if (conv && conv.statusKey !== 'closed') {
+        conv.status = 'WAITING_CUSTOMER'
+        conv.statusKey = 'waiting'
       }
     } catch (error) {
       uiStore.showToast({
@@ -514,6 +823,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     // State
     inbox,
     filters,
+    assignableAdmins,
     workspace,
     socket,
     // Getters
@@ -526,7 +836,10 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     loadConversation,
     toggleDetailPanel,
     setMsgType,
+    loadAssignableAdmins,
+    assignConversation,
     updateStatus,
+    updatePriority,
     resolveConversation,
     sendCustomerReply,
     sendInternalNote,

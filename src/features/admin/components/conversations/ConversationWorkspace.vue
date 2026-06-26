@@ -20,7 +20,12 @@ const messageText = ref('')
 const timelineRef = ref(null)
 const inputWrapClasses = ref('')
 
-
+const quickReplies = [
+  'Xin chào 👋',
+  'Cần hỗ trợ thêm?',
+  'Kiểm tra đơn hàng',
+  'Bảo hành',
+]
 
 const messages = computed(() => store.workspace.messages)
 
@@ -85,6 +90,11 @@ function handleKeydown(e) {
     sendMsg()
   }
 }
+
+function insertQuickReply(text) {
+  messageText.value = text
+  store.setMsgType('reply')
+}
 </script>
 
 <template>
@@ -115,6 +125,7 @@ function handleKeydown(e) {
           @change="(e) => store.updateStatus(e.target.value)"
         >
           <option value="new">Mới</option>
+          <option value="assigned">Đã giao</option>
           <option value="pending">Đang xử lý</option>
           <option value="waiting">Chờ khách</option>
           <option value="resolved">Đã giải quyết</option>
@@ -185,11 +196,18 @@ function handleKeydown(e) {
 
     <!-- Quick replies -->
     <div v-if="store.currentConv" class="cw-quick-replies">
-      <button class="cw-qr-chip">Xin chào 👋</button>
-      <button class="cw-qr-chip">Cần hỗ trợ thêm?</button>
-      <button class="cw-qr-chip">Kiểm tra đơn hàng</button>
-      <button class="cw-qr-chip">Bảo hành</button>
-      <button class="cw-qr-chip" title="Gợi ý khác..."><AppIcon name="moreHorizontal" :size="12" /></button>
+      <button
+        v-for="reply in quickReplies"
+        :key="reply"
+        type="button"
+        class="cw-qr-chip"
+        @click="insertQuickReply(reply)"
+      >
+        {{ reply }}
+      </button>
+      <button type="button" class="cw-qr-chip" title="Gợi ý khác..." @click="emit('open-templates')">
+        <AppIcon name="moreHorizontal" :size="12" />
+      </button>
     </div>
 
     <!-- Input Area -->

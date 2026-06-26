@@ -56,7 +56,7 @@
 
 :root {
   /* Feature-scoped layout vars */
-  --cm-list-w: 300px;
+  --cm-list-w: 360px;
   --cm-detail-w: 284px;
 }
 
@@ -134,6 +134,12 @@
   color: var(--gold);
 }
 
+.clp-hdr-btn.active {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+
 .clp-hdr-btn i {
   font-size: 14px;
 }
@@ -177,14 +183,9 @@
 /* Filter chips row */
 .clp-filter-row {
   display: flex;
-  gap: 5px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-wrap: wrap;
+  gap: 8px;
   padding-bottom: 1px;
-}
-
-.clp-filter-row::-webkit-scrollbar {
-  display: none;
 }
 
 .clf-chip {
@@ -210,6 +211,32 @@
   background: var(--navy);
   border-color: var(--navy);
   color: #fff;
+}
+
+.clf-status-select,
+.clf-priority-select,
+.clf-assignment-select {
+  flex-shrink: 0;
+  flex: 1 1 calc((100% - 16px) / 3);
+  width: auto;
+  min-width: 0;
+  padding: 6px 26px 6px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  color: var(--text3);
+  cursor: pointer;
+  outline: none;
+  font-family: var(--sans);
+}
+
+.clf-status-select:focus,
+.clf-priority-select:focus,
+.clf-assignment-select:focus {
+  border-color: var(--gold);
+  color: var(--text);
 }
 
 /* Tabs */
@@ -899,6 +926,54 @@
   color: var(--gold3);
 }
 
+.tl-attachment-image {
+  display: block;
+  margin-top: 7px;
+  max-width: 220px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, .08);
+}
+
+.tl-attachment-image img {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.tl-attachment-file {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 7px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .12);
+  color: inherit;
+  text-decoration: none;
+  max-width: 240px;
+}
+
+.tl-bubble.customer .tl-attachment-file,
+.tl-note-wrap .tl-attachment-file {
+  background: var(--cream);
+  border: 1px solid var(--border);
+}
+
+.tl-attachment-file span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tl-attachment-file small {
+  opacity: .7;
+  white-space: nowrap;
+}
+
 /* System event bubble */
 .tl-system-pill {
   background: rgba(59, 130, 246, .07);
@@ -1347,6 +1422,13 @@
   color: var(--text);
 }
 
+.cw-tool-btn:disabled,
+.cw-send-btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .cw-tool-btn i {
   font-size: 15px;
 }
@@ -1372,6 +1454,72 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.cw-file-input {
+  display: none;
+}
+
+.cw-attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--cream);
+}
+
+.cw-attachment-thumb,
+.cw-attachment-file {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.cw-attachment-thumb {
+  object-fit: cover;
+}
+
+.cw-attachment-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--white);
+  color: var(--gold);
+  border: 1px solid var(--border);
+}
+
+.cw-attachment-meta {
+  min-width: 0;
+  flex: 1;
+}
+
+.cw-attachment-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cw-attachment-size {
+  font-size: 10px;
+  color: var(--text4);
+  margin-top: 2px;
+}
+
+.cw-attachment-remove {
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 7px;
+  background: var(--white);
+  color: var(--text4);
+  cursor: pointer;
 }
 
 /* Input wrap */
@@ -1818,6 +1966,8 @@
   width: 26px;
   height: 26px;
   border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold3);
   display: flex;
   align-items: center;
   justify-content: center;

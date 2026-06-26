@@ -94,13 +94,10 @@ async function loadIconOptions() {
 }
 
 async function loadRoleOptions() {
-  if (loadedOptions.has('roles')) return
-  loadedOptions.add('roles')
   try {
     const roleRes = await adminApi.fetchRoles()
     roleOptions.value = Array.isArray(roleRes.data) ? roleRes.data : roleRes.data?.items ?? []
   } catch {
-    loadedOptions.delete('roles')
     roleOptions.value = []
   }
 }

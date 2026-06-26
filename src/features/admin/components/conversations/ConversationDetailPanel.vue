@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminUiStore } from '../../store/adminUiStore'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
@@ -8,6 +8,15 @@ const store = useAdminConversationStore()
 const uiStore = useAdminUiStore()
 
 const noteText = ref('')
+
+const assignedStaffId = computed(() => store.currentConv?.assignedAdminId ?? store.currentConv?.staffId ?? '')
+const assignedAdmin = computed(() => {
+  return store.assignableAdmins.items.find((admin) => Number(admin.staffId) === Number(assignedStaffId.value)) || null
+})
+
+onMounted(() => {
+  store.loadAssignableAdmins()
+})
 
 function saveNote() {
   if (noteText.value.trim()) {
@@ -38,8 +47,40 @@ function saveNote() {
         <div class="cdp-sec-title"><AppIcon name="info" /> Thông tin hội thoại</div>
 
         <div>
+          <div class="cdp-info-label" style="margin-bottom: 4px">Giao cho</div>
+          <select
+            class="cdp-priority-select"
+            :value="assignedStaffId"
+            :disabled="store.assignableAdmins.loading"
+            @focus="store.loadAssignableAdmins()"
+            @change="(e) => store.assignConversation(e.target.value)"
+          >
+            <option value="">Chưa giao</option>
+            <option
+              v-for="admin in store.assignableAdmins.items"
+              :key="admin.staffId"
+              :value="admin.staffId"
+            >
+              {{ admin.name }} - {{ admin.role || 'Admin' }}
+            </option>
+          </select>
+          <div v-if="assignedAdmin" class="cdp-assigned-row" style="margin: 8px 0 12px">
+            <div class="cdp-assigned-av">{{ assignedAdmin.av }}</div>
+            <div>
+              <div class="cdp-assigned-name">{{ assignedAdmin.name }}</div>
+              <div class="cdp-assigned-role">{{ assignedAdmin.role || 'Admin' }} · CUSTOMER_SUPPORT</div>
+            </div>
+          </div>
+          <div v-else-if="store.assignableAdmins.error" class="cdp-assigned-role" style="margin: 6px 0 12px">
+            {{ store.assignableAdmins.error }}
+          </div>
+
           <div class="cdp-info-label" style="margin-bottom: 4px">Độ ưu tiên</div>
-          <select class="cdp-priority-select" :value="store.currentConv.priority">
+          <select
+            class="cdp-priority-select"
+            :value="store.currentConv.priority"
+            @change="(e) => store.updatePriority(e.target.value)"
+          >
             <option value="low">Thấp</option>
             <option value="medium">Trung bình</option>
             <option value="high">Cao</option>

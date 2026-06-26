@@ -1,14 +1,12 @@
 <script setup>
-import { computed, onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const store = useAdminConversationStore()
 const emit = defineEmits(['open-templates', 'add-template'])
 
-const newCount = computed(() => {
-  return store.inbox.items.filter((c) => c.statusKey === 'new').length
-})
+const searchOpen = ref(false)
 
 function selectConversation(id) {
   store.loadConversation(id)
@@ -18,14 +16,26 @@ function isActive(id) {
   return store.workspace.convId === id
 }
 
-function filterChip(type) {
-  store.filters.status = type
+function filterStatus(status) {
+  store.filters.tab = 'all'
+  store.filters.status = status
   store.loadInbox(true)
 }
 
-function switchTab(tab) {
-  store.filters.tab = tab
+function filterPriority(priority) {
+  store.filters.priority = priority
   store.loadInbox(true)
+}
+
+function filterAssignment(assignment) {
+  store.filters.assignment = assignment
+}
+
+function toggleSearch() {
+  searchOpen.value = !searchOpen.value
+  if (!searchOpen.value) {
+    store.filters.query = ''
+  }
 }
 
 function formatTime(conv) {
@@ -69,39 +79,65 @@ onUnmounted(() => {
           <AppIcon name="messageSquare" /> Hội thoại
         </div>
         <div class="clp-hdr-actions">
+          <button
+            class="clp-hdr-btn"
+            :class="{ active: searchOpen }"
+            title="Tìm kiếm hội thoại"
+            @click="toggleSearch"
+          >
+            <AppIcon name="search" />
+          </button>
           <button class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
             <AppIcon name="fileText" />
           </button>
           <button class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
             <AppIcon name="plus" />
           </button>
-          <button class="clp-hdr-btn" title="Cài đặt"><AppIcon name="settings" /></button>
         </div>
       </div>
-      <div class="clp-search">
+      <div v-if="searchOpen" class="clp-search">
         <AppIcon name="search" />
         <input v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
       </div>
       <div class="clp-filter-row">
-        <button class="clf-chip" :class="{ active: store.filters.status === 'all' }" @click="filterChip('all')">Tất cả</button>
-        <button class="clf-chip" :class="{ active: store.filters.status === 'urgent' }" @click="filterChip('urgent')">Khẩn cấp</button>
-        <button class="clf-chip" :class="{ active: store.filters.status === 'unread' }" @click="filterChip('unread')">Chưa đọc</button>
-        <button class="clf-chip" :class="{ active: store.filters.status === 'waiting' }" @click="filterChip('waiting')">Chờ khách</button>
-      </div>
-    </div>
-
-    <div class="clp-tabs">
-      <div class="clp-tab" :class="{ active: store.filters.tab === 'all' }" @click="switchTab('all')">
-        Tất cả <span class="clp-tab-badge" v-if="store.filters.tab !== 'all'">{{ store.inbox.items.length }}</span>
-      </div>
-      <div class="clp-tab" :class="{ active: store.filters.tab === 'new' }" @click="switchTab('new')">
-        Mới <span class="clp-tab-badge" v-if="newCount > 0">{{ newCount }}</span>
-      </div>
-      <div class="clp-tab" :class="{ active: store.filters.tab === 'pending' }" @click="switchTab('pending')">
-        Đang xử lý
-      </div>
-      <div class="clp-tab" :class="{ active: store.filters.tab === 'resolved' }" @click="switchTab('resolved')">
-        Đã xong
+        <select
+          class="clf-status-select"
+          :value="store.filters.status"
+          title="Lọc theo trạng thái"
+          @change="(e) => filterStatus(e.target.value)"
+        >
+          <option value="all">Mọi trạng thái</option>
+          <option value="unread">Chưa đọc</option>
+          <option value="new">Mới</option>
+          <option value="assigned">Đã giao</option>
+          <option value="pending">Đang xử lý</option>
+          <option value="waiting">Chờ khách</option>
+          <option value="resolved">Đã giải quyết</option>
+          <option value="closed">Đã đóng</option>
+        </select>
+        <select
+          class="clf-priority-select"
+          :value="store.filters.priority"
+          title="Lọc theo độ ưu tiên"
+          @change="(e) => filterPriority(e.target.value)"
+        >
+          <option value="all">Mọi ưu tiên</option>
+          <option value="low">Thấp</option>
+          <option value="medium">Trung bình</option>
+          <option value="high">Cao</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+        <select
+          class="clf-assignment-select"
+          :value="store.filters.assignment"
+          title="Lọc theo phân công"
+          @change="(e) => filterAssignment(e.target.value)"
+        >
+          <option value="all">Mọi phân công</option>
+          <option value="unassigned">Chưa giao</option>
+          <option value="mine">Giao cho tôi</option>
+          <option value="assigned">Đã giao</option>
+        </select>
       </div>
     </div>
 

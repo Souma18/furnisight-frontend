@@ -54,16 +54,25 @@ function buildUserPayload(form) {
   return {
     name: form.name?.trim(),
     email: form.email?.trim(),
-    roleId: form.roleId || null,
-    status: form.accountStatus || null,
   }
 }
 
+function changedText(next, previous) {
+  return String(next || '').trim() !== String(previous || '').trim()
+}
+
 function buildRolePayload(form) {
+  const name = form.name?.trim()
+  if (!name) {
+    throw new Error('Vui lòng nhập tên vai trò.')
+  }
+  if (name.length < 3 || name.length > 50) {
+    throw new Error('Tên vai trò phải từ 3 đến 50 ký tự.')
+  }
   return {
-    name: form.name?.trim(),
+    name,
     description: form.roleDescription?.trim(),
-    permissions: form.permissions ?? [],
+    permissions: normalizePermissions(form.permissions),
   }
 }
 
@@ -71,6 +80,14 @@ function assertActionResult(response) {
   if (response?.data && response.data.success === false) {
     throw new Error(response.data.message || 'Thao tác không thành công.')
   }
+}
+
+function normalizePermission(value) {
+  return String(value ?? '').trim().replace(/-/g, '_').toUpperCase()
+}
+
+function normalizePermissions(permissions = []) {
+  return [...new Set((permissions || []).map(normalizePermission).filter(Boolean))]
 }
 
 export function useAdminModal() {
@@ -103,7 +120,7 @@ export function useAdminModal() {
     imageUrls: [],
     imageUploads: [],
     roleDescription: '',
-    permissions: ['dashboard'],
+    permissions: [],
     adminRole: 'Manager',
     stockSku: '',
     stockProductId: '',
@@ -145,7 +162,7 @@ export function useAdminModal() {
       roleDescription: payload?.description ?? '',
       imageUrl: payload?.imageUrl ?? '',
       categoryImageUpload: null,
-      permissions: payload?.permissionIds ?? ['dashboard'],
+      permissions: normalizePermissions(payload?.permissionIds),
       adminRole: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
       stockSku: payload?.sku ?? '',
       stockProductId: payload?.productId ?? '',
@@ -174,7 +191,7 @@ export function useAdminModal() {
     if (type === 'addRole' || type === 'editRole') {
       form.name = payload?.name ?? ''
       form.roleDescription = payload?.note ?? ''
-      form.permissions = payload?.permissionIds ?? ['dashboard', 'product_create', 'order_view']
+      form.permissions = normalizePermissions(payload?.permissionIds)
     }
   }
 
@@ -324,8 +341,22 @@ export function useAdminModal() {
         }))
       }
       if (type === 'editUser') {
-        if (!modal.value.payload?.id) throw new Error('Thiếu người dùng cần cập nhật.')
-        await adminApi.updateAdminUser(modal.value.payload.id, buildUserPayload(form))
+        const user = modal.value.payload
+        if (!user?.id) throw new Error('Thiếu người dùng cần cập nhật.')
+
+        if (changedText(form.name, user.name) || changedText(form.email, user.email)) {
+          assertActionResult(await adminApi.updateAdminUser(user.id, buildUserPayload(form)))
+        }
+
+        const previousRoleId = user.roleId ?? user.roles?.[0]?.id ?? ''
+        if (form.roleId && form.roleId !== previousRoleId) {
+          assertActionResult(await adminApi.updateAdminUserRole(user.id, form.roleId, 'ASSIGN'))
+        }
+
+        const previousStatus = user.status === 'blocked' || user.status === 'banned' ? 'BANNED' : 'ACTIVE'
+        if (form.accountStatus && form.accountStatus !== previousStatus) {
+          assertActionResult(await adminApi.updateAdminUserStatus(user.id, form.accountStatus))
+        }
       }
       if (type === 'addCat' || type === 'editCat') {
         if (form.categoryImageUpload && !form.categoryImageUpload.completed) {

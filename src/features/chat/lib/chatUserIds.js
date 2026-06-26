@@ -25,7 +25,7 @@ function hashStableNumericId(value, offset = 100_000, span = 1_400_000_000) {
   return Math.abs(hash) % span + offset
 }
 
-function profileNumericId(profile, offset, span) {
+export function profileNumericId(profile, offset, span) {
   if (!profile) return null
 
   const direct = parseNumericId(profile.id)

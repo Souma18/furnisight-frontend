@@ -81,6 +81,10 @@ export function createMessageServiceSocket({ url, onConnect, onDisconnect, onErr
     return subscribe(`/topic/conversation/${conversationId}/internal`, handler)
   }
 
+  function subscribeAdminInbox(handler) {
+    return subscribe('/topic/admin/inbox', handler)
+  }
+
   function sendChatMessage(dto) {
     if (!ensureConnected()) {
       console.warn('[messageServiceSocket] STOMP not connected')
@@ -111,6 +115,7 @@ export function createMessageServiceSocket({ url, onConnect, onDisconnect, onErr
     unsubscribe,
     subscribeConversation,
     subscribeInternal,
+    subscribeAdminInbox,
     sendChatMessage,
     isConnected,
   }

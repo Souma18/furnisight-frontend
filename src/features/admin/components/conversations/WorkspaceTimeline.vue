@@ -9,6 +9,13 @@ const currentAdmin = computed(() => store.currentAdmin)
 
 const timelineRef = ref(null)
 
+function formatBytes(bytes = 0) {
+  if (!bytes) return ''
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
 function scrollToBottom() {
   nextTick(() => {
     if (timelineRef.value) {
@@ -49,14 +56,34 @@ onMounted(() => {
           {{ store.currentConv.av }}
         </div>
         <div class="tl-msg-group">
-          <div class="tl-bubble customer">{{ msg.text }}</div>
+          <div class="tl-bubble customer">
+            <div v-if="msg.text">{{ msg.text }}</div>
+            <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+              <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+            </a>
+            <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+              <AppIcon name="paperclip" />
+              <span>{{ msg.attachment.name }}</span>
+              <small>{{ formatBytes(msg.attachment.size) }}</small>
+            </a>
+          </div>
           <div class="tl-msg-meta">{{ msg.time }}</div>
         </div>
       </template>
 
       <template v-if="msg.type === 'admin'">
         <div class="tl-msg-group">
-          <div class="tl-bubble admin">{{ msg.text }}</div>
+          <div class="tl-bubble admin">
+            <div v-if="msg.text">{{ msg.text }}</div>
+            <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+              <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+            </a>
+            <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+              <AppIcon name="paperclip" />
+              <span>{{ msg.attachment.name }}</span>
+              <small>{{ formatBytes(msg.attachment.size) }}</small>
+            </a>
+          </div>
           <div class="tl-msg-meta">
             <span>{{ msg.time }}</span> <AppIcon name="checkCheck" :size="11" class="read" />
           </div>
@@ -73,7 +100,15 @@ onMounted(() => {
           <div class="tl-note-header">
             <AppIcon name="lock" /> Ghi chú nội bộ - {{ msg.senderName || currentAdmin.name }}
           </div>
-          {{ msg.text }}
+          <div v-if="msg.text">{{ msg.text }}</div>
+          <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
+            <img :src="msg.attachment.url" :alt="msg.attachment.name" />
+          </a>
+          <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
+            <AppIcon name="paperclip" />
+            <span>{{ msg.attachment.name }}</span>
+            <small>{{ formatBytes(msg.attachment.size) }}</small>
+          </a>
         </div>
       </template>
     </div>

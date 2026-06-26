@@ -7,7 +7,7 @@ const AVATAR_PALETTE = [
 
 const STATUS_TO_KEY = {
   OPEN: 'new',
-  ASSIGNED: 'pending',
+  ASSIGNED: 'assigned',
   IN_PROGRESS: 'pending',
   WAITING_CUSTOMER: 'waiting',
   RESOLVED: 'resolved',
@@ -16,6 +16,7 @@ const STATUS_TO_KEY = {
 
 const KEY_TO_STATUS = {
   new: 'OPEN',
+  assigned: 'ASSIGNED',
   pending: 'IN_PROGRESS',
   waiting: 'WAITING_CUSTOMER',
   resolved: 'RESOLVED',
@@ -29,8 +30,19 @@ const PRIORITY_TO_UI = {
   URGENT: 'urgent',
 }
 
+const KEY_TO_PRIORITY = {
+  low: 'LOW',
+  medium: 'MEDIUM',
+  high: 'HIGH',
+  urgent: 'URGENT',
+}
+
 export function mapStatusToApi(statusKey) {
   return KEY_TO_STATUS[statusKey] ?? String(statusKey || 'OPEN').toUpperCase()
+}
+
+export function mapPriorityToApi(priorityKey) {
+  return KEY_TO_PRIORITY[priorityKey] ?? String(priorityKey || 'MEDIUM').toUpperCase()
 }
 
 export function formatTimeLabel(iso) {
@@ -46,9 +58,26 @@ function pickAvatarPalette(seed) {
 function messageContent(raw) {
   if (!raw) return ''
   if (raw.messageType && raw.messageType !== 'TEXT') {
-    return raw.content || '[Đính kèm]'
+    return raw.content || raw.attachmentName || '[Đính kèm]'
   }
   return raw.content ?? ''
+}
+
+function mapAttachment(raw = {}) {
+  const url = raw.attachmentUrl || raw.mediaUrl || raw.fileUrl || raw.url || ''
+  const name = raw.attachmentName || raw.fileName || raw.name || ''
+  const mime = raw.attachmentType || raw.contentType || raw.mimeType || ''
+  const type = raw.type || raw.messageType || ''
+  if (!url && !name && !raw.mediaId && !raw.fileId) return null
+  return {
+    url,
+    name: name || (type === 'IMAGE' ? 'Ảnh đính kèm' : 'Tệp đính kèm'),
+    mime,
+    size: raw.attachmentSize || raw.sizeBytes || raw.fileSize || 0,
+    mediaId: raw.mediaId || '',
+    fileId: raw.fileId || null,
+    isImage: String(type).toUpperCase() === 'IMAGE' || String(mime).startsWith('image/'),
+  }
 }
 
 export function mapMessageToCustomer(raw, buyerId) {
@@ -58,6 +87,7 @@ export function mapMessageToCustomer(raw, buyerId) {
     id: raw.id ?? raw.messageId ?? `msg-${Date.now()}`,
     role,
     content: messageContent(raw),
+    attachment: mapAttachment(raw),
     products: [],
     createdAt: raw.createdAt ?? new Date().toISOString(),
     clientTempId: raw.clientTempId,
@@ -71,6 +101,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
       id: raw.id ?? raw.messageId,
       type: 'note',
       text: messageContent(raw),
+      attachment: mapAttachment(raw),
       time: formatTimeLabel(raw.createdAt),
       senderName: staffName || `Admin #${raw.senderId}`,
     }
@@ -83,6 +114,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
     id: raw.id ?? raw.messageId,
     type: isCustomer ? 'customer' : 'admin',
     text: messageContent(raw),
+    attachment: mapAttachment(raw),
     time: formatTimeLabel(raw.createdAt),
     senderName: isCustomer ? `Khách #${buyerId}` : staffName || `Admin #${staffId}`,
     senderRole: isCustomer ? undefined : 'AD',
@@ -104,6 +136,9 @@ export function mapConversationToAdminList(raw) {
     id: raw.id,
     buyerId,
     staffId: raw.staffId ?? raw.assignedAdminId ?? null,
+    assignedAdminId: raw.assignedAdminId ?? raw.staffId ?? null,
+    assigneeName: raw.assigneeName ?? raw.staffName ?? raw.assignedAdminName ?? '',
+    assigneeRole: raw.assigneeRole ?? raw.staffRole ?? '',
     name,
     av: initials || 'KH',
     ...palette,
@@ -116,10 +151,12 @@ export function mapConversationToAdminList(raw) {
     priority: PRIORITY_TO_UI[raw.priority] ?? 'medium',
     vip: false,
     isAi: false,
-    unreadCount: raw.adminUnreadCount || 0,
-    unread: (raw.adminUnreadCount || 0) > 0 || Boolean(raw.unread ?? raw.hasUnread),
+    unreadCount: 0,
+    unread: false,
     lastMessage: raw.lastMessageContent || '',
     preview: raw.lastMessageContent || '',
+    lastSenderId: raw.senderId ?? raw.lastSenderId ?? null,
+    lastMessageId: raw.messageId ?? raw.lastMessageId ?? null,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
     channel: raw.channel || 'SUPPORT',
