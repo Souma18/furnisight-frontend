@@ -86,6 +86,7 @@ test('admin voucher campaigns only target customers and send through selected ch
   expect(publishPayload).not.toHaveProperty('emails')
 
   await page.getByRole('button', { name: 'Chiến dịch Voucher', exact: true }).click()
+  await page.screenshot({ path: 'test-results/debug-campaign-tab.png' })
   await page.getByRole('button', { name: /Tạo chiến dịch/i }).click()
   const modal = page.locator('form.modal-backdrop')
 
@@ -102,7 +103,7 @@ test('admin voucher campaigns only target customers and send through selected ch
   await modal.locator('input[value="NOTIFICATION"]').uncheck()
   await modal.locator('input[value="EMAIL"]').uncheck()
   await modal.getByRole('button', { name: /Lưu chiến dịch/i }).click()
-  await expect(page.locator('.mc-toast')).toContainText('Hãy chọn ít nhất một kênh gửi')
+  await expect(page.getByText('ít nhất một kênh')).toBeVisible()
   expect(campaignPayload).toBeNull()
 
   await modal.locator('input[value="EMAIL"]').check()

@@ -270,6 +270,10 @@ function openPreviewHtml(title, body) {
   modal.previewTemplate = true
 }
 
+function isHtmlContent(body) {
+  return typeof body === 'string' && /<[a-z][\s\S]*>/i.test(body)
+}
+
 const getPreviewHtml = (body) => {
   if (isHtmlContent(body)) return body
   return `<div style="font-family: Arial, sans-serif; padding: 20px; white-space: pre-wrap; color: #333; font-size: 14px; line-height: 1.5;">${body || ''}</div>`
@@ -308,7 +312,10 @@ const {
       subtitle="Quản lý voucher, chiến dịch, combo khuyến mãi và thông báo"
     >
       <template #actions>
-        <AppButton variant="primary"></AppButton>
+        <AppButton variant="primary" @click="openPrimaryAction">
+          <AppIcon name="plus" />
+          {{ activeAction }}
+        </AppButton>
       </template>
     </AdminPageHeader>
 
@@ -517,75 +524,6 @@ const {
       </div>
     </div>
 
-    <aside v-if="publish.voucher" class="drawer-backdrop" @click.self="publish.voucher = null">
-      <div class="publish-drawer">
-        <header><strong>Phát hành voucher <em>{{ publish.voucher.code }}</em></strong><AppButton variant="unstyled" type="button" @click="publish.voucher = null"><AppIcon name="x" /></AppButton></header>
-        <div class="drawer-body">
-          <div class="segment-choice">
-            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'"><AppIcon name="user" /><span>Một người<small>Tìm và cấp cho 1 user cụ thể</small></span></AppButton>
-            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'"><AppIcon name="users" /><span>Nhiều người<small>Chọn danh sách user</small></span></AppButton>
-            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'"><AppIcon name="globe" /><span>Toàn bộ người dùng<small>Phát hàng loạt</small></span></AppButton>
-            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'"><AppIcon name="filter" /><span>Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></span></AppButton>
-          </div>
-          <label v-if="publish.segment === 'one' || publish.segment === 'many'">Tìm người dùng<AppInput v-model="publish.userQuery" placeholder="Email hoặc tên..."/></label>
-          <div v-if="publish.segment === 'one' || publish.segment === 'many'" class="user-pick-list compact-users">
-            <label v-for="user in filteredUsers" :key="user.id" class="user-pick-item">
-              <input
-                v-if="publish.segment === 'one'"
-                type="radio"
-                name="publish-user"
-                :checked="publish.selectedUserIds[0] === user.id"
-                @change="publish.selectedUserIds = [user.id]"
-              >
-              <input v-else v-model="publish.selectedUserIds" type="checkbox" :value="user.id">
-              <span>{{ user.avatar }}</span><b>{{ user.name }}</b><small>{{ user.email }}</small>
-            </label>
-            <div v-if="!filteredUsers.length" class="user-pick-empty">Không tìm thấy người dùng phù hợp.</div>
-          </div>
-          <div v-if="publish.segment === 'all'" class="warn-box">Bạn sắp phát voucher cho toàn bộ người dùng đủ điều kiện nhận.</div>
-          <label v-if="publish.segment === 'cond'">Nhóm người dùng<select v-model="publish.segmentKey"><option v-for="segment in PROMOTION_SEGMENTS" :key="segment.value" :value="segment.value">{{ segment.label }}</option></select></label>
-          <div class="checkbox-grid"><label class="check-line"><input v-model="publish.channels" type="checkbox" value="NOTIFICATION">Notification</label><label class="check-line"><input v-model="publish.channels" type="checkbox" value="EMAIL">Email</label></div>
-          <label>Áp dụng Mẫu thông báo (Tùy chọn)
-            <select @change="applyTemplateToForm($event.target.value, 'publish')">
-              <option value="">-- Chọn mẫu thông báo --</option>
-              <option v-for="t in promotionTemplates" :key="t.id" :value="t.id">{{ t.code }} - {{ t.name }}</option>
-            </select>
-          </label>
-          <label>Tiêu đề<AppInput v-model="publish.title" class="large-input"/></label>
-          <label>Nội dung
-            <div v-if="isHtmlContent(publish.body)" class="html-content-badge">
-              <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
-              <div class="html-actions">
-                <AppButton variant="unstyled" type="button" class="mc-outline" @click="openPreviewHtml(publish.title, publish.body)">Xem trước</AppButton>
-                <AppButton variant="unstyled" type="button" class="mc-outline" @click="openUnlayerEditor(publish.body, (val) => publish.body = val)">Sửa thiết kế</AppButton>
-                <AppButton variant="cancel"></AppButton>
-              </div>
-            </div>
-            <textarea v-else v-model="publish.body" rows="12" class="large-textarea" />
-          </label>
-
-          <!-- VOUCHER PREVIEW CARD -->
-          <div v-if="selectedPublishVoucher" class="voucher-preview-wrap">
-            <div class="vp-label"><AppIcon name="eye" :size="14" /> Xem trước thẻ Voucher (hiển thị với người nhận)</div>
-            <div class="vp-card">
-              <div class="vp-left">
-                <AppIcon name="badgePercent" :size="26" />
-              </div>
-              <div class="vp-info">
-                <div class="vp-name">{{ selectedPublishVoucher.name }}</div>
-                <div class="vp-code">{{ selectedPublishVoucher.code }}</div>
-                <div class="vp-discount">{{ discountPreviewLabel(selectedPublishVoucher) }}</div>
-                <div class="vp-meta">{{ minOrderLabel(selectedPublishVoucher) }}</div>
-                <div v-if="selectedPublishVoucher.endDate" class="vp-expiry">HSD: {{ expireDateLabel(selectedPublishVoucher) }}</div>
-              </div>
-              <div class="vp-badge">VOUCHER</div>
-            </div>
-          </div>
-
-          <AppButton variant="primary"></AppButton>
-        </div>
-      </div>
-    </aside>
 
     <ConfirmDialog
       :open="Boolean(comboDeleteTarget)"
