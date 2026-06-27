@@ -12,6 +12,14 @@ export function formatDateTime(dateStr) {
     : ''
 }
 
+export function formatTime(dateStr) {
+  if (!dateStr) return ''
+  const date = parseDateStr(dateStr)
+  return date
+    ? new Intl.DateTimeFormat('vi-VN', { timeStyle: 'short' }).format(date)
+    : ''
+}
+
 export function dateOnly(value) {
   if (!value) return 'Chưa đặt'
   return formatDate(value) || 'Chưa đặt'

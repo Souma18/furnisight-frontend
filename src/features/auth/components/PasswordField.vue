@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { computed, ref, useAttrs } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -22,12 +24,12 @@ function togglePasswordVisibility() {
 
 <template>
   <div class="password-field">
-    <input
+    <AppInput
       v-model="model"
       v-bind="attrs"
       :type="passwordVisible ? 'text' : 'password'"
     />
-    <button
+    <AppButton
       type="button"
       class="password-toggle"
       :aria-label="passwordVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
@@ -36,7 +38,7 @@ function togglePasswordVisibility() {
       @click="togglePasswordVisibility"
     >
       <AppIcon :name="passwordVisible ? 'eyeOff' : 'eye'" :size="16" />
-    </button>
+    </AppButton>
   </div>
 </template>
 

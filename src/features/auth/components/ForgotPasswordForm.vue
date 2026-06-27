@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { useForgotPasswordForm } from '../composables/useForgotPasswordForm'
 import PasswordField from './PasswordField.vue'
 
@@ -16,19 +18,19 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
     <template v-if="form.step === 1">
       <label>Địa chỉ email</label>
       <div class="input-with-btn">
-        <input 
+        <AppInput 
           v-model="form.destination" 
           type="email"
           placeholder="hello@email.com"
           required 
         />
-        <button type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
+        <AppButton type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
           {{ (loading && !form.code) ? 'Đang gửi...' : 'Gửi mã' }}
-        </button>
+        </AppButton>
       </div>
 
       <label>Mã xác nhận</label>
-      <input v-model="form.code" type="text" placeholder="Nhập mã 6 số" required />
+      <AppInput v-model="form.code" type="text" placeholder="Nhập mã 6 số" required />
     </template>
 
     <template v-else>
@@ -44,54 +46,17 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     
-    <button class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
+    <AppButton class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
       {{ loading ? 'Đang xử lý...' : (form.step === 1 ? 'Xác nhận mã' : 'Đổi mật khẩu') }}
-    </button>
-    <button class="outline-btn" type="button" @click="goBackToLogin">
+    </AppButton>
+    <AppButton class="outline-btn" type="button" @click="goBackToLogin">
       ← Quay lại {{ form.step === 1 ? 'đăng nhập' : '' }}
-    </button>
+    </AppButton>
   </form>
 </template>
 
 <style scoped>
-.form {
-  display: grid;
-  gap: 0.55rem;
-}
-.intro .title {
-  margin: 0 0 0.2rem;
-  color: var(--auth-text-primary);
-  font-weight: 600;
-}
-.intro .desc {
-  margin: 0;
-  color: var(--auth-text-secondary);
-  font-size: 0.83rem;
-}
-label {
-  color: var(--auth-text-secondary);
-  font-size: 0.76rem;
-  margin-top: 0.2rem;
-}
-input {
-  min-height: 2.55rem;
-  border-radius: var(--auth-radius-md);
-  border: 1px solid var(--auth-border);
-  background: var(--auth-surface-secondary);
-  color: var(--auth-text-primary);
-  padding: 0 0.72rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
 
-.input-with-btn {
-  display: flex;
-  gap: 0.45rem;
-}
 .input-with-btn input {
   flex: 1;
   min-width: 0; /* prevent input from blowing out flex container */
@@ -117,20 +82,8 @@ input:focus {
   cursor: not-allowed;
 }
 
-.submit-btn {
-  min-height: 2.7rem;
-  border: none;
-  border-radius: var(--auth-radius-md);
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.5rem;
-}
-.submit-btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
+
+
 .outline-btn {
   min-height: 2.45rem;
   border-radius: var(--auth-radius-md);
@@ -139,9 +92,5 @@ input:focus {
   color: var(--auth-text-secondary);
   cursor: pointer;
 }
-.error {
-  margin: 0;
-  color: var(--account-toast-error);
-  font-size: 0.8rem;
-}
+
 </style>

@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
@@ -185,20 +187,20 @@ function handleKeydown(e) {
 <template>
   <div v-if="store.currentConv" class="cw-input-area">
     <div class="cw-msg-type-row">
-      <button
+      <AppButton
         class="cw-msg-type-btn"
         :class="{ active: store.workspace.msgType === 'reply' }"
         @click="store.setMsgType('reply')"
       >
         <AppIcon name="messageSquare" /> Trả lời
-      </button>
-      <button
+      </AppButton>
+      <AppButton
         class="cw-msg-type-btn note-type"
         :class="{ active: store.workspace.msgType === 'note' }"
         @click="store.setMsgType('note')"
       >
         <AppIcon name="lock" /> Ghi chú nội bộ
-      </button>
+      </AppButton>
     </div>
 
     <div class="cw-toolbar">
@@ -211,16 +213,16 @@ function handleKeydown(e) {
         @change="(e) => onAttachmentSelected(e, false)"
       />
       <input ref="imageInputRef" type="file" class="cw-file-input" accept="image/*" multiple @change="(e) => onAttachmentSelected(e, true)" />
-      <button class="cw-tool-btn" title="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile"><AppIcon name="paperclip" /></button>
-      <button class="cw-tool-btn" title="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage"><AppIcon name="image" /></button>
+      <AppButton class="cw-tool-btn" title="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile"><AppIcon name="paperclip" /></AppButton>
+      <AppButton class="cw-tool-btn" title="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage"><AppIcon name="image" /></AppButton>
       <div class="cw-tool-sep"></div>
-      <button class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" :disabled="uploadingAttachment" @click="emit('open-products')">
+      <AppButton class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" :disabled="uploadingAttachment" @click="emit('open-products')">
         <AppIcon name="armchair" />
-      </button>
-      <button class="cw-tool-btn" title="Chọn template (mở danh sách)" :disabled="uploadingAttachment" @click="emit('open-templates')">
+      </AppButton>
+      <AppButton class="cw-tool-btn" title="Chọn template (mở danh sách)" :disabled="uploadingAttachment" @click="emit('open-templates')">
         <AppIcon name="fileText" />
-      </button>
-      <button class="cw-tool-btn" title="Chèn Emoji" :disabled="uploadingAttachment"><AppIcon name="smile" /></button>
+      </AppButton>
+      <AppButton class="cw-tool-btn" title="Chèn Emoji" :disabled="uploadingAttachment"><AppIcon name="smile" /></AppButton>
     </div>
 
     <div class="cw-input-area-wrap">
@@ -231,7 +233,7 @@ function handleKeydown(e) {
           class="cw-attachment-preview"
           :class="{ uploading: uploadingAttachment }"
         >
-          <img v-if="attachment.isImage" :src="attachment.previewUrl" alt="" class="cw-attachment-thumb" />
+          <AppImage v-if="attachment.isImage" :src="attachment.previewUrl" alt="" class="cw-attachment-thumb"  />
           <div v-else class="cw-attachment-file"><AppIcon name="paperclip" /></div>
           <div class="cw-attachment-meta">
             <div class="cw-attachment-name">{{ attachment.name }}</div>
@@ -240,9 +242,9 @@ function handleKeydown(e) {
             </div>
           </div>
           <div v-if="uploadingAttachment" class="cw-upload-spinner" aria-hidden="true"></div>
-          <button type="button" class="cw-attachment-remove" title="Bỏ đính kèm" :disabled="uploadingAttachment" @click="removeAttachment(attachment.id)">
+          <AppButton type="button" class="cw-attachment-remove" title="Bỏ đính kèm" :disabled="uploadingAttachment" @click="removeAttachment(attachment.id)">
             <AppIcon name="x" />
-          </button>
+          </AppButton>
           <div v-if="uploadingAttachment" class="cw-upload-bar" aria-hidden="true"></div>
         </div>
       </div>
@@ -261,10 +263,10 @@ function handleKeydown(e) {
           ></textarea>
           <div class="cw-char-count">{{ messageText.length }}</div>
         </div>
-        <button class="cw-send-btn" @click="sendMsg" title="Gửi (Enter)" :disabled="uploadingAttachment">
+        <AppButton class="cw-send-btn" @click="sendMsg" title="Gửi (Enter)" :disabled="uploadingAttachment">
           <span v-if="uploadingAttachment" class="cw-send-spinner" aria-hidden="true"></span>
           <AppIcon v-else name="send" />
-        </button>
+        </AppButton>
       </div>
 
 

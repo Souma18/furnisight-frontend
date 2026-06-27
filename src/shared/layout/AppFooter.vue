@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -14,7 +15,7 @@ const currentYear = computed(() => new Date().getFullYear())
         <div class="brand-block">
           <a href="/" class="brand-link">
             <span class="brand-icon" aria-hidden="true">
-              <img src="/brand/furnisight-logo-mark.png" alt="" />
+              <AppImage src="/brand/furnisight-logo-mark.png" alt=""  />
             </span>
             <span class="brand">FurniSight</span>
           </a>

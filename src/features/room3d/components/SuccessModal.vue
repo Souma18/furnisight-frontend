@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
@@ -24,7 +25,7 @@ defineEmits(['update:show'])
       <div class="content">
         <p>Cảm ơn bạn đã mua sắm tại FurniSight.</p>
         <p><strong>Mã đơn:</strong> {{ orderCode || 'Đang tạo...' }}</p>
-        <button type="button" class="btn-primary block" @click="$emit('update:show', false)">Tiếp tục khám phá</button>
+        <AppButton type="button" class="btn-primary block" @click="$emit('update:show', false)">Tiếp tục khám phá</AppButton>
       </div>
     </div>
   </AppModal>

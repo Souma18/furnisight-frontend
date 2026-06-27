@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -45,10 +46,10 @@ const { t } = useI18n()
             <AppIcon name="clock3" :size="14" />
             {{ item.duration }}
           </div>
-          <button type="button" class="ct-bc-btn" @click="emit('book', item)">
+          <AppButton type="button" class="ct-bc-btn" @click="emit('book', item)">
             <AppIcon name="calendar" :size="14" />
             {{ item.buttonLabel }}
-          </button>
+          </AppButton>
         </article>
       </div>
     </div>

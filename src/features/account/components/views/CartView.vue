@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -114,7 +116,7 @@ const formatPrice = PriceFormatter.format
             <p class="variant-modal-kicker">{{ t('account.cart.chooseVariant') }}</p>
             <h3>{{ activeItem.name }}</h3>
           </div>
-          <button type="button" class="close-btn" @click="closeItemEditor">×</button>
+          <AppButton type="button" class="close-btn" @click="closeItemEditor">×</AppButton>
         </div>
 
         <div class="variant-modal-body">
@@ -153,8 +155,8 @@ const formatPrice = PriceFormatter.format
           <label>
             <span>{{ t('account.cart.quantity') }}</span>
             <div class="modal-qty">
-              <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
-              <input
+              <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</AppButton>
+              <AppInput
                 :value="activeDraft.qty"
                 type="number"
                 inputmode="numeric"
@@ -163,14 +165,14 @@ const formatPrice = PriceFormatter.format
                 @input="setDraftQty($event.target.value)"
                 @blur="setDraftQty($event.target.value || 1)"
               />
-              <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
+              <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</AppButton>
             </div>
           </label>
         </div>
 
         <div class="variant-modal-actions">
-          <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">{{ t('common.cancel') }}</button>
-          <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">{{ t('common.save') }}</button>
+          <AppButton type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">{{ t('common.cancel') }}</AppButton>
+          <AppButton type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">{{ t('common.save') }}</AppButton>
         </div>
       </div>
     </div>

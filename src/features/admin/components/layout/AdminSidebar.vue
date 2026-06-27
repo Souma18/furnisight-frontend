@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminLayout } from '../../composables/useAdminLayout'
 
@@ -15,19 +16,19 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
       </div>
     </div>
 
-    <button type="button" class="sb-profile" @click="go('admin-my-account')">
+    <AppButton type="button" class="sb-profile" @click="go('admin-my-account')">
       <div class="sb-av">{{ simUser.av }}</div>
       <div>
         <div class="sb-profile-name">{{ simUser.name }}</div>
         <div class="sb-profile-role">{{ simUser.role }}</div>
       </div>
       <div class="sb-online"><span class="sb-online-dot" /></div>
-    </button>
+    </AppButton>
 
     <nav class="sb-nav">
       <div v-for="section in navSections" :key="section.label" class="sb-section">
         <div class="sb-section-label">{{ section.label }}</div>
-        <button
+        <AppButton
           v-for="item in section.items"
           :key="item.name"
           type="button"
@@ -42,15 +43,15 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
             class="sb-badge"
             :class="item.badgeTone"
           >{{ navBadge(item.badge) }}</span>
-        </button>
+        </AppButton>
       </div>
     </nav>
 
     <div class="sb-footer">
-      <button type="button" class="sb-logout" @click="logout">
+      <AppButton type="button" class="sb-logout" @click="logout">
         <AppIcon name="logout" :size="16" />
         Đăng xuất
-      </button>
+      </AppButton>
     </div>
   </aside>
 </template>

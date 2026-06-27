@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminLayout } from '../../composables/useAdminLayout'
 import { useAdminUiStore } from '../../store/adminUiStore'
@@ -17,7 +19,7 @@ function notify() {
     <div class="tb-divider" />
     <div class="topbar-search">
       <AppIcon name="search" :size="15" />
-      <input type="text" placeholder="Tìm kiếm toàn hệ thống..." />
+      <AppInput type="text" placeholder="Tìm kiếm toàn hệ thống..." />
     </div>
     <div class="topbar-right">
       <div class="tb-admin-chip" :title="currentAdmin.email">
@@ -28,13 +30,13 @@ function notify() {
         </div>
       </div>
       <div class="tb-date"><AppIcon name="calendar" :size="13" /> 20/05/2026</div>
-      <button type="button" class="tb-btn" @click="notify">
+      <AppButton type="button" class="tb-btn" @click="notify">
         <AppIcon name="bell" :size="17" />
         <span class="tb-notif-dot" />
-      </button>
-      <button type="button" class="tb-btn" @click="$router.push({ name: 'admin-my-account' })">
+      </AppButton>
+      <AppButton type="button" class="tb-btn" @click="$router.push({ name: 'admin-my-account' })">
         <AppIcon name="user" :size="17" />
-      </button>
+      </AppButton>
     </div>
   </div>
 </template>

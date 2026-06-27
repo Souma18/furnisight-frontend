@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { defineAsyncComponent } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -78,10 +79,10 @@ const {
       <AppIcon class="pd-state-icon" name="alert" :size="34" />
       <h2>Không thể tải sản phẩm</h2>
       <p>Đã xảy ra lỗi kết nối. Vui lòng thử lại.</p>
-      <button class="pd-btn-retry" @click="retry">
+      <AppButton class="pd-btn-retry" @click="retry">
         <AppIcon name="refresh" :size="16" />
         Thử lại
-      </button>
+      </AppButton>
     </div>
 
     <!-- Product loaded -->

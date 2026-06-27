@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -24,6 +25,8 @@ const { t } = useI18n()
 
 const navItems = computed(() => [
   { key: 'profile', label: t('account.nav.profile'), icon: 'user' },
+  { key: 'address', label: t('account.nav.address', 'Sổ địa chỉ'), icon: 'mapPin' },
+  { key: 'security', label: t('account.nav.security', 'Bảo mật'), icon: 'shield' },
   { key: 'bell', label: t('account.nav.notifications'), icon: 'bell' },
   { key: 'cart', label: t('account.nav.cart'), icon: 'cart' },
   { key: 'orders', label: t('account.nav.orders'), icon: 'box' },
@@ -40,7 +43,7 @@ function isActive(key) {
 <template>
   <nav class="account-nav" :aria-label="t('account.nav.aria')">
     <div class="nav-scroll">
-      <button
+      <AppButton
         v-for="item in navItems"
         :key="item.key"
         type="button"
@@ -50,13 +53,13 @@ function isActive(key) {
       >
         <AppIcon :name="item.icon" :size="16" />
         <span>{{ item.label }}</span>
-      </button>
+      </AppButton>
     </div>
 
-    <button type="button" class="logout-btn" @click="$emit('logout')">
+    <AppButton type="button" class="logout-btn" @click="$emit('logout')">
       <AppIcon name="logout" :size="16" />
       <span>{{ t('account.nav.logout') }}</span>
-    </button>
+    </AppButton>
   </nav>
 </template>
 

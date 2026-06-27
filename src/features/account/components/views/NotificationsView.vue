@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -76,7 +77,7 @@ function voucherExpiry(metadata) {
 
     <div class="toolbar">
       <div class="chips">
-        <button
+        <AppButton
           v-for="option in statusOptions"
           :key="option.value"
           type="button"
@@ -85,17 +86,17 @@ function voucherExpiry(metadata) {
           @click="readStatus = option.value"
         >
           {{ option.label }}
-        </button>
+        </AppButton>
       </div>
 
-      <button type="button" class="mark-all-btn" :disabled="!unreadCount" @click="markAllRead">
+      <AppButton type="button" class="mark-all-btn" :disabled="!unreadCount" @click="markAllRead">
         {{ unreadCount ? t('account.notifications.markAllRead') : t('account.notifications.allRead') }}
-      </button>
+      </AppButton>
     </div>
 
     <p v-if="errorMessage" class="error">
       {{ errorMessage }}
-      <button type="button" class="text-btn" @click="reload">{{ t('common.retry') }}</button>
+      <AppButton type="button" class="text-btn" @click="reload">{{ t('common.retry') }}</AppButton>
     </p>
 
     <div v-else-if="loading" class="state-card">{{ t('account.notifications.loading') }}</div>
@@ -132,9 +133,9 @@ function voucherExpiry(metadata) {
 
             <div class="item-footer">
               <span class="item-tag" :class="tagClass(item.tagTone)">{{ item.tagLabel }}</span>
-              <button type="button" class="text-btn" @click="toggleExpanded(item)">
+              <AppButton type="button" class="text-btn" @click="toggleExpanded(item)">
                 {{ isExpanded(item.id) ? t('account.notifications.hideDetail') : t('account.notifications.viewDetail') }}
-              </button>
+              </AppButton>
             </div>
 
             <div v-if="isExpanded(item.id)" class="item-detail">
@@ -158,7 +159,7 @@ function voucherExpiry(metadata) {
               </div>
 
               <div v-if="item.actions?.length" class="detail-actions">
-                <button
+                <AppButton
                   v-for="action in item.actions"
                   :key="action.label"
                   type="button"
@@ -166,7 +167,7 @@ function voucherExpiry(metadata) {
                   @click="handleAction(action)"
                 >
                   {{ action.label }}
-                </button>
+                </AppButton>
               </div>
             </div>
           </div>

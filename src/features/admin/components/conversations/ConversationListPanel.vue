@@ -1,7 +1,11 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { onMounted, onUnmounted, ref } from 'vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { formatTime as globalFormatTime } from '@shared/lib/formatters/DateFormatter'
 
 const store = useAdminConversationStore()
 const emit = defineEmits(['open-templates', 'add-template'])
@@ -40,8 +44,7 @@ function toggleSearch() {
 
 function formatTime(conv) {
   const iso = conv?.updatedAt || conv?.createdAt
-  if (!iso) return ''
-  return new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+  return globalFormatTime(iso)
 }
 
 function priorityClass(priority) {
@@ -79,25 +82,25 @@ onUnmounted(() => {
           <AppIcon name="messageSquare" /> Hội thoại
         </div>
         <div class="clp-hdr-actions">
-          <button
+          <AppButton
             class="clp-hdr-btn"
             :class="{ active: searchOpen }"
             title="Tìm kiếm hội thoại"
             @click="toggleSearch"
           >
             <AppIcon name="search" />
-          </button>
-          <button class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
+          </AppButton>
+          <AppButton class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
             <AppIcon name="fileText" />
-          </button>
-          <button class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
+          </AppButton>
+          <AppButton class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
             <AppIcon name="plus" />
-          </button>
+          </AppButton>
         </div>
       </div>
       <div v-if="searchOpen" class="clp-search">
         <AppIcon name="search" />
-        <input v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
+        <AppInput v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
       </div>
       <div class="clp-filter-row">
         <select
@@ -143,9 +146,9 @@ onUnmounted(() => {
 
     <div class="clp-sort-bar">
       <div class="csb-label">Danh sách</div>
-      <button type="button" class="csb-sort">
+      <AppButton type="button" class="csb-sort">
         Mới nhất <AppIcon name="chevronDown" />
-      </button>
+      </AppButton>
     </div>
 
     <div class="clp-list" @scroll="handleScroll">
@@ -158,10 +161,9 @@ onUnmounted(() => {
       >
         <div class="cm-ci-av-wrap">
           <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">
-            <img v-if="conv.avatarUrl" :src="conv.avatarUrl" :alt="conv.name" />
+            <AppImage v-if="conv.avatarUrl" :src="conv.avatarUrl" :alt="conv.name"  />
             <span v-else>{{ conv.av }}</span>
           </div>
-          <div class="cm-ci-online" :class="conv.online"></div>
           <div v-if="conv.unreadCount > 0" class="cm-conv-unread-badge">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</div>
           <div v-else-if="conv.unread" class="cm-conv-unread-dot"></div>
         </div>

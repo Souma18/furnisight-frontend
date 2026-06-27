@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, defineAsyncComponent, onMounted, ref, unref } from 'vue'
 import { NConfigProvider } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
@@ -84,7 +85,7 @@ onMounted(() => {
       />
 
       <nav class="workspace-nav" :aria-label="t('room3d.workspace.aria')">
-        <button
+        <AppButton
           v-for="view in workspaceViews"
           :key="view.key"
           type="button"
@@ -93,7 +94,7 @@ onMounted(() => {
         >
           <AppIcon :name="view.icon" :size="16" />
           <span>{{ view.label }}</span>
-        </button>
+        </AppButton>
       </nav>
 
       <div class="room-body" :data-mobile-view="mobileView">

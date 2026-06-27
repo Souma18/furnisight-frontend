@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
@@ -47,9 +49,9 @@ bindCharts((charts, d) => {
   <AdminPageHeader eyebrow="Tài chính" title-html="Doanh <em>thu</em>"
     :subtitle="data?.snapshotAt ? `Cập nhật lúc ${data.snapshotAt}` : 'Đang tải...'">
     <template #actions>
-      <button type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
+      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
         <AppIcon name="download" :size="15" />Xuất báo cáo
-      </button>
+      </AppButton>
     </template>
   </AdminPageHeader>
 
@@ -62,14 +64,14 @@ bindCharts((charts, d) => {
     <AppIcon name="alert" :size="28" style="opacity:.45;margin-bottom:8px" />
     <strong>Không tải được dữ liệu doanh thu</strong>
     <span>{{ error }}</span>
-    <button type="button" class="btn-export rev-retry" @click="load">Tải lại</button>
+    <AppButton type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
   </div>
 
   <div v-else-if="data && !hasRevenueData" class="rev-state">
     <AppIcon name="trendingUp" :size="28" style="opacity:.3;margin-bottom:8px" />
     <strong>Chưa có dữ liệu doanh thu</strong>
     <span>Hệ thống đã phản hồi nhưng chưa có snapshot hoặc đơn hàng phù hợp.</span>
-    <button type="button" class="btn-export rev-retry" @click="load">Tải lại</button>
+    <AppButton type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
   </div>
 
   <template v-if="data && hasRevenueData">
@@ -100,7 +102,7 @@ bindCharts((charts, d) => {
       <h3 style="margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--text)">Top 5 sản phẩm bán chạy nhất</h3>
       <AdminDataTable :columns="topProductColumns" :rows="data.topProducts">
         <template #cell-imageUrl="{ row }">
-          <img v-if="row.imageUrl" :src="row.imageUrl" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" alt="" />
+          <AppImage v-if="row.imageUrl" :src="row.imageUrl" style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px;" alt=""  />
           <span v-else style="color:var(--text3); font-size:12px;">—</span>
         </template>
         <template #cell-productName="{ row }">

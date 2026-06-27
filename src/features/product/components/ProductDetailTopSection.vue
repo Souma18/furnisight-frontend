@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useToast } from '@shared/composables/useToast'
@@ -109,28 +112,28 @@ function handleOpen3D() {
     <div class="pd-gallery">
       <div class="pd-main">
         <div class="pd-img-wrap">
-          <img
+          <AppImage
             v-if="activeImage || product.image"
             :src="activeImage || product.image"
             :alt="product.name || 'Hình ảnh sản phẩm'"
             class="pd-main-img"
-          />
+           />
         </div>
-        <button type="button" class="pd-btn-3d" @click="handleOpen3D">
+        <AppButton type="button" class="pd-btn-3d" @click="handleOpen3D">
           <AppIcon name="box" :size="16" />
           Xem mô hình 3D
-        </button>
+        </AppButton>
       </div>
       <div class="pd-thumbs">
-        <button
+        <AppButton
           v-for="imgUrl in displayGallery"
           :key="imgUrl"
           type="button"
           :class="['thumb', { active: activeImage === imgUrl }]"
           @click="emit('pick-image', imgUrl)"
         >
-          <img :src="imgUrl" :alt="`Ảnh ${product.name}`" />
-        </button>
+          <AppImage :src="imgUrl" :alt="`Ảnh ${product.name}`"  />
+        </AppButton>
       </div>
     </div>
 
@@ -163,7 +166,7 @@ function handleOpen3D() {
         <div v-if="product.colors?.length" class="pd-option-group">
           <p class="opt-label">Màu sắc <span>{{ selectedColor }}</span></p>
           <div class="colors">
-            <button
+            <AppButton
               v-for="color in product.colors"
               :key="color"
               type="button"
@@ -171,14 +174,14 @@ function handleOpen3D() {
               @click="handlePickColor(color)"
             >
               {{ color }}
-            </button>
+            </AppButton>
           </div>
         </div>
 
         <div v-if="product.sizes?.length" class="pd-option-group">
           <p class="opt-label">Kích thước <span>{{ selectedSize }}</span></p>
           <div class="sizes">
-            <button
+            <AppButton
               v-for="size in product.sizes"
               :key="size"
               type="button"
@@ -186,7 +189,7 @@ function handleOpen3D() {
               @click="handlePickSize(size)"
             >
               {{ size }}
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>
@@ -194,10 +197,10 @@ function handleOpen3D() {
       <div class="pd-buy-actions">
         <div class="qty-row">
           <div class="qty-ctrl">
-            <button type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
+            <AppButton type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
               <AppIcon name="minus" :size="15" />
-            </button>
-            <input
+            </AppButton>
+            <AppInput
               :value="qtyDraft"
               type="number"
               inputmode="numeric"
@@ -209,9 +212,9 @@ function handleOpen3D() {
               @blur="commitQtyInput"
               @keydown.enter.prevent="commitQtyInput"
             />
-            <button type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
+            <AppButton type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
               <AppIcon name="plus" :size="15" />
-            </button>
+            </AppButton>
           </div>
           <span>{{ selectedStock > 0 ? `Còn hàng (${selectedStock} sản phẩm)` : 'Tạm hết hàng' }}</span>
         </div>
@@ -219,7 +222,7 @@ function handleOpen3D() {
           {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
         </p>
         <div class="actions">
-          <button
+          <AppButton
             type="button"
             class="outline"
             :class="{ loading: cartAdding, added: cartAdded }"
@@ -229,8 +232,8 @@ function handleOpen3D() {
             <AppIcon v-if="cartAdded" name="check" :size="17" />
             <AppIcon v-else name="cart" :size="17" />
             {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="solid"
             :disabled="cartAdding || isOutOfStock"
@@ -238,8 +241,8 @@ function handleOpen3D() {
           >
             <AppIcon :name="isOutOfStock ? 'ban' : 'creditCard'" :size="17" />
             {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="wish"
             :class="{ active: wished }"
@@ -247,7 +250,7 @@ function handleOpen3D() {
             @click="emit('toggle-wish')"
           >
             <AppIcon name="heart" :size="18" />
-          </button>
+          </AppButton>
         </div>
       </div>
     </aside>

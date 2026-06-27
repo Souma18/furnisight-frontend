@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { RouterLink } from 'vue-router'
@@ -66,11 +68,11 @@ const formatPrice = PriceFormatter.format
     </div>
 
     <RouterLink v-if="detailRoute" :to="detailRoute" class="thumb thumb-link">
-      <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
+      <AppImage v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image" />
       <template v-else>{{ item.imageFallback ?? item.emoji ?? 'SP' }}</template>
     </RouterLink>
     <div v-else class="thumb">
-      <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image">
+      <AppImage v-if="item.imageUrl" :src="item.imageUrl" :alt="item.name" class="thumb-image" />
       <template v-else>{{ item.imageFallback ?? item.emoji ?? 'SP' }}</template>
     </div>
 
@@ -82,26 +84,26 @@ const formatPrice = PriceFormatter.format
       <p v-if="stockWarning" class="stock-note">{{ stockWarning }}</p>
     </div>
 
-    <button type="button" class="variant-btn" @click="$emit('open-variant', item)">
+    <AppButton type="button" class="variant-btn" @click="$emit('open-variant', item)">
       <span class="variant-btn-label">{{ t('account.cart.variantLabel', { value: variantLabel }) }}</span>
       <AppIcon name="chevronDown" :size="15" />
-    </button>
+    </AppButton>
 
     <div class="qty-wrap">
-      <button type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
+      <AppButton type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
         <AppIcon name="minus" :size="15" />
-      </button>
+      </AppButton>
       <span>{{ item.qty }}</span>
-      <button type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
+      <AppButton type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
         <AppIcon name="plus" :size="15" />
-      </button>
+      </AppButton>
     </div>
 
     <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
 
-    <button type="button" class="delete-btn" :aria-label="t('account.cart.removeItem')" @click="$emit('remove', item.id)">
+    <AppButton type="button" class="delete-btn" :aria-label="t('account.cart.removeItem')" @click="$emit('remove', item.id)">
       <AppIcon name="trash" :size="22" />
-    </button>
+    </AppButton>
   </article>
 </template>
 

@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useToast } from '@shared/composables/useToast'
@@ -81,15 +82,15 @@ function pickVariant(variant) {
     <div class="item-quick-panel">
       <div class="panel-head">
         <strong>{{ selectedProduct.name }}</strong>
-        <button type="button" class="close-btn" @click="$emit('close')">
+        <AppButton type="button" class="close-btn" @click="$emit('close')">
           <AppIcon name="close" :size="14" />
-        </button>
+        </AppButton>
       </div>
 
       <div v-if="variants.length > 0" class="panel-row variants-row">
         <label>Phiên bản</label>
         <div class="variant-pills">
-          <button
+          <AppButton
             v-for="v in variants"
             :key="v.id"
             type="button"
@@ -98,20 +99,20 @@ function pickVariant(variant) {
             @click="pickVariant(v)"
           >
             {{ v.color || '' }}{{ v.color && v.dimensionText ? ' - ' : '' }}{{ v.dimensionText || '' }}{{ (!v.color && !v.dimensionText) ? 'Mặc định' : '' }}
-          </button>
+          </AppButton>
         </div>
       </div>
 
       <div class="panel-actions">
-        <button
+        <AppButton
           type="button"
           class="action-btn primary"
           :disabled="isSelectedInCart"
           @click="$emit('add-to-cart')"
         >
           {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
-        </button>
-        <button type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</button>
+        </AppButton>
+        <AppButton type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</AppButton>
       </div>
     </div>
 
@@ -121,18 +122,18 @@ function pickVariant(variant) {
       class="hud-container"
       :style="{ left: screenPos.left + 'px', top: screenPos.top + 'px' }"
     >
-      <button class="hud-nudge up" @click="$emit('nudge-selected', 0, -0.05)" title="Lên"><AppIcon name="chevronUp" :size="24"/></button>
-      <button class="hud-nudge down" @click="$emit('nudge-selected', 0, 0.05)" title="Xuống"><AppIcon name="chevronDown" :size="24"/></button>
-      <button class="hud-nudge left" @click="$emit('nudge-selected', -0.05, 0)" title="Trái"><AppIcon name="chevronLeft" :size="24"/></button>
-      <button class="hud-nudge right" @click="$emit('nudge-selected', 0.05, 0)" title="Phải"><AppIcon name="chevronRight" :size="24"/></button>
+      <AppButton class="hud-nudge up" @click="$emit('nudge-selected', 0, -0.05)" title="Lên"><AppIcon name="chevronUp" :size="24"/></AppButton>
+      <AppButton class="hud-nudge down" @click="$emit('nudge-selected', 0, 0.05)" title="Xuống"><AppIcon name="chevronDown" :size="24"/></AppButton>
+      <AppButton class="hud-nudge left" @click="$emit('nudge-selected', -0.05, 0)" title="Trái"><AppIcon name="chevronLeft" :size="24"/></AppButton>
+      <AppButton class="hud-nudge right" @click="$emit('nudge-selected', 0.05, 0)" title="Phải"><AppIcon name="chevronRight" :size="24"/></AppButton>
 
       <div class="hud-rotate">
-        <button type="button" @click="$emit('rotate-selected', -0.2618)">
+        <AppButton type="button" @click="$emit('rotate-selected', -0.2618)">
           <AppIcon name="rotateCcw" :size="16" /> Xoay trái
-        </button>
-        <button type="button" @click="$emit('rotate-selected', 0.2618)">
+        </AppButton>
+        <AppButton type="button" @click="$emit('rotate-selected', 0.2618)">
           Xoay phải <AppIcon name="rotateCw" :size="16" />
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

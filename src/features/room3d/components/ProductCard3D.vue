@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -90,7 +92,7 @@ function openDetail() {
   >
     <div class="preview">
       <span v-if="cartQty > 0" class="cart-badge">{{ cartQty }}</span>
-      <img v-if="productImage" class="product-image" :src="productImage" :alt="product.name" />
+      <AppImage v-if="productImage" class="product-image" :src="productImage" :alt="product.name"  />
       <div v-else class="product-icon"><AppIcon :name="productIconName" :size="34" /></div>
     </div>
 
@@ -102,7 +104,7 @@ function openDetail() {
         <p class="price-current" :title="priceLabel">{{ priceLabel }}</p>
       </div>
 
-      <button
+      <AppButton
         type="button"
         class="add-btn"
         :aria-label="t('room3d.product.addToCart')"
@@ -110,7 +112,7 @@ function openDetail() {
         @click.stop="$emit('add', product)"
       >
         <AppIcon name="cart" :size="15" :stroke-width="2.4" />
-      </button>
+      </AppButton>
     </div>
   </article>
 </template>

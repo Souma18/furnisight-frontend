@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import AppIcon from './AppIcon.vue'
@@ -82,7 +83,7 @@ function roundedRating(rating) {
     >
       <RouterLink v-if="detailRoute(item)" :to="detailRoute(item)" class="shared-product-card__link">
         <div class="shared-product-card__media">
-          <img v-if="item.image" :src="item.image" :alt="item.name" class="shared-product-card__img" />
+          <AppImage v-if="item.image" :src="item.image" :alt="item.name" class="shared-product-card__img"  />
           <span v-else>{{ t('products.noImage') }}</span>
         </div>
 

@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -87,19 +90,19 @@ function getProductStock(p) {
       <div class="sp-modal" role="dialog" aria-modal="true" @click.stop>
         <div class="sp-head">
           <div class="sp-head-title">Gửi <em>sản phẩm tư vấn</em></div>
-          <button type="button" class="sp-close" aria-label="Đóng" @click="close">
+          <AppButton type="button" class="sp-close" aria-label="Đóng" @click="close">
             <AppIcon name="close" :size="14" />
-          </button>
+          </AppButton>
         </div>
 
         <div class="sp-body" @scroll="onScroll">
           <div class="sp-search-wrap">
             <AppIcon name="search" />
-            <input v-model="searchQuery" type="text" placeholder="Tìm theo tên, SKU, danh mục..." />
+            <AppInput v-model="searchQuery" type="text" placeholder="Tìm theo tên, SKU, danh mục..." />
           </div>
 
           <div class="sp-cats">
-            <button
+            <AppButton
               v-for="cat in categories"
               :key="cat.id"
               type="button"
@@ -108,7 +111,7 @@ function getProductStock(p) {
               @click="activeCat = cat.id"
             >
               {{ cat.name }}
-            </button>
+            </AppButton>
           </div>
 
           <div class="sp-prod-grid">
@@ -120,7 +123,7 @@ function getProductStock(p) {
               @click="mgr.selectProduct(p.id)"
             >
               <div class="sp-prod-img">
-                <img v-if="p.imageUrls && p.imageUrls.length" :src="p.imageUrls[0]" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                <AppImage v-if="p.imageUrls && p.imageUrls.length" :src="p.imageUrls[0]" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"  />
                 <div v-else style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #eee; border-radius: 8px; color: #999;">No IMG</div>
                 <div class="sp-prod-check"><AppIcon name="check" :size="10" /></div>
               </div>
@@ -154,10 +157,10 @@ function getProductStock(p) {
             <template v-else>Chưa chọn sản phẩm</template>
           </div>
           <div class="sp-foot-actions">
-            <button type="button" class="sp-cancel-btn" @click="close">Huỷ</button>
-            <button type="button" class="sp-send-btn" :disabled="!selectedProduct" @click="sendProduct">
+            <AppButton type="button" class="sp-cancel-btn" @click="close">Huỷ</AppButton>
+            <AppButton type="button" class="sp-send-btn" :disabled="!selectedProduct" @click="sendProduct">
               <AppIcon name="send" /> Gửi sản phẩm
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>

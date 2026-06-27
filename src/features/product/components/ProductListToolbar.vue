@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -29,7 +31,7 @@ function chipClass(chip) {
     <div class="pl-inner pl-toolbar-inner">
       <label class="pl-search-wrap" :aria-label="t('products.searchPlaceholder')">
         <AppIcon name="search" :size="15" />
-        <input
+        <AppInput
           :value="modelValue"
           class="pl-search"
           type="text"
@@ -38,7 +40,7 @@ function chipClass(chip) {
         />
       </label>
       <div class="pl-chips">
-        <button
+        <AppButton
           v-for="chip in quickFilters"
           :key="chip.slug ?? chip.label"
           type="button"
@@ -46,30 +48,30 @@ function chipClass(chip) {
           @click="emit('toggle-category', chip)"
         >
           {{ chip.label }}
-        </button>
+        </AppButton>
       </div>
-      <button type="button" class="pl-filter-trigger" @click="emit('open-filters')">
+      <AppButton type="button" class="pl-filter-trigger" @click="emit('open-filters')">
         <AppIcon name="filter" :size="16" />
         {{ t('products.filters') }}
         <span v-if="activeFilterCount" class="pl-filter-trigger__count">{{ activeFilterCount }}</span>
-      </button>
+      </AppButton>
       <div class="pl-view-toggle">
-        <button
+        <AppButton
           type="button"
           :class="{ active: viewMode === 'grid' }"
           :aria-label="t('products.gridView')"
           @click="emit('update:view-mode', 'grid')"
         >
           <AppIcon name="layoutDashboard" :size="16" />
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           type="button"
           :class="{ active: viewMode === 'list' }"
           :aria-label="t('products.listView')"
           @click="emit('update:view-mode', 'list')"
         >
           <AppIcon name="list" :size="16" />
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

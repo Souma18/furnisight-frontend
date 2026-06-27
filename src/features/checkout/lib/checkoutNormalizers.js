@@ -1,8 +1,9 @@
+import { formatDate } from '@shared/lib/formatters/DateFormatter'
+
 function formatVoucherExpire(dateValue) {
   if (!dateValue) return ''
-  const date = new Date(dateValue)
-  if (Number.isNaN(date.getTime())) return ''
-  return `HSD: ${new Intl.DateTimeFormat('vi-VN').format(date)}`
+  const dateStr = formatDate(dateValue)
+  return dateStr ? `HSD: ${dateStr}` : ''
 }
 
 function normalizeDiscountType(type) {

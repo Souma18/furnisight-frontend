@@ -1,4 +1,5 @@
 <script setup>
+import AppInput from '@shared/ui/AppInput.vue'
 import { useI18n } from 'vue-i18n'
 import { computed, ref } from 'vue'
 import ProductCard3D from './ProductCard3D.vue'
@@ -118,7 +119,7 @@ function getCartQty(productId) {
 
       <div class="search-wrap">
         <span class="search-icon"><AppIcon name="search" :size="16" /></span>
-        <input
+        <AppInput
           class="search-input"
           :value="searchKeyword"
           :placeholder="t('room3d.products.search')"

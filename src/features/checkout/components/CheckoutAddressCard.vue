@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { computed, reactive, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { formatVietnamAddress } from '@shared/lib/formatters'
@@ -141,7 +143,7 @@ function submitAddress() {
         <AppIcon name="mapPin" :size="16" />
         Địa chỉ giao hàng
       </h2>
-      <button type="button" class="checkout-card-change" @click="openCreateModal">Thêm địa chỉ</button>
+      <AppButton type="button" class="checkout-card-change" @click="openCreateModal">Thêm địa chỉ</AppButton>
     </div>
 
     <div v-if="!addresses.length" class="co-empty">
@@ -169,7 +171,7 @@ function submitAddress() {
           </div>
           <p class="co-addr-street">{{ formatVietnamAddress(address) }}</p>
         </div>
-        <button type="button" class="co-address-edit" @click.prevent="openEditModal(address)">Sửa</button>
+        <AppButton type="button" class="co-address-edit" @click.prevent="openEditModal(address)">Sửa</AppButton>
       </label>
     </div>
 
@@ -177,17 +179,17 @@ function submitAddress() {
       <div class="co-address-dialog">
         <div class="co-address-dialog-head">
           <h3>{{ editingId ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới' }}</h3>
-          <button type="button" class="co-address-close" @click="showModal = false">×</button>
+          <AppButton type="button" class="co-address-close" @click="showModal = false">×</AppButton>
         </div>
 
         <div class="co-address-form">
           <label>
             Họ tên
-            <input v-model.trim="form.fullName" placeholder="Nguyễn Văn A" />
+            <AppInput v-model.trim="form.fullName" placeholder="Nguyễn Văn A" />
           </label>
           <label>
             Số điện thoại
-            <input v-model.trim="form.phone" placeholder="0123456789" />
+            <AppInput v-model.trim="form.phone" placeholder="0123456789" />
           </label>
           <label>
             Tỉnh/Thành
@@ -211,7 +213,7 @@ function submitAddress() {
           </label>
           <label class="co-address-form-full">
             Địa chỉ cụ thể
-            <input v-model.trim="form.detail" placeholder="Số nhà, tên đường..." />
+            <AppInput v-model.trim="form.detail" placeholder="Số nhà, tên đường..." />
           </label>
           <label>
             Loại địa chỉ
@@ -233,10 +235,10 @@ function submitAddress() {
         <p v-if="formError" class="co-address-warning">{{ formError }}</p>
 
         <div class="co-address-dialog-actions">
-          <button type="button" class="co-address-secondary" @click="showModal = false">Huỷ</button>
-          <button type="button" class="co-address-primary" @click="submitAddress">
+          <AppButton type="button" class="co-address-secondary" @click="showModal = false">Huỷ</AppButton>
+          <AppButton type="button" class="co-address-primary" @click="submitAddress">
             {{ editingId ? 'Cập nhật' : 'Lưu địa chỉ' }}
-          </button>
+          </AppButton>
         </div>
       </div>
     </div>

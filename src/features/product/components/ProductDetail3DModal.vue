@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "@shared/ui/AppIcon.vue";
 import AppModal from "@shared/ui/AppModal.vue";
@@ -169,28 +170,28 @@ onBeforeUnmount(() => {
     <div class="box">
       <div class="head">
         <strong>Trực quan 3D – {{ productName }}</strong>
-        <button type="button" aria-label="Đóng" @click="emit('close')">
+        <AppButton type="button" aria-label="Đóng" @click="emit('close')">
           <AppIcon name="close" :size="16" />
-        </button>
+        </AppButton>
       </div>
       <div class="scene">
         <div class="scene-controls">
-          <button
+          <AppButton
             type="button"
             class="scene-ctrl-btn"
             :class="{ active: viewMode === 'product' }"
             @click="viewMode = 'product'"
           >
             Sản phẩm
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="scene-ctrl-btn"
             :class="{ active: viewMode === 'room' }"
             @click="viewMode = 'room'"
           >
             Phòng đầy đủ
-          </button>
+          </AppButton>
         </div>
 
         <div
@@ -207,13 +208,13 @@ onBeforeUnmount(() => {
             Để xem sản phẩm trong không gian phòng, chuyển qua Trực quan 3D và
             đặt vào phòng mẫu.
           </p>
-          <button
+          <AppButton
             type="button"
             class="room-cta-btn"
             @click="emit('go-room3d', { roomType: roomTypeHint })"
           >
             Mở Trực quan 3D
-          </button>
+          </AppButton>
         </div>
         <p v-if="isLoading" class="scene-status">Đang tải mô hình...</p>
         <p v-if="loadError" class="scene-error">{{ loadError }}</p>

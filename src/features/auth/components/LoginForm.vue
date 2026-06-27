@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { useLoginForm } from '../composables/useLoginForm'
 import AuthSocialButtons from './AuthSocialButtons.vue'
 import PasswordField from './PasswordField.vue'
@@ -23,7 +25,7 @@ const {
 <template>
   <form class="form" @submit.prevent="submitLogin">
     <label>Email</label>
-    <input
+    <AppInput
       v-model.trim="form.email"
       type="email"
       placeholder="hello@email.com"
@@ -43,41 +45,22 @@ const {
     />
 
     <div class="right-link">
-      <button type="button" class="text-btn" @click="openForgotPassword">Quên mật khẩu?</button>
+      <AppButton type="button" class="text-btn" @click="openForgotPassword">Quên mật khẩu?</AppButton>
     </div>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-    <button class="submit-btn" type="submit" :disabled="loading">
+    <AppButton class="submit-btn" type="submit" :disabled="loading">
       {{ loading ? 'Đang xử lý...' : 'Đăng nhập' }}
-    </button>
+    </AppButton>
     <AuthSocialButtons />
   </form>
 </template>
 
 <style scoped>
-.form {
-  display: grid;
-  gap: 0.45rem;
-}
-label {
-  color: var(--auth-text-secondary);
-  font-size: 0.76rem;
-  margin-top: 0.2rem;
-}
-input {
-  min-height: 2.55rem;
-  border-radius: var(--auth-radius-md);
-  border: 1px solid var(--auth-border);
-  background: var(--auth-surface-secondary);
-  color: var(--auth-text-primary);
-  padding: 0 0.72rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
+
+
+
+
 .right-link {
   text-align: right;
 }
@@ -88,22 +71,7 @@ input:focus {
   cursor: pointer;
   font-size: 0.76rem;
 }
-.submit-btn {
-  min-height: 2.7rem;
-  border: none;
-  border-radius: var(--auth-radius-md);
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
-  font-weight: 600;
-  cursor: pointer;
-}
-.submit-btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-.error {
-  margin: 0;
-  color: var(--account-toast-error);
-  font-size: 0.8rem;
-}
+
+
+
 </style>

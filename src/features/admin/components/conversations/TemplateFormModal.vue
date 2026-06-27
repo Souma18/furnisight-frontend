@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AppModal from '@shared/ui/AppModal.vue'
@@ -73,16 +75,16 @@ async function saveTemplate() {
           <template v-if="currentForm.id">Sửa <em>template</em></template>
           <template v-else>Thêm <em>template mới</em></template>
         </div>
-        <button type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
+        <AppButton type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
           <AppIcon name="close" :size="14" />
-        </button>
+        </AppButton>
       </div>
 
       <div class="cm-modal-body">
         <div class="tpl-form-grid">
           <div class="tfg full">
             <label class="tfl">Tiêu đề *</label>
-            <input v-model="currentForm.title" type="text" class="tfi" placeholder="VD: Chào hỏi khách mới" />
+            <AppInput v-model="currentForm.title" type="text" class="tfi" placeholder="VD: Chào hỏi khách mới" />
           </div>
           <div class="tfg">
             <label class="tfl">Phân loại</label>
@@ -110,11 +112,11 @@ async function saveTemplate() {
       </div>
 
       <div class="cm-modal-foot">
-        <button type="button" class="btn-ghost" :disabled="submitting" @click="close">Huỷ</button>
-        <button type="button" class="btn-primary" :disabled="submitting" @click="saveTemplate">
+        <AppButton type="button" class="btn-ghost" :disabled="submitting" @click="close">Huỷ</AppButton>
+        <AppButton type="button" class="btn-primary" :disabled="submitting" @click="saveTemplate">
           <AppIcon name="check" :size="14" />
           {{ submitting ? 'Đang lưu...' : 'Lưu template' }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </AppModal>

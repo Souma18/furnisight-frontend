@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, onMounted, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminUiStore } from '../../store/adminUiStore'
@@ -163,7 +166,7 @@ function downloadAttachment(file) {
           :class="store.currentConv.avClass"
           :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
         >
-          <img v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name" />
+          <AppImage v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name"  />
           <span v-else>{{ store.currentConv.av }}</span>
         </div>
         <div class="cdp-cust-name">{{ store.currentConv.name }}</div>
@@ -177,7 +180,7 @@ function downloadAttachment(file) {
         <div class="cdp-message-search">
           <label class="cdp-message-search-field">
             <AppIcon name="search" :size="14" />
-            <input
+            <AppInput
               :value="searchState.query"
               type="search"
               placeholder="Tìm tin nhắn..."
@@ -188,25 +191,25 @@ function downloadAttachment(file) {
           <div v-if="searchState.query.trim()" class="cdp-message-search-actions">
             <small v-if="searchState.error">{{ searchState.error }}</small>
             <span v-else>{{ searchCountLabel }}</span>
-            <button
+            <AppButton
               type="button"
               :disabled="!searchState.resultIds.length"
               title="Kết quả trước"
               @click="store.goToPrevConversationSearchResult()"
             >
               <AppIcon name="chevronUp" :size="14" />
-            </button>
-            <button
+            </AppButton>
+            <AppButton
               type="button"
               :disabled="!searchState.resultIds.length"
               title="Kết quả tiếp"
               @click="store.goToNextConversationSearchResult()"
             >
               <AppIcon name="chevronDown" :size="14" />
-            </button>
-            <button type="button" title="Xóa tìm kiếm" @click="store.setConversationSearchQuery('')">
+            </AppButton>
+            <AppButton type="button" title="Xóa tìm kiếm" @click="store.setConversationSearchQuery('')">
               <AppIcon name="x" :size="14" />
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -260,14 +263,14 @@ function downloadAttachment(file) {
         <div v-if="imageAttachments.length" class="cdp-media-block">
           <div class="cdp-media-head">
             <div class="cdp-media-subtitle"><AppIcon name="image" /> Ảnh</div>
-            <button
+            <AppButton
               v-if="showImageTools"
               type="button"
               class="cdp-media-toggle"
               @click="openMediaDialog('image')"
             >
               ...
-            </button>
+            </AppButton>
           </div>
 
           <div class="cdp-image-grid">
@@ -280,9 +283,9 @@ function downloadAttachment(file) {
               rel="noreferrer"
               :title="image.name"
             >
-              <img :src="image.url" :alt="image.name" />
+              <AppImage :src="image.url" :alt="image.name"  />
             </a>
-            <button
+            <AppButton
               v-if="hiddenImageCount > 0"
               type="button"
               class="cdp-image-tile cdp-image-more"
@@ -290,25 +293,25 @@ function downloadAttachment(file) {
             >
               <span>...</span>
               <small>+{{ hiddenImageCount }}</small>
-            </button>
+            </AppButton>
           </div>
         </div>
 
         <div v-if="fileAttachments.length" class="cdp-media-block">
           <div class="cdp-media-head">
             <div class="cdp-media-subtitle"><AppIcon name="fileText" /> Tệp</div>
-            <button
+            <AppButton
               v-if="showFileTools"
               type="button"
               class="cdp-media-toggle"
               @click="openMediaDialog('file')"
             >
               ...
-            </button>
+            </AppButton>
           </div>
 
           <div class="cdp-file-list">
-            <button
+            <AppButton
               v-for="file in visibleFileAttachments"
               :key="file.id"
               type="button"
@@ -319,8 +322,8 @@ function downloadAttachment(file) {
               <AppIcon name="fileText" :size="16" />
               <span>{{ file.name || 'Tệp đính kèm' }}</span>
               <small>{{ formatBytes(file.size) }}</small>
-            </button>
-            <button
+            </AppButton>
+            <AppButton
               v-if="hiddenFileCount > 0"
               type="button"
               class="cdp-file-row cdp-file-more"
@@ -329,7 +332,7 @@ function downloadAttachment(file) {
               <AppIcon name="moreHorizontal" :size="16" />
               <span>Xem thêm</span>
               <small>+{{ hiddenFileCount }}</small>
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -344,9 +347,9 @@ function downloadAttachment(file) {
           v-model="noteText"
           placeholder="Thêm ghi chú riêng tư về khách hàng này... (Chỉ admin xem được)"
         ></textarea>
-        <button class="cdp-note-save-btn" @click="saveNote">
+        <AppButton class="cdp-note-save-btn" @click="saveNote">
           <AppIcon name="save" /> Lưu ghi chú
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -359,14 +362,14 @@ function downloadAttachment(file) {
         <div class="cm-modal-head">
           <div class="cm-modal-title">Thư viện <em>{{ mediaDialogTitle }}</em></div>
           <span class="cm-modal-head-meta">{{ mediaDialogCountLabel }}</span>
-          <button type="button" class="cm-modal-close" aria-label="Đóng" @click="closeMediaDialog">
+          <AppButton type="button" class="cm-modal-close" aria-label="Đóng" @click="closeMediaDialog">
             <AppIcon name="x" />
-          </button>
+          </AppButton>
         </div>
         <div class="cm-modal-body">
           <div class="cdp-gallery-search">
             <AppIcon name="search" :size="15" />
-            <input v-model="mediaSearch" type="search" :placeholder="mediaSearchPlaceholder" />
+            <AppInput v-model="mediaSearch" type="search" :placeholder="mediaSearchPlaceholder" />
           </div>
 
           <div class="cdp-gallery-date-row">
@@ -378,7 +381,7 @@ function downloadAttachment(file) {
               <span>Đến ngày</span>
               <input v-model="mediaDateTo" type="date" />
             </label>
-            <button type="button" class="cdp-gallery-clear" @click="clearMediaFilters">Xóa lọc</button>
+            <AppButton type="button" class="cdp-gallery-clear" @click="clearMediaFilters">Xóa lọc</AppButton>
           </div>
 
           <div class="cdp-gallery-results">
@@ -392,12 +395,12 @@ function downloadAttachment(file) {
                 rel="noreferrer"
                 :title="image.name"
               >
-                <img :src="image.url" :alt="image.name" />
+                <AppImage :src="image.url" :alt="image.name"  />
                 <span>{{ image.name || image.time || 'Ảnh đính kèm' }}</span>
               </a>
             </div>
             <div v-if="filteredMediaAttachments.length && mediaDialogType === 'file'" class="cdp-gallery-file-list">
-              <button
+              <AppButton
                 v-for="file in visibleGalleryItems"
                 :key="file.id"
                 type="button"
@@ -411,9 +414,9 @@ function downloadAttachment(file) {
                   <span>{{ formatBytes(file.size) }} · {{ file.time || 'Không rõ thời gian' }}</span>
                 </div>
                 <AppIcon name="download" :size="16" />
-              </button>
+              </AppButton>
             </div>
-            <button
+            <AppButton
               v-if="remainingGalleryCount > 0"
               type="button"
               class="cdp-gallery-more"
@@ -421,7 +424,7 @@ function downloadAttachment(file) {
             >
               <AppIcon name="plus" :size="15" />
               {{ loadMoreLabel }}
-            </button>
+            </AppButton>
             <div v-if="!filteredMediaAttachments.length" class="cdp-gallery-empty">{{ mediaEmptyText }}</div>
           </div>
         </div>

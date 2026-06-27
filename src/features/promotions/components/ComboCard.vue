@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -38,19 +40,19 @@ function stockIssue(combo = {}) {
     @keydown.space.self.prevent="emit('view', combo)"
   >
     <div class="combo-media">
-      <img
+      <AppImage
         v-if="combo.imageUrl"
         :src="combo.imageUrl"
         :alt="combo.name"
         loading="lazy"
         @error="$event.target.style.display = 'none'"
-      >
+       />
       <AppIcon v-else name="armchair" :size="compact ? 42 : 52" />
       <span class="room-tag">{{ comboRoomLabel(combo) }}</span>
       <span class="save-tag">{{ t('promotions.combo.saveAmount', { amount: PriceFormatter.format(combo.savedAmount) }) }}</span>
       <div class="combo-thumbs">
         <span v-for="item in comboPreviewItems(combo)" :key="`${combo.id}-${item.productId}-${item.variantId}`">
-          <img :src="item.imageUrl" :alt="item.productName" loading="lazy">
+          <AppImage :src="item.imageUrl" :alt="item.productName" loading="lazy" />
         </span>
       </div>
     </div>
@@ -64,10 +66,10 @@ function stockIssue(combo = {}) {
         <span><small>{{ t('promotions.combo.comboPrice') }}</small><b>{{ PriceFormatter.format(combo.finalAmount) }}</b></span>
       </div>
       <div class="combo-actions">
-        <button type="button" class="combo-btn outline" @click.stop="emit('view', combo)">
+        <AppButton type="button" class="combo-btn outline" @click.stop="emit('view', combo)">
           <AppIcon name="eye" :size="14" />{{ t('promotions.combo.view') }}
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           type="button"
           class="combo-btn dark"
           :class="{ unavailable: stockIssue(combo) }"
@@ -75,7 +77,7 @@ function stockIssue(combo = {}) {
           @click.stop="emit('buy', combo)"
         >
           <AppIcon name="cart" :size="14" />{{ stockIssue(combo) ? t('promotions.combo.soldOut') : buyingId === combo.id ? t('promotions.combo.preparing') : t('promotions.combo.buy') }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </article>

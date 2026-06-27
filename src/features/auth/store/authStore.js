@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import { AuthSessionResponse } from '@shared/lib/api/services/auth/auth.model'
 import { usersApi } from '@shared/lib/api/services/users/users.api'
+import { authApi } from '@shared/lib/api/services/auth/auth.api'
 import {
   clearStoredAuthSession,
   decodeJwt,
@@ -87,6 +88,20 @@ export const useAuthStore = defineStore('auth', () => {
     writeStoredRoles(roles.value)
   }
 
+  async function loginGoogle() {
+    try {
+      const response = await authApi.loginGoogle()
+      const redirectUrl = response.data?.data?.redirectUrl || response.data?.redirectUrl
+      if (redirectUrl) {
+        const beURL = import.meta.env.VITE_API_BASE_URL ?? ''
+        window.location.href = `${beURL}/users${redirectUrl}`
+      }
+    } catch (error) {
+      console.error('Google login failed:', error)
+      throw error
+    }
+  }
+
   function logout() {
     setSession({ accessToken: null, refreshToken: null, profile: null, roles: [] })
     document.documentElement.classList.remove('admin-route-active')
@@ -146,6 +161,7 @@ export const useAuthStore = defineStore('auth', () => {
     setSession,
     updateProfile,
     ensureProfileLoaded,
+    loginGoogle,
     logout,
   }
 })

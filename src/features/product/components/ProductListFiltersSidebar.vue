@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { onMounted, onUnmounted } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import {
@@ -71,16 +72,16 @@ onUnmounted(() => {
       :aria-hidden="String(!open)"
       @keydown.esc="emit('close')"
     >
-      <button type="button" class="pl-filter-backdrop" aria-label="Đóng bộ lọc" @click="emit('close')"></button>
+      <AppButton type="button" class="pl-filter-backdrop" aria-label="Đóng bộ lọc" @click="emit('close')"></AppButton>
       <aside class="pl-sidebar-filters pl-sidebar-filters--drawer" aria-label="Bộ lọc sản phẩm">
         <header class="pl-filter-drawer-head">
           <div>
             <p>Bộ lọc sản phẩm</p>
             <strong>{{ totalCategoryCount }} sản phẩm theo danh mục</strong>
           </div>
-          <button type="button" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
+          <AppButton type="button" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
             <AppIcon name="close" :size="18" />
-          </button>
+          </AppButton>
         </header>
         <div class="pl-filter-drawer-content">
           <div class="pl-filter-block">
@@ -162,7 +163,7 @@ onUnmounted(() => {
             </div>
             <div v-show="openBlocks.color" class="pl-filter-body">
               <div class="pl-color-filter-row">
-                <button
+                <AppButton
                   v-for="c in displayColors"
                   :key="c.id"
                   type="button"
@@ -172,7 +173,7 @@ onUnmounted(() => {
                   :title="c.label"
                   :aria-label="c.label"
                   @click="toggleArrayItem('colors', c.id)"
-                ></button>
+                ></AppButton>
               </div>
             </div>
           </div>
@@ -206,11 +207,11 @@ onUnmounted(() => {
           </div>
         </div>
         <footer class="pl-filter-drawer-actions">
-          <button type="button" class="pl-filter-clear" @click="clearAll">
+          <AppButton type="button" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
             Xóa tất cả
-          </button>
-          <button type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</button>
+          </AppButton>
+          <AppButton type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
         </footer>
       </aside>
     </div>
@@ -300,7 +301,7 @@ onUnmounted(() => {
       </div>
       <div v-show="openBlocks.color" class="pl-filter-body">
         <div class="pl-color-filter-row">
-          <button
+          <AppButton
             v-for="c in displayColors"
             :key="c.id"
             type="button"
@@ -313,7 +314,7 @@ onUnmounted(() => {
             :title="c.label"
             :aria-label="c.label"
             @click="toggleArrayItem('colors', c.id)"
-          ></button>
+          ></AppButton>
         </div>
       </div>
     </div>
@@ -357,11 +358,11 @@ onUnmounted(() => {
     </div>
 
     <div class="pl-filter-block pl-filter-actions">
-      <button type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</button>
-      <button type="button" class="pl-filter-clear" @click="clearAll">
+      <AppButton type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+      <AppButton type="button" class="pl-filter-clear" @click="clearAll">
         <AppIcon name="close" :size="15" />
         Xóa tất cả bộ lọc
-      </button>
+      </AppButton>
     </div>
   </aside>
 </template>

@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ChatProductCard from './ChatProductCard.vue'
@@ -69,7 +70,7 @@ function handleAttachmentClick(event, attachment) {
             :class="attachment.isImage ? 'chat-bubble-image' : 'chat-bubble-file'"
             @click="handleAttachmentClick($event, attachment)"
           >
-            <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+            <AppImage v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name"  />
             <template v-else>
               <AppIcon name="paperclip" :size="15" />
               <span>{{ attachment.name }}</span>

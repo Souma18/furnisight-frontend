@@ -224,18 +224,6 @@ export function useOrderDetailView(notify) {
 
 
 
-function orderItemImage(item = {}) {
-  return item.imageUrl || item.productSnapshot?.imageUrl || ''
-}
-
-function orderItemProductId(item = {}) {
-  return item.productId || item.productSnapshot?.productId || ''
-}
-
-function hideBrokenImage(event) {
-  event.target.style.display = 'none'
-}
-
 function buildTransactionTimeline(current, helpers) {
   if (!current) return []
 

@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -34,13 +35,13 @@ defineEmits(['open-voucher', 'remove-voucher'])
             −{{ formatMoney(shopDiscount) }}
             <AppIcon name="check" :size="13" />
           </span>
-          <button type="button" class="co-voucher-remove" aria-label="Bỏ voucher" @click="$emit('remove-voucher', 'shop')">
+          <AppButton type="button" class="co-voucher-remove" aria-label="Bỏ voucher" @click="$emit('remove-voucher', 'shop')">
             <AppIcon name="close" :size="14" />
-          </button>
+          </AppButton>
         </div>
-        <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'shop')">
+        <AppButton v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'shop')">
           Chọn Voucher
-        </button>
+        </AppButton>
       </div>
 
       <hr style="border: none; border-top: 1px solid var(--co-cream-dark, #f0e9dd); margin: 0">
@@ -69,13 +70,13 @@ defineEmits(['open-voucher', 'remove-voucher'])
             −{{ formatMoney(shippingDiscount) }}
             <AppIcon name="check" :size="13" />
           </span>
-          <button type="button" class="co-voucher-remove" aria-label="Bỏ voucher vận chuyển" @click="$emit('remove-voucher', 'ship')">
+          <AppButton type="button" class="co-voucher-remove" aria-label="Bỏ voucher vận chuyển" @click="$emit('remove-voucher', 'ship')">
             <AppIcon name="close" :size="14" />
-          </button>
+          </AppButton>
         </div>
-        <button v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'ship')">
+        <AppButton v-else type="button" class="co-voucher-btn" @click="$emit('open-voucher', 'ship')">
           Chọn Voucher
-        </button>
+        </AppButton>
       </div>
     </div>
   </section>

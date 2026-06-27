@@ -1,5 +1,5 @@
 import { PriceFormatter } from '@shared/lib/formatters'
 
-export function formatCurrency(value) {
-  return PriceFormatter.format(value)
-}
+export const formatCurrency = PriceFormatter.format
+export const formatPrice = PriceFormatter.format
+

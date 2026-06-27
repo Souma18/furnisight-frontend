@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { buildCheckoutSummary } from '../utils/checkoutPricing'
 import { readPendingPayment, writePendingPayment } from '../lib/checkoutPendingPaymentStorage'
 import { normalizeCheckoutVoucher } from '../lib/checkoutNormalizers'
+import { ordersApi } from '@shared/lib/api/services'
 
 export const useCheckoutStore = defineStore('checkout', () => {
   const loading = ref(false)
@@ -115,6 +116,10 @@ export const useCheckoutStore = defineStore('checkout', () => {
     writePendingPayment(null)
   }
 
+  async function verifyPaymentCallback(paymentMethod, callbackParams) {
+    return ordersApi.getPaymentCallback(paymentMethod, callbackParams)
+  }
+
   return {
     loading,
     placing,
@@ -145,6 +150,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     beginVoucherSession,
     rememberPendingPayment,
     clearPendingPayment,
+    verifyPaymentCallback,
     resetCheckoutState,
   }
 })

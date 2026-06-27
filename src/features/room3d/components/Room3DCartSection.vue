@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -35,7 +37,7 @@ function itemIconName(item) {
 
 <template>
   <section class="cart">
-    <button type="button" class="cart-toggle" @click="isOpen = !isOpen">
+    <AppButton type="button" class="cart-toggle" @click="isOpen = !isOpen">
       <span class="toggle-left">
         <span class="icon"><AppIcon name="cart" :size="14" /></span>
         <span class="title">{{ t('cart.title') }}</span>
@@ -47,30 +49,30 @@ function itemIconName(item) {
           <AppIcon name="chevronRight" :size="13" />
         </span>
       </span>
-    </button>
+    </AppButton>
 
     <div v-if="isOpen" class="cart-body">
       <div v-if="cartItems.length === 0" class="empty">{{ t('room3d.cart.empty') }}</div>
       <div v-else class="list">
         <article v-for="item in cartItems" :key="item.id" class="item">
           <div class="thumb">
-            <img v-if="item.imageUrl || item.image" :src="item.imageUrl || item.image" :alt="item.name" />
+            <AppImage v-if="item.imageUrl || item.image" :src="item.imageUrl || item.image" :alt="item.name"  />
             <span v-else class="thumb-icon"><AppIcon :name="itemIconName(item)" :size="16" /></span>
           </div>
           <div class="meta">
             <p class="name">{{ item.name }}</p>
             <p class="price">{{ formatCurrency(item.price) }}</p>
           </div>
-          <button type="button" class="remove-btn" @click="$emit('remove', item.id)">
+          <AppButton type="button" class="remove-btn" @click="$emit('remove', item.id)">
             <AppIcon name="close" :size="15" />
-          </button>
+          </AppButton>
         </article>
       </div>
 
-      <button type="button" class="checkout" :disabled="cartItems.length === 0" @click="$emit('checkout')">
+      <AppButton type="button" class="checkout" :disabled="cartItems.length === 0" @click="$emit('checkout')">
         <AppIcon name="creditCard" :size="15" />
         <span>{{ t('room3d.cart.checkoutNow') }}</span>
-      </button>
+      </AppButton>
     </div>
   </section>
 </template>

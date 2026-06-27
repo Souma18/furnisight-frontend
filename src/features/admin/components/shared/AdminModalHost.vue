@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, defineAsyncComponent, ref, watch } from 'vue'
 import { adminApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -173,8 +176,8 @@ watch(
 
     <template v-else-if="modal.type === 'addUser' || modal.type === 'editUser'">
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Họ tên *</label><input v-model="form.name" class="mfi" /></div>
-        <div class="mform-group"><label class="mfl">Email *</label><input v-model="form.email" class="mfi" type="email" :disabled="modal.type === 'editUser'" /></div>
+        <div class="mform-group"><label class="mfl">Họ tên *</label><AppInput v-model="form.name" class="mfi" /></div>
+        <div class="mform-group"><label class="mfl">Email *</label><AppInput v-model="form.email" class="mfi" type="email" :disabled="modal.type === 'editUser'" /></div>
       </div>
       <div class="mform-row">
         <div class="mform-group">
@@ -192,17 +195,17 @@ watch(
           </select>
         </div>
       </div>
-      <div v-if="modal.type === 'addUser'" class="mform-group"><label class="mfl">Mật khẩu tạm</label><input v-model="form.password" class="mfi" type="password" /></div>
+      <div v-if="modal.type === 'addUser'" class="mform-group"><label class="mfl">Mật khẩu tạm</label><AppInput v-model="form.password" class="mfi" type="password" /></div>
     </template>
 
     <template v-else-if="modal.type === 'addCat' || modal.type === 'editCat'">
       <div class="mform-group">
         <label class="mfl">Tên danh mục *</label>
-        <input v-model="form.name" class="mfi" placeholder="Vd: Phòng ngủ" />
+        <AppInput v-model="form.name" class="mfi" placeholder="Vd: Phòng ngủ" />
       </div>
       <div class="mform-group">
         <label class="mfl">Slug</label>
-        <input v-model="form.slug" class="mfi" placeholder="phong-ngu" />
+        <AppInput v-model="form.slug" class="mfi" placeholder="phong-ngu" />
       </div>
       <div class="mform-row mform-row--cat">
         <AdminIconPicker v-model="form.iconId" variant="inline" :options="iconOptions" />
@@ -229,10 +232,10 @@ watch(
         </label>
         <div v-if="form.imageUrl" class="product-image-grid product-image-grid--single">
           <div class="product-image-thumb">
-            <img :src="form.imageUrl" alt="" />
-            <button type="button" class="product-image-remove" @click="removeCategoryImage">
+            <AppImage :src="form.imageUrl" alt=""  />
+            <AppButton type="button" class="product-image-remove" @click="removeCategoryImage">
               <AppIcon name="x" :size="12" />
-            </button>
+            </AppButton>
           </div>
         </div>
       </div>
@@ -240,7 +243,7 @@ watch(
 
     <template v-else-if="modal.type === 'addProd' || modal.type === 'editProd'">
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Tên sản phẩm *</label><input v-model="form.name" class="mfi" /></div>
+        <div class="mform-group"><label class="mfl">Tên sản phẩm *</label><AppInput v-model="form.name" class="mfi" /></div>
         <div class="mform-group">
           <label class="mfl">Danh mục</label>
           <select v-model="form.category" class="mfi">
@@ -250,7 +253,7 @@ watch(
         </div>
       </div>
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">SKU Sản phẩm *</label><input v-model="form.sku" class="mfi" /></div>
+        <div class="mform-group"><label class="mfl">SKU Sản phẩm *</label><AppInput v-model="form.sku" class="mfi" /></div>
       </div>
       <div class="mform-note">
         <AppIcon name="warehouse" :size="13" style="margin-right:5px;opacity:.7" />
@@ -259,11 +262,11 @@ watch(
       <div class="mform-group">
         <div class="variant-head">
           <label class="mfl">Biến thể sản phẩm</label>
-          <button type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm biến thể</button>
+          <AppButton type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm biến thể</AppButton>
         </div>
         <div class="variant-list">
           <div v-for="(variant, index) in form.variants" :key="variant.id || index" class="variant-row">
-            <button type="button" class="variant-summary" :class="{ active: form.activeVariantIndex === index }" @click="selectVariant(index)">
+            <AppButton type="button" class="variant-summary" :class="{ active: form.activeVariantIndex === index }" @click="selectVariant(index)">
               <span class="variant-summary-main">
                 <strong>{{ variantSummary(variant, index) }}</strong>
                 <small>{{ variantDisplayCode(variant) }}</small>
@@ -273,18 +276,18 @@ watch(
                 <small>Tồn {{ Number(variant.stock || 0) }}</small>
               </span>
               <AppIcon :name="form.activeVariantIndex === index ? 'chevronDown' : 'chevronRight'" :size="14" />
-            </button>
+            </AppButton>
             <div v-if="form.activeVariantIndex === index" class="variant-detail">
               <div class="mform-row">
-                <div class="mform-group"><label class="mfl">Màu</label><input v-model="variant.color" class="mfi" placeholder="Nâu" /></div>
-                <div class="mform-group"><label class="mfl">Chất liệu</label><input v-model="variant.material" class="mfi" placeholder="Gỗ / Da / Vải" /></div>
-                <div class="mform-group"><label class="mfl">Bảo hành</label><input v-model="variant.warranty" class="mfi" placeholder="12 tháng" /></div>
+                <div class="mform-group"><label class="mfl">Màu</label><AppInput v-model="variant.color" class="mfi" placeholder="Nâu" /></div>
+                <div class="mform-group"><label class="mfl">Chất liệu</label><AppInput v-model="variant.material" class="mfi" placeholder="Gỗ / Da / Vải" /></div>
+                <div class="mform-group"><label class="mfl">Bảo hành</label><AppInput v-model="variant.warranty" class="mfi" placeholder="12 tháng" /></div>
               </div>
               <div class="mform-row">
-                <div class="mform-group"><label class="mfl">Giá</label><input v-model="variant.price" class="mfi" type="number" min="0" /></div>
+                <div class="mform-group"><label class="mfl">Giá</label><AppInput v-model="variant.price" class="mfi" type="number" min="0" /></div>
                 <div class="mform-group">
                   <label class="mfl">SKU variant *</label>
-                  <input
+                  <AppInput
                     v-model="variant.sku"
                     class="mfi"
                     required
@@ -297,12 +300,12 @@ watch(
               <div class="mform-row">
                 <div class="mform-group">
                   <label class="mfl">Ngưỡng cảnh báo *</label>
-                  <input v-model.number="variant.lowStockThreshold" class="mfi" type="number" min="1" max="9999" required />
+                  <AppInput v-model.number="variant.lowStockThreshold" class="mfi" type="number" min="1" max="9999" required />
                 </div>
-                <div class="mform-group"><label class="mfl">Nặng</label><input v-model="variant.weight" class="mfi" type="number" min="1" /></div>
-                <div class="mform-group"><label class="mfl">Dài</label><input v-model="variant.length" class="mfi" type="number" min="1" /></div>
-                <div class="mform-group"><label class="mfl">Rộng</label><input v-model="variant.width" class="mfi" type="number" min="1" /></div>
-                <div class="mform-group"><label class="mfl">Cao</label><input v-model="variant.height" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Nặng</label><AppInput v-model="variant.weight" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Dài</label><AppInput v-model="variant.length" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Rộng</label><AppInput v-model="variant.width" class="mfi" type="number" min="1" /></div>
+                <div class="mform-group"><label class="mfl">Cao</label><AppInput v-model="variant.height" class="mfi" type="number" min="1" /></div>
               </div>
               <AdminProductImagesUpload
                 :images="variant.imageUrls"
@@ -328,9 +331,9 @@ watch(
                 @preview-ready="() => onModelPreviewReady(index)"
                 @preview-loading="loading => onModelPreviewLoading(loading, index)"
               />
-              <button type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
+              <AppButton type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
                 <AppIcon name="trash2" :size="13" />Xóa biến thể
-              </button>
+              </AppButton>
             </div>
           </div>
         </div>
@@ -357,7 +360,7 @@ watch(
       </div>
       <div class="mform-group">
         <label class="mfl">Mã vận đơn</label>
-        <input
+        <AppInput
           :value="trackingCodeLocked ? trackingCodeDisplay : form.trackingCode"
           class="mfi"
           :disabled="trackingCodeLocked"
@@ -370,15 +373,15 @@ watch(
     </template>
 
     <template v-else-if="modal.type === 'addRole' || modal.type === 'editRole'">
-      <div class="mform-group"><label class="mfl">Tên vai trò *</label><input v-model="form.name" class="mfi" placeholder="Vd: Editor" /></div>
-      <div class="mform-group"><label class="mfl">Mô tả</label><input v-model="form.roleDescription" class="mfi" placeholder="Vai trò dành cho..." /></div>
+      <div class="mform-group"><label class="mfl">Tên vai trò *</label><AppInput v-model="form.name" class="mfi" placeholder="Vd: Editor" /></div>
+      <div class="mform-group"><label class="mfl">Mô tả</label><AppInput v-model="form.roleDescription" class="mfi" placeholder="Vai trò dành cho..." /></div>
       <AdminPermissionPicker v-model="form.permissions" />
     </template>
 
     <template v-else-if="modal.type === 'addAdmin'">
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Họ tên *</label><input v-model="form.name" class="mfi" placeholder="Nguyễn Văn X" /></div>
-        <div class="mform-group"><label class="mfl">Email *</label><input v-model="form.email" class="mfi" type="email" placeholder="email@furnisight.store" /></div>
+        <div class="mform-group"><label class="mfl">Họ tên *</label><AppInput v-model="form.name" class="mfi" placeholder="Nguyễn Văn X" /></div>
+        <div class="mform-group"><label class="mfl">Email *</label><AppInput v-model="form.email" class="mfi" type="email" placeholder="email@furnisight.store" /></div>
       </div>
       <div class="mform-row">
         <div class="mform-group">
@@ -388,7 +391,7 @@ watch(
             <option v-for="role in roleOptions" :key="role.id" :value="role.id">{{ role.name }}</option>
           </select>
         </div>
-        <div class="mform-group"><label class="mfl">Mật khẩu tạm</label><input v-model="form.password" class="mfi" type="password" placeholder="••••••••" /></div>
+        <div class="mform-group"><label class="mfl">Mật khẩu tạm</label><AppInput v-model="form.password" class="mfi" type="password" placeholder="••••••••" /></div>
       </div>
     </template>
 
@@ -410,7 +413,7 @@ watch(
         </select>
       </div>
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Số lượng nhập *</label><input v-model="form.stockQty" class="mfi" type="number" min="1" /></div>
+        <div class="mform-group"><label class="mfl">Số lượng nhập *</label><AppInput v-model="form.stockQty" class="mfi" type="number" min="1" /></div>
         <div class="mform-group"><label class="mfl">Kho</label><select class="mfi"><option>Kho HCM</option><option>Kho HN</option></select></div>
       </div>
       <div class="mform-group"><label class="mfl">Ghi chú</label><textarea v-model="form.stockNote" class="mfi" rows="3" placeholder="Phiếu nhập, lô hàng..." /></div>
@@ -418,8 +421,8 @@ watch(
 
     <template v-else-if="modal.type === 'addVoucher' || modal.type === 'editVoucher'">
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Mã voucher *</label><input v-model="form.voucherCode" class="mfi" placeholder="SALE10" /></div>
-        <div class="mform-group"><label class="mfl">Tên</label><input v-model="form.voucherName" class="mfi" placeholder="Giảm 10%" /></div>
+        <div class="mform-group"><label class="mfl">Mã voucher *</label><AppInput v-model="form.voucherCode" class="mfi" placeholder="SALE10" /></div>
+        <div class="mform-group"><label class="mfl">Tên</label><AppInput v-model="form.voucherName" class="mfi" placeholder="Giảm 10%" /></div>
       </div>
       <div class="mform-row">
         <div class="mform-group">
@@ -430,11 +433,11 @@ watch(
             <option value="SHIPPING_CAP">Giảm vận chuyển</option>
           </select>
         </div>
-        <div class="mform-group"><label class="mfl">Giá trị</label><input v-model="form.discountValue" class="mfi" type="number" min="0" /></div>
+        <div class="mform-group"><label class="mfl">Giá trị</label><AppInput v-model="form.discountValue" class="mfi" type="number" min="0" /></div>
       </div>
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Giảm tối đa</label><input v-model="form.maxDiscount" class="mfi" type="number" min="0" /></div>
-        <div class="mform-group"><label class="mfl">Đơn tối thiểu</label><input v-model="form.minOrder" class="mfi" type="number" min="0" /></div>
+        <div class="mform-group"><label class="mfl">Giảm tối đa</label><AppInput v-model="form.maxDiscount" class="mfi" type="number" min="0" /></div>
+        <div class="mform-group"><label class="mfl">Đơn tối thiểu</label><AppInput v-model="form.minOrder" class="mfi" type="number" min="0" /></div>
       </div>
       <div class="mform-row">
         <div class="mform-group"><label class="mfl">Bắt đầu</label><input v-model="form.startDate" class="mfi" type="datetime-local" /></div>

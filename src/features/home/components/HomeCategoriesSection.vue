@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
@@ -37,12 +38,12 @@ function categoryImage(category) {
           :class="['room-card', { big: index === 0 }]"
         >
           <RouterLink :to="categoryRoute(category)" class="room-link">
-            <img
+            <AppImage
               :src="categoryImage(category)"
               :alt="category.name"
               loading="lazy"
               @error="$event.target.src = '/home/rooms/livingroom.jpeg'"
-            >
+             />
             <div class="room-overlay">
               <span class="room-badge">{{ t('home.categories.badge') }}</span>
               <div class="room-info">

@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminAuditFilterBar from '../../components/shared/AdminAuditFilterBar.vue'
@@ -15,9 +16,9 @@ const dotClass = { success: 'success', danger: 'danger', warn: 'warn', info: 'in
 <template>
   <AdminPageHeader eyebrow="Bảo mật hệ thống" title-html="Nhật ký <em>thao tác</em>" subtitle="Ghi nhận toàn bộ hành vi trong hệ thống">
     <template #actions>
-      <button type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất nhật ký', subtitle: 'Đang tạo file CSV...' })">
+      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất nhật ký', subtitle: 'Đang tạo file CSV...' })">
         <AppIcon name="download" :size="15" />Xuất CSV
-      </button>
+      </AppButton>
     </template>
   </AdminPageHeader>
 

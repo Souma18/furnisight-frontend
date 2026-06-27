@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
@@ -32,7 +34,7 @@ async function confirmDelete() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Danh <em>mục</em>" subtitle="8 danh mục sản phẩm">
     <template #actions>
-      <button type="button" class="btn-add" @click="openAdd"><AppIcon name="plus" :size="15" />Thêm danh mục</button>
+      <AppButton type="button" class="btn-add" @click="openAdd"><AppIcon name="plus" :size="15" />Thêm danh mục</AppButton>
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm danh mục..." />
@@ -40,7 +42,7 @@ async function confirmDelete() {
     <template #cell-name="{ row }">
       <div class="flex-cell">
         <span class="category-thumb">
-          <img v-if="row.imageUrl" :src="row.imageUrl" alt="" />
+          <AppImage v-if="row.imageUrl" :src="row.imageUrl" alt=""  />
           <AppIcon v-else :name="row.iconId" :size="18" />
         </span>
         <span class="cell-name">{{ row.name }}</span>
@@ -54,15 +56,15 @@ async function confirmDelete() {
     </template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <button type="button" class="ra-btn ra-edit" @click="openEdit(row)"><AppIcon name="edit" :size="14" /></button>
-        <button
+        <AppButton type="button" class="ra-btn ra-edit" @click="openEdit(row)"><AppIcon name="edit" :size="14" /></AppButton>
+        <AppButton
           type="button"
           class="ra-btn ra-del"
           :aria-label="`Xóa danh mục ${row.name}`"
           @click="requestDelete(row)"
         >
           <AppIcon name="trash2" :size="14" />
-        </button>
+        </AppButton>
       </div>
     </template>
   </AdminDataTable>

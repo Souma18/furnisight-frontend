@@ -1,7 +1,9 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
+import OrderCard from '../orders/OrderCard.vue'
 import { useOrdersView } from '../../composables/useOrdersView'
 
 const emit = defineEmits(['notify'])
@@ -42,7 +44,7 @@ const {
     </h2>
 
     <div class="orders-filters">
-      <button
+      <AppButton
         v-for="item in filterOptions"
         :key="item"
         type="button"
@@ -50,62 +52,19 @@ const {
         @click="filter = item"
       >
         {{ statusLabels[item] ?? item }}
-      </button>
+      </AppButton>
     </div>
 
     <div class="orders-list">
-      <article v-for="order in filteredOrders" :key="order.orderCode || order.id" class="order-card">
-        <div class="order-card-head">
-          <div>
-            <p class="order-code">{{ displayCode(order) }}</p>
-            <p class="order-meta">{{ formatDate(order.createdAt) }}</p>
-            <p v-if="formatPaymentDeadline(order)" class="order-payment-deadline">
-              {{ formatPaymentDeadline(order) }}
-            </p>
-          </div>
-          <div class="order-card-right">
-            <span class="status-badge" :class="statusClass(order.status)">
-              <AppIcon v-if="order.status === 'shipping' || order.status === 'in_transit'" name="truck" :size="14" />
-              {{ displayStatusLabel(order) }}
-            </span>
-            <strong class="order-total">{{ formatMoney(order.totalAmount) }}</strong>
-          </div>
-        </div>
-
-        <div class="order-card-foot">
-          <div class="order-thumbs">
-            <span class="order-thumb">
-              <img v-if="orderListImage(order)" :src="orderListImage(order)" class="order-thumb-img" alt="product" @error="hideBrokenImage" />
-              <AppIcon v-else name="image" :size="16" />
-            </span>
-          </div>
-          <div class="order-card-actions">
-            <button
-              v-if="canCancelOrder(order)"
-              type="button"
-              class="order-cancel-btn"
-              @click="handleCancel(order, $event)"
-            >
-              {{ t('account.orders.cancel') }}
-            </button>
-            <button
-              v-if="shouldShowRetryPayment(order)"
-              type="button"
-              class="order-pay-btn"
-              :disabled="!canRetryPaymentNow(order) || isRetrying(order)"
-              :title="retryPaymentTitle(order)"
-              @click="handleRetryPayment(order, $event)"
-            >
-              <AppIcon :name="isRetrying(order) ? 'refresh' : 'creditCard'" :size="15" :class="{ 'spin-icon': isRetrying(order) }" />
-              {{ isRetrying(order) ? t('account.orders.creatingPayment') : t('account.orders.retryPayment') }}
-            </button>
-            <button type="button" class="order-detail-btn" :disabled="!order.orderCode" @click="openOrderDetail(order.orderCode)">
-              <AppIcon name="eye" :size="15" />
-              {{ t('account.orders.viewDetail') }}
-            </button>
-          </div>
-        </div>
-      </article>
+      <OrderCard
+        v-for="order in filteredOrders"
+        :key="order.orderCode || order.id"
+        :order="order"
+        :is-retrying="isRetrying(order)"
+        @cancel="handleCancel(order, $event)"
+        @pay="handleRetryPayment(order, $event)"
+        @detail="openOrderDetail"
+      />
 
       <p v-if="!filteredOrders.length" class="orders-empty">
         <AppIcon name="box" :size="14" />
@@ -166,202 +125,6 @@ const {
 .orders-list {
   display: grid;
   gap: 0.85rem;
-}
-
-.order-card {
-  background: #fff;
-  border: 1px solid var(--auth-border, #e0d9ce);
-  border-radius: 12px;
-  padding: 1rem 1.1rem;
-}
-
-.order-card-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.85rem;
-}
-
-.order-code {
-  margin: 0;
-  font-size: 0.82rem;
-  font-weight: 600;
-}
-
-.order-meta {
-  margin: 0.2rem 0 0;
-  font-size: 0.75rem;
-  color: var(--auth-text-secondary, #6b6560);
-}
-
-.order-payment-deadline {
-  margin: 0.3rem 0 0;
-  font-size: 0.72rem;
-  color: #c9922a;
-  font-weight: 500;
-}
-
-.order-card-right {
-  text-align: right;
-  display: grid;
-  gap: 0.35rem;
-  justify-items: end;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: 20px;
-  font-size: 0.68rem;
-  font-weight: 500;
-}
-
-.status-badge.shipping {
-  background: #eaf5ef;
-  color: #2a7a50;
-}
-
-.status-badge.pending {
-  background: #fdf6e8;
-  color: #c9922a;
-}
-
-.status-badge.done {
-  background: #f0f0f0;
-  color: #555;
-}
-
-.status-badge.failed {
-  background: #fff0df;
-  color: #b95e00;
-}
-
-.status-badge.paid {
-  background: #eef5ff;
-  color: #2364a8;
-}
-
-.status-badge.refund {
-  background: #fff6e6;
-  color: #9a6500;
-}
-
-.status-badge.cancel {
-  background: #fdf0ee;
-  color: #c0392b;
-}
-
-.order-total {
-  font-size: 1rem;
-  color: var(--auth-brand-start, #c9922a);
-}
-
-.order-card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.65rem;
-}
-
-.order-thumbs {
-  display: flex;
-  gap: 0.45rem;
-}
-
-.order-thumb, .order-thumb-img, .order-thumb-more {
-  width: 2.75rem;
-  height: 2.75rem;
-  border-radius: 8px;
-  background: #f5f0e8;
-  display: grid;
-  place-items: center;
-  font-size: 1.25rem;
-  object-fit: cover;
-}
-.order-thumb {
-  position: relative;
-  overflow: hidden;
-}
-.order-thumb-img {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-}
-.order-thumb-more {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--auth-brand-start, #c9922a);
-}
-
-.order-card-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-.order-cancel-btn {
-  border: 1px solid #e8c5c0;
-  border-radius: 9px;
-  padding: 0.55rem 0.85rem;
-  background: #fff;
-  color: #c0392b;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-
-.order-cancel-btn:hover {
-  background: #fdf0ee;
-}
-
-.order-pay-btn {
-  border: none;
-  border-radius: 9px;
-  padding: 0.55rem 0.85rem;
-  background: #c9922a;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.order-pay-btn:hover {
-  background: #a9781e;
-}
-
-.order-pay-btn:disabled {
-  background: #b7b0a5;
-  cursor: not-allowed;
-  opacity: 0.78;
-}
-
-.spin-icon {
-  animation: order-spin 0.8s linear infinite;
-}
-
-@keyframes order-spin {
-  to { transform: rotate(360deg); }
-}
-
-.order-detail-btn {
-  border: none;
-  border-radius: 9px;
-  padding: 0.55rem 0.85rem;
-  background: #12202e;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 500;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
 }
 
 .orders-empty {

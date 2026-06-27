@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import AccountSectionCard from "../AccountSectionCard.vue";
@@ -40,9 +42,9 @@ onMounted(() => {
 <template>
   <AccountSectionCard class="address-card" :title="t('account.address.title')">
     <template #head>
-      <button class="primary" type="button" @click="openModal">
+      <AppButton class="primary" type="button" @click="openModal">
         {{ t('account.address.addNew') }}
-      </button>
+      </AppButton>
     </template>
 
     <div v-if="!addresses.length" class="empty">
@@ -67,7 +69,7 @@ onMounted(() => {
           </div>
 
           <div class="item-actions">
-            <button
+            <AppButton
               v-if="!address.isDefault"
               type="button"
               class="set-default-btn"
@@ -75,15 +77,15 @@ onMounted(() => {
             >
               <AppIcon name="pin" :size="13" />
               {{ t('account.address.setDefault') }}
-            </button>
-            <button
+            </AppButton>
+            <AppButton
               type="button"
               class="delete-btn"
               @click="deleteAddress(address.id)"
               :title="t('account.address.deleteTitle')"
             >
               {{ t('account.address.delete') }}
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -100,11 +102,11 @@ onMounted(() => {
       <div class="form-grid">
         <label
           >{{ t('account.address.fullName') }}
-          <input v-model.trim="form.fullName" :placeholder="t('account.address.fullNamePlaceholder')"
+          <AppInput v-model.trim="form.fullName" :placeholder="t('account.address.fullNamePlaceholder')"
         /></label>
         <label
           >{{ t('account.address.phone') }}
-          <input v-model.trim="form.phone" placeholder="0123456789"
+          <AppInput v-model.trim="form.phone" placeholder="0123456789"
         /></label>
         <label>
           {{ t('account.address.province') }}
@@ -145,18 +147,18 @@ onMounted(() => {
           class="address-api-error detail-field"
         >
           <span>{{ t('account.address.provinceLoadError') }}</span>
-          <button
+          <AppButton
             type="button"
             class="ghost"
             :disabled="loadingProvince"
             @click="loadProvinces"
           >
             {{ loadingProvince ? t('account.address.retrying') : t('common.retry') }}
-          </button>
+          </AppButton>
         </div>
         <label class="detail-field">
           {{ t('account.address.detail') }}
-          <input
+          <AppInput
             v-model.trim="form.detail"
             :placeholder="t('account.address.detailPlaceholder')"
           />
@@ -174,12 +176,12 @@ onMounted(() => {
         </label>
       </div>
       <div class="actions">
-        <button type="button" class="ghost" @click="showModal = false">
+        <AppButton type="button" class="ghost" @click="showModal = false">
           {{ t('common.cancel') }}
-        </button>
-        <button type="button" class="primary" @click="submitAddress">
+        </AppButton>
+        <AppButton type="button" class="primary" @click="submitAddress">
           {{ t('account.address.save') }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

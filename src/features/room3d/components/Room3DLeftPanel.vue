@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { NSpin, NTag } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -102,7 +104,7 @@ function runAiGenerate() {
     </div>
 
     <div class="mode-tabs">
-      <button
+      <AppButton
         type="button"
         class="mode-tab"
         :class="{ active: mode === 'upload' }"
@@ -110,8 +112,8 @@ function runAiGenerate() {
       >
         <span class="tab-icon"><AppIcon name="image" :size="22" /></span>
         <span>{{ t('room3d.setup.imageMode') }}</span>
-      </button>
-      <button
+      </AppButton>
+      <AppButton
         type="button"
         class="mode-tab"
         :class="{ active: mode === 'room' }"
@@ -119,7 +121,7 @@ function runAiGenerate() {
       >
         <span class="tab-icon"><AppIcon name="house" :size="22" /></span>
         <span>{{ t('room3d.setup.roomMode') }}</span>
-      </button>
+      </AppButton>
     </div>
 
     <div v-if="mode === 'upload'" class="upload-section">
@@ -127,22 +129,22 @@ function runAiGenerate() {
       
       <div class="image-type-section">
         <div class="quality-row quality-row--two">
-          <button
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: imageType === 'normal' }"
             @click="emit('image-type-change', 'normal')"
           >
             {{ t('room3d.setup.normalImage') }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: imageType === '360' }"
             @click="emit('image-type-change', '360')"
           >
             {{ t('room3d.setup.image360') }}
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -156,14 +158,14 @@ function runAiGenerate() {
       <p v-if="selectedFileName" class="selected-file" :title="selectedFile?.name">
         {{ t('room3d.setup.selectedFile') }}: <strong>{{ selectedFileName }}</strong>
       </p>
-      <button
+      <AppButton
         type="button"
         class="run-ai-btn"
         :disabled="!selectedFile || isAnalyzing"
         @click="runAiGenerate"
       >
         {{ isAnalyzing ? t('room3d.setup.generating') : t('room3d.setup.useAi') }}
-      </button>
+      </AppButton>
       <!-- <NSpin v-if="isAnalyzing" size="small">AI dang phan tich...</NSpin> -->
       <p v-if="uploadError" class="upload-error">{{ uploadError }}</p>
     </div>
@@ -172,7 +174,7 @@ function runAiGenerate() {
       <p class="label">{{ t('room3d.setup.roomSource') }}</p>
       <NSpin v-if="isLoadingTemplates" size="small">{{ t('room3d.setup.loadingTemplates') }}</NSpin>
       <div v-else class="room-list">
-        <button
+        <AppButton
           v-for="room in roomTemplates"
           :key="room.id"
           type="button"
@@ -188,7 +190,7 @@ function runAiGenerate() {
             <strong>{{ room.name }}</strong>
             <small>{{ t('room3d.products.count', { count: room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }) }}</small>
           </span>
-        </button>
+        </AppButton>
       </div>
 
       <div class="room-mode-note" v-if="selectedRoom">
@@ -223,7 +225,7 @@ function runAiGenerate() {
 
     <div v-if="mode === 'upload'" class="project-name">
       <p class="label">{{ t('room3d.setup.projectName') }}</p>
-      <input
+      <AppInput
         class="project-input"
         :value="projectName"
         :placeholder="t('room3d.setup.projectPlaceholder')"
@@ -235,68 +237,68 @@ function runAiGenerate() {
       <template v-if="imageType === 'normal'">
         <p class="label">{{ t('room3d.setup.meshQuality') }}</p>
         <div class="quality-row quality-row--three">
-          <button
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: meshQuality === 'low' }"
             @click="emit('mesh-quality-change', 'low')"
           >
             {{ t('room3d.setup.low') }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: meshQuality === 'medium' }"
             @click="emit('mesh-quality-change', 'medium')"
           >
             {{ t('room3d.setup.medium') }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: meshQuality === 'high' }"
             @click="emit('mesh-quality-change', 'high')"
           >
             {{ t('room3d.setup.high') }}
-          </button>
+          </AppButton>
         </div>
         <small class="quality-hint">{{ t('room3d.setup.meshHint') }}</small>
       </template>
       <template v-else>
         <p class="label">MESH RESOLUTION</p>
         <div class="quality-row">
-          <button
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: quality === '128' }"
             @click="emit('quality-change', '128')"
           >
             128
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: quality === '256' }"
             @click="emit('quality-change', '256')"
           >
             256
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: quality === '512' }"
             @click="emit('quality-change', '512')"
           >
             512
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             type="button"
             class="quality-btn"
             :class="{ active: quality === '1024' }"
             @click="emit('quality-change', '1024')"
           >
             1024
-          </button>
+          </AppButton>
         </div>
         <small class="quality-hint">{{ t('room3d.setup.resolutionHint') }}</small>
       </template>

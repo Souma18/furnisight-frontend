@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -51,13 +52,13 @@ defineEmits(['view-order', 'continue-shopping'])
         <div v-if="orderCode" class="checkout-success-order-id">Mã đơn: {{ orderCode }}</div>
 
         <div class="checkout-success-actions">
-          <button type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
+          <AppButton type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
             <AppIcon name="package" :size="16" />
             Xem đơn hàng
-          </button>
-          <button type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
+          </AppButton>
+          <AppButton type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
             Tiếp tục mua sắm
-          </button>
+          </AppButton>
         </div>
       </div>
     </div>

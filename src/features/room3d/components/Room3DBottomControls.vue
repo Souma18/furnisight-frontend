@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -45,16 +46,16 @@ const { t } = useI18n()
 <template>
   <div v-if="hasRoom" class="bottom-controls">
     <div class="view-tabs">
-      <button type="button" :class="{ active: viewMode === '3d' }" @click="$emit('focus-camera')">3D</button>
-      <button type="button" :class="{ active: viewMode === 'top' }" @click="$emit('set-top-view')">{{ t('room3d.controls.top') }}</button>
-      <button type="button" :class="{ active: viewMode === 'front' }" @click="$emit('set-front-view')">
+      <AppButton type="button" :class="{ active: viewMode === '3d' }" @click="$emit('focus-camera')">3D</AppButton>
+      <AppButton type="button" :class="{ active: viewMode === 'top' }" @click="$emit('set-top-view')">{{ t('room3d.controls.top') }}</AppButton>
+      <AppButton type="button" :class="{ active: viewMode === 'front' }" @click="$emit('set-front-view')">
         {{ t('room3d.controls.front') }}
-      </button>
+      </AppButton>
     </div>
     <div class="scale-controls" :aria-label="t('room3d.controls.scaleAria')">
       <span class="scale-label">{{ t('room3d.controls.scale') }}</span>
       <div class="scale-stepper">
-        <button
+        <AppButton
           type="button"
           class="icon-btn"
           :disabled="!canDecreaseRoomScale"
@@ -62,11 +63,11 @@ const { t } = useI18n()
           @click="$emit('decrease-room-scale')"
         >
           <AppIcon name="minus" :size="14" />
-        </button>
-        <button type="button" class="scale-value" @click="$emit('reset-room-scale')">
+        </AppButton>
+        <AppButton type="button" class="scale-value" @click="$emit('reset-room-scale')">
           {{ roomScaleLabel }}
-        </button>
-        <button
+        </AppButton>
+        <AppButton
           type="button"
           class="icon-btn"
           :disabled="!canIncreaseRoomScale"
@@ -74,13 +75,13 @@ const { t } = useI18n()
           @click="$emit('increase-room-scale')"
         >
           <AppIcon name="plus" :size="14" />
-        </button>
+        </AppButton>
       </div>
     </div>
-    <button type="button" class="fullscreen-btn" @click="$emit('toggle-fullscreen')">
+    <AppButton type="button" class="fullscreen-btn" @click="$emit('toggle-fullscreen')">
       <AppIcon name="fullscreen" :size="14" />
       <span>{{ t('room3d.controls.panorama') }}</span>
-    </button>
+    </AppButton>
   </div>
 </template>
 

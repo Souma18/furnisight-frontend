@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AppModal from '@shared/ui/AppModal.vue'
 
@@ -29,9 +31,9 @@ defineEmits(['update:show', 'submit'])
     <div class="modal-content">
       <div class="modal-header">
         <h3>Xác nhận đơn hàng</h3>
-        <button type="button" class="modal-close" aria-label="Đóng" @click="$emit('update:show', false)">
+        <AppButton type="button" class="modal-close" aria-label="Đóng" @click="$emit('update:show', false)">
           <AppIcon name="close" :size="16" />
-        </button>
+        </AppButton>
       </div>
     <div class="body">
       <section class="section">
@@ -55,13 +57,13 @@ defineEmits(['update:show', 'submit'])
       <section class="section">
         <h4>Thông tin giao hàng</h4>
         <div class="form">
-          <input type="text" class="mc-input" placeholder="Họ và tên" />
-          <input type="text" class="mc-input" placeholder="Số điện thoại" />
-          <input type="text" class="mc-input" placeholder="Địa chỉ" />
+          <AppInput type="text" class="mc-input" placeholder="Họ và tên" />
+          <AppInput type="text" class="mc-input" placeholder="Số điện thoại" />
+          <AppInput type="text" class="mc-input" placeholder="Địa chỉ" />
         </div>
       </section>
 
-      <button type="button" class="btn-primary block" @click="$emit('submit')">Đặt hàng ngay</button>
+      <AppButton type="button" class="btn-primary block" @click="$emit('submit')">Đặt hàng ngay</AppButton>
     </div>
     </div>
   </AppModal>

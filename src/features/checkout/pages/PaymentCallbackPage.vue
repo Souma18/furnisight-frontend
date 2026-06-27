@@ -1,8 +1,8 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { ordersApi } from '@shared/lib/api/services'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
 import CheckoutSuccessOverlay from '../components/CheckoutSuccessOverlay.vue'
@@ -111,7 +111,7 @@ async function processCallback() {
   }
 
   try {
-    await ordersApi.getPaymentCallback(paymentMethod, callbackParams)
+    await checkoutStore.verifyPaymentCallback(paymentMethod, callbackParams)
 
     if (isGatewaySuccess(paymentMethod, callbackParams)) {
       status.value = 'success'
@@ -179,13 +179,13 @@ onMounted(processCallback)
       <p v-if="orderCode" class="payment-order">Mã đơn: {{ orderCode }}</p>
 
       <div v-if="status !== 'processing'" class="payment-actions">
-        <button type="button" class="primary" @click="goOrders">
+        <AppButton type="button" class="primary" @click="goOrders">
           <AppIcon name="box" :size="15" />
           Đơn hàng của tôi
-        </button>
-        <button v-if="isFailure" type="button" class="ghost" @click="retryCheckout">
+        </AppButton>
+        <AppButton v-if="isFailure" type="button" class="ghost" @click="retryCheckout">
           Thử thanh toán lại
-        </button>
+        </AppButton>
       </div>
     </section>
   </main>

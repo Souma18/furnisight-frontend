@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
@@ -18,7 +19,6 @@ import { useRoomCameraControls } from '../composables/useRoomCameraControls'
 import { useRoomFurnitureInteraction } from '../composables/useRoomFurnitureInteraction'
 import { useRoomModelLoader } from '../composables/useRoomModelLoader'
 import {
-  productsApi,
   room3dApi,
 } from '@shared/lib/api/services'
 import { ProductResponse } from '@shared/lib/api/services/products/products.model'
@@ -29,6 +29,7 @@ import {
 import { LIGHTING_PRESET, setupSceneVisuals } from '../lib/room3DSceneVisuals'
 import { clampToRoomBounds } from '../lib/room3DPlacement'
 import { centerRoomModelOnXYGrid } from '../lib/room3DObjects'
+import { useRoom3dProduct } from '../composables/useRoom3dProduct'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import Room3DBadge from './Room3DBadge.vue'
 import Room3DBottomControls from './Room3DBottomControls.vue'
@@ -36,6 +37,7 @@ import Room3DFurniturePanel from './Room3DFurniturePanel.vue'
 import Room3DOverlay from './Room3DOverlay.vue'
 
 const { t } = useI18n()
+const { fetchProduct } = useRoom3dProduct()
 
 const props = defineProps({
   mode: {
@@ -187,8 +189,7 @@ watch(selectedSceneItemId, async (newId) => {
   if (!item) return
   
   try {
-    const res = await productsApi.getProductDetail(item.productId)
-    fullSelectedProduct.value = new ProductResponse(res.data ?? res)
+    fullSelectedProduct.value = await fetchProduct(item.productId)
   } catch (err) {
     console.error('Failed to fetch full product details for variant selection', err)
   }
@@ -552,10 +553,10 @@ defineExpose({
       :is-drag-over-canvas="isDragOverCanvas"
     />
 
-    <button v-if="isFullscreen" type="button" class="exit-fullscreen-btn" @click="toggleFullscreen">
+    <AppButton v-if="isFullscreen" type="button" class="exit-fullscreen-btn" @click="toggleFullscreen">
       <AppIcon name="close" :size="14" />
       <span>Thoát toàn cảnh</span>
-    </button>
+    </AppButton>
   </section>
 </template>
 

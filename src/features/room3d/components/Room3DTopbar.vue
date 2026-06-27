@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
@@ -37,7 +39,7 @@ function goHome() {
   <header class="header">
     <div class="brand" @click="goHome" style="cursor: pointer;">
       <span class="brand-icon" aria-hidden="true">
-        <img src="/brand/furnisight-logo-mark.png" alt="" />
+        <AppImage src="/brand/furnisight-logo-mark.png" alt=""  />
       </span>
       <span class="brand-text">FurniSight</span>
     </div>
@@ -48,20 +50,20 @@ function goHome() {
     </div>
 
     <div class="actions">
-      <button type="button" class="action-btn ghost" @click="goHome">
+      <AppButton type="button" class="action-btn ghost" @click="goHome">
         <AppIcon name="chevronLeft" :size="14" />
         <span>{{ t('nav.home') }}</span>
-      </button>
-      <button type="button" class="action-btn ghost" @click="$emit('toggle-fullscreen')">
+      </AppButton>
+      <AppButton type="button" class="action-btn ghost" @click="$emit('toggle-fullscreen')">
         <AppIcon name="fullscreen" :size="14" />
         <span>{{ t('room3d.topbar.fullscreen') }}</span>
-      </button>
+      </AppButton>
       <div class="checkout-wrap">
-        <button type="button" class="action-btn gold checkout-trigger">
+        <AppButton type="button" class="action-btn gold checkout-trigger">
           <AppIcon name="cart" :size="14" />
           <span>{{ t('room3d.cart.checkout') }}</span>
           <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
-        </button>
+        </AppButton>
 
         <div class="checkout-dropdown">
           <div class="cart-header">
@@ -69,9 +71,9 @@ function goHome() {
               {{ t('cart.title') }}
               <span v-if="cartCount" class="cart-count">{{ cartCount }}</span>
             </div>
-            <button type="button" class="cart-head-link" @click="$emit('open-checkout')">
+            <AppButton type="button" class="cart-head-link" @click="$emit('open-checkout')">
               {{ t('room3d.cart.checkout') }}
-            </button>
+            </AppButton>
           </div>
 
           <CartPreviewList

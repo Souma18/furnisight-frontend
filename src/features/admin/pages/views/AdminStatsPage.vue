@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
@@ -81,9 +82,9 @@ bindCharts((charts, d) => {
 <template>
   <AdminPageHeader eyebrow="Phân tích" title-html="Thống kê <em>& Báo cáo</em>" subtitle="Tổng hợp dữ liệu kinh doanh">
     <template #actions>
-      <button type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo', subtitle: 'Đang tạo file PDF...' })">
+      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo', subtitle: 'Đang tạo file PDF...' })">
         <AppIcon name="download" :size="15" />Xuất PDF
-      </button>
+      </AppButton>
     </template>
   </AdminPageHeader>
 

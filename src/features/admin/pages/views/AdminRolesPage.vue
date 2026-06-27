@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
@@ -86,7 +87,7 @@ async function confirmDeleteAdmin() {
 <template>
   <AdminPageHeader eyebrow="Bảo mật hệ thống" title-html="Vai trò <em>& Quyền hạn</em>" subtitle="Quản lý phân quyền động">
     <template #actions>
-      <button type="button" class="btn-add" @click="ui.openModal('addRole')"><AppIcon name="plus" :size="15" />Tạo vai trò mới</button>
+      <AppButton type="button" class="btn-add" @click="ui.openModal('addRole')"><AppIcon name="plus" :size="15" />Tạo vai trò mới</AppButton>
     </template>
   </AdminPageHeader>
 
@@ -97,9 +98,9 @@ async function confirmDeleteAdmin() {
     <div class="tcard roles-table-card">
       <div class="tcard-header">
         <div class="tcard-title"><AppIcon name="users" :size="17" />Tài khoản quản trị</div>
-        <button type="button" class="btn-add" style="font-size:11px;padding:5px 10px" @click="ui.openModal('addAdmin')">
+        <AppButton type="button" class="btn-add" style="font-size:11px;padding:5px 10px" @click="ui.openModal('addAdmin')">
           <AppIcon name="plus" :size="13" />Cấp tài khoản
-        </button>
+        </AppButton>
       </div>
       <AdminDataTable
         table-class="full-table--admin-accounts"
@@ -129,8 +130,8 @@ async function confirmDeleteAdmin() {
         <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ accountStatusLabel(row) }}</span></template>
         <template #cell-actions="{ row }">
           <div class="row-actions row-actions--sm">
-            <button type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="12" /></button>
-            <button type="button" class="ra-btn ra-btn--sm ra-del" @click="requestDeleteAdmin(row)"><AppIcon name="trash2" :size="12" /></button>
+            <AppButton type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="12" /></AppButton>
+            <AppButton type="button" class="ra-btn ra-btn--sm ra-del" @click="requestDeleteAdmin(row)"><AppIcon name="trash2" :size="12" /></AppButton>
           </div>
         </template>
       </AdminDataTable>
@@ -143,23 +144,23 @@ async function confirmDeleteAdmin() {
           <div class="role-card-head">
             <span class="role-tag" :class="role.tagClass"><AppIcon :name="iconName(role.icon, fallbackRoleIcon)" :size="14" />{{ role.name }}</span>
             <div class="row-actions">
-              <button type="button" class="ra-btn ra-edit" @click="ui.openModal('editRole', role)"><AppIcon name="edit" :size="14" /></button>
-              <button
+              <AppButton type="button" class="ra-btn ra-edit" @click="ui.openModal('editRole', role)"><AppIcon name="edit" :size="14" /></AppButton>
+              <AppButton
                 v-if="!role.system"
                 type="button"
                 class="ra-btn ra-del"
                 @click="deleteRole(role)"
               >
                 <AppIcon name="trash2" :size="14" />
-              </button>
-              <button
+              </AppButton>
+              <AppButton
                 v-else
                 type="button"
                 class="ra-btn ra-del"
                 @click="ui.showToast({ icon: 'x', title: 'Không thể xóa', subtitle: 'Vai trò hệ thống không thể xóa.' })"
               >
                 <AppIcon name="trash2" :size="14" />
-              </button>
+              </AppButton>
             </div>
           </div>
           <div class="role-perms-wrap">

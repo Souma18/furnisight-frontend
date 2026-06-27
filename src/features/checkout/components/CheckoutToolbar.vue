@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineEmits(['back'])
@@ -20,7 +21,7 @@ defineEmits(['back'])
       <AppIcon name="shield" :size="14" />
       Thanh toán bảo mật
     </span>
-    <button
+    <AppButton
       type="button"
       style="
         display: inline-flex;
@@ -39,6 +40,6 @@ defineEmits(['back'])
     >
       <AppIcon name="arrowLeft" :size="14" />
       Giỏ hàng
-    </button>
+    </AppButton>
   </div>
 </template>

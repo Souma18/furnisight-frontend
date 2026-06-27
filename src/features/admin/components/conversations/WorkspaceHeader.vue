@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
 
@@ -38,17 +39,17 @@ const store = useAdminConversationStore()
           <option value="resolved">Đã giải quyết</option>
           <option value="closed">Đã đóng</option>
         </select>
-        <button
+        <AppButton
           class="cw-action-btn"
           :class="{ 'active-btn': store.workspace.detailVisible }"
           title="Ẩn/Hiện thông tin khách hàng"
           @click="store.toggleDetailPanel()"
         >
           <AppIcon name="panelRight" />
-        </button>
-        <button class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="store.resolveConversation()">
+        </AppButton>
+        <AppButton class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="store.resolveConversation()">
           <AppIcon name="check" /> Xong
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

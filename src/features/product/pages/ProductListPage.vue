@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductListFiltersSidebar from '../components/ProductListFiltersSidebar.vue'
@@ -96,7 +97,7 @@ function applySidebarAndClose(payload) {
         <div v-if="apiError" class="pl-api-error">
           <AppIcon name="alert" :size="18" />
           <span>Không thể kết nối máy chủ. Dữ liệu có thể không đầy đủ.</span>
-          <button type="button" class="pl-api-error-retry" @click="reloadPage">Tải lại</button>
+          <AppButton type="button" class="pl-api-error-retry" @click="reloadPage">Tải lại</AppButton>
         </div>
         <ProductListGrid
           :products="items"

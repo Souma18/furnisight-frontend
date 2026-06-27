@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppEmptyState from '@shared/ui/AppEmptyState.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { onMounted } from 'vue'
 import { useRouter, RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
@@ -136,7 +139,7 @@ const formatPrice = PriceFormatter.format
         <div class="cart-empty-icon">🔐</div>
         <h2>Đăng nhập để xem giỏ hàng</h2>
         <p>Vui lòng đăng nhập để lưu trữ và xem các sản phẩm trong giỏ hàng của bạn.</p>
-        <button class="primary-btn continue-shopping" @click="openAuthModal">Đăng nhập ngay</button>
+        <AppButton class="primary-btn continue-shopping" @click="openAuthModal">Đăng nhập ngay</AppButton>
       </div>
 
       <!-- Authenticated & Empty Cart -->
@@ -144,7 +147,7 @@ const formatPrice = PriceFormatter.format
         <div class="cart-empty-icon">🛒</div>
         <h2>Giỏ hàng trống</h2>
         <p>Bạn chưa thêm sản phẩm nào vào giỏ hàng.</p>
-        <button class="primary-btn continue-shopping" @click="router.push('/products')">Tiếp tục mua sắm</button>
+        <AppButton class="primary-btn continue-shopping" @click="router.push('/products')">Tiếp tục mua sắm</AppButton>
       </div>
     </div>
 
@@ -156,7 +159,7 @@ const formatPrice = PriceFormatter.format
               <p class="variant-modal-kicker">Chọn phân loại</p>
               <h3>{{ activeItem.name }}</h3>
             </div>
-            <button type="button" class="close-btn" @click="closeItemEditor">×</button>
+            <AppButton type="button" class="close-btn" @click="closeItemEditor">×</AppButton>
           </div>
 
           <div class="variant-modal-body">
@@ -195,8 +198,8 @@ const formatPrice = PriceFormatter.format
             <label>
               <span>Số lượng</span>
               <div class="modal-qty">
-                <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
-                <input
+                <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</AppButton>
+                <AppInput
                   :value="activeDraft.qty"
                   type="number"
                   inputmode="numeric"
@@ -205,14 +208,14 @@ const formatPrice = PriceFormatter.format
                   @input="setDraftQty($event.target.value)"
                   @blur="setDraftQty($event.target.value)"
                 />
-                <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
+                <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</AppButton>
               </div>
             </label>
           </div>
 
           <div class="variant-modal-actions">
-            <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">Hủy</button>
-            <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">Lưu</button>
+            <AppButton type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">Hủy</AppButton>
+            <AppButton type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">Lưu</AppButton>
           </div>
         </div>
       </div>
