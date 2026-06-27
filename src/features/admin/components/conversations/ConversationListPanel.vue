@@ -1,37 +1,41 @@
 <script setup>
-import { computed } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import { useAdminConversationStore } from '../../store/adminConversationStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-const props = defineProps({
-  manager: {
-    type: Object,
-    required: true,
-  },
-})
-
-const mgr = props.manager
+const store = useAdminConversationStore()
 const emit = defineEmits(['open-templates', 'add-template'])
-const filteredConversations = mgr.filteredConversations
 
-const todayCount = computed(() => {
-  const today = new Date().toDateString()
-  return mgr.conversations.value.filter((c) => c.createdAt && new Date(c.createdAt).toDateString() === today).length
-})
+const searchOpen = ref(false)
 
 function selectConversation(id) {
-  mgr.loadConversation(id)
+  store.loadConversation(id)
 }
 
 function isActive(id) {
-  return mgr.currentConvId.value === id
+  return store.workspace.convId === id
 }
 
-function filterChip(type) {
-  mgr.activeFilter.value = type
+function filterStatus(status) {
+  store.filters.tab = 'all'
+  store.filters.status = status
+  store.loadInbox(true)
 }
 
-function switchTab(tab) {
-  mgr.activeTab.value = tab
+function filterPriority(priority) {
+  store.filters.priority = priority
+  store.loadInbox(true)
+}
+
+function filterAssignment(assignment) {
+  store.filters.assignment = assignment
+}
+
+function toggleSearch() {
+  searchOpen.value = !searchOpen.value
+  if (!searchOpen.value) {
+    store.filters.query = ''
+  }
 }
 
 function formatTime(conv) {
@@ -48,6 +52,23 @@ function priorityLabel(priority) {
   const map = { urgent: 'Khẩn cấp', high: 'Cao', medium: 'Vừa', low: 'Thấp' }
   return map[priority] || priority
 }
+
+function handleScroll(e) {
+  const el = e.target
+  if (el.scrollHeight - el.scrollTop - el.clientHeight < 50) {
+    if (store.inbox.hasMore && !store.inbox.loadingMore) {
+      store.loadInbox(false)
+    }
+  }
+}
+
+onMounted(() => {
+  store.startPollingInbox()
+})
+
+onUnmounted(() => {
+  store.stopPollingInbox()
+})
 </script>
 
 <template>
@@ -58,39 +79,65 @@ function priorityLabel(priority) {
           <AppIcon name="messageSquare" /> Hội thoại
         </div>
         <div class="clp-hdr-actions">
+          <button
+            class="clp-hdr-btn"
+            :class="{ active: searchOpen }"
+            title="Tìm kiếm hội thoại"
+            @click="toggleSearch"
+          >
+            <AppIcon name="search" />
+          </button>
           <button class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
             <AppIcon name="fileText" />
           </button>
           <button class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
             <AppIcon name="plus" />
           </button>
-          <button class="clp-hdr-btn" title="Cài đặt"><AppIcon name="settings" /></button>
         </div>
       </div>
-      <div class="clp-search">
+      <div v-if="searchOpen" class="clp-search">
         <AppIcon name="search" />
-        <input v-model="mgr.searchQuery.value" type="text" placeholder="Tìm tên, email..." />
+        <input v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
       </div>
       <div class="clp-filter-row">
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'all' }" @click="filterChip('all')">Tất cả</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'urgent' }" @click="filterChip('urgent')">Khẩn cấp</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'unread' }" @click="filterChip('unread')">Chưa đọc</button>
-        <button class="clf-chip" :class="{ active: mgr.activeFilter.value === 'waiting' }" @click="filterChip('waiting')">Chờ khách</button>
-      </div>
-    </div>
-
-    <div class="clp-tabs">
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'all' }" @click="switchTab('all')">
-        Tất cả <span class="clp-tab-badge" v-if="mgr.activeTab.value !== 'all'">{{ mgr.conversations.value.length }}</span>
-      </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'new' }" @click="switchTab('new')">
-        Mới <span class="clp-tab-badge">{{ todayCount }}</span>
-      </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'pending' }" @click="switchTab('pending')">
-        Đang xử lý
-      </div>
-      <div class="clp-tab" :class="{ active: mgr.activeTab.value === 'resolved' }" @click="switchTab('resolved')">
-        Đã xong
+        <select
+          class="clf-status-select"
+          :value="store.filters.status"
+          title="Lọc theo trạng thái"
+          @change="(e) => filterStatus(e.target.value)"
+        >
+          <option value="all">Mọi trạng thái</option>
+          <option value="unread">Chưa đọc</option>
+          <option value="new">Mới</option>
+          <option value="assigned">Đã giao</option>
+          <option value="pending">Đang xử lý</option>
+          <option value="waiting">Chờ khách</option>
+          <option value="resolved">Đã giải quyết</option>
+          <option value="closed">Đã đóng</option>
+        </select>
+        <select
+          class="clf-priority-select"
+          :value="store.filters.priority"
+          title="Lọc theo độ ưu tiên"
+          @change="(e) => filterPriority(e.target.value)"
+        >
+          <option value="all">Mọi ưu tiên</option>
+          <option value="low">Thấp</option>
+          <option value="medium">Trung bình</option>
+          <option value="high">Cao</option>
+          <option value="urgent">Khẩn cấp</option>
+        </select>
+        <select
+          class="clf-assignment-select"
+          :value="store.filters.assignment"
+          title="Lọc theo phân công"
+          @change="(e) => filterAssignment(e.target.value)"
+        >
+          <option value="all">Mọi phân công</option>
+          <option value="unassigned">Chưa giao</option>
+          <option value="mine">Giao cho tôi</option>
+          <option value="assigned">Đã giao</option>
+        </select>
       </div>
     </div>
 
@@ -101,18 +148,22 @@ function priorityLabel(priority) {
       </button>
     </div>
 
-    <div class="clp-list">
+    <div class="clp-list" @scroll="handleScroll">
       <div
-        v-for="conv in filteredConversations"
+        v-for="conv in store.filteredConversations"
         :key="conv.id"
         class="cm-conv-item"
         :class="{ active: isActive(conv.id), unread: conv.unread }"
         @click="selectConversation(conv.id)"
       >
         <div class="cm-ci-av-wrap">
-          <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">{{ conv.av }}</div>
+          <div class="cm-ci-av" :class="conv.avClass" :style="{ background: conv.avColor, color: conv.textColor }">
+            <img v-if="conv.avatarUrl" :src="conv.avatarUrl" :alt="conv.name" />
+            <span v-else>{{ conv.av }}</span>
+          </div>
           <div class="cm-ci-online" :class="conv.online"></div>
-          <div v-if="conv.unread" class="cm-conv-unread-dot"></div>
+          <div v-if="conv.unreadCount > 0" class="cm-conv-unread-badge">{{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}</div>
+          <div v-else-if="conv.unread" class="cm-conv-unread-dot"></div>
         </div>
 
         <div class="cm-ci-body">
@@ -131,8 +182,11 @@ function priorityLabel(priority) {
           </div>
         </div>
       </div>
-      <div v-if="filteredConversations.length === 0" style="padding: 20px; text-align: center; color: var(--text4); font-size: 12px;">
+      <div v-if="store.filteredConversations.length === 0 && !store.inbox.loading" style="padding: 20px; text-align: center; color: var(--text4); font-size: 12px;">
         Không tìm thấy hội thoại nào.
+      </div>
+      <div v-if="store.inbox.loadingMore" style="padding: 10px; text-align: center; color: var(--text4); font-size: 12px;">
+        Đang tải thêm...
       </div>
     </div>
   </div>

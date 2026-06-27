@@ -96,7 +96,13 @@ function normalizeAdminAccount(account = {}) {
 }
 
 function normalizePermissions(permissions = []) {
-  return [...new Set((permissions ?? []).filter(Boolean).map((permission) => String(permission).trim()))]
+  return [
+    ...new Set(
+      (permissions ?? [])
+        .filter(Boolean)
+        .map((permission) => String(permission).trim().replace(/-/g, '_').toUpperCase()),
+    ),
+  ]
 }
 
 function buildMatrix(roles) {

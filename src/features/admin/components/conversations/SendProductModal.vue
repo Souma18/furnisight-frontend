@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
+import { useProductSearch } from '../../composables/useProductSearch'
 
 const props = defineProps({
   manager: {
@@ -14,46 +15,43 @@ const props = defineProps({
 const emit = defineEmits(['close', 'send-product'])
 const mgr = props.manager
 
-const searchQuery = ref('')
-const activeCat = ref('all')
+const { 
+  searchQuery, 
+  activeCat, 
+  categories, 
+  products, 
+  loading, 
+  hasMore, 
+  loadCategories, 
+  fetchProducts, 
+  resetSearch 
+} = useProductSearch()
 
-const categories = [
-  { key: 'all', label: 'Tất cả', emoji: '' },
-  { key: 'phong-ngu', label: 'Phòng ngủ', emoji: '🛏️' },
-  { key: 'phong-khach', label: 'Phòng khách', emoji: '🛋️' },
-  { key: 'van-phong', label: 'Văn phòng', emoji: '🪑' },
-  { key: 'den', label: 'Đèn', emoji: '💡' },
-]
-
-const filteredProducts = computed(() => {
-  let filtered = mgr.products.value
-
-  if (activeCat.value !== 'all') {
-    filtered = filtered.filter((p) => p.catKey === activeCat.value)
-  }
-
-  if (searchQuery.value) {
-    const q = searchQuery.value.toLowerCase()
-    filtered = filtered.filter(
-      (p) => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q),
-    )
-  }
-
-  return filtered
-})
-
-const selectedProduct = computed(() => mgr.products.value.find((p) => p.id === mgr.selectedProdId.value))
+const selectedProduct = computed(() => products.value.find((p) => p.id === mgr.selectedProdId.value))
 
 watch(
   () => props.isOpen,
   (open) => {
-    if (!open) {
-      searchQuery.value = ''
-      activeCat.value = 'all'
+    if (open) {
+      if (categories.value.length <= 1) {
+        loadCategories()
+      }
+      if (products.value.length === 0) {
+        fetchProducts(true)
+      }
+    } else {
+      resetSearch()
       mgr.selectedProdId.value = null
     }
   },
 )
+
+function onScroll(e) {
+  const target = e.target
+  if (target.scrollTop + target.clientHeight >= target.scrollHeight - 50) {
+    fetchProducts()
+  }
+}
 
 function onOverlayClick(event) {
   if (event.target === event.currentTarget) close()
@@ -65,9 +63,21 @@ function close() {
 
 function sendProduct() {
   if (selectedProduct.value) {
-    emit('send-product', selectedProduct.value)
+    emit('send-product', {
+      ...selectedProduct.value,
+      price: selectedProduct.value.price || selectedProduct.value.variants?.[0]?.price || 0,
+      stock: selectedProduct.value.stock || selectedProduct.value.variants?.[0]?.stock || 0,
+    })
     close()
   }
+}
+
+function getProductPrice(p) {
+  return p.price || p.variants?.[0]?.price || 0
+}
+
+function getProductStock(p) {
+  return p.variants?.[0]?.stockQuantity ?? p.stock ?? 0
 }
 </script>
 
@@ -82,7 +92,7 @@ function sendProduct() {
           </button>
         </div>
 
-        <div class="sp-body">
+        <div class="sp-body" @scroll="onScroll">
           <div class="sp-search-wrap">
             <AppIcon name="search" />
             <input v-model="searchQuery" type="text" placeholder="Tìm theo tên, SKU, danh mục..." />
@@ -91,40 +101,47 @@ function sendProduct() {
           <div class="sp-cats">
             <button
               v-for="cat in categories"
-              :key="cat.key"
+              :key="cat.id"
               type="button"
               class="sp-cat-chip"
-              :class="{ active: activeCat === cat.key }"
-              @click="activeCat = cat.key"
+              :class="{ active: activeCat === cat.id }"
+              @click="activeCat = cat.id"
             >
-              {{ cat.emoji ? `${cat.emoji} ` : '' }}{{ cat.label }}
+              {{ cat.name }}
             </button>
           </div>
 
           <div class="sp-prod-grid">
             <div
-              v-for="p in filteredProducts"
+              v-for="p in products"
               :key="p.id"
               class="sp-prod-item"
               :class="{ selected: mgr.selectedProdId.value === p.id }"
               @click="mgr.selectProduct(p.id)"
             >
               <div class="sp-prod-img">
-                {{ p.icon }}
+                <img v-if="p.imageUrls && p.imageUrls.length" :src="p.imageUrls[0]" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                <div v-else style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #eee; border-radius: 8px; color: #999;">No IMG</div>
                 <div class="sp-prod-check"><AppIcon name="check" :size="10" /></div>
               </div>
               <div class="sp-prod-body">
-                <div class="sp-prod-cat">{{ p.cat }}</div>
+                <div class="sp-prod-cat">{{ p.category }}</div>
                 <div class="sp-prod-name">{{ p.name }}</div>
-                <div class="sp-prod-price">{{ PriceFormatter.format(p.price) }}</div>
-                <div class="sp-prod-sku">{{ p.id }} · {{ p.stock > 0 ? `Còn ${p.stock} sp` : 'Hết hàng' }}</div>
+                <div class="sp-prod-price">{{ PriceFormatter.format(getProductPrice(p)) }}</div>
+                <div class="sp-prod-sku">{{ p.sku || p.id }} · {{ getProductStock(p) > 0 ? `Còn ${getProductStock(p)} sp` : 'Hết hàng' }}</div>
               </div>
             </div>
             <div
-              v-if="!filteredProducts.length"
+              v-if="!products.length && !loading"
               style="grid-column: 1 / -1; padding: 20px; text-align: center; font-size: 12px; color: var(--text4)"
             >
               Không tìm thấy sản phẩm.
+            </div>
+            <div
+              v-if="loading"
+              style="grid-column: 1 / -1; padding: 20px; text-align: center; font-size: 12px; color: var(--text4)"
+            >
+              Đang tải...
             </div>
           </div>
         </div>

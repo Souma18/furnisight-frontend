@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, reactive, watch, toRefs } from 'vue'
 import { defineStore } from 'pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import {
@@ -7,6 +7,7 @@ import {
   getMessages,
   markMessageRead,
   postMessage,
+  searchMessages,
 } from '../api/messageServiceApi'
 import { getBuyerId } from '../lib/chatUserIds'
 import {
@@ -17,32 +18,69 @@ import {
 } from '../lib/chatMappers'
 import { appendMessage, createMessageId, upsertMessage } from '../lib/chatMessages'
 import { createChatSocketSession } from '../lib/chatSocketSession'
+import { uploadChatAttachment } from '../lib/chatAttachmentUpload'
+import { formatChatError } from '../lib/chatErrorMessages'
 import { CHAT_AGENT, CHAT_QUICK_CHIPS } from '../config/chatContent'
 
 const CHAT_CHANNEL = 'SUPPORT'
 
 export const useChatStore = defineStore('chat', () => {
-  const hydrated = ref(false)
-  const isOpen = ref(false)
-  const isTyping = ref(false)
-  const unreadCount = ref(0)
-  const messages = ref([])
-  const draft = ref('')
-  const connectionStatus = ref('idle')
-  const conversationId = ref(null)
-  const staffId = ref(null)
-  const buyerId = ref(getBuyerId())
-  const loading = ref(false)
-  const error = ref(null)
+  // --- Domain State ---
+  const session = reactive({
+    hydrated: false,
+    isOpen: false,
+    loading: false,
+    error: null,
+  })
+
+  const workspace = reactive({
+    conversationId: null,
+    messages: [],
+    draft: '',
+    isTyping: false,
+    search: {
+      visible: false,
+      query: '',
+      resultIds: [],
+      activeIndex: -1,
+      total: 0,
+      loading: false,
+      error: '',
+    },
+  })
+
+  const user = reactive({
+    buyerId: getBuyerId(),
+    staffId: null,
+  })
+
+  const socket = reactive({
+    connectionStatus: 'idle',
+    unreadCount: 0,
+  })
+
+  // Provide backward compatibility for chatSocketSession bindings
+  const sessionBindings = {
+    connectionStatus: computed({
+      get: () => socket.connectionStatus,
+      set: (val) => { socket.connectionStatus = val },
+    }),
+    conversationId: computed({
+      get: () => workspace.conversationId,
+      set: (val) => { workspace.conversationId = val },
+    }),
+  }
 
   const agent = CHAT_AGENT
   const quickChips = CHAT_QUICK_CHIPS
 
-  const hasUnread = computed(() => unreadCount.value > 0)
+  const hasUnread = computed(() => socket.unreadCount > 0)
+  let searchTimer = null
+  let searchRequestSeq = 0
 
   const socketSession = createChatSocketSession({
-    connectionStatus,
-    conversationId,
+    connectionStatus: sessionBindings.connectionStatus,
+    conversationId: sessionBindings.conversationId,
     onIncomingMessage: handleIncomingMessage,
   })
 
@@ -50,7 +88,7 @@ export const useChatStore = defineStore('chat', () => {
   watch(() => authStore.isAuthenticated, (isAuth) => {
     if (!isAuth) {
       resetSessionState()
-      buyerId.value = null
+      user.buyerId = null
     }
   })
 
@@ -67,44 +105,63 @@ export const useChatStore = defineStore('chat', () => {
 
   function resetSessionState() {
     socketSession.disconnectSocket()
-    conversationId.value = null
-    staffId.value = null
-    messages.value = []
-    unreadCount.value = 0
-    hydrated.value = false
-    error.value = null
+    Object.assign(session, {
+      hydrated: false,
+      loading: false,
+      error: null,
+    })
+    Object.assign(workspace, {
+      conversationId: null,
+      messages: [],
+      search: {
+        visible: false,
+        query: '',
+        resultIds: [],
+        activeIndex: -1,
+        total: 0,
+        loading: false,
+        error: '',
+      },
+    })
+    user.staffId = null
+    socket.unreadCount = 0
   }
 
   function handleIncomingMessage(payload) {
     if (!payload || typeof payload !== 'object' || payload.isInternal) return
 
-    isTyping.value = false
-    const mapped = mapMessageToCustomer(payload, buyerId.value)
-    upsertMessage(messages, mapped)
+    workspace.isTyping = false
+    const mapped = mapMessageToCustomer(payload, user.buyerId)
+    // Pass `.messages` array to the helper
+    const messagesRefProxy = computed({
+      get: () => workspace.messages,
+      set: (val) => { workspace.messages = val }
+    })
+    upsertMessage(messagesRefProxy, mapped)
 
-    if (mapped.role !== 'user' && !isOpen.value) {
-      unreadCount.value += 1
+    if (mapped.role !== 'user' && !session.isOpen) {
+      socket.unreadCount += 1
     }
   }
 
   async function loadMessages() {
-    if (!conversationId.value) {
-      messages.value = []
+    if (!workspace.conversationId) {
+      workspace.messages = []
       return
     }
 
-    const page = await getMessages({ conversationId: conversationId.value, size: 50 })
+    const page = await getMessages({ conversationId: workspace.conversationId, size: 50 })
     const items = normalizeMessagePage(page)
-    messages.value = items
+    workspace.messages = items
       .filter((m) => !m.isInternal)
-      .map((m) => mapMessageToCustomer(m, buyerId.value))
-      .sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt))
+      .map((m) => mapMessageToCustomer(m, user.buyerId))
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
   }
 
   async function markIncomingAsRead() {
-    if (!conversationId.value || !isOpen.value) return
+    if (!workspace.conversationId || !session.isOpen) return
 
-    const unreadFromOthers = messages.value.filter(
+    const unreadFromOthers = workspace.messages.filter(
       (m) => m.role === 'assistant' && typeof m.id === 'number',
     )
 
@@ -112,186 +169,383 @@ export const useChatStore = defineStore('chat', () => {
   }
 
   async function hydrateSession(force = false) {
-    loading.value = true
-    error.value = null
+    session.loading = true
+    session.error = null
 
     try {
       const nextBuyerId = await resolveBuyerId()
-      const userChanged = buyerId.value !== nextBuyerId
+      const userChanged = user.buyerId !== nextBuyerId
 
       if (userChanged) {
         resetSessionState()
-        buyerId.value = nextBuyerId
+        user.buyerId = nextBuyerId
       } else if (force) {
         resetSessionState()
-        buyerId.value = nextBuyerId
-      } else if (hydrated.value) {
+        user.buyerId = nextBuyerId
+      } else if (session.hydrated) {
         return
       }
 
-      if (!buyerId.value) {
-        hydrated.value = true
+      if (!user.buyerId) {
+        session.hydrated = true
         return
       }
 
-      const list = await getConversationsByUser(buyerId.value)
+      const list = await getConversationsByUser(user.buyerId)
       const existing = pickLatestConversation(list, CHAT_CHANNEL)
 
       if (existing?.id) {
-        conversationId.value = existing.id
-        staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+        workspace.conversationId = existing.id
+        user.staffId = existing.staffId ?? existing.assignedAdminId ?? null
         await loadMessages()
         socketSession.connectSocket()
       }
 
-      hydrated.value = true
+      session.hydrated = true
     } catch (err) {
       const authStore = useAuthStore()
-      error.value = authStore.isAuthenticated
+      session.error = authStore.isAuthenticated
         ? (err.message || 'Không thể tải hội thoại')
         : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] hydrateSession', err)
     } finally {
-      loading.value = false
+      session.loading = false
     }
   }
 
-  async function ensureConversationForFirstMessage(firstMessage) {
-    if (conversationId.value) return { createdWithFirstMessage: false }
-    if (!buyerId.value) {
+  async function ensureConversationForFirstMessage(firstMessage, attachmentPayload = null) {
+    if (workspace.conversationId) return { createdWithFirstMessage: false }
+    if (!user.buyerId) {
       throw new Error('Vui lòng đăng nhập để sử dụng chat hỗ trợ.')
     }
 
-    const list = await getConversationsByUser(buyerId.value)
+    const list = await getConversationsByUser(user.buyerId)
     const existing = pickLatestConversation(list, CHAT_CHANNEL)
     if (existing?.id) {
-      conversationId.value = existing.id
-      staffId.value = existing.staffId ?? existing.assignedAdminId ?? null
+      workspace.conversationId = existing.id
+      user.staffId = existing.staffId ?? existing.assignedAdminId ?? null
       await loadMessages()
       socketSession.connectSocket()
-      hydrated.value = true
+      session.hydrated = true
       return { createdWithFirstMessage: false }
     }
 
     const created = await createConversation({
-      buyerId: buyerId.value,
+      buyerId: user.buyerId,
       staffId: null,
       message: firstMessage,
-      messageType: 'TEXT',
+      messageType: attachmentPayload?.messageType || 'TEXT',
       channel: CHAT_CHANNEL,
       fileId: null,
+      ...(attachmentPayload?.dtoFields || {}),
     })
 
-    conversationId.value = created.id
-    staffId.value = created.staffId ?? created.assignedAdminId ?? null
+    workspace.conversationId = created.id
+    user.staffId = created.staffId ?? created.assignedAdminId ?? null
     await loadMessages()
     socketSession.connectSocket()
-    hydrated.value = true
+    session.hydrated = true
 
     // Theo API design, message đầu tiên đã được lưu ngay trong createConversation.
     return { createdWithFirstMessage: true }
   }
 
   function toggleOpen() {
-    isOpen.value = !isOpen.value
-    if (isOpen.value) {
-      unreadCount.value = 0
+    session.isOpen = !session.isOpen
+    if (session.isOpen) {
+      socket.unreadCount = 0
       markIncomingAsRead()
     }
   }
 
   function close() {
-    isOpen.value = false
+    session.isOpen = false
   }
 
   function open() {
-    isOpen.value = true
-    unreadCount.value = 0
+    session.isOpen = true
+    socket.unreadCount = 0
   }
 
-  async function sendMessage(text) {
-    const content = String(text ?? draft.value).trim()
-    if (!content) return
+  function setError(message) {
+    session.error = message || null
+  }
 
-    draft.value = ''
-    error.value = null
-    loading.value = true
+  async function _ensureBuyerAuth() {
+    const nextBuyerId = await resolveBuyerId()
+    if (!nextBuyerId) {
+      session.error = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
+      return false
+    }
+    user.buyerId = nextBuyerId
+    return true
+  }
+
+  async function _ensureActiveConversation(content, attachmentPayload = null) {
+    if (!workspace.conversationId) {
+      const result = await ensureConversationForFirstMessage(content, attachmentPayload)
+      return result
+    }
+    return { createdWithFirstMessage: false }
+  }
+
+  function _ensureSocketConnected() {
+    if (!socketSession.isConnected()) {
+      socketSession.connectSocket()
+    }
+  }
+
+  function _appendMessageToTimeline(payload) {
+    const messagesRefProxy = computed({
+      get: () => workspace.messages,
+      set: (val) => { workspace.messages = val }
+    })
+    upsertMessage(messagesRefProxy, mapMessageToCustomer(payload, user.buyerId))
+  }
+
+  function mergeSearchMessages(items = []) {
+    if (!items.length) return
+
+    const mapped = items
+      .filter((message) => !message.isInternal)
+      .map((message) => mapMessageToCustomer(message, user.buyerId))
+
+    const byId = new Map(workspace.messages.map((message) => [message.id, message]))
+    for (const message of mapped) {
+      byId.set(message.id, message)
+    }
+
+    workspace.messages = [...byId.values()].sort(
+      (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
+    )
+  }
+
+  async function performSearch() {
+    const query = String(workspace.search.query || '').trim()
+    if (!query || !workspace.conversationId) {
+      Object.assign(workspace.search, {
+        resultIds: [],
+        activeIndex: -1,
+        total: 0,
+        loading: false,
+        error: '',
+      })
+      return
+    }
+
+    const requestSeq = ++searchRequestSeq
+    const previousActiveId = workspace.search.resultIds[workspace.search.activeIndex]
+    workspace.search.loading = true
+    workspace.search.error = ''
 
     try {
-      const nextBuyerId = await resolveBuyerId()
-      if (!nextBuyerId) {
-        error.value = 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
-        return
-      }
-      buyerId.value = nextBuyerId
-
-      if (!conversationId.value) {
-        const { createdWithFirstMessage } = await ensureConversationForFirstMessage(content)
-        if (createdWithFirstMessage) {
-          return
-        }
-      }
-
-      if (!conversationId.value) {
-        return
-      }
-
-      const clientTempId = createMessageId('user')
-      appendMessage(messages, {
-        id: clientTempId,
-        clientTempId,
-        role: 'user',
-        content,
-        products: [],
-        createdAt: new Date().toISOString(),
+      const page = await searchMessages({
+        conversationId: workspace.conversationId,
+        query,
+        page: 0,
+        size: 20,
+        includeInternal: false,
       })
+      if (requestSeq !== searchRequestSeq) return
 
-      if (!socketSession.isConnected()) {
-        socketSession.connectSocket()
+      const items = normalizeMessagePage(page)
+      mergeSearchMessages(items)
+
+      const resultIds = items.map((message) => message.id ?? message.messageId).filter(Boolean)
+      workspace.search.resultIds = resultIds
+      workspace.search.total = Number(page?.totalElements ?? resultIds.length) || 0
+
+      if (!resultIds.length) {
+        workspace.search.activeIndex = -1
+        return
       }
+
+      const previousIndex = resultIds.indexOf(previousActiveId)
+      workspace.search.activeIndex = previousIndex >= 0 ? previousIndex : 0
+    } catch (err) {
+      if (requestSeq !== searchRequestSeq) return
+      workspace.search.resultIds = []
+      workspace.search.activeIndex = -1
+      workspace.search.total = 0
+      workspace.search.error = formatChatError(err, 'Không tìm được tin nhắn.')
+    } finally {
+      if (requestSeq === searchRequestSeq) {
+        workspace.search.loading = false
+      }
+    }
+  }
+
+  function toggleSearch() {
+    workspace.search.visible = !workspace.search.visible
+    if (!workspace.search.visible) {
+      setSearchQuery('')
+    }
+  }
+
+  function setSearchQuery(query) {
+    workspace.search.query = query
+    workspace.search.visible = workspace.search.visible || Boolean(String(query || '').trim())
+    if (searchTimer) {
+      clearTimeout(searchTimer)
+      searchTimer = null
+    }
+
+    if (!String(query || '').trim()) {
+      searchRequestSeq += 1
+      Object.assign(workspace.search, {
+        resultIds: [],
+        activeIndex: -1,
+        total: 0,
+        loading: false,
+        error: '',
+      })
+      return
+    }
+
+    workspace.search.loading = true
+    searchTimer = setTimeout(() => {
+      performSearch()
+    }, 250)
+  }
+
+  function closeSearch() {
+    workspace.search.visible = false
+    setSearchQuery('')
+  }
+
+  function nextSearchResult() {
+    const total = workspace.search.resultIds.length
+    if (!total) return
+    workspace.search.activeIndex = (workspace.search.activeIndex + 1 + total) % total
+  }
+
+  function prevSearchResult() {
+    const total = workspace.search.resultIds.length
+    if (!total) return
+    workspace.search.activeIndex = (workspace.search.activeIndex - 1 + total) % total
+  }
+
+  function buildAttachmentPayload(attachments = []) {
+    const list = Array.isArray(attachments) ? attachments.filter(Boolean) : [attachments].filter(Boolean)
+    const first = list[0] || null
+    const allImages = list.length > 0 && list.every((item) => item.isImage)
+    const allFiles = list.length > 0 && list.every((item) => !item.isImage)
+    const contentFallback = first
+      ? list.length > 1
+        ? allImages ? `${list.length} ảnh` : allFiles ? `${list.length} tệp` : `${list.length} đính kèm`
+        : first.name || 'Đính kèm'
+      : ''
+
+    return {
+      list,
+      first,
+      messageType: list.length ? (allImages ? 'IMAGE' : 'FILE') : 'TEXT',
+      contentFallback,
+      dtoFields: first ? {
+        mediaId: first.mediaId || undefined,
+        attachmentUrl: first.url || undefined,
+        attachmentName: first.name || undefined,
+        attachmentType: first.type || undefined,
+        attachmentSize: first.size || undefined,
+        attachments: list.map((item) => ({
+          mediaId: item.mediaId || '',
+          url: item.url || '',
+          name: item.name || '',
+          type: item.type || '',
+          size: item.size || 0,
+          isImage: Boolean(item.isImage),
+        })),
+      } : {},
+    }
+  }
+
+  async function uploadAttachments(files = []) {
+    if (!files.length) return []
+    return Promise.all(files.map(async (attachment) => {
+      const uploaded = await uploadChatAttachment(attachment.file, authStore)
+      return {
+        mediaId: uploaded.mediaId || uploaded.id || '',
+        url: uploaded.secureUrl || uploaded.secure_url || uploaded.url || '',
+        name: attachment.name,
+        type: attachment.type,
+        size: attachment.size,
+        isImage: attachment.isImage,
+      }
+    }))
+  }
+
+  async function sendMessage(text, files = []) {
+    const content = String(text ?? workspace.draft).trim()
+    if (!content && !files.length) return false
+
+    session.error = null
+    session.loading = true
+
+    try {
+      const hasAuth = await _ensureBuyerAuth()
+      if (!hasAuth) return false
+
+      const uploadedAttachments = await uploadAttachments(files)
+      const attachmentPayload = buildAttachmentPayload(uploadedAttachments)
+      const messageContent = content || attachmentPayload.contentFallback || 'Đính kèm'
+      const convStatus = await _ensureActiveConversation(messageContent, attachmentPayload)
+      if (convStatus.createdWithFirstMessage) {
+        workspace.draft = ''
+        return true
+      }
+      if (!workspace.conversationId) return false
+
+      _ensureSocketConnected()
 
       const saved = await postMessage({
-        conversationId: conversationId.value,
-        senderId: buyerId.value,
-        receiverId: staffId.value,
-        content,
-        messageType: 'TEXT',
+        conversationId: workspace.conversationId,
+        senderId: user.buyerId,
+        receiverId: user.staffId,
+        content: messageContent,
+        messageType: attachmentPayload.messageType,
+        ...attachmentPayload.dtoFields,
         isInternal: false,
       })
-      upsertMessage(messages, mapMessageToCustomer(saved, buyerId.value))
+      
+      _appendMessageToTimeline(saved)
+      workspace.draft = ''
+      return true
     } catch (err) {
       const authStore = useAuthStore()
-      error.value = authStore.isAuthenticated
-        ? (err.message || 'Gửi tin nhắn thất bại')
+      session.error = authStore.isAuthenticated
+        ? formatChatError(err, 'Không gửi được tin nhắn. Vui lòng kiểm tra kết nối hoặc thử lại.')
         : 'Vui lòng đăng nhập để sử dụng chat hỗ trợ.'
       console.error('[chatStore] sendMessage', err)
+      return false
     } finally {
-      loading.value = false
+      session.loading = false
     }
   }
 
   return {
-    hydrated,
-    isOpen,
-    isTyping,
-    unreadCount,
-    messages,
-    draft,
-    connectionStatus,
-    conversationId,
-    loading,
-    error,
-      buyerId,
+    // Domains
+    session,
+    workspace,
+    user,
+    socket,
+    // Original static properties and getters
     agent,
     quickChips,
     hasUnread,
     formatTimeLabel,
+    // Actions
     hydrateSession,
     resetSession: resetSessionState,
     toggleOpen,
     close,
     open,
+    setError,
     sendMessage,
+    toggleSearch,
+    setSearchQuery,
+    closeSearch,
+    nextSearchResult,
+    prevSearchResult,
     disconnectSocket: socketSession.disconnectSocket,
   }
 })

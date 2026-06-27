@@ -6,8 +6,8 @@ const AVATAR_PALETTE = [
 ]
 
 const STATUS_TO_KEY = {
-  OPEN: 'pending',
-  ASSIGNED: 'pending',
+  OPEN: 'new',
+  ASSIGNED: 'assigned',
   IN_PROGRESS: 'pending',
   WAITING_CUSTOMER: 'waiting',
   RESOLVED: 'resolved',
@@ -16,6 +16,7 @@ const STATUS_TO_KEY = {
 
 const KEY_TO_STATUS = {
   new: 'OPEN',
+  assigned: 'ASSIGNED',
   pending: 'IN_PROGRESS',
   waiting: 'WAITING_CUSTOMER',
   resolved: 'RESOLVED',
@@ -29,8 +30,19 @@ const PRIORITY_TO_UI = {
   URGENT: 'urgent',
 }
 
+const KEY_TO_PRIORITY = {
+  low: 'LOW',
+  medium: 'MEDIUM',
+  high: 'HIGH',
+  urgent: 'URGENT',
+}
+
 export function mapStatusToApi(statusKey) {
   return KEY_TO_STATUS[statusKey] ?? String(statusKey || 'OPEN').toUpperCase()
+}
+
+export function mapPriorityToApi(priorityKey) {
+  return KEY_TO_PRIORITY[priorityKey] ?? String(priorityKey || 'MEDIUM').toUpperCase()
 }
 
 export function formatTimeLabel(iso) {
@@ -46,18 +58,71 @@ function pickAvatarPalette(seed) {
 function messageContent(raw) {
   if (!raw) return ''
   if (raw.messageType && raw.messageType !== 'TEXT') {
-    return raw.content || '[Đính kèm]'
+    const firstAttachment = Array.isArray(raw.attachments) ? raw.attachments[0] : null
+    return raw.content || raw.attachmentName || firstAttachment?.name || '[Đính kèm]'
   }
   return raw.content ?? ''
+}
+
+function mapAttachment(raw = {}) {
+  const url = raw.attachmentUrl || raw.mediaUrl || raw.fileUrl || raw.url || ''
+  const name = raw.attachmentName || raw.fileName || raw.name || ''
+  const mime = raw.attachmentType || raw.contentType || raw.mimeType || ''
+  const type = raw.type || raw.messageType || ''
+  if (!url && !name && !raw.mediaId && !raw.fileId) return null
+  return {
+    url,
+    name: name || (type === 'IMAGE' ? 'Ảnh đính kèm' : 'Tệp đính kèm'),
+    mime,
+    size: raw.attachmentSize || raw.sizeBytes || raw.fileSize || 0,
+    mediaId: raw.mediaId || '',
+    fileId: raw.fileId || null,
+    isImage: String(type).toUpperCase() === 'IMAGE' || String(mime).startsWith('image/'),
+  }
+}
+
+function mapAttachments(raw = {}) {
+  const source = Array.isArray(raw.attachments)
+    ? raw.attachments
+    : typeof raw.attachments === 'string'
+      ? safeParseAttachments(raw.attachments)
+      : []
+  const mapped = source
+    .map((item) => mapAttachment({
+      attachmentUrl: item.url,
+      attachmentName: item.name,
+      attachmentType: item.type,
+      attachmentSize: item.size,
+      mediaId: item.mediaId,
+      messageType: item.isImage ? 'IMAGE' : raw.messageType,
+      ...item,
+    }))
+    .filter(Boolean)
+
+  if (mapped.length) return mapped
+  const single = mapAttachment(raw)
+  return single ? [single] : []
+}
+
+function safeParseAttachments(value) {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
 }
 
 export function mapMessageToCustomer(raw, buyerId) {
   const senderId = Number(raw.senderId)
   const role = senderId === Number(buyerId) ? 'user' : 'assistant'
+  const attachments = mapAttachments(raw)
   return {
     id: raw.id ?? raw.messageId ?? `msg-${Date.now()}`,
     role,
     content: messageContent(raw),
+    attachment: attachments[0] || null,
+    attachments,
     products: [],
     createdAt: raw.createdAt ?? new Date().toISOString(),
     clientTempId: raw.clientTempId,
@@ -66,12 +131,16 @@ export function mapMessageToCustomer(raw, buyerId) {
 }
 
 export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } = {}) {
+  const attachments = mapAttachments(raw)
   if (raw.isInternal) {
     return {
       id: raw.id ?? raw.messageId,
       type: 'note',
       text: messageContent(raw),
+      attachment: attachments[0] || null,
+      attachments,
       time: formatTimeLabel(raw.createdAt),
+      createdAt: raw.createdAt ?? new Date().toISOString(),
       senderName: staffName || `Admin #${raw.senderId}`,
     }
   }
@@ -83,7 +152,10 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
     id: raw.id ?? raw.messageId,
     type: isCustomer ? 'customer' : 'admin',
     text: messageContent(raw),
+    attachment: attachments[0] || null,
+    attachments,
     time: formatTimeLabel(raw.createdAt),
+    createdAt: raw.createdAt ?? new Date().toISOString(),
     senderName: isCustomer ? `Khách #${buyerId}` : staffName || `Admin #${staffId}`,
     senderRole: isCustomer ? undefined : 'AD',
   }
@@ -93,6 +165,7 @@ export function mapConversationToAdminList(raw) {
   const buyerId = raw.buyerId
   const palette = pickAvatarPalette(buyerId)
   const name = raw.buyerName || `Khách #${buyerId}`
+  const avatarUrl = raw.buyerAvatarUrl || raw.avatarUrl || raw.buyer?.avatarUrl || ''
   const initials = name
     .split(/\s+/)
     .map((w) => w[0])
@@ -104,11 +177,15 @@ export function mapConversationToAdminList(raw) {
     id: raw.id,
     buyerId,
     staffId: raw.staffId ?? raw.assignedAdminId ?? null,
+    assignedAdminId: raw.assignedAdminId ?? raw.staffId ?? null,
+    assigneeName: raw.assigneeName ?? raw.staffName ?? raw.assignedAdminName ?? '',
+    assigneeRole: raw.assigneeRole ?? raw.staffRole ?? '',
     name,
     av: initials || 'KH',
+    avatarUrl,
     ...palette,
     status: raw.status || 'OPEN',
-    statusKey: STATUS_TO_KEY[raw.status] ?? 'pending',
+    statusKey: STATUS_TO_KEY[raw.status || 'OPEN'] ?? 'pending',
     online: 'online-away',
     onlinePill: 'pill-away',
     pillText: 'Hỗ trợ',
@@ -116,9 +193,13 @@ export function mapConversationToAdminList(raw) {
     priority: PRIORITY_TO_UI[raw.priority] ?? 'medium',
     vip: false,
     isAi: false,
-    unread: Boolean(raw.unread ?? raw.hasUnread),
+    unreadCount: 0,
+    unread: false,
     lastMessage: raw.lastMessageContent || '',
     preview: raw.lastMessageContent || '',
+    lastSenderId: raw.senderId ?? raw.lastSenderId ?? null,
+    lastMessageId: raw.messageId ?? raw.lastMessageId ?? null,
+    closedAt: raw.closedAt ?? null,
     createdAt: raw.createdAt,
     updatedAt: raw.updatedAt,
     channel: raw.channel || 'SUPPORT',

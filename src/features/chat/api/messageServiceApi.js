@@ -1,4 +1,4 @@
-import { apiClient } from '@/shared/lib/api/client'
+import { apiClient } from '@/shared/lib/api'
 
 const PREFIX = '/messages'
 
@@ -37,7 +37,19 @@ export async function getConversation(conversationId) {
 }
 
 export async function getAdminInbox(params = {}) {
-  const res = await apiClient.get(msUrl('/conversation/admin/inbox'), { params })
+  const queryParts = []
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '') continue
+    if (Array.isArray(v)) {
+      v.forEach(item => {
+        queryParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(item)}`)
+      })
+    } else {
+      queryParts.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`)
+    }
+  }
+  const queryString = queryParts.length > 0 ? `?${queryParts.join('&')}` : ''
+  const res = await apiClient.get(`${msUrl('/conversation/admin/inbox')}${queryString}`)
   return unwrapMessageService(res)
 }
 
@@ -45,6 +57,19 @@ export async function getMessages({ conversationId, page = 0, size = 50, include
   const res = await apiClient.get(msUrl('/message'), {
     params: {
       conversationID: conversationId,
+      page,
+      size,
+      ...(includeInternal ? { includeInternal: true } : {}),
+    },
+  })
+  return unwrapMessageService(res)
+}
+
+export async function searchMessages({ conversationId, query, page = 0, size = 20, includeInternal = false } = {}) {
+  const res = await apiClient.get(msUrl('/message/search'), {
+    params: {
+      conversationID: conversationId,
+      query,
       page,
       size,
       ...(includeInternal ? { includeInternal: true } : {}),

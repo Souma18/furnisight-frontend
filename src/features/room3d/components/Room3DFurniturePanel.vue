@@ -1,8 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import AppToast from '@shared/ui/AppToast.vue'
-import { useAppToast } from '@shared/composables/useAppToast'
+import { useToast } from '@shared/composables/useToast'
 import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
@@ -51,7 +50,7 @@ const emit = defineEmits([
 
 const PRESET_COLORS = ['#ffffff', '#333333', '#888888', '#8b5a2b', '#0f3f5c', '#d8aa56']
 const { t } = useI18n()
-const { toastMessage, showToast, notify } = useAppToast()
+const { show: showToast } = useToast()
 
 const variants = computed(() => props.selectedProduct?.variants || [])
 
@@ -67,7 +66,7 @@ const currentVariant = computed(() => {
 
 function pickVariant(variant) {
   if (!variant.supports3d && !variant.modelUrl) {
-    notify('Phiên bản này chưa có mô hình 3D.')
+    showToast('Phiên bản này chưa có mô hình 3D.', 'error')
     return
   }
   if (currentVariant.value?.id !== variant.id) {
@@ -136,7 +135,6 @@ function pickVariant(variant) {
         </button>
       </div>
     </div>
-    <AppToast :show="showToast" :message="toastMessage" />
   </div>
 </template>
 

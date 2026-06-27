@@ -3,15 +3,21 @@ import { ADMIN_PERMISSION_OPTIONS } from '../../config/adminPermissions'
 
 const model = defineModel({ type: Array, default: () => [] })
 
+function normalizePermission(value) {
+  return String(value ?? '').trim().replace(/-/g, '_').toUpperCase()
+}
+
 function toggle(id) {
-  const set = new Set(model.value)
-  if (set.has(id)) set.delete(id)
-  else set.add(id)
+  const normalizedId = normalizePermission(id)
+  const set = new Set((model.value || []).map(normalizePermission).filter(Boolean))
+  if (set.has(normalizedId)) set.delete(normalizedId)
+  else set.add(normalizedId)
   model.value = [...set]
 }
 
 function isChecked(id) {
-  return model.value.includes(id)
+  const normalizedId = normalizePermission(id)
+  return (model.value || []).some((value) => normalizePermission(value) === normalizedId)
 }
 </script>
 

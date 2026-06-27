@@ -109,11 +109,12 @@ class UsersApi {
   /**
    * Updates a user's role (Admin only)
    * @param {string} userId 
-   * @param {string} role 
+   * @param {string} roleId
+   * @param {string} [action]
    * @returns {Promise<import('axios').AxiosResponse<import('./users.model').UserResponse>>}
    */
-  updateUserRole(userId, role) {
-    return apiClient.put(`/admin/users/${userId}/role`, { role })
+  updateUserRole(userId, roleId, action = 'ASSIGN') {
+    return apiClient.put(`/admin/users/${userId}/role`, { roleId, action })
   }
   
   /**

@@ -84,6 +84,15 @@ function normalizeCode(code, status) {
   return 'UNKNOWN_ERROR'
 }
 
+function pickServerMessage(data, error) {
+  if (typeof data?.message === 'string') return data.message
+  if (typeof data?.detail === 'string') return data.detail
+  if (typeof data?.error === 'string') return data.error
+  if (typeof data?.error?.message === 'string') return data.error.message
+  if (typeof data?.errors?.[0]?.message === 'string') return data.errors[0].message
+  return error?.message
+}
+
 function statusCodeToCode(status) {
   const codeByStatus = {
     400: 'BAD_REQUEST',
@@ -106,11 +115,12 @@ function isTechnicalMessage(message) {
 }
 
 function pickFriendlyMessage({ code, status, serverMessage, fallbackMessage }) {
-  if (MESSAGE_BY_CODE[code]) return MESSAGE_BY_CODE[code]
-  if (MESSAGE_BY_STATUS[status]) return MESSAGE_BY_STATUS[status]
-
   const trimmed = typeof serverMessage === 'string' ? serverMessage.trim() : ''
   if (trimmed && !isTechnicalMessage(trimmed)) return trimmed
+
+  if (MESSAGE_BY_CODE[code]) return MESSAGE_BY_CODE[code]
+
+  if (MESSAGE_BY_STATUS[status]) return MESSAGE_BY_STATUS[status]
 
   return fallbackMessage || GENERIC_ERROR_MESSAGE
 }
@@ -134,7 +144,7 @@ export function normalizeApiError(error, fallbackMessage) {
   }
 
   const code = normalizeCode(data.code, status)
-  const serverMessage = data.message || data.detail || data.error
+  const serverMessage = pickServerMessage(data, error)
   const message = pickFriendlyMessage({
     code,
     status,

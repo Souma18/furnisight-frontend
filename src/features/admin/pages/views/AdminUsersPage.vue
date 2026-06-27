@@ -19,7 +19,6 @@ const deleteTarget = ref(null)
 const deletingUser = ref(false)
 const columns = [
   { key: 'stt', label: 'STT' }, { key: 'name', label: 'Người dùng' }, { key: 'email', label: 'Email' },
-  { key: 'role', label: 'Vai trò' }, { key: 'orders', label: 'Đơn hàng' },
   { key: 'statusLabel', label: 'Trạng thái' }, { key: 'createdAt', label: 'Ngày tạo' }, { key: 'actions', label: 'Hành động' },
 ]
 
@@ -127,7 +126,6 @@ async function confirmDeleteUser() {
   <AdminFilterBar v-model:search="search" placeholder="Tìm theo tên hoặc email..." />
   <AdminDataTable :columns="columns" :rows="userRows">
     <template #cell-name="{ row }"><div class="flex-cell"><div class="av" :class="`av-${row.avTone}`">{{ row.av }}</div><div class="cell-name">{{ row.name }}</div></div></template>
-    <template #cell-role="{ row }"><span class="badge" :class="row.role === 'Admin' ? 'b-gold' : 'b-navy'">{{ row.role }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="isBlocked(row) ? 'b-cancel' : 'b-success'">{{ userStatusLabel(row) }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">

@@ -1,8 +1,7 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import AppToast from '@shared/ui/AppToast.vue'
-import { useAppToast } from '@shared/composables/useAppToast'
+import { useToast } from '@shared/composables/useToast'
 
 const props = defineProps({
   product: { type: Object, required: true },
@@ -32,7 +31,7 @@ const emit = defineEmits([
   'go-room3d',
 ])
 
-const { toastMessage, showToast, notify } = useAppToast()
+const { show: showToast } = useToast()
 
 const isOutOfStock = computed(() => props.selectedOutOfStock || Number(props.selectedStock || 0) <= 0)
 const cannotIncrease = computed(() => Number(props.qty || 1) >= Number(props.selectedStock || 0))
@@ -98,7 +97,7 @@ function handleOpen3D() {
   }) || variants.value.find((v) => !props.selectedColor || v.color === props.selectedColor) || variants.value[0]
 
   if (matched && !matched.supports3d && !matched.modelUrl) {
-    notify('Phiên bản này chưa có mô hình 3D.')
+    showToast('Phiên bản này chưa có mô hình 3D.')
     return
   }
   emit('open-3d')
@@ -252,7 +251,5 @@ function handleOpen3D() {
         </div>
       </div>
     </aside>
-
-    <AppToast :show="showToast" :message="toastMessage" />
   </div>
 </template>

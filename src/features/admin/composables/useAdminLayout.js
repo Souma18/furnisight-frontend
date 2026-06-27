@@ -78,7 +78,7 @@ async function loadNavBadges() {
     if (inboxResult.status === 'fulfilled') {
       const conversations = normalizeConversationList(inboxResult.value)
       nextBadges.conversations = formatBadgeCount(
-        conversations.filter((item) => Boolean(item.unread ?? item.hasUnread)).length,
+        conversations.filter((item) => normalizeStatus(item.status) === 'open').length,
       )
     }
 

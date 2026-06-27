@@ -20,6 +20,10 @@ class AdminApi {
     return apiClient.put(`/admin/users/${id}`, payload)
   }
 
+  updateAdminUserRole(id, roleId, action = 'ASSIGN') {
+    return apiClient.put(`/admin/users/${id}/role`, { roleId, action })
+  }
+
   updateAdminUserStatus(id, status) {
     return apiClient.patch(`/admin/users/${id}/status`, { status })
   }
