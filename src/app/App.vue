@@ -10,6 +10,7 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useThemeStore } from '@shared/stores/themeStore'
 import { useLocaleStore } from '@shared/stores/localeStore'
+import AppToast from '@shared/ui/AppToast.vue'
 
 const ChatWidget = defineAsyncComponent(() => import('@features/chat/components/ChatWidget.vue'))
 
@@ -202,6 +203,7 @@ onBeforeUnmount(() => {
       @close="closeAuthModal"
       @authenticated="onAuthSuccess"
     />
+    <AppToast />
   </div>
 </template>
 

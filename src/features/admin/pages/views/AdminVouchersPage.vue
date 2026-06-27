@@ -27,7 +27,7 @@ import { useAdminCombos } from '../../composables/useAdminCombos'
 import { useAdminNotifications } from '../../composables/useAdminNotifications'
 import { useAdminTemplates } from '../../composables/useAdminTemplates'
 import { useAdminPromotionShell } from '../../composables/useAdminPromotionShell'
-import { useAdminPromotionToast } from '../../composables/useAdminPromotionToast'
+import { useToast } from '@shared/composables/useToast'
 import { useAdminPromotionUsers } from '../../composables/useAdminPromotionUsers'
 import { useAdminVouchers } from '../../composables/useAdminVouchers'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
@@ -36,7 +36,7 @@ import AdminVoucherForm from '../../components/promotion/AdminVoucherForm.vue'
 const tabs = ADMIN_PROMOTION_TABS
 const loading = ref(false)
 const saving = ref(false)
-const { toast, notify } = useAdminPromotionToast()
+const { show: notify } = useToast()
 const { users, loadUsersForTarget } = useAdminPromotionUsers({ notify })
 
 const filters = reactive(createAdminPromotionFilters())
@@ -836,17 +836,6 @@ const {
       @close="closeComboDelete"
       @confirm="confirmComboDelete"
     />
-
-    <div
-      v-if="toast.message"
-      class="mc-toast"
-      :class="`mc-toast--${toast.type}`"
-      role="status"
-      aria-live="polite"
-    >
-      <AppIcon :name="toast.type === 'error' ? 'alert' : toast.type === 'success' ? 'check' : 'info'" :size="16" />
-      {{ toast.message }}
-    </div>
   </div>
 </template>
 

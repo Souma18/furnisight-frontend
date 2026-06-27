@@ -4,7 +4,16 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
 import { useAdminUiStore } from '../../store/adminUiStore'
 import { useAuthStore } from '@features/auth/store/authStore'
-import { mediaApi } from '@shared/lib/api/services'
+import { uploadChatAttachment } from '../../lib/chatAttachmentUpload'
+import { formatChatError } from '@features/chat/lib/chatErrorMessages'
+import {
+  DOCUMENT_FILE_ACCEPT,
+  chatAttachmentFormatError,
+  chatAttachmentSizeError,
+  isAllowedChatDocument,
+  isAllowedChatAttachmentSize,
+  isAllowedChatImage,
+} from '@features/chat/lib/chatAttachmentRules'
 
 const props = defineProps({
   templateMgr: {
@@ -25,7 +34,7 @@ const messageText = ref('')
 const inputWrapClasses = ref('')
 const fileInputRef = ref(null)
 const imageInputRef = ref(null)
-const selectedAttachment = ref(null)
+const selectedAttachments = ref([])
 const uploadingAttachment = ref(false)
 
 function updateInputMode() {
@@ -37,19 +46,14 @@ watch(() => store.workspace.msgType, updateInputMode)
 
 watch(() => store.workspace.convId, () => {
   messageText.value = ''
-  clearAttachment()
+  clearAttachments()
 })
 
-// EXPOSE method to parent to insert template explicitly without hidden mutation via watch
 function insertTemplate(text) {
   messageText.value = text
   store.setMsgType('reply')
 }
 defineExpose({ insertTemplate })
-
-function isUuid(value) {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(String(value || ''))
-}
 
 function formatBytes(bytes = 0) {
   if (!bytes) return ''
@@ -67,68 +71,103 @@ function chooseImage() {
 }
 
 function onAttachmentSelected(event, forceImage = false) {
-  const file = event.target.files?.[0]
+  const files = Array.from(event.target.files || [])
   event.target.value = ''
-  if (!file) return
+  if (!files.length) return
 
-  clearAttachment()
-  const isImage = forceImage || file.type.startsWith('image/')
-  selectedAttachment.value = {
-    file,
-    name: file.name,
-    type: file.type || 'application/octet-stream',
-    size: file.size,
-    isImage,
-    previewUrl: isImage ? URL.createObjectURL(file) : '',
+  const oversizedFiles = files.filter((file) => !isAllowedChatAttachmentSize(file))
+  if (oversizedFiles.length) {
+    uiStore.showToast({
+      icon: 'alert',
+      title: 'Tệp quá lớn',
+      subtitle: chatAttachmentSizeError(),
+    })
+    return
   }
+
+  const acceptedFiles = forceImage
+    ? files.filter(isAllowedChatImage)
+    : files.filter(isAllowedChatDocument)
+
+  if (!acceptedFiles.length) {
+    uiStore.showToast({
+      icon: 'alert',
+      title: 'File không được hỗ trợ',
+      subtitle: chatAttachmentFormatError(forceImage ? 'image' : 'file'),
+    })
+    return
+  }
+
+  const nextAttachments = files
+    .filter((file) => acceptedFiles.includes(file))
+    .map((file) => {
+      const isImage = forceImage || file.type.startsWith('image/')
+      return {
+        id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(36).slice(2)}`,
+        file,
+        name: file.name,
+        type: file.type || 'application/octet-stream',
+        size: file.size,
+        isImage,
+        previewUrl: isImage ? URL.createObjectURL(file) : '',
+      }
+    })
+
+  selectedAttachments.value = [...selectedAttachments.value, ...nextAttachments]
 }
 
-function clearAttachment() {
-  if (selectedAttachment.value?.previewUrl) {
-    URL.revokeObjectURL(selectedAttachment.value.previewUrl)
+function removeAttachment(id) {
+  const removed = selectedAttachments.value.find((item) => item.id === id)
+  if (removed?.previewUrl) {
+    URL.revokeObjectURL(removed.previewUrl)
   }
-  selectedAttachment.value = null
+  selectedAttachments.value = selectedAttachments.value.filter((item) => item.id !== id)
 }
 
-async function uploadAttachment() {
-  if (!selectedAttachment.value?.file) return null
-  const ownerId = authStore.user?.id || authStore.user?.accountId
-  if (!isUuid(ownerId)) {
-    throw new Error('Không xác định được tài khoản để tải tệp lên.')
-  }
-
-  const uploaded = await mediaApi.uploadDirect(selectedAttachment.value.file, {
-    ownerType: 'CHAT',
-    ownerId,
+function clearAttachments() {
+  selectedAttachments.value.forEach((item) => {
+    if (item.previewUrl) URL.revokeObjectURL(item.previewUrl)
   })
-  return {
-    mediaId: uploaded.mediaId || uploaded.id || '',
-    url: uploaded.secureUrl || uploaded.secure_url || uploaded.url || '',
-    name: selectedAttachment.value.name,
-    type: selectedAttachment.value.type,
-    size: selectedAttachment.value.size,
-    isImage: selectedAttachment.value.isImage,
-  }
+  selectedAttachments.value = []
+}
+
+async function uploadAttachments() {
+  if (!selectedAttachments.value.length) return []
+  return Promise.all(selectedAttachments.value.map(async (attachment) => {
+    const uploaded = await uploadChatAttachment(attachment.file, authStore)
+    return {
+      mediaId: uploaded.mediaId || uploaded.id || '',
+      url: uploaded.secureUrl || uploaded.secure_url || uploaded.url || '',
+      name: attachment.name,
+      type: attachment.type,
+      size: attachment.size,
+      isImage: attachment.isImage,
+    }
+  }))
 }
 
 async function sendMsg() {
-  if (!messageText.value.trim() && !selectedAttachment.value) return
+  if (!messageText.value.trim() && !selectedAttachments.value.length) return
 
   const text = messageText.value
   const type = store.workspace.msgType
   uploadingAttachment.value = true
   try {
-    const attachment = await uploadAttachment()
+    const attachments = await uploadAttachments()
     messageText.value = ''
-    clearAttachment()
+    clearAttachments()
 
     if (type === 'note') {
-      await store.sendInternalNote(text, attachment)
+      await store.sendInternalNote(text, attachments)
     } else {
-      await store.sendCustomerReply(text, attachment)
+      await store.sendCustomerReply(text, attachments)
     }
   } catch (error) {
-    uiStore.showToast({ icon: 'alert', title: 'Không thể gửi đính kèm', subtitle: error.message || '' })
+    uiStore.showToast({
+      icon: 'alert',
+      title: 'Không thể gửi đính kèm',
+      subtitle: formatChatError(error, 'Không tải được tệp lên. Vui lòng thử lại.'),
+    })
     console.error('[WorkspaceInputArea] attachment send failed', error)
   } finally {
     uploadingAttachment.value = false
@@ -163,31 +202,49 @@ function handleKeydown(e) {
     </div>
 
     <div class="cw-toolbar">
-      <input ref="fileInputRef" type="file" class="cw-file-input" @change="(e) => onAttachmentSelected(e, false)" />
-      <input ref="imageInputRef" type="file" class="cw-file-input" accept="image/*" @change="(e) => onAttachmentSelected(e, true)" />
+      <input
+        ref="fileInputRef"
+        type="file"
+        class="cw-file-input"
+        :accept="DOCUMENT_FILE_ACCEPT"
+        multiple
+        @change="(e) => onAttachmentSelected(e, false)"
+      />
+      <input ref="imageInputRef" type="file" class="cw-file-input" accept="image/*" multiple @change="(e) => onAttachmentSelected(e, true)" />
       <button class="cw-tool-btn" title="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile"><AppIcon name="paperclip" /></button>
       <button class="cw-tool-btn" title="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage"><AppIcon name="image" /></button>
       <div class="cw-tool-sep"></div>
-      <button class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" @click="emit('open-products')">
+      <button class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" :disabled="uploadingAttachment" @click="emit('open-products')">
         <AppIcon name="armchair" />
       </button>
-      <button class="cw-tool-btn" title="Chọn template (mở danh sách)" @click="emit('open-templates')">
+      <button class="cw-tool-btn" title="Chọn template (mở danh sách)" :disabled="uploadingAttachment" @click="emit('open-templates')">
         <AppIcon name="fileText" />
       </button>
-      <button class="cw-tool-btn" title="Chèn Emoji"><AppIcon name="smile" /></button>
+      <button class="cw-tool-btn" title="Chèn Emoji" :disabled="uploadingAttachment"><AppIcon name="smile" /></button>
     </div>
 
     <div class="cw-input-area-wrap">
-      <div v-if="selectedAttachment" class="cw-attachment-preview">
-        <img v-if="selectedAttachment.isImage" :src="selectedAttachment.previewUrl" alt="" class="cw-attachment-thumb" />
-        <div v-else class="cw-attachment-file"><AppIcon name="paperclip" /></div>
-        <div class="cw-attachment-meta">
-          <div class="cw-attachment-name">{{ selectedAttachment.name }}</div>
-          <div class="cw-attachment-size">{{ formatBytes(selectedAttachment.size) }}</div>
+      <div v-if="selectedAttachments.length" class="cw-attachment-list" :class="{ uploading: uploadingAttachment }">
+        <div
+          v-for="attachment in selectedAttachments"
+          :key="attachment.id"
+          class="cw-attachment-preview"
+          :class="{ uploading: uploadingAttachment }"
+        >
+          <img v-if="attachment.isImage" :src="attachment.previewUrl" alt="" class="cw-attachment-thumb" />
+          <div v-else class="cw-attachment-file"><AppIcon name="paperclip" /></div>
+          <div class="cw-attachment-meta">
+            <div class="cw-attachment-name">{{ attachment.name }}</div>
+            <div class="cw-attachment-size">
+              {{ uploadingAttachment ? 'Đang tải lên...' : formatBytes(attachment.size) }}
+            </div>
+          </div>
+          <div v-if="uploadingAttachment" class="cw-upload-spinner" aria-hidden="true"></div>
+          <button type="button" class="cw-attachment-remove" title="Bỏ đính kèm" :disabled="uploadingAttachment" @click="removeAttachment(attachment.id)">
+            <AppIcon name="x" />
+          </button>
+          <div v-if="uploadingAttachment" class="cw-upload-bar" aria-hidden="true"></div>
         </div>
-        <button type="button" class="cw-attachment-remove" title="Bỏ đính kèm" @click="clearAttachment">
-          <AppIcon name="x" />
-        </button>
       </div>
       <div class="cw-input-row">
         <div class="cw-input-wrap" :class="inputWrapClasses">
@@ -200,11 +257,13 @@ function handleKeydown(e) {
             "
             @keydown="handleKeydown"
             rows="1"
+            :disabled="uploadingAttachment"
           ></textarea>
           <div class="cw-char-count">{{ messageText.length }}</div>
         </div>
         <button class="cw-send-btn" @click="sendMsg" title="Gửi (Enter)" :disabled="uploadingAttachment">
-          <AppIcon :name="uploadingAttachment ? 'loader' : 'send'" />
+          <span v-if="uploadingAttachment" class="cw-send-spinner" aria-hidden="true"></span>
+          <AppIcon v-else name="send" />
         </button>
       </div>
 

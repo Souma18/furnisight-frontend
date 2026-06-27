@@ -2,12 +2,23 @@
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
+import { downloadChatAttachment } from '@features/chat/lib/chatAttachmentDownload'
 
 const store = useAdminConversationStore()
 const messages = computed(() => store.workspace.messages)
 const currentAdmin = computed(() => store.currentAdmin)
 const closedLine = computed(() => formatClosedLine(store.currentConv?.closedAt))
 const timelineItems = computed(() => insertClosedLine(messages.value, store.currentConv?.closedAt, closedLine.value))
+const searchState = computed(() => store.workspace.search || {
+  visible: false,
+  query: '',
+  resultIds: [],
+  activeIndex: -1,
+})
+const activeSearchMessageId = computed(() => {
+  const search = searchState.value
+  return search.resultIds[search.activeIndex] || null
+})
 
 const timelineRef = ref(null)
 
@@ -16,6 +27,12 @@ function formatBytes(bytes = 0) {
   if (bytes < 1024) return `${bytes} B`
   if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
+
+function handleAttachmentClick(event, attachment) {
+  if (attachment?.isImage) return
+  event.preventDefault()
+  downloadChatAttachment(attachment)
 }
 
 function formatClosedLine(value) {
@@ -59,11 +76,30 @@ function insertClosedLine(items, closedAt, label) {
 }
 
 function scrollToBottom() {
+  if (activeSearchMessageId.value) return
   nextTick(() => {
     if (timelineRef.value) {
       timelineRef.value.scrollTop = timelineRef.value.scrollHeight
     }
   })
+}
+
+function scrollToSearchResult() {
+  const activeId = activeSearchMessageId.value
+  if (!activeId) return
+
+  nextTick(() => {
+    const node = timelineRef.value?.querySelector(`[data-message-id="${activeId}"]`)
+    node?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+  })
+}
+
+function isSearchHit(id) {
+  return searchState.value.resultIds.includes(id)
+}
+
+function isActiveSearchHit(id) {
+  return activeSearchMessageId.value === id
 }
 
 watch(() => store.workspace.convId, () => {
@@ -78,6 +114,10 @@ watch(
   { deep: true },
 )
 
+watch(activeSearchMessageId, () => {
+  scrollToSearchResult()
+})
+
 onMounted(() => {
   scrollToBottom()
 })
@@ -90,7 +130,15 @@ onMounted(() => {
 
     <template v-for="msg in timelineItems" :key="msg.id">
     <div v-if="msg.type === 'closed-line'" class="tl-date-sep tl-date-sep--closed">{{ msg.text }}</div>
-    <div v-else class="tl-msg-row" :class="`msg-${msg.type}`">
+    <div
+      v-else
+      class="tl-msg-row"
+      :class="[`msg-${msg.type}`, {
+        'tl-msg-row--search-hit': isSearchHit(msg.id),
+        'tl-msg-row--search-active': isActiveSearchHit(msg.id),
+      }]"
+      :data-message-id="msg.id"
+    >
       <template v-if="msg.type === 'customer'">
         <div
           class="tl-av"
@@ -103,14 +151,25 @@ onMounted(() => {
         <div class="tl-msg-group">
           <div class="tl-bubble customer">
             <div v-if="msg.text">{{ msg.text }}</div>
-            <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
-              <img :src="msg.attachment.url" :alt="msg.attachment.name" />
-            </a>
-            <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
-              <AppIcon name="paperclip" />
-              <span>{{ msg.attachment.name }}</span>
-              <small>{{ formatBytes(msg.attachment.size) }}</small>
-            </a>
+            <div v-if="msg.attachments?.length" class="tl-attachment-list">
+              <a
+                v-for="attachment in msg.attachments"
+                :key="attachment.mediaId || attachment.url || attachment.name"
+                :href="attachment.url || '#'"
+                target="_blank"
+                rel="noreferrer"
+                :download="!attachment.isImage ? attachment.name : undefined"
+                :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
+                @click="handleAttachmentClick($event, attachment)"
+              >
+                <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+                <template v-else>
+                  <AppIcon name="paperclip" />
+                  <span>{{ attachment.name }}</span>
+                  <small>{{ formatBytes(attachment.size) }}</small>
+                </template>
+              </a>
+            </div>
           </div>
           <div class="tl-msg-meta">{{ msg.time }}</div>
         </div>
@@ -120,14 +179,25 @@ onMounted(() => {
         <div class="tl-msg-group">
           <div class="tl-bubble admin">
             <div v-if="msg.text">{{ msg.text }}</div>
-            <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
-              <img :src="msg.attachment.url" :alt="msg.attachment.name" />
-            </a>
-            <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
-              <AppIcon name="paperclip" />
-              <span>{{ msg.attachment.name }}</span>
-              <small>{{ formatBytes(msg.attachment.size) }}</small>
-            </a>
+            <div v-if="msg.attachments?.length" class="tl-attachment-list">
+              <a
+                v-for="attachment in msg.attachments"
+                :key="attachment.mediaId || attachment.url || attachment.name"
+                :href="attachment.url || '#'"
+                target="_blank"
+                rel="noreferrer"
+                :download="!attachment.isImage ? attachment.name : undefined"
+                :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
+                @click="handleAttachmentClick($event, attachment)"
+              >
+                <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+                <template v-else>
+                  <AppIcon name="paperclip" />
+                  <span>{{ attachment.name }}</span>
+                  <small>{{ formatBytes(attachment.size) }}</small>
+                </template>
+              </a>
+            </div>
           </div>
           <div class="tl-msg-meta">
             <span>{{ msg.time }}</span> <AppIcon name="checkCheck" :size="11" class="read" />
@@ -146,14 +216,25 @@ onMounted(() => {
             <AppIcon name="lock" /> Ghi chú nội bộ - {{ msg.senderName || currentAdmin.name }}
           </div>
           <div v-if="msg.text">{{ msg.text }}</div>
-          <a v-if="msg.attachment?.isImage && msg.attachment.url" :href="msg.attachment.url" target="_blank" rel="noreferrer" class="tl-attachment-image">
-            <img :src="msg.attachment.url" :alt="msg.attachment.name" />
-          </a>
-          <a v-else-if="msg.attachment" :href="msg.attachment.url || '#'" target="_blank" rel="noreferrer" class="tl-attachment-file">
-            <AppIcon name="paperclip" />
-            <span>{{ msg.attachment.name }}</span>
-            <small>{{ formatBytes(msg.attachment.size) }}</small>
-          </a>
+          <div v-if="msg.attachments?.length" class="tl-attachment-list">
+            <a
+              v-for="attachment in msg.attachments"
+              :key="attachment.mediaId || attachment.url || attachment.name"
+              :href="attachment.url || '#'"
+              target="_blank"
+              rel="noreferrer"
+              :download="!attachment.isImage ? attachment.name : undefined"
+              :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
+              @click="handleAttachmentClick($event, attachment)"
+            >
+              <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+              <template v-else>
+                <AppIcon name="paperclip" />
+                <span>{{ attachment.name }}</span>
+                <small>{{ formatBytes(attachment.size) }}</small>
+              </template>
+            </a>
+          </div>
         </div>
       </template>
     </div>

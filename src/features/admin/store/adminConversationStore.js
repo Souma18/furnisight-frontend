@@ -3,6 +3,7 @@ import { computed, reactive } from 'vue'
 import {
   getAdminInbox,
   getMessages,
+  searchMessages,
   postMessage,
   postInternalNote,
   patchAssign,
@@ -22,6 +23,7 @@ import {
 import { useAdminUiStore } from './adminUiStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { adminApi } from '@shared/lib/api/services'
+import { formatChatError } from '@features/chat/lib/chatErrorMessages'
 import { ADMIN_SIM_USERS } from '../config/adminLayoutContent'
 import { accountRoleNames, normalizeRoleName } from '../utils/adminAccountRoles'
 
@@ -112,8 +114,35 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     messages: [],
     loading: false,
     detailVisible: true,
-    msgType: 'reply'
+    msgType: 'reply',
+    search: {
+      visible: false,
+      query: '',
+      resultIds: [],
+      activeIndex: -1,
+      total: 0,
+      loading: false,
+      error: '',
+    },
   })
+
+  let conversationSearchTimer = null
+  let conversationSearchRequestSeq = 0
+
+  function ensureConversationSearchState() {
+    if (!workspace.search) {
+      workspace.search = {
+        visible: false,
+        query: '',
+        resultIds: [],
+        activeIndex: -1,
+        total: 0,
+        loading: false,
+        error: '',
+      }
+    }
+    return workspace.search
+  }
 
   const socket = reactive({
     connected: false,
@@ -272,6 +301,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       })
       if (!workspace.messages.some((m) => m.id === mapped.id)) {
         workspace.messages.push(mapped)
+        if (ensureConversationSearchState().query.trim()) performConversationSearch()
         
         // Update inbox preview and move to top
         if (conv) {
@@ -296,6 +326,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       )
       if (!workspace.messages.some((m) => m.id === mapped.id)) {
         workspace.messages.push(mapped)
+        if (ensureConversationSearchState().query.trim()) performConversationSearch()
         
         // Update inbox preview and move to top
         if (conv) {
@@ -494,6 +525,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   async function loadMessages(id = workspace.convId) {
     if (!id) {
       workspace.messages = []
+      resetConversationSearch(false)
       return
     }
 
@@ -513,6 +545,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
           staffName: currentAdmin.value.name,
         }),
       )
+      if (ensureConversationSearchState().query.trim()) performConversationSearch()
 
       connectSocketForConversation(id)
     } catch (error) {
@@ -528,6 +561,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
   async function loadConversation(id) {
     workspace.convId = id
+    resetConversationSearch(ensureConversationSearchState().visible)
     const conv = inbox.items.find((c) => c.id === id)
     if (conv) {
       clearRealtimeUnread(id)
@@ -541,6 +575,139 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
 
   function setMsgType(type) {
     workspace.msgType = type
+  }
+
+  function mergeSearchMessages(items = []) {
+    if (!items.length || !workspace.convId) return
+    const conv = inbox.items.find((c) => c.id === workspace.convId)
+    const existingIds = new Set(workspace.messages.map((message) => message.id))
+    const mappedItems = items
+      .map((message) => mapMessageToAdminTimeline(message, {
+        buyerId: conv?.buyerId,
+        staffId: getStaffId(),
+        staffName: currentAdmin.value.name,
+      }))
+      .filter((message) => !existingIds.has(message.id))
+
+    if (!mappedItems.length) return
+
+    workspace.messages = [...workspace.messages, ...mappedItems].sort(
+      (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime(),
+    )
+  }
+
+  async function performConversationSearch() {
+    const search = ensureConversationSearchState()
+    const query = String(search.query || '').trim()
+    if (!query) {
+      search.resultIds = []
+      search.activeIndex = -1
+      search.total = 0
+      search.loading = false
+      search.error = ''
+      return
+    }
+
+    const requestSeq = ++conversationSearchRequestSeq
+    const previousActiveId = search.resultIds[search.activeIndex]
+    search.loading = true
+    search.error = ''
+
+    try {
+      const page = await searchMessages({
+        conversationId: workspace.convId,
+        query,
+        page: 0,
+        size: 30,
+        includeInternal: true,
+      })
+      if (requestSeq !== conversationSearchRequestSeq) return
+
+      const items = normalizeMessagePage(page)
+      mergeSearchMessages(items)
+
+      const resultIds = items.map((message) => message.id ?? message.messageId).filter(Boolean)
+      search.resultIds = resultIds
+      search.total = Number(page?.totalElements ?? page?.total ?? resultIds.length) || 0
+
+      if (!resultIds.length) {
+        search.activeIndex = -1
+        return
+      }
+
+      const previousIndex = resultIds.indexOf(previousActiveId)
+      search.activeIndex = previousIndex >= 0 ? previousIndex : 0
+    } catch (error) {
+      if (requestSeq !== conversationSearchRequestSeq) return
+      search.resultIds = []
+      search.activeIndex = -1
+      search.total = 0
+      search.error = error.message || 'Không tìm được tin nhắn'
+    } finally {
+      if (requestSeq === conversationSearchRequestSeq) {
+        search.loading = false
+      }
+    }
+  }
+
+  function resetConversationSearch(keepVisible = false) {
+    const search = ensureConversationSearchState()
+    search.visible = Boolean(keepVisible)
+    search.query = ''
+    search.resultIds = []
+    search.activeIndex = -1
+    search.total = 0
+    search.loading = false
+    search.error = ''
+  }
+
+  function toggleConversationSearch() {
+    const search = ensureConversationSearchState()
+    search.visible = !search.visible
+    if (!search.visible) {
+      resetConversationSearch(false)
+    }
+  }
+
+  function closeConversationSearch() {
+    resetConversationSearch(false)
+  }
+
+  function setConversationSearchQuery(query) {
+    const search = ensureConversationSearchState()
+    search.query = query
+    search.visible = Boolean(String(query || '').trim())
+    if (conversationSearchTimer) {
+      clearTimeout(conversationSearchTimer)
+      conversationSearchTimer = null
+    }
+    if (!search.visible) {
+      conversationSearchRequestSeq += 1
+      search.resultIds = []
+      search.activeIndex = -1
+      search.total = 0
+      search.loading = false
+      search.error = ''
+      return
+    }
+    search.loading = true
+    conversationSearchTimer = setTimeout(() => {
+      performConversationSearch()
+    }, 250)
+  }
+
+  function goToNextConversationSearchResult() {
+    const search = ensureConversationSearchState()
+    const total = search.resultIds.length
+    if (!total) return
+    search.activeIndex = (search.activeIndex + 1 + total) % total
+  }
+
+  function goToPrevConversationSearchResult() {
+    const search = ensureConversationSearchState()
+    const total = search.resultIds.length
+    if (!total) return
+    search.activeIndex = (search.activeIndex - 1 + total) % total
   }
 
   function currentAdminRank() {
@@ -731,6 +898,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     )
     if (!workspace.messages.some((m) => m.id === mapped.id)) {
       workspace.messages.push(mapped)
+      if (ensureConversationSearchState().query.trim()) performConversationSearch()
       
       // Update inbox preview
       if (conv) {
@@ -741,35 +909,72 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     }
   }
 
+  function normalizeOutgoingAttachments(attachments = []) {
+    if (!attachments) return []
+    return Array.isArray(attachments) ? attachments.filter(Boolean) : [attachments].filter(Boolean)
+  }
+
+  function buildAttachmentPayload(attachments = []) {
+    const list = normalizeOutgoingAttachments(attachments)
+    const first = list[0] || null
+    const allImages = list.length > 0 && list.every((item) => item.isImage)
+    const allFiles = list.length > 0 && list.every((item) => !item.isImage)
+    const contentFallback = first
+      ? list.length > 1
+        ? allImages ? `${list.length} ảnh` : allFiles ? `${list.length} tệp` : `${list.length} đính kèm`
+        : first.name || 'Đính kèm'
+      : ''
+
+    return {
+      list,
+      first,
+      messageType: list.length ? (allImages ? 'IMAGE' : 'FILE') : 'TEXT',
+      contentFallback,
+      dtoFields: first ? {
+        mediaId: first.mediaId || undefined,
+        attachmentUrl: first.url || undefined,
+        attachmentName: first.name || undefined,
+        attachmentType: first.type || undefined,
+        attachmentSize: first.size || undefined,
+        attachments: list.map((item) => ({
+          mediaId: item.mediaId || '',
+          url: item.url || '',
+          name: item.name || '',
+          type: item.type || '',
+          size: item.size || 0,
+          isImage: Boolean(item.isImage),
+        })),
+      } : {},
+    }
+  }
+
   function _ensureSocketConnected(convId) {
     if (!socket.client?.isConnected?.()) {
       connectSocketForConversation(convId)
     }
   }
 
-  async function sendInternalNote(text, attachment = null) {
+  async function sendInternalNote(text, attachments = []) {
     const trimmed = String(text ?? '').trim()
-    if ((!trimmed && !attachment) || !workspace.convId) return
+    const attachmentPayload = buildAttachmentPayload(attachments)
+    if ((!trimmed && !attachmentPayload.list.length) || !workspace.convId) return
 
     try {
-      const content = trimmed || attachment?.name || 'Đính kèm'
+      const content = trimmed || attachmentPayload.contentFallback || 'Đính kèm'
       const note = await postInternalNote(workspace.convId, {
         senderId: getStaffId(),
         content,
-        messageType: attachment?.isImage ? 'IMAGE' : attachment ? 'FILE' : 'TEXT',
-        mediaId: attachment?.mediaId || undefined,
-        attachmentUrl: attachment?.url || undefined,
-        attachmentName: attachment?.name || undefined,
-        attachmentType: attachment?.type || undefined,
-        attachmentSize: attachment?.size || undefined,
+        messageType: attachmentPayload.messageType,
+        ...attachmentPayload.dtoFields,
       })
       _appendMessageToTimeline({
         ...note,
-        attachmentUrl: note?.attachmentUrl || attachment?.url,
-        attachmentName: note?.attachmentName || attachment?.name,
-        attachmentType: note?.attachmentType || attachment?.type,
-        attachmentSize: note?.attachmentSize || attachment?.size,
-        mediaId: note?.mediaId || attachment?.mediaId,
+        attachments: note?.attachments?.length ? note.attachments : attachmentPayload.dtoFields.attachments,
+        attachmentUrl: note?.attachmentUrl || attachmentPayload.first?.url,
+        attachmentName: note?.attachmentName || attachmentPayload.first?.name,
+        attachmentType: note?.attachmentType || attachmentPayload.first?.type,
+        attachmentSize: note?.attachmentSize || attachmentPayload.first?.size,
+        mediaId: note?.mediaId || attachmentPayload.first?.mediaId,
       }, true)
       uiStore.showToast({
         icon: 'lock',
@@ -785,23 +990,20 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     }
   }
 
-  async function sendCustomerReply(text, attachment = null) {
+  async function sendCustomerReply(text, attachments = []) {
     const trimmed = String(text ?? '').trim()
-    if ((!trimmed && !attachment) || !workspace.convId) return
+    const attachmentPayload = buildAttachmentPayload(attachments)
+    if ((!trimmed && !attachmentPayload.list.length) || !workspace.convId) return
 
     const conv = currentConv.value
-    const content = trimmed || attachment?.name || 'Đính kèm'
+    const content = trimmed || attachmentPayload.contentFallback || 'Đính kèm'
     const dto = {
       conversationId: workspace.convId,
       senderId: getStaffId(),
       receiverId: conv?.buyerId ?? null,
       content,
-      messageType: attachment?.isImage ? 'IMAGE' : attachment ? 'FILE' : 'TEXT',
-      mediaId: attachment?.mediaId || undefined,
-      attachmentUrl: attachment?.url || undefined,
-      attachmentName: attachment?.name || undefined,
-      attachmentType: attachment?.type || undefined,
-      attachmentSize: attachment?.size || undefined,
+      messageType: attachmentPayload.messageType,
+      ...attachmentPayload.dtoFields,
       isInternal: false,
     }
 
@@ -812,6 +1014,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       _appendMessageToTimeline({
         ...dto,
         ...saved,
+        attachments: saved?.attachments?.length ? saved.attachments : dto.attachments,
         attachmentUrl: saved?.attachmentUrl || dto.attachmentUrl,
         attachmentName: saved?.attachmentName || dto.attachmentName,
         attachmentType: saved?.attachmentType || dto.attachmentType,
@@ -827,7 +1030,7 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
       uiStore.showToast({
         icon: 'alert',
         title: 'Gửi tin nhắn thất bại',
-        subtitle: error.message || '',
+        subtitle: formatChatError(error, 'Không gửi được tin nhắn. Vui lòng kiểm tra kết nối hoặc thử lại.'),
       })
     }
   }
@@ -849,6 +1052,11 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
     loadConversation,
     toggleDetailPanel,
     setMsgType,
+    toggleConversationSearch,
+    closeConversationSearch,
+    setConversationSearchQuery,
+    goToNextConversationSearchResult,
+    goToPrevConversationSearchResult,
     loadAssignableAdmins,
     assignConversation,
     updateStatus,

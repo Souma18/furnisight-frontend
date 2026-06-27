@@ -1,4 +1,4 @@
-import { apiClient } from '@/shared/lib/api/client'
+import { apiClient } from '@/shared/lib/api'
 
 const PREFIX = '/messages'
 
@@ -57,6 +57,19 @@ export async function getMessages({ conversationId, page = 0, size = 50, include
   const res = await apiClient.get(msUrl('/message'), {
     params: {
       conversationID: conversationId,
+      page,
+      size,
+      ...(includeInternal ? { includeInternal: true } : {}),
+    },
+  })
+  return unwrapMessageService(res)
+}
+
+export async function searchMessages({ conversationId, query, page = 0, size = 20, includeInternal = false } = {}) {
+  const res = await apiClient.get(msUrl('/message/search'), {
+    params: {
+      conversationID: conversationId,
+      query,
       page,
       size,
       ...(includeInternal ? { includeInternal: true } : {}),

@@ -2,7 +2,6 @@
 import { onMounted, onUnmounted } from 'vue'
 import AdminSidebar from '../components/layout/AdminSidebar.vue'
 import AdminTopbar from '../components/layout/AdminTopbar.vue'
-import AdminToast from '../components/shared/AdminToast.vue'
 import AdminModalHost from '../components/shared/AdminModalHost.vue'
 import '../styles/admin.css'
 
@@ -24,7 +23,6 @@ onUnmounted(() => {
       </div>
     </div>
     <AdminModalHost />
-    <AdminToast />
   </div>
 </template>
 

@@ -18,21 +18,42 @@ const {
   hasUnread,
   messagesRef,
   inputRef,
+  fileInputRef,
+  imageInputRef,
+  selectedAttachments,
+  uploadingAttachment,
+  DOCUMENT_FILE_ACCEPT,
   showFabTooltip,
   authModalOpen,
+  showScrollBottom,
   todayLabel,
   formatTimeLabel,
   toggleChat,
   sendDraft,
+  chooseFile,
+  chooseImage,
+  handleAttachmentSelected,
+  removeAttachment,
   quickSend,
   handleInputKeydown,
   resizeTextarea,
+  handleMessagesScroll,
+  scrollToBottomNow,
   handleAuthenticated,
   closeAuthModal,
   closeChat,
   loading,
   error,
   connectionStatus,
+  search,
+  searchCountLabel,
+  isSearchHit,
+  isActiveSearchHit,
+  toggleSearch,
+  setSearchQuery,
+  closeSearch,
+  nextSearchResult,
+  prevSearchResult,
 } = useChat()
 
 const {
@@ -108,7 +129,14 @@ function handleAddToCart(product) {
         </div>
 
         <div class="chat-header-actions">
-          <button type="button" class="chat-hdr-btn" title="Tìm kiếm" aria-label="Tìm kiếm">
+          <button
+            type="button"
+            class="chat-hdr-btn"
+            :class="{ active: search.visible }"
+            title="Tìm kiếm"
+            aria-label="Tìm kiếm"
+            @click="toggleSearch"
+          >
             <AppIcon name="search" :size="15" />
           </button>
           <button type="button" class="chat-hdr-btn" title="Thu nhỏ" aria-label="Thu nhỏ" @click="closeChat">
@@ -116,6 +144,32 @@ function handleAddToCart(product) {
           </button>
         </div>
       </header>
+
+      <div v-if="search.visible" class="chat-search-panel">
+        <label class="chat-search-field">
+          <AppIcon name="search" :size="15" />
+          <input
+            :value="search.query"
+            type="search"
+            placeholder="Tìm tin nhắn..."
+            @input="(event) => setSearchQuery(event.target.value)"
+            @keydown.enter.prevent="nextSearchResult"
+          />
+        </label>
+        <div v-if="search.query.trim()" class="chat-search-actions">
+          <small v-if="search.error">{{ search.error }}</small>
+          <span v-else>{{ searchCountLabel }}</span>
+          <button type="button" :disabled="!search.resultIds.length" title="Kết quả trước" @click="prevSearchResult">
+            <AppIcon name="chevronUp" :size="14" />
+          </button>
+          <button type="button" :disabled="!search.resultIds.length" title="Kết quả tiếp" @click="nextSearchResult">
+            <AppIcon name="chevronDown" :size="14" />
+          </button>
+          <button type="button" title="Đóng tìm kiếm" @click="closeSearch">
+            <AppIcon name="x" :size="14" />
+          </button>
+        </div>
+      </div>
 
       <div class="chat-chips">
         <button
@@ -129,7 +183,7 @@ function handleAddToCart(product) {
         </button>
       </div>
 
-      <div ref="messagesRef" class="chat-messages">
+      <div ref="messagesRef" class="chat-messages" @scroll="handleMessagesScroll">
         <div v-if="error" class="chat-date-sep chat-error-banner">{{ error }}</div>
         <div v-else-if="connectionStatus === 'error'" class="chat-date-sep chat-error-banner">
           Mất kết nối realtime. Tin nhắn có thể trễ.
@@ -142,6 +196,8 @@ function handleAddToCart(product) {
           :key="message.id"
           :message="message"
           :time-label="formatTimeLabel(message.createdAt)"
+          :search-hit="isSearchHit(message.id)"
+          :search-active="isActiveSearchHit(message.id)"
           @add-to-cart="handleAddToCart"
         />
 
@@ -159,8 +215,56 @@ function handleAddToCart(product) {
         </div>
       </div>
 
+      <button
+        v-if="showScrollBottom"
+        type="button"
+        class="chat-scroll-bottom"
+        title="Xuống tin mới nhất"
+        aria-label="Xuống tin mới nhất"
+        @click="scrollToBottomNow"
+      >
+        <AppIcon name="chevronDown" :size="18" />
+      </button>
+
       <footer class="chat-input-bar">
+        <div v-if="selectedAttachments.length" class="chat-attachment-preview-list">
+          <div
+            v-for="attachment in selectedAttachments"
+            :key="attachment.id"
+            class="chat-attachment-preview"
+            :class="{ uploading: uploadingAttachment }"
+          >
+            <img v-if="attachment.isImage" :src="attachment.previewUrl" alt="" />
+            <AppIcon v-else name="paperclip" :size="15" />
+            <span>{{ attachment.name }}</span>
+            <button
+              type="button"
+              title="Bỏ đính kèm"
+              aria-label="Bỏ đính kèm"
+              :disabled="uploadingAttachment"
+              @click="removeAttachment(attachment.id)"
+            >
+              <AppIcon name="x" :size="13" />
+            </button>
+          </div>
+        </div>
         <div class="chat-input-row">
+          <input
+            ref="fileInputRef"
+            type="file"
+            class="chat-file-input"
+            :accept="DOCUMENT_FILE_ACCEPT"
+            multiple
+            @change="(event) => handleAttachmentSelected(event, 'file')"
+          />
+          <input
+            ref="imageInputRef"
+            type="file"
+            class="chat-file-input"
+            accept="image/*"
+            multiple
+            @change="(event) => handleAttachmentSelected(event, 'image')"
+          />
           <div class="chat-input-wrap">
             <textarea
               ref="inputRef"
@@ -169,13 +273,18 @@ function handleAddToCart(product) {
               placeholder="Nhập tin nhắn..."
               @keydown="handleInputKeydown"
               @input="resizeTextarea"
+              :disabled="uploadingAttachment"
             />
-            <button type="button" class="chat-input-attach" title="Đính kèm ảnh" aria-label="Đính kèm">
+            <button type="button" class="chat-input-attach" title="Đính kèm file" aria-label="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile">
+              <AppIcon name="paperclip" :size="17" />
+            </button>
+            <button type="button" class="chat-input-attach" title="Gửi ảnh" aria-label="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage">
               <AppIcon name="image" :size="17" />
             </button>
           </div>
-          <button type="button" class="chat-send-btn" aria-label="Gửi" @click="sendDraft">
-            <AppIcon name="send" :size="18" />
+          <button type="button" class="chat-send-btn" aria-label="Gửi" :disabled="uploadingAttachment" @click="sendDraft">
+            <span v-if="uploadingAttachment" class="chat-send-spinner" aria-hidden="true"></span>
+            <AppIcon v-else name="send" :size="18" />
           </button>
         </div>
         <div class="chat-input-hint">

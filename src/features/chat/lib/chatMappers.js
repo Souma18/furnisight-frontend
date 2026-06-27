@@ -58,7 +58,8 @@ function pickAvatarPalette(seed) {
 function messageContent(raw) {
   if (!raw) return ''
   if (raw.messageType && raw.messageType !== 'TEXT') {
-    return raw.content || raw.attachmentName || '[Đính kèm]'
+    const firstAttachment = Array.isArray(raw.attachments) ? raw.attachments[0] : null
+    return raw.content || raw.attachmentName || firstAttachment?.name || '[Đính kèm]'
   }
   return raw.content ?? ''
 }
@@ -80,14 +81,48 @@ function mapAttachment(raw = {}) {
   }
 }
 
+function mapAttachments(raw = {}) {
+  const source = Array.isArray(raw.attachments)
+    ? raw.attachments
+    : typeof raw.attachments === 'string'
+      ? safeParseAttachments(raw.attachments)
+      : []
+  const mapped = source
+    .map((item) => mapAttachment({
+      attachmentUrl: item.url,
+      attachmentName: item.name,
+      attachmentType: item.type,
+      attachmentSize: item.size,
+      mediaId: item.mediaId,
+      messageType: item.isImage ? 'IMAGE' : raw.messageType,
+      ...item,
+    }))
+    .filter(Boolean)
+
+  if (mapped.length) return mapped
+  const single = mapAttachment(raw)
+  return single ? [single] : []
+}
+
+function safeParseAttachments(value) {
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
+}
+
 export function mapMessageToCustomer(raw, buyerId) {
   const senderId = Number(raw.senderId)
   const role = senderId === Number(buyerId) ? 'user' : 'assistant'
+  const attachments = mapAttachments(raw)
   return {
     id: raw.id ?? raw.messageId ?? `msg-${Date.now()}`,
     role,
     content: messageContent(raw),
-    attachment: mapAttachment(raw),
+    attachment: attachments[0] || null,
+    attachments,
     products: [],
     createdAt: raw.createdAt ?? new Date().toISOString(),
     clientTempId: raw.clientTempId,
@@ -96,12 +131,14 @@ export function mapMessageToCustomer(raw, buyerId) {
 }
 
 export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } = {}) {
+  const attachments = mapAttachments(raw)
   if (raw.isInternal) {
     return {
       id: raw.id ?? raw.messageId,
       type: 'note',
       text: messageContent(raw),
-      attachment: mapAttachment(raw),
+      attachment: attachments[0] || null,
+      attachments,
       time: formatTimeLabel(raw.createdAt),
       createdAt: raw.createdAt ?? new Date().toISOString(),
       senderName: staffName || `Admin #${raw.senderId}`,
@@ -115,7 +152,8 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
     id: raw.id ?? raw.messageId,
     type: isCustomer ? 'customer' : 'admin',
     text: messageContent(raw),
-    attachment: mapAttachment(raw),
+    attachment: attachments[0] || null,
+    attachments,
     time: formatTimeLabel(raw.createdAt),
     createdAt: raw.createdAt ?? new Date().toISOString(),
     senderName: isCustomer ? `Khách #${buyerId}` : staffName || `Admin #${staffId}`,

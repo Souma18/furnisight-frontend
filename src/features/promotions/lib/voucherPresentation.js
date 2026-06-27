@@ -1,5 +1,5 @@
 import { i18n } from '@shared/i18n'
-
+import { formatPrice } from '@shared/lib/formatters'
 function t(key, params = {}) {
   return i18n.global.t(key, params)
 }
@@ -67,7 +67,7 @@ export function formatDate(value) {
   if (!value) return t('promotions.voucher.unlimited')
   const date = new Date(value)
   if (Number.isNaN(date.getTime())) return t('promotions.voucher.unlimited')
-  return new Intl.DateTimeFormat(currentLocale() === 'en' ? 'en-US' : 'vi-VN').format(date)
+  return date.toLocaleDateString(currentLocale() === 'en' ? 'en-US' : 'vi-VN')
 }
 
 export function isExpiring(value) {
@@ -77,11 +77,7 @@ export function isExpiring(value) {
 }
 
 export function formatCurrency(value) {
-  return new Intl.NumberFormat(currentLocale() === 'en' ? 'en-US' : 'vi-VN', {
-    style: 'currency',
-    currency: 'VND',
-    maximumFractionDigits: 0,
-  }).format(Number(value) || 0)
+  return formatPrice(value)
 }
 
 function isActiveByTime(start, end, now = Date.now()) {
