@@ -60,7 +60,7 @@ function handleUnlayer() {
     <div class="modal-card">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>thông báo</em></h2>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
         <label>Áp dụng Mẫu thông báo (Tùy chọn)
@@ -80,9 +80,9 @@ function handleUnlayer() {
           <div v-if="isHtmlContent" class="html-content-badge">
             <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
             <div class="html-actions">
-              <AppButton type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-              <AppButton type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
-              <AppButton type="button" class="mc-cancel" @click="form.body = ''">Xóa / Soạn lại</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-cancel" @click="form.body = ''">Xóa / Soạn lại</AppButton>
             </div>
           </div>
           <textarea v-else v-model="form.body" required rows="12" class="large-textarea" />
@@ -111,13 +111,13 @@ function handleUnlayer() {
         </label>
 
         <div class="choice-grid">
-          <AppButton type="button" :class="{ selected: form.targetType === 'MANUAL' }" @click="form.targetType = 'MANUAL'">Chọn user</AppButton>
-          <AppButton type="button" :class="{ selected: form.targetType === 'ALL' }" @click="form.targetType = 'ALL'">Toàn bộ</AppButton>
-          <AppButton type="button" :class="{ selected: form.targetType === 'SEGMENT' }" @click="form.targetType = 'SEGMENT'">Theo điều kiện</AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'MANUAL' }" @click="form.targetType = 'MANUAL'">Chọn user</AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'ALL' }" @click="form.targetType = 'ALL'">Toàn bộ</AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'SEGMENT' }" @click="form.targetType = 'SEGMENT'">Theo điều kiện</AppButton>
         </div>
 
         <template v-if="form.targetType === 'MANUAL'">
-          <AppButton type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showUserPicker = !showUserPicker">
+          <AppButton variant="unstyled" type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showUserPicker = !showUserPicker">
             <AppIcon :name="showUserPicker ? 'chevronUp' : 'chevronDown'" :size="16" />
             {{ showUserPicker ? 'Ẩn danh sách tìm kiếm' : 'Hiển thị tìm người dùng' }}
           </AppButton>
@@ -151,10 +151,10 @@ function handleUnlayer() {
         </div>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">
           {{ isEditing?.status === 'SENT' ? 'Đóng' : 'Hủy' }}
         </AppButton>
-        <AppButton v-if="isEditing?.status !== 'SENT'" type="submit" class="mc-primary">
+        <AppButton variant="unstyled" v-if="isEditing?.status !== 'SENT'" type="submit" class="mc-primary">
           <AppIcon name="send" />Lưu thông báo
         </AppButton>
       </footer>

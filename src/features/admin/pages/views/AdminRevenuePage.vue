@@ -49,7 +49,7 @@ bindCharts((charts, d) => {
   <AdminPageHeader eyebrow="Tài chính" title-html="Doanh <em>thu</em>"
     :subtitle="data?.snapshotAt ? `Cập nhật lúc ${data.snapshotAt}` : 'Đang tải...'">
     <template #actions>
-      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
         <AppIcon name="download" :size="15" />Xuất báo cáo
       </AppButton>
     </template>
@@ -64,14 +64,14 @@ bindCharts((charts, d) => {
     <AppIcon name="alert" :size="28" style="opacity:.45;margin-bottom:8px" />
     <strong>Không tải được dữ liệu doanh thu</strong>
     <span>{{ error }}</span>
-    <AppButton type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
+    <AppButton variant="unstyled" type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
   </div>
 
   <div v-else-if="data && !hasRevenueData" class="rev-state">
     <AppIcon name="trendingUp" :size="28" style="opacity:.3;margin-bottom:8px" />
     <strong>Chưa có dữ liệu doanh thu</strong>
     <span>Hệ thống đã phản hồi nhưng chưa có snapshot hoặc đơn hàng phù hợp.</span>
-    <AppButton type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
+    <AppButton variant="unstyled" type="button" class="btn-export rev-retry" @click="load">Tải lại</AppButton>
   </div>
 
   <template v-if="data && hasRevenueData">

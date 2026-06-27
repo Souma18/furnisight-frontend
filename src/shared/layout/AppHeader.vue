@@ -130,13 +130,9 @@ watch(() => route.query.otpCode, (newVal) => {
 
     <AppHeaderNavigation />
 
-    <div class="actions">
+    <div class="header-actions">
       <LanguageToggle compact />
       <ThemeToggle variant="icon" />
-      <RouterLink to="/room3d" class="visualize-btn">
-        <AppIcon name="map" :size="14" />
-        {{ t('header.visualize') }}
-      </RouterLink>
       <div class="notif-wrap" @mouseenter="loadNotificationsOnce" @click="loadNotificationsOnce">
         <button
           class="icon-btn"
@@ -214,6 +210,11 @@ watch(() => route.query.otpCode, (newVal) => {
         <AppIcon :name="mobileMenuOpen ? 'close' : 'menu'" :size="14" />
       </button>
     </div>
+
+    <RouterLink to="/room3d" class="visualize-btn">
+      <AppIcon name="map" :size="14" />
+      {{ t('header.visualize') }}
+    </RouterLink>
 
     <AppHeaderMobileMenu :is-open="mobileMenuOpen" />
   </header>

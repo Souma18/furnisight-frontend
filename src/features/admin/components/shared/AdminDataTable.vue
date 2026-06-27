@@ -33,7 +33,7 @@ const emit = defineEmits(['page'])
     <div v-if="pagination" class="pagination">
       <div class="pg-info" v-html="pagination.info" />
       <div class="pg-btns">
-        <AppButton
+        <AppButton variant="unstyled"
           v-for="btn in pagination.buttons"
           :key="String(btn.label) + String(btn.page)"
           type="button"

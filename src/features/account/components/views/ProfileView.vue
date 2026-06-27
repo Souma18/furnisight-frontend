@@ -9,6 +9,10 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 
 import { useProfileForm } from '../../composables/useProfileForm'
 import { useProfileStore } from '../../store/profileStore'
+import { defineAsyncComponent } from 'vue'
+
+const AddressView = defineAsyncComponent(() => import('./AddressView.vue'))
+const SecurityView = defineAsyncComponent(() => import('./SecurityView.vue'))
 
 const emit = defineEmits(['notify'])
 const { t, locale } = useI18n()
@@ -214,6 +218,9 @@ onMounted(() => {
       <input ref="avatarInput" type="file" accept="image/*" class="hidden-input" @change="onAvatarSelected" />
     </div>
     </AccountSectionCard>
+
+    <AddressView @notify="(msg, type) => emit('notify', msg, type)" />
+    <SecurityView @notify="(msg, type) => emit('notify', msg, type)" />
   </div>
 </template>
 

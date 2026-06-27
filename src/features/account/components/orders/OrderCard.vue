@@ -125,8 +125,8 @@ const displayStatusLabel = computed(() => {
 
 <style scoped>
 .order-card {
-  background: #fff;
-  border: 1px solid var(--auth-border, #e0d9ce);
+  background: var(--acc-surface, var(--app-surface));
+  border: 1px solid var(--acc-line, var(--app-border));
   border-radius: 12px;
   padding: 1rem 1.1rem;
 }
@@ -250,7 +250,7 @@ const displayStatusLabel = computed(() => {
   border: 1px solid #e8c5c0;
   border-radius: 9px;
   padding: 0.55rem 0.85rem;
-  background: #fff;
+  background: var(--acc-surface, var(--app-surface));
   color: #c0392b;
   font-size: 0.78rem;
   font-weight: 500;
@@ -297,8 +297,8 @@ const displayStatusLabel = computed(() => {
   border: none;
   border-radius: 9px;
   padding: 0.55rem 0.85rem;
-  background: #12202e;
-  color: #fff;
+  background: var(--acc-ink, var(--app-heading));
+  color: var(--app-bg);
   font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;

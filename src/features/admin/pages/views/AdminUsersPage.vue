@@ -120,8 +120,8 @@ async function confirmDeleteUser() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Người <em>dùng</em>" subtitle="1.243 tài khoản đã đăng ký">
     <template #actions>
-      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất danh sách' })"><AppIcon name="download" :size="15" />Xuất Excel</AppButton>
-      <AppButton type="button" class="btn-add" @click="ui.openModal('addUser')"><AppIcon name="plus" :size="15" />Thêm người dùng</AppButton>
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất danh sách' })"><AppIcon name="download" :size="15" />Xuất Excel</AppButton>
+      <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('addUser')"><AppIcon name="plus" :size="15" />Thêm người dùng</AppButton>
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm theo tên hoặc email..." />
@@ -130,9 +130,9 @@ async function confirmDeleteUser() {
     <template #cell-statusLabel="{ row }"><span class="badge" :class="isBlocked(row) ? 'b-cancel' : 'b-success'">{{ userStatusLabel(row) }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <AppButton type="button" class="ra-btn ra-view" title="Xem người dùng" @click="ui.openModal('viewUser', row)"><AppIcon name="eye" :size="14" /></AppButton>
-        <AppButton type="button" class="ra-btn ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="14" /></AppButton>
-        <AppButton
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-view" title="Xem người dùng" @click="ui.openModal('viewUser', row)"><AppIcon name="eye" :size="14" /></AppButton>
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="14" /></AppButton>
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-lock"
           :title="isBlocked(row) ? 'Mở khóa tài khoản' : 'Khóa tài khoản'"
@@ -140,7 +140,7 @@ async function confirmDeleteUser() {
         >
           <AppIcon :name="isBlocked(row) ? 'refresh' : 'lock'" :size="14" />
         </AppButton>
-        <AppButton type="button" class="ra-btn ra-del" title="Xóa tài khoản" @click="requestDeleteUser(row)"><AppIcon name="trash2" :size="14" /></AppButton>
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-del" title="Xóa tài khoản" @click="requestDeleteUser(row)"><AppIcon name="trash2" :size="14" /></AppButton>
       </div>
     </template>
   </AdminDataTable>

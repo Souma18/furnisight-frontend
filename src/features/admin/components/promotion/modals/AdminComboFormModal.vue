@@ -35,10 +35,10 @@ const emit = defineEmits([
     <div class="modal-card modal-lg">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>combo</em></h2>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
-        <div class="section-title"><AppIcon name="gift" />Thông tin combo</div>
+        <div class="mc-section-title"><AppIcon name="gift" />Thông tin combo</div>
         <div class="form-row">
           <label>Tên combo *
             <AppInput v-model="form.name" required placeholder="Combo phòng ngủ FurniSight"/>
@@ -75,13 +75,13 @@ const emit = defineEmits([
         </label>
         <div v-if="form.imageUrl" class="combo-image-preview">
           <AppImage :src="form.imageUrl" alt="Ảnh combo" />
-          <AppButton type="button" title="Xóa ảnh" @click="emit('remove-image')">
+          <AppButton variant="unstyled" type="button" title="Xóa ảnh" @click="emit('remove-image')">
             <AppIcon name="x" :size="14" />
           </AppButton>
         </div>
         
-        <div class="section-title"><AppIcon name="box" />Sản phẩm trong combo</div>
-        <AppButton type="button" class="add-product" @click="emit('open-product-picker')">
+        <div class="mc-section-title"><AppIcon name="box" />Sản phẩm trong combo</div>
+        <AppButton variant="unstyled" type="button" class="add-product" @click="emit('open-product-picker')">
           <AppIcon name="plus" />Chọn sản phẩm
         </AppButton>
         <div v-if="!form.items.length" class="empty-box">Chưa có sản phẩm nào trong combo.</div>
@@ -96,7 +96,7 @@ const emit = defineEmits([
             <small>SKU: {{ item.sku }} · {{ money(item.price) }} · {{ item.category }}</small>
           </div>
           <label><span>SL</span><AppInput v-model.number="item.quantity" type="number" min="1"/></label>
-          <AppButton type="button" @click="emit('remove-item', item.id)">
+          <AppButton variant="unstyled" type="button" @click="emit('remove-item', item.id)">
             <AppIcon name="trash" />
           </AppButton>
         </div>
@@ -108,8 +108,8 @@ const emit = defineEmits([
         </div>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton type="submit" class="mc-primary" :disabled="saving">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="submit" class="mc-primary" :disabled="saving">
           <AppIcon name="save" />Lưu combo
         </AppButton>
       </footer>

@@ -322,7 +322,7 @@ const {
     </div>
 
     <nav class="mc-tabs">
-      <AppButton
+      <AppButton variant="unstyled"
         v-for="tab in tabs"
         :key="tab.id"
         type="button"
@@ -498,7 +498,7 @@ const {
 
     <div v-if="modal.previewTemplate" class="modal-backdrop" @click.self="modal.previewTemplate = false">
       <div class="modal-card">
-        <header><h2>Xem trước <em>{{ editing.previewTemplate?.name }}</em></h2><AppButton type="button" @click="modal.previewTemplate = false"><AppIcon name="x" /></AppButton></header>
+        <header><h2>Xem trước <em>{{ editing.previewTemplate?.name }}</em></h2><AppButton variant="unstyled" type="button" @click="modal.previewTemplate = false"><AppIcon name="x" /></AppButton></header>
         <div class="modal-body preview-body">
           <div class="preview-title">
             <AppIcon name="bell" :size="18" />
@@ -519,13 +519,13 @@ const {
 
     <aside v-if="publish.voucher" class="drawer-backdrop" @click.self="publish.voucher = null">
       <div class="publish-drawer">
-        <header><strong>Phát hành voucher <em>{{ publish.voucher.code }}</em></strong><AppButton type="button" @click="publish.voucher = null"><AppIcon name="x" /></AppButton></header>
+        <header><strong>Phát hành voucher <em>{{ publish.voucher.code }}</em></strong><AppButton variant="unstyled" type="button" @click="publish.voucher = null"><AppIcon name="x" /></AppButton></header>
         <div class="drawer-body">
           <div class="segment-choice">
-            <AppButton :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'"><AppIcon name="user" /><span>Một người<small>Tìm và cấp cho 1 user cụ thể</small></span></AppButton>
-            <AppButton :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'"><AppIcon name="users" /><span>Nhiều người<small>Chọn danh sách user</small></span></AppButton>
-            <AppButton :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'"><AppIcon name="globe" /><span>Toàn bộ người dùng<small>Phát hàng loạt</small></span></AppButton>
-            <AppButton :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'"><AppIcon name="filter" /><span>Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></span></AppButton>
+            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'"><AppIcon name="user" /><span>Một người<small>Tìm và cấp cho 1 user cụ thể</small></span></AppButton>
+            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'"><AppIcon name="users" /><span>Nhiều người<small>Chọn danh sách user</small></span></AppButton>
+            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'"><AppIcon name="globe" /><span>Toàn bộ người dùng<small>Phát hàng loạt</small></span></AppButton>
+            <AppButton variant="unstyled" :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'"><AppIcon name="filter" /><span>Theo điều kiện<small>Khách mới, bỏ giỏ, không hoạt động</small></span></AppButton>
           </div>
           <label v-if="publish.segment === 'one' || publish.segment === 'many'">Tìm người dùng<AppInput v-model="publish.userQuery" placeholder="Email hoặc tên..."/></label>
           <div v-if="publish.segment === 'one' || publish.segment === 'many'" class="user-pick-list compact-users">
@@ -556,8 +556,8 @@ const {
             <div v-if="isHtmlContent(publish.body)" class="html-content-badge">
               <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
               <div class="html-actions">
-                <AppButton type="button" class="mc-outline" @click="openPreviewHtml(publish.title, publish.body)">Xem trước</AppButton>
-                <AppButton type="button" class="mc-outline" @click="openUnlayerEditor(publish.body, (val) => publish.body = val)">Sửa thiết kế</AppButton>
+                <AppButton variant="unstyled" type="button" class="mc-outline" @click="openPreviewHtml(publish.title, publish.body)">Xem trước</AppButton>
+                <AppButton variant="unstyled" type="button" class="mc-outline" @click="openUnlayerEditor(publish.body, (val) => publish.body = val)">Sửa thiết kế</AppButton>
                 <AppButton variant="cancel"></AppButton>
               </div>
             </div>

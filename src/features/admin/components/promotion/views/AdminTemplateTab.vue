@@ -27,7 +27,7 @@ const emit = defineEmits(['load', 'open-preview', 'open-modal', 'delete'])
         <option value="REVIEW">Đánh giá (Review)</option>
         <option value="ORDER">Đơn hàng (Order)</option>
       </select>
-      <AppButton type="button" class="mc-outline" @click="emit('load')">
+      <AppButton variant="unstyled" type="button" class="mc-outline" @click="emit('load')">
         <AppIcon name="search" :size="14" />Lọc
       </AppButton>
     </div>
@@ -53,13 +53,13 @@ const emit = defineEmits(['load', 'open-preview', 'open-modal', 'delete'])
             <td>{{ row.titleTemplate }}</td>
             <td>
               <div class="mc-actions">
-                <AppButton title="Xem trước" type="button" @click="emit('open-preview', row)">
+                <AppButton variant="unstyled" title="Xem trước" type="button" @click="emit('open-preview', row)">
                   <AppIcon name="eye" :size="14" />
                 </AppButton>
-                <AppButton title="Chỉnh sửa" type="button" @click="emit('open-modal', row)">
+                <AppButton variant="unstyled" title="Chỉnh sửa" type="button" @click="emit('open-modal', row)">
                   <AppIcon name="edit" :size="14" />
                 </AppButton>
-                <AppButton title="Xóa" type="button" class="danger" @click="emit('delete', row)">
+                <AppButton variant="unstyled" title="Xóa" type="button" class="danger" @click="emit('delete', row)">
                   <AppIcon name="trash" :size="14" />
                 </AppButton>
               </div>

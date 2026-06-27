@@ -39,7 +39,7 @@ const store = useAdminConversationStore()
           <option value="resolved">Đã giải quyết</option>
           <option value="closed">Đã đóng</option>
         </select>
-        <AppButton
+        <AppButton variant="unstyled"
           class="cw-action-btn"
           :class="{ 'active-btn': store.workspace.detailVisible }"
           title="Ẩn/Hiện thông tin khách hàng"
@@ -47,7 +47,7 @@ const store = useAdminConversationStore()
         >
           <AppIcon name="panelRight" />
         </AppButton>
-        <AppButton class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="store.resolveConversation()">
+        <AppButton variant="unstyled" class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="store.resolveConversation()">
           <AppIcon name="check" /> Xong
         </AppButton>
       </div>

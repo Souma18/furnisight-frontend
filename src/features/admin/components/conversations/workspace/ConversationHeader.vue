@@ -45,7 +45,7 @@ const emit = defineEmits(['update-status', 'toggle-detail', 'resolve'])
           <option value="resolved">Đã giải quyết</option>
           <option value="closed">Đã đóng</option>
         </select>
-        <AppButton
+        <AppButton variant="unstyled"
           class="cw-action-btn"
           :class="{ 'active-btn': detailVisible }"
           title="Ẩn/Hiện thông tin khách hàng"
@@ -53,7 +53,7 @@ const emit = defineEmits(['update-status', 'toggle-detail', 'resolve'])
         >
           <AppIcon name="panelRight" />
         </AppButton>
-        <AppButton class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="emit('resolve')">
+        <AppButton variant="unstyled" class="cw-resolve-btn" title="Đánh dấu đã giải quyết" @click="emit('resolve')">
           <AppIcon name="check" /> Xong
         </AppButton>
       </div>

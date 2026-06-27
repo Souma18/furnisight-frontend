@@ -60,10 +60,10 @@ function handleUnlayer() {
     <div class="modal-card modal-lg">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>chiến dịch</em></h2>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
-        <div class="section-title"><AppIcon name="calendar" />Thông tin chiến dịch</div>
+        <div class="mc-section-title"><AppIcon name="calendar" />Thông tin chiến dịch</div>
         <div class="form-row">
           <label>Tên chiến dịch *
             <AppInput v-model="form.name" required placeholder="Phát voucher cho khách mới"/>
@@ -78,15 +78,15 @@ function handleUnlayer() {
           </label>
         </div>
 
-        <div class="section-title"><AppIcon name="users" />Tệp người nhận</div>
+        <div class="mc-section-title"><AppIcon name="users" />Tệp người nhận</div>
         <div class="choice-grid">
-          <AppButton type="button" :class="{ selected: form.targetType === 'MANUAL' }" @click="form.targetType = 'MANUAL'">Chọn thủ công<small>{{ form.targetUserIds.length }} user</small></AppButton>
-          <AppButton type="button" :class="{ selected: form.targetType === 'ALL' }" @click="form.targetType = 'ALL'">Toàn bộ<small>Tất cả user</small></AppButton>
-          <AppButton type="button" :class="{ selected: form.targetType === 'SEGMENT' }" @click="form.targetType = 'SEGMENT'">Theo điều kiện<small>Nhóm người dùng</small></AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'MANUAL' }" @click="form.targetType = 'MANUAL'">Chọn thủ công<small>{{ form.targetUserIds.length }} user</small></AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'ALL' }" @click="form.targetType = 'ALL'">Toàn bộ<small>Tất cả user</small></AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.targetType === 'SEGMENT' }" @click="form.targetType = 'SEGMENT'">Theo điều kiện<small>Nhóm người dùng</small></AppButton>
         </div>
 
         <template v-if="form.targetType === 'MANUAL'">
-          <AppButton type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showUserPicker = !showUserPicker">
+          <AppButton variant="unstyled" type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showUserPicker = !showUserPicker">
             <AppIcon :name="showUserPicker ? 'chevronUp' : 'chevronDown'" :size="16" />
             {{ showUserPicker ? 'Ẩn danh sách tìm kiếm' : 'Hiển thị tìm người dùng' }}
           </AppButton>
@@ -111,14 +111,14 @@ function handleUnlayer() {
           </select>
         </label>
 
-        <div class="section-title"><AppIcon name="send" />Kênh gửi và lịch</div>
+        <div class="mc-section-title"><AppIcon name="send" />Kênh gửi và lịch</div>
         <div class="checkbox-grid">
           <label class="check-line"><input v-model="form.channels" type="checkbox" value="NOTIFICATION">Notification</label>
           <label class="check-line"><input v-model="form.channels" type="checkbox" value="EMAIL">Email</label>
         </div>
         <div class="choice-grid">
-          <AppButton type="button" :class="{ selected: form.scheduleType === 'NOW' }" @click="form.scheduleType = 'NOW'">Gửi ngay</AppButton>
-          <AppButton type="button" :class="{ selected: form.scheduleType === 'SCHEDULED' }" @click="form.scheduleType = 'SCHEDULED'">Hẹn lịch</AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.scheduleType === 'NOW' }" @click="form.scheduleType = 'NOW'">Gửi ngay</AppButton>
+          <AppButton variant="unstyled" type="button" :class="{ selected: form.scheduleType === 'SCHEDULED' }" @click="form.scheduleType = 'SCHEDULED'">Hẹn lịch</AppButton>
         </div>
         <label v-if="form.scheduleType === 'SCHEDULED'">Thời gian gửi
           <input v-model="form.scheduledAt" type="datetime-local">
@@ -145,9 +145,9 @@ function handleUnlayer() {
           <div v-if="isHtmlContent" class="html-content-badge">
             <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
             <div class="html-actions">
-              <AppButton type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-              <AppButton type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
-              <AppButton type="button" class="mc-cancel" @click="form.notificationBody = ''">Xóa / Soạn lại</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-cancel" @click="form.notificationBody = ''">Xóa / Soạn lại</AppButton>
             </div>
           </div>
           <textarea v-else v-model="form.notificationBody" rows="12" class="large-textarea" />
@@ -156,10 +156,10 @@ function handleUnlayer() {
         <slot name="voucher-preview"></slot>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">
           {{ isEditing?.status === 'SENT' ? 'Đóng' : 'Hủy' }}
         </AppButton>
-        <AppButton v-if="isEditing?.status !== 'SENT'" type="submit" class="mc-primary">
+        <AppButton variant="unstyled" v-if="isEditing?.status !== 'SENT'" type="submit" class="mc-primary">
           <AppIcon name="save" />Lưu chiến dịch
         </AppButton>
       </footer>

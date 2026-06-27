@@ -132,7 +132,7 @@ function removeAttachment(id) {
   <div class="cw-input-area">
     <!-- Quick replies -->
     <div class="cw-quick-replies">
-      <AppButton
+      <AppButton variant="unstyled"
         v-for="reply in quickReplies"
         :key="reply"
         type="button"
@@ -141,20 +141,20 @@ function removeAttachment(id) {
       >
         {{ reply }}
       </AppButton>
-      <AppButton type="button" class="cw-qr-chip" title="Gợi ý khác..." @click="emit('open-templates')">
+      <AppButton variant="unstyled" type="button" class="cw-qr-chip" title="Gợi ý khác..." @click="emit('open-templates')">
         <AppIcon name="moreHorizontal" :size="12" />
       </AppButton>
     </div>
 
     <div class="cw-msg-type-row">
-      <AppButton
+      <AppButton variant="unstyled"
         class="cw-msg-type-btn"
         :class="{ active: msgType === 'reply' }"
         @click="emit('update:msgType', 'reply')"
       >
         <AppIcon name="messageSquare" /> Trả lời
       </AppButton>
-      <AppButton
+      <AppButton variant="unstyled"
         class="cw-msg-type-btn note-type"
         :class="{ active: msgType === 'note' }"
         @click="emit('update:msgType', 'note')"
@@ -180,20 +180,20 @@ function removeAttachment(id) {
         multiple
         @change="(e) => onAttachmentSelected(e, true)"
       />
-      <AppButton class="cw-tool-btn" title="Đính kèm file" :disabled="uploading" @click="chooseFile">
+      <AppButton variant="unstyled" class="cw-tool-btn" title="Đính kèm file" :disabled="uploading" @click="chooseFile">
         <AppIcon name="paperclip" />
       </AppButton>
-      <AppButton class="cw-tool-btn" title="Gửi ảnh" :disabled="uploading" @click="chooseImage">
+      <AppButton variant="unstyled" class="cw-tool-btn" title="Gửi ảnh" :disabled="uploading" @click="chooseImage">
         <AppIcon name="image" />
       </AppButton>
       <div class="cw-tool-sep"></div>
-      <AppButton class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" :disabled="uploading" @click="emit('open-products')">
+      <AppButton variant="unstyled" class="cw-tool-btn" title="Gửi sản phẩm (Product Card)" :disabled="uploading" @click="emit('open-products')">
         <AppIcon name="armchair" />
       </AppButton>
-      <AppButton class="cw-tool-btn" title="Chọn template (mở danh sách)" :disabled="uploading" @click="emit('open-templates')">
+      <AppButton variant="unstyled" class="cw-tool-btn" title="Chọn template (mở danh sách)" :disabled="uploading" @click="emit('open-templates')">
         <AppIcon name="fileText" />
       </AppButton>
-      <AppButton class="cw-tool-btn" title="Chèn Emoji" :disabled="uploading">
+      <AppButton variant="unstyled" class="cw-tool-btn" title="Chèn Emoji" :disabled="uploading">
         <AppIcon name="smile" />
       </AppButton>
     </div>
@@ -215,7 +215,7 @@ function removeAttachment(id) {
             </div>
           </div>
           <div v-if="uploading" class="cw-upload-spinner" aria-hidden="true"></div>
-          <AppButton
+          <AppButton variant="unstyled"
             type="button"
             class="cw-attachment-remove"
             title="Bỏ đính kèm"
@@ -243,7 +243,7 @@ function removeAttachment(id) {
           ></textarea>
           <div class="cw-char-count">{{ modelValue.length }}</div>
         </div>
-        <AppButton class="cw-send-btn" @click="emit('send')" title="Gửi (Enter)" :disabled="uploading">
+        <AppButton variant="unstyled" class="cw-send-btn" @click="emit('send')" title="Gửi (Enter)" :disabled="uploading">
           <span v-if="uploading" class="cw-send-spinner" aria-hidden="true"></span>
           <AppIcon v-else name="send" />
         </AppButton>

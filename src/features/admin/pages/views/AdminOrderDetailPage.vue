@@ -94,10 +94,10 @@ watch(() => props.orderCode, load, { immediate: true })
     subtitle="Thông tin sản phẩm, giao hàng và thanh toán"
   >
     <template #actions>
-      <AppButton v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="promptCancelOrder">
+      <AppButton variant="unstyled" v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="promptCancelOrder">
         <AppIcon name="ban" :size="15" />Hủy đơn
       </AppButton>
-      <AppButton type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
         <AppIcon name="chevronLeft" :size="15" />Quay lại
       </AppButton>
     </template>

@@ -72,7 +72,7 @@ const onInput = (event) => {
   cursor: not-allowed;
 }
 
-[data-theme='dark'] .app-input {
+:global([data-theme='dark']) .app-input {
   background: var(--input-bg-dark, #1b3044);
   border-color: var(--border-color-dark, #2a4054);
   color: #fff;

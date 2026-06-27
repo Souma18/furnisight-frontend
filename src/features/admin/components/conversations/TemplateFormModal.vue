@@ -75,7 +75,7 @@ async function saveTemplate() {
           <template v-if="currentForm.id">Sửa <em>template</em></template>
           <template v-else>Thêm <em>template mới</em></template>
         </div>
-        <AppButton type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
+        <AppButton variant="unstyled" type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
           <AppIcon name="close" :size="14" />
         </AppButton>
       </div>
@@ -112,8 +112,8 @@ async function saveTemplate() {
       </div>
 
       <div class="cm-modal-foot">
-        <AppButton type="button" class="btn-ghost" :disabled="submitting" @click="close">Huỷ</AppButton>
-        <AppButton type="button" class="btn-primary" :disabled="submitting" @click="saveTemplate">
+        <AppButton variant="unstyled" type="button" class="btn-ghost" :disabled="submitting" @click="close">Huỷ</AppButton>
+        <AppButton variant="unstyled" type="button" class="btn-primary" :disabled="submitting" @click="saveTemplate">
           <AppIcon name="check" :size="14" />
           {{ submitting ? 'Đang lưu...' : 'Lưu template' }}
         </AppButton>

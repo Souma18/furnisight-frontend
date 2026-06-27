@@ -142,7 +142,7 @@ async function confirmStatusChange() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Sản <em>phẩm</em>" subtitle="Quản lý catalog & model 3D">
     <template #actions>
-      <AppButton type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</AppButton>
+      <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</AppButton>
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm sản phẩm theo tên hoặc SKU..." />
@@ -187,13 +187,13 @@ async function confirmStatusChange() {
 
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <AppButton type="button" class="ra-btn ra-view" title="Xem chi tiết" @click="requestView(row)">
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-view" title="Xem chi tiết" @click="requestView(row)">
           <AppIcon name="eye" :size="14" />
         </AppButton>
-        <AppButton type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
           <AppIcon name="edit" :size="14" />
         </AppButton>
-        <AppButton
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-lock"
           :title="isInactiveProduct(row) ? 'Mở bán lại sản phẩm' : 'Ngừng bán sản phẩm'"
@@ -201,7 +201,7 @@ async function confirmStatusChange() {
         >
           <AppIcon :name="isInactiveProduct(row) ? 'refresh' : 'ban'" :size="14" />
         </AppButton>
-        <AppButton
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-del"
           :aria-label="`Xóa sản phẩm ${row.name}`"

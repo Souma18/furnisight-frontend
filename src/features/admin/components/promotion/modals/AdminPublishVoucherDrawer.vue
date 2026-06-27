@@ -42,23 +42,23 @@ function handleUnlayer() {
     <div class="publish-drawer">
       <header>
         <strong>Phát hành voucher <em>{{ selectedVoucher?.code }}</em></strong>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="drawer-body">
         <div class="segment-choice">
-          <AppButton :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'">
+          <AppButton variant="unstyled" :class="{ selected: publish.segment === 'one' }" @click="publish.segment = 'one'">
             <AppIcon name="user" />
             <span>Một người<small>Tìm và cấp cho 1 user cụ thể</small></span>
           </AppButton>
-          <AppButton :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'">
+          <AppButton variant="unstyled" :class="{ selected: publish.segment === 'many' }" @click="publish.segment = 'many'">
             <AppIcon name="users" />
             <span>Nhiều người<small>Chọn danh sách user</small></span>
           </AppButton>
-          <AppButton :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'">
+          <AppButton variant="unstyled" :class="{ selected: publish.segment === 'all' }" @click="publish.segment = 'all'">
             <AppIcon name="globe" />
             <span>Toàn bộ người dùng<small>Phát hàng loạt</small></span>
           </AppButton>
-          <AppButton :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'">
+          <AppButton variant="unstyled" :class="{ selected: publish.segment === 'cond' }" @click="publish.segment = 'cond'">
             <AppIcon name="filter" />
             <span>Theo điều kiện<small>Khách mới, bỏ giỏ...</small></span>
           </AppButton>
@@ -121,9 +121,9 @@ function handleUnlayer() {
             <div v-if="isHtmlContent" class="html-content-badge">
               <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
               <div class="html-actions">
-                <AppButton type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-                <AppButton type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
-                <AppButton type="button" class="mc-cancel" @click="publish.body = ''">Xóa / Soạn lại</AppButton>
+                <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
+                <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
+                <AppButton variant="unstyled" type="button" class="mc-cancel" @click="publish.body = ''">Xóa / Soạn lại</AppButton>
               </div>
             </div>
             <textarea v-else v-model="publish.body" rows="6" />
@@ -131,8 +131,8 @@ function handleUnlayer() {
         </template>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton type="button" class="mc-primary" :disabled="publishing" @click="emit('submit')">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="button" class="mc-primary" :disabled="publishing" @click="emit('submit')">
           <AppIcon name="send" />
           {{ publishing ? 'Đang phát hành...' : 'Xác nhận phát hành' }}
         </AppButton>

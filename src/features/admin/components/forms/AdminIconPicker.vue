@@ -54,7 +54,7 @@ onUnmounted(() => {
     :class="{ 'icon-picker-root--inline': isInline, 'mform-group': !isInline }"
   >
     <label class="mfl">{{ isInline ? 'Icon' : 'Icon danh mục' }}</label>
-    <AppButton
+    <AppButton variant="unstyled"
       type="button"
       class="icon-picker-trigger"
       :class="{ open, 'icon-picker-trigger--inline': isInline }"
@@ -73,7 +73,7 @@ onUnmounted(() => {
       <div v-if="open" class="icon-picker-popover" :class="{ 'icon-picker-popover--inline': isInline }" @click.stop>
         <div v-if="!isInline" class="icon-picker-popover-title">Chọn icon danh mục</div>
         <div class="icon-picker-grid">
-          <AppButton
+          <AppButton variant="unstyled"
             v-for="opt in list"
             :key="opt.id"
             type="button"

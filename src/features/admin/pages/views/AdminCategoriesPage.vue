@@ -34,7 +34,7 @@ async function confirmDelete() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Danh <em>mục</em>" subtitle="8 danh mục sản phẩm">
     <template #actions>
-      <AppButton type="button" class="btn-add" @click="openAdd"><AppIcon name="plus" :size="15" />Thêm danh mục</AppButton>
+      <AppButton variant="unstyled" type="button" class="btn-add" @click="openAdd"><AppIcon name="plus" :size="15" />Thêm danh mục</AppButton>
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm danh mục..." />
@@ -56,8 +56,8 @@ async function confirmDelete() {
     </template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <AppButton type="button" class="ra-btn ra-edit" @click="openEdit(row)"><AppIcon name="edit" :size="14" /></AppButton>
-        <AppButton
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" @click="openEdit(row)"><AppIcon name="edit" :size="14" /></AppButton>
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-del"
           :aria-label="`Xóa danh mục ${row.name}`"

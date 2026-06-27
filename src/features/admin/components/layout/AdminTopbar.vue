@@ -1,12 +1,23 @@
 <script setup>
+import { computed } from 'vue'
+import { storeToRefs } from 'pinia'
 import AppButton from '@shared/ui/AppButton.vue'
 import AppInput from '@shared/ui/AppInput.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminLayout } from '../../composables/useAdminLayout'
 import { useAdminUiStore } from '../../store/adminUiStore'
+import { useThemeStore } from '@shared/stores/themeStore'
 
 const { pageTitleHtml, currentAdmin } = useAdminLayout()
 const ui = useAdminUiStore()
+const themeStore = useThemeStore()
+const { resolvedTheme } = storeToRefs(themeStore)
+
+const themeIcon = computed(() => resolvedTheme.value === 'dark' ? 'moon' : 'sun')
+
+function toggleTheme() {
+  themeStore.setTheme(resolvedTheme.value === 'dark' ? 'light' : 'dark')
+}
 
 function notify() {
   ui.showToast({ icon: 'bell', title: '3 thông báo mới', subtitle: 'Kiểm tra mục thông báo.' })
@@ -30,12 +41,15 @@ function notify() {
         </div>
       </div>
       <div class="tb-date"><AppIcon name="calendar" :size="13" /> 20/05/2026</div>
-      <AppButton type="button" class="tb-btn" @click="notify">
-        <AppIcon name="bell" :size="17" />
+      <AppButton variant="unstyled" type="button" class="tb-btn" title="Đổi giao diện" @click="toggleTheme">
+        <AppIcon :name="themeIcon" :size="20" :stroke-width="2" />
+      </AppButton>
+      <AppButton variant="unstyled" type="button" class="tb-btn" @click="notify">
+        <AppIcon name="bell" :size="20" :stroke-width="2" />
         <span class="tb-notif-dot" />
       </AppButton>
-      <AppButton type="button" class="tb-btn" @click="$router.push({ name: 'admin-my-account' })">
-        <AppIcon name="user" :size="17" />
+      <AppButton variant="unstyled" type="button" class="tb-btn" @click="$router.push({ name: 'admin-my-account' })">
+        <AppIcon name="user" :size="20" :stroke-width="2" />
       </AppButton>
     </div>
   </div>

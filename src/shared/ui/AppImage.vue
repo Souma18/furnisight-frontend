@@ -21,16 +21,25 @@ const props = defineProps({
   },
   lazy: {
     type: Boolean,
-    default: true
+    default: false
   }
 })
 
 const hasError = ref(false)
 const isLoaded = ref(false)
 
+const imgRef = ref(null)
+
 watch(() => props.src, (newSrc) => {
   hasError.value = !newSrc
   isLoaded.value = false
+  
+  // Check if image is already loaded from cache after a brief tick
+  setTimeout(() => {
+    if (imgRef.value && imgRef.value.complete && imgRef.value.naturalWidth > 0) {
+      isLoaded.value = true
+    }
+  }, 50)
 }, { immediate: true })
 
 function onError() {
@@ -49,6 +58,7 @@ function onLoad() {
     :style="$attrs.style"
   >
     <img
+      ref="imgRef"
       v-if="src && !hasError"
       :src="src"
       :alt="alt"
@@ -66,9 +76,9 @@ function onLoad() {
 <style scoped>
 .app-image-wrapper {
   position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: block; /* changed from inline-flex */
+  width: 100%;
+  height: 100%;
   background: var(--bg2, #f5f0e8);
   /* Remove overflow: hidden so border-radius works better if inherited */
 }
@@ -80,8 +90,7 @@ function onLoad() {
   border-radius: inherit; /* inherit from wrapper */
   opacity: 0;
   transition: opacity 0.3s ease;
-  position: absolute;
-  inset: 0;
+  display: block;
 }
 
 .app-image-wrapper.is-loaded .app-image-content {
@@ -115,13 +124,13 @@ function onLoad() {
   100% { background-position: -200% 0; }
 }
 
-[data-theme='dark'] .app-image-wrapper {
+:global([data-theme='dark']) .app-image-wrapper {
   background: var(--bg2-dark, #1b3044);
 }
-[data-theme='dark'] .app-image-fallback {
+:global([data-theme='dark']) .app-image-fallback {
   background: var(--bg2-dark, #1b3044);
 }
-[data-theme='dark'] .skeleton-loading {
+:global([data-theme='dark']) .skeleton-loading {
   background: linear-gradient(90deg, var(--bg2-dark, #1b3044) 25%, var(--border-dark, #2a4054) 50%, var(--bg2-dark, #1b3044) 75%);
   background-size: 200% 100%;
 }

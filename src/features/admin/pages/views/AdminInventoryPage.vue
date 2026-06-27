@@ -35,16 +35,16 @@ watch(reloadTick, load)
     :subtitle="data ? `${groupedProducts.length} sản phẩm · ${data.items?.length || 0} biến thể` : 'Theo dõi tồn kho theo sản phẩm'"
   >
     <template #actions>
-      <AppButton v-if="data" type="button" class="btn-ghost" @click="expandAll">
+      <AppButton variant="unstyled" v-if="data" type="button" class="btn-ghost" @click="expandAll">
         <AppIcon name="chevronDown" :size="13" />Mở tất cả
       </AppButton>
-      <AppButton v-if="data" type="button" class="btn-ghost" @click="collapseAll">
+      <AppButton variant="unstyled" v-if="data" type="button" class="btn-ghost" @click="collapseAll">
         <AppIcon name="chevronRight" :size="13" />Thu tất cả
       </AppButton>
-      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo kho' })">
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo kho' })">
         <AppIcon name="download" :size="15" />Báo cáo
       </AppButton>
-      <AppButton type="button" class="btn-add" @click="ui.openModal('stockIn')">
+      <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('stockIn')">
         <AppIcon name="plus" :size="15" />Nhập kho
       </AppButton>
     </template>
@@ -58,7 +58,7 @@ watch(reloadTick, load)
   <div v-if="data" class="inventory-groups">
     <div v-for="group in groupedProducts" :key="group.productId" class="inv-group">
       <!-- Group header — bấm để toggle -->
-      <AppButton type="button" class="inv-group-header" @click="toggleProduct(group.productId)">
+      <AppButton variant="unstyled" type="button" class="inv-group-header" @click="toggleProduct(group.productId)">
         <span class="inv-group-toggle">
           <AppIcon :name="isExpanded(group.productId) ? 'chevronDown' : 'chevronRight'" :size="14" />
         </span>
@@ -105,7 +105,7 @@ watch(reloadTick, load)
             <span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span>
           </span>
           <span class="ivc ivc-actions">
-            <AppButton type="button" class="ra-btn ra-edit" @click="ui.openModal('stockIn', row)">
+            <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" @click="ui.openModal('stockIn', row)">
               <AppIcon name="warehouse" :size="14" />
             </AppButton>
           </span>
@@ -174,7 +174,7 @@ watch(reloadTick, load)
   text-align: left;
   transition: background .15s;
 }
-.inv-group-header:hover { background: var(--bg2, #faf9f6); }
+.inv-group-header:hover { background: var(--cream2); }
 
 .inv-group-toggle {
   color: var(--text3);
@@ -217,11 +217,11 @@ watch(reloadTick, load)
   gap: 12px;
   padding: 9px 16px 9px 42px;
   border-bottom: 1px solid var(--border);
-  background: var(--bg2, #faf9f6);
+  background: var(--cream2);
   transition: background .12s;
 }
 .inv-variant-row:last-child { border-bottom: none; }
-.inv-variant-row:hover { background: #f3f1ec; }
+.inv-variant-row:hover { background: var(--cream3); }
 
 .ivc { display: flex; align-items: center; }
 .ivc-sku  { width: 120px; flex-shrink: 0; }

@@ -137,7 +137,8 @@ function updateReviewField(field, value) {
           <AppButton
             v-for="star in 5"
             :key="`pick-star-${star}`"
-            type="button"
+            variant="unstyled"
+            size="unstyled"
             class="star-pick"
             :class="{ active: star <= Number(reviewForm.rating || 0) }"
             :aria-label="`Chọn ${star} sao`"

@@ -82,7 +82,7 @@ bindCharts((charts, d) => {
 <template>
   <AdminPageHeader eyebrow="Phân tích" title-html="Thống kê <em>& Báo cáo</em>" subtitle="Tổng hợp dữ liệu kinh doanh">
     <template #actions>
-      <AppButton type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo', subtitle: 'Đang tạo file PDF...' })">
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo', subtitle: 'Đang tạo file PDF...' })">
         <AppIcon name="download" :size="15" />Xuất PDF
       </AppButton>
     </template>

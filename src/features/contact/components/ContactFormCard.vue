@@ -99,7 +99,8 @@ onBeforeUnmount(() => {
       <AppButton
         v-for="intent in config.intents"
         :key="intent.id"
-        type="button"
+        variant="unstyled"
+        size="unstyled"
         class="ct-it-tab"
         :class="{ active: activeIntentId === intent.id }"
         @click="handleIntent(intent.id)"
@@ -155,7 +156,8 @@ onBeforeUnmount(() => {
             <AppButton
               v-for="option in config.budgetOptions"
               :key="option"
-              type="button"
+              variant="unstyled"
+              size="unstyled"
               class="ct-bp"
               :class="{ active: selectedBudget === option }"
               @click="selectedBudget = option"
@@ -214,7 +216,7 @@ onBeforeUnmount(() => {
         ></textarea>
       </div>
 
-      <AppButton class="ct-form-submit" type="submit">
+      <AppButton variant="unstyled" size="unstyled" class="ct-form-submit" type="submit">
         <AppIcon name="mail" :size="18" />
         {{ t('contact.form.submit') }}
       </AppButton>

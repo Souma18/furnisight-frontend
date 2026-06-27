@@ -167,7 +167,7 @@ defineExpose({
     </template>
   </div>
 
-  <AppButton
+  <AppButton variant="unstyled"
     v-if="showScrollBottom"
     type="button"
     class="cw-scroll-bottom"

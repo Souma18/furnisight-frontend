@@ -28,11 +28,9 @@ const {
   formatMoney,
   formatDate,
   formatDateTime,
-  orderItemImage,
   orderItemProductId,
   openProductDetail,
   reviewProduct,
-  hideBrokenImage,
   paymentMethodLabel,
   handleCancel,
   closeCancelDialog,
@@ -366,7 +364,7 @@ const {
   border: 1px solid #e8c5c0;
   border-radius: 9px;
   padding: 0.45rem 0.75rem;
-  background: #fff;
+  background: var(--acc-surface, var(--app-surface));
   color: #c0392b;
   font-size: 0.78rem;
   cursor: pointer;
@@ -423,7 +421,7 @@ const {
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1rem; align-items: start;
 }
 .detail-card {
-  background: #fff; border: 1px solid var(--auth-border, #e0d9ce);
+  background: var(--acc-surface, var(--app-surface)); border: 1px solid var(--acc-line, var(--app-border));
   border-radius: 12px; padding: 1rem; margin-bottom: 0.85rem;
 }
 .detail-card-title {

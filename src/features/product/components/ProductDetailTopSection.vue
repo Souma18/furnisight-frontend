@@ -169,7 +169,8 @@ function handleOpen3D() {
             <AppButton
               v-for="color in product.colors"
               :key="color"
-              type="button"
+              variant="unstyled"
+              size="unstyled"
               :class="['color-btn', { active: selectedColor === color, unavailable: !isValidColor(color) }]"
               @click="handlePickColor(color)"
             >
@@ -184,7 +185,8 @@ function handleOpen3D() {
             <AppButton
               v-for="size in product.sizes"
               :key="size"
-              type="button"
+              variant="unstyled"
+              size="unstyled"
               :class="['size-btn', { active: selectedSize === size, unavailable: !isValidSize(size) }]"
               @click="handlePickSize(size)"
             >
@@ -197,10 +199,10 @@ function handleOpen3D() {
       <div class="pd-buy-actions">
         <div class="qty-row">
           <div class="qty-ctrl">
-            <AppButton type="button" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
+            <AppButton variant="unstyled" size="unstyled" aria-label="Giảm số lượng" :disabled="qty <= 1" @click="emit('change-qty', -1)">
               <AppIcon name="minus" :size="15" />
             </AppButton>
-            <AppInput
+            <input
               :value="qtyDraft"
               type="number"
               inputmode="numeric"
@@ -212,7 +214,7 @@ function handleOpen3D() {
               @blur="commitQtyInput"
               @keydown.enter.prevent="commitQtyInput"
             />
-            <AppButton type="button" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
+            <AppButton variant="unstyled" size="unstyled" aria-label="Tăng số lượng" :disabled="cannotIncrease || isOutOfStock" @click="emit('change-qty', 1)">
               <AppIcon name="plus" :size="15" />
             </AppButton>
           </div>

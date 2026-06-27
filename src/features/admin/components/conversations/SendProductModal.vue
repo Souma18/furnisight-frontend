@@ -90,7 +90,7 @@ function getProductStock(p) {
       <div class="sp-modal" role="dialog" aria-modal="true" @click.stop>
         <div class="sp-head">
           <div class="sp-head-title">Gửi <em>sản phẩm tư vấn</em></div>
-          <AppButton type="button" class="sp-close" aria-label="Đóng" @click="close">
+          <AppButton variant="unstyled" type="button" class="sp-close" aria-label="Đóng" @click="close">
             <AppIcon name="close" :size="14" />
           </AppButton>
         </div>
@@ -102,7 +102,7 @@ function getProductStock(p) {
           </div>
 
           <div class="sp-cats">
-            <AppButton
+            <AppButton variant="unstyled"
               v-for="cat in categories"
               :key="cat.id"
               type="button"
@@ -157,8 +157,8 @@ function getProductStock(p) {
             <template v-else>Chưa chọn sản phẩm</template>
           </div>
           <div class="sp-foot-actions">
-            <AppButton type="button" class="sp-cancel-btn" @click="close">Huỷ</AppButton>
-            <AppButton type="button" class="sp-send-btn" :disabled="!selectedProduct" @click="sendProduct">
+            <AppButton variant="unstyled" type="button" class="sp-cancel-btn" @click="close">Huỷ</AppButton>
+            <AppButton variant="unstyled" type="button" class="sp-send-btn" :disabled="!selectedProduct" @click="sendProduct">
               <AppIcon name="send" /> Gửi sản phẩm
             </AppButton>
           </div>

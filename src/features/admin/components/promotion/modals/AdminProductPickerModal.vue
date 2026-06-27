@@ -25,7 +25,7 @@ const emit = defineEmits([
     <div class="modal-card modal-lg">
       <header>
         <h2>Chọn <em>sản phẩm</em></h2>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="mc-filter compact">
@@ -94,8 +94,8 @@ const emit = defineEmits([
         </div>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton type="button" class="mc-primary" @click="emit('apply')">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="button" class="mc-primary" @click="emit('apply')">
           <AppIcon name="check" />Thêm vào combo
         </AppButton>
       </footer>

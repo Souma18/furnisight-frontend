@@ -30,7 +30,7 @@ defineEmits(['close', 'submit'])
     <div class="modal-card">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>voucher</em></h2>
-        <AppButton type="button" @click="$emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="$emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="form-row">
@@ -89,7 +89,7 @@ defineEmits(['close', 'submit'])
 .modal-card label { display: flex; flex-direction: column; gap: 6px; font-size: 11px; font-weight: 800; color: #5a4a3a; text-transform: uppercase; letter-spacing: .04em; margin: 0; }
 .check-line { flex-direction: row !important; align-items: center; text-transform: none !important; font-size: 13px !important; letter-spacing: 0 !important; }
 .check-line input { width: auto; accent-color: #c9953a; margin: 0; }
-.section-title { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #1a2332; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
+.mc-section-title { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; color: #1a2332; text-transform: uppercase; letter-spacing: .04em; margin-top: 4px; }
 .checkbox-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; }
 
 

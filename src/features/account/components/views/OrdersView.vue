@@ -48,6 +48,8 @@ const {
         v-for="item in filterOptions"
         :key="item"
         type="button"
+        variant="unstyled"
+        class="order-filter-btn"
         :class="{ active: filter === item }"
         @click="filter = item"
       >
@@ -108,16 +110,19 @@ const {
   gap: 0.4rem;
 }
 
-.orders-filters button {
-  border: 1px solid var(--auth-border, #e0d9ce);
-  background: var(--account-surface, #fff);
+.orders-filters .order-filter-btn {
+  border: 1px solid var(--acc-line, var(--app-border));
+  background: var(--acc-surface, var(--app-surface));
+  color: var(--acc-muted, var(--app-text-muted));
   border-radius: 999px;
   padding: 0.35rem 0.7rem;
   font-size: 0.78rem;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
 }
 
-.orders-filters button.active {
+.orders-filters .order-filter-btn.active {
   border-color: var(--auth-brand-start, #c9922a);
   color: var(--auth-brand-start, #c9922a);
 }

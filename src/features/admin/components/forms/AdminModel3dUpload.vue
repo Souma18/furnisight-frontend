@@ -218,7 +218,7 @@ onBeforeUnmount(() => {
   <div class="mform-group admin-model-upload">
     <div class="admin-model-upload__head">
       <label class="mfl">Model 3D (GLB, tối đa 100 MB)</label>
-      <AppButton
+      <AppButton variant="unstyled"
         v-if="fileName || previewUrl"
         type="button"
         class="admin-model-upload__remove"
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
 
     <div v-if="error" class="admin-model-upload__error" role="alert">
       <span><AppIcon name="alert" :size="14" />{{ error }}</span>
-      <AppButton v-if="retryable" type="button" :disabled="uploading" @click="emit('retry')">
+      <AppButton variant="unstyled" v-if="retryable" type="button" :disabled="uploading" @click="emit('retry')">
         <AppIcon name="refresh" :size="13" />
         Thử lại
       </AppButton>

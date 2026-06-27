@@ -54,15 +54,15 @@ function onDrop(index) {
       >
         <AppImage :src="url" alt=""  />
         <div v-if="multiple" class="product-image-order">
-          <AppButton type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
+          <AppButton variant="unstyled" type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
             <AppIcon name="chevron-left" :size="12" />
           </AppButton>
           <span>{{ index + 1 }}</span>
-          <AppButton type="button" :disabled="index === images.length - 1" @click="emit('move', index, index + 1)">
+          <AppButton variant="unstyled" type="button" :disabled="index === images.length - 1" @click="emit('move', index, index + 1)">
             <AppIcon name="chevron-right" :size="12" />
           </AppButton>
         </div>
-        <AppButton type="button" class="product-image-remove" @click="emit('remove', url)">
+        <AppButton variant="unstyled" type="button" class="product-image-remove" @click="emit('remove', url)">
           <AppIcon name="x" :size="12" />
         </AppButton>
       </div>

@@ -11,8 +11,7 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
   <form class="form" @submit.prevent="submitForgot">
     <div class="intro">
       <p class="title">Đặt lại mật khẩu</p>
-      <p class="desc" v-if="form.step === 1">Chọn phương thức và nhận mã xác nhận.</p>
-      <p class="desc" v-else>Tạo mật khẩu mới cho tài khoản của bạn.</p>
+      <p class="desc" v-if="form.step !== 1">Tạo mật khẩu mới cho tài khoản của bạn.</p>
     </div>
 
     <template v-if="form.step === 1">
@@ -24,7 +23,7 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
           placeholder="hello@email.com"
           required 
         />
-        <AppButton type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
+        <AppButton variant="unstyled" type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
           {{ (loading && !form.code) ? 'Đang gửi...' : 'Gửi mã' }}
         </AppButton>
       </div>
@@ -57,7 +56,11 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
 
 <style scoped>
 
-.input-with-btn input {
+.input-with-btn {
+  display: flex;
+  gap: 0.5rem;
+}
+.input-with-btn :deep(input) {
   flex: 1;
   min-width: 0; /* prevent input from blowing out flex container */
 }

@@ -9,11 +9,11 @@ const props = defineProps({
   },
   variant: {
     type: String,
-    default: 'primary', // primary, outline, cancel, danger, ghost
+    default: 'primary', // primary, outline, cancel, danger, ghost, unstyled
   },
   size: {
     type: String,
-    default: 'md', // sm, md, lg
+    default: 'md', // sm, md, lg, unstyled
   },
   disabled: {
     type: Boolean,
@@ -33,11 +33,11 @@ const emit = defineEmits(['click'])
 
 const buttonClasses = computed(() => {
   return [
-    'app-btn',
-    `app-btn--${props.variant}`,
-    `app-btn--${props.size}`,
+    props.variant === 'unstyled' ? '' : 'app-btn',
+    props.variant === 'unstyled' ? '' : `app-btn--${props.variant}`,
+    props.size === 'unstyled' || props.variant === 'unstyled' ? '' : `app-btn--${props.size}`,
     { 'app-btn--loading': props.loading }
-  ]
+  ].filter(Boolean)
 })
 </script>
 

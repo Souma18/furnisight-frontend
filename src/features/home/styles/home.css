@@ -651,17 +651,17 @@
 }
 
 .testi-card {
-  background: rgba(255, 253, 249, 0.78);
+  background: color-mix(in srgb, var(--home-paper) 78%, transparent);
   border: 1px solid var(--home-line);
   border-radius: 8px;
   display: grid;
   gap: 16px;
-  padding: 20px;
+  padding: 24px;
 }
 
 .testi-text {
   color: var(--home-muted);
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.65;
   margin: 0;
 }

@@ -43,7 +43,7 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
     <div class="modal-card">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>mẫu thông báo</em></h2>
-        <AppButton type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="form-row">
@@ -61,14 +61,14 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
           <div v-if="isHtmlContent" class="html-content-badge">
             <AppIcon name="layout" :size="16" /> Đã có thiết kế mẫu HTML
             <div class="html-actions">
-              <AppButton type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-              <AppButton type="button" class="mc-outline" @click="handleUnlayer()">Sửa thiết kế</AppButton>
-              <AppButton type="button" class="mc-cancel" @click="form.bodyTemplate = ''">Xóa / Soạn lại</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer()">Sửa thiết kế</AppButton>
+              <AppButton variant="unstyled" type="button" class="mc-cancel" @click="form.bodyTemplate = ''">Xóa / Soạn lại</AppButton>
             </div>
           </div>
           <textarea v-else v-model="form.bodyTemplate" rows="4" placeholder="Nhập nội dung mẫu. Có thể chứa biến như {{user_name}}..." />
         </label>
-        <AppButton
+        <AppButton variant="unstyled"
           v-if="!isHtmlContent"
           type="button"
           class="mc-outline"
@@ -79,8 +79,8 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
         </AppButton>
       </div>
       <footer>
-        <AppButton type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton type="submit" class="mc-primary">
+        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="submit" class="mc-primary">
           <AppIcon name="save" />Lưu mẫu thông báo
         </AppButton>
       </footer>

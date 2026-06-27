@@ -233,7 +233,7 @@ watch(
         <div v-if="form.imageUrl" class="product-image-grid product-image-grid--single">
           <div class="product-image-thumb">
             <AppImage :src="form.imageUrl" alt=""  />
-            <AppButton type="button" class="product-image-remove" @click="removeCategoryImage">
+            <AppButton variant="unstyled" type="button" class="product-image-remove" @click="removeCategoryImage">
               <AppIcon name="x" :size="12" />
             </AppButton>
           </div>
@@ -257,16 +257,16 @@ watch(
       </div>
       <div class="mform-note">
         <AppIcon name="warehouse" :size="13" style="margin-right:5px;opacity:.7" />
-        Tồn kho được quản lý tại trang <strong>Kho hàng</strong> · thêm hàng bằng chức năng &ldquo;Nhập kho&rdquo;
+        Tồn kho được quản lý tại trang&nbsp;<strong>Kho hàng</strong> · thêm hàng bằng chức năng &ldquo;Nhập kho&rdquo;
       </div>
       <div class="mform-group">
         <div class="variant-head">
           <label class="mfl">Biến thể sản phẩm</label>
-          <AppButton type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm biến thể</AppButton>
+          <AppButton variant="unstyled" type="button" class="variant-add-btn" @click="addVariant"><AppIcon name="plus" :size="13" />Thêm biến thể</AppButton>
         </div>
         <div class="variant-list">
           <div v-for="(variant, index) in form.variants" :key="variant.id || index" class="variant-row">
-            <AppButton type="button" class="variant-summary" :class="{ active: form.activeVariantIndex === index }" @click="selectVariant(index)">
+            <AppButton variant="unstyled" type="button" class="variant-summary" :class="{ active: form.activeVariantIndex === index }" @click="selectVariant(index)">
               <span class="variant-summary-main">
                 <strong>{{ variantSummary(variant, index) }}</strong>
                 <small>{{ variantDisplayCode(variant) }}</small>
@@ -331,7 +331,7 @@ watch(
                 @preview-ready="() => onModelPreviewReady(index)"
                 @preview-loading="loading => onModelPreviewLoading(loading, index)"
               />
-              <AppButton type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
+              <AppButton variant="unstyled" type="button" class="variant-remove-btn" :disabled="form.variants.length <= 1" @click="removeVariant(index)">
                 <AppIcon name="trash2" :size="13" />Xóa biến thể
               </AppButton>
             </div>
@@ -455,12 +455,12 @@ watch(
   align-items: center;
   font-size: 11.5px;
   color: var(--text3);
-  background: var(--bg2, #f7f5f0);
+  background: var(--cream2, #f7f5f0);
   border: 1px solid var(--border);
   border-radius: 7px;
-  padding: 7px 10px;
-  margin-top: 2px;
-  margin-bottom: 6px;
+  padding: 8px 12px;
+  margin-top: 10px;
+  margin-bottom: 16px;
 }
 .user-view-head { display: flex; align-items: center; gap: 12px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
 .user-view-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--navy); color: #fff; display: grid; place-items: center; font-weight: 700; }
@@ -468,7 +468,7 @@ watch(
 .user-view-head strong { font-size: 15px; }
 .user-view-head span { color: var(--text3); font-size: 12px; }
 .user-view-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 16px 0 0; }
-.user-view-grid div { padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg2, #f7f5f0); }
+.user-view-grid div { padding: 11px; border: 1px solid var(--border); border-radius: 8px; background: var(--cream2, #f7f5f0); }
 .user-view-grid dt { color: var(--text3); font-size: 11px; }
 .user-view-grid dd { margin: 5px 0 0; font-size: 13px; font-weight: 600; }
 </style>

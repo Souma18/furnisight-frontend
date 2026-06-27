@@ -10,12 +10,12 @@
   left: 0;
   right: var(--app-main-scrollbar-width, 0px);
   z-index: 120;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 1rem;
-  min-height: 58px;
-  padding: 0.55rem clamp(0.85rem, 2vw, 1.35rem);
+  gap: 0;
+  height: 58px;
+  padding: 0 clamp(0.85rem, 2vw, 1.35rem);
   background:
     radial-gradient(circle at 12% 0%, rgba(229, 184, 74, 0.14), transparent 34%),
     linear-gradient(180deg, rgba(18, 32, 46, 0.98) 0%, rgba(13, 42, 61, 0.98) 100%);
@@ -23,6 +23,7 @@
   box-shadow: 0 12px 32px rgba(18, 32, 46, 0.16);
   box-sizing: border-box;
   backdrop-filter: blur(14px);
+  overflow: visible;
 }
 
 .brand {
@@ -30,6 +31,7 @@
   align-items: center;
   gap: 0.55rem;
   text-decoration: none;
+  flex-shrink: 0;
   min-width: 0;
 }
 
@@ -64,7 +66,7 @@
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  justify-self: center;
+  flex: 1;
   gap: 0.25rem;
   min-width: 0;
   padding: 0.2rem;
@@ -72,6 +74,8 @@
   border-radius: 8px;
   background: rgba(255, 250, 241, 0.045);
   flex-wrap: nowrap;
+  margin: 0 1rem;
+  overflow: hidden;
 }
 
 .nav a {
@@ -96,16 +100,18 @@
 }
 
 .nav .nav-pill {
-  background: var(--header-cream);
-  color: var(--header-ink);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+  background: rgba(229, 184, 74, 0.15);
+  color: var(--header-gold-bright);
+  box-shadow: none;
 }
 
-.actions {
-  display: inline-flex;
+.header-actions {
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  justify-self: end;
+  flex-shrink: 0;
   gap: 0.42rem;
+  flex-wrap: nowrap;
 }
 
 .notif-wrap {
@@ -117,16 +123,19 @@
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: 0.5rem;
   min-height: 36px;
   background: linear-gradient(135deg, var(--header-gold-bright), var(--header-gold));
   color: var(--header-ink);
   text-decoration: none;
   padding: 0 0.82rem;
-  border: 1px solid rgba(255, 250, 241, 0.14);
+  border: none;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 760;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.14);
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
 }
 
@@ -136,7 +145,7 @@
   color: var(--header-ink);
   transform: translateY(-1px);
   outline: none;
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
 }
 
 .visualize-btn:active {
@@ -445,17 +454,21 @@
 }
 
 .mobile-nav {
-  grid-column: 1 / -1;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-  margin-top: 0.5rem;
   padding: 0.65rem;
-  border: 1px solid rgba(255, 250, 241, 0.1);
-  border-radius: 8px;
+  border-bottom: 1px solid rgba(229, 184, 74, 0.18);
+  border-top: 1px solid rgba(255, 250, 241, 0.06);
   background: rgba(9, 31, 46, 0.98);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  animation: slideDown 0.25s ease-out forwards;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(14px);
+  animation: slideDown 0.22s ease-out forwards;
+  z-index: 10;
 }
 
 @keyframes slideDown {
@@ -496,9 +509,8 @@
 
 @media (max-width: 980px) {
   .header {
-    grid-template-columns: auto 1fr;
-    justify-items: stretch;
-    gap: 0.75rem;
+    padding: 0 0.75rem;
+    gap: 0;
   }
 
   .nav {
@@ -513,8 +525,8 @@
     display: inline-flex;
   }
 
-  .actions {
-    justify-self: end;
+  .header-actions {
+    margin-left: auto;
   }
 
   .notif-dropdown {
@@ -533,7 +545,7 @@
     letter-spacing: 0.035em;
   }
 
-  .actions {
+  .header-actions {
     gap: 0.32rem;
   }
 

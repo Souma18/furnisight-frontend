@@ -185,6 +185,10 @@ export function useOrderDetailView(notify) {
       : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || t('account.orders.unknown'))
   }
 
+  function orderItemProductId(item) {
+    return item?.productSnapshot?.productId || item?.productId || ''
+  }
+
   return {
     order,
     backToOrders,
@@ -206,11 +210,9 @@ export function useOrderDetailView(notify) {
     formatMoney,
     formatDate,
     formatDateTime,
-    orderItemImage,
     orderItemProductId,
     openProductDetail,
     reviewProduct,
-    hideBrokenImage,
     paymentMethodLabel,
     handleCancel,
     closeCancelDialog,

@@ -40,7 +40,7 @@ function chipClass(chip) {
         />
       </label>
       <div class="pl-chips">
-        <AppButton
+        <button
           v-for="chip in quickFilters"
           :key="chip.slug ?? chip.label"
           type="button"
@@ -48,30 +48,30 @@ function chipClass(chip) {
           @click="emit('toggle-category', chip)"
         >
           {{ chip.label }}
-        </AppButton>
+        </button>
       </div>
-      <AppButton type="button" class="pl-filter-trigger" @click="emit('open-filters')">
+      <button type="button" class="pl-filter-trigger" @click="emit('open-filters')">
         <AppIcon name="filter" :size="16" />
         {{ t('products.filters') }}
         <span v-if="activeFilterCount" class="pl-filter-trigger__count">{{ activeFilterCount }}</span>
-      </AppButton>
+      </button>
       <div class="pl-view-toggle">
-        <AppButton
+        <button
           type="button"
           :class="{ active: viewMode === 'grid' }"
           :aria-label="t('products.gridView')"
           @click="emit('update:view-mode', 'grid')"
         >
           <AppIcon name="layoutDashboard" :size="16" />
-        </AppButton>
-        <AppButton
+        </button>
+        <button
           type="button"
           :class="{ active: viewMode === 'list' }"
           :aria-label="t('products.listView')"
           @click="emit('update:view-mode', 'list')"
         >
           <AppIcon name="list" :size="16" />
-        </AppButton>
+        </button>
       </div>
     </div>
   </div>

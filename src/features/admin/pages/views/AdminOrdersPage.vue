@@ -152,21 +152,21 @@ function resetFilters() {
       <option v-for="status in statusOptions" :key="status" :value="status">{{ status }}</option>
     </select>
     <input v-model="dateFilter" class="filter-select filter-date" type="date" aria-label="Lọc theo ngày" />
-    <AppButton v-if="hasActiveFilters" type="button" class="filter-reset" @click="resetFilters">
+    <AppButton variant="unstyled" v-if="hasActiveFilters" type="button" class="filter-reset" @click="resetFilters">
       <AppIcon name="refresh" :size="14" />
       Xóa lọc
     </AppButton>
   </AdminFilterBar>
   <AdminDataTable :columns="columns" :rows="filteredOrders">
     <template #cell-orderCode="{ row }">
-      <AppButton type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</AppButton>
+      <AppButton variant="unstyled" type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</AppButton>
     </template>
     <template #cell-total="{ row }"><span style="font-weight:600;color:var(--gold)">{{ formatPrice(row.total) }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <AppButton type="button" class="ra-btn ra-view" @click="openDetail(row)"><AppIcon name="eye" :size="14" /></AppButton>
-        <AppButton
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-view" @click="openDetail(row)"><AppIcon name="eye" :size="14" /></AppButton>
+        <AppButton variant="unstyled"
           v-if="canUpdateStatus(row)"
           type="button"
           class="ra-btn ra-edit"
@@ -175,7 +175,7 @@ function resetFilters() {
         >
           <AppIcon name="edit" :size="14" />
         </AppButton>
-        <AppButton
+        <AppButton variant="unstyled"
           v-if="canCancelOrder(row)"
           type="button"
           class="ra-btn ra-cancel"

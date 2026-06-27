@@ -40,7 +40,7 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
         <option value="inactive">Đang tắt</option>
         <option value="expired">Hết hạn</option>
       </select>
-      <AppButton type="button" class="mc-outline" @click="emit('load')">
+      <AppButton variant="unstyled" type="button" class="mc-outline" @click="emit('load')">
         <AppIcon name="search" :size="14" />Lọc
       </AppButton>
     </div>
@@ -90,16 +90,16 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
             </td>
             <td>
               <div class="mc-actions">
-                <AppButton type="button" title="Xem/Sửa" @click="emit('open-modal', row)">
+                <AppButton variant="unstyled" type="button" title="Xem/Sửa" @click="emit('open-modal', row)">
                   <AppIcon name="eye" :size="14" />
                 </AppButton>
-                <AppButton type="button" title="Sửa" @click="emit('open-modal', row)">
+                <AppButton variant="unstyled" type="button" title="Sửa" @click="emit('open-modal', row)">
                   <AppIcon name="edit" :size="14" />
                 </AppButton>
-                <AppButton type="button" class="publish" title="Phát hành" @click="emit('open-publish', row)">
+                <AppButton variant="unstyled" type="button" class="publish" title="Phát hành" @click="emit('open-publish', row)">
                   <AppIcon name="send" :size="14" />
                 </AppButton>
-                <AppButton type="button" class="danger" title="Xóa" @click="emit('delete', row)">
+                <AppButton variant="unstyled" type="button" class="danger" title="Xóa" @click="emit('delete', row)">
                   <AppIcon name="trash" :size="14" />
                 </AppButton>
               </div>
@@ -111,8 +111,8 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
     <div class="pagination">
       <span>Hiển thị {{ vouchers.length }} voucher</span>
       <div>
-        <AppButton>1</AppButton>
-        <AppButton disabled>2</AppButton>
+        <AppButton variant="unstyled">1</AppButton>
+        <AppButton variant="unstyled" disabled>2</AppButton>
       </div>
     </div>
   </section>

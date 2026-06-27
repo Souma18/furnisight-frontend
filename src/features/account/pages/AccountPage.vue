@@ -16,9 +16,6 @@ import '../assets/account-shared.css'
 
 import { defineAsyncComponent } from 'vue'
 
-const AddressView = defineAsyncComponent(() => import('../components/views/AddressView.vue'))
-const SecurityView = defineAsyncComponent(() => import('../components/views/SecurityView.vue'))
-
 const { logout: authLogout } = useAuth()
 const { t } = useI18n()
 
@@ -75,8 +72,6 @@ async function handleLogout() {
         v-else-if="activeView === 'wishlist'"
         @notify="showToast"
       />
-      <AddressView v-else-if="activeView === 'address'" @notify="showToast" />
-      <SecurityView v-else-if="activeView === 'security'" @notify="showToast" />
       <SettingsView v-else-if="activeView === 'settings'" />
     </main>
 

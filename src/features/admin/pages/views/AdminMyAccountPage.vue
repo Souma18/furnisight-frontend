@@ -123,7 +123,7 @@ const menuItems = [
         <div class="acct-stat"><div class="acct-stat-val green">12</div><div class="acct-stat-label">Module</div></div>
         <div class="acct-stat"><div class="acct-stat-val">1</div><div class="acct-stat-label">Vai trò</div></div>
       </div>
-      <AppButton
+      <AppButton variant="unstyled"
         v-for="m in menuItems"
         :key="m.id"
         type="button"
@@ -139,7 +139,7 @@ const menuItems = [
       <p v-if="loading" class="account-state">Đang tải hồ sơ...</p>
       <div v-else-if="loadError" class="account-state account-state--error">
         <span>{{ loadError }}</span>
-        <AppButton type="button" class="btn-export" @click="loadProfile">Thử lại</AppButton>
+        <AppButton variant="unstyled" type="button" class="btn-export" @click="loadProfile">Thử lại</AppButton>
       </div>
 
       <template v-else-if="activeTab === 'profile'">
@@ -180,8 +180,8 @@ const menuItems = [
         </div>
 
         <div class="acct-form-actions">
-          <AppButton type="button" class="btn-export" :disabled="saving" @click="resetProfile"><AppIcon name="close" :size="14" />Hủy</AppButton>
-          <AppButton type="button" class="btn-add" :disabled="saving" @click="saveProfile">
+          <AppButton variant="unstyled" type="button" class="btn-export" :disabled="saving" @click="resetProfile"><AppIcon name="close" :size="14" />Hủy</AppButton>
+          <AppButton variant="unstyled" type="button" class="btn-add" :disabled="saving" @click="saveProfile">
             <AppIcon name="check" :size="14" />{{ saving ? 'Đang lưu...' : 'Lưu thay đổi' }}
           </AppButton>
         </div>
@@ -194,7 +194,7 @@ const menuItems = [
           <div class="form-group password-admin-field"><label class="form-label">Mật khẩu mới</label><PasswordField v-model="pwdForm.newPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
           <div class="form-group password-admin-field"><label class="form-label">Xác nhận mật khẩu</label><PasswordField v-model="pwdForm.confirmPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
           <div class="form-group full acct-form-actions">
-            <AppButton type="submit" class="btn-add" :disabled="pwdSaving">Cập nhật mật khẩu</AppButton>
+            <AppButton variant="unstyled" type="submit" class="btn-add" :disabled="pwdSaving">Cập nhật mật khẩu</AppButton>
           </div>
         </form>
       </template>

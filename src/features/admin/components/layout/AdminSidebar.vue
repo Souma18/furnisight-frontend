@@ -16,7 +16,7 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
       </div>
     </div>
 
-    <AppButton type="button" class="sb-profile" @click="go('admin-my-account')">
+    <AppButton variant="unstyled" size="unstyled" type="button" class="sb-profile" @click="go('admin-my-account')">
       <div class="sb-av">{{ simUser.av }}</div>
       <div>
         <div class="sb-profile-name">{{ simUser.name }}</div>
@@ -29,6 +29,8 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
       <div v-for="section in navSections" :key="section.label" class="sb-section">
         <div class="sb-section-label">{{ section.label }}</div>
         <AppButton
+          variant="unstyled"
+          size="unstyled"
           v-for="item in section.items"
           :key="item.name"
           type="button"
@@ -48,7 +50,7 @@ const { navSections, simUser, navBadge, isActive, go, logout } = useAdminLayout(
     </nav>
 
     <div class="sb-footer">
-      <AppButton type="button" class="sb-logout" @click="logout">
+      <AppButton variant="unstyled" size="unstyled" type="button" class="sb-logout" @click="logout">
         <AppIcon name="logout" :size="16" />
         Đăng xuất
       </AppButton>

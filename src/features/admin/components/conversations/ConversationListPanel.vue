@@ -82,7 +82,7 @@ onUnmounted(() => {
           <AppIcon name="messageSquare" /> Hội thoại
         </div>
         <div class="clp-hdr-actions">
-          <AppButton
+          <AppButton variant="unstyled"
             class="clp-hdr-btn"
             :class="{ active: searchOpen }"
             title="Tìm kiếm hội thoại"
@@ -90,10 +90,10 @@ onUnmounted(() => {
           >
             <AppIcon name="search" />
           </AppButton>
-          <AppButton class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
+          <AppButton variant="unstyled" class="clp-hdr-btn" title="Quản lý template" @click="emit('open-templates')">
             <AppIcon name="fileText" />
           </AppButton>
-          <AppButton class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
+          <AppButton variant="unstyled" class="clp-hdr-btn" title="Thêm template" @click="emit('add-template')">
             <AppIcon name="plus" />
           </AppButton>
         </div>
@@ -146,7 +146,7 @@ onUnmounted(() => {
 
     <div class="clp-sort-bar">
       <div class="csb-label">Danh sách</div>
-      <AppButton type="button" class="csb-sort">
+      <AppButton variant="unstyled" type="button" class="csb-sort">
         Mới nhất <AppIcon name="chevronDown" />
       </AppButton>
     </div>

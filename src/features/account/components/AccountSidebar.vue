@@ -25,8 +25,6 @@ const { t } = useI18n()
 
 const navItems = computed(() => [
   { key: 'profile', label: t('account.nav.profile'), icon: 'user' },
-  { key: 'address', label: t('account.nav.address', 'Sổ địa chỉ'), icon: 'mapPin' },
-  { key: 'security', label: t('account.nav.security', 'Bảo mật'), icon: 'shield' },
   { key: 'bell', label: t('account.nav.notifications'), icon: 'bell' },
   { key: 'cart', label: t('account.nav.cart'), icon: 'cart' },
   { key: 'orders', label: t('account.nav.orders'), icon: 'box' },

@@ -87,7 +87,7 @@ function handleAddToCart(product) {
       FurniSight Support đang trực tuyến!
     </div>
 
-    <AppButton
+    <button
       type="button"
       class="chat-fab"
       :class="{ open: isOpen, dragging }"
@@ -106,7 +106,7 @@ function handleAddToCart(product) {
         <AppIcon name="close" :size="22" />
       </span>
       <span v-if="hasUnread && !isOpen" class="chat-fab-badge">{{ unreadCount }}</span>
-    </AppButton>
+    </button>
 
     <div
       class="chat-modal"
@@ -132,7 +132,7 @@ function handleAddToCart(product) {
         </div>
 
         <div class="chat-header-actions">
-          <AppButton
+          <button
             type="button"
             class="chat-hdr-btn"
             :class="{ active: search.visible }"
@@ -141,10 +141,10 @@ function handleAddToCart(product) {
             @click="toggleSearch"
           >
             <AppIcon name="search" :size="15" />
-          </AppButton>
-          <AppButton type="button" class="chat-hdr-btn" title="Thu nhỏ" aria-label="Thu nhỏ" @click="closeChat">
+          </button>
+          <button type="button" class="chat-hdr-btn" title="Thu nhỏ" aria-label="Thu nhỏ" @click="closeChat">
             <AppIcon name="minus" :size="15" />
-          </AppButton>
+          </button>
         </div>
       </header>
 
@@ -162,20 +162,20 @@ function handleAddToCart(product) {
         <div v-if="search.query.trim()" class="chat-search-actions">
           <small v-if="search.error">{{ search.error }}</small>
           <span v-else>{{ searchCountLabel }}</span>
-          <AppButton type="button" :disabled="!search.resultIds.length" title="Kết quả trước" @click="prevSearchResult">
+          <button type="button" :disabled="!search.resultIds.length" title="Kết quả trước" @click="prevSearchResult">
             <AppIcon name="chevronUp" :size="14" />
-          </AppButton>
-          <AppButton type="button" :disabled="!search.resultIds.length" title="Kết quả tiếp" @click="nextSearchResult">
+          </button>
+          <button type="button" :disabled="!search.resultIds.length" title="Kết quả tiếp" @click="nextSearchResult">
             <AppIcon name="chevronDown" :size="14" />
-          </AppButton>
-          <AppButton type="button" title="Đóng tìm kiếm" @click="closeSearch">
+          </button>
+          <button type="button" title="Đóng tìm kiếm" @click="closeSearch">
             <AppIcon name="x" :size="14" />
-          </AppButton>
+          </button>
         </div>
       </div>
 
       <div class="chat-chips">
-        <AppButton
+        <button
           v-for="chip in quickChips"
           :key="chip.id"
           type="button"
@@ -183,7 +183,7 @@ function handleAddToCart(product) {
           @click="quickSend(chip.text)"
         >
           {{ chip.label }}
-        </AppButton>
+        </button>
       </div>
 
       <div ref="messagesRef" class="chat-messages" @scroll="handleMessagesScroll">
@@ -218,7 +218,7 @@ function handleAddToCart(product) {
         </div>
       </div>
 
-      <AppButton
+      <button
         v-if="showScrollBottom"
         type="button"
         class="chat-scroll-bottom"
@@ -227,7 +227,7 @@ function handleAddToCart(product) {
         @click="scrollToBottomNow"
       >
         <AppIcon name="chevronDown" :size="18" />
-      </AppButton>
+      </button>
 
       <footer class="chat-input-bar">
         <div v-if="selectedAttachments.length" class="chat-attachment-preview-list">
@@ -240,7 +240,7 @@ function handleAddToCart(product) {
             <AppImage v-if="attachment.isImage" :src="attachment.previewUrl" alt=""  />
             <AppIcon v-else name="paperclip" :size="15" />
             <span>{{ attachment.name }}</span>
-            <AppButton
+            <button
               type="button"
               title="Bỏ đính kèm"
               aria-label="Bỏ đính kèm"
@@ -248,7 +248,7 @@ function handleAddToCart(product) {
               @click="removeAttachment(attachment.id)"
             >
               <AppIcon name="x" :size="13" />
-            </AppButton>
+            </button>
           </div>
         </div>
         <div class="chat-input-row">
@@ -278,17 +278,17 @@ function handleAddToCart(product) {
               @input="resizeTextarea"
               :disabled="uploadingAttachment"
             />
-            <AppButton type="button" class="chat-input-attach" title="Đính kèm file" aria-label="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile">
+            <button type="button" class="chat-input-attach" title="Đính kèm file" aria-label="Đính kèm file" :disabled="uploadingAttachment" @click="chooseFile">
               <AppIcon name="paperclip" :size="17" />
-            </AppButton>
-            <AppButton type="button" class="chat-input-attach" title="Gửi ảnh" aria-label="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage">
+            </button>
+            <button type="button" class="chat-input-attach" title="Gửi ảnh" aria-label="Gửi ảnh" :disabled="uploadingAttachment" @click="chooseImage">
               <AppIcon name="image" :size="17" />
-            </AppButton>
+            </button>
           </div>
-          <AppButton type="button" class="chat-send-btn" aria-label="Gửi" :disabled="uploadingAttachment" @click="sendDraft">
+          <button type="button" class="chat-send-btn" aria-label="Gửi" :disabled="uploadingAttachment" @click="sendDraft">
             <span v-if="uploadingAttachment" class="chat-send-spinner" aria-hidden="true"></span>
             <AppIcon v-else name="send" :size="18" />
-          </AppButton>
+          </button>
         </div>
         <div class="chat-input-hint">
           <span>
