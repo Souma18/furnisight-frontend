@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -40,7 +41,7 @@ function handleApplyCode() {
 </script>
 
 <template>
-  <div v-if="open" class="co-modal-backdrop" @click.self="$emit('close')">
+  <AppModal :open="open" width="500px" no-bg @close="$emit('close')">
     <div class="co-modal" role="dialog" aria-modal="true">
       <div class="co-modal-head">
         <p style="font-size: 1rem; font-weight: 600">Chọn <em style="font-style: italic; color: var(--co-gold, #c9922a)">Voucher</em></p>
@@ -89,5 +90,5 @@ function handleApplyCode() {
         </button>
       </div>
     </div>
-  </div>
+  </AppModal>
 </template>

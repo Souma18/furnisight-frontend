@@ -1,5 +1,6 @@
 <script setup>
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
   open: { type: Boolean, default: false },
@@ -11,14 +12,16 @@ defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
-function onOverlayClick(event) {
-  if (event.target === event.currentTarget) emit('close')
-}
 </script>
 
 <template>
-  <div class="modal-overlay" :class="{ open }" @click="onOverlayClick">
-    <div class="modal-box" :class="{ 'modal-box--wide': wide }" role="dialog" @click.stop>
+  <AppModal
+    :open="open"
+    :width="wide ? '800px' : '500px'"
+    no-bg
+    @close="emit('close')"
+  >
+    <div class="modal-box" role="dialog" @click.stop>
       <div class="modal-head">
         <div class="modal-title" v-html="titleHtml" />
         <button type="button" class="modal-close" aria-label="Đóng" @click="emit('close')">
@@ -36,5 +39,5 @@ function onOverlayClick(event) {
         </button>
       </div>
     </div>
-  </div>
+  </AppModal>
 </template>

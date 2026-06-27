@@ -8,7 +8,6 @@ import CheckoutShopCard from '../components/CheckoutShopCard.vue'
 import CheckoutStepsBar from '../components/CheckoutStepsBar.vue'
 import CheckoutSuccessOverlay from '../components/CheckoutSuccessOverlay.vue'
 import CheckoutSummaryCard from '../components/CheckoutSummaryCard.vue'
-import CheckoutToast from '../components/CheckoutToast.vue'
 import CheckoutToolbar from '../components/CheckoutToolbar.vue'
 import CheckoutVoucherCard from '../components/CheckoutVoucherCard.vue'
 import CheckoutVoucherModal from '../components/CheckoutVoucherModal.vue'
@@ -30,7 +29,6 @@ const {
   loading,
   placing,
   showSuccess,
-  toast,
   shippingOptions,
   paymentMethods,
   shopVouchers,
@@ -204,11 +202,5 @@ function handleContinueShopping() {
       @continue-shopping="handleContinueShopping"
     />
 
-    <CheckoutToast
-      :show="toast.show"
-      :icon="toast.icon"
-      :title="toast.title"
-      :subtitle="toast.subtitle"
-    />
   </section>
 </template>

@@ -1,6 +1,7 @@
 <script setup>
 import { nextTick, onBeforeUnmount, ref, watch } from "vue";
 import AppIcon from "@shared/ui/AppIcon.vue";
+import AppModal from "@shared/ui/AppModal.vue";
 import {
   Scene,
   PerspectiveCamera,
@@ -164,7 +165,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="pd-modal" :class="{ open }" @click.self="emit('close')">
+  <AppModal :open="open" width="700px" no-bg @close="emit('close')">
     <div class="box">
       <div class="head">
         <strong>Trực quan 3D – {{ productName }}</strong>
@@ -225,5 +226,5 @@ onBeforeUnmount(() => {
         </p>
       </div>
     </div>
-  </div>
+  </AppModal>
 </template>

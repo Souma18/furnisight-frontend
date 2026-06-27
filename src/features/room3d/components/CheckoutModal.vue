@@ -1,6 +1,6 @@
 <script setup>
-import { NButton, NInput, NModal } from 'naive-ui'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
   show: {
@@ -25,7 +25,14 @@ defineEmits(['update:show', 'submit'])
 </script>
 
 <template>
-  <NModal :show="show" preset="card" title="Xác nhận đơn hàng" style="width: 560px" @update:show="$emit('update:show', $event)">
+  <AppModal :open="show" width="560px" @close="$emit('update:show', false)">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Xác nhận đơn hàng</h3>
+        <button type="button" class="modal-close" aria-label="Đóng" @click="$emit('update:show', false)">
+          <AppIcon name="close" :size="16" />
+        </button>
+      </div>
     <div class="body">
       <section class="section">
         <h4>Sản phẩm đã chọn</h4>
@@ -48,22 +55,47 @@ defineEmits(['update:show', 'submit'])
       <section class="section">
         <h4>Thông tin giao hàng</h4>
         <div class="form">
-          <NInput placeholder="Họ và tên" />
-          <NInput placeholder="Số điện thoại" />
-          <NInput placeholder="Địa chỉ" />
+          <input type="text" class="mc-input" placeholder="Họ và tên" />
+          <input type="text" class="mc-input" placeholder="Số điện thoại" />
+          <input type="text" class="mc-input" placeholder="Địa chỉ" />
         </div>
       </section>
 
-      <NButton type="primary" block @click="$emit('submit')">Đặt hàng ngay</NButton>
+      <button type="button" class="btn-primary block" @click="$emit('submit')">Đặt hàng ngay</button>
     </div>
-  </NModal>
+    </div>
+  </AppModal>
 </template>
 
 <style scoped>
+.modal-content {
+  background: var(--app-surface, #fff);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--app-border, #eaeaea);
+}
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+.modal-close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--app-text-muted, #666);
+}
 .body {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 20px;
 }
 .section h4 {
   margin: 0 0 0.5rem;
@@ -94,6 +126,24 @@ defineEmits(['update:show', 'submit'])
 }
 .form {
   display: grid;
-  gap: 0.5rem;
+  gap: 0.75rem;
+}
+.mc-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border, #eaeaea);
+  border-radius: 6px;
+  background: var(--app-control-bg, #fff);
+  font-family: inherit;
+}
+.btn-primary.block {
+  width: 100%;
+  padding: 12px;
+  background: var(--app-navy, #16233b);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>

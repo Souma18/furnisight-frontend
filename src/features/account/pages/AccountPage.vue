@@ -2,7 +2,6 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountSidebar from '../components/AccountSidebar.vue'
-import AccountToast from '../components/AccountToast.vue'
 import ProfileView from '../components/views/ProfileView.vue'
 import OrdersView from '../components/views/OrdersView.vue'
 import OrderDetailView from '../components/views/OrderDetailView.vue'
@@ -20,7 +19,6 @@ const {
   activeView,
   profile,
   stats,
-  toast,
   setView,
   showToast,
 } = useAccountPage()
@@ -73,7 +71,6 @@ async function handleLogout() {
       <SettingsView v-else-if="activeView === 'settings'" />
     </main>
 
-    <AccountToast :show="toast.open" :message="toast.message" :type="toast.type" />
   </div>
 </template>
 

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 const props = defineProps({
   manager: {
@@ -42,9 +43,6 @@ watch(
   }
 )
 
-function onOverlayClick(event) {
-  if (event.target === event.currentTarget) close()
-}
 
 function close() {
   emit('close')
@@ -68,12 +66,8 @@ async function saveTemplate() {
 </script>
 
 <template>
-  <div
-    class="cm-modal-overlay cm-modal-overlay--form cm-feature-vars"
-    :class="{ open: isOpen }"
-    @click="onOverlayClick"
-  >
-    <div class="cm-modal size-md" role="dialog" aria-modal="true" @click.stop>
+  <AppModal :open="isOpen" width="600px" no-bg @close="close">
+    <div class="cm-modal size-md cm-feature-vars" role="dialog" aria-modal="true" @click.stop>
       <div class="cm-modal-head">
         <div class="cm-modal-title">
           <template v-if="currentForm.id">Sửa <em>template</em></template>
@@ -123,5 +117,5 @@ async function saveTemplate() {
         </button>
       </div>
     </div>
-  </div>
+  </AppModal>
 </template>

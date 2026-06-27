@@ -8,7 +8,6 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { isPurchasableLine } from '@features/cart/lib/stockGuards'
 import { useComboCart } from '../composables/useComboCart'
-import { usePromotionToast } from '../composables/usePromotionToast'
 import { usePromotionsCombos } from '../composables/usePromotionsCombos'
 import { comboStockIssue } from '../lib/comboStock'
 import { usePromotionsVouchers } from '../composables/usePromotionsVouchers'
@@ -24,6 +23,7 @@ import {
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ComboCard from '../components/ComboCard.vue'
 import { writeVoucherIntent } from '@features/checkout/lib/checkoutVoucherIntentStorage'
+import { useToast } from '@shared/composables/useToast'
 
 const route = useRoute()
 const router = useRouter()
@@ -39,7 +39,13 @@ const selectedCombo = ref(null)
 const voucherRail = ref(null)
 const mineVoucherTypeFilter = ref('all')
 const mineVoucherTimeFilter = ref('all')
-const { toast, showToast } = usePromotionToast()
+const { show: showToastGlobal } = useToast()
+
+function showToast(title, subtitle = '', icon = 'check') {
+  const msg = subtitle ? `${title} - ${subtitle}` : title
+  const type = icon === 'alert' ? 'error' : 'success'
+  showToastGlobal(msg, type)
+}
 const {
   startVoucherDrag,
   moveVoucherDrag,
@@ -427,10 +433,6 @@ async function scrollToPromotionSection(sectionId) {
       </div>
     </div>
 
-    <div class="promo-toast" :class="{ show: toast.show }">
-      <AppIcon :name="toast.icon" :size="17" />
-      <span><b>{{ toast.title }}</b><small>{{ toast.subtitle }}</small></span>
-    </div>
     </template>
   </main>
 </template>
@@ -576,9 +578,6 @@ async function scrollToPromotionSection(sectionId) {
 .combo-product-info small { color: #7a6a5a; }
 .combo-modal-row b { color: #17233b; white-space: nowrap; }
 .combo-product-arrow { color: #9b8052; }
-.promo-toast { position: fixed; right: 22px; bottom: 22px; z-index: 140; display: flex; align-items: center; gap: 10px; background: #16233b; color: #fff; border-radius: 12px; padding: 12px 14px; opacity: 0; transform: translateY(12px); pointer-events: none; transition: .2s ease; }
-.promo-toast.show { opacity: 1; transform: translateY(0); }
-.promo-toast small { display: block; color: #d7deeb; }
 @media (max-width: 980px) {
   .promo-breadcrumb, .promo-hero-inner, .promo-section, .promo-tabs { padding-left: 24px; padding-right: 24px; }
   .promo-hero-inner { gap: 34px; grid-template-columns: 1fr; }

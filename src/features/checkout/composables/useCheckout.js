@@ -11,6 +11,7 @@ import { useCheckoutSession } from './useCheckoutSession'
 import { calcLineTotal, formatCheckoutMoney } from '../utils/checkoutPricing'
 import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/stockGuards'
 import { consumeVoucherIntent } from '../lib/checkoutVoucherIntentStorage'
+import { useToast } from '@shared/composables/useToast'
 
 export function useCheckout() {
   const route = useRoute()
@@ -24,7 +25,7 @@ export function useCheckout() {
   const checkoutState = storeToRefs(checkoutStore)
   const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode, revalidateVouchers } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
-  const toast = ref({ show: false, icon: 'check', title: '', subtitle: '' })
+  const { show: showToastGlobal } = useToast()
   const selectedAddressId = ref('')
 
   const lineIdsFromQuery = computed(() => {
@@ -64,19 +65,10 @@ export function useCheckout() {
     summary,
   })
 
-  let toastTimer = null
-
   function showToast(payload) {
-    clearTimeout(toastTimer)
-    toast.value = {
-      show: true,
-      icon: payload.icon ?? 'check',
-      title: payload.title ?? '',
-      subtitle: payload.subtitle ?? '',
-    }
-    toastTimer = setTimeout(() => {
-      toast.value = { ...toast.value, show: false }
-    }, 3000)
+    const message = payload.subtitle ? `${payload.title} - ${payload.subtitle}` : payload.title
+    const type = payload.icon === 'alert' ? 'error' : 'success'
+    showToastGlobal(message, type)
   }
 
   async function initCheckout() {
@@ -202,7 +194,6 @@ export function useCheckout() {
     summary,
     isEmpty,
     showSuccess,
-    toast,
     formatMoney: formatCheckoutMoney,
     initCheckout,
     goBackToCart,
