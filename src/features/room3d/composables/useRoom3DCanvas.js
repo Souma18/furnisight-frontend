@@ -97,7 +97,7 @@ export function useRoom3DCanvas(props, emit) {
     isRoomAvailable,
     selectedProduct,
     isSelectedInCart,
-    applyUserOverrides,
+    applyUserOverrides: (model) => applyUserOverrides(model),
     setOrbitEnabled,
   })
 
@@ -184,6 +184,7 @@ export function useRoom3DCanvas(props, emit) {
         await loadRoomModel()
         applyRoomScale()
         loadFurnitureModels()
+        prevItemsSnapshot.value = props.sceneItems.map(i => `${i.instanceId}:${i.variantId}`).join(',')
       }
     },
   )
@@ -199,10 +200,37 @@ export function useRoom3DCanvas(props, emit) {
     },
   )
 
+  const prevItemsSnapshot = ref('')
+
   watch(
     () => props.sceneItems,
-    () => {
+    (items) => {
+      if (!sceneRef.value?.scene) return
+
+      const currentSnapshot = items.map(i => `${i.instanceId}:${i.variantId}`).join(',')
+      if (prevItemsSnapshot.value === currentSnapshot) return
+
+      const oldEntries = prevItemsSnapshot.value ? prevItemsSnapshot.value.split(',') : []
+      const newEntries = currentSnapshot ? currentSnapshot.split(',') : []
+      
+      if (oldEntries.length === newEntries.length && oldEntries.length > 0) {
+        const changedEntries = newEntries.filter(e => !oldEntries.includes(e))
+        const removedEntries = oldEntries.filter(e => !newEntries.includes(e))
+        
+        if (changedEntries.length === 1 && removedEntries.length === 1) {
+          const newId = changedEntries[0].split(':')[0]
+          const oldId = removedEntries[0].split(':')[0]
+          
+          if (newId === oldId) {
+            reloadFurnitureModel(newId)
+            prevItemsSnapshot.value = currentSnapshot
+            return
+          }
+        }
+      }
+      
       loadFurnitureModels()
+      prevItemsSnapshot.value = currentSnapshot
     },
     { deep: true },
   )
@@ -310,6 +338,8 @@ export function useRoom3DCanvas(props, emit) {
     fallbackProductIds,
     isCanvasBusy,
     busyText,
+    isRoomAvailable,
+    resetRoomScale,
     emit,
   }
 }

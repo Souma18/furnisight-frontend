@@ -4,6 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AppImage from '@shared/ui/AppImage.vue'
+import AppBadge from '@shared/ui/AppBadge.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 import { formatDate as formatDisplayDate } from '@shared/lib/formatters'
 import {

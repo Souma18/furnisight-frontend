@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AccountSectionCard from '../AccountSectionCard.vue'
-import NotificationItem from './NotificationItem.vue'
+import NotificationItem from '../notifications/NotificationItem.vue'
 import { useNotificationsCenter } from '../../composables/useNotificationsCenter'
 
 const props = defineProps({

@@ -54,6 +54,10 @@ export function useOrdersView(notify) {
     return retryingOrderCode.value === order.orderCode
   }
 
+  function displayCode(order) {
+    return order?.orderCode || order?.id || ''
+  }
+
   return {
     filter,
     filteredOrders,
@@ -61,12 +65,12 @@ export function useOrdersView(notify) {
     canceling,
     filterOptions: ORDER_FILTER_OPTIONS,
     statusLabels,
-    shouldShowRetryPayment,
     openOrderDetail,
     handleCancel,
     closeCancelDialog,
     confirmCancel,
     handleRetryPayment,
     isRetrying,
+    displayCode,
   }
 }
