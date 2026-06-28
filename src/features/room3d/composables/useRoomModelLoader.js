@@ -145,9 +145,8 @@ export function useRoomModelLoader({
         focusCameraToRoom()
         resizeRendererToShell()
       })
-    } catch {
-      console.warn('[Room3D] Failed to load room model:', props.selectedRoom.modelUrl)
-      roomModelGroup.value = null
+    } catch (err) {
+      // Silent fail
     } finally {
       if (currentToken === roomLoadToken) {
         isModelLoading.value = false
@@ -182,8 +181,8 @@ export function useRoomModelLoader({
           sceneRef.value.scene.add(model)
           furnitureGroups.value.push(model)
           loaded.push(sceneItem.instanceId)
-        } catch {
-          console.warn('[Room3D] Failed to load furniture model:', product.modelUrl)
+        } catch (err) {
+          // Silent fail
         }
       }),
     )
@@ -244,9 +243,9 @@ export function useRoomModelLoader({
       
       sceneRef.value.scene.add(model)
       furnitureGroups.value.push(model)
-    } catch {
-      console.warn('[Room3D] Failed to reload furniture model:', modelUrl)
-    }
+    } catch (err) {
+      // Silent fail
+    } finally { }
   }
 
   return {

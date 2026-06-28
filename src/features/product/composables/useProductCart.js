@@ -71,7 +71,6 @@ export function useProductCart({ product, buildCartPayload }) {
       } else {
         cartError.value = e?.response?.data?.message || 'Không thể thêm sản phẩm vào giỏ. Vui lòng thử lại.'
       }
-      console.error('Failed to add product to cart:', e)
       return null
     } finally {
       cartAdding.value = false

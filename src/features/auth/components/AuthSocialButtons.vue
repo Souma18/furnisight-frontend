@@ -5,12 +5,7 @@ import { useAuthStore } from '../store/authStore'
 const authStore = useAuthStore()
 
 const loginGoogle = () => authStore.loginGoogle()
-
-const loginFacebook = async () => {
-  // nếu sau này có backend OAuth Facebook
-  window.location.href =
-    'http://localhost:8081/oauth2/authorization/facebook'
-}
+const loginFacebook = () => authStore.loginFacebook()
 </script>
 
 <template>

@@ -32,8 +32,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const selectedCategory = ref('all')
   const sceneItems = ref([])
   const isCartExpanded = ref(false)
-  const isCheckoutOpen = ref(false)
-  const isSuccessOpen = ref(false)
 
   function restorePersistedState() {
     if (typeof window === 'undefined') return
@@ -266,22 +264,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     isCartExpanded.value = !isCartExpanded.value
   }
 
-  function openCheckout() {
-    isCheckoutOpen.value = true
-  }
-
-  function closeCheckout() {
-    isCheckoutOpen.value = false
-  }
-
-  function openSuccess() {
-    isSuccessOpen.value = true
-  }
-
-  function closeSuccess() {
-    isSuccessOpen.value = false
-  }
-
   return {
     mode,
     isAnalyzing,
@@ -303,8 +285,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedCategory,
     sceneItems,
     isCartExpanded,
-    isCheckoutOpen,
-    isSuccessOpen,
     setMode,
     setAnalyzing,
     setSelectedRoomType,
@@ -328,9 +308,5 @@ export const useRoom3DStore = defineStore('room3d', () => {
     removeFromScene,
     updateSceneItemVariant,
     toggleCart,
-    openCheckout,
-    closeCheckout,
-    openSuccess,
-    closeSuccess,
   }
 })

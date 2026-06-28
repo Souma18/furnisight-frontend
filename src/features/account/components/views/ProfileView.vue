@@ -549,44 +549,7 @@ textarea {
   border-color: var(--app-navy, #1b3044);
 }
 
-[data-theme='dark'] .profile-summary {
-  border-bottom-color: var(--app-border) !important;
-}
 
-[data-theme='dark'] .summary-kicker {
-  color: var(--app-gold) !important;
-}
-
-[data-theme='dark'] .summary-copy h4,
-[data-theme='dark'] .read-row strong {
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .summary-copy p:not(.summary-kicker),
-[data-theme='dark'] .read-row span,
-[data-theme='dark'] label,
-[data-theme='dark'] .readonly-field {
-  color: var(--app-text-muted) !important;
-}
-
-[data-theme='dark'] .read-row {
-  border-bottom-color: var(--app-border) !important;
-}
-
-[data-theme='dark'] .avatar-button {
-  background: var(--app-surface-soft) !important;
-  border-color: var(--app-border) !important;
-  color: var(--app-gold) !important;
-}
-
-[data-theme='dark'] .avatar-action,
-[data-theme='dark'] input,
-[data-theme='dark'] select,
-[data-theme='dark'] textarea,
-[data-theme='dark'] .readonly-field {
-  background: var(--app-control-bg) !important;
-  border-color: var(--app-border) !important;
-}
 
 button:disabled {
   cursor: not-allowed;

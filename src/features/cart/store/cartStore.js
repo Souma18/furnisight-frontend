@@ -117,13 +117,7 @@ export const useCartStore = defineStore('cart', () => {
       .filter((value, index, arr) => Number.isFinite(value) && arr.indexOf(value) === index),
   )
 
-  watch(
-    items,
-    () => {
-      persistItems()
-    },
-    { deep: true },
-  )
+
 
   async function hydrate(options = {}) {
     const { force = false } = options
@@ -137,6 +131,7 @@ export const useCartStore = defineStore('cart', () => {
       try {
         const response = await cartApi.getCart(undefined, authStore.isAdmin ? { skipAuth: true } : {})
         items.value = cloneItems(response?.data?.items ?? [])
+        persistItems()
         hydrated.value = true
         return items.value
       } catch (error) {
@@ -193,6 +188,7 @@ export const useCartStore = defineStore('cart', () => {
       payload.qty = payload.quantity
       const response = await cartApi.addToCart(payload)
       items.value = cloneItems(response?.data?.items ?? [])
+      persistItems()
       hydrated.value = true
       return items.value
     } finally {
@@ -206,6 +202,7 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const response = await cartApi.updateCartItem(lineId, patch)
       items.value = cloneItems(response?.data?.items ?? [])
+      persistItems()
       hydrated.value = true
       return response?.data?.item ?? null
     } finally {
@@ -224,6 +221,7 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const response = await cartApi.removeCartItem(lineId)
       items.value = cloneItems(response?.data?.items ?? [])
+      persistItems()
       hydrated.value = true
       return items.value
     } finally {
@@ -237,6 +235,7 @@ export const useCartStore = defineStore('cart', () => {
     try {
       const response = await cartApi.clearCart()
       items.value = cloneItems(response?.data?.items ?? [])
+      persistItems()
       hydrated.value = true
       return items.value
     } finally {

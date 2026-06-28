@@ -39,8 +39,8 @@ export function useRoomCartBridge({
     try {
       await cartStore.addItem(product)
     } catch (error) {
-      console.warn('Không thể thêm sản phẩm vào giỏ:', error?.message || error)
-    }
+      showToast('Không thể thêm sản phẩm vào giỏ', 'Vui lòng thử lại sau', 'alert')
+    } finally { }
   }
 
   function openProductDetail(product) {
@@ -66,13 +66,6 @@ export function useRoomCartBridge({
     router.push('/checkout')
   }
 
-  function submitCheckoutMock() {
-    orderCode.value = `LN${Date.now().toString().slice(-6)}`
-    store.closeCheckout()
-    store.openSuccess()
-    cartStore.clearCart()
-  }
-
   return {
     orderCode,
     cartItems,
@@ -85,6 +78,5 @@ export function useRoomCartBridge({
     removeProductFromCart,
     updateCartQty,
     goCheckout,
-    submitCheckoutMock,
   }
 }

@@ -22,19 +22,15 @@ const props = defineProps({
 defineEmits(['toggle-check', 'open-variant', 'change-qty', 'remove'])
 const { t } = useI18n()
 
-const variantLabel = computed(() => {
+const variantCombination = computed(() => {
   const color = props.item.selectedColor ?? ''
   const size = props.item.selectedSize ?? ''
   if (color && size) return `${color} / ${size}`
-  return color || size || t('account.cart.chooseVariant')
+  return color || size || ''
 })
 
-const summaryLabel = computed(() => {
-  const color = props.item.selectedColor ?? ''
-  const size = props.item.selectedSize ?? ''
-  if (color && size) return `${color} / ${size}`
-  return color || size || t('account.cart.defaultVariant')
-})
+const variantLabel = computed(() => variantCombination.value || t('account.cart.chooseVariant'))
+const summaryLabel = computed(() => variantCombination.value || t('account.cart.defaultVariant'))
 
 const detailRoute = computed(() => {
   const detailId = props.item?.detailId || props.item?.slug || ''

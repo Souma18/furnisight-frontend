@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountOrders } from './useAccountOrders'
+import { useCancelOrderDialog } from './useCancelOrderDialog'
 import { usePaymentCountdown } from './usePaymentCountdown'
 import { i18n } from '@shared/i18n'
 import {
@@ -29,9 +30,15 @@ export function useOrderDetailView(notify) {
     retryingOrderCode,
   } = useAccountOrders(notify)
 
-  const cancelDialogOpen = ref(false)
-  const canceling = ref(false)
+  const {
+    cancelTarget,
+    canceling,
+    openCancelDialog,
+    closeCancelDialog,
+    confirmCancel,
+  } = useCancelOrderDialog(cancelOrder)
   
+  const cancelDialogOpen = computed(() => Boolean(cancelTarget.value))
   const confirmDialogOpen = ref(false)
   const confirming = ref(false)
 
@@ -117,20 +124,7 @@ export function useOrderDetailView(notify) {
 
   function handleCancel() {
     if (!canCancelCurrentOrder.value) return
-    cancelDialogOpen.value = true
-  }
-
-  function closeCancelDialog() {
-    if (canceling.value) return
-    cancelDialogOpen.value = false
-  }
-
-  async function confirmCancel() {
-    if (!order.value || canceling.value) return
-    canceling.value = true
-    const success = await cancelOrder(order.value.orderCode)
-    canceling.value = false
-    if (success) cancelDialogOpen.value = false
+    openCancelDialog(order.value)
   }
 
   function handleConfirmReceived() {

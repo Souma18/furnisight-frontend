@@ -15,6 +15,8 @@ const props = defineProps({
   sellerNote: { type: String, default: '' },
   shippingOptions: { type: Array, default: () => [] },
   selectedShippingId: { type: String, default: '' },
+  itemQty: { type: Number, default: 0 },
+  subtotal: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['update-qty', 'update-insurance', 'update-note', 'update-shipping'])
@@ -49,11 +51,6 @@ function stockText(line) {
 function selectShipping(id) {
   emit('update-shipping', id)
 }
-
-const itemQty = () => props.lines.reduce((sum, line) => sum + (Number(line.qty) || 0), 0)
-
-const merchandiseSubtotal = () =>
-  props.lines.reduce((sum, line) => sum + calcLineTotal(line), 0)
 </script>
 
 <template>
@@ -156,8 +153,8 @@ const merchandiseSubtotal = () =>
     </div>
 
     <div class="co-subtotal-row">
-      <span>Tổng số tiền ({{ itemQty() }} sản phẩm):</span>
-      <span class="co-subtotal-val">{{ formatMoney(merchandiseSubtotal()) }}</span>
+      <span>Tổng số tiền ({{ itemQty }} sản phẩm):</span>
+      <span class="co-subtotal-val">{{ formatMoney(subtotal) }}</span>
     </div>
   </section>
 </template>

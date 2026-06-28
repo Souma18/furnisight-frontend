@@ -27,7 +27,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
       orders.value = Array.isArray(rawItems) ? rawItems.map(item => new OrderListResponse(item)) : []
       return orders.value
     } catch (error) {
-      console.error('Failed to fetch orders:', error)
+      // Error handled by empty state
     } finally {
       loading.value = false
     }
@@ -45,7 +45,6 @@ export const useOrderStore = defineStore('accountOrder', () => {
       if (detail.id) orderDetails.value[detail.id] = detail
       return detail
     } catch (error) {
-      console.error(`Failed to fetch order detail ${orderCode}:`, error)
       return null
     } finally {
       loading.value = false

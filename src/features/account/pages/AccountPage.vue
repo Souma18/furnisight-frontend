@@ -67,7 +67,7 @@ async function handleLogout() {
       />
       <OrdersView v-else-if="activeView === 'orders'" @notify="showToast" />
       <OrderDetailView v-else-if="activeView === 'order-detail'" @notify="showToast" />
-      <CartView v-else-if="activeView === 'cart'" />
+      <CartView v-else-if="activeView === 'cart'" @notify="showToast" />
       <WishlistView
         v-else-if="activeView === 'wishlist'"
         @notify="showToast"

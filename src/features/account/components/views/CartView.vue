@@ -15,6 +15,7 @@ import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
 const { t } = useI18n()
+const emit = defineEmits(['notify'])
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
 const {
   checkedIds,
@@ -45,7 +46,7 @@ onMounted(async () => {
   try {
     await ensureHydrated()
   } catch (error) {
-    console.error('Failed to hydrate cart view:', error)
+    emit('notify', t('account.cart.loadFailed') || 'Lỗi tải giỏ hàng', 'error')
   }
 })
 
@@ -54,7 +55,7 @@ async function changeQty(item, delta) {
   try {
     await updateQty(item.id, Number(item.qty || 1) + delta)
   } catch (error) {
-    console.error('Failed to update cart quantity:', error)
+    emit('notify', t('account.cart.updateFailed') || 'Lỗi cập nhật số lượng', 'error')
   }
 }
 
@@ -64,7 +65,7 @@ async function removeLine(itemId) {
     uncheck(itemId)
     if (activeItem.value?.id === itemId) closeItemEditor()
   } catch (error) {
-    console.error('Failed to remove cart line:', error)
+    emit('notify', t('account.cart.removeFailed') || 'Lỗi xoá sản phẩm', 'error')
   }
 }
 

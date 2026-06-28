@@ -97,9 +97,13 @@ export const useAuthStore = defineStore('auth', () => {
         window.location.href = `${beURL}/users${redirectUrl}`
       }
     } catch (error) {
-      console.error('Google login failed:', error)
       throw error
     }
+  }
+
+  function loginFacebook() {
+    const beURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081'
+    window.location.href = `${beURL}/oauth2/authorization/facebook`
   }
 
   function logout() {
@@ -162,6 +166,7 @@ export const useAuthStore = defineStore('auth', () => {
     updateProfile,
     ensureProfileLoaded,
     loginGoogle,
+    loginFacebook,
     logout,
   }
 })

@@ -1,7 +1,6 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import {
   Box3,
-  Plane as MathPlane,
   Raycaster,
   Vector2,
   Vector3,

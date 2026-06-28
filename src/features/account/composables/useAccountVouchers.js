@@ -43,7 +43,6 @@ export function useAccountVouchers(notify) {
       const { data } = await ordersApi.getVouchers()
       vouchers.value = Array.isArray(data) ? data : data?.items ?? []
     } catch (error) {
-      console.error('Failed to load account vouchers:', error)
       notify(t('account.vouchers.loadError'), 'error')
     } finally {
       loading.value = false

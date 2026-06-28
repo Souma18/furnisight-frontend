@@ -1,6 +1,7 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
   open: { type: Boolean, default: false },
@@ -11,62 +12,59 @@ defineEmits(['view-order', 'continue-shopping'])
 </script>
 
 <template>
-  <Teleport to="body">
+  <AppModal :open="open" width="460px" no-bg @close="null">
     <div
-      v-if="open"
-      class="checkout-success-overlay"
+      class="checkout-success-box"
       role="dialog"
       aria-modal="true"
       aria-labelledby="checkout-success-title"
     >
-      <div class="checkout-success-box">
-        <div class="checkout-success-icon">
-          <AppIcon name="partyPopper" :size="46" />
+      <div class="checkout-success-icon">
+        <AppIcon name="partyPopper" :size="46" />
+      </div>
+      <h2 id="checkout-success-title" class="checkout-success-title">
+        Đặt hàng <em>thành công!</em>
+      </h2>
+      <p class="checkout-success-sub">
+        Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.
+      </p>
+
+      <div class="checkout-success-steps">
+        <div class="ss-item">
+          <div class="ss-dot done"><AppIcon name="check" :size="14" /></div>
+          <div class="ss-label">Đặt hàng</div>
         </div>
-        <h2 id="checkout-success-title" class="checkout-success-title">
-          Đặt hàng <em>thành công!</em>
-        </h2>
-        <p class="checkout-success-sub">
-          Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.
-        </p>
-
-        <div class="checkout-success-steps">
-          <div class="ss-item">
-            <div class="ss-dot done"><AppIcon name="check" :size="14" /></div>
-            <div class="ss-label">Đặt hàng</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-dot pend"><AppIcon name="package" :size="14" /></div>
-            <div class="ss-label">Xử lý</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-dot pend"><AppIcon name="truck" :size="14" /></div>
-            <div class="ss-label">Giao hàng</div>
-          </div>
-          <div class="ss-item">
-            <div class="ss-dot pend"><AppIcon name="home" :size="14" /></div>
-            <div class="ss-label">Hoàn tất</div>
-          </div>
+        <div class="ss-item">
+          <div class="ss-dot pend"><AppIcon name="package" :size="14" /></div>
+          <div class="ss-label">Xử lý</div>
         </div>
-
-        <div v-if="orderCode" class="checkout-success-order-id">Mã đơn: {{ orderCode }}</div>
-
-        <div class="checkout-success-actions">
-          <AppButton type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
-            <AppIcon name="package" :size="16" />
-            Xem đơn hàng
-          </AppButton>
-          <AppButton type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
-            Tiếp tục mua sắm
-          </AppButton>
+        <div class="ss-item">
+          <div class="ss-dot pend"><AppIcon name="truck" :size="14" /></div>
+          <div class="ss-label">Giao hàng</div>
+        </div>
+        <div class="ss-item">
+          <div class="ss-dot pend"><AppIcon name="home" :size="14" /></div>
+          <div class="ss-label">Hoàn tất</div>
         </div>
       </div>
+
+      <div v-if="orderCode" class="checkout-success-order-id">Mã đơn: {{ orderCode }}</div>
+
+      <div class="checkout-success-actions">
+        <AppButton type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
+          <AppIcon name="package" :size="16" />
+          Xem đơn hàng
+        </AppButton>
+        <AppButton type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
+          Tiếp tục mua sắm
+        </AppButton>
+      </div>
     </div>
-  </Teleport>
+  </AppModal>
 </template>
 
 <style scoped>
-.checkout-success-overlay {
+.checkout-success-box {
   --co-navy: #12202e;
   --co-gold: #c9922a;
   --co-cream: #faf6f0;
@@ -75,26 +73,13 @@ defineEmits(['view-order', 'continue-shopping'])
   --co-text-light: #888;
   --co-green: #2d9e6b;
 
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(10, 18, 28, 0.7);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  font-family: var(--sans);
-}
-
-.checkout-success-box {
   background: #fff;
   border-radius: 24px;
   width: 100%;
-  max-width: 460px;
   padding: 48px 40px;
   text-align: center;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.35);
+  font-family: var(--sans);
 }
 
 .checkout-success-icon {

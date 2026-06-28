@@ -137,6 +137,7 @@ export function useCheckout() {
         ? addressId
         : (nextAddresses.find((item) => item.isDefault)?.id ?? nextAddresses[0]?.id)
       selectedAddressId.value = nextSelected ?? ''
+      syncSelectedAddress()
       showToast({
         icon: 'mapPin',
         title: addressId ? 'Đã cập nhật địa chỉ' : 'Đã thêm địa chỉ mới',
@@ -154,7 +155,12 @@ export function useCheckout() {
   async function updateLineQty(lineId, nextQty) {
     const line = cartStore.items.find((item) => item.id === lineId)
     await cartStore.updateQty(lineId, clampPurchaseQuantity(nextQty, line))
-    await refreshApplicableCombo(checkoutLines.value)
+    if (requestedComboId.value) {
+      await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+    } else {
+      await refreshApplicableCombo(checkoutLines.value)
+    }
+    await refreshVoucherSelection()
   }
 
   let voucherSessionReady = false
@@ -169,20 +175,7 @@ export function useCheckout() {
     return requestId === voucherRequestId ? result : null
   }
 
-  watch(
-    checkoutLines,
-    (lines) => {
-      if (requestedComboId.value) {
-        validateRequestedCombo(requestedComboId.value, lines)
-      } else {
-        refreshApplicableCombo(lines)
-      }
-      refreshVoucherSelection()
-    },
-    { deep: true },
-  )
-
-  watch(addressList, syncSelectedAddress, { deep: true })
+  // Explicit UI-triggered API call
   watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)
 
   return {

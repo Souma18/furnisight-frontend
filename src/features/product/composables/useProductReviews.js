@@ -74,7 +74,7 @@ export function useProductReviews(product) {
         product.value.rating = totalRating / product.value.reviews.length
       }
     } catch (error) {
-      console.error('Failed to load product reviews:', error)
+      // Silent fail
     }
   }
 

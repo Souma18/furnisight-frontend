@@ -1,7 +1,8 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CheckoutAddressCard from '../components/CheckoutAddressCard.vue'
+import CheckoutAddressModal from '../components/CheckoutAddressModal.vue'
 import CheckoutBreadcrumb from '../components/CheckoutBreadcrumb.vue'
 import CheckoutPaymentCard from '../components/CheckoutPaymentCard.vue'
 import CheckoutShopCard from '../components/CheckoutShopCard.vue'
@@ -19,6 +20,19 @@ import '../styles/checkoutPage.css'
 
 const router = useRouter()
 const checkoutStore = useCheckoutStore()
+
+const addressModalOpen = ref(false)
+const addressToEdit = ref(null)
+
+function openAddressModal(address = null) {
+  addressToEdit.value = address
+  addressModalOpen.value = true
+}
+
+async function handleSaveAddress(payload) {
+  await saveCheckoutAddress(payload)
+  addressModalOpen.value = false
+}
 
 const {
   checkoutLines,
@@ -81,7 +95,7 @@ const {
 onMounted(async () => {
   try {
     await initCheckout()
-    if (isEmpty.value) {
+    if (isEmpty.value && !showSuccess.value && !placing.value) {
       router.replace('/cart')
     }
   } catch (error) {
@@ -90,12 +104,6 @@ onMounted(async () => {
       title: 'Không thể tải thanh toán',
       subtitle: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
     })
-  }
-})
-
-watch(isEmpty, (empty) => {
-  if (empty && !showSuccess.value && !placing.value) {
-    router.replace('/cart')
   }
 })
 
@@ -135,7 +143,8 @@ function handleContinueShopping() {
             :addresses="addressList"
             :selected-address-id="selectedAddressId"
             @select-address="selectAddress"
-            @save-address="saveCheckoutAddress"
+            @open-create="openAddressModal()"
+            @open-edit="openAddressModal"
           />
 
           <CheckoutShopCard
@@ -146,6 +155,8 @@ function handleContinueShopping() {
             :seller-note="sellerNote"
             :shipping-options="shippingOptions"
             :selected-shipping-id="selectedShippingId"
+            :item-qty="summary.itemQty"
+            :subtotal="summary.subtotal"
             @update-qty="updateLineQty"
             @update-insurance="hasInsurance = $event"
             @update-note="sellerNote = $event"
@@ -193,6 +204,13 @@ function handleContinueShopping() {
       @close="closeVoucherModal"
       @apply-code="handleApplyVoucherCode"
       @confirm="handleConfirmVoucher"
+    />
+
+    <CheckoutAddressModal
+      :open="addressModalOpen"
+      :address="addressToEdit"
+      @close="addressModalOpen = false"
+      @save="handleSaveAddress"
     />
 
     <CheckoutSuccessOverlay
