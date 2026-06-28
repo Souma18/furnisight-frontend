@@ -92,17 +92,17 @@ function getVariantOptions(item, key) {
 .modal-qty {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #e5dcca;
+  border: 1px solid var(--app-border);
   border-radius: 10px;
   overflow: hidden;
-  background: #f5efe6;
+  background: var(--app-surface-soft);
 }
 .modal-qty button {
   width: 28px;
   height: 30px;
   border: none;
   background: transparent;
-  color: #9a8d7a;
+  color: var(--app-text-muted);
   cursor: pointer;
 }
 .modal-qty input {
@@ -111,9 +111,9 @@ function getVariantOptions(item, key) {
   display: grid;
   place-items: center;
   text-align: center;
-  border-inline: 1px solid #e5dcca;
-  background: rgba(255,255,255,0.45);
-  color: #8b7d68;
+  border-inline: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-heading);
 }
 .modal-qty input::-webkit-outer-spin-button,
 .modal-qty input::-webkit-inner-spin-button { margin: 0; appearance: none; }
@@ -131,10 +131,10 @@ function getVariantOptions(item, key) {
 
 .variant-modal {
   width: min(520px, 100%);
-  background: #fff;
-  border: 1px solid #ece2cf;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(18, 32, 46, 0.18);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -144,7 +144,7 @@ function getVariantOptions(item, key) {
   align-items: flex-start;
   gap: 16px;
   padding: 18px 20px 14px;
-  border-bottom: 1px solid #ece2cf;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .variant-modal-kicker {
@@ -153,13 +153,13 @@ function getVariantOptions(item, key) {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #c9922a;
+  color: var(--app-gold);
 }
 
 .variant-modal-head h3 {
   margin: 0;
   font-size: 18px;
-  color: #1a1a1a;
+  color: var(--app-heading);
 }
 
 .close-btn {
@@ -167,8 +167,8 @@ function getVariantOptions(item, key) {
   height: 34px;
   border: none;
   border-radius: 10px;
-  background: #f5efe6;
-  color: #12202e;
+  background: var(--app-surface-soft);
+  color: var(--app-heading);
   font-size: 20px;
   cursor: pointer;
 }
@@ -185,7 +185,7 @@ function getVariantOptions(item, key) {
 }
 
 .variant-modal-body span {
-  color: #7a7a7a;
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -203,11 +203,12 @@ function getVariantOptions(item, key) {
 .variant-modal-body select,
 .variant-modal-body input {
   width: 100%;
-  border: 1px solid #ece2cf;
+  border: 1px solid var(--app-border);
   border-radius: 12px;
   padding: 0.7rem 0.9rem;
   font: inherit;
-  background: #fff;
+  background: var(--app-surface);
+  color: var(--app-heading);
 }
 
 .variant-modal-actions {
@@ -227,12 +228,12 @@ function getVariantOptions(item, key) {
 }
 
 .ghost-btn {
-  background: #f5efe6;
-  color: #12202e;
+  background: var(--app-surface-soft);
+  color: var(--app-heading);
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #e5b84a, #c9922a);
+  background: var(--app-gold);
   color: #12202e;
 }
 

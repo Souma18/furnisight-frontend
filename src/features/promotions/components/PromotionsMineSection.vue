@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from 'vue-i18n'
 import AppButton from '@shared/ui/AppButton.vue'
-import { conditionText, discountLabel, formatDate } from '../lib/voucherPresentation'
+import { conditionText, discountLabel, formatDate, isExpired } from '../lib/voucherPresentation'
 
 const props = defineProps({
   isAuthenticated: { type: Boolean, default: false },
@@ -43,7 +43,8 @@ const { t } = useI18n()
         <strong>{{ voucher.code }}</strong>
         <span>{{ discountLabel(voucher) }}</span>
         <small>{{ t('promotions.voucher.expires', { date: formatDate(voucher.endDate) }) }}</small>
-        <AppButton type="button" class="claim-btn outline" @click="emit('use-now', voucher)">{{ t('promotions.voucher.useNow') }}</AppButton>
+        <AppButton v-if="!isExpired(voucher.endDate)" variant="unstyled" size="unstyled" type="button" class="claim-btn outline" @click="emit('use-now', voucher)">{{ t('promotions.voucher.useNow') }}</AppButton>
+        <AppButton v-else variant="unstyled" size="unstyled" type="button" class="claim-btn muted" disabled>{{ t('promotions.voucher.status.expired') }}</AppButton>
       </article>
     </div>
     <div v-else class="empty-state">

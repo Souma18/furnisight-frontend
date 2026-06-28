@@ -28,6 +28,7 @@ const roomHasModel = computed(() => Boolean(props.selectedRoom?.modelUrl))
         v-for="room in roomTemplates"
         :key="room.id"
         type="button"
+        variant="unstyled"
         class="room-btn"
         :class="{ active: selectedRoomType === room.type, disabled: isRoomSelectionLocked }"
         :disabled="isRoomSelectionLocked"

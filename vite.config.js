@@ -14,6 +14,17 @@ export default defineConfig({
       Pragma: 'no-cache',
       Expires: '0',
     },
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8080',
+        changeOrigin: true,
+      },
+      '/messages': {
+        target: 'http://127.0.0.1:8080',
+        ws: true,
+        changeOrigin: true,
+      },
+    },
   },
   define: {
     global: 'window',

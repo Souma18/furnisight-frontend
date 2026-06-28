@@ -102,17 +102,17 @@ function openDetail() {
 
       <div class="prices">
         <p class="price-current" :title="priceLabel">{{ priceLabel }}</p>
+        <AppButton
+          type="button"
+          variant="unstyled"
+          class="add-btn"
+          :aria-label="t('room3d.product.addToCart')"
+          :title="t('room3d.product.addToCart')"
+          @click.stop="$emit('add', product)"
+        >
+          <AppIcon name="cart" :size="20" :stroke-width="2.4" />
+        </AppButton>
       </div>
-
-      <AppButton
-        type="button"
-        class="add-btn"
-        :aria-label="t('room3d.product.addToCart')"
-        :title="t('room3d.product.addToCart')"
-        @click.stop="$emit('add', product)"
-      >
-        <AppIcon name="cart" :size="15" :stroke-width="2.4" />
-      </AppButton>
     </div>
   </article>
 </template>

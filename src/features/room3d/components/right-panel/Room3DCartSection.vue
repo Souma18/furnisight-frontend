@@ -37,7 +37,7 @@ function itemIconName(item) {
 
 <template>
   <section class="cart">
-    <AppButton type="button" class="cart-toggle" @click="isOpen = !isOpen">
+    <AppButton type="button" variant="unstyled" class="cart-toggle" @click="isOpen = !isOpen">
       <span class="toggle-left">
         <span class="icon"><AppIcon name="cart" :size="14" /></span>
         <span class="title">{{ t('cart.title') }}</span>
@@ -63,7 +63,7 @@ function itemIconName(item) {
             <p class="name">{{ item.name }}</p>
             <p class="price">{{ formatCurrency(item.price) }}</p>
           </div>
-          <AppButton type="button" class="remove-btn" @click="$emit('remove', item.id)">
+          <AppButton type="button" variant="unstyled" class="remove-btn" @click="$emit('remove', item.id)">
             <AppIcon name="close" :size="15" />
           </AppButton>
         </article>

@@ -72,7 +72,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NConfigProvider>
+  <NConfigProvider style="display: contents">
     <section class="room-page">
       <Room3DTopbar
         :selected-room="selectedRoom"

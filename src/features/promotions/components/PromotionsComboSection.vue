@@ -50,7 +50,7 @@ function changeComboSort(event) {
     </div>
 
     <div class="load-more-wrap">
-      <AppButton v-if="hasMoreCombos" type="button" class="load-more" :disabled="loadingMore" @click="emit('load-more')">
+      <AppButton variant="unstyled" size="unstyled" v-if="hasMoreCombos" type="button" class="load-more" :disabled="loadingMore" @click="emit('load-more')">
         {{ loadingMore ? t('common.loading') : t('promotions.combo.loadMore') }}
       </AppButton>
     </div>

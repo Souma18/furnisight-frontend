@@ -81,6 +81,7 @@ const {
 .orders-view {
   display: grid;
   gap: 1rem;
+  padding: 0 1rem;
 }
 
 .orders-title {

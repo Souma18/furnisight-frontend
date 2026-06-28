@@ -16,7 +16,6 @@ import ThemeToggle from '@shared/ui/ThemeToggle.vue'
 import LanguageToggle from '@shared/ui/LanguageToggle.vue'
 import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 import AppHeaderNavigation from './AppHeaderNavigation.vue'
-import AppHeaderMobileMenu from './AppHeaderMobileMenu.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -106,11 +105,6 @@ watch(isAuthenticated, (newVal) => {
   }
 })
 
-const mobileMenuOpen = ref(false)
-
-watch(() => route.path, () => {
-  mobileMenuOpen.value = false
-})
 
 watch(() => route.query.otpCode, (newVal) => {
   if (newVal) {
@@ -201,21 +195,11 @@ watch(() => route.query.otpCode, (newVal) => {
         <AppIcon name="user" :size="14" />
       </button>
 
-      <button
-        class="icon-btn hamburger-btn"
-        type="button"
-        :aria-label="mobileMenuOpen ? t('header.closeMenu') : t('header.openMenu')"
-        @click="mobileMenuOpen = !mobileMenuOpen"
-      >
-        <AppIcon :name="mobileMenuOpen ? 'close' : 'menu'" :size="14" />
-      </button>
     </div>
 
     <RouterLink to="/room3d" class="visualize-btn">
       <AppIcon name="map" :size="14" />
       {{ t('header.visualize') }}
     </RouterLink>
-
-    <AppHeaderMobileMenu :is-open="mobileMenuOpen" />
   </header>
 </template>

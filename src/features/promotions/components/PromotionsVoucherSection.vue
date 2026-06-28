@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { conditionText, discountLabel, formatDate, isExpiring, isShippingVoucher } from '../lib/voucherPresentation'
+import { conditionText, discountLabel, formatDate, isExpiring, isExpired, isShippingVoucher } from '../lib/voucherPresentation'
 
 const props = defineProps({
   filteredVouchers: { type: Array, default: () => [] },
@@ -53,13 +53,13 @@ defineExpose({
       @pointercancel="emit('stop-drag', $event)"
       @pointerleave="emit('stop-drag', $event)"
     >
-      <article v-for="voucher in filteredVouchers" :key="voucher.id" class="voucher-card" :class="{ disabled: voucher.used || !voucher.active }">
+      <article v-for="voucher in filteredVouchers" :key="voucher.id" class="voucher-card" :class="{ disabled: voucher.used || !voucher.active || isExpired(voucher.endDate) }">
         <div class="voucher-stub">
           <span>{{ isShippingVoucher(voucher) ? 'Freeship' : 'Voucher' }}</span>
           <strong>{{ voucher.code }}</strong>
         </div>
         <div class="voucher-body">
-          <AppButton type="button" class="info-btn" @click="emit('view-detail', voucher)" :aria-label="t('promotions.voucher.detail')">
+          <AppButton variant="unstyled" size="unstyled" type="button" class="info-btn" @click="emit('view-detail', voucher)" :aria-label="t('promotions.voucher.detail')">
             <AppIcon name="info" :size="14" />
           </AppButton>
           <h3>{{ discountLabel(voucher) }}</h3>
@@ -70,10 +70,10 @@ defineExpose({
           </div>
           <div class="voucher-footer">
             <span class="status" :class="{ saved: voucher.saved, used: voucher.used }">
-              {{ voucher.used ? t('promotions.voucher.used') : voucher.saved ? t('promotions.voucher.saved') : t('promotions.voucher.notClaimed') }}
+              {{ voucher.used ? t('promotions.voucher.used') : isExpired(voucher.endDate) ? t('promotions.voucher.status.expired') : voucher.saved ? t('promotions.voucher.saved') : t('promotions.voucher.notClaimed') }}
             </span>
-            <AppButton
-              v-if="!voucher.saved && !voucher.used"
+            <AppButton variant="unstyled" size="unstyled"
+              v-if="!voucher.saved && !voucher.used && !isExpired(voucher.endDate)"
               type="button"
               class="claim-btn"
               :disabled="claimingCode === voucher.code"
@@ -81,17 +81,19 @@ defineExpose({
             >
               <AppIcon name="download" :size="14" />{{ t('promotions.voucher.claim') }}
             </AppButton>
-            <AppButton v-else-if="!voucher.used" type="button" class="claim-btn outline" @click="emit('use-now', voucher)">
+            <AppButton variant="unstyled" size="unstyled" v-else-if="!voucher.used && !isExpired(voucher.endDate)" type="button" class="claim-btn outline" @click="emit('use-now', voucher)">
               <AppIcon name="cart" :size="14" />{{ t('promotions.voucher.useNow') }}
             </AppButton>
-            <AppButton v-else type="button" class="claim-btn muted" disabled>{{ t('promotions.voucher.used') }}</AppButton>
+            <AppButton variant="unstyled" size="unstyled" v-else type="button" class="claim-btn muted" disabled>
+              {{ voucher.used ? t('promotions.voucher.used') : t('promotions.voucher.status.expired') }}
+            </AppButton>
           </div>
         </div>
       </article>
     </div>
     <div v-else class="empty-state">{{ t('promotions.empty.vouchers') }}</div>
     <div v-if="activeFilter !== 'saved' && hasMoreVouchers" class="load-more-wrap">
-      <AppButton type="button" class="load-more" :disabled="loadingMoreVouchers" @click="emit('load-more')">
+      <AppButton variant="unstyled" size="unstyled" type="button" class="load-more" :disabled="loadingMoreVouchers" @click="emit('load-more')">
         {{ loadingMoreVouchers ? t('common.loading') : t('promotions.voucher.loadMore') }}
       </AppButton>
     </div>

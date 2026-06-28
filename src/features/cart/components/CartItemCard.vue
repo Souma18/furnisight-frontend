@@ -58,7 +58,9 @@ const formatPrice = PriceFormatter.format
           :checked="checked"
           @change="$emit('toggle-check', item.id)"
         >
-        <span class="select-box-ui"></span>
+        <span class="select-box-ui">
+          <AppIcon name="check" class="select-box-check" :size="14" :stroke-width="3" />
+        </span>
       </label>
       <span v-else class="stock-badge">{{ stockWarning || t('account.cart.outOfStock') }}</span>
     </div>
@@ -87,18 +89,18 @@ const formatPrice = PriceFormatter.format
 
     <div class="qty-wrap">
       <AppButton type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(item.qty || 1) <= 1" @click="$emit('change-qty', item, -1)">
-        <AppIcon name="minus" :size="15" />
+        <AppIcon name="minus" :size="16" style="width: 16px; height: 16px;" />
       </AppButton>
-      <span>{{ item.qty }}</span>
-      <AppButton type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease" @click="$emit('change-qty', item, 1)">
-        <AppIcon name="plus" :size="15" />
+      <span>{{ item.qty || 1 }}</span>
+      <AppButton type="button" :aria-label="t('account.cart.increaseQty')" :disabled="isOverStock(item)" @click="$emit('change-qty', item, 1)">
+        <AppIcon name="plus" :size="16" style="width: 16px; height: 16px;" />
       </AppButton>
     </div>
 
     <p class="line-total">{{ formatPrice(item.price * item.qty) }}</p>
 
     <AppButton type="button" class="delete-btn" :aria-label="t('account.cart.removeItem')" @click="$emit('remove', item.id)">
-      <AppIcon name="trash" :size="22" />
+      <AppIcon name="trash" :size="24" class="delete-icon" />
     </AppButton>
   </article>
 </template>
@@ -138,34 +140,30 @@ const formatPrice = PriceFormatter.format
 }
 .select-box-ui {
   position: relative;
-  display: inline-block;
-  width: 1.05rem;
-  height: 1.05rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
   border: 1px solid #ccb993;
   border-radius: 4px;
   background: #fff;
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.85);
+  transition: all 0.2s ease;
 }
-.select-box-ui::after {
-  content: '';
-  position: absolute;
-  left: 0.3rem;
-  top: 0.08rem;
-  width: 0.26rem;
-  height: 0.56rem;
-  border-right: 2px solid #8b6a21;
-  border-bottom: 2px solid #8b6a21;
-  transform: rotate(45deg) scale(0.7);
+.select-box-check {
+  color: #c9922a;
   opacity: 0;
-  transition: opacity 0.16s ease, transform 0.16s ease;
+  transform: scale(0.5);
+  transition: all 0.2s ease;
 }
 .select-box-input:checked + .select-box-ui {
   background: rgba(229, 184, 74, 0.18);
   border-color: #c9922a;
 }
-.select-box-input:checked + .select-box-ui::after {
+.select-box-input:checked + .select-box-ui .select-box-check {
   opacity: 1;
-  transform: rotate(45deg) scale(1);
+  transform: scale(1);
 }
 .stock-badge {
   display: inline-flex;
@@ -296,12 +294,17 @@ const formatPrice = PriceFormatter.format
   background: #f5efe6;
 }
 .qty-wrap button {
-  width: 28px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: none;
   background: transparent;
   color: #9a8d7a;
   cursor: pointer;
+}
+.qty-wrap button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 .qty-wrap button:disabled {
   cursor: not-allowed;
@@ -319,8 +322,8 @@ const formatPrice = PriceFormatter.format
 }
 .delete-btn {
   justify-self: center;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +333,11 @@ const formatPrice = PriceFormatter.format
   color: #7d776d;
   cursor: pointer;
   transition: all 0.2s;
+}
+.delete-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 .delete-btn:hover {
   background: #f5efe6;
@@ -373,5 +381,59 @@ const formatPrice = PriceFormatter.format
   .variant-btn { width: 100%; }
   .qty-wrap { justify-self: start; }
   .line-total { text-align: left; }
+}
+
+/* Dark Mode Overrides */
+:global([data-theme='dark']) .item {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+}
+:global([data-theme='dark']) .select-box-ui {
+  background: var(--app-surface-soft);
+  border-color: var(--app-border);
+  box-shadow: none;
+}
+:global([data-theme='dark']) .select-box-check {
+  color: var(--app-gold);
+}
+:global([data-theme='dark']) .select-box-input:checked + .select-box-ui {
+  background: var(--app-gold-soft);
+  border-color: var(--app-gold);
+}
+:global([data-theme='dark']) .thumb {
+  background: var(--app-surface-soft);
+  border-color: var(--app-border);
+  color: var(--app-gold);
+}
+:global([data-theme='dark']) .name {
+  color: var(--app-heading);
+}
+:global([data-theme='dark']) .variant-btn {
+  background: var(--app-surface-soft);
+  border-color: var(--app-border);
+  color: var(--app-text);
+  box-shadow: none;
+}
+:global([data-theme='dark']) .qty-wrap {
+  border-color: var(--app-border);
+  background: var(--app-surface-soft);
+}
+:global([data-theme='dark']) .qty-wrap button {
+  color: var(--app-heading);
+}
+:global([data-theme='dark']) .qty-wrap span {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-heading);
+}
+:global([data-theme='dark']) .delete-btn {
+  border-color: var(--app-border);
+  color: var(--app-text);
+  background: var(--app-surface-soft);
+}
+:global([data-theme='dark']) .delete-btn:hover {
+  background: color-mix(in srgb, var(--app-danger) 15%, var(--app-surface-soft));
+  color: var(--app-danger);
+  border-color: var(--app-danger);
 }
 </style>

@@ -51,7 +51,7 @@ const { t } = useI18n()
   border-radius: 10px;
   padding: 0.72rem 1.15rem;
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
+  color: #ffffff;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;

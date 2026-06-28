@@ -23,7 +23,7 @@ const show = computed(() => !!props.combo)
 <template>
   <div v-if="show" class="modal-overlay" @click.self="emit('close')">
     <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="t('promotions.combo.detailAria', { name: combo.name })">
-      <AppButton class="modal-close" type="button" @click="emit('close')">
+      <AppButton variant="unstyled" size="unstyled" class="modal-close" type="button" @click="emit('close')">
         <AppIcon name="close" :size="16" />
       </AppButton>
       <h3>{{ combo.name }}</h3>
@@ -54,14 +54,14 @@ const show = computed(() => !!props.combo)
         </RouterLink>
       </div>
       <div class="modal-actions">
-        <AppButton type="button" class="combo-btn outline" @click="emit('close')">{{ t('common.close') }}</AppButton>
-        <AppButton v-if="comboStockIssue(combo)" type="button" class="combo-btn unavailable" disabled>
+        <AppButton variant="unstyled" size="unstyled" type="button" class="combo-btn outline" @click="emit('close')">{{ t('common.close') }}</AppButton>
+        <AppButton variant="unstyled" size="unstyled" v-if="comboStockIssue(combo)" type="button" class="combo-btn unavailable" disabled>
           <AppIcon name="cart" :size="14" />{{ t('promotions.combo.soldOut') }}
         </AppButton>
-        <AppButton v-else type="button" class="combo-btn dark" :disabled="addingId === combo.id" @click="emit('add-cart', combo)">
+        <AppButton variant="unstyled" size="unstyled" v-else type="button" class="combo-btn dark" :disabled="addingId === combo.id" @click="emit('add-cart', combo)">
           <AppIcon name="cart" :size="14" />{{ addingId === combo.id ? t('promotions.combo.adding') : t('promotions.combo.add') }}
         </AppButton>
-        <AppButton v-if="!comboStockIssue(combo)" type="button" class="combo-btn dark" :disabled="buyingId === combo.id" @click="emit('buy-now', combo)">
+        <AppButton variant="unstyled" size="unstyled" v-if="!comboStockIssue(combo)" type="button" class="combo-btn dark" :disabled="buyingId === combo.id" @click="emit('buy-now', combo)">
           <AppIcon name="creditCard" :size="14" />{{ buyingId === combo.id ? t('promotions.combo.preparing') : t('promotions.combo.buy') }}
         </AppButton>
       </div>

@@ -67,7 +67,7 @@
 .pl-fb-title {
   font-size: 13px;
   font-weight: 600;
-  color: #1a1a1a;
+  color: var(--app-heading);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -80,8 +80,8 @@
 .pl-fb-count {
   font-size: 11px;
   font-weight: 700;
-  background: #f5e6c8;
-  color: var(--brand-gold-600);
+  background: var(--app-gold-soft);
+  color: var(--app-gold);
   padding: 2px 8px;
   border-radius: 8px;
 }
@@ -107,9 +107,9 @@
 }
 .pl-cat-list li:last-child { border-bottom: none; }
 .pl-cat-list li:hover .pl-cl-name,
-.pl-cat-list li.active .pl-cl-name { color: var(--brand-gold-600); }
+.pl-cat-list li.active .pl-cl-name { color: var(--app-gold); }
 .pl-cat-list li.active { font-weight: 600; }
-.pl-cl-name { font-size: 13px; color: #555; transition: color 0.2s; }
+.pl-cl-name { font-size: 13px; color: var(--app-text); transition: color 0.2s; }
 .pl-cl-count {
   font-size: 12px;
   color: #888;
@@ -117,7 +117,7 @@
   padding: 2px 8px;
   border-radius: 8px;
 }
-.pl-cat-list li.active .pl-cl-count { background: #f5e6c8; color: var(--brand-gold-600); }
+.pl-cat-list li.active .pl-cl-count { background: var(--app-gold-soft); color: var(--app-gold); }
 
 .pl-price-range-display { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
 .pl-price-val { font-size: 13px; font-weight: 500; color: #1a1a1a; flex: 1; }
@@ -176,6 +176,7 @@
   cursor: pointer;
   transition: background 0.25s, box-shadow 0.25s;
   margin-top: 4px;
+  text-align: center;
 }
 .pl-filter-apply:hover { background: var(--brand-navy-700); box-shadow: 0 6px 18px rgba(18, 32, 46, 0.3); }
 
@@ -483,11 +484,11 @@
 
 .pl-cat-list li:hover,
 .pl-cat-list li.active {
-  background: #faf3e8;
+  background: var(--app-control-hover);
 }
 
 .pl-cl-name {
-  color: #615a50;
+  color: var(--app-text);
 }
 
 .pl-cl-count {
@@ -847,7 +848,7 @@
 .pl-sidebar-filters--drawer {
   align-self: stretch;
   background: var(--pl-cream);
-  border-left: 1px solid rgba(224, 210, 184, 0.7);
+  border-left: 1px solid var(--pl-line);
   box-shadow: -24px 0 70px rgba(18, 32, 46, 0.24);
   display: grid;
   grid-template-rows: auto 1fr auto;

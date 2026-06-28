@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import ThemeToggle from '@shared/ui/ThemeToggle.vue'
 
 const router = useRouter()
 const { t } = useI18n()
@@ -36,12 +37,12 @@ function goHome() {
 </script>
 
 <template>
-  <header class="header">
-    <div class="brand" @click="goHome" style="cursor: pointer;">
-      <span class="brand-icon" aria-hidden="true">
+  <header class="room3d-header">
+    <div class="room3d-brand" @click="goHome" style="cursor: pointer;">
+      <span class="room3d-brand-icon" aria-hidden="true">
         <AppImage src="/brand/furnisight-logo-mark.png" alt=""  />
       </span>
-      <span class="brand-text">FurniSight</span>
+      <span class="room3d-brand-text">FurniSight</span>
     </div>
 
     <div class="center-title">
@@ -50,17 +51,18 @@ function goHome() {
     </div>
 
     <div class="actions">
-      <AppButton type="button" class="action-btn ghost" @click="goHome">
+      <AppButton type="button" class="action-btn ghost" variant="unstyled" @click="goHome">
         <AppIcon name="chevronLeft" :size="14" />
         <span>{{ t('nav.home') }}</span>
       </AppButton>
-      <AppButton type="button" class="action-btn ghost" @click="$emit('toggle-fullscreen')">
+      <AppButton type="button" class="action-btn ghost" variant="unstyled" @click="$emit('toggle-fullscreen')">
         <AppIcon name="fullscreen" :size="14" />
         <span>{{ t('room3d.topbar.fullscreen') }}</span>
       </AppButton>
+      <ThemeToggle variant="icon" />
       <div class="checkout-wrap">
-        <AppButton type="button" class="action-btn gold checkout-trigger">
-          <AppIcon name="cart" :size="14" />
+        <AppButton type="button" class="action-btn gold checkout-trigger" variant="unstyled">
+          <AppIcon name="cart" :size="20" />
           <span>{{ t('room3d.cart.checkout') }}</span>
           <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
         </AppButton>

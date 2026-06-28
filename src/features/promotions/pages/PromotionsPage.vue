@@ -86,6 +86,8 @@ const {
         v-for="tab in filterTabs"
         :key="tab.key"
         type="button"
+        variant="unstyled"
+        size="unstyled"
         :class="['promo-tab', { active: activeFilter === tab.key }]"
         @click="activeFilter = tab.key"
       >

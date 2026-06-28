@@ -272,7 +272,7 @@ const {
 </template>
 
 <style scoped>
-.order-detail { display: grid; gap: 1rem; }
+.order-detail { display: grid; gap: 1rem; padding: 0 1rem; }
 .order-detail-back {
   border: none; background: none; color: var(--auth-brand-start, #c9922a);
   font-size: 0.82rem; cursor: pointer; padding: 0; width: fit-content;

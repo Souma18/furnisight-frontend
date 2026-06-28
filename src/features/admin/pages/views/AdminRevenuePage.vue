@@ -38,9 +38,25 @@ const topProductColumns = [
 ]
 
 bindCharts((charts, d) => {
-  // Biểu đồ bar doanh thu tháng (đơn vị triệu VNĐ)
-  if (monthCanvas.value && d.monthLabels?.length) {
-    charts.renderRevenueBar(monthCanvas.value, d.monthLabels, d.monthData)
+  let labels = d.monthLabels
+  let chartData = d.monthData
+
+  if ((!labels || !labels.length) && d.monthlyRows?.length) {
+    // Backup: extract from monthlyRows if backend doesn't provide monthLabels
+    // Assuming we want chronological order, reverse if rows are descending
+    const rows = [...d.monthlyRows].reverse()
+    labels = rows.map((r) => r.month)
+    chartData = rows.map((r) => {
+      if (typeof r.revenue === 'string') {
+        const val = parseFloat(r.revenue.replace(/[^0-9.-]+/g, ''))
+        return val > 1000000 ? val / 1000000 : val
+      }
+      return typeof r.revenue === 'number' ? (r.revenue > 1000000 ? r.revenue / 1000000 : r.revenue) : 0
+    })
+  }
+
+  if (monthCanvas.value && labels?.length) {
+    charts.renderRevenueBar(monthCanvas.value, labels, chartData)
   }
 })
 </script>

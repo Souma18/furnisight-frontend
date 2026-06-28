@@ -138,7 +138,7 @@ export function useAdminCharts() {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: (v) => `${v}tỷ` } } },
+          scales: { y: { ticks: { callback: (v) => `${v}tr` } } },
         },
       }),
     )

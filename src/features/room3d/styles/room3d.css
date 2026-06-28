@@ -176,11 +176,12 @@
   background: #ffffff;
   flex: 1 1 auto;
   min-height: 0;
-  padding: calc(0.45rem * var(--pc-content-scale)) calc(0.5rem * var(--pc-content-scale))
-    calc(2.65rem * var(--pc-content-scale));
+  display: flex;
+  flex-direction: column;
+  padding: calc(0.6rem * var(--pc-content-scale));
 }
 
-.name {
+.card .name {
   margin: 0;
   color: #0f172a;
   font-size: calc(0.62rem + (0.2rem * var(--pc-content-scale)));
@@ -192,7 +193,7 @@
   overflow: hidden;
 }
 
-.category {
+.card .category {
   margin: 0.18rem 0 0;
   color: #6f7b86;
   font-size: calc(0.58rem + (0.08rem * var(--pc-content-scale)));
@@ -202,16 +203,16 @@
   text-overflow: ellipsis;
 }
 
-.prices {
-  margin-top: calc(0.55rem * var(--pc-content-scale));
-  padding-right: calc(2.25rem * var(--pc-content-scale));
-  min-width: 0;
+.card .prices {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
   width: 100%;
-  max-width: 100%;
-  min-height: 1.4rem;
 }
 
-.price-current {
+.card .price-current {
   margin: 0;
   display: block;
   width: 100%;
@@ -220,14 +221,15 @@
   font-weight: 800;
   line-height: 1.25;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .add-btn {
-  position: absolute;
-  right: calc(0.5rem * var(--pc-content-scale));
-  bottom: calc(0.5rem * var(--pc-content-scale));
+  position: relative;
+  align-self: flex-end;
+  flex: 0 0 auto;
   width: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
-  min-width: 0;
   height: calc(1.86rem + (0.14rem * var(--pc-content-scale)));
   padding: 0;
   display: inline-flex;
@@ -388,7 +390,7 @@
   gap: 0.28rem;
 }
 
-.icon-btn,
+.room3d-icon-btn,
 .scale-value {
   border: 1px solid rgba(16, 49, 70, 0.15);
   background: #fff;
@@ -409,12 +411,12 @@
   font-weight: 700;
 }
 
-.icon-btn:hover:not(:disabled),
+.room3d-icon-btn:hover:not(:disabled),
 .scale-value:hover {
   border-color: #d4c3aa;
 }
 
-.icon-btn:disabled {
+.room3d-icon-btn:disabled {
   opacity: 0.42;
   cursor: not-allowed;
 }
@@ -510,26 +512,26 @@
   background: var(--app-control-hover, #f8f5ef);
 }
 
-.toggle-left {
+.cart-toggle .toggle-left {
   display: flex;
   align-items: center;
   gap: 0.38rem;
 }
 
-.icon {
+.cart-toggle .icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: var(--app-gold, #133f5c);
 }
 
-.title {
+.cart-toggle .title {
   color: var(--app-heading, #133f5c);
   font-size: 0.95rem;
   font-weight: 700;
 }
 
-.count {
+.cart-toggle .count {
   min-width: 1.25rem;
   height: 1.25rem;
   border-radius: 999px;
@@ -543,18 +545,18 @@
   padding: 0 0.35rem;
 }
 
-.toggle-right {
+.cart-toggle .toggle-right {
   display: flex;
   align-items: center;
   gap: 0.36rem;
 }
 
-.total {
+.cart-toggle .total {
   color: var(--app-gold, #9a744f);
   font-size: 0.88rem;
 }
 
-.chevron {
+.cart-toggle .chevron {
   color: var(--app-text-muted, #8f8f8f);
   font-size: 0.72rem;
   transition: transform 0.18s ease;
@@ -579,7 +581,6 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 0.44rem;
 }
 
 .item {
@@ -587,12 +588,11 @@
   align-items: center;
   gap: 0.5rem;
   border-bottom: 1px solid var(--app-border, #f3ece1);
-  padding-bottom: 0.42rem;
+  padding: 0.6rem 0;
 }
 
 .item:last-child {
   border-bottom: none;
-  padding-bottom: 0;
 }
 
 .thumb {
@@ -944,10 +944,10 @@
   flex-direction: column;
   gap: 0.9rem;
   padding: 0.9rem 0.8rem 1rem;
-  border-right: 1px solid #ddd3c6;
+  border-right: 1px solid var(--app-border);
   height: 100%;
   overflow: auto;
-  background: #f7f3ed;
+  background: var(--app-surface);
   /* An thanh scrollbar nhung van giu kha nang scroll */
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -964,7 +964,7 @@
 }
 
 .panel-heading strong {
-  color: #172532;
+  color: var(--app-heading);
   font-size: 1rem;
   font-weight: 700;
 }
@@ -986,9 +986,9 @@
 }
 
 .mode-tab {
-  border: 1px solid #d8cec1;
-  background: #fffdf9;
-  color: #5f5d58;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-muted);
   border-radius: 8px;
   min-height: 48px;
   font-size: 0.84rem;
@@ -1003,9 +1003,9 @@
 }
 .mode-tab:hover { border-color: #c9aa78; transform: translateY(-1px); }
 .mode-tab.active {
-  background: #12202e;
-  border-color: #12202e;
-  color: #fff;
+  background: var(--app-gold);
+  border-color: var(--app-gold);
+  color: #12202e;
 }
 
 .mode-tab:focus-visible,
@@ -1026,7 +1026,7 @@
 
 .label {
   margin: 0;
-  color: #a29d96;
+  color: var(--app-text-muted);
   font-weight: 700;
   letter-spacing: 0.08em;
   font-size: 0.68rem;
@@ -1044,7 +1044,7 @@
 }
 
 .upload-zone {
-  border: 1px dashed #cdbda8;
+  border: 1px dashed var(--app-border);
   border-radius: 8px;
   min-height: 150px;
   padding: 1rem 0.7rem;
@@ -1053,7 +1053,7 @@
   align-items: center;
   justify-content: center;
   text-align: center;
-  background: rgba(255, 253, 249, 0.7);
+  background: var(--app-surface-soft);
   color: #7d776e;
   gap: 0.2rem;
   cursor: pointer;
@@ -1086,9 +1086,9 @@
 
 .room-btn {
   width: 100%;
-  border: 1px solid #d8cec1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #fffdf9;
+  background: var(--app-surface);
   min-height: 3.8rem;
   display: flex;
   align-items: center;
@@ -1134,35 +1134,35 @@
 }
 
 .room-btn-content strong {
-  color: #272522;
+  color: var(--app-heading);
   font-size: 0.84rem;
   line-height: 1.2;
 }
 
 .room-btn-content small {
-  color: #a29d96;
+  color: var(--app-text-muted);
   font-size: 0.78rem;
 }
 
 .room-mode-note {
   margin-top: 0.2rem;
-  border: 1px solid #d8cec1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   padding: 0.6rem 0.7rem;
-  background: #f4f1ec;
+  background: var(--app-surface-soft);
 }
 
 .room-mode-note strong {
   display: block;
   font-size: 0.88rem;
-  color: #4f4b44;
+  color: var(--app-heading);
   margin-bottom: 0.25rem;
 }
 
 .room-mode-note p {
   margin: 0;
   font-size: 0.8rem;
-  color: #6f6a62;
+  color: var(--app-text-muted);
 }
 
 .room-meta {
@@ -1180,7 +1180,7 @@
 .room-meta p {
   margin: 0;
   font-size: 0.84rem;
-  color: #625e57;
+  color: var(--app-text-muted);
 }
 
 :deep(.room-meta .n-tag) {
@@ -1208,10 +1208,10 @@
 .quality-row--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 
 .quality-btn {
-  border: 1px solid #d8cec1;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
-  background: #fffdf9;
-  color: #68655f;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
   min-height: 2.25rem;
   font-weight: 700;
   cursor: pointer;
@@ -1224,17 +1224,17 @@
 }
 
 .quality-hint {
-  color: #8f8a82;
+  color: var(--app-text-muted);
   font-size: 0.72rem;
 }
 
 .project-input {
   width: 100%;
   min-height: 2.45rem;
-  border: 1px solid #d8cec1;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
-  background: #fffdf9;
-  color: #68655f;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
   padding: 0.55rem 0.9rem;
   font: inherit;
   outline: none;
@@ -1253,7 +1253,7 @@
 
 .selected-file {
   margin: 0;
-  color: #6d675f;
+  color: var(--app-text-muted);
   font-size: 0.74rem;
   line-height: 1.3;
   min-width: 0;
@@ -1270,7 +1270,7 @@
   width: 100%;
   border: none;
   border-radius: 8px;
-  background: #12202e;
+  background: var(--app-gold);
   color: #f8fafb;
   min-height: 2.45rem;
   font-weight: 700;
@@ -1309,10 +1309,12 @@
 
 .empty h2 {
   margin: 0;
+  color: #6b7280;
 }
 
 .empty p {
   margin: 0;
+  color: #6b7280;
 }
 
 .busy-overlay {
@@ -1367,14 +1369,14 @@
 
 /* --- Room3DRightPanel.vue --- */
 .panel {
-  border-left: 1px solid #e6ded1;
+  border-left: 1px solid var(--app-border);
   height: 100%;
   overflow: hidden;
   padding: 0.9rem 0.8rem 0.75rem;
   display: flex;
   flex-direction: column;
   gap: 0.55rem;
-  background: #fbf8f3;
+  background: var(--app-surface);
 }
 
 .panel-top {
@@ -1406,12 +1408,12 @@
 }
 
 .panel-heading strong {
-  color: #172532;
+  color: var(--app-heading);
   font-size: 1rem;
 }
 
 .panel-heading small {
-  color: #81786e;
+  color: var(--app-text-muted);
   flex: 0 0 auto;
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
@@ -1421,8 +1423,8 @@
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  background: #fffdf9;
-  border: 1px solid #d8cec1;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   padding: 0 0.7rem;
   min-height: 2.35rem;
@@ -1439,17 +1441,19 @@
 }
 
 .search-input {
-  border: none;
-  outline: none;
-  background: transparent;
-  color: #172532;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  color: var(--app-heading) !important;
+  box-shadow: none !important;
+  padding: 0 !important;
   width: 100%;
   font: inherit;
   font-size: 0.86rem;
 }
 
 .search-input::placeholder {
-  color: #9a9288;
+  color: var(--app-text-muted);
 }
 
 .filters {
@@ -1459,10 +1463,10 @@
 }
 
 .filter-btn {
-  border: 1px solid #d8cec1;
+  border: 1px solid var(--app-border);
   border-radius: 6px;
-  background: #fffdf9;
-  color: #5f5d58;
+  background: var(--app-surface);
+  color: var(--app-text-muted);
   min-height: 2.25rem;
   font-size: 0.82rem;
   font-weight: 600;
@@ -1476,14 +1480,14 @@
 
 .filter-btn:hover {
   border-color: #c9b49a;
-  background: #f8f5f0;
+  background: var(--app-surface-soft);
   color: #29465a;
   transform: translateY(-1px);
 }
 
 .filter-btn.active {
-  border-color: #12202e;
-  background: #12202e;
+  border-color: var(--app-gold);
+  background: var(--app-gold);
   color: #e5b84a;
 }
 
@@ -1517,7 +1521,7 @@
 
 .ai-text {
   margin: 0.3rem 0 0;
-  color: #1f4964;
+  color: var(--app-heading);
   font-size: 0.88rem;
   line-height: 1.35;
 }
@@ -1540,16 +1544,16 @@
   display: grid;
   gap: 0.55rem;
   grid-template-columns: repeat(var(--product-columns, 2), minmax(0, 1fr));
-  align-items: start;
+  align-items: stretch;
 }
 
 .products-empty {
   min-height: 8rem;
   display: grid;
   place-items: center;
-  border: 1px dashed #d8cec1;
+  border: 1px dashed var(--app-border);
   border-radius: 0.8rem;
-  color: #7b7369;
+  color: var(--app-text-muted);
   font-size: 0.84rem;
   text-align: center;
   padding: 1rem;
@@ -1563,9 +1567,9 @@
 
 .panel-cart {
   flex: 0 0 auto;
-  border-top: 1px solid #ece5da;
+  border-top: 1px solid var(--app-border);
   padding-top: 0.45rem;
-  background: #fbf8f3;
+  background: var(--app-surface);
 }
 
 /* Accordion Styles */
@@ -1577,8 +1581,8 @@
 }
 
 .product-group {
-  background: #fffdf9;
-  border: 1px solid #d8cec1;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -1590,19 +1594,19 @@
   padding: 0.65rem 0.8rem;
   cursor: pointer;
   user-select: none;
-  background: #fdfbf7;
+  background: var(--app-surface-soft);
   transition: background 0.2s;
 }
 
 .group-header:hover {
-  background: #f4efeb;
+  background: var(--app-surface-soft);
 }
 
 .group-title {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #172532;
+  color: var(--app-heading);
 }
 
 .group-title strong {
@@ -1621,12 +1625,12 @@
 
 .group-content {
   padding: 0.6rem;
-  border-top: 1px solid #efeae2;
-  background: #fffdf9;
+  border-top: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
 /* --- Room3DTopbar.vue --- */
-.header {
+.room3d-header {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
@@ -1635,16 +1639,17 @@
   min-height: 58px;
   padding: 0.55rem 1rem;
   background: #12202e;
+  color: #eef4f9;
 }
 
-.brand {
+.room3d-brand {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
   text-decoration: none;
 }
 
-.brand-icon {
+.room3d-brand-icon {
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 0.45rem;
@@ -1658,14 +1663,14 @@
   padding: 2px;
 }
 
-.brand-icon img {
+.room3d-brand-icon img {
   display: block;
   height: 100%;
   object-fit: contain;
   width: 100%;
 }
 
-.brand-text {
+.room3d-brand-text {
   color: #efe6d7;
   letter-spacing: 0.08em;
   font-weight: 600;
@@ -1678,7 +1683,7 @@
   gap: 0.6rem;
 }
 
-.title {
+.center-title .title {
   color: #e7f0f8;
   font-size: 0.9rem;
   font-weight: 600;
@@ -1713,12 +1718,14 @@
   cursor: pointer;
   border-radius: 6px;
   min-height: 34px;
+  white-space: nowrap;
   padding: 0.35rem 0.72rem;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
   font-size: 0.74rem;
   font-weight: 600;
+  position: relative;
 }
 
 .action-btn.ghost {
@@ -1727,8 +1734,17 @@
   color: #eef4f9;
 }
 
-.action-btn.ghost:hover {
-  background: rgba(255, 255, 255, 0.24);
+.action-btn.ghost:hover,
+.room3d-header .theme-icon-toggle:hover,
+.room3d-header .theme-icon-toggle:focus-visible {
+  background: rgba(255, 255, 255, 0.24) !important;
+  color: #eef4f9 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.room3d-header .theme-icon-toggle {
+  width: auto !important;
+  padding: 0.35rem 0.72rem !important;
 }
 
 .action-btn.gold {
@@ -1752,6 +1768,10 @@
   align-items: center;
   justify-content: center;
   padding: 0 0.28rem;
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
 .checkout-dropdown {
@@ -1760,10 +1780,10 @@
   right: 0;
   width: min(396px, 92vw);
   overflow: hidden;
-  border: 1px solid #ece2cf;
+  border: 1px solid var(--app-border);
   border-radius: 18px;
-  background: #fff;
-  box-shadow: 0 20px 60px rgba(18, 32, 46, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
+  background: var(--app-surface);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22), 0 4px 16px rgba(0, 0, 0, 0.08);
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px) scale(0.97);
@@ -1786,9 +1806,9 @@
   width: 12px;
   height: 12px;
   transform: rotate(45deg);
-  border-top: 1px solid #ece2cf;
-  border-left: 1px solid #ece2cf;
-  background: #fff;
+  border-top: 1px solid var(--app-border);
+  border-left: 1px solid var(--app-border);
+  background: var(--app-surface);
   z-index: 1;
 }
 
@@ -1799,14 +1819,14 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 18px 12px;
-  border-bottom: 1px solid #f0e9dd;
-  background: #fff;
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
 }
 
 .cart-title {
   font-size: 14px;
   font-weight: 700;
-  color: #1a1a1a;
+  color: var(--app-heading);
 }
 
 .cart-count {
@@ -1833,7 +1853,7 @@
 }
 
 @media (max-width: 980px) {
-  .header {
+  .room3d-header {
     gap: 0.65rem;
     grid-template-columns: auto minmax(0, 1fr) auto;
     padding: 0.5rem 0.75rem;
@@ -1854,7 +1874,7 @@
 }
 
 @media (max-width: 640px) {
-  .header {
+  .room3d-header {
     grid-template-columns: auto 1fr;
   }
 
@@ -1862,7 +1882,7 @@
     display: none;
   }
 
-  .brand-text {
+  .room3d-brand-text {
     font-size: 0.9rem;
     letter-spacing: 0.04em;
   }

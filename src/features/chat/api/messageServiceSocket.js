@@ -6,10 +6,21 @@ const SEND_DESTINATION = '/app/chat.sendMessage'
 function resolveWsUrl(explicitUrl) {
   if (explicitUrl) return explicitUrl
   const prefix = import.meta.env.VITE_MESSAGE_SERVICE_PREFIX || '/messages'
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8080'
+  
+  if (apiBaseUrl.startsWith('http')) {
+    try {
+      const url = new URL(apiBaseUrl)
+      return `${url.origin}${prefix}/ws`
+    } catch {
+      // fallback
+    }
+  }
+
   if (typeof window !== 'undefined') {
     return `${window.location.origin}${prefix}/ws`
   }
-  return 'http://localhost:8080/messages/ws'
+  return `http://localhost:8080${prefix}/ws`
 }
 
 /**

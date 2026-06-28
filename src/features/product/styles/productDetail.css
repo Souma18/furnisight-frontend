@@ -369,7 +369,7 @@
 .price-box {
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0)),
-    var(--pd-ink);
+    var(--app-navy);
   border: 1px solid rgba(201, 146, 42, 0.2);
   border-radius: 8px;
   box-shadow: 0 14px 32px rgba(18, 32, 46, 0.12);
@@ -417,9 +417,9 @@
 
 .color-btn.active,
 .size-btn.active {
-  background: #f2e2c4;
+  background: var(--app-gold-soft);
   border-color: var(--pd-gold);
-  color: #7a5516;
+  color: var(--pd-gold);
 }
 
 .qty-row {
@@ -444,8 +444,8 @@
 
 .qty-ctrl button:not(:disabled):hover,
 .qty-ctrl button:not(:disabled):focus-visible {
-  background: #eadcc7;
-  color: #8a601c;
+  background: var(--app-control-hover);
+  color: var(--pd-gold);
   outline: none;
 }
 
@@ -479,9 +479,9 @@
 
 .actions .outline:hover:not(:disabled),
 .actions .outline:focus-visible:not(:disabled) {
-  background: #f8f1e6;
+  background: var(--app-control-hover);
   border-color: var(--pd-gold);
-  color: #8a601c;
+  color: var(--pd-gold);
   outline: none;
   transform: translateY(-1px);
 }
@@ -513,7 +513,7 @@
 
 .pd-tabs .nav button {
   border-radius: 8px 8px 0 0;
-  color: #7d7468;
+  color: var(--app-text-muted);
   cursor: pointer;
   font-weight: 650;
   white-space: nowrap;
@@ -521,13 +521,13 @@
 
 .pd-tabs .nav button:hover,
 .pd-tabs .nav button:focus-visible {
-  background: #f7efe3;
+  background: var(--app-control-hover);
   color: var(--pd-ink);
   outline: none;
 }
 
 .pd-tabs .nav button.active {
-  color: #9b6c1d;
+  color: var(--pd-gold);
 }
 
 .pd-tabs .content h2 {
@@ -613,7 +613,7 @@
 }
 
 .avatar {
-  background: #eadfce;
+  background: var(--pd-cream);
 }
 
 .pd-modal .box {

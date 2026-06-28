@@ -82,7 +82,7 @@ function pickVariant(variant) {
     <div class="item-quick-panel">
       <div class="panel-head">
         <strong>{{ selectedProduct.name }}</strong>
-        <AppButton type="button" class="close-btn" @click="$emit('close')">
+        <AppButton type="button" variant="unstyled" class="close-btn" @click="$emit('close')">
           <AppIcon name="close" :size="14" />
         </AppButton>
       </div>
@@ -94,6 +94,7 @@ function pickVariant(variant) {
             v-for="v in variants"
             :key="v.id"
             type="button"
+            variant="unstyled"
             class="pill-btn"
             :class="{ active: currentVariant?.id === v.id, unavailable: !v.supports3d && !v.modelUrl }"
             @click="pickVariant(v)"
@@ -107,12 +108,13 @@ function pickVariant(variant) {
         <AppButton
           type="button"
           class="action-btn primary"
+          variant="primary"
           :disabled="isSelectedInCart"
           @click="$emit('add-to-cart')"
         >
           {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
         </AppButton>
-        <AppButton type="button" class="action-btn danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</AppButton>
+        <AppButton type="button" class="action-btn danger" variant="danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</AppButton>
       </div>
     </div>
 
@@ -122,16 +124,16 @@ function pickVariant(variant) {
       class="hud-container"
       :style="{ left: screenPos.left + 'px', top: screenPos.top + 'px' }"
     >
-      <AppButton class="hud-nudge up" @click="$emit('nudge-selected', 0, -0.05)" title="Lên"><AppIcon name="chevronUp" :size="24"/></AppButton>
-      <AppButton class="hud-nudge down" @click="$emit('nudge-selected', 0, 0.05)" title="Xuống"><AppIcon name="chevronDown" :size="24"/></AppButton>
-      <AppButton class="hud-nudge left" @click="$emit('nudge-selected', -0.05, 0)" title="Trái"><AppIcon name="chevronLeft" :size="24"/></AppButton>
-      <AppButton class="hud-nudge right" @click="$emit('nudge-selected', 0.05, 0)" title="Phải"><AppIcon name="chevronRight" :size="24"/></AppButton>
+      <AppButton variant="unstyled" class="hud-nudge up" @click="$emit('nudge-selected', 0, -0.05)" title="Lên"><AppIcon name="chevronUp" :size="24"/></AppButton>
+      <AppButton variant="unstyled" class="hud-nudge down" @click="$emit('nudge-selected', 0, 0.05)" title="Xuống"><AppIcon name="chevronDown" :size="24"/></AppButton>
+      <AppButton variant="unstyled" class="hud-nudge left" @click="$emit('nudge-selected', -0.05, 0)" title="Trái"><AppIcon name="chevronLeft" :size="24"/></AppButton>
+      <AppButton variant="unstyled" class="hud-nudge right" @click="$emit('nudge-selected', 0.05, 0)" title="Phải"><AppIcon name="chevronRight" :size="24"/></AppButton>
 
       <div class="hud-rotate">
-        <AppButton type="button" @click="$emit('rotate-selected', -0.2618)">
+        <AppButton type="button" variant="unstyled" @click="$emit('rotate-selected', -0.2618)">
           <AppIcon name="rotateCcw" :size="16" /> Xoay trái
         </AppButton>
-        <AppButton type="button" @click="$emit('rotate-selected', 0.2618)">
+        <AppButton type="button" variant="unstyled" @click="$emit('rotate-selected', 0.2618)">
           Xoay phải <AppIcon name="rotateCw" :size="16" />
         </AppButton>
       </div>

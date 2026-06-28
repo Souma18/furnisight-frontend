@@ -73,6 +73,7 @@ onUnmounted(() => {
       <AppButton
         v-if="mode === 'drawer'"
         type="button"
+        variant="unstyled"
         class="pl-filter-backdrop"
         aria-label="Đóng bộ lọc"
         @click="emit('close')"
@@ -88,7 +89,7 @@ onUnmounted(() => {
             <p>Bộ lọc sản phẩm</p>
             <strong>{{ totalCategoryCount }} sản phẩm theo danh mục</strong>
           </div>
-          <AppButton type="button" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
+          <AppButton type="button" variant="unstyled" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
             <AppIcon name="close" :size="18" />
           </AppButton>
         </header>
@@ -177,6 +178,7 @@ onUnmounted(() => {
                   v-for="c in displayColors"
                   :key="c.id"
                   type="button"
+                  variant="unstyled"
                   class="pl-cf-swatch"
                   :class="{ active: pending.colors.includes(c.id) }"
                   :style="{ background: c.hex, border: c.id === 'ivory' ? '1px solid #ece2cf' : undefined }"
@@ -218,15 +220,15 @@ onUnmounted(() => {
         </div>
         
         <footer v-if="mode === 'drawer'" class="pl-filter-drawer-actions">
-          <AppButton type="button" class="pl-filter-clear" @click="clearAll">
+          <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
             Xóa tất cả
           </AppButton>
-          <AppButton type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
         </footer>
         <div v-else class="pl-filter-block pl-filter-actions">
-          <AppButton type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
-          <AppButton type="button" class="pl-filter-clear" @click="clearAll">
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
             Xóa tất cả bộ lọc
           </AppButton>

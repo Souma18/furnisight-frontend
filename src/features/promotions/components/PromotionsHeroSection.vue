@@ -30,10 +30,10 @@ const { t } = useI18n()
           {{ t('promotions.hero.subtitle') }}
         </p>
         <div class="promo-actions">
-          <AppButton type="button" class="promo-btn primary" @click="emit('scroll-to', 'voucher-section')">
+          <AppButton variant="unstyled" size="unstyled" type="button" class="promo-btn primary" @click="emit('scroll-to', 'voucher-section')">
             <AppIcon name="badgePercent" :size="16" />{{ t('promotions.hero.claimVoucher') }}
           </AppButton>
-          <AppButton type="button" class="promo-btn ghost" @click="emit('scroll-to', 'combo-section')">
+          <AppButton variant="unstyled" size="unstyled" type="button" class="promo-btn ghost" @click="emit('scroll-to', 'combo-section')">
             <AppIcon name="armchair" :size="16" />{{ t('promotions.hero.viewCombos') }}
           </AppButton>
         </div>

@@ -18,7 +18,7 @@ const show = computed(() => !!props.voucher)
 <template>
   <div v-if="show" class="modal-overlay" @click.self="emit('close')">
     <div class="modal-box">
-      <AppButton class="modal-close" type="button" @click="emit('close')">
+      <AppButton variant="unstyled" size="unstyled" class="modal-close" type="button" @click="emit('close')">
         <AppIcon name="close" :size="16" />
       </AppButton>
       <h3>{{ discountLabel(voucher) }}</h3>
