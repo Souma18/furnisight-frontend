@@ -1,4 +1,5 @@
 import { apiClient } from '../../client'
+import { withApiLocale } from '../locale'
 
 class OrdersApi {
   /**
@@ -8,7 +9,7 @@ class OrdersApi {
    */
   getOrders(params) {
     // Gateway: /orders/user -> OrderService: /api/v1/user
-    return apiClient.get('/orders/user', { params })
+    return apiClient.get('/orders/user', { params: withApiLocale(params) })
   }
 
   /**
@@ -17,7 +18,7 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./orders.model').OrderResponse>>}
    */
   getOrderDetail(orderCode) {
-    return apiClient.get(`/orders/${orderCode}`)
+    return apiClient.get(`/orders/${orderCode}`, { params: withApiLocale() })
   }
 
   checkProductPurchased(productId) {
@@ -30,11 +31,13 @@ class OrdersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./orders.model').OrderResponse>>}
    */
   createOrder(payload) {
-    return apiClient.post('/orders/initiate', payload)
+    return apiClient.post('/orders/initiate', payload, {
+      params: withApiLocale(),
+    })
   }
 
   getCheckoutSession(params) {
-    return apiClient.get('/orders/checkout/session', { params })
+    return apiClient.get('/orders/checkout/session', { params: withApiLocale(params) })
   }
 
   /**
@@ -81,7 +84,7 @@ class OrdersApi {
   // ─── VOUCHERS ────────────────────────────────────────────────────────
 
   getVouchers(params) {
-    return apiClient.get('/promotions/vouchers/user', { params })
+    return apiClient.get('/promotions/vouchers/user', { params: withApiLocale(params) })
   }
 
   applyVoucher(code, orderAmount) {
@@ -90,22 +93,28 @@ class OrdersApi {
       type: 'shop',
       subtotal: orderAmount,
       shippingFee: 0,
+    }, {
+      params: withApiLocale(),
     })
   }
 
   validateCheckoutVoucher(payload) {
-    return apiClient.post('/promotions/vouchers/validate', payload)
+    return apiClient.post('/promotions/vouchers/validate', payload, {
+      params: withApiLocale(),
+    })
   }
 
   getActiveCombos(params) {
     return apiClient.get('/promotions/combos', {
-      params: { availableOnly: true, size: 24, sort: 'save-desc', ...params },
+      params: withApiLocale({ availableOnly: true, size: 24, sort: 'save-desc', ...params }),
       skipAuth: true,
     })
   }
 
   validateCheckoutCombo(payload) {
-    return apiClient.post('/promotions/combos/validate', payload)
+    return apiClient.post('/promotions/combos/validate', payload, {
+      params: withApiLocale(),
+    })
   }
 }
 

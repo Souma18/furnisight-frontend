@@ -1,5 +1,5 @@
 <script setup>
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
@@ -24,10 +24,13 @@ import {
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ComboCard from '../components/ComboCard.vue'
 import { writeVoucherIntent } from '@features/checkout/lib/checkoutVoucherIntentStorage'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
+const localeStore = useLocaleStore()
+const { locale } = storeToRefs(localeStore)
 const authStore = useAuthStore()
 const cartStore = useCartStore()
 const { isAuthenticated } = storeToRefs(authStore)
@@ -129,19 +132,34 @@ const showVoucherSection = computed(() => ['all', 'voucher', 'freeship', 'expiri
 const showComboSection = computed(() => activeFilter.value === 'all' || activeFilter.value === 'combo')
 const pageLoading = ref(true)
 const pageError = ref(false)
+const pageLoaded = ref(false)
 
-async function loadPageData() {
-  pageLoading.value = true
-  pageError.value = false
-  const results = await Promise.all([loadVouchers(), loadCombos(true)])
+async function loadPageData(options = {}) {
+  const { soft = false } = options
+  const preserveState = soft && pageLoaded.value
+
+  if (!preserveState) {
+    pageLoading.value = true
+    pageError.value = false
+  }
+
+  const results = await Promise.all([
+    loadVouchers(true, { preserveState }),
+    loadCombos(true, { preserveState }),
+  ])
   const allFailed = results.every(success => !success)
   pageError.value = allFailed
   pageLoading.value = false
+  pageLoaded.value = !allFailed
   cartStore.ensureHydrated().catch(() => null)
 }
 
 onMounted(() => {
   loadPageData()
+})
+
+watch(locale, () => {
+  loadPageData({ soft: true })
 })
 
 async function useVoucherNow(voucher) {

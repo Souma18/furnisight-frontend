@@ -68,23 +68,47 @@ export function useProductDetailPage(props) {
   const has3dModel = computed(() => activeVariant.value?.supports3d ?? false)
   const activeModelUrl = computed(() => activeVariant.value?.modelUrl || '')
 
-  async function loadProduct(id) {
-    loading.value = true
+  async function loadProduct(id, options = {}) {
+    const preserveState = options?.preserveState === true && !!product.value
+    const previousColor = selectedColor.value
+    const previousSize = selectedSize.value
+    const previousImage = activeImage.value
+    const previousQty = qty.value
+    const previousTab = activeTab.value
+
+    if (!preserveState) loading.value = true
     error.value = null
-    product.value = null
+    if (!preserveState) product.value = null
     try {
-      const loadedProduct = await loadDetail(id)
+      const loadedProduct = await loadDetail(id, { preserveState })
       if (!loadedProduct) throw new Error('not_found')
       product.value = loadedProduct
 
-      selectedColor.value = product.value.colors?.[0] ?? ''
-      selectedSize.value = product.value.sizes?.[0] ?? ''
-      activeImage.value = activeGallery.value[0] ?? ''
-      qty.value = 1
-      activeTab.value = route.query.tab === 'review' ? 'review' : 'desc'
-      show3DModal.value = false
-      resetCartButtonState()
-      resetReviewState()
+      const availableColors = Array.isArray(product.value.colors) ? product.value.colors : []
+      const availableSizes = Array.isArray(product.value.sizes) ? product.value.sizes : []
+      const nextGallery = activeGallery.value
+
+      selectedColor.value = preserveState && availableColors.includes(previousColor)
+        ? previousColor
+        : (availableColors[0] ?? '')
+      selectedSize.value = preserveState && availableSizes.includes(previousSize)
+        ? previousSize
+        : (availableSizes[0] ?? '')
+      activeImage.value = preserveState && nextGallery.includes(previousImage)
+        ? previousImage
+        : (nextGallery[0] ?? '')
+      qty.value = preserveState
+        ? Math.max(1, Math.min(selectedStock.value || 1, previousQty || 1))
+        : 1
+      activeTab.value = route.query.tab === 'review'
+        ? 'review'
+        : (preserveState ? previousTab : 'desc')
+
+      if (!preserveState) {
+        show3DModal.value = false
+        resetCartButtonState()
+        resetReviewState()
+      }
 
       await checkWishlist()
 
@@ -141,7 +165,7 @@ export function useProductDetailPage(props) {
   })
 
   watch(() => props.id, (id) => loadProduct(id))
-  watch(locale, () => loadProduct(props.id))
+  watch(locale, () => loadProduct(props.id, { preserveState: true }))
   watch(() => route.query.tab, (tab) => {
     if (tab === 'review') activeTab.value = 'review'
   })

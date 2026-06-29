@@ -1,14 +1,17 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore, storeToRefs } from 'pinia'
+import { ref, watch } from 'vue'
 import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
 import { i18n } from '@shared/i18n'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 const t = (key, params) => i18n.global.t(key, params)
 
 export const useOrderStore = defineStore('accountOrder', () => {
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const orders = ref([])
   const orderDetails = ref({})
   const loading = ref(false)
@@ -177,6 +180,15 @@ export const useOrderStore = defineStore('accountOrder', () => {
     orderDetails.value = {}
     loading.value = false
   }
+
+  watch(locale, () => {
+    const hadOrders = orders.value.length > 0
+    const detailKeys = Object.keys(orderDetails.value)
+    orderDetails.value = {}
+    if (hadOrders || detailKeys.length > 0) {
+      fetchOrders().catch(() => null)
+    }
+  })
 
   return {
     orders,

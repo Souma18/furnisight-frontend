@@ -1,4 +1,5 @@
 import { apiClient } from '../../client'
+import { withApiLocale } from '../locale'
 
 class UsersApi {
   // ─── PROFILE ────────────────────────────────────────────────────────
@@ -65,7 +66,7 @@ class UsersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./users.model').FavoriteResponse[]>>}
    */
   getFavorites() {
-    return apiClient.get('/users/favorites/products')
+    return apiClient.get('/users/favorites/products', { params: withApiLocale() })
   }
 
   /**
@@ -74,7 +75,9 @@ class UsersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./users.model').FavoriteResponse>>}
    */
   addFavorite(productId) {
-    return apiClient.post(`/users/favorites/products/${productId}`)
+    return apiClient.post(`/users/favorites/products/${productId}`, null, {
+      params: withApiLocale(),
+    })
   }
 
   /**

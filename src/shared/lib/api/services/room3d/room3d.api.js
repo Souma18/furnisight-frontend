@@ -1,6 +1,16 @@
 import { apiClient } from '@shared/lib/api/client'
 import { ROOM_TEMPLATES } from '@features/room3d/core/mockData'
 
+const LOCALE_STORAGE_KEY = 'furnisight:locale'
+const SUPPORTED_LOCALES = ['vi', 'en']
+
+function getCatalogLocale() {
+  if (typeof window === 'undefined') return 'vi'
+
+  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+  return SUPPORTED_LOCALES.includes(storedLocale) ? storedLocale : 'vi'
+}
+
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {
   bedroom: 'bedroom',
@@ -271,6 +281,7 @@ export async function getRoomRecommendations(roomType, options = {}) {
   const response = await apiClient.get('/catalog/products', {
     params: {
       ...filters,
+      lang: getCatalogLocale(),
       size: options.limit ?? 8,
       sort: options.sort ?? 'popular',
     },

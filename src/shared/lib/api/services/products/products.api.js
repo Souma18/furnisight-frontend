@@ -1,6 +1,22 @@
 import { apiClient } from '../../client'
 
 const catalogBaseUrl = '/catalog'
+const LOCALE_STORAGE_KEY = 'furnisight:locale'
+const SUPPORTED_LOCALES = ['vi', 'en']
+
+function getCatalogLocale() {
+  if (typeof window === 'undefined') return 'vi'
+
+  const storedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+  return SUPPORTED_LOCALES.includes(storedLocale) ? storedLocale : 'vi'
+}
+
+function withCatalogLocale(params = {}) {
+  return {
+    ...params,
+    lang: getCatalogLocale(),
+  }
+}
 
 class ProductsApi {
   // ─── PRODUCTS ────────────────────────────────────────────────────────
@@ -11,7 +27,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./products.model').ProductResponse[], totalElements: number}>>}
    */
   getProducts(params) {
-    return apiClient.get(`${catalogBaseUrl}/products`, { params })
+    return apiClient.get(`${catalogBaseUrl}/products`, { params: withCatalogLocale(params) })
   }
 
   /**
@@ -20,7 +36,9 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').ProductResponse>>}
    */
   getProductDetail(slugOrId) {
-    return apiClient.get(`${catalogBaseUrl}/products/${slugOrId}`)
+    return apiClient.get(`${catalogBaseUrl}/products/${slugOrId}`, {
+      params: withCatalogLocale(),
+    })
   }
 
   // ─── CATEGORIES ────────────────────────────────────────────────────────
@@ -31,15 +49,19 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').CategoryResponse[]>>}
    */
   getCategories(params) {
-    return apiClient.get(`${catalogBaseUrl}/categories`, { params })
+    return apiClient.get(`${catalogBaseUrl}/categories`, { params: withCatalogLocale(params) })
   }
 
   getRootCategories() {
-    return apiClient.get(`${catalogBaseUrl}/categories/roots`)
+    return apiClient.get(`${catalogBaseUrl}/categories/roots`, {
+      params: withCatalogLocale(),
+    })
   }
 
   getSubcategories(slugOrId) {
-    return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}/subcategories`)
+    return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}/subcategories`, {
+      params: withCatalogLocale(),
+    })
   }
 
   /**
@@ -48,7 +70,9 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').CategoryResponse>>}
    */
   getCategoryDetail(slugOrId) {
-    return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}`)
+    return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}`, {
+      params: withCatalogLocale(),
+    })
   }
 
   // ─── REVIEWS ────────────────────────────────────────────────────────

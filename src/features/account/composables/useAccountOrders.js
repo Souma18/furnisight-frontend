@@ -2,12 +2,16 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderStore } from '../store/orderStore'
 import { i18n } from '@shared/i18n'
+import { useLocaleStore } from '@shared/stores/localeStore'
+import { storeToRefs } from 'pinia'
 
 const t = (key, params) => i18n.global.t(key, params)
 
 export function useAccountOrders(emitNotify) {
   const route = useRoute()
   const router = useRouter()
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const orderStore = useOrderStore()
   const retryingOrderCode = ref('')
 
@@ -98,6 +102,12 @@ export function useAccountOrders(emitNotify) {
     const order = orderStore.getOrderDetail(orderCode)
     orderStore.fetchOrderDetail(order?.orderCode || orderCode)
   }, { immediate: true })
+
+  watch(locale, () => {
+    const orderCode = selectedOrderCode.value
+    if (!orderCode) return
+    orderStore.fetchOrderDetail(orderCode)
+  })
 
   return {
     orders,

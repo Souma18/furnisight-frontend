@@ -14,11 +14,14 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
   const loadingMore = ref(false)
   const hasMoreCombos = computed(() => combos.value.length < comboTotal.value)
 
-  async function loadCombos(reset = false) {
+  async function loadCombos(reset = false, options = {}) {
+    const { preserveState = false } = options
     if (reset) {
       comboPage.value = 0
-      combos.value = []
-      loading.value = true
+      if (!preserveState) {
+        combos.value = []
+      }
+      loading.value = !preserveState
     } else {
       loadingMore.value = true
     }
@@ -42,7 +45,7 @@ export function usePromotionsCombos({ enrichComboItemImage, showToast }) {
       combos.value = reset ? rows : [...combos.value, ...rows]
       return true
     } catch (error) {
-      if (reset) {
+      if (reset && !preserveState) {
         combos.value = []
         comboTotal.value = 0
       }

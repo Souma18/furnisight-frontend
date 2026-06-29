@@ -1,5 +1,6 @@
 import { apiClient } from '../../client'
 import { CartResponse, resolveCartImageUrl } from './cart.model'
+import { withApiLocale } from '../locale'
 
 const baseUrl = '/cart/carts'
 
@@ -38,19 +39,21 @@ function toCartResponse(response) {
 
 class CartApi {
   async getCart(params, config = {}) {
-    const response = await apiClient.get(baseUrl, { params, ...config })
+    const response = await apiClient.get(baseUrl, { params: withApiLocale(params), ...config })
     return toCartResponse(response)
   }
 
   async addToCart(payload) {
-    const response = await apiClient.post(`${baseUrl}/items`, toAddCartPayload(payload))
+    const response = await apiClient.post(`${baseUrl}/items`, toAddCartPayload(payload), {
+      params: withApiLocale(),
+    })
     return toCartResponse(response)
   }
 
   async updateCartItem(cartItemId, payload) {
     const { productId, variantId } = parseCartItemId(cartItemId)
     const response = await apiClient.put(`${baseUrl}/items/${productId}`, toUpdateCartPayload(payload), {
-      params: variantId ? { variantId } : undefined,
+      params: withApiLocale(variantId ? { variantId } : {}),
     })
     return toCartResponse(response)
   }
@@ -58,7 +61,7 @@ class CartApi {
   async removeCartItem(cartItemId) {
     const { productId, variantId } = parseCartItemId(cartItemId)
     const response = await apiClient.delete(`${baseUrl}/items/${productId}`, {
-      params: variantId ? { variantId } : undefined,
+      params: withApiLocale(variantId ? { variantId } : {}),
     })
     return toCartResponse(response)
   }

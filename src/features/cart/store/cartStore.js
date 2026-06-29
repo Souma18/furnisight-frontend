@@ -1,9 +1,10 @@
 import { computed, ref, watch } from 'vue'
-import { defineStore } from 'pinia'
+import { defineStore, storeToRefs } from 'pinia'
 import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
 import { clampPurchaseQuantity, resolveStockLimit } from '../lib/stockGuards'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 const STORAGE_KEY = 'furnisight-cart-store-v4'
 const LEGACY_STORAGE_KEYS = [
@@ -39,6 +40,8 @@ function isApiBackedCartLine(item = {}) {
 
 export const useCartStore = defineStore('cart', () => {
   const authStore = useAuthStore(pinia)
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const items = ref([])
   const loading = ref(false)
   const hydrated = ref(false)
@@ -124,6 +127,11 @@ export const useCartStore = defineStore('cart', () => {
     },
     { deep: true },
   )
+
+  watch(locale, () => {
+    if (!hydrated.value) return
+    hydrate({ force: true }).catch(() => null)
+  })
 
   async function hydrate(options = {}) {
     const { force = false } = options

@@ -4,6 +4,7 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { useLocaleStore } from '@shared/stores/localeStore'
 import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
@@ -17,6 +18,8 @@ import AppHeaderCartDropdown from './AppHeaderCartDropdown.vue'
 const router = useRouter()
 const route = useRoute()
 const { t } = useI18n()
+const localeStore = useLocaleStore()
+const { locale } = storeToRefs(localeStore)
 const authStore = useAuthStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authStore)
 const notifications = ref([])
@@ -109,6 +112,13 @@ watch(isAuthenticated, (newVal) => {
   } else {
     notificationsLoaded.value = false
   }
+})
+
+watch(locale, () => {
+  if (!isAuthenticated.value || !notificationsLoaded.value) return
+  loadNotifications().catch((error) => {
+    console.warn('[Header] reload notifications failed:', getApiErrorMessage(error))
+  })
 })
 
 const mobileMenuOpen = ref(false)

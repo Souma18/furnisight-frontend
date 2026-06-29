@@ -1,6 +1,8 @@
-import { computed, onMounted, ref, unref } from 'vue'
+import { computed, onMounted, ref, unref, watch } from 'vue'
 import { notificationsApi } from '@shared/lib/api/services'
 import { i18n } from '@shared/i18n'
+import { useLocaleStore } from '@shared/stores/localeStore'
+import { storeToRefs } from 'pinia'
 
 const t = (key, params) => i18n.global.t(key, params)
 
@@ -101,6 +103,8 @@ export function mapInboxMessageToFrontend(item) {
 }
 
 export function useNotificationsCenter(emit, selectedCategory = 'all') {
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const loading = ref(false)
   const errorMessage = ref('')
   const notifications = ref([])
@@ -200,6 +204,10 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
   }
 
   onMounted(loadNotifications)
+
+  watch(locale, () => {
+    loadNotifications().catch(() => null)
+  })
 
   return {
     loading,

@@ -1,9 +1,12 @@
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { defineStore, storeToRefs } from 'pinia'
+import { ref, computed, watch } from 'vue'
 import { usersApi } from '@shared/lib/api/services'
 import { FavoriteResponse } from '@shared/lib/api/services/users/users.model'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 export const useWishlistStore = defineStore('accountWishlist', () => {
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const wishlist = ref([])
   const wishlistHydrated = ref(false)
   let wishlistPromise = null
@@ -95,6 +98,11 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
     wishlistHydrated.value = false
     wishlistPromise = null
   }
+
+  watch(locale, () => {
+    if (!wishlistHydrated.value) return
+    loadWishlist({ force: true }).catch(() => null)
+  })
 
   return {
     wishlist,

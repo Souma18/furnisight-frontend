@@ -17,9 +17,10 @@ export const useProductStore = defineStore('product', () => {
     return Array.isArray(rawItems) ? rawItems.map((item) => new ProductResponse(item)) : []
   }
 
-  async function loadList(params) {
+  async function loadList(params, options = {}) {
+    const preserveState = options?.preserveState === true
     const requestId = ++listRequestId
-    loading.value = true
+    if (!preserveState) loading.value = true
     error.value = null
     try {
       const { data } = await productsApi.getProducts(params)
@@ -30,18 +31,21 @@ export const useProductStore = defineStore('product', () => {
     } catch (e) {
       if (requestId !== listRequestId) return
       error.value = e
-      items.value = []
-      total.value = 0
-      facets.value = {}
+      if (!preserveState) {
+        items.value = []
+        total.value = 0
+        facets.value = {}
+      }
     } finally {
       if (requestId === listRequestId) loading.value = false
     }
   }
 
-  async function loadDetail(productId) {
-    loading.value = true
+  async function loadDetail(productId, options = {}) {
+    const preserveState = options?.preserveState === true
+    if (!preserveState) loading.value = true
     error.value = null
-    selectedProduct.value = null
+    if (!preserveState) selectedProduct.value = null
 
     try {
       const { data } = await productsApi.getProductDetail(productId)
@@ -60,7 +64,7 @@ export const useProductStore = defineStore('product', () => {
       return product
     } catch (e) {
       error.value = e
-      selectedProduct.value = null
+      if (!preserveState) selectedProduct.value = null
       throw e
     } finally {
       loading.value = false

@@ -192,7 +192,7 @@ export function useProductListPage() {
     requestList()
   }
 
-  function requestList() {
+  function requestList(options = {}) {
     loadList(buildProductListParams({
       appliedFilters: appliedFilters.value,
       saleOnly: saleOnly.value,
@@ -200,7 +200,7 @@ export function useProductListPage() {
       selectedCategory: selectedCategory.value,
       selectedSubcategory: selectedSubcategory.value,
       sortBy: sortBy.value,
-    }))
+    }), options)
   }
 
   async function favoriteProduct(productId) {
@@ -256,7 +256,7 @@ export function useProductListPage() {
     await loadSidebarCategories(selectedCategory.value)
     suppressCategoryWatch.value = false
     suppressListWatch.value = false
-    requestList()
+    requestList({ preserveState: true })
   })
 
   const dynamicHero = computed(() => {

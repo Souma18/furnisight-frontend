@@ -50,10 +50,13 @@ export function usePromotionsVouchers({
     vouchers.value = mergeStatus(vouchers.value)
   }
 
-  async function loadVouchers(reset = true) {
+  async function loadVouchers(reset = true, options = {}) {
+    const { preserveState = false } = options
     if (reset) {
       voucherPage.value = 0
-      vouchers.value = []
+      if (!preserveState) {
+        vouchers.value = []
+      }
     }
     try {
       const response = await promotionsApi.getPublicVouchers({
@@ -68,7 +71,7 @@ export function usePromotionsVouchers({
       if (reset) await loadUserVouchers().catch(() => null)
       return true
     } catch (error) {
-      if (reset) {
+      if (reset && !preserveState) {
         vouchers.value = []
         voucherTotal.value = 0
       }

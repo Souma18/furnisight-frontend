@@ -1,4 +1,5 @@
 import { apiClient } from '../../client'
+import { withApiLocale } from '../locale'
 
 class NotificationsApi {
   static templateBaseUrl = '/notifications/notification-templates'
@@ -11,7 +12,7 @@ class NotificationsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./notifications.model').InboxMessageResponse[], totalElements: number}>>}
    */
   getInboxMessages(params) {
-    return apiClient.get('/notifications/inbox-messages', { params })
+    return apiClient.get('/notifications/inbox-messages', { params: withApiLocale(params) })
   }
 
   markAsRead(id) {
