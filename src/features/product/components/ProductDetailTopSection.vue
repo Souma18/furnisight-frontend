@@ -129,6 +129,8 @@ function handleOpen3D() {
           v-for="imgUrl in displayGallery"
           :key="imgUrl"
           type="button"
+          variant="unstyled"
+          size="unstyled"
           :class="['thumb', { active: activeImage === imgUrl }]"
           @click="emit('pick-image', imgUrl)"
         >

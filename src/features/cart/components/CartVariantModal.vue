@@ -5,15 +5,11 @@ import AppInput from '@shared/ui/AppInput.vue'
 const props = defineProps({
   activeItem: { type: Object, default: null },
   activeDraft: { type: Object, default: null },
-  loading: { type: Boolean, default: false }
+  loading: { type: Boolean, default: false },
+  getVariantOptions: { type: Function, required: true }
 })
 
 const emit = defineEmits(['close', 'save', 'change-qty', 'set-qty'])
-
-function getVariantOptions(item, key) {
-  if (!item || !item.variants) return []
-  return [...new Set(item.variants.map((v) => v[key === 'colors' ? 'color' : 'size']).filter(Boolean))]
-}
 </script>
 
 <template>
@@ -31,11 +27,11 @@ function getVariantOptions(item, key) {
         <div class="variant-modal-body">
           <label>
             <span>Màu</span>
-            <select v-model="activeDraft.selectedColor" :disabled="loading || !getVariantOptions(activeItem, 'colors').length">
-              <option v-if="!getVariantOptions(activeItem, 'colors').length" value="">
+            <select v-model="activeDraft.selectedColor" :disabled="loading || !props.getVariantOptions(activeItem, 'colors').length">
+              <option v-if="!props.getVariantOptions(activeItem, 'colors').length" value="">
                 Không có dữ liệu màu
               </option>
-              <option v-for="color in getVariantOptions(activeItem, 'colors')" :key="color" :value="color">
+              <option v-for="color in props.getVariantOptions(activeItem, 'colors')" :key="color" :value="color">
                 {{ color }}
               </option>
             </select>
@@ -47,12 +43,12 @@ function getVariantOptions(item, key) {
 
           <label>
             <span>Kích thước</span>
-            <select v-model="activeDraft.selectedSize" :disabled="loading || !getVariantOptions(activeItem, 'sizes').length">
-              <option v-if="!getVariantOptions(activeItem, 'sizes').length" value="">
+            <select v-model="activeDraft.selectedSize" :disabled="loading || !props.getVariantOptions(activeItem, 'sizes').length">
+              <option v-if="!props.getVariantOptions(activeItem, 'sizes').length" value="">
                 Không có dữ liệu kích thước
               </option>
               <option
-                v-for="size in getVariantOptions(activeItem, 'sizes')"
+                v-for="size in props.getVariantOptions(activeItem, 'sizes')"
                 :key="size"
                 :value="size"
               >

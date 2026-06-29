@@ -3,7 +3,7 @@ import AppButton from '@shared/ui/AppButton.vue'
 import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 import { isOverStock, resolveStockLimit, stockLimitLabel } from '../lib/stockGuards'
@@ -33,9 +33,21 @@ const variantLabel = computed(() => variantCombination.value || t('account.cart.
 const summaryLabel = computed(() => variantCombination.value || t('account.cart.defaultVariant'))
 
 const detailRoute = computed(() => {
-  const detailId = props.item?.detailId || props.item?.slug || ''
+  const detailId = props.item?.detailId || props.item?.slug || props.item?.productId || ''
   return detailId ? `/products/${detailId}` : ''
 })
+
+const router = useRouter()
+
+function handleCardClick(event) {
+  const interactiveSelectors = 'button, input, label, a, .qty-wrap, .delete-btn, .variant-btn, .select-box'
+  if (event.target.closest(interactiveSelectors)) {
+    return
+  }
+  if (detailRoute.value) {
+    router.push(detailRoute.value)
+  }
+}
 
 const stockLimit = computed(() => resolveStockLimit(props.item))
 const cannotIncrease = computed(() => stockLimit.value != null && Number(props.item.qty || 1) >= stockLimit.value)
@@ -49,7 +61,7 @@ const formatPrice = PriceFormatter.format
 </script>
 
 <template>
-  <article class="item">
+  <article class="item" :class="{ 'clickable-card': !!detailRoute }" @click="handleCardClick">
     <div class="item-selection">
       <label v-if="!item.outOfStock && !isOverStock(item)" class="select-box" :aria-label="t('account.cart.selectItem', { name: item.name })">
         <input
@@ -118,6 +130,13 @@ const formatPrice = PriceFormatter.format
     radial-gradient(circle at top, rgba(201, 146, 42, 0.08), transparent 60%),
     var(--account-surface);
   box-shadow: 0 10px 30px rgba(18, 32, 46, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.clickable-card {
+  cursor: pointer;
+}
+.clickable-card:hover {
+  border-color: #c9922a;
 }
 .item-selection {
   display: flex;

@@ -83,6 +83,7 @@ const {
   updateSelectedScale,
   updateSelectedColor,
   removeSelectedProduct,
+  deselectProduct,
   addSelectedProductToCart,
   resetSelectedColor,
   updateSelectedRotation,
@@ -194,7 +195,7 @@ defineExpose({
       :selected-rotation-y="selectedRotationY"
       :is-selected-in-cart="isSelectedInCart"
       :screen-pos="selectedScreenPos"
-      @close="selectedSceneItemId = null"
+      @close="deselectProduct"
       @update-variant="(instanceId, variantId) => { 
         $emit('update-variant', instanceId, variantId);
       }"

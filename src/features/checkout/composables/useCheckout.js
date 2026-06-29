@@ -72,41 +72,46 @@ export function useCheckout() {
   }
 
   async function initCheckout() {
-    if (!authStore.isCustomer) {
-      await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
-      return
-    }
-    checkoutStore.beginVoucherSession()
-    await Promise.all([
-      cartStore.ensureHydrated(),
-      addressStore.fetchAddresses(),
-      hydrateSession({ loadCombos: !requestedComboId.value }),
-    ])
-    syncSelectedAddress()
-    if (requestedComboId.value) {
-      await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
-    } else {
-      await refreshApplicableCombo(checkoutLines.value)
-    }
-    const intentCode = consumeVoucherIntent()
-    const preferredCode = requestedVoucherCode.value || intentCode
+    checkoutStore.loading = true
     try {
-      await revalidateVouchers({
-        subtotal: voucherSubtotal.value,
-        shippingFee: checkoutStore.shipFee,
-        preferredVoucherCode: preferredCode,
-      })
-    } catch {
-      checkoutStore.shopVoucher = null
-      checkoutStore.shippingVoucher = null
-    } finally {
-      if (requestedVoucherCode.value) {
-        const query = { ...route.query }
-        delete query.voucherCode
-        await router.replace({ query })
+      if (!authStore.isCustomer) {
+        await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
+        return
       }
+      checkoutStore.beginVoucherSession()
+      await Promise.all([
+        cartStore.ensureHydrated(),
+        addressStore.fetchAddresses(),
+        hydrateSession({ loadCombos: !requestedComboId.value }),
+      ])
+      syncSelectedAddress()
+      if (requestedComboId.value) {
+        await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+      } else {
+        await refreshApplicableCombo(checkoutLines.value)
+      }
+      const intentCode = consumeVoucherIntent()
+      const preferredCode = requestedVoucherCode.value || intentCode
+      try {
+        await revalidateVouchers({
+          subtotal: voucherSubtotal.value,
+          shippingFee: checkoutStore.shipFee,
+          preferredVoucherCode: preferredCode,
+        })
+      } catch {
+        checkoutStore.shopVoucher = null
+        checkoutStore.shippingVoucher = null
+      } finally {
+        if (requestedVoucherCode.value) {
+          const query = { ...route.query }
+          delete query.voucherCode
+          await router.replace({ query })
+        }
+      }
+      voucherSessionReady = true
+    } finally {
+      checkoutStore.loading = false
     }
-    voucherSessionReady = true
   }
 
   function goBackToCart() {

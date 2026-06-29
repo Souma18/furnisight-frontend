@@ -180,17 +180,20 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedRoomType.value = roomType ?? null
     uploadedModelUrl.value = modelUrl ?? ''
     roomRenderSource.value = uploadedModelUrl.value ? 'uploaded' : 'none'
+    sceneItems.value = []
   }
 
   function showPredictionRoom(roomType) {
     selectedRoomType.value = roomType ?? null
     uploadedModelUrl.value = ''
     roomRenderSource.value = 'prediction'
+    sceneItems.value = []
   }
 
   function selectTemplateRoom(roomType) {
     selectedRoomType.value = roomType
     roomRenderSource.value = 'template'
+    sceneItems.value = []
   }
 
   function setAiRecognition(label, confidence) {

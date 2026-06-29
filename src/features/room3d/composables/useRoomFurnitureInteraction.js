@@ -288,6 +288,12 @@ export function useRoomFurnitureInteraction({
     isDraggingProduct.value = false
   }
 
+  function deselectProduct() {
+    selectedSceneItemId.value = null
+    setOrbitEnabled(true)
+    isDraggingProduct.value = false
+  }
+
   function addSelectedProductToCart() {
     if (!selectedProduct.value?.id || isSelectedInCart.value) return
     emit('add-product', {
@@ -383,6 +389,7 @@ export function useRoomFurnitureInteraction({
     updateSelectedScale,
     updateSelectedColor,
     removeSelectedProduct,
+    deselectProduct,
     addSelectedProductToCart,
     resetSelectedColor,
     updateSelectedRotation,

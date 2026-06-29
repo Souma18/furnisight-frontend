@@ -38,6 +38,7 @@ const {
   changeQty,
   removeLine,
   formatPrice,
+  getVariantOptions,
 } = useCartPage();
 </script>
 
@@ -135,6 +136,7 @@ const {
       :active-item="activeItem"
       :active-draft="activeDraft"
       :loading="editorLoading"
+      :get-variant-options="getVariantOptions"
       @close="closeItemEditor"
       @save="applyActiveItemChanges"
       @change-qty="changeDraftQty"

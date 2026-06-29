@@ -3,12 +3,17 @@ import AppButton from '@shared/ui/AppButton.vue'
 import AppImage from '@shared/ui/AppImage.vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import CartPreviewList from '@features/cart/components/CartPreviewList.vue'
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@features/auth/store/authStore'
+import { openAuthModal } from '@features/auth/lib/authModalBus'
+import AppHeaderCartDropdown from '@shared/layout/AppHeaderCartDropdown.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ThemeToggle from '@shared/ui/ThemeToggle.vue'
 
 const router = useRouter()
 const { t } = useI18n()
+const authStore = useAuthStore()
+const { isAuthenticated } = storeToRefs(authStore)
 
 defineProps({
   selectedRoom: {
@@ -61,32 +66,15 @@ function goHome() {
       </AppButton>
       <ThemeToggle variant="icon" />
       <div class="checkout-wrap">
-        <AppButton type="button" class="action-btn gold checkout-trigger" variant="unstyled">
-          <AppIcon name="cart" :size="20" />
-          <span>{{ t('room3d.cart.checkout') }}</span>
-          <span v-if="cartCount > 0" class="topbar-cart-badge">{{ cartCount }}</span>
-        </AppButton>
-
-        <div class="checkout-dropdown">
-          <div class="cart-header">
-            <div class="cart-title">
-              {{ t('cart.title') }}
-              <span v-if="cartCount" class="cart-count">{{ cartCount }}</span>
-            </div>
-            <AppButton type="button" class="cart-head-link" @click="$emit('open-checkout')">
-              {{ t('room3d.cart.checkout') }}
+        <AppHeaderCartDropdown :is-authenticated="isAuthenticated" @require-auth="openAuthModal">
+          <template #trigger="{ openCart, itemCount }">
+            <AppButton type="button" class="action-btn gold checkout-trigger" variant="unstyled" @click="openCart">
+              <AppIcon name="cart" :size="20" />
+              <span>{{ t('room3d.cart.checkout') }}</span>
+              <span v-if="itemCount > 0" class="topbar-cart-badge">{{ itemCount }}</span>
             </AppButton>
-          </div>
-
-          <CartPreviewList
-            :items="cartItems"
-            :total-count="cartCount"
-            :total-amount="cartTotal"
-            @open-cart="$emit('open-checkout')"
-            @update-qty="(lineId, qty) => $emit('update-cart-qty', lineId, qty)"
-            @remove="$emit('remove-product', $event)"
-          />
-        </div>
+          </template>
+        </AppHeaderCartDropdown>
       </div>
     </div>
   </header>

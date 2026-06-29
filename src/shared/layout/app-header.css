@@ -35,6 +35,11 @@
   min-width: 0;
 }
 
+.brand:hover {
+  text-decoration: none;
+}
+
+
 .brand-icon {
   width: 2rem;
   height: 2rem;
@@ -145,6 +150,7 @@
   color: var(--header-ink);
   transform: translateY(-1px);
   outline: none;
+  text-decoration: none;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
 }
 

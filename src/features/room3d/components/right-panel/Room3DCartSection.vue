@@ -4,6 +4,7 @@ import AppImage from '@shared/ui/AppImage.vue'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { useRouter } from 'vue-router'
 
 defineProps({
   cartItems: {
@@ -24,6 +25,7 @@ defineEmits(['remove', 'checkout'])
 
 const isOpen = ref(false)
 const { t } = useI18n()
+const router = useRouter()
 
 function itemIconName(item) {
   const raw = `${item.categoryName ?? ''} ${item.category ?? ''}`.toLowerCase()
@@ -32,6 +34,13 @@ function itemIconName(item) {
   if (raw.includes('bed') || raw.includes('giường')) return 'bed'
   if (raw.includes('table') || raw.includes('bàn')) return 'table'
   return 'box'
+}
+
+function goToDetail(item) {
+  const identifier = item.slug || item.productId
+  if (identifier) {
+    router.push(`/product/${identifier}`)
+  }
 }
 </script>
 
@@ -54,7 +63,7 @@ function itemIconName(item) {
     <div v-if="isOpen" class="cart-body">
       <div v-if="cartItems.length === 0" class="empty">{{ t('room3d.cart.empty') }}</div>
       <div v-else class="list">
-        <article v-for="item in cartItems" :key="item.id" class="item">
+        <article v-for="item in cartItems" :key="item.id" class="item" role="button" tabindex="0" @click="goToDetail(item)" @keydown.enter="goToDetail(item)">
           <div class="thumb">
             <AppImage v-if="item.imageUrl || item.image" :src="item.imageUrl || item.image" :alt="item.name"  />
             <span v-else class="thumb-icon"><AppIcon :name="itemIconName(item)" :size="16" /></span>
@@ -63,7 +72,7 @@ function itemIconName(item) {
             <p class="name">{{ item.name }}</p>
             <p class="price">{{ formatCurrency(item.price) }}</p>
           </div>
-          <AppButton type="button" variant="unstyled" class="remove-btn" @click="$emit('remove', item.id)">
+          <AppButton type="button" variant="unstyled" class="remove-btn" @click.stop="$emit('remove', item.id)">
             <AppIcon name="close" :size="15" />
           </AppButton>
         </article>

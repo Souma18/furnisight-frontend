@@ -60,7 +60,7 @@ onBeforeUnmount(() => {
             <p class="brand-title">FurniSight</p>
             <p class="brand-subtitle">Nội thất cao cấp</p>
           </div>
-          <AppButton v-if="embedded" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
+          <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
             <AppIcon name="close" :size="14" :stroke-width="2" />
           </AppButton>
         </div>
@@ -168,6 +168,10 @@ onBeforeUnmount(() => {
   background: var(--auth-surface-secondary);
   color: var(--auth-text-secondary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .auth-body {
