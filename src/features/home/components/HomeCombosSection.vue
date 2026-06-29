@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -50,9 +52,9 @@ function openCombo(combo) {
 
     <div v-if="selectedCombo" class="modal-overlay" @click.self="selectedCombo = null">
       <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="t('home.combos.detailAria', { name: selectedCombo.name })">
-        <button class="modal-close" type="button" @click="selectedCombo = null">
+        <AppButton class="modal-close" type="button" @click="selectedCombo = null">
           <AppIcon name="close" :size="16" />
-        </button>
+        </AppButton>
         <h3>{{ selectedCombo.name }}</h3>
         <p>{{ selectedCombo.description }}</p>
         <div class="combo-modal-list">
@@ -64,7 +66,7 @@ function openCombo(combo) {
             @click="selectedCombo = null"
           >
             <span class="combo-product-image">
-              <img v-if="item.imageUrl" :src="item.imageUrl" :alt="item.productName" loading="lazy">
+              <AppImage v-if="item.imageUrl" :src="item.imageUrl" :alt="item.productName" loading="lazy" />
               <AppIcon v-else name="image" :size="18" />
             </span>
             <span class="combo-product-info">
@@ -76,11 +78,11 @@ function openCombo(combo) {
           </RouterLink>
         </div>
         <div class="modal-actions">
-          <button type="button" class="combo-btn outline" @click="selectedCombo = null">{{ t('home.combos.close') }}</button>
-          <button v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
+          <AppButton type="button" class="combo-btn outline" @click="selectedCombo = null">{{ t('home.combos.close') }}</AppButton>
+          <AppButton v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
             <AppIcon name="cart" :size="14" />{{ t('home.combos.soldOut') }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             v-else
             type="button"
             class="combo-btn dark"
@@ -88,8 +90,8 @@ function openCombo(combo) {
             @click="$emit('add', selectedCombo)"
           >
             <AppIcon name="cart" :size="14" />{{ addingId === selectedCombo.id ? t('home.combos.adding') : t('home.combos.add') }}
-          </button>
-          <button
+          </AppButton>
+          <AppButton
             v-if="!comboStockIssue(selectedCombo)"
             type="button"
             class="combo-btn dark"
@@ -97,7 +99,7 @@ function openCombo(combo) {
             @click="$emit('buy', selectedCombo)"
           >
             <AppIcon name="creditCard" :size="14" />{{ buyingId === selectedCombo.id ? t('home.combos.preparing') : t('home.combos.buy') }}
-          </button>
+          </AppButton>
         </div>
       </div>
     </div>

@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { ADMIN_ICON_OPTIONS } from '../../config/adminIconOptions'
@@ -53,7 +54,7 @@ onUnmounted(() => {
     :class="{ 'icon-picker-root--inline': isInline, 'mform-group': !isInline }"
   >
     <label class="mfl">{{ isInline ? 'Icon' : 'Icon danh mục' }}</label>
-    <button
+    <AppButton variant="unstyled"
       type="button"
       class="icon-picker-trigger"
       :class="{ open, 'icon-picker-trigger--inline': isInline }"
@@ -66,13 +67,13 @@ onUnmounted(() => {
         {{ selected?.label ?? 'Chọn icon' }}
       </span>
       <AppIcon name="chevronDown" :size="14" class="icon-picker-chevron" />
-    </button>
+    </AppButton>
 
     <Transition name="icon-picker-drop">
       <div v-if="open" class="icon-picker-popover" :class="{ 'icon-picker-popover--inline': isInline }" @click.stop>
         <div v-if="!isInline" class="icon-picker-popover-title">Chọn icon danh mục</div>
         <div class="icon-picker-grid">
-          <button
+          <AppButton variant="unstyled"
             v-for="opt in list"
             :key="opt.id"
             type="button"
@@ -83,7 +84,7 @@ onUnmounted(() => {
           >
             <AppIcon :name="opt.name" :size="20" />
             <span class="icon-picker-item-label">{{ opt.label }}</span>
-          </button>
+          </AppButton>
         </div>
       </div>
     </Transition>

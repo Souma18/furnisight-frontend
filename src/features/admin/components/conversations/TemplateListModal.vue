@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -64,24 +66,24 @@ async function deleteTemplate(id) {
       <div class="cm-modal-head">
         <div class="cm-modal-title">Quản lý <em>Template hỗ trợ</em></div>
         <span class="cm-modal-head-meta">{{ templateCount }} template</span>
-        <button type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
+        <AppButton variant="unstyled" type="button" class="cm-modal-close" aria-label="Đóng" @click="close">
           <AppIcon name="close" :size="14" />
-        </button>
+        </AppButton>
       </div>
 
       <div class="cm-modal-body">
         <div class="tpl-toolbar">
           <div class="tpl-search">
             <AppIcon name="search" />
-            <input v-model="searchQuery" type="text" placeholder="Tìm tên, nội dung template..." />
+            <AppInput v-model="searchQuery" type="text" placeholder="Tìm tên, nội dung template..." />
           </div>
           <select v-model="filterCategory" class="tpl-cat-select">
             <option value="all">Tất cả danh mục</option>
             <option v-for="cat in categories" :key="cat.value" :value="cat.value">{{ cat.label }}</option>
           </select>
-          <button type="button" class="tpl-add-btn" @click="emit('add-template')">
+          <AppButton variant="unstyled" type="button" class="tpl-add-btn" @click="emit('add-template')">
             <AppIcon name="plus" /> Thêm template
-          </button>
+          </AppButton>
         </div>
 
         <div class="tpl-table-wrap">
@@ -109,15 +111,15 @@ async function deleteTemplate(id) {
                 </td>
                 <td>
                   <div class="tpl-row-actions">
-                    <button type="button" class="ra-btn ra-view" title="Dùng ngay" @click="emit('use-template', t.content)">
+                    <AppButton variant="unstyled" type="button" class="ra-btn ra-view" title="Dùng ngay" @click="emit('use-template', t.content)">
                       <AppIcon name="send" />
-                    </button>
-                    <button type="button" class="ra-btn ra-edit" title="Sửa" @click="emit('edit-template', t)">
+                    </AppButton>
+                    <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" title="Sửa" @click="emit('edit-template', t)">
                       <AppIcon name="pencil" />
-                    </button>
-                    <button type="button" class="ra-btn ra-del" title="Xóa" @click="deleteTemplate(t.id)">
+                    </AppButton>
+                    <AppButton variant="unstyled" type="button" class="ra-btn ra-del" title="Xóa" @click="deleteTemplate(t.id)">
                       <AppIcon name="trash" />
-                    </button>
+                    </AppButton>
                   </div>
                 </td>
               </tr>
@@ -132,7 +134,7 @@ async function deleteTemplate(id) {
       </div>
 
       <div class="cm-modal-foot">
-        <button type="button" class="btn-ghost" @click="close">Đóng</button>
+        <AppButton variant="unstyled" type="button" class="btn-ghost" @click="close">Đóng</AppButton>
       </div>
     </div>
   </div>

@@ -13,7 +13,6 @@ import { useLocaleStore } from '@shared/stores/localeStore'
 import AppToast from '@shared/ui/AppToast.vue'
 
 const ChatWidget = defineAsyncComponent(() => import('@features/chat/components/ChatWidget.vue'))
-
 const route = router.currentRoute
 const authStore = useAuthStore()
 const themeStore = useThemeStore()
@@ -70,8 +69,8 @@ async function closeAuthModal() {
   isAuthModalOpen.value = false
   initialAuthView.value = 'login'
 
-  if (route.value.query.otpCode) {
-    const query = { ...route.value.query }
+  if (route.query.otpCode) {
+    const query = { ...route.query }
     delete query.otpCode
     await router.replace({ query })
   }
@@ -122,7 +121,7 @@ onMounted(async () => {
 })
 
 watch(
-  () => route.value.fullPath,
+  () => route.fullPath,
   async () => {
     await nextTick()
     syncHeaderScrollbarInset()

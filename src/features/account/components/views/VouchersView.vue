@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAccountVouchers } from '../../composables/useAccountVouchers'
@@ -32,10 +33,10 @@ const {
         <AppIcon name="badgePercent" :size="20" />
         {{ t('account.vouchers.title') }}
       </h2>
-      <button type="button" class="refresh-btn" :disabled="loading" @click="fetchVouchers">
+      <AppButton type="button" class="refresh-btn" :disabled="loading" @click="fetchVouchers">
         <AppIcon name="refresh" :size="15" />
         {{ t('account.vouchers.refresh') }}
-      </button>
+      </AppButton>
     </header>
 
     <div class="voucher-filters">
@@ -78,10 +79,10 @@ const {
             {{ conditionText(voucher) }} · {{ t('account.vouchers.expiryShort') }} {{ formatDate(voucher.endDate) }}
           </p>
         </div>
-        <button type="button" class="copy-btn" @click="copyCode(voucher.code)">
+        <AppButton type="button" class="copy-btn" @click="copyCode(voucher.code)">
           <AppIcon name="copy" :size="15" />
           {{ t('account.vouchers.copy') }}
-        </button>
+        </AppButton>
       </article>
 
       <p v-if="!filteredVouchers.length" class="voucher-state">

@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -13,6 +15,7 @@ import { PriceFormatter } from '@shared/lib/formatters'
 
 const router = useRouter()
 const { t } = useI18n()
+const emit = defineEmits(['notify'])
 const { items, ensureHydrated, updateItem, updateQty, removeItem } = useCart()
 const {
   checkedIds,
@@ -43,7 +46,7 @@ onMounted(async () => {
   try {
     await ensureHydrated()
   } catch (error) {
-    console.error('Failed to hydrate cart view:', error)
+    emit('notify', t('account.cart.loadFailed') || 'Lỗi tải giỏ hàng', 'error')
   }
 })
 
@@ -52,7 +55,7 @@ async function changeQty(item, delta) {
   try {
     await updateQty(item.id, Number(item.qty || 1) + delta)
   } catch (error) {
-    console.error('Failed to update cart quantity:', error)
+    emit('notify', t('account.cart.updateFailed') || 'Lỗi cập nhật số lượng', 'error')
   }
 }
 
@@ -62,7 +65,7 @@ async function removeLine(itemId) {
     uncheck(itemId)
     if (activeItem.value?.id === itemId) closeItemEditor()
   } catch (error) {
-    console.error('Failed to remove cart line:', error)
+    emit('notify', t('account.cart.removeFailed') || 'Lỗi xoá sản phẩm', 'error')
   }
 }
 
@@ -114,7 +117,7 @@ const formatPrice = PriceFormatter.format
             <p class="variant-modal-kicker">{{ t('account.cart.chooseVariant') }}</p>
             <h3>{{ activeItem.name }}</h3>
           </div>
-          <button type="button" class="close-btn" @click="closeItemEditor">×</button>
+          <AppButton type="button" class="close-btn" @click="closeItemEditor">×</AppButton>
         </div>
 
         <div class="variant-modal-body">
@@ -153,8 +156,8 @@ const formatPrice = PriceFormatter.format
           <label>
             <span>{{ t('account.cart.quantity') }}</span>
             <div class="modal-qty">
-              <button type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</button>
-              <input
+              <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</AppButton>
+              <AppInput
                 :value="activeDraft.qty"
                 type="number"
                 inputmode="numeric"
@@ -163,14 +166,14 @@ const formatPrice = PriceFormatter.format
                 @input="setDraftQty($event.target.value)"
                 @blur="setDraftQty($event.target.value || 1)"
               />
-              <button type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</button>
+              <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(1)">+</AppButton>
             </div>
           </label>
         </div>
 
         <div class="variant-modal-actions">
-          <button type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">{{ t('common.cancel') }}</button>
-          <button type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">{{ t('common.save') }}</button>
+          <AppButton type="button" class="ghost-btn" :disabled="editorLoading" @click="closeItemEditor">{{ t('common.cancel') }}</AppButton>
+          <AppButton type="button" class="primary-btn" :disabled="editorLoading" @click="applyActiveItemChanges">{{ t('common.save') }}</AppButton>
         </div>
       </div>
     </div>
@@ -185,8 +188,7 @@ const formatPrice = PriceFormatter.format
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #ece2cf;
+  padding: 12px 16px;
   color: var(--auth-text-secondary);
   font-size: 14px;
 }
@@ -206,17 +208,17 @@ const formatPrice = PriceFormatter.format
 .modal-qty {
   display: inline-flex;
   align-items: center;
-  border: 1px solid #e5dcca;
+  border: 1px solid var(--app-border);
   border-radius: 10px;
   overflow: hidden;
-  background: #f5efe6;
+  background: var(--app-surface-soft);
 }
 .modal-qty button {
   width: 28px;
   height: 30px;
   border: none;
   background: transparent;
-  color: #9a8d7a;
+  color: var(--app-text-muted);
   cursor: pointer;
 }
 .modal-qty input {
@@ -225,9 +227,9 @@ const formatPrice = PriceFormatter.format
   display: grid;
   place-items: center;
   text-align: center;
-  border-inline: 1px solid #e5dcca;
-  background: rgba(255,255,255,0.45);
-  color: #8b7d68;
+  border-inline: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-heading);
 }
 
 .variant-modal-backdrop {
@@ -242,10 +244,10 @@ const formatPrice = PriceFormatter.format
 
 .variant-modal {
   width: min(520px, 100%);
-  background: #fff;
-  border: 1px solid #ece2cf;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(18, 32, 46, 0.18);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
 }
 
@@ -255,7 +257,7 @@ const formatPrice = PriceFormatter.format
   align-items: flex-start;
   gap: 16px;
   padding: 18px 20px 14px;
-  border-bottom: 1px solid #ece2cf;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .variant-modal-kicker {
@@ -264,13 +266,13 @@ const formatPrice = PriceFormatter.format
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-weight: 700;
-  color: #c9922a;
+  color: var(--app-gold);
 }
 
 .variant-modal-head h3 {
   margin: 0;
   font-size: 18px;
-  color: var(--auth-text-primary);
+  color: var(--app-heading);
 }
 
 .close-btn {
@@ -278,8 +280,8 @@ const formatPrice = PriceFormatter.format
   height: 34px;
   border: none;
   border-radius: 10px;
-  background: #f5efe6;
-  color: #12202e;
+  background: var(--app-surface-soft);
+  color: var(--app-heading);
   font-size: 20px;
   cursor: pointer;
 }
@@ -296,7 +298,7 @@ const formatPrice = PriceFormatter.format
 }
 
 .variant-modal-body span {
-  color: var(--auth-text-secondary);
+  color: var(--app-text-muted);
   font-size: 12px;
 }
 
@@ -314,11 +316,12 @@ const formatPrice = PriceFormatter.format
 .variant-modal-body select,
 .variant-modal-body input {
   width: 100%;
-  border: 1px solid #ece2cf;
+  border: 1px solid var(--app-border);
   border-radius: 12px;
   padding: 0.7rem 0.9rem;
   font: inherit;
-  background: #fff;
+  background: var(--app-surface);
+  color: var(--app-heading);
 }
 
 .variant-modal-actions {
@@ -338,12 +341,12 @@ const formatPrice = PriceFormatter.format
 }
 
 .ghost-btn {
-  background: #f5efe6;
-  color: #12202e;
+  background: var(--app-surface-soft);
+  color: var(--app-heading);
 }
 
 .primary-btn {
-  background: linear-gradient(135deg, #e5b84a, #c9922a);
+  background: var(--app-gold);
   color: #12202e;
 }
 

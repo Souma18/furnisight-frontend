@@ -76,6 +76,11 @@ export function isExpiring(value) {
   return diff > 0 && diff <= 7 * 24 * 60 * 60 * 1000
 }
 
+export function isExpired(value) {
+  if (!value) return false
+  return new Date(value).getTime() < Date.now()
+}
+
 export function formatCurrency(value) {
   return formatPrice(value)
 }

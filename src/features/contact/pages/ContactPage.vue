@@ -6,9 +6,8 @@ import ContactFaqSection from '../components/ContactFaqSection.vue'
 import ContactFormCard from '../components/ContactFormCard.vue'
 import ContactHeroSection from '../components/ContactHeroSection.vue'
 import ContactSidebar from '../components/ContactSidebar.vue'
-import ContactToast from '../components/ContactToast.vue'
 import { useContactReveal } from '../composables/useContactReveal'
-import { useContactToast } from '../composables/useContactToast'
+import { useToast } from '@shared/composables/useToast'
 import '../styles/contactPage.css'
 
 const { t } = useI18n()
@@ -16,7 +15,7 @@ const defaultToast = computed(() => ({
   title: t('contact.toast.successTitle'),
   subtitle: t('contact.toast.successSubtitle'),
 }))
-const { toast, showToast } = useContactToast(defaultToast.value)
+const { show: showToast } = useToast()
 useContactReveal()
 
 const breadcrumb = computed(() => [{ label: t('nav.home'), href: '/' }, { label: t('nav.contact') }])
@@ -138,14 +137,11 @@ const faqs = computed(() => ['free3d', 'shipping', 'return', 'ai', 'designFee', 
 })))
 
 function handleSubmitSuccess() {
-  showToast(defaultToast.value)
+  showToast(`${defaultToast.value.title} - ${defaultToast.value.subtitle}`, 'success')
 }
 
 function handleBook(item) {
-  showToast({
-    title: t('contact.toast.bookingTitle', { name: item.name }),
-    subtitle: t('contact.toast.bookingSubtitle'),
-  })
+  showToast(`${t('contact.toast.bookingTitle', { name: item.name })} - ${t('contact.toast.bookingSubtitle')}`, 'success')
 }
 </script>
 
@@ -165,7 +161,5 @@ function handleBook(item) {
     />
 
     <ContactFaqSection :section="faqSection" :items="faqs" />
-
-    <ContactToast :show="toast.show" :title="toast.title" :subtitle="toast.subtitle" />
   </section>
 </template>

@@ -13,6 +13,7 @@ import {
   parseProductListQueryPreset,
 } from './productListFilters'
 import { useProducts } from './useProducts'
+import { useToast } from '@shared/composables/useToast'
 
 function mapCategoryToOption(raw = {}) {
   const category = new CategoryResponse(raw)
@@ -37,6 +38,7 @@ export function useProductListPage() {
   const localeStore = useLocaleStore()
   const { locale } = storeToRefs(localeStore)
   const { items, total, facets, loading, loadList } = useProducts()
+  const { show: showToast } = useToast()
   const searchKeyword = ref('')
   const selectedCategory = ref('all')
   const selectedSubcategory = ref('all')
@@ -117,7 +119,6 @@ export function useProductListPage() {
       const { data } = await productsApi.getCategories()
       allCategories.value = (Array.isArray(data) ? data : []).map(mapCategoryToOption)
     } catch (e) {
-      console.error('Failed to load categories', e)
       allCategories.value = []
       apiError.value = true
     }
@@ -132,7 +133,6 @@ export function useProductListPage() {
       })
       dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }, ...chips]
     } catch (e) {
-      console.error('Failed to load quick filters', e)
       dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }]
     }
   }
@@ -147,7 +147,6 @@ export function useProductListPage() {
       const { data } = await productsApi.getSubcategories(rootSlug)
       sidebarCategories.value = (Array.isArray(data) ? data : []).map(mapCategoryToOption)
     } catch (e) {
-      console.error('Failed to load subcategories', e)
       sidebarCategories.value = []
     }
   }
@@ -218,7 +217,7 @@ export function useProductListPage() {
         await wishlistStore.addFavorite(productId)
       }
     } catch (e) {
-      console.error('Failed to toggle favorite list product:', e)
+      showToast('Không thể cập nhật danh sách yêu thích', 'error')
     }
   }
 

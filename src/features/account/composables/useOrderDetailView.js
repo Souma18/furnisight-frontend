@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAccountOrders } from './useAccountOrders'
+import { useCancelOrderDialog } from './useCancelOrderDialog'
 import { usePaymentCountdown } from './usePaymentCountdown'
 import { i18n } from '@shared/i18n'
 import {
@@ -29,9 +30,15 @@ export function useOrderDetailView(notify) {
     retryingOrderCode,
   } = useAccountOrders(notify)
 
-  const cancelDialogOpen = ref(false)
-  const canceling = ref(false)
+  const {
+    cancelTarget,
+    canceling,
+    openCancelDialog,
+    closeCancelDialog,
+    confirmCancel,
+  } = useCancelOrderDialog(cancelOrder)
   
+  const cancelDialogOpen = computed(() => Boolean(cancelTarget.value))
   const confirmDialogOpen = ref(false)
   const confirming = ref(false)
 
@@ -117,20 +124,7 @@ export function useOrderDetailView(notify) {
 
   function handleCancel() {
     if (!canCancelCurrentOrder.value) return
-    cancelDialogOpen.value = true
-  }
-
-  function closeCancelDialog() {
-    if (canceling.value) return
-    cancelDialogOpen.value = false
-  }
-
-  async function confirmCancel() {
-    if (!order.value || canceling.value) return
-    canceling.value = true
-    const success = await cancelOrder(order.value.orderCode)
-    canceling.value = false
-    if (success) cancelDialogOpen.value = false
+    openCancelDialog(order.value)
   }
 
   function handleConfirmReceived() {
@@ -185,6 +179,10 @@ export function useOrderDetailView(notify) {
       : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || t('account.orders.unknown'))
   }
 
+  function orderItemProductId(item) {
+    return item?.productSnapshot?.productId || item?.productId || ''
+  }
+
   return {
     order,
     backToOrders,
@@ -206,11 +204,9 @@ export function useOrderDetailView(notify) {
     formatMoney,
     formatDate,
     formatDateTime,
-    orderItemImage,
     orderItemProductId,
     openProductDetail,
     reviewProduct,
-    hideBrokenImage,
     paymentMethodLabel,
     handleCancel,
     closeCancelDialog,
@@ -223,18 +219,6 @@ export function useOrderDetailView(notify) {
 }
 
 
-
-function orderItemImage(item = {}) {
-  return item.imageUrl || item.productSnapshot?.imageUrl || ''
-}
-
-function orderItemProductId(item = {}) {
-  return item.productId || item.productSnapshot?.productId || ''
-}
-
-function hideBrokenImage(event) {
-  event.target.style.display = 'none'
-}
 
 function buildTransactionTimeline(current, helpers) {
   if (!current) return []

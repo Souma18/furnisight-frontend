@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
 
@@ -23,7 +24,7 @@ const { t } = useI18n()
         <p>{{ t('products.resultCount', { count: total }) }}</p>
       </div>
       <div class="pl-result-controls">
-        <button v-if="activeTags.length" type="button" class="pl-clear-tags" @click="emit('clear')">{{ t('products.clearFilters') }}</button>
+        <AppButton v-if="activeTags.length" type="button" class="pl-clear-tags" @click="emit('clear')">{{ t('products.clearFilters') }}</AppButton>
       </div>
     </header>
 

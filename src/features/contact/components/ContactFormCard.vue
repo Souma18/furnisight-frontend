@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { computed, onBeforeUnmount, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -93,34 +96,35 @@ onBeforeUnmount(() => {
     </div>
 
     <div class="ct-intent-tabs">
-      <button
+      <AppButton
         v-for="intent in config.intents"
         :key="intent.id"
-        type="button"
+        variant="unstyled"
+        size="unstyled"
         class="ct-it-tab"
         :class="{ active: activeIntentId === intent.id }"
         @click="handleIntent(intent.id)"
       >
         <AppIcon :name="intent.icon" :size="14" />
         {{ intent.label }}
-      </button>
+      </AppButton>
     </div>
 
     <form @submit.prevent="handleSubmit">
       <div class="ct-form-row">
         <div class="ct-form-group">
           <label class="ct-fl">{{ t('contact.form.fullName') }} <span>*</span></label>
-          <input v-model.trim="form.fullName" class="ct-fi" type="text" placeholder="Nguyễn Văn A" required>
+          <AppInput v-model.trim="form.fullName" class="ct-fi" type="text" placeholder="Nguyễn Văn A" required/>
         </div>
         <div class="ct-form-group">
           <label class="ct-fl">{{ t('contact.form.phone') }} <span>*</span></label>
-          <input v-model.trim="form.phone" class="ct-fi" type="tel" placeholder="090 xxx xxxx" required>
+          <AppInput v-model.trim="form.phone" class="ct-fi" type="tel" placeholder="090 xxx xxxx" required/>
         </div>
       </div>
 
       <div class="ct-form-group">
         <label class="ct-fl">Email</label>
-        <input v-model.trim="form.email" class="ct-fi" type="email" placeholder="email@example.com">
+        <AppInput v-model.trim="form.email" class="ct-fi" type="email" placeholder="email@example.com"/>
       </div>
 
       <div v-show="showDesignFields">
@@ -149,16 +153,17 @@ onBeforeUnmount(() => {
         <div class="ct-form-group">
           <label class="ct-fl">{{ t('contact.form.budget') }}</label>
           <div class="ct-budget-pills">
-            <button
+            <AppButton
               v-for="option in config.budgetOptions"
               :key="option"
-              type="button"
+              variant="unstyled"
+              size="unstyled"
               class="ct-bp"
               :class="{ active: selectedBudget === option }"
               @click="selectedBudget = option"
             >
               {{ option }}
-            </button>
+            </AppButton>
           </div>
         </div>
 
@@ -192,7 +197,7 @@ onBeforeUnmount(() => {
 
           <div v-if="selectedFiles.length" class="ct-file-preview">
             <div v-for="item in selectedFiles" :key="item.id" class="ct-file-preview-item">
-              <img v-if="item.previewUrl" :src="item.previewUrl" :alt="item.name" class="ct-file-preview-image">
+              <AppImage v-if="item.previewUrl" :src="item.previewUrl" :alt="item.name" class="ct-file-preview-image" />
               <div v-else class="ct-file-preview-fallback">
                 <AppIcon name="image" :size="24" />
               </div>
@@ -211,10 +216,10 @@ onBeforeUnmount(() => {
         ></textarea>
       </div>
 
-      <button class="ct-form-submit" type="submit">
+      <AppButton variant="unstyled" size="unstyled" class="ct-form-submit" type="submit">
         <AppIcon name="mail" :size="18" />
         {{ t('contact.form.submit') }}
-      </button>
+      </AppButton>
       <div class="ct-form-note">{{ config.note }}</div>
     </form>
   </section>

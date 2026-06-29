@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -151,21 +152,21 @@ function resetFilters() {
       <option v-for="status in statusOptions" :key="status" :value="status">{{ status }}</option>
     </select>
     <input v-model="dateFilter" class="filter-select filter-date" type="date" aria-label="Lọc theo ngày" />
-    <button v-if="hasActiveFilters" type="button" class="filter-reset" @click="resetFilters">
+    <AppButton variant="unstyled" v-if="hasActiveFilters" type="button" class="filter-reset" @click="resetFilters">
       <AppIcon name="refresh" :size="14" />
       Xóa lọc
-    </button>
+    </AppButton>
   </AdminFilterBar>
   <AdminDataTable :columns="columns" :rows="filteredOrders">
     <template #cell-orderCode="{ row }">
-      <button type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</button>
+      <AppButton variant="unstyled" type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</AppButton>
     </template>
     <template #cell-total="{ row }"><span style="font-weight:600;color:var(--gold)">{{ formatPrice(row.total) }}</span></template>
     <template #cell-statusLabel="{ row }"><span class="badge" :class="badgeMap[row.status]">{{ row.statusLabel }}</span></template>
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <button type="button" class="ra-btn ra-view" @click="openDetail(row)"><AppIcon name="eye" :size="14" /></button>
-        <button
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-view" @click="openDetail(row)"><AppIcon name="eye" :size="14" /></AppButton>
+        <AppButton variant="unstyled"
           v-if="canUpdateStatus(row)"
           type="button"
           class="ra-btn ra-edit"
@@ -173,8 +174,8 @@ function resetFilters() {
           @click="ui.openModal('editOrder', row)"
         >
           <AppIcon name="edit" :size="14" />
-        </button>
-        <button
+        </AppButton>
+        <AppButton variant="unstyled"
           v-if="canCancelOrder(row)"
           type="button"
           class="ra-btn ra-cancel"
@@ -182,7 +183,7 @@ function resetFilters() {
           @click="promptCancelOrder(row)"
         >
           <AppIcon name="ban" :size="14" />
-        </button>
+        </AppButton>
       </div>
     </template>
   </AdminDataTable>

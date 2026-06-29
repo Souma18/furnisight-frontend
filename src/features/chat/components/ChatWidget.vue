@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AuthModal from '@features/auth/components/AuthModal.vue'
@@ -148,7 +151,7 @@ function handleAddToCart(product) {
       <div v-if="search.visible" class="chat-search-panel">
         <label class="chat-search-field">
           <AppIcon name="search" :size="15" />
-          <input
+          <AppInput
             :value="search.query"
             type="search"
             placeholder="Tìm tin nhắn..."
@@ -234,7 +237,7 @@ function handleAddToCart(product) {
             class="chat-attachment-preview"
             :class="{ uploading: uploadingAttachment }"
           >
-            <img v-if="attachment.isImage" :src="attachment.previewUrl" alt="" />
+            <AppImage v-if="attachment.isImage" :src="attachment.previewUrl" alt=""  />
             <AppIcon v-else name="paperclip" :size="15" />
             <span>{{ attachment.name }}</span>
             <button

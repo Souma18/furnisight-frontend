@@ -1,14 +1,14 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import CheckoutAddressCard from '../components/CheckoutAddressCard.vue'
+import CheckoutAddressModal from '../components/CheckoutAddressModal.vue'
 import CheckoutBreadcrumb from '../components/CheckoutBreadcrumb.vue'
 import CheckoutPaymentCard from '../components/CheckoutPaymentCard.vue'
 import CheckoutShopCard from '../components/CheckoutShopCard.vue'
 import CheckoutStepsBar from '../components/CheckoutStepsBar.vue'
 import CheckoutSuccessOverlay from '../components/CheckoutSuccessOverlay.vue'
 import CheckoutSummaryCard from '../components/CheckoutSummaryCard.vue'
-import CheckoutToast from '../components/CheckoutToast.vue'
 import CheckoutToolbar from '../components/CheckoutToolbar.vue'
 import CheckoutVoucherCard from '../components/CheckoutVoucherCard.vue'
 import CheckoutVoucherModal from '../components/CheckoutVoucherModal.vue'
@@ -21,6 +21,19 @@ import '../styles/checkoutPage.css'
 const router = useRouter()
 const checkoutStore = useCheckoutStore()
 
+const addressModalOpen = ref(false)
+const addressToEdit = ref(null)
+
+function openAddressModal(address = null) {
+  addressToEdit.value = address
+  addressModalOpen.value = true
+}
+
+async function handleSaveAddress(payload) {
+  await saveCheckoutAddress(payload)
+  addressModalOpen.value = false
+}
+
 const {
   checkoutLines,
   addressList,
@@ -30,7 +43,6 @@ const {
   loading,
   placing,
   showSuccess,
-  toast,
   shippingOptions,
   paymentMethods,
   shopVouchers,
@@ -83,7 +95,7 @@ const {
 onMounted(async () => {
   try {
     await initCheckout()
-    if (isEmpty.value) {
+    if (isEmpty.value && !showSuccess.value && !placing.value) {
       router.replace('/cart')
     }
   } catch (error) {
@@ -92,12 +104,6 @@ onMounted(async () => {
       title: 'Không thể tải thanh toán',
       subtitle: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
     })
-  }
-})
-
-watch(isEmpty, (empty) => {
-  if (empty && !showSuccess.value && !placing.value) {
-    router.replace('/cart')
   }
 })
 
@@ -137,7 +143,8 @@ function handleContinueShopping() {
             :addresses="addressList"
             :selected-address-id="selectedAddressId"
             @select-address="selectAddress"
-            @save-address="saveCheckoutAddress"
+            @open-create="openAddressModal()"
+            @open-edit="openAddressModal"
           />
 
           <CheckoutShopCard
@@ -148,6 +155,8 @@ function handleContinueShopping() {
             :seller-note="sellerNote"
             :shipping-options="shippingOptions"
             :selected-shipping-id="selectedShippingId"
+            :item-qty="summary.itemQty"
+            :subtotal="summary.subtotal"
             @update-qty="updateLineQty"
             @update-insurance="hasInsurance = $event"
             @update-note="sellerNote = $event"
@@ -197,6 +206,13 @@ function handleContinueShopping() {
       @confirm="handleConfirmVoucher"
     />
 
+    <CheckoutAddressModal
+      :open="addressModalOpen"
+      :address="addressToEdit"
+      @close="addressModalOpen = false"
+      @save="handleSaveAddress"
+    />
+
     <CheckoutSuccessOverlay
       :open="showSuccess"
       :order-code="lastOrder?.orderCode ?? ''"
@@ -204,11 +220,5 @@ function handleContinueShopping() {
       @continue-shopping="handleContinueShopping"
     />
 
-    <CheckoutToast
-      :show="toast.show"
-      :icon="toast.icon"
-      :title="toast.title"
-      :subtitle="toast.subtitle"
-    />
   </section>
 </template>

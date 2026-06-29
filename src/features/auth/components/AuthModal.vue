@@ -1,5 +1,6 @@
 <script setup>
 import AuthContainer from './AuthContainer.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
   open: {
@@ -16,26 +17,12 @@ defineEmits(['close', 'authenticated'])
 </script>
 
 <template>
-  <div v-if="open" class="modal-backdrop">
-    <div class="auth-modal-frame">
-      <AuthContainer embedded :initialView="initialView" @close="$emit('close')" @authenticated="$emit('authenticated')" />
-    </div>
-  </div>
+  <AppModal
+    :open="open"
+    width="430px"
+    no-bg
+    @close="$emit('close')"
+  >
+    <AuthContainer embedded :initialView="initialView" @close="$emit('close')" @authenticated="$emit('authenticated')" />
+  </AppModal>
 </template>
-
-<style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 90;
-  padding: 1rem;
-  background: rgba(2, 7, 17, 0.62);
-  display: grid;
-  place-items: center;
-}
-
-.auth-modal-frame {
-  width: 100%;
-  max-width: 430px;
-}
-</style>

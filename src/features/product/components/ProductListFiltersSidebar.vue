@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { onMounted, onUnmounted } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import {
@@ -65,24 +66,35 @@ onUnmounted(() => {
 <template>
   <Teleport to="body" :disabled="mode !== 'drawer'">
     <div
-      v-if="mode === 'drawer'"
-      class="pl-filter-drawer-shell"
-      :class="{ open }"
-      :aria-hidden="String(!open)"
-      @keydown.esc="emit('close')"
+      :class="mode === 'drawer' ? ['pl-filter-drawer-shell', { open }] : 'pl-filter-sidebar-shell'"
+      :aria-hidden="mode === 'drawer' ? String(!open) : undefined"
+      @keydown.esc="handleEscape"
     >
-      <button type="button" class="pl-filter-backdrop" aria-label="Đóng bộ lọc" @click="emit('close')"></button>
-      <aside class="pl-sidebar-filters pl-sidebar-filters--drawer" aria-label="Bộ lọc sản phẩm">
-        <header class="pl-filter-drawer-head">
+      <AppButton
+        v-if="mode === 'drawer'"
+        type="button"
+        variant="unstyled"
+        class="pl-filter-backdrop"
+        aria-label="Đóng bộ lọc"
+        @click="emit('close')"
+      ></AppButton>
+      
+      <aside
+        class="pl-sidebar-filters"
+        :class="mode === 'drawer' ? 'pl-sidebar-filters--drawer' : `pl-sidebar-filters--${mode}`"
+        aria-label="Bộ lọc sản phẩm"
+      >
+        <header v-if="mode === 'drawer'" class="pl-filter-drawer-head">
           <div>
             <p>Bộ lọc sản phẩm</p>
             <strong>{{ totalCategoryCount }} sản phẩm theo danh mục</strong>
           </div>
-          <button type="button" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
+          <AppButton type="button" variant="unstyled" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
             <AppIcon name="close" :size="18" />
-          </button>
+          </AppButton>
         </header>
-        <div class="pl-filter-drawer-content">
+
+        <div :class="mode === 'drawer' ? 'pl-filter-drawer-content' : 'pl-filter-content-wrapper'">
           <div class="pl-filter-block">
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('cat')" @keydown.enter.prevent="toggleBlock('cat')">
               <div class="pl-fb-title">
@@ -162,17 +174,18 @@ onUnmounted(() => {
             </div>
             <div v-show="openBlocks.color" class="pl-filter-body">
               <div class="pl-color-filter-row">
-                <button
+                <AppButton
                   v-for="c in displayColors"
                   :key="c.id"
                   type="button"
+                  variant="unstyled"
                   class="pl-cf-swatch"
                   :class="{ active: pending.colors.includes(c.id) }"
                   :style="{ background: c.hex, border: c.id === 'ivory' ? '1px solid #ece2cf' : undefined }"
                   :title="c.label"
                   :aria-label="c.label"
                   @click="toggleArrayItem('colors', c.id)"
-                ></button>
+                ></AppButton>
               </div>
             </div>
           </div>
@@ -185,11 +198,11 @@ onUnmounted(() => {
             <div v-show="openBlocks.rating" class="pl-filter-body">
               <div class="pl-star-rows">
                 <label v-for="opt in displayRatings" :key="opt.value" class="pl-star-row">
-                  <input type="radio" name="pl-star-filter-drawer" :value="opt.value" v-model="pending.minStar" />
+                  <input type="radio" name="pl-star-filter" :value="opt.value" v-model="pending.minStar" />
                   <span class="pl-star-icons" aria-label="Mức đánh giá">
                     <AppIcon
                       v-for="star in 5"
-                      :key="`${opt.value}-drawer-filter-star-${star}`"
+                      :key="`${opt.value}-filter-star-${star}`"
                       name="star"
                       :size="14"
                       :class="{ active: star <= opt.value }"
@@ -198,170 +211,29 @@ onUnmounted(() => {
                   <span class="pl-star-num">{{ opt.hint }}</span>
                 </label>
                 <label class="pl-star-row">
-                  <input type="radio" name="pl-star-filter-drawer" :value="null" v-model="pending.minStar" />
+                  <input type="radio" name="pl-star-filter" :value="null" v-model="pending.minStar" />
                   <span class="pl-star-num">Tất cả</span>
                 </label>
               </div>
             </div>
           </div>
         </div>
-        <footer class="pl-filter-drawer-actions">
-          <button type="button" class="pl-filter-clear" @click="clearAll">
+        
+        <footer v-if="mode === 'drawer'" class="pl-filter-drawer-actions">
+          <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
             Xóa tất cả
-          </button>
-          <button type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</button>
+          </AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
         </footer>
+        <div v-else class="pl-filter-block pl-filter-actions">
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
+            <AppIcon name="close" :size="15" />
+            Xóa tất cả bộ lọc
+          </AppButton>
+        </div>
       </aside>
     </div>
   </Teleport>
-
-  <aside v-if="mode !== 'drawer'" class="pl-sidebar-filters" :class="`pl-sidebar-filters--${mode}`">
-    <div class="pl-filter-block">
-      <div class="pl-filter-block-header" role="button" @click="toggleBlock('cat')">
-        <div class="pl-fb-title">
-          <AppIcon class="pl-fb-icon" name="category" :size="16" />
-          Danh mục
-          <span class="pl-fb-count">{{ totalCategoryCount }}</span>
-        </div>
-        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.cat }" name="chevronDown" :size="16" />
-      </div>
-      <div v-show="openBlocks.cat" class="pl-filter-body">
-        <ul class="pl-cat-list" role="list">
-          <li
-            v-for="cat in displayCategories"
-            :key="cat.id"
-            :class="{ active: categoryActive(cat) }"
-            @click="selectCategory(cat)"
-          >
-            <span class="pl-cl-name">{{ cat.label }}</span>
-            <span class="pl-cl-count">{{ cat.count }}</span>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="pl-filter-block">
-      <div class="pl-filter-block-header" role="button" @click="toggleBlock('price')">
-        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="banknote" :size="16" /> Khoảng giá</div>
-        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.price }" name="chevronDown" :size="16" />
-      </div>
-      <div v-show="openBlocks.price" class="pl-filter-body">
-        <div class="pl-price-range-display">
-          <span class="pl-price-val">{{ priceMinLabel }}</span>
-          <span class="pl-price-sep">—</span>
-          <span class="pl-price-val pl-price-val--right">{{ priceMaxLabel }}</span>
-        </div>
-        <input
-          class="pl-range-slider"
-          type="range"
-          min="0"
-          max="4"
-          step="1"
-          v-model.number="pending.priceSliderStep"
-        />
-        <div class="pl-price-checks">
-          <label v-for="opt in PRODUCT_PRICE_BAND_OPTIONS" :key="opt.id" class="pl-check-row">
-            <input
-              type="checkbox"
-              :value="opt.id"
-              :checked="pending.priceBands.includes(opt.id)"
-              @change="togglePriceBand(opt.id)"
-            />
-            <span>{{ opt.label }}</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="displayMaterials.length" class="pl-filter-block">
-      <div class="pl-filter-block-header" role="button" @click="toggleBlock('mat')">
-        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="box" :size="16" /> Chất liệu</div>
-        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.mat }" name="chevronDown" :size="16" />
-      </div>
-      <div v-show="openBlocks.mat" class="pl-filter-body">
-        <div class="pl-mat-list">
-          <label v-for="m in displayMaterials" :key="m.id" class="pl-mat-row">
-            <input
-              type="checkbox"
-              :value="m.id"
-              v-model="pending.materials"
-            />
-            <span>{{ m.label }}</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="displayColors.length" class="pl-filter-block">
-      <div class="pl-filter-block-header" role="button" @click="toggleBlock('color')">
-        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="palette" :size="16" /> Màu sắc</div>
-        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.color }" name="chevronDown" :size="16" />
-      </div>
-      <div v-show="openBlocks.color" class="pl-filter-body">
-        <div class="pl-color-filter-row">
-          <button
-            v-for="c in displayColors"
-            :key="c.id"
-            type="button"
-            class="pl-cf-swatch"
-            :class="{ active: pending.colors.includes(c.id) }"
-            :style="{
-              background: c.hex,
-              border: c.id === 'ivory' ? '1px solid #ece2cf' : undefined,
-            }"
-            :title="c.label"
-            :aria-label="c.label"
-            @click="toggleArrayItem('colors', c.id)"
-          ></button>
-        </div>
-      </div>
-    </div>
-
-    <div class="pl-filter-block">
-      <div class="pl-filter-block-header" role="button" @click="toggleBlock('rating')">
-        <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="star" :size="16" /> Đánh giá</div>
-        <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.rating }" name="chevronDown" :size="16" />
-      </div>
-      <div v-show="openBlocks.rating" class="pl-filter-body">
-        <div class="pl-star-rows">
-          <label v-for="opt in displayRatings" :key="opt.value" class="pl-star-row">
-            <input
-              type="radio"
-              name="pl-star-filter"
-              :value="opt.value"
-              v-model="pending.minStar"
-            />
-            <span class="pl-star-icons" aria-label="Mức đánh giá">
-              <AppIcon
-                v-for="star in 5"
-                :key="`${opt.value}-filter-star-${star}`"
-                name="star"
-                :size="14"
-                :class="{ active: star <= opt.value }"
-              />
-            </span>
-            <span class="pl-star-num">{{ opt.hint }}</span>
-          </label>
-          <label class="pl-star-row">
-            <input
-              type="radio"
-              name="pl-star-filter"
-              :value="null"
-              v-model="pending.minStar"
-            />
-            <span class="pl-star-num">Tất cả</span>
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div class="pl-filter-block pl-filter-actions">
-      <button type="button" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</button>
-      <button type="button" class="pl-filter-clear" @click="clearAll">
-        <AppIcon name="close" :size="15" />
-        Xóa tất cả bộ lọc
-      </button>
-    </div>
-  </aside>
 </template>

@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { RouterLink } from 'vue-router'
 
 defineProps({
@@ -34,10 +35,10 @@ function scrollToVisualizer() {
 
       <div class="hero-gallery" :aria-label="hero.galleryAria">
         <figure class="hero-image hero-image-main">
-          <img src="/home/rooms/livingroom.jpeg" :alt="hero.mainAlt" />
+          <AppImage src="/home/rooms/livingroom.jpeg" :alt="hero.mainAlt"  />
         </figure>
         <figure class="hero-image hero-image-small">
-          <img src="/home/rooms/bedroom.jpg" :alt="hero.smallAlt" />
+          <AppImage src="/home/rooms/bedroom.jpg" :alt="hero.smallAlt"  />
         </figure>
         <a class="hero-note" href="#home-room-visualizer" @click.prevent="scrollToVisualizer">
           <span>{{ hero.noteLabel }}</span>

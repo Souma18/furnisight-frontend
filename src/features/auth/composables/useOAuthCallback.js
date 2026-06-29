@@ -17,7 +17,6 @@ export function useOAuthCallback() {
       try {
         await authStore.ensureProfileLoaded()
       } catch (error) {
-        console.error('[useOAuthCallback] ensureProfileLoaded', error)
         router.replace({ name: 'home' })
         openAuthModal()
         return

@@ -11,6 +11,7 @@ import { useCheckoutSession } from './useCheckoutSession'
 import { calcLineTotal, formatCheckoutMoney } from '../utils/checkoutPricing'
 import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/stockGuards'
 import { consumeVoucherIntent } from '../lib/checkoutVoucherIntentStorage'
+import { useToast } from '@shared/composables/useToast'
 
 export function useCheckout() {
   const route = useRoute()
@@ -24,7 +25,7 @@ export function useCheckout() {
   const checkoutState = storeToRefs(checkoutStore)
   const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode, revalidateVouchers } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
-  const toast = ref({ show: false, icon: 'check', title: '', subtitle: '' })
+  const { show: showToastGlobal } = useToast()
   const selectedAddressId = ref('')
 
   const lineIdsFromQuery = computed(() => {
@@ -64,57 +65,53 @@ export function useCheckout() {
     summary,
   })
 
-  let toastTimer = null
-
   function showToast(payload) {
-    clearTimeout(toastTimer)
-    toast.value = {
-      show: true,
-      icon: payload.icon ?? 'check',
-      title: payload.title ?? '',
-      subtitle: payload.subtitle ?? '',
-    }
-    toastTimer = setTimeout(() => {
-      toast.value = { ...toast.value, show: false }
-    }, 3000)
+    const message = payload.subtitle ? `${payload.title} - ${payload.subtitle}` : payload.title
+    const type = payload.icon === 'alert' ? 'error' : 'success'
+    showToastGlobal(message, type)
   }
 
   async function initCheckout() {
-    if (!authStore.isCustomer) {
-      await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
-      return
-    }
-    checkoutStore.beginVoucherSession()
-    await Promise.all([
-      cartStore.ensureHydrated(),
-      addressStore.fetchAddresses(),
-      hydrateSession({ loadCombos: !requestedComboId.value }),
-    ])
-    syncSelectedAddress()
-    if (requestedComboId.value) {
-      await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
-    } else {
-      await refreshApplicableCombo(checkoutLines.value)
-    }
-    const intentCode = consumeVoucherIntent()
-    const preferredCode = requestedVoucherCode.value || intentCode
+    checkoutStore.loading = true
     try {
-      await revalidateVouchers({
-        subtotal: voucherSubtotal.value,
-        shippingFee: checkoutStore.shipFee,
-        preferredVoucherCode: preferredCode,
-      })
-    } catch {
-      checkoutStore.shopVoucher = null
-      checkoutStore.shippingVoucher = null
-    } finally {
-      if (requestedVoucherCode.value) {
-        const query = { ...route.query }
-        delete query.voucherCode
-        await router.replace({ query })
+      if (!authStore.isCustomer) {
+        await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
+        return
       }
+      checkoutStore.beginVoucherSession()
+      await Promise.all([
+        cartStore.ensureHydrated(),
+        addressStore.fetchAddresses(),
+        hydrateSession({ loadCombos: !requestedComboId.value }),
+      ])
+      syncSelectedAddress()
+      if (requestedComboId.value) {
+        await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+      } else {
+        await refreshApplicableCombo(checkoutLines.value)
+      }
+      const intentCode = consumeVoucherIntent()
+      const preferredCode = requestedVoucherCode.value || intentCode
+      try {
+        await revalidateVouchers({
+          subtotal: voucherSubtotal.value,
+          shippingFee: checkoutStore.shipFee,
+          preferredVoucherCode: preferredCode,
+        })
+      } catch {
+        checkoutStore.shopVoucher = null
+        checkoutStore.shippingVoucher = null
+      } finally {
+        if (requestedVoucherCode.value) {
+          const query = { ...route.query }
+          delete query.voucherCode
+          await router.replace({ query })
+        }
+      }
+      voucherSessionReady = true
+    } finally {
+      checkoutStore.loading = false
     }
-    voucherSessionReady = true
   }
 
   function goBackToCart() {
@@ -145,6 +142,7 @@ export function useCheckout() {
         ? addressId
         : (nextAddresses.find((item) => item.isDefault)?.id ?? nextAddresses[0]?.id)
       selectedAddressId.value = nextSelected ?? ''
+      syncSelectedAddress()
       showToast({
         icon: 'mapPin',
         title: addressId ? 'Đã cập nhật địa chỉ' : 'Đã thêm địa chỉ mới',
@@ -162,7 +160,12 @@ export function useCheckout() {
   async function updateLineQty(lineId, nextQty) {
     const line = cartStore.items.find((item) => item.id === lineId)
     await cartStore.updateQty(lineId, clampPurchaseQuantity(nextQty, line))
-    await refreshApplicableCombo(checkoutLines.value)
+    if (requestedComboId.value) {
+      await validateRequestedCombo(requestedComboId.value, checkoutLines.value)
+    } else {
+      await refreshApplicableCombo(checkoutLines.value)
+    }
+    await refreshVoucherSelection()
   }
 
   let voucherSessionReady = false
@@ -177,20 +180,7 @@ export function useCheckout() {
     return requestId === voucherRequestId ? result : null
   }
 
-  watch(
-    checkoutLines,
-    (lines) => {
-      if (requestedComboId.value) {
-        validateRequestedCombo(requestedComboId.value, lines)
-      } else {
-        refreshApplicableCombo(lines)
-      }
-      refreshVoucherSelection()
-    },
-    { deep: true },
-  )
-
-  watch(addressList, syncSelectedAddress, { deep: true })
+  // Explicit UI-triggered API call
   watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)
 
   return {
@@ -202,7 +192,6 @@ export function useCheckout() {
     summary,
     isEmpty,
     showSuccess,
-    toast,
     formatMoney: formatCheckoutMoney,
     initCheckout,
     goBackToCart,

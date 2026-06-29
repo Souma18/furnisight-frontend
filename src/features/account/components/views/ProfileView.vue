@@ -1,13 +1,18 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import AddressView from './AddressView.vue'
-import SecurityView from './SecurityView.vue'
 
 import { useProfileForm } from '../../composables/useProfileForm'
 import { useProfileStore } from '../../store/profileStore'
+import { defineAsyncComponent } from 'vue'
+
+const AddressView = defineAsyncComponent(() => import('./AddressView.vue'))
+const SecurityView = defineAsyncComponent(() => import('./SecurityView.vue'))
 
 const emit = defineEmits(['notify'])
 const { t, locale } = useI18n()
@@ -106,28 +111,28 @@ onMounted(() => {
   <div class="profile-layout">
     <AccountSectionCard :title="t('account.profile.title')">
     <template #head>
-      <button v-if="!editing" type="button" class="edit-btn" @click="startEditing">
+      <AppButton v-if="!editing" type="button" class="edit-btn" @click="startEditing">
         <AppIcon name="pencil" :size="14" />
         {{ t('account.profile.edit') }}
-      </button>
+      </AppButton>
       <span v-else class="edit-state">{{ t('account.profile.editing') }}</span>
     </template>
 
     <div class="profile-simple" :class="{ 'profile-simple--editing': editing }">
       <header class="profile-summary">
-        <button
+        <AppButton
           type="button"
           class="avatar-button"
           :aria-label="avatarUploading ? t('account.profile.avatarUploading') : t('account.profile.changeAvatarAria')"
           :disabled="avatarUploading"
           @click="pickAvatar"
         >
-          <img v-if="profile?.avatarUrl" :src="profile.avatarUrl" alt="Avatar" />
+          <AppImage v-if="profile?.avatarUrl" :src="profile.avatarUrl" alt="Avatar"  />
           <span v-else>{{ avatarLabel }}</span>
           <span class="avatar-camera" aria-hidden="true">
             <AppIcon name="camera" :size="14" />
           </span>
-        </button>
+        </AppButton>
 
         <div class="profile-identity">
           <div class="summary-copy">
@@ -137,11 +142,11 @@ onMounted(() => {
           </div>
 
           <div class="avatar-actions">
-            <button type="button" class="avatar-action" :disabled="avatarUploading" @click="pickAvatar">
+            <AppButton type="button" class="avatar-action" :disabled="avatarUploading" @click="pickAvatar">
               <AppIcon name="camera" :size="14" />
               {{ t('account.profile.changeAvatar') }}
-            </button>
-            <button
+            </AppButton>
+            <AppButton
               v-if="profile?.avatarUrl"
               type="button"
               class="avatar-action avatar-action--danger"
@@ -149,7 +154,7 @@ onMounted(() => {
               @click="removeAvatar"
             >
               {{ t('account.profile.removeAvatar') }}
-            </button>
+            </AppButton>
           </div>
         </div>
       </header>
@@ -179,8 +184,8 @@ onMounted(() => {
 
       <form v-else class="profile-form" @submit.prevent="handleSubmit">
         <div class="field-grid">
-          <label>{{ t('account.profile.lastName') }} <input v-model="form.lastName" :placeholder="t('account.profile.lastNamePlaceholder')" required /></label>
-          <label>{{ t('account.profile.firstName') }} <input v-model="form.firstName" :placeholder="t('account.profile.firstNamePlaceholder')" required /></label>
+          <label>{{ t('account.profile.lastName') }} <AppInput v-model="form.lastName" :placeholder="t('account.profile.lastNamePlaceholder')" required /></label>
+          <label>{{ t('account.profile.firstName') }} <AppInput v-model="form.firstName" :placeholder="t('account.profile.firstNamePlaceholder')" required /></label>
           <label>
             Email
             <div class="readonly-field">
@@ -203,10 +208,10 @@ onMounted(() => {
         </div>
 
         <div class="actions">
-          <button type="button" class="ghost" :disabled="saving" @click="cancelEditing">{{ t('common.cancel') }}</button>
-          <button type="submit" class="primary" :disabled="saving">
+          <AppButton type="button" class="ghost" :disabled="saving" @click="cancelEditing">{{ t('common.cancel') }}</AppButton>
+          <AppButton type="submit" class="primary" :disabled="saving">
             {{ saving ? t('account.profile.saving') : t('account.profile.saveChanges') }}
-          </button>
+          </AppButton>
         </div>
       </form>
 
@@ -214,8 +219,8 @@ onMounted(() => {
     </div>
     </AccountSectionCard>
 
-    <AddressView @notify="(m, t) => emit('notify', m, t)" />
-    <SecurityView @notify="(m, t) => emit('notify', m, t)" />
+    <AddressView @notify="(msg, type) => emit('notify', msg, type)" />
+    <SecurityView @notify="(msg, type) => emit('notify', msg, type)" />
   </div>
 </template>
 
@@ -544,44 +549,7 @@ textarea {
   border-color: var(--app-navy, #1b3044);
 }
 
-[data-theme='dark'] .profile-summary {
-  border-bottom-color: var(--app-border) !important;
-}
 
-[data-theme='dark'] .summary-kicker {
-  color: var(--app-gold) !important;
-}
-
-[data-theme='dark'] .summary-copy h4,
-[data-theme='dark'] .read-row strong {
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .summary-copy p:not(.summary-kicker),
-[data-theme='dark'] .read-row span,
-[data-theme='dark'] label,
-[data-theme='dark'] .readonly-field {
-  color: var(--app-text-muted) !important;
-}
-
-[data-theme='dark'] .read-row {
-  border-bottom-color: var(--app-border) !important;
-}
-
-[data-theme='dark'] .avatar-button {
-  background: var(--app-surface-soft) !important;
-  border-color: var(--app-border) !important;
-  color: var(--app-gold) !important;
-}
-
-[data-theme='dark'] .avatar-action,
-[data-theme='dark'] input,
-[data-theme='dark'] select,
-[data-theme='dark'] textarea,
-[data-theme='dark'] .readonly-field {
-  background: var(--app-control-bg) !important;
-  border-color: var(--app-border) !important;
-}
 
 button:disabled {
   cursor: not-allowed;

@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -50,19 +52,19 @@ function onDrop(index) {
         @dragover.prevent
         @drop.prevent="onDrop(index)"
       >
-        <img :src="url" alt="" />
+        <AppImage :src="url" alt=""  />
         <div v-if="multiple" class="product-image-order">
-          <button type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
+          <AppButton variant="unstyled" type="button" :disabled="index === 0" @click="emit('move', index, index - 1)">
             <AppIcon name="chevron-left" :size="12" />
-          </button>
+          </AppButton>
           <span>{{ index + 1 }}</span>
-          <button type="button" :disabled="index === images.length - 1" @click="emit('move', index, index + 1)">
+          <AppButton variant="unstyled" type="button" :disabled="index === images.length - 1" @click="emit('move', index, index + 1)">
             <AppIcon name="chevron-right" :size="12" />
-          </button>
+          </AppButton>
         </div>
-        <button type="button" class="product-image-remove" @click="emit('remove', url)">
+        <AppButton variant="unstyled" type="button" class="product-image-remove" @click="emit('remove', url)">
           <AppIcon name="x" :size="12" />
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

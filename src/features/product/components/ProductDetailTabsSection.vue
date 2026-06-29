@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, toRef } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useProductTabs } from '../composables/useProductTabs'
@@ -52,18 +55,18 @@ function updateReviewField(field, value) {
 <template>
   <section class="pd-tabs" aria-label="Thông tin chi tiết sản phẩm">
     <div class="nav" aria-label="Chuyển nội dung sản phẩm">
-      <button type="button" :class="{ active: activeTab === 'desc' }" @click="emit('switch-tab', 'desc')">
+      <AppButton type="button" :class="{ active: activeTab === 'desc' }" @click="emit('switch-tab', 'desc')">
         Mô tả sản phẩm
-      </button>
-      <button type="button" :class="{ active: activeTab === 'spec' }" @click="emit('switch-tab', 'spec')">
+      </AppButton>
+      <AppButton type="button" :class="{ active: activeTab === 'spec' }" @click="emit('switch-tab', 'spec')">
         Thông số kỹ thuật
-      </button>
-      <button type="button" :class="{ active: activeTab === 'review' }" @click="emit('switch-tab', 'review')">
+      </AppButton>
+      <AppButton type="button" :class="{ active: activeTab === 'review' }" @click="emit('switch-tab', 'review')">
         Đánh giá ({{ reviewCountLabel }})
-      </button>
+      </AppButton>
     </div>
     <div v-if="activeTab === 'desc'" class="pd-section-layout desc-grid">
-      <div class="content pd-story-panel">
+      <div class="pd-content pd-story-panel">
         <span class="pd-section-eyebrow">Tổng quan</span>
         <h2>Mô tả sản phẩm</h2>
         <p class="pd-description-text">{{ product.description }}</p>
@@ -121,20 +124,21 @@ function updateReviewField(field, value) {
             <p v-if="reviewGateMessage" class="review-gate">{{ reviewGateMessage }}</p>
             <p v-else class="review-gate ready">Chia sẻ trải nghiệm thực tế của bạn về sản phẩm.</p>
           </div>
-          <button
+          <AppButton
             v-if="!reviewIsAuthenticated && !reviewEligibility.loading"
             type="button"
             class="review-login-btn"
             @click="emit('open-login')"
           >
             Đăng nhập
-          </button>
+          </AppButton>
         </div>
         <div class="rating-picker" aria-label="Chọn số sao">
-          <button
+          <AppButton
             v-for="star in 5"
             :key="`pick-star-${star}`"
-            type="button"
+            variant="unstyled"
+            size="unstyled"
             class="star-pick"
             :class="{ active: star <= Number(reviewForm.rating || 0) }"
             :aria-label="`Chọn ${star} sao`"
@@ -143,10 +147,10 @@ function updateReviewField(field, value) {
             @click="updateReviewField('rating', star)"
           >
             <AppIcon name="star" :size="22" />
-          </button>
+          </AppButton>
           <span class="rating-picked-label">Đã chọn {{ Number(reviewForm.rating || 0) }} sao</span>
         </div>
-        <input
+        <AppInput
           class="review-title-input"
           type="text"
           placeholder="Tiêu đề đánh giá"
@@ -167,14 +171,14 @@ function updateReviewField(field, value) {
           <p v-if="reviewSubmitError" class="review-submit-msg error">{{ reviewSubmitError }}</p>
           <p v-else-if="reviewSubmitSuccess" class="review-submit-msg success">{{ reviewSubmitSuccess }}</p>
           <span v-else></span>
-          <button type="submit" class="review-submit-btn" :disabled="!reviewCanSubmit">
+          <AppButton type="submit" class="review-submit-btn" :disabled="!reviewCanSubmit">
             {{ reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá' }}
-          </button>
+          </AppButton>
         </div>
       </form>
       <div v-for="item in product.reviews || []" :key="item.id" class="review-card">
         <div class="review-head">
-          <img v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img" />
+          <AppImage v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img"  />
           <span v-else class="avatar">{{ (item.userName || item.user || 'K').slice(0, 1).toUpperCase() }}</span>
           <div>
             <p class="name">{{ item.userName || item.user || 'Khách hàng' }}</p>
@@ -197,6 +201,6 @@ function updateReviewField(field, value) {
         </div>
       </div>
     </div>
-    <div v-else class="content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>
+    <div v-else class="pd-content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>
   </section>
 </template>

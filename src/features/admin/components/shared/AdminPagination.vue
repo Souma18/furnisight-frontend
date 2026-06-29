@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -13,7 +14,7 @@ const emit = defineEmits(['page'])
   <div class="pagination">
     <div v-if="info" class="pg-info" v-html="info" />
     <div class="pg-btns">
-      <button
+      <AppButton variant="unstyled"
         v-for="(btn, idx) in buttons"
         :key="`${btn.label}-${btn.page}-${idx}`"
         type="button"
@@ -24,7 +25,7 @@ const emit = defineEmits(['page'])
       >
         <AppIcon v-if="btn.icon" :name="btn.icon" :size="14" />
         <template v-else>{{ btn.label }}</template>
-      </button>
+      </AppButton>
     </div>
   </div>
 </template>

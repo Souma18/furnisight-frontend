@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { onBeforeUnmount } from 'vue'
 import { provideAuthViewState, useAuthViewState } from '../composables/useAuthViewState'
 import AuthTabs from './AuthTabs.vue'
@@ -8,6 +9,7 @@ import ForgotPasswordForm from './ForgotPasswordForm.vue'
 import AuthSuccessState from './AuthSuccessState.vue'
 import VerifyEmailForm from './VerifyEmailForm.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import '../assets/auth-forms.css'
 
 const props = defineProps({
   embedded: {
@@ -58,9 +60,9 @@ onBeforeUnmount(() => {
             <p class="brand-title">FurniSight</p>
             <p class="brand-subtitle">Nội thất cao cấp</p>
           </div>
-          <button v-if="embedded" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
+          <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
             <AppIcon name="close" :size="14" :stroke-width="2" />
-          </button>
+          </AppButton>
         </div>
         <AuthTabs v-if="showTabs" :model-value="activeView" @update:model-value="handleTabChange" />
       </div>
@@ -166,6 +168,10 @@ onBeforeUnmount(() => {
   background: var(--auth-surface-secondary);
   color: var(--auth-text-secondary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .auth-body {

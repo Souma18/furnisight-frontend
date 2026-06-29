@@ -1,3 +1,5 @@
+import { formatTime } from '@shared/lib/formatters/DateFormatter'
+
 const AVATAR_PALETTE = [
   { avClass: 'av-gold', avColor: 'linear-gradient(135deg,#e5b84a,#c9922a)', textColor: 'var(--navy)' },
   { avClass: 'av-blue', avColor: 'linear-gradient(135deg,#60a5fa,#2563eb)', textColor: '#fff' },
@@ -46,8 +48,7 @@ export function mapPriorityToApi(priorityKey) {
 }
 
 export function formatTimeLabel(iso) {
-  const date = iso ? new Date(iso) : new Date()
-  return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })
+  return formatTime(iso || new Date().toISOString())
 }
 
 function pickAvatarPalette(seed) {
@@ -186,13 +187,8 @@ export function mapConversationToAdminList(raw) {
     ...palette,
     status: raw.status || 'OPEN',
     statusKey: STATUS_TO_KEY[raw.status || 'OPEN'] ?? 'pending',
-    online: 'online-away',
-    onlinePill: 'pill-away',
-    pillText: 'Hỗ trợ',
     email: raw.buyerEmail || `buyer-${buyerId}@furnisight.store`,
     priority: PRIORITY_TO_UI[raw.priority] ?? 'medium',
-    vip: false,
-    isAi: false,
     unreadCount: 0,
     unread: false,
     lastMessage: raw.lastMessageContent || '',

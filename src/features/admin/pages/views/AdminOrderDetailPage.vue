@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -92,12 +94,12 @@ watch(() => props.orderCode, load, { immediate: true })
     subtitle="Thông tin sản phẩm, giao hàng và thanh toán"
   >
     <template #actions>
-      <button v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="promptCancelOrder">
+      <AppButton variant="unstyled" v-if="canCancelCurrentOrder" type="button" class="btn-cancel-order" @click="promptCancelOrder">
         <AppIcon name="ban" :size="15" />Hủy đơn
-      </button>
-      <button type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
+      </AppButton>
+      <AppButton variant="unstyled" type="button" class="btn-export" @click="router.push({ name: 'admin-orders' })">
         <AppIcon name="chevronLeft" :size="15" />Quay lại
-      </button>
+      </AppButton>
     </template>
   </AdminPageHeader>
 
@@ -118,7 +120,7 @@ watch(() => props.orderCode, load, { immediate: true })
       <div class="admin-order-lines">
         <div v-for="item in order.items" :key="item.id" class="admin-order-line">
           <span class="admin-order-thumb">
-            <img v-if="itemImage(item)" :src="itemImage(item)" alt="" @error="hideBrokenImage" />
+            <AppImage v-if="itemImage(item)" :src="itemImage(item)" alt="" @error="hideBrokenImage"  />
             <AppIcon v-else name="image" :size="18" />
           </span>
           <div>

@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { onMounted, reactive, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import PasswordField from '@features/auth/components/PasswordField.vue'
@@ -121,7 +123,7 @@ const menuItems = [
         <div class="acct-stat"><div class="acct-stat-val green">12</div><div class="acct-stat-label">Module</div></div>
         <div class="acct-stat"><div class="acct-stat-val">1</div><div class="acct-stat-label">Vai trò</div></div>
       </div>
-      <button
+      <AppButton variant="unstyled"
         v-for="m in menuItems"
         :key="m.id"
         type="button"
@@ -130,21 +132,21 @@ const menuItems = [
         @click="activeTab = m.id"
       >
         <AppIcon :name="m.icon" :size="16" /> {{ m.label }}
-      </button>
+      </AppButton>
     </div>
 
     <div class="account-detail-card">
       <p v-if="loading" class="account-state">Đang tải hồ sơ...</p>
       <div v-else-if="loadError" class="account-state account-state--error">
         <span>{{ loadError }}</span>
-        <button type="button" class="btn-export" @click="loadProfile">Thử lại</button>
+        <AppButton variant="unstyled" type="button" class="btn-export" @click="loadProfile">Thử lại</AppButton>
       </div>
 
       <template v-else-if="activeTab === 'profile'">
         <div class="form-section-title"><AppIcon name="user" :size="16" />Thông tin cá nhân</div>
         <div class="form-grid">
-          <div class="form-group full"><label class="form-label">Họ và tên</label><input v-model="profile.displayName" class="form-input" /></div>
-          <div class="form-group"><label class="form-label">Email</label><input v-model="profile.email" class="form-input" readonly /></div>
+          <div class="form-group full"><label class="form-label">Họ và tên</label><AppInput v-model="profile.displayName" class="form-input" /></div>
+          <div class="form-group"><label class="form-label">Email</label><AppInput v-model="profile.email" class="form-input" readonly /></div>
           <div class="form-group"><label class="form-label">Ngày sinh</label><input v-model="profile.birthday" class="form-input" type="date" /></div>
           <div class="form-group">
             <label class="form-label">Giới tính</label>
@@ -178,10 +180,10 @@ const menuItems = [
         </div>
 
         <div class="acct-form-actions">
-          <button type="button" class="btn-export" :disabled="saving" @click="resetProfile"><AppIcon name="close" :size="14" />Hủy</button>
-          <button type="button" class="btn-add" :disabled="saving" @click="saveProfile">
+          <AppButton variant="unstyled" type="button" class="btn-export" :disabled="saving" @click="resetProfile"><AppIcon name="close" :size="14" />Hủy</AppButton>
+          <AppButton variant="unstyled" type="button" class="btn-add" :disabled="saving" @click="saveProfile">
             <AppIcon name="check" :size="14" />{{ saving ? 'Đang lưu...' : 'Lưu thay đổi' }}
-          </button>
+          </AppButton>
         </div>
       </template>
 
@@ -192,7 +194,7 @@ const menuItems = [
           <div class="form-group password-admin-field"><label class="form-label">Mật khẩu mới</label><PasswordField v-model="pwdForm.newPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
           <div class="form-group password-admin-field"><label class="form-label">Xác nhận mật khẩu</label><PasswordField v-model="pwdForm.confirmPassword" autocomplete="new-password" required class="admin-pwd-override" /></div>
           <div class="form-group full acct-form-actions">
-            <button type="submit" class="btn-add" :disabled="pwdSaving">Cập nhật mật khẩu</button>
+            <AppButton variant="unstyled" type="submit" class="btn-add" :disabled="pwdSaving">Cập nhật mật khẩu</AppButton>
           </div>
         </form>
       </template>

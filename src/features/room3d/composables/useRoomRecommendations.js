@@ -54,7 +54,6 @@ export function useRoomRecommendations({ store, state }) {
         },
       })
       recommendationError.value = 'Không thể tải gợi ý sản phẩm cho phòng này.'
-      console.warn('Failed to load manual room recommendations:', error?.response?.status || error?.message || error)
     }
   }
 

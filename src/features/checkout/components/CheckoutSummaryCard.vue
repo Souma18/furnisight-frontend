@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -24,7 +26,7 @@ defineEmits(['update-agreed', 'place-order'])
       <div class="co-sum-products">
         <div v-for="line in lines" :key="line.id" class="co-sum-item">
           <div class="co-sum-thumb">
-            <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-sum-thumb-img">
+            <AppImage v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-sum-thumb-img" />
             <AppIcon v-else name="image" :size="18" />
             <span class="co-sum-qty">{{ line.qty }}</span>
           </div>
@@ -89,7 +91,7 @@ defineEmits(['update-agreed', 'place-order'])
             <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của FurniSight.
           </span>
         </label>
-        <button
+        <AppButton
           type="button"
           class="co-btn-order"
           :disabled="placing"
@@ -97,7 +99,7 @@ defineEmits(['update-agreed', 'place-order'])
         >
           <AppIcon name="creditCard" :size="17" />
           Đặt hàng – {{ formatMoney(summary.total) }}
-        </button>
+        </AppButton>
         <p class="co-btn-order-sub">
           <AppIcon name="lockKeyhole" :size="13" />
           Thanh toán được mã hoá và bảo mật

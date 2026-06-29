@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -45,10 +46,10 @@ function toggleFaq(id) {
         class="ct-faq-item"
         :class="{ open: isOpen(item.id) }"
       >
-        <button type="button" class="ct-faq-q" @click="toggleFaq(item.id)">
+        <AppButton type="button" class="ct-faq-q" @click="toggleFaq(item.id)">
           <span class="ct-faq-q-text">{{ item.question }}</span>
           <span class="ct-faq-toggle">+</span>
-        </button>
+        </AppButton>
         <div v-if="isOpen(item.id)" class="ct-faq-a">
           {{ item.answer }}
         </div>

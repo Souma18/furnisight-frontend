@@ -1,4 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { CHECKOUT_SHOP } from '../composables/checkoutContent'
 import { calcLineTotal } from '../utils/checkoutPricing'
@@ -12,6 +15,8 @@ const props = defineProps({
   sellerNote: { type: String, default: '' },
   shippingOptions: { type: Array, default: () => [] },
   selectedShippingId: { type: String, default: '' },
+  itemQty: { type: Number, default: 0 },
+  subtotal: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['update-qty', 'update-insurance', 'update-note', 'update-shipping'])
@@ -46,11 +51,6 @@ function stockText(line) {
 function selectShipping(id) {
   emit('update-shipping', id)
 }
-
-const itemQty = () => props.lines.reduce((sum, line) => sum + (Number(line.qty) || 0), 0)
-
-const merchandiseSubtotal = () =>
-  props.lines.reduce((sum, line) => sum + calcLineTotal(line), 0)
 </script>
 
 <template>
@@ -68,7 +68,7 @@ const merchandiseSubtotal = () =>
       class="co-prod-row"
     >
       <div class="co-prod-thumb">
-        <img v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-prod-thumb-img" @error="hideBrokenImage">
+        <AppImage v-if="line.imageUrl" :src="line.imageUrl" :alt="line.name" class="co-prod-thumb-img" @error="hideBrokenImage" />
         <AppIcon v-else name="image" :size="20" />
       </div>
       <div>
@@ -82,9 +82,9 @@ const merchandiseSubtotal = () =>
         <div class="co-prod-unit">{{ formatMoney(line.price) }}</div>
       </div>
       <div class="co-qty">
-        <button type="button" aria-label="Giảm" :disabled="Number(line.qty || 1) <= 1" @click="changeQty(line, -1)">−</button>
+        <AppButton type="button" aria-label="Giảm" :disabled="Number(line.qty || 1) <= 1" @click="changeQty(line, -1)">−</AppButton>
         <span>{{ line.qty }}</span>
-        <button type="button" aria-label="Tăng" :disabled="cannotIncrease(line)" @click="changeQty(line, 1)">+</button>
+        <AppButton type="button" aria-label="Tăng" :disabled="cannotIncrease(line)" @click="changeQty(line, 1)">+</AppButton>
       </div>
       <div class="co-prod-total">{{ formatMoney(calcLineTotal(line)) }}</div>
     </div>
@@ -108,13 +108,13 @@ const merchandiseSubtotal = () =>
     <div class="co-shop-options">
       <div class="co-opt-row">
         <span class="co-opt-label">Lời nhắn:</span>
-        <input
+        <AppInput
           class="co-opt-input"
           type="text"
           placeholder="Lưu ý cho người bán..."
           :value="sellerNote"
           @input="$emit('update-note', $event.target.value)"
-        >
+        />
       </div>
       <div class="co-opt-row">
         <span class="co-opt-label">Vận chuyển:</span>
@@ -153,8 +153,8 @@ const merchandiseSubtotal = () =>
     </div>
 
     <div class="co-subtotal-row">
-      <span>Tổng số tiền ({{ itemQty() }} sản phẩm):</span>
-      <span class="co-subtotal-val">{{ formatMoney(merchandiseSubtotal()) }}</span>
+      <span>Tổng số tiền ({{ itemQty }} sản phẩm):</span>
+      <span class="co-subtotal-val">{{ formatMoney(subtotal) }}</span>
     </div>
   </section>
 </template>

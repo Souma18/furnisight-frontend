@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
 
 defineProps({
@@ -22,14 +23,14 @@ const { t } = useI18n()
 
 <template>
   <div class="cart-footer">
-    <button
+    <AppButton
       type="button"
       class="checkout-btn"
       :disabled="checkoutDisabled"
       @click="$emit('checkout')"
     >
       {{ t('account.cart.checkoutNow') }}
-    </button>
+    </AppButton>
 
     <p class="total">
       {{ t('account.cart.totalLabel', { count: selectedCount, total: totalLabel }) }}
@@ -50,7 +51,7 @@ const { t } = useI18n()
   border-radius: 10px;
   padding: 0.72rem 1.15rem;
   background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: var(--color-white);
+  color: #ffffff;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;

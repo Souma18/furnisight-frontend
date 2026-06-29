@@ -54,6 +54,7 @@ export function useRoomFurnitureInteraction({
   hasRoom,
   isRoomAvailable,
   selectedProduct,
+  selectedSceneItem,
   isSelectedInCart,
   applyUserOverrides,
   setOrbitEnabled,
@@ -287,9 +288,18 @@ export function useRoomFurnitureInteraction({
     isDraggingProduct.value = false
   }
 
+  function deselectProduct() {
+    selectedSceneItemId.value = null
+    setOrbitEnabled(true)
+    isDraggingProduct.value = false
+  }
+
   function addSelectedProductToCart() {
     if (!selectedProduct.value?.id || isSelectedInCart.value) return
-    emit('add-product', selectedProduct.value.id)
+    emit('add-product', {
+      ...selectedProduct.value,
+      _selectedVariantId: selectedSceneItem?.value?.variantId
+    })
   }
 
   function resetSelectedColor() {
@@ -379,6 +389,7 @@ export function useRoomFurnitureInteraction({
     updateSelectedScale,
     updateSelectedColor,
     removeSelectedProduct,
+    deselectProduct,
     addSelectedProductToCart,
     resetSelectedColor,
     updateSelectedRotation,

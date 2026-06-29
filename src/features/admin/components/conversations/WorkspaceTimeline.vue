@@ -1,4 +1,5 @@
 <script setup>
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAdminConversationStore } from '../../store/adminConversationStore'
@@ -145,7 +146,7 @@ onMounted(() => {
           :class="store.currentConv.avClass"
           :style="{ background: store.currentConv.avColor, color: store.currentConv.textColor }"
         >
-          <img v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name" />
+          <AppImage v-if="store.currentConv.avatarUrl" :src="store.currentConv.avatarUrl" :alt="store.currentConv.name"  />
           <span v-else>{{ store.currentConv.av }}</span>
         </div>
         <div class="tl-msg-group">
@@ -162,7 +163,7 @@ onMounted(() => {
                 :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
                 @click="handleAttachmentClick($event, attachment)"
               >
-                <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+                <AppImage v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name"  />
                 <template v-else>
                   <AppIcon name="paperclip" />
                   <span>{{ attachment.name }}</span>
@@ -190,7 +191,7 @@ onMounted(() => {
                 :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
                 @click="handleAttachmentClick($event, attachment)"
               >
-                <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+                <AppImage v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name"  />
                 <template v-else>
                   <AppIcon name="paperclip" />
                   <span>{{ attachment.name }}</span>
@@ -227,7 +228,7 @@ onMounted(() => {
               :class="attachment.isImage ? 'tl-attachment-image' : 'tl-attachment-file'"
               @click="handleAttachmentClick($event, attachment)"
             >
-              <img v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name" />
+              <AppImage v-if="attachment.isImage" :src="attachment.url" :alt="attachment.name"  />
               <template v-else>
                 <AppIcon name="paperclip" />
                 <span>{{ attachment.name }}</span>

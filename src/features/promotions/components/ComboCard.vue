@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -38,19 +40,19 @@ function stockIssue(combo = {}) {
     @keydown.space.self.prevent="emit('view', combo)"
   >
     <div class="combo-media">
-      <img
+      <AppImage
         v-if="combo.imageUrl"
         :src="combo.imageUrl"
         :alt="combo.name"
         loading="lazy"
         @error="$event.target.style.display = 'none'"
-      >
+       />
       <AppIcon v-else name="armchair" :size="compact ? 42 : 52" />
       <span class="room-tag">{{ comboRoomLabel(combo) }}</span>
       <span class="save-tag">{{ t('promotions.combo.saveAmount', { amount: PriceFormatter.format(combo.savedAmount) }) }}</span>
       <div class="combo-thumbs">
         <span v-for="item in comboPreviewItems(combo)" :key="`${combo.id}-${item.productId}-${item.variantId}`">
-          <img :src="item.imageUrl" :alt="item.productName" loading="lazy">
+          <AppImage :src="item.imageUrl" :alt="item.productName" loading="lazy" />
         </span>
       </div>
     </div>
@@ -64,10 +66,10 @@ function stockIssue(combo = {}) {
         <span><small>{{ t('promotions.combo.comboPrice') }}</small><b>{{ PriceFormatter.format(combo.finalAmount) }}</b></span>
       </div>
       <div class="combo-actions">
-        <button type="button" class="combo-btn outline" @click.stop="emit('view', combo)">
+        <AppButton variant="unstyled" size="unstyled" type="button" class="combo-btn outline" @click.stop="emit('view', combo)">
           <AppIcon name="eye" :size="14" />{{ t('promotions.combo.view') }}
-        </button>
-        <button
+        </AppButton>
+        <AppButton variant="unstyled" size="unstyled"
           type="button"
           class="combo-btn dark"
           :class="{ unavailable: stockIssue(combo) }"
@@ -75,7 +77,7 @@ function stockIssue(combo = {}) {
           @click.stop="emit('buy', combo)"
         >
           <AppIcon name="cart" :size="14" />{{ stockIssue(combo) ? t('promotions.combo.soldOut') : buyingId === combo.id ? t('promotions.combo.preparing') : t('promotions.combo.buy') }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </article>
@@ -83,17 +85,17 @@ function stockIssue(combo = {}) {
 
 <style scoped>
 .combo-card {
-  background: var(--app-surface, #fff);
-  border: 1px solid var(--app-border, #e8e0d0);
-  border-radius: 14px;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
   overflow: hidden;
   cursor: pointer;
-  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  transition: transform .25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow .25s cubic-bezier(0.4, 0, 0.2, 1), border-color .25s ease;
 }
 .combo-card:hover {
-  transform: translateY(-3px);
-  border-color: var(--app-border-strong, #d8c39d);
-  box-shadow: var(--app-shadow, 0 14px 34px rgba(18, 32, 46, .1));
+  transform: translateY(-4px);
+  border-color: var(--brand-gold-400);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.08);
 }
 .combo-card:focus-visible {
   outline: 3px solid rgba(201, 149, 58, .35);
@@ -102,11 +104,11 @@ function stockIssue(combo = {}) {
 .combo-media {
   position: relative;
   aspect-ratio: 4 / 3;
-  background: var(--app-surface-soft, #e8decc);
+  background: var(--app-bg);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
+  color: var(--app-text-muted);
   overflow: hidden;
 }
 .combo-media > img {
@@ -125,13 +127,16 @@ function stockIssue(combo = {}) {
 }
 .room-tag {
   top: 12px;
-  background: rgba(22, 35, 59, .82);
+  background: rgba(10, 18, 28, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   color: #fff;
 }
 .save-tag {
   bottom: 12px;
-  background: var(--app-gold, #c9953a);
-  color: var(--app-bg-deep, #17233b);
+  background: var(--brand-gold-600);
+  color: var(--app-bg);
+  box-shadow: 0 4px 12px rgba(201,146,42,0.3);
 }
 .combo-thumbs {
   position: absolute;
@@ -144,9 +149,9 @@ function stockIssue(combo = {}) {
   height: 34px;
   margin-left: -9px;
   overflow: hidden;
-  border-radius: 7px;
-  border: 2px solid var(--app-surface, #fff);
-  background: var(--app-surface-soft, #f5f0e8);
+  border-radius: 8px;
+  border: 2px solid var(--app-surface);
+  background: var(--app-bg);
   display: inline-flex;
 }
 .combo-thumbs img {
@@ -159,7 +164,7 @@ function stockIssue(combo = {}) {
 }
 .combo-count {
   margin: 0 0 8px;
-  color: var(--app-gold, #c9953a);
+  color: var(--brand-gold-600);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 2.4px;
@@ -167,14 +172,15 @@ function stockIssue(combo = {}) {
 }
 .combo-body h3 {
   margin: 0;
-  color: var(--app-heading, #182532);
-  font-size: 15.5px;
+  color: var(--app-heading);
+  font-size: 16px;
+  font-weight: 700;
   line-height: 1.3;
 }
 .combo-desc {
   margin: 0;
-  color: var(--app-text-muted, #7a6a5a);
-  font-size: 11.5px;
+  color: var(--app-text-muted);
+  font-size: 13px;
   line-height: 1.42;
   display: -webkit-box;
   overflow: hidden;
@@ -185,21 +191,21 @@ function stockIssue(combo = {}) {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid var(--app-border, #e8e0d0);
-  padding-top: 12px;
-  margin-top: 12px;
+  border-top: 1px solid var(--app-border);
+  padding-top: 14px;
+  margin-top: 14px;
 }
 .combo-price small {
   display: block;
-  color: var(--app-text-muted, #918474);
-  font-size: 11px;
-}
-.combo-price del {
-  color: var(--app-text-muted, #9f9488);
+  color: var(--app-text-muted);
   font-size: 12px;
 }
+.combo-price del {
+  color: var(--app-text-muted);
+  font-size: 13px;
+}
 .combo-price b {
-  color: var(--app-heading, #16233b);
+  color: var(--app-heading);
   font-size: 18px;
 }
 .combo-actions {
@@ -211,7 +217,7 @@ function stockIssue(combo = {}) {
 }
 .combo-btn {
   flex: 1;
-  min-height: 38px;
+  min-height: 40px;
   padding: 9px 10px;
   border: 0;
   border-radius: 9px;
@@ -219,23 +225,34 @@ function stockIssue(combo = {}) {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  font-size: 12px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
+  transition: all 0.2s ease;
 }
 .combo-btn.outline {
-  background: var(--app-control-bg, #fff);
-  border: 1px solid var(--app-border, #e8e0d0);
-  color: var(--app-heading, #1a2332);
+  background: transparent;
+  border: 1px solid var(--app-border);
+  color: var(--app-heading);
+}
+.combo-btn.outline:hover {
+  background: var(--app-control-hover);
+  border-color: var(--brand-gold-600);
+  color: var(--brand-gold-600);
 }
 .combo-btn.dark {
-  background: var(--app-navy-soft, #16233b);
-  color: var(--app-heading-inverse, #fff);
+  background: var(--app-heading);
+  color: var(--app-bg);
+}
+.combo-btn.dark:hover {
+  background: var(--app-text);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 .combo-btn.unavailable {
-  background: var(--app-surface-muted, #f1e7db);
-  color: var(--app-text-muted, #7b6652);
+  background: var(--app-surface-soft);
+  color: var(--app-text-muted);
 }
 .combo-btn:disabled {
   opacity: .65;
@@ -328,63 +345,4 @@ function stockIssue(combo = {}) {
   }
 }
 
-[data-theme='dark'] .combo-card {
-  background: var(--app-surface) !important;
-  border-color: var(--app-border) !important;
-  color: var(--app-text) !important;
-}
-
-[data-theme='dark'] .combo-card:hover {
-  border-color: var(--app-border-strong) !important;
-}
-
-[data-theme='dark'] .combo-media {
-  background: var(--app-surface-soft) !important;
-}
-
-[data-theme='dark'] .combo-body h3,
-[data-theme='dark'] .combo-price b {
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .combo-count {
-  color: var(--app-gold) !important;
-}
-
-[data-theme='dark'] .save-tag {
-  background: var(--app-gold) !important;
-  color: var(--app-bg-deep) !important;
-}
-
-[data-theme='dark'] .combo-desc,
-[data-theme='dark'] .combo-price small,
-[data-theme='dark'] .combo-price del {
-  color: var(--app-text-muted) !important;
-}
-
-[data-theme='dark'] .combo-price {
-  border-top-color: var(--app-border) !important;
-}
-
-[data-theme='dark'] .combo-btn.outline {
-  background: var(--app-control-bg) !important;
-  border-color: var(--app-border) !important;
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .combo-btn.outline:hover,
-[data-theme='dark'] .combo-btn.outline:focus-visible {
-  background: var(--app-control-hover) !important;
-  border-color: var(--app-border-strong) !important;
-}
-
-[data-theme='dark'] .combo-btn.dark {
-  background: var(--app-navy-soft) !important;
-  color: var(--app-heading-inverse) !important;
-}
-
-[data-theme='dark'] .combo-btn.unavailable {
-  background: var(--app-surface-muted) !important;
-  color: var(--app-text-muted) !important;
-}
 </style>

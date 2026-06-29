@@ -7,8 +7,9 @@ import { setupApp } from './plugins'
 
 const app = createApp(App)
 
-app.config.errorHandler = (error) => {
+app.config.errorHandler = (error, instance, info) => {
   console.warn('[App] handled error:', getApiErrorMessage(error))
+  console.error('[App] Original error:', error, info)
 }
 
 window.addEventListener('unhandledrejection', (event) => {

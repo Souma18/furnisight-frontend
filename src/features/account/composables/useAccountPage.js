@@ -4,6 +4,7 @@ import { useProfileStore } from '../store/profileStore'
 import { useOrderStore } from '../store/orderStore'
 import { useWishlistStore } from '../store/wishlistStore'
 import { normalizeOrderUiStatus } from '@shared/lib/orders/orderStatusMapper'
+import { useToast } from '@shared/composables/useToast'
 
 const VIEWS = [
   'profile',
@@ -28,7 +29,7 @@ export function useAccountPage() {
   const wishlistStore = useWishlistStore()
 
   const activeView = ref('profile')
-  const toast = ref({ open: false, message: '', type: 'success' })
+  const { show: showToast } = useToast()
 
   const profile = computed(() => profileStore.profile)
   const stats = computed(() => ({
@@ -76,14 +77,7 @@ export function useAccountPage() {
     cleanOrderDetailQuery(normalizedView)
   }
 
-  let toastTimer = null
-  function showToast(message, type = 'success') {
-    clearTimeout(toastTimer)
-    toast.value = { open: true, message, type }
-    toastTimer = setTimeout(() => {
-      toast.value.open = false
-    }, 2600)
-  }
+
 
   onMounted(() => {
     syncViewFromQuery()
@@ -101,7 +95,6 @@ export function useAccountPage() {
     activeView,
     profile,
     stats,
-    toast,
     setView,
     showToast,
   }

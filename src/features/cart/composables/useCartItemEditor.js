@@ -24,7 +24,7 @@ function normalizeEditorVariants(variants = []) {
 }
 
 function resolveProductDetailLookup(item) {
-  return item?.detailId || item?.slug || ''
+  return item?.slug || item?.productId || ''
 }
 
 export function useCartItemEditor(items, updateItem) {
@@ -113,7 +113,6 @@ export function useCartItemEditor(items, updateItem) {
         selectedSize: item.selectedSize || product?.sizes?.[0] || '',
       }
     } catch (error) {
-      console.warn('Failed to load product variants for cart item:', error?.response?.status || error?.message || error)
       return {
         ...item,
         variantLoadFailed: true,

@@ -61,7 +61,7 @@
 .checkout-step.done .checkout-step-num {
   background: var(--co-green);
   border-color: var(--co-green);
-  color: #fff;
+  color: var(--app-heading-inverse);
 }
 
 .checkout-step-div {
@@ -100,7 +100,7 @@
 }
 
 .checkout-bc .cur {
-  color: #1a1a1a;
+  color: var(--app-heading);
   font-weight: 500;
 }
 
@@ -115,7 +115,7 @@
 }
 
 .checkout-card {
-  background: #fff;
+  background: var(--app-surface);
   border-radius: 18px;
   border: 1.5px solid var(--co-cream-dark);
   margin-bottom: 0.85rem;
@@ -162,7 +162,7 @@
 .co-addr-name { font-weight: 600; display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
 .co-addr-default {
   font-size: 0.58rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
-  padding: 0.14rem 0.5rem; border-radius: 7px; background: var(--co-gold); color: #fff;
+  padding: 0.14rem 0.5rem; border-radius: 7px; background: var(--co-gold); color: var(--app-heading-inverse);
   border: 1px solid rgba(201, 146, 42, 0.38); box-shadow: 0 5px 14px rgba(201, 146, 42, 0.16);
 }
 .co-addr-street { font-size: 0.78rem; color: var(--co-text-mid); margin-top: 0.25rem; line-height: 1.5; }
@@ -171,7 +171,7 @@
 .co-address-option {
   display: grid; grid-template-columns: auto auto minmax(0, 1fr) auto; gap: 0.7rem; align-items: flex-start;
   padding: 0.8rem; border: 1.5px solid var(--co-cream-dark); border-radius: 12px; cursor: pointer;
-  background: #fff; transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+  background: var(--app-surface); transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
 }
 .co-address-option input { margin-top: 0.7rem; accent-color: var(--co-gold); }
 .co-address-option--active {
@@ -181,7 +181,7 @@
 }
 .co-address-main { min-width: 0; }
 .co-address-edit {
-  border: 1px solid var(--co-cream-mid); background: #fff; color: var(--co-navy);
+  border: 1px solid var(--co-cream-mid); background: var(--app-surface); color: var(--co-navy);
   border-radius: 8px; padding: 0.35rem 0.6rem; font-size: 0.72rem; font-weight: 700; cursor: pointer;
 }
 .co-address-edit:hover { border-color: var(--co-gold); color: var(--co-gold); }
@@ -191,7 +191,7 @@
 }
 .co-address-dialog {
   width: min(620px, 100%); max-height: min(90vh, 720px); overflow: auto;
-  background: #fff; border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,.28);
+  background: var(--app-surface); border-radius: 16px; box-shadow: 0 24px 80px rgba(0,0,0,.28);
 }
 .co-address-dialog-head {
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
@@ -200,14 +200,14 @@
 .co-address-dialog-head h3 { margin: 0; font-size: 1rem; color: var(--co-navy); }
 .co-address-close {
   width: 32px; height: 32px; border: 1px solid var(--co-cream-mid); border-radius: 8px;
-  background: #fff; color: var(--co-text-mid); cursor: pointer; font-size: 1.2rem;
+  background: var(--app-surface); color: var(--co-text-mid); cursor: pointer; font-size: 1.2rem;
 }
 .co-address-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.8rem; padding: 1rem 1.1rem; }
 .co-address-form label { display: grid; gap: 0.35rem; font-size: 0.76rem; color: var(--co-text-mid); font-weight: 700; }
 .co-address-form input,
 .co-address-form select {
   width: 100%; min-height: 38px; border: 1.5px solid var(--co-cream-mid); border-radius: 9px;
-  padding: 0 0.7rem; font: inherit; font-size: 0.82rem; color: var(--co-navy); background: #fff;
+  padding: 0 0.7rem; font: inherit; font-size: 0.82rem; color: var(--co-navy); background: var(--app-surface);
 }
 .co-address-form-full { grid-column: 1 / -1; }
 .co-address-default-check { align-self: end; grid-template-columns: auto minmax(0,1fr) !important; align-items: center; }
@@ -220,7 +220,7 @@
 .co-address-primary {
   min-height: 38px; border-radius: 9px; padding: 0 1rem; font-weight: 700; cursor: pointer;
 }
-.co-address-secondary { border: 1.5px solid var(--co-cream-mid); background: #fff; color: var(--co-text-mid); }
+.co-address-secondary { border: 1.5px solid var(--co-cream-mid); background: var(--app-surface); color: var(--co-text-mid); }
 .co-address-primary { border: 0; background: linear-gradient(135deg, var(--co-gold-light), var(--co-gold)); color: var(--co-navy); }
 
 .co-shop-head {
@@ -230,7 +230,7 @@
 }
 .co-shop-icon {
   width: 1.7rem; height: 1.7rem; border-radius: 8px; background: var(--co-navy);
-  display: grid; place-items: center; color: #fff;
+  display: grid; place-items: center; color: var(--app-heading-inverse);
 }
 .co-shop-name { font-size: 0.82rem; font-weight: 600; }
 
@@ -266,7 +266,7 @@
 }
 .co-qty span {
   width: 32px; height: 28px; display: grid; place-items: center; font-size: 0.78rem; font-weight: 600;
-  border-inline: 1.5px solid var(--co-cream-mid); background: #fff;
+  border-inline: 1.5px solid var(--co-cream-mid); background: var(--app-surface);
 }
 
 .co-addon {
@@ -275,7 +275,7 @@
   background: linear-gradient(90deg, rgba(59, 130, 246, 0.04), transparent);
 }
 .co-addon-label { font-size: 0.78rem; color: var(--co-text-mid); flex: 1; }
-.co-addon-badge { font-size: 0.55rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; background: var(--co-red); color: #fff; }
+.co-addon-badge { font-size: 0.55rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; background: var(--co-red); color: var(--app-heading-inverse); }
 .co-addon-price { font-size: 0.82rem; font-weight: 600; white-space: nowrap; }
 
 .co-shop-options { padding: 0.85rem 1rem; display: grid; gap: 0.75rem; border-top: 1px solid var(--co-cream-dark); }
@@ -290,7 +290,7 @@
   display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.65rem 0.75rem;
   border-radius: 10px; border: 1.5px solid var(--co-cream-mid); cursor: pointer;
 }
-.co-ship-option.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-ship-option.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 .co-ship-name { font-size: 0.78rem; font-weight: 600; display: flex; gap: 0.35rem; align-items: center; }
 .co-ship-badge { font-size: 0.58rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 5px; background: rgba(45, 158, 107, 0.12); color: var(--co-green); }
 .co-ship-badge.gold { background: rgba(201, 146, 42, 0.15); color: var(--co-gold); }
@@ -308,7 +308,7 @@
 .co-voucher-row > svg { flex: 0 0 auto; color: var(--co-gold); }
 .co-voucher-label { flex: 1; font-size: 0.82rem; font-weight: 500; }
 .co-voucher-btn {
-  border: 1.5px solid #f5e6c8; background: #fff; color: var(--co-gold); font-size: 0.76rem; font-weight: 600;
+  border: 1.5px solid #f5e6c8; background: var(--app-surface); color: var(--co-gold); font-size: 0.76rem; font-weight: 600;
   padding: 0.35rem 0.7rem; border-radius: 8px; cursor: pointer;
 }
 .co-voucher-applied { display: flex; align-items: center; gap: 0.35rem; font-size: 0.76rem; color: var(--co-green); }
@@ -330,7 +330,7 @@
   display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.75rem;
   border-radius: 11px; border: 2px solid var(--co-cream-mid); cursor: pointer; position: relative;
 }
-.co-pay-method.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-pay-method.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 .co-pay-selected { position: absolute; top: 7px; right: 8px; color: var(--co-gold); }
 .co-pay-icon { font-size: 1.2rem; }
 .co-pay-name { font-size: 0.76rem; font-weight: 600; }
@@ -341,10 +341,10 @@
   font-size: 0.72rem; color: var(--co-text-mid); line-height: 1.55;
 }
 
-.co-sum-card { background: #fff; border-radius: 18px; border: 1.5px solid var(--co-cream-dark); overflow: hidden; }
+.co-sum-card { background: var(--app-surface); border-radius: 18px; border: 1.5px solid var(--co-cream-dark); overflow: hidden; }
 .co-sum-head {
   padding: 0.9rem 1rem; border-bottom: 1px solid var(--co-cream-dark);
-  background: linear-gradient(135deg, var(--co-navy), var(--brand-navy-700)); color: #fff;
+  background: linear-gradient(135deg, var(--co-navy), var(--brand-navy-700)); color: var(--app-heading-inverse);
 }
 .co-sum-title { font-size: 1.2rem; font-weight: 300; }
 .co-sum-title em { font-style: italic; color: var(--co-gold-light); }
@@ -358,7 +358,7 @@
 .co-sum-thumb-img { width: 100%; height: 100%; object-fit: cover; }
 .co-sum-qty {
   position: absolute; top: -4px; right: -4px; width: 14px; height: 14px; border-radius: 50%;
-  background: var(--co-navy); color: #fff; font-size: 0.52rem; font-weight: 700; display: grid; place-items: center;
+  background: var(--co-navy); color: var(--app-heading-inverse); font-size: 0.52rem; font-weight: 700; display: grid; place-items: center;
 }
 .co-sum-name { flex: 1; font-size: 0.72rem; color: var(--co-text-mid); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .co-sum-price { font-size: 0.76rem; font-weight: 600; }
@@ -392,7 +392,7 @@
   position: fixed; inset: 0; z-index: 900; background: rgba(10, 18, 28, 0.65);
   backdrop-filter: blur(6px); display: grid; place-items: center; padding: 1rem;
 }
-.co-modal { background: #fff; border-radius: 18px; width: min(480px, 100%); overflow: hidden; }
+.co-modal { background: var(--app-surface); border-radius: 18px; width: min(480px, 100%); overflow: hidden; }
 .co-modal-head {
   display: flex; justify-content: space-between; align-items: center;
   padding: 0.9rem 1rem; border-bottom: 1px solid var(--co-cream-dark);
@@ -403,7 +403,7 @@
   display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem;
   border-radius: 12px; border: 2px solid var(--co-cream-mid); cursor: pointer; margin-bottom: 0.45rem;
 }
-.co-voucher-opt.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-voucher-opt.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 
 .checkout-success-overlay {
   position: fixed;
@@ -436,7 +436,7 @@
 }
 
 .checkout-success-box {
-  background: #fff;
+  background: var(--app-surface);
   border-radius: 24px;
   width: 100%;
   max-width: 460px;
@@ -457,7 +457,7 @@
   font-family: var(--sans);
   font-size: 32px;
   font-weight: 300;
-  color: #1a1a1a;
+  color: var(--app-heading);
   margin: 0 0 10px;
   line-height: 1.2;
 }
@@ -516,7 +516,7 @@
 
 .checkout-success-steps .ss-dot.done {
   background: var(--co-green);
-  color: #fff;
+  color: var(--app-heading-inverse);
 }
 
 .checkout-success-steps .ss-dot.pend {
@@ -569,7 +569,7 @@
 
 .checkout-success-overlay .success-btn-track {
   background: var(--co-navy);
-  color: #fff !important;
+  color: var(--app-heading-inverse) !important;
   font-weight: 600;
   border: none;
 }
@@ -579,7 +579,7 @@
 }
 
 .checkout-success-overlay .success-btn-home {
-  background: #fff;
+  background: var(--app-surface);
   border: 1.5px solid var(--co-cream-mid);
   color: var(--co-text-mid) !important;
 }
@@ -590,7 +590,7 @@
 }
 .co-toast {
   position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 1100;
-  background: var(--co-navy); color: #fff; padding: 0.7rem 0.9rem; border-radius: 12px;
+  background: var(--co-navy); color: var(--app-heading-inverse); padding: 0.7rem 0.9rem; border-radius: 12px;
   display: flex; gap: 0.55rem; align-items: center; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   transform: translateY(80px); opacity: 0; transition: all 0.35s ease; pointer-events: none;
 }
@@ -605,42 +605,4 @@
   .co-address-edit { grid-column: 3; justify-self: start; }
   .co-address-form { grid-template-columns: 1fr; }
   .co-address-form-full { grid-column: auto; }
-}
-
-[data-theme='dark'] .checkout-page {
-  color: var(--app-text);
-}
-
-[data-theme='dark'] .checkout-bc,
-[data-theme='dark'] .co-card,
-[data-theme='dark'] .co-address-card,
-[data-theme='dark'] .co-address-secondary,
-[data-theme='dark'] .co-shop-card,
-[data-theme='dark'] .co-item-card,
-[data-theme='dark'] .co-sum-card,
-[data-theme='dark'] .co-modal,
-[data-theme='dark'] .co-voucher-card,
-[data-theme='dark'] .co-toolbar,
-[data-theme='dark'] .checkout-success-overlay .success-card {
-  background: var(--app-surface);
-  border-color: var(--app-border);
-  color: var(--app-text);
-}
-
-[data-theme='dark'] .co-item-line,
-[data-theme='dark'] .co-payment-method,
-[data-theme='dark'] .co-note,
-[data-theme='dark'] .co-input,
-[data-theme='dark'] .co-select,
-[data-theme='dark'] .checkout-success-overlay .success-btn-home {
-  background: var(--app-control-bg);
-  border-color: var(--app-border);
-  color: var(--app-text) !important;
-}
-
-[data-theme='dark'] .co-muted,
-[data-theme='dark'] .co-item-meta,
-[data-theme='dark'] .co-address-detail,
-[data-theme='dark'] .co-help {
-  color: var(--app-text-muted);
 }

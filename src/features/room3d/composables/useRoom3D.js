@@ -40,7 +40,6 @@ export function useRoom3D() {
     removeProductFromCart,
     updateCartQty,
     goCheckout,
-    submitCheckoutMock,
   } = useRoomCartBridge({
     store,
     state,
@@ -115,10 +114,7 @@ export function useRoom3D() {
     setSearchKeyword: store.setSearchKeyword,
     setCategory: store.setCategory,
     toggleCart: store.toggleCart,
-    openCheckout: goCheckout,
     goCheckout,
-    closeCheckout: store.closeCheckout,
-    closeSuccess: store.closeSuccess,
     initRoomTemplates,
     handleUploadImage,
     selectRoomType,
@@ -128,7 +124,6 @@ export function useRoom3D() {
     removeProductFromCart,
     updateCartQty,
     removeProductFromScene,
-    submitCheckoutMock,
     handleUpdateVariant: store.updateSceneItemVariant,
   }
 }

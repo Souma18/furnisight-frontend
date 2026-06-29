@@ -1,6 +1,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
+import { useToast } from '@shared/composables/useToast'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
@@ -16,6 +17,7 @@ export function useHomePage() {
   const localeStore = useLocaleStore()
   const { locale } = storeToRefs(localeStore)
   const { t } = useI18n()
+  const { show: showToast } = useToast()
 
   const categories = ref([])
   const combos = ref([])
@@ -61,7 +63,6 @@ export function useHomePage() {
         activeCategoryId.value = categories.value[0].id
       }
     } catch (error) {
-      console.error('Failed to load home categories:', error)
       categories.value = []
     }
   }
@@ -100,7 +101,6 @@ export function useHomePage() {
         })))
       combos.value = combos.value.map((combo) => ({ ...combo, stockIssue: combo.available === false ? 'unavailable' : comboStockIssue(combo) }))
     } catch (error) {
-      console.error('Failed to load home combos:', error)
       combos.value = []
     }
   }
@@ -118,7 +118,7 @@ export function useHomePage() {
       const rawProducts = Array.isArray(data) ? data : data?.items ?? []
       products.value = rawProducts.map((item) => new ProductResponse(item))
     } catch (error) {
-      console.error('Failed to load products for category:', error)
+      // Silent fail
     }
   }
 
@@ -134,7 +134,7 @@ export function useHomePage() {
         rating: Number(review.rating) || 5,
       }))
     } catch (error) {
-      console.error('Failed to load top reviews:', error)
+      // Silent fail
     }
   }
 
@@ -153,7 +153,7 @@ export function useHomePage() {
         await wishlistStore.addFavorite(productId)
       }
     } catch (error) {
-      console.error('Failed to toggle favorite home product:', error)
+      showToast('Không thể cập nhật danh sách yêu thích', 'error')
     }
   }
 

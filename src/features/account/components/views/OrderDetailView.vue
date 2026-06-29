@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
@@ -26,11 +28,9 @@ const {
   formatMoney,
   formatDate,
   formatDateTime,
-  orderItemImage,
   orderItemProductId,
   openProductDetail,
   reviewProduct,
-  hideBrokenImage,
   paymentMethodLabel,
   handleCancel,
   closeCancelDialog,
@@ -44,10 +44,10 @@ const {
 
 <template>
   <section v-if="order" class="order-detail">
-    <button type="button" class="order-detail-back" @click="backToOrders">
+    <AppButton type="button" class="order-detail-back" @click="backToOrders">
       <AppIcon name="chevronLeft" :size="15" />
       {{ t('account.orders.back') }}
-    </button>
+    </AppButton>
 
     <header class="order-detail-head">
       <div>
@@ -59,7 +59,7 @@ const {
       </div>
       <div class="order-detail-head-actions">
         <span class="status-badge" :class="order.status">{{ statusLabel }}</span>
-        <button
+        <AppButton
           v-if="shouldShowRetryPayment(order)"
           type="button"
           class="order-pay-btn"
@@ -69,15 +69,15 @@ const {
         >
           <AppIcon :name="retryingPayment ? 'refresh' : 'creditCard'" :size="14" :class="{ 'spin-icon': retryingPayment }" />
           {{ retryingPayment ? t('account.orders.creatingPayment') : t('account.orders.retryPayment') }}
-        </button>
-        <button v-if="canConfirmReceived" type="button" class="order-confirm-btn" @click="handleConfirmReceived">
+        </AppButton>
+        <AppButton v-if="canConfirmReceived" type="button" class="order-confirm-btn" @click="handleConfirmReceived">
           <AppIcon name="check" :size="14" />
           {{ t('account.orders.confirmReceived') }}
-        </button>
-        <button v-if="canCancelCurrentOrder" type="button" class="order-cancel-btn" @click="handleCancel">
+        </AppButton>
+        <AppButton v-if="canCancelCurrentOrder" type="button" class="order-cancel-btn" @click="handleCancel">
           <AppIcon name="close" :size="14" />
           {{ t('account.orders.cancel') }}
-        </button>
+        </AppButton>
       </div>
     </header>
 
@@ -136,26 +136,26 @@ const {
           </h2>
           <div class="order-lines">
             <div v-for="(item, index) in order.items" :key="index" class="order-line">
-              <button
+              <AppButton
                 type="button"
                 class="order-line-thumb"
-                :class="{ clickable: orderItemProductId(item) }"
-                :disabled="!orderItemProductId(item)"
+                :class="{ clickable: item.productId }"
+                :disabled="!item.productId"
                 :aria-label="t('account.orders.viewProductDetail', { name: item.productSnapshot?.productName || t('account.orders.product') })"
                 @click="openProductDetail(item)"
               >
-                <img v-if="orderItemImage(item)" :src="orderItemImage(item)" alt="product" class="line-thumb-img" @error="hideBrokenImage" />
+                <AppImage v-if="item.imageUrl" :src="item.imageUrl" alt="product" class="line-thumb-img"   />
                 <AppIcon name="image" :size="16" />
-              </button>
+              </AppButton>
               <div class="order-line-info">
-                <button
-                  v-if="orderItemProductId(item)"
+                <AppButton
+                  v-if="item.productId"
                   type="button"
                   class="order-line-name order-line-name-btn"
                   @click="openProductDetail(item)"
                 >
                   {{ item.productSnapshot?.productName || t('account.orders.product') }}
-                </button>
+                </AppButton>
                 <p v-else class="order-line-name">{{ item.productSnapshot?.productName || t('account.orders.product') }}</p>
                 <p v-if="item.productSnapshot?.color || item.productSnapshot?.material" class="order-line-var">
                   {{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}
@@ -163,15 +163,15 @@ const {
               </div>
               <span class="order-line-qty">{{ t('account.orders.quantityShort', { count: item.quantity }) }}</span>
               <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
-              <button
-                v-if="order.status === 'delivered' && orderItemProductId(item)"
+              <AppButton
+                v-if="order.status === 'delivered' && item.productId"
                 type="button"
                 class="order-review-btn"
                 @click="reviewProduct(item)"
               >
                 <AppIcon name="star" :size="14" />
                 {{ t('account.orders.review') }}
-              </button>
+              </AppButton>
             </div>
           </div>
         </article>
@@ -272,7 +272,7 @@ const {
 </template>
 
 <style scoped>
-.order-detail { display: grid; gap: 1rem; }
+.order-detail { display: grid; gap: 1rem; padding: 0 1rem; }
 .order-detail-back {
   border: none; background: none; color: var(--auth-brand-start, #c9922a);
   font-size: 0.82rem; cursor: pointer; padding: 0; width: fit-content;
@@ -364,7 +364,7 @@ const {
   border: 1px solid #e8c5c0;
   border-radius: 9px;
   padding: 0.45rem 0.75rem;
-  background: #fff;
+  background: var(--acc-surface, var(--app-surface));
   color: #c0392b;
   font-size: 0.78rem;
   cursor: pointer;
@@ -421,7 +421,7 @@ const {
   display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 1rem; align-items: start;
 }
 .detail-card {
-  background: #fff; border: 1px solid var(--auth-border, #e0d9ce);
+  background: var(--acc-surface, var(--app-surface)); border: 1px solid var(--acc-line, var(--app-border));
   border-radius: 12px; padding: 1rem; margin-bottom: 0.85rem;
 }
 .detail-card-title {

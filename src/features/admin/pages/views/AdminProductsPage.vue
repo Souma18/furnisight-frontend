@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
@@ -58,9 +60,7 @@ async function requestEdit(row) {
   }
 }
 
-async function requestView(row) {
-  await requestEdit(row)
-}
+
 
 function closeDeleteDialog() {
   if (deleting.value) return
@@ -140,7 +140,7 @@ async function confirmStatusChange() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Sản <em>phẩm</em>" subtitle="Quản lý catalog & model 3D">
     <template #actions>
-      <button type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</button>
+      <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</AppButton>
     </template>
   </AdminPageHeader>
   <AdminFilterBar v-model:search="search" placeholder="Tìm sản phẩm theo tên hoặc SKU..." />
@@ -149,7 +149,7 @@ async function confirmStatusChange() {
     <template #cell-name="{ row }">
       <div class="flex-cell">
         <span class="product-thumb">
-          <img v-if="row.imageUrls?.[0]" :src="row.imageUrls[0]" alt="" />
+          <AppImage v-if="row.imageUrls?.[0]" :src="row.imageUrls[0]" alt=""  />
           <AppIcon v-else name="box" :size="18" />
         </span>
         <div>
@@ -185,28 +185,25 @@ async function confirmStatusChange() {
 
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <button type="button" class="ra-btn ra-view" title="Xem chi tiết" @click="requestView(row)">
-          <AppIcon name="eye" :size="14" />
-        </button>
-        <button type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
+        <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
           <AppIcon name="edit" :size="14" />
-        </button>
-        <button
+        </AppButton>
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-lock"
           :title="isInactiveProduct(row) ? 'Mở bán lại sản phẩm' : 'Ngừng bán sản phẩm'"
           @click="requestStatusChange(row)"
         >
           <AppIcon :name="isInactiveProduct(row) ? 'refresh' : 'ban'" :size="14" />
-        </button>
-        <button
+        </AppButton>
+        <AppButton variant="unstyled"
           type="button"
           class="ra-btn ra-del"
           :aria-label="`Xóa sản phẩm ${row.name}`"
           @click="requestDelete(row)"
         >
           <AppIcon name="trash2" :size="14" />
-        </button>
+        </AppButton>
       </div>
     </template>
   </AdminDataTable>

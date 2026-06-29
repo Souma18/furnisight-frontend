@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -29,7 +31,7 @@ function chipClass(chip) {
     <div class="pl-inner pl-toolbar-inner">
       <label class="pl-search-wrap" :aria-label="t('products.searchPlaceholder')">
         <AppIcon name="search" :size="15" />
-        <input
+        <AppInput
           :value="modelValue"
           class="pl-search"
           type="text"

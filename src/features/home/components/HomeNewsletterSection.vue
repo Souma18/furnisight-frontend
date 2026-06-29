@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -12,8 +14,8 @@ const { t } = useI18n()
       <p class="newsletter-sub">{{ t('home.newsletter.subtitle') }}</p>
     </div>
     <form class="newsletter-form" @submit.prevent>
-      <input class="newsletter-input" type="email" :placeholder="t('home.newsletter.placeholder')" />
-      <button class="newsletter-btn" type="submit">{{ t('home.newsletter.submit') }}</button>
+      <AppInput class="newsletter-input" type="email" :placeholder="t('home.newsletter.placeholder')" />
+      <AppButton class="newsletter-btn" type="submit">{{ t('home.newsletter.submit') }}</AppButton>
     </form>
   </div>
 </template>

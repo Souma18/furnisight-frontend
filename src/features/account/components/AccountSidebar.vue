@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -40,7 +41,7 @@ function isActive(key) {
 <template>
   <nav class="account-nav" :aria-label="t('account.nav.aria')">
     <div class="nav-scroll">
-      <button
+      <AppButton
         v-for="item in navItems"
         :key="item.key"
         type="button"
@@ -50,13 +51,13 @@ function isActive(key) {
       >
         <AppIcon :name="item.icon" :size="16" />
         <span>{{ item.label }}</span>
-      </button>
+      </AppButton>
     </div>
 
-    <button type="button" class="logout-btn" @click="$emit('logout')">
+    <AppButton type="button" class="logout-btn" @click="$emit('logout')">
       <AppIcon name="logout" :size="16" />
       <span>{{ t('account.nav.logout') }}</span>
-    </button>
+    </AppButton>
   </nav>
 </template>
 
@@ -146,37 +147,7 @@ function isActive(key) {
   outline: none;
 }
 
-[data-theme='dark'] .account-nav {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-surface-soft) 74%, transparent), color-mix(in srgb, var(--app-surface) 94%, transparent)),
-    var(--app-surface) !important;
-  border-color: var(--app-border) !important;
-}
 
-[data-theme='dark'] .nav-tab {
-  background: transparent !important;
-  border-color: transparent !important;
-  color: var(--app-text-muted) !important;
-}
-
-[data-theme='dark'] .nav-tab:hover,
-[data-theme='dark'] .nav-tab:focus-visible {
-  background: var(--app-control-hover) !important;
-  border-color: var(--app-border-strong) !important;
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .nav-tab.active {
-  background: color-mix(in srgb, var(--app-gold) 20%, var(--app-surface-soft)) !important;
-  border-color: color-mix(in srgb, var(--app-gold) 52%, var(--app-border)) !important;
-  color: var(--app-heading) !important;
-}
-
-[data-theme='dark'] .logout-btn {
-  background: var(--app-control-bg) !important;
-  border-color: color-mix(in srgb, var(--app-danger) 34%, var(--app-border)) !important;
-  color: var(--app-danger) !important;
-}
 
 .nav-tab:active,
 .logout-btn:active {

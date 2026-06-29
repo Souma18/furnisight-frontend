@@ -1,5 +1,7 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppModal from '@shared/ui/AppModal.vue'
 
 defineProps({
   open: { type: Boolean, default: false },
@@ -11,30 +13,32 @@ defineProps({
 
 const emit = defineEmits(['close', 'save'])
 
-function onOverlayClick(event) {
-  if (event.target === event.currentTarget) emit('close')
-}
 </script>
 
 <template>
-  <div class="modal-overlay" :class="{ open }" @click="onOverlayClick">
-    <div class="modal-box" :class="{ 'modal-box--wide': wide }" role="dialog" @click.stop>
+  <AppModal
+    :open="open"
+    :width="wide ? '800px' : '500px'"
+    no-bg
+    @close="emit('close')"
+  >
+    <div class="modal-box admin-vars" role="dialog" @click.stop>
       <div class="modal-head">
         <div class="modal-title" v-html="titleHtml" />
-        <button type="button" class="modal-close" aria-label="Đóng" @click="emit('close')">
+        <AppButton variant="unstyled" type="button" class="modal-close" aria-label="Đóng" @click="emit('close')">
           <AppIcon name="close" :size="16" />
-        </button>
+        </AppButton>
       </div>
       <div class="modal-body">
         <slot />
       </div>
       <div class="modal-foot">
-        <button type="button" class="btn-modal-cancel" @click="emit('close')">{{ readOnly ? 'Đóng' : 'Huỷ' }}</button>
-        <button v-if="!readOnly" type="button" class="btn-modal-save" :disabled="saving" @click="emit('save')">
+        <AppButton variant="unstyled" type="button" class="btn-modal-cancel" @click="emit('close')">{{ readOnly ? 'Đóng' : 'Huỷ' }}</AppButton>
+        <AppButton variant="unstyled" v-if="!readOnly" type="button" class="btn-modal-save" :disabled="saving" @click="emit('save')">
           <AppIcon name="check" :size="14" />
           Lưu thay đổi
-        </button>
+        </AppButton>
       </div>
     </div>
-  </div>
+  </AppModal>
 </template>

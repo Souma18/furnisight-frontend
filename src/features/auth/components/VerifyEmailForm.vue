@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 import { useEmailVerification } from '../composables/useEmailVerification'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useAuthViewStateContext, AUTH_VIEWS } from '../composables/useAuthViewState'
@@ -34,13 +35,13 @@ const { status, message } = useEmailVerification(() => {
     </p>
 
     <div class="actions" v-if="status !== 'verifying'">
-      <button 
+      <AppButton 
         v-if="status === 'success' || status === 'error'"
         class="submit-btn" 
         @click="setView(AUTH_VIEWS.LOGIN)"
       >
         Về trang đăng nhập
-      </button>
+      </AppButton>
     </div>
   </div>
 </template>

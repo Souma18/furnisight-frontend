@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, watch } from 'vue'
+import { onMounted, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCart } from '@features/cart/composables/useCart'
@@ -15,6 +15,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['require-auth'])
+
+const isHovered = ref(false)
 
 const router = useRouter()
 const { t } = useI18n()
@@ -75,11 +77,13 @@ watch(
 </script>
 
 <template>
-  <div class="cart-wrap">
-    <button class="cart-trigger" type="button" :aria-label="t('cart.open')" @click="openCart">
-      <AppIcon name="cart" :size="14" />
-      <span v-if="itemCount" class="cart-badge">{{ itemCount }}</span>
-    </button>
+  <div class="cart-wrap" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
+    <slot name="trigger" :item-count="itemCount" :open-cart="openCart" :is-hovered="isHovered">
+      <button class="cart-trigger" type="button" :aria-label="t('cart.open')" @click="openCart">
+        <AppIcon name="cart" :size="14" />
+        <span v-if="itemCount" class="cart-badge">{{ itemCount }}</span>
+      </button>
+    </slot>
 
     <div class="cart-dropdown">
       <div class="cart-header">

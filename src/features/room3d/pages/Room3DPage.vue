@@ -1,14 +1,16 @@
 <script setup>
+import '../styles/room3d.css'
+import AppButton from '@shared/ui/AppButton.vue'
 import { computed, defineAsyncComponent, onMounted, ref, unref } from 'vue'
 import { NConfigProvider } from 'naive-ui'
 import { useI18n } from 'vue-i18n'
 import { useRoom3D } from '../composables/useRoom3D'
-import Room3DTopbar from '../components/Room3DTopbar.vue'
-import Room3DLeftPanel from '../components/Room3DLeftPanel.vue'
-import Room3DRightPanel from '../components/Room3DRightPanel.vue'
+import Room3DTopbar from '../components/layout/Room3DTopbar.vue'
+import Room3DLeftPanel from '../components/left-panel/Room3DLeftPanel.vue'
+import Room3DRightPanel from '../components/right-panel/Room3DRightPanel.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
-const Room3DCanvas = defineAsyncComponent(() => import('../components/Room3DCanvas.vue'))
+const Room3DCanvas = defineAsyncComponent(() => import('../components/canvas/Room3DCanvas.vue'))
 
 const { t } = useI18n()
 const vm = useRoom3D()
@@ -70,7 +72,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <NConfigProvider>
+  <NConfigProvider style="display: contents">
     <section class="room-page">
       <Room3DTopbar
         :selected-room="selectedRoom"
@@ -84,7 +86,7 @@ onMounted(() => {
       />
 
       <nav class="workspace-nav" :aria-label="t('room3d.workspace.aria')">
-        <button
+        <AppButton
           v-for="view in workspaceViews"
           :key="view.key"
           type="button"
@@ -93,7 +95,7 @@ onMounted(() => {
         >
           <AppIcon :name="view.icon" :size="16" />
           <span>{{ view.label }}</span>
-        </button>
+        </AppButton>
       </nav>
 
       <div class="room-body" :data-mobile-view="mobileView">
@@ -168,97 +170,3 @@ onMounted(() => {
     </section>
   </NConfigProvider>
 </template>
-
-<style scoped>
-.room-page {
-  display: flex;
-  flex-direction: column;
-  height: 100svh;
-  overflow: hidden;
-  background: var(--app-bg);
-  color: var(--app-text);
-}
-.room-body {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 264px minmax(0, 1fr) 324px;
-  min-height: 0;
-}
-
-.room-pane {
-  min-height: 0;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.room-pane > * {
-  height: 100%;
-}
-
-.workspace-nav {
-  display: none;
-}
-
-@media (max-width: 1240px) {
-  .room-body {
-    grid-template-columns: 240px minmax(0, 1fr) 290px;
-  }
-}
-
-@media (max-width: 980px) {
-  .workspace-nav {
-    background: var(--app-surface);
-    border-bottom: 1px solid var(--app-border);
-    display: grid;
-    flex: 0 0 auto;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    padding: 6px 10px;
-  }
-
-  .workspace-nav button {
-    align-items: center;
-    background: transparent;
-    border: 0;
-    border-radius: 6px;
-    color: var(--app-text-muted);
-    cursor: pointer;
-    display: inline-flex;
-    font: inherit;
-    font-size: 0.78rem;
-    font-weight: 650;
-    gap: 6px;
-    justify-content: center;
-    min-height: 38px;
-  }
-
-  .workspace-nav button.active {
-    background: var(--app-navy);
-    color: var(--app-gold);
-  }
-
-  .workspace-nav button:focus-visible {
-    outline: 2px solid #c9922a;
-    outline-offset: 1px;
-  }
-
-  .room-body {
-    display: block;
-    position: relative;
-  }
-
-  .room-pane {
-    inset: 0;
-    opacity: 0;
-    pointer-events: none;
-    position: absolute;
-    visibility: hidden;
-  }
-
-  .room-pane.active {
-    opacity: 1;
-    pointer-events: auto;
-    visibility: visible;
-    z-index: 1;
-  }
-}
-</style>

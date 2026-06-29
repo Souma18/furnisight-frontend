@@ -1,4 +1,6 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
+import AppImage from '@shared/ui/AppImage.vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -63,13 +65,13 @@ function cannotIncrease(line) {
       >
         <div class="cart-thumb">
           <AppIcon name="image" :size="20" />
-          <img
+          <AppImage
             v-if="line.imageUrl"
             :src="line.imageUrl"
             alt=""
             class="cart-thumb-image"
             @error="hideBrokenImage"
-          >
+           />
         </div>
 
         <div class="cart-content">
@@ -81,13 +83,13 @@ function cannotIncrease(line) {
 
         <div class="cart-item-controls" @click.stop @keydown.stop>
           <div class="cart-item-qty-stepper">
-            <button type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(line.qty || 1) <= 1" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</button>
+            <AppButton type="button" :aria-label="t('account.cart.decreaseQty')" :disabled="Number(line.qty || 1) <= 1" @click="$emit('update-qty', line.id, Number(line.qty || 1) - 1)">−</AppButton>
             <span>{{ line.qty }}</span>
-            <button type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease(line)" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</button>
+            <AppButton type="button" :aria-label="t('account.cart.increaseQty')" :disabled="cannotIncrease(line)" @click="$emit('update-qty', line.id, Number(line.qty || 1) + 1)">+</AppButton>
           </div>
         </div>
 
-        <button
+        <AppButton
           type="button"
           class="cart-item-remove"
           :aria-label="t('account.cart.removeItem')"
@@ -95,7 +97,7 @@ function cannotIncrease(line) {
           @click.stop="$emit('remove', line.id)"
         >
           <AppIcon name="trash" :size="16" />
-        </button>
+        </AppButton>
       </div>
     </div>
 
@@ -110,10 +112,10 @@ function cannotIncrease(line) {
       </div>
 
       <div class="cart-actions">
-        <button type="button" class="cart-secondary-btn" @click="$emit('open-cart')">{{ t('account.cart.viewCart') }}</button>
-        <button type="button" class="cart-primary-btn" @click="$emit('open-cart')">
+        <AppButton type="button" class="cart-secondary-btn" @click="$emit('open-cart')">{{ t('account.cart.viewCart') }}</AppButton>
+        <AppButton type="button" class="cart-primary-btn" @click="$emit('open-cart')">
           {{ totalCount ? t('account.cart.checkoutWithCount', { count: totalCount }) : t('account.cart.checkout') }}
-        </button>
+        </AppButton>
       </div>
     </div>
   </div>

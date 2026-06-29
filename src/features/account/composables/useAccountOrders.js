@@ -47,28 +47,38 @@ export function useAccountOrders(emitNotify) {
   }
 
   async function cancelOrder(orderCode) {
-    const result = await orderStore.cancelOrder(orderCode)
-    if (!result.ok) {
-      if (emitNotify) emitNotify(result.message ?? t('account.orders.cancelError'), 'error')
+    try {
+      const updatedDetail = await orderStore.cancelOrder(orderCode)
+      if (emitNotify) {
+        emitNotify(
+          updatedDetail.status === 'refund_pending' ? t('account.orders.cancelRefundPending') : t('account.orders.cancelSuccess'),
+          'success',
+        )
+      }
+      return true
+    } catch (error) {
+      let msg = t('account.orders.cancelError')
+      if (error.message === 'NOT_FOUND') msg = t('account.orders.notFound')
+      else if (error.response?.data?.message) msg = error.response.data.message
+      
+      if (emitNotify) emitNotify(msg, 'error')
       return false
     }
-    if (emitNotify) {
-      emitNotify(
-        result.status === 'refund_pending' ? t('account.orders.cancelRefundPending') : t('account.orders.cancelSuccess'),
-        'success',
-      )
-    }
-    return true
   }
 
   async function confirmOrderReceived(orderCode) {
-    const result = await orderStore.confirmOrderReceived(orderCode)
-    if (!result.ok) {
-      if (emitNotify) emitNotify(result.message ?? t('account.orders.confirmError'), 'error')
+    try {
+      await orderStore.confirmOrderReceived(orderCode)
+      if (emitNotify) emitNotify(t('account.orders.confirmSuccess'), 'success')
+      return true
+    } catch (error) {
+      let msg = t('account.orders.confirmError')
+      if (error.message === 'NOT_FOUND') msg = t('account.orders.notFound')
+      else if (error.response?.data?.message) msg = error.response.data.message
+      
+      if (emitNotify) emitNotify(msg, 'error')
       return false
     }
-    if (emitNotify) emitNotify(t('account.orders.confirmSuccess'), 'success')
-    return true
   }
 
   async function retryPayment(order) {
@@ -77,13 +87,19 @@ export function useAccountOrders(emitNotify) {
 
     retryingOrderCode.value = orderCode
     try {
-      const result = await orderStore.retryPayment(order)
-      if (!result.ok) {
-        if (emitNotify) emitNotify(result.message ?? t('account.orders.retryError'), 'error')
-        return false
-      }
+      await orderStore.retryPayment(order)
       if (emitNotify) emitNotify(t('account.orders.redirectPayment'), 'success')
       return true
+    } catch (error) {
+      let msg = t('account.orders.paymentCreateError')
+      if (error.message === 'NO_CODE') msg = t('account.orders.retryNoCode')
+      else if (error.message === 'EXPIRED_OR_UNAVAILABLE') msg = t('account.orders.retryExpiredOrUnavailable')
+      else if (error.message === 'UNSUPPORTED_METHOD') msg = t('account.orders.retryMethodUnsupported')
+      else if (error.message === 'PAYMENT_URL_MISSING') msg = t('account.orders.paymentUrlMissing')
+      else if (error.response?.data?.message) msg = error.response.data.message
+      
+      if (emitNotify) emitNotify(msg, 'error')
+      return false
     } finally {
       retryingOrderCode.value = ''
     }
