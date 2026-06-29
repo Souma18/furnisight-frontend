@@ -77,7 +77,7 @@ function openDetail() {
 
 <template>
   <article
-    class="card"
+    class="room3d-product-card"
     :class="{ added }"
     :style="{ '--pc-step': shapeStep }"
     :draggable="canDragToScene"

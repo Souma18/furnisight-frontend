@@ -60,9 +60,7 @@ async function requestEdit(row) {
   }
 }
 
-async function requestView(row) {
-  await requestEdit(row)
-}
+
 
 function closeDeleteDialog() {
   if (deleting.value) return
@@ -187,9 +185,6 @@ async function confirmStatusChange() {
 
     <template #cell-actions="{ row }">
       <div class="row-actions">
-        <AppButton variant="unstyled" type="button" class="ra-btn ra-view" title="Xem chi tiết" @click="requestView(row)">
-          <AppIcon name="eye" :size="14" />
-        </AppButton>
         <AppButton variant="unstyled" type="button" class="ra-btn ra-edit" title="Chỉnh sửa sản phẩm" @click="requestEdit(row)">
           <AppIcon name="edit" :size="14" />
         </AppButton>

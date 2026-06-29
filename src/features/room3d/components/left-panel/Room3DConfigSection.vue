@@ -49,15 +49,7 @@ const predictionConfidencePercent = computed(() =>
       </div>
     </div>
 
-    <div class="project-name">
-      <p class="label">{{ t('room3d.setup.projectName') }}</p>
-      <AppInput
-        class="project-input"
-        :value="projectName"
-        :placeholder="t('room3d.setup.projectPlaceholder')"
-        @input="emit('project-name-change', $event.target.value)"
-      />
-    </div>
+
 
     <div class="quality">
       <template v-if="imageType === 'normal'">

@@ -60,7 +60,7 @@ function handleUnlayer() {
     <div class="modal-card modal-lg">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>chiến dịch</em></h2>
-        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" :size="18" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="mc-section-title"><AppIcon name="calendar" />Thông tin chiến dịch</div>
@@ -86,7 +86,7 @@ function handleUnlayer() {
         </div>
 
         <template v-if="form.targetType === 'MANUAL'">
-          <AppButton variant="unstyled" type="button" class="mc-outline" style="margin-bottom: 15px;" @click="showUserPicker = !showUserPicker">
+          <AppButton variant="outline" type="button" style="margin-bottom: 15px; width: 100%; justify-content: center" @click="showUserPicker = !showUserPicker">
             <AppIcon :name="showUserPicker ? 'chevronUp' : 'chevronDown'" :size="16" />
             {{ showUserPicker ? 'Ẩn danh sách tìm kiếm' : 'Hiển thị tìm người dùng' }}
           </AppButton>
@@ -145,9 +145,9 @@ function handleUnlayer() {
           <div v-if="isHtmlContent" class="html-content-badge">
             <AppIcon name="layout" :size="16" /> Đã áp dụng mẫu HTML
             <div class="html-actions">
-              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer">Sửa thiết kế</AppButton>
-              <AppButton variant="unstyled" type="button" class="mc-cancel" @click="form.notificationBody = ''">Xóa / Soạn lại</AppButton>
+              <AppButton variant="outline" size="sm" type="button" @click="handlePreview">Xem trước</AppButton>
+              <AppButton variant="outline" size="sm" type="button" @click="handleUnlayer">Sửa thiết kế</AppButton>
+              <AppButton variant="cancel" size="sm" type="button" @click="form.notificationBody = ''">Xóa / Soạn lại</AppButton>
             </div>
           </div>
           <textarea v-else v-model="form.notificationBody" rows="12" class="large-textarea" />
@@ -156,10 +156,10 @@ function handleUnlayer() {
         <slot name="voucher-preview"></slot>
       </div>
       <footer>
-        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">
+        <AppButton variant="cancel" type="button" @click="emit('close')">
           {{ isEditing?.status === 'SENT' ? 'Đóng' : 'Hủy' }}
         </AppButton>
-        <AppButton variant="unstyled" v-if="isEditing?.status !== 'SENT'" type="submit" class="mc-primary">
+        <AppButton variant="primary" v-if="isEditing?.status !== 'SENT'" type="submit">
           <AppIcon name="save" />Lưu chiến dịch
         </AppButton>
       </footer>

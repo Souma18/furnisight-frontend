@@ -35,7 +35,7 @@ const emit = defineEmits([
     <div class="modal-card modal-lg">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>combo</em></h2>
-        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" :size="18" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="mc-section-title"><AppIcon name="gift" />Thông tin combo</div>
@@ -108,8 +108,8 @@ const emit = defineEmits([
         </div>
       </div>
       <footer>
-        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton variant="unstyled" type="submit" class="mc-primary" :disabled="saving">
+        <AppButton variant="cancel" type="button" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="primary" type="submit" :disabled="saving">
           <AppIcon name="save" />Lưu combo
         </AppButton>
       </footer>

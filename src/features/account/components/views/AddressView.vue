@@ -40,7 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <AccountSectionCard class="address-card" :title="t('account.address.title')">
+  <AccountSectionCard class="address-card" :title="t('account.address.title')" collapsible>
     <template #head>
       <AppButton class="primary" type="button" @click="openModal">
         {{ t('account.address.addNew') }}

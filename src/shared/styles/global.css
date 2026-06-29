@@ -59,6 +59,7 @@
 }
 
 [data-theme='dark'] {
+  color-scheme: dark;
   --auth-bg-overlay: rgba(2, 20, 34, 0.72);
   --auth-brand-start: #c8923a;
   --auth-brand-end: #e2b64f;

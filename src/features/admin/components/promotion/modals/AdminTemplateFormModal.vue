@@ -43,7 +43,7 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
     <div class="modal-card">
       <header>
         <h2>{{ isEditing ? 'Sửa' : 'Tạo' }} <em>mẫu thông báo</em></h2>
-        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" /></AppButton>
+        <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" :size="18" /></AppButton>
       </header>
       <div class="modal-body">
         <div class="form-row">
@@ -61,17 +61,16 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
           <div v-if="isHtmlContent" class="html-content-badge">
             <AppIcon name="layout" :size="16" /> Đã có thiết kế mẫu HTML
             <div class="html-actions">
-              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handlePreview">Xem trước</AppButton>
-              <AppButton variant="unstyled" type="button" class="mc-outline" @click="handleUnlayer()">Sửa thiết kế</AppButton>
-              <AppButton variant="unstyled" type="button" class="mc-cancel" @click="form.bodyTemplate = ''">Xóa / Soạn lại</AppButton>
+              <AppButton variant="outline" size="sm" type="button" @click="handlePreview">Xem trước</AppButton>
+              <AppButton variant="outline" size="sm" type="button" @click="handleUnlayer()">Sửa thiết kế</AppButton>
+              <AppButton variant="cancel" size="sm" type="button" @click="form.bodyTemplate = ''">Xóa / Soạn lại</AppButton>
             </div>
           </div>
-          <textarea v-else v-model="form.bodyTemplate" rows="4" placeholder="Nhập nội dung mẫu. Có thể chứa biến như {{user_name}}..." />
+          <textarea v-else v-model="form.bodyTemplate" rows="4" style="resize: vertical; min-height: 100px; max-height: 240px;" placeholder="Nhập nội dung mẫu. Có thể chứa biến như {{user_name}}..." />
         </label>
-        <AppButton variant="unstyled"
+        <AppButton variant="outline"
           v-if="!isHtmlContent"
           type="button"
-          class="mc-outline"
           style="width:100%; justify-content:center; margin-top: 10px;"
           @click="handleUnlayer('')"
         >
@@ -79,9 +78,9 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
         </AppButton>
       </div>
       <footer>
-        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton variant="unstyled" type="submit" class="mc-primary">
-          <AppIcon name="save" />Lưu mẫu thông báo
+        <AppButton variant="cancel" type="button" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="primary" type="submit">
+          <AppIcon name="save" />Lưu mẫu
         </AppButton>
       </footer>
     </div>

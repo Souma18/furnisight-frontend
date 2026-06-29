@@ -33,7 +33,7 @@ const emit = defineEmits(['load', 'open-modal', 'delete'])
         <option value="SCHEDULED">Đã hẹn lịch</option>
         <option value="DRAFT">Bản nháp</option>
       </select>
-      <AppButton variant="unstyled" type="button" class="mc-outline" @click="emit('load')">
+      <AppButton variant="outline" type="button" class="mc-outline" @click="emit('load')">
         <AppIcon name="search" :size="14" />Lọc
       </AppButton>
     </div>

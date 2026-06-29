@@ -27,11 +27,7 @@ function notify() {
 <template>
   <div class="topbar">
     <div class="topbar-title" v-html="pageTitleHtml" />
-    <div class="tb-divider" />
-    <div class="topbar-search">
-      <AppIcon name="search" :size="15" />
-      <AppInput type="text" placeholder="Tìm kiếm toàn hệ thống..." />
-    </div>
+
     <div class="topbar-right">
       <div class="tb-admin-chip" :title="currentAdmin.email">
         <div class="tb-admin-av">{{ currentAdmin.av }}</div>

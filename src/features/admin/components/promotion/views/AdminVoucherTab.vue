@@ -40,7 +40,7 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
         <option value="inactive">Đang tắt</option>
         <option value="expired">Hết hạn</option>
       </select>
-      <AppButton variant="unstyled" type="button" class="mc-outline" @click="emit('load')">
+      <AppButton variant="outline" type="button" class="mc-outline" @click="emit('load')">
         <AppIcon name="search" :size="14" />Lọc
       </AppButton>
     </div>
@@ -90,9 +90,6 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
             </td>
             <td>
               <div class="mc-actions">
-                <AppButton variant="unstyled" type="button" title="Xem/Sửa" @click="emit('open-modal', row)">
-                  <AppIcon name="eye" :size="14" />
-                </AppButton>
                 <AppButton variant="unstyled" type="button" title="Sửa" @click="emit('open-modal', row)">
                   <AppIcon name="edit" :size="14" />
                 </AppButton>

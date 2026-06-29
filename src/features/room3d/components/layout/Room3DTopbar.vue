@@ -55,7 +55,7 @@ function goHome() {
       <span class="ai-pill">{{ t('room3d.topbar.smart') }}</span>
     </div>
 
-    <div class="actions">
+    <div class="room3d-actions">
       <AppButton type="button" class="action-btn ghost" variant="unstyled" @click="goHome">
         <AppIcon name="chevronLeft" :size="14" />
         <span>{{ t('nav.home') }}</span>

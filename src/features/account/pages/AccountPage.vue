@@ -108,10 +108,7 @@ async function handleLogout() {
   --auth-brand-start: var(--app-gold);
   --auth-brand-end: var(--brand-gold-700);
   --color-error: var(--app-danger);
-  background:
-    radial-gradient(circle at 4% 0%, var(--app-gold-soft), transparent 24rem),
-    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 82%, transparent), color-mix(in srgb, var(--app-surface-soft) 88%, transparent)),
-    var(--account-bg);
+
   align-content: start;
   color: var(--acc-ink);
   display: grid;

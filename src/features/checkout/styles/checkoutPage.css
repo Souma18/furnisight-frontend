@@ -290,7 +290,7 @@
   display: flex; align-items: flex-start; gap: 0.55rem; padding: 0.65rem 0.75rem;
   border-radius: 10px; border: 1.5px solid var(--co-cream-mid); cursor: pointer;
 }
-.co-ship-option.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-ship-option.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 .co-ship-name { font-size: 0.78rem; font-weight: 600; display: flex; gap: 0.35rem; align-items: center; }
 .co-ship-badge { font-size: 0.58rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 5px; background: rgba(45, 158, 107, 0.12); color: var(--co-green); }
 .co-ship-badge.gold { background: rgba(201, 146, 42, 0.15); color: var(--co-gold); }
@@ -330,7 +330,7 @@
   display: flex; align-items: center; gap: 0.55rem; padding: 0.7rem 0.75rem;
   border-radius: 11px; border: 2px solid var(--co-cream-mid); cursor: pointer; position: relative;
 }
-.co-pay-method.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-pay-method.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 .co-pay-selected { position: absolute; top: 7px; right: 8px; color: var(--co-gold); }
 .co-pay-icon { font-size: 1.2rem; }
 .co-pay-name { font-size: 0.76rem; font-weight: 600; }
@@ -403,7 +403,7 @@
   display: flex; align-items: center; gap: 0.65rem; padding: 0.75rem;
   border-radius: 12px; border: 2px solid var(--co-cream-mid); cursor: pointer; margin-bottom: 0.45rem;
 }
-.co-voucher-opt.active { border-color: var(--co-gold); background: #f5e6c8; }
+.co-voucher-opt.active { border-color: var(--co-gold); background: var(--app-gold-soft); }
 
 .checkout-success-overlay {
   position: fixed;

@@ -1,19 +1,47 @@
 <script setup>
-defineProps({
+import { ref } from 'vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
+
+const props = defineProps({
   title: {
     type: String,
     required: true,
   },
+  collapsible: {
+    type: Boolean,
+    default: false,
+  },
+  defaultExpanded: {
+    type: Boolean,
+    default: false,
+  }
 })
+
+const isExpanded = ref(props.defaultExpanded)
+
+function toggle() {
+  if (props.collapsible) {
+    isExpanded.value = !isExpanded.value
+  }
+}
 </script>
 
 <template>
-  <section class="card">
-    <header class="card-head">
+  <section class="card" :class="{ collapsible, collapsed: !isExpanded }">
+    <header class="card-head" @click="toggle" :style="{ cursor: collapsible ? 'pointer' : 'default' }">
       <h3>{{ title }}</h3>
-      <slot name="head" />
+      <div class="card-head-right">
+        <slot name="head" />
+        <AppIcon
+          v-if="collapsible"
+          name="chevronDown"
+          :size="18"
+          class="chevron-icon"
+          :class="{ rotated: isExpanded }"
+        />
+      </div>
     </header>
-    <div class="card-body">
+    <div v-show="!collapsible || isExpanded" class="card-body">
       <slot />
     </div>
   </section>
@@ -41,6 +69,21 @@ defineProps({
   font-size: 1.05rem;
   font-weight: 760;
   letter-spacing: 0;
+}
+.card-head-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.chevron-icon {
+  color: var(--acc-muted, var(--app-text-muted));
+  transition: transform 0.2s ease;
+}
+.chevron-icon.rotated {
+  transform: rotate(180deg);
+}
+.card.collapsed .card-head {
+  border-bottom: none;
 }
 .card-body {
   padding: 20px;

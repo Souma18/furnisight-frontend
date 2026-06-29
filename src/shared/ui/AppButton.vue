@@ -119,12 +119,12 @@ const buttonClasses = computed(() => {
 }
 
 .app-btn--cancel {
-  background: transparent;
-  color: var(--text-muted, #746b5f);
-  border: 1px solid var(--border-color, #e0d9ce);
+  background: var(--app-surface, transparent);
+  color: var(--app-text, #746b5f);
+  border: 1px solid var(--app-border, #e0d9ce);
 }
 .app-btn--cancel:hover:not(:disabled) {
-  background: var(--bg-hover, #f5f0e6);
+  background: var(--app-control-bg, #f5f0e6);
 }
 
 .app-btn--danger {

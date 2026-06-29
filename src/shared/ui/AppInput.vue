@@ -51,9 +51,9 @@ const onInput = (event) => {
   box-sizing: border-box;
   min-height: 38px;
   border-radius: 8px;
-  border: 1px solid var(--border-color, #e0d9ce);
-  background: var(--input-bg, #fffdf9);
-  color: var(--text-primary, #12202e);
+  border: 1.5px solid var(--app-border);
+  background: var(--app-control-bg);
+  color: var(--app-text);
   padding: 0 12px;
   font-family: inherit;
   font-size: 13px;
@@ -62,19 +62,26 @@ const onInput = (event) => {
 
 .app-input:focus {
   outline: none;
-  border-color: var(--focus-color, #c9953a);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus-color, #c9953a) 20%, transparent);
+  border-color: var(--app-gold);
+  background: var(--app-surface);
+  box-shadow: 0 0 0 3px var(--app-focus-ring);
 }
 
 .app-input:disabled {
-  background: var(--bg-disabled, #f0ebd8);
-  color: var(--text-disabled, #a09a8f);
+  background: var(--app-surface-soft);
+  color: var(--app-text-muted);
   cursor: not-allowed;
 }
 
-:global([data-theme='dark']) .app-input {
-  background: var(--input-bg-dark, #1b3044);
-  border-color: var(--border-color-dark, #2a4054);
-  color: #fff;
+/* Ẩn spinner của input number để tránh lỗi giao diện trên các trình duyệt / dark mode */
+.app-input[type="number"]::-webkit-inner-spin-button,
+.app-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+.app-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 </style>

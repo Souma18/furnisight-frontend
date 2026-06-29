@@ -47,7 +47,6 @@ import AdminCampaignFormModal from '../../components/promotion/modals/AdminCampa
 import AdminComboFormModal from '../../components/promotion/modals/AdminComboFormModal.vue'
 import AdminNotifyFormModal from '../../components/promotion/modals/AdminNotifyFormModal.vue'
 import AdminTemplateFormModal from '../../components/promotion/modals/AdminTemplateFormModal.vue'
-import AdminPublishVoucherDrawer from '../../components/promotion/modals/AdminPublishVoucherDrawer.vue'
 import AdminProductPickerModal from '../../components/promotion/modals/AdminProductPickerModal.vue'
 
 const tabs = ADMIN_PROMOTION_TABS
@@ -182,6 +181,12 @@ const { applyTemplateToForm } = useAdminTemplateParser({
   publish
 })
 
+function handlePublishVoucher(voucher) {
+  activeTab.value = 'campaign'
+  openCampaignModal(null)
+  campaignForm.voucherId = voucher.id
+}
+
 // --- Voucher Preview ---
 const selectedPublishVoucher = computed(() =>
   publish.value?.voucher ? publish.value.voucher : null
@@ -292,7 +297,7 @@ const {
       :loading="loading"
       @load="loadVoucherData"
       @open-modal="openVoucherModal"
-      @open-publish="openPublishDrawer"
+      @open-publish="handlePublishVoucher"
       @delete="deleteVoucher"
     />
 
@@ -426,22 +431,15 @@ const {
       @open-unlayer="openUnlayerEditor"
     />
 
-    <AdminPublishVoucherDrawer
-      :show="!!publish.voucher"
-      :publish="publish"
-      :users="filteredUsers"
-      :templates="promotionTemplates"
-      :publishing="publishing"
-      @close="publish.voucher = null"
-      @submit="confirmPublishVoucher"
-      @apply-template="(id) => applyTemplateToForm(id, 'publish')"
-      @open-preview="openPreviewHtml"
-      @open-unlayer="openUnlayerEditor"
-    />
-
     <div v-if="modal.unlayer" class="modal-backdrop unlayer-layer">
       <div class="modal-card modal-unlayer">
-        <header><h2>Thiết kế Email</h2><div class="actions" style="display: flex; gap: 8px;"><AppButton variant="cancel"></AppButton><AppButton variant="primary"></AppButton></div></header>
+        <header>
+          <h2>Thiết kế Email</h2>
+          <div class="actions" style="display: flex; gap: 8px;">
+            <AppButton variant="cancel" @click="modal.unlayer = false">Đóng</AppButton>
+            <AppButton variant="primary" @click="saveUnlayerDesign">Lưu thiết kế</AppButton>
+          </div>
+        </header>
         <div class="modal-body unlayer-body">
           <div id="unlayer-editor-container" style="height: 100%; width: 100%;"></div>
         </div>
@@ -450,7 +448,7 @@ const {
 
     <div v-if="modal.previewTemplate" class="modal-backdrop" @click.self="modal.previewTemplate = false">
       <div class="modal-card">
-        <header><h2>Xem trước <em>{{ editing.previewTemplate?.name }}</em></h2><AppButton variant="unstyled" type="button" @click="modal.previewTemplate = false"><AppIcon name="x" /></AppButton></header>
+        <header><h2><em>{{ editing.previewTemplate?.name }}</em></h2><AppButton variant="unstyled" type="button" @click="modal.previewTemplate = false"><AppIcon name="x" :size="18" /></AppButton></header>
         <div class="modal-body preview-body">
           <div class="preview-title">
             <AppIcon name="bell" :size="18" />
@@ -465,7 +463,6 @@ const {
             ></iframe>
           </div>
         </div>
-        <footer><AppButton variant="cancel"></AppButton></footer>
       </div>
     </div>
 

@@ -79,7 +79,7 @@
 }
 
 /* --- ProductCard3D.vue --- */
-.card {
+.room3d-product-card {
   position: relative;
   border: 1px solid #ddd3c6;
   border-radius: 8px;
@@ -98,22 +98,22 @@
   --pc-content-scale: clamp(0.7, calc(1 - (var(--pc-step) * 0.1)), 1);
 }
 
-.card:hover {
+.room3d-product-card:hover {
   border-color: #c9922a;
   box-shadow: 0 6px 16px rgba(15, 63, 92, 0.13);
   transform: translateY(-2px);
 }
 
-.card:active {
+.room3d-product-card:active {
   transform: translateY(0);
 }
 
-.card:focus-visible {
+.room3d-product-card:focus-visible {
   outline: 2px solid rgba(201, 146, 42, 0.65);
   outline-offset: 2px;
 }
 
-.card.added {
+.room3d-product-card.added {
   border-color: #5ab36f;
   background: #fbfffc;
 }
@@ -129,7 +129,7 @@
   transition: background-color 0.2s ease;
 }
 
-.card:hover .preview {
+.room3d-product-card:hover .preview {
   background: #f2ede5;
 }
 
@@ -167,7 +167,7 @@
   display: block;
 }
 
-.card:hover .product-icon {
+.room3d-product-card:hover .product-icon {
   transform: scale(1.06);
 }
 
@@ -181,7 +181,7 @@
   padding: calc(0.6rem * var(--pc-content-scale));
 }
 
-.card .name {
+.room3d-product-card .name {
   margin: 0;
   color: #0f172a;
   font-size: calc(0.62rem + (0.2rem * var(--pc-content-scale)));
@@ -193,7 +193,7 @@
   overflow: hidden;
 }
 
-.card .category {
+.room3d-product-card .category {
   margin: 0.18rem 0 0;
   color: #6f7b86;
   font-size: calc(0.58rem + (0.08rem * var(--pc-content-scale)));
@@ -203,7 +203,7 @@
   text-overflow: ellipsis;
 }
 
-.card .prices {
+.room3d-product-card .prices {
   margin-top: auto;
   display: flex;
   flex-direction: column;
@@ -212,7 +212,7 @@
   width: 100%;
 }
 
-.card .price-current {
+.room3d-product-card .price-current {
   margin: 0;
   display: block;
   width: 100%;
@@ -1711,7 +1711,7 @@
   font-weight: 700;
 }
 
-.actions {
+.room3d-actions {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -1794,7 +1794,7 @@
     justify-content: flex-start;
   }
 
-  .actions {
+  .room3d-actions {
     gap: 0.3rem;
   }
 

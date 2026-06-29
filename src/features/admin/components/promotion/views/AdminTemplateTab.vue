@@ -27,7 +27,7 @@ const emit = defineEmits(['load', 'open-preview', 'open-modal', 'delete'])
         <option value="REVIEW">Đánh giá (Review)</option>
         <option value="ORDER">Đơn hàng (Order)</option>
       </select>
-      <AppButton variant="unstyled" type="button" class="mc-outline" @click="emit('load')">
+      <AppButton variant="outline" type="button" class="mc-outline" @click="emit('load')">
         <AppIcon name="search" :size="14" />Lọc
       </AppButton>
     </div>

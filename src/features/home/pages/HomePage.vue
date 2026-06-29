@@ -9,7 +9,6 @@ import HomeCategoriesSection from '../components/HomeCategoriesSection.vue'
 import HomeCombosSection from '../components/HomeCombosSection.vue'
 import HomeSharedProductsSection from '../components/HomeSharedProductsSection.vue'
 import HomeTestimonialsSection from '../components/HomeTestimonialsSection.vue'
-import HomeNewsletterSection from '../components/HomeNewsletterSection.vue'
 import { useHomePage } from '../composables/useHomePage'
 
 const { t } = useI18n()
@@ -74,6 +73,5 @@ const translatedFeatures = computed(() => [
 
     <HomeProcess3DSection />
     <HomeTestimonialsSection :testimonials="topReviews" />
-    <HomeNewsletterSection />
   </div>
 </template>

@@ -16,7 +16,7 @@ const {
 </script>
 
 <template>
-  <AccountSectionCard :title="t('account.security.title')">
+  <AccountSectionCard :title="t('account.security.title')" collapsible>
     <section class="security-layout">
       <article class="security-card">
         <header class="security-card-head">{{ t('account.security.changePassword') }}</header>
