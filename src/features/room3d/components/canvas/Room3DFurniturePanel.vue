@@ -107,14 +107,14 @@ function pickVariant(variant) {
       <div class="panel-actions">
         <AppButton
           type="button"
-          class="action-btn primary"
+          class="action-btn"
           variant="primary"
           :disabled="isSelectedInCart"
           @click="$emit('add-to-cart')"
         >
           {{ isSelectedInCart ? t('room3d.product.added') : t('room3d.product.addToCart') }}
         </AppButton>
-        <AppButton type="button" class="action-btn danger" variant="danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</AppButton>
+        <AppButton type="button" class="action-btn" variant="danger" @click="$emit('remove-product')">{{ t('room3d.furniture.remove') }}</AppButton>
       </div>
     </div>
 

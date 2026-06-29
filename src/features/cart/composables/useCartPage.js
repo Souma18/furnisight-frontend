@@ -5,14 +5,13 @@ import { useCartSelection } from './useCartSelection'
 import { useCartItemEditor } from './useCartItemEditor'
 import { useCartCheckout } from './useCartCheckout'
 import { PriceFormatter } from '@shared/lib/formatters'
-import { useToast } from '@shared/composables/useToast'
+import { useSharedCartActions } from './useSharedCartActions'
 
 export function useCartPage() {
   const router = useRouter()
-  const { show: showToast } = useToast()
   
   const cartState = useCart()
-  const { items, ensureHydrated, updateItem, updateQty, removeItem, loading, hydrated } = cartState
+  const { items, ensureHydrated, updateItem, loading, hydrated } = cartState
   
   const selectionState = useCartSelection(items)
   const { uncheck, selectedItems, selectedCount } = selectionState
@@ -21,6 +20,8 @@ export function useCartPage() {
   const { activeItem, closeItemEditor } = editorState
   
   const checkoutState = useCartCheckout(router, selectedItems, selectedCount, ensureHydrated)
+  
+  const { changeQty: sharedChangeQty, removeLine: sharedRemoveLine } = useSharedCartActions()
 
   onMounted(async () => {
     try {
@@ -31,24 +32,13 @@ export function useCartPage() {
   })
 
   async function changeQty(item, delta) {
-    if (!item || item.outOfStock) return
-    try {
-      await updateQty(item.id, Number(item.qty || 1) + delta)
-    } catch (error) {
-      const msg = error.response?.data?.message || error.message || 'Không thể cập nhật số lượng.'
-      showToast(msg, 'error')
-    }
+    await sharedChangeQty(item, delta)
   }
 
   async function removeLine(itemId) {
-    try {
-      await removeItem(itemId)
-      uncheck(itemId)
-      if (activeItem.value?.id === itemId) closeItemEditor()
-    } catch (error) {
-      const msg = error.response?.data?.message || error.message || 'Không thể xóa sản phẩm.'
-      showToast(msg, 'error')
-    }
+    await sharedRemoveLine(itemId)
+    uncheck(itemId)
+    if (activeItem.value?.id === itemId) closeItemEditor()
   }
 
   return {

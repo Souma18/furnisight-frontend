@@ -23,7 +23,8 @@ const {
 
 <template>
   <AppModal :open="open" width="700px" no-bg @close="emit('close')">
-    <div class="box">
+    <div class="pd-3d-modal">
+      <div class="box">
       <div class="head">
         <strong>Trực quan 3D – {{ productName }}</strong>
         <AppButton type="button" aria-label="Đóng" @click="emit('close')">
@@ -51,15 +52,16 @@ const {
         </div>
 
         <div
-          v-if="viewMode === 'product' && supports3d"
+          v-if="supports3d"
+          v-show="viewMode === 'product'"
           ref="viewportRef"
           class="scene-viewport"
         ></div>
-        <div v-else-if="viewMode === 'product'" class="scene-empty">
+        <div v-if="!supports3d && viewMode === 'product'" class="scene-empty">
           Mẫu này chưa có mô hình 3D thật. Bạn vẫn có thể xem thông tin và đặt
           trong Room3D.
         </div>
-        <div v-else class="scene-room-mode">
+        <div v-if="viewMode === 'room'" class="scene-room-mode">
           <p>
             Để xem sản phẩm trong không gian phòng, chuyển qua Trực quan 3D và
             đặt vào phòng mẫu.
@@ -81,6 +83,7 @@ const {
               : "Chế độ phòng đầy đủ - điều hướng sang Room3D"
           }}
         </p>
+      </div>
       </div>
     </div>
   </AppModal>

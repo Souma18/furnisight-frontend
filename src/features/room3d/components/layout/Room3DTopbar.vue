@@ -64,7 +64,7 @@ function goHome() {
         <AppButton type="button" class="action-btn gold checkout-trigger" variant="unstyled">
           <AppIcon name="cart" :size="20" />
           <span>{{ t('room3d.cart.checkout') }}</span>
-          <span v-if="cartCount > 0" class="cart-badge">{{ cartCount }}</span>
+          <span v-if="cartCount > 0" class="topbar-cart-badge">{{ cartCount }}</span>
         </AppButton>
 
         <div class="checkout-dropdown">

@@ -96,6 +96,7 @@ export function useRoom3DCanvas(props, emit) {
     hasRoom,
     isRoomAvailable,
     selectedProduct,
+    selectedSceneItem,
     isSelectedInCart,
     applyUserOverrides: (model) => applyUserOverrides(model),
     setOrbitEnabled,

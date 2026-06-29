@@ -66,7 +66,7 @@ function updateReviewField(field, value) {
       </AppButton>
     </div>
     <div v-if="activeTab === 'desc'" class="pd-section-layout desc-grid">
-      <div class="content pd-story-panel">
+      <div class="pd-content pd-story-panel">
         <span class="pd-section-eyebrow">Tổng quan</span>
         <h2>Mô tả sản phẩm</h2>
         <p class="pd-description-text">{{ product.description }}</p>
@@ -201,6 +201,6 @@ function updateReviewField(field, value) {
         </div>
       </div>
     </div>
-    <div v-else class="content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>
+    <div v-else class="pd-content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>
   </section>
 </template>

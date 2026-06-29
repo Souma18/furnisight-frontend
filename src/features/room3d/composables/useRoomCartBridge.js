@@ -1,6 +1,37 @@
 import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { PRODUCTS_3D } from '../core/mockData'
 import { isPurchasableLine } from '@features/cart/lib/stockGuards'
+import { useSharedCartActions } from '@features/cart/composables/useSharedCartActions'
+
+function buildRoomCartPayload(product) {
+  let primaryVariant = null
+  
+  if (product._selectedVariantId && Array.isArray(product.variants)) {
+    primaryVariant = product.variants.find(v => v.id === product._selectedVariantId)
+  }
+  
+  if (!primaryVariant) {
+    primaryVariant = Array.isArray(product.variants) ? product.variants[0] : null
+  }
+  
+  const stockQuantity = primaryVariant?.stockQuantity ?? product.stock ?? null
+  
+  return {
+    productId: product.id,
+    detailId: product.slug || product.id,
+    variantId: primaryVariant?.id ?? null,
+    name: product.name,
+    price: primaryVariant?.price ?? product.price ?? 0,
+    stockQuantity,
+    outOfStock: Number(stockQuantity ?? 0) <= 0,
+    imageUrl: product.image || product.gallery?.[0] || '',
+    quantity: 1,
+    selectedColor: primaryVariant?.color || '',
+    selectedSize: primaryVariant?.dimensionText || '',
+    room3dProductId: product.room3dProductId ?? null,
+  }
+}
 
 export function useRoomCartBridge({
   store,
@@ -10,6 +41,12 @@ export function useRoomCartBridge({
   router,
 }) {
   const orderCode = ref('')
+  
+  const { 
+    addProductToCart: sharedAddProductToCart,
+    changeQty: sharedChangeQty,
+    removeLine: sharedRemoveLine
+  } = useSharedCartActions()
 
   const cartItems = computed(() => cartState.items.value)
   const placedProductIds = computed(() => cartState.room3dProductIds.value)
@@ -36,11 +73,8 @@ export function useRoomCartBridge({
     }
 
     if (!product) return
-    try {
-      await cartStore.addItem(product)
-    } catch (error) {
-      showToast('Không thể thêm sản phẩm vào giỏ', 'Vui lòng thử lại sau', 'alert')
-    } finally { }
+    
+    await sharedAddProductToCart(buildRoomCartPayload(product), { showSuccessToast: true })
   }
 
   function openProductDetail(product) {
@@ -53,11 +87,14 @@ export function useRoomCartBridge({
   }
 
   function removeProductFromCart(lineId) {
-    cartStore.removeItem(lineId)
+    sharedRemoveLine(lineId)
   }
 
   function updateCartQty(lineId, nextQty) {
-    cartStore.updateQty(lineId, nextQty)
+    const item = cartState.items.value.find(item => item.id === lineId)
+    if (!item) return
+    const delta = nextQty - Number(item.qty || 1)
+    sharedChangeQty(item, delta)
   }
 
   async function goCheckout() {
