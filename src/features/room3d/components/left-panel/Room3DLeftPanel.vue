@@ -79,6 +79,7 @@ const isRoomSelectionLocked = computed(
     <div class="mode-tabs">
       <AppButton
         type="button"
+        variant="unstyled"
         class="mode-tab"
         :class="{ active: mode === 'upload' }"
         @click="emit('switch-mode', 'upload')"
@@ -88,6 +89,7 @@ const isRoomSelectionLocked = computed(
       </AppButton>
       <AppButton
         type="button"
+        variant="unstyled"
         class="mode-tab"
         :class="{ active: mode === 'room' }"
         @click="emit('switch-mode', 'room')"

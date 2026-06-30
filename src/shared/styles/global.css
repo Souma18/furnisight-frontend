@@ -84,6 +84,22 @@ body {
   margin: 0;
   background: var(--app-bg);
   color: var(--app-text);
+  /* Hide scrollbar but keep functionality */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 h1,
@@ -124,4 +140,3 @@ code {
 #app {
   min-height: 100svh;
 }
-

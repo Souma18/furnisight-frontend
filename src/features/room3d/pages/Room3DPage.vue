@@ -46,6 +46,56 @@ const {
 const canvasRef = ref(null)
 const mobileView = ref('canvas')
 const isRoomModelLoading = ref(false)
+const leftPanelWidth = ref(264)
+const rightPanelWidth = ref(324)
+
+function startResizeLeftPanel(e) {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = leftPanelWidth.value
+
+  function onMouseMove(moveEvent) {
+    const delta = moveEvent.clientX - startX
+    let newWidth = startWidth + delta
+    if (newWidth < 220) newWidth = 220
+    if (newWidth > 500) newWidth = 500
+    leftPanelWidth.value = newWidth
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+    document.body.style.cursor = ''
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+  document.body.style.cursor = 'ew-resize'
+}
+
+function startResizeRightPanel(e) {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = rightPanelWidth.value
+
+  function onMouseMove(moveEvent) {
+    const delta = startX - moveEvent.clientX
+    let newWidth = startWidth + delta
+    if (newWidth < 280) newWidth = 280
+    if (newWidth > 600) newWidth = 600
+    rightPanelWidth.value = newWidth
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+    document.body.style.cursor = ''
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+  document.body.style.cursor = 'ew-resize'
+}
 const isLoadingTemplatesValue = computed(() => Boolean(unref(isLoadingTemplates)))
 const isRoomSelectionLocked = computed(
   () => Boolean(unref(isLoadingTemplates)) || Boolean(unref(isAnalyzing)) || isRoomModelLoading.value,
@@ -98,8 +148,9 @@ onMounted(() => {
         </AppButton>
       </nav>
 
-      <div class="room-body" :data-mobile-view="mobileView">
-        <div class="room-pane room-pane--setup" :class="{ active: mobileView === 'setup' }">
+      <div class="room-body" :data-mobile-view="mobileView" :style="{ '--left-panel-width': leftPanelWidth + 'px', '--right-panel-width': rightPanelWidth + 'px' }">
+        <div class="room-pane room-pane--setup" :class="{ active: mobileView === 'setup' }" style="position: relative;">
+          <div class="panel-resizer panel-resizer--right" @mousedown="startResizeLeftPanel"></div>
           <Room3DLeftPanel
           :mode="mode"
           :room-templates="roomTemplates"
@@ -144,7 +195,8 @@ onMounted(() => {
           />
         </div>
 
-        <div class="room-pane room-pane--products" :class="{ active: mobileView === 'products' }">
+        <div class="room-pane room-pane--products" :class="{ active: mobileView === 'products' }" style="position: relative;">
+          <div class="panel-resizer panel-resizer--left" @mousedown="startResizeRightPanel"></div>
           <Room3DRightPanel
           :selected-room="selectedRoom"
           :selected-category="selectedCategory"

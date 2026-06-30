@@ -45,6 +45,7 @@ function runAiGenerate() {
       <div class="quality-row quality-row--two">
         <AppButton
           type="button"
+          variant="unstyled"
           class="quality-btn"
           :class="{ active: imageType === 'normal' }"
           @click="emit('image-type-change', 'normal')"
@@ -53,6 +54,7 @@ function runAiGenerate() {
         </AppButton>
         <AppButton
           type="button"
+          variant="unstyled"
           class="quality-btn"
           :class="{ active: imageType === '360' }"
           @click="emit('image-type-change', '360')"
@@ -76,6 +78,7 @@ function runAiGenerate() {
     
     <AppButton
       type="button"
+      variant="unstyled"
       class="run-ai-btn"
       :disabled="!selectedFile || isAnalyzing"
       @click="runAiGenerate"

@@ -57,6 +57,7 @@ const predictionConfidencePercent = computed(() =>
         <div class="quality-row quality-row--three">
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: meshQuality === 'low' }"
             @click="emit('mesh-quality-change', 'low')"
@@ -65,6 +66,7 @@ const predictionConfidencePercent = computed(() =>
           </AppButton>
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: meshQuality === 'medium' }"
             @click="emit('mesh-quality-change', 'medium')"
@@ -73,6 +75,7 @@ const predictionConfidencePercent = computed(() =>
           </AppButton>
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: meshQuality === 'high' }"
             @click="emit('mesh-quality-change', 'high')"
@@ -87,6 +90,7 @@ const predictionConfidencePercent = computed(() =>
         <div class="quality-row">
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: quality === '128' }"
             @click="emit('quality-change', '128')"
@@ -95,6 +99,7 @@ const predictionConfidencePercent = computed(() =>
           </AppButton>
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: quality === '256' }"
             @click="emit('quality-change', '256')"
@@ -103,6 +108,7 @@ const predictionConfidencePercent = computed(() =>
           </AppButton>
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: quality === '512' }"
             @click="emit('quality-change', '512')"
@@ -111,6 +117,7 @@ const predictionConfidencePercent = computed(() =>
           </AppButton>
           <AppButton
             type="button"
+            variant="unstyled"
             class="quality-btn"
             :class="{ active: quality === '1024' }"
             @click="emit('quality-change', '1024')"
