@@ -1,11 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { usersApi } from '@shared/lib/api/services'
+import { i18n, normalizeLocale } from '@shared/i18n'
 import { FavoriteResponse } from '@shared/lib/api/services/users/users.model'
+
+function getCurrentLocale() {
+  return normalizeLocale(i18n.global.locale.value)
+}
 
 export const useWishlistStore = defineStore('accountWishlist', () => {
   const wishlist = ref([])
   const wishlistHydrated = ref(false)
+  const wishlistLocale = ref('')
   let wishlistPromise = null
 
   const wishlistProductIds = computed(() =>
@@ -43,8 +49,9 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
 
   async function loadWishlist(options = {}) {
     const { force = false } = options
+    const currentLocale = getCurrentLocale()
 
-    if (wishlistHydrated.value && !force) return wishlist.value
+    if (wishlistHydrated.value && wishlistLocale.value === currentLocale && !force) return wishlist.value
     if (wishlistPromise && !force) return wishlistPromise
 
     wishlistPromise = (async () => {
@@ -53,6 +60,7 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
         ? data.map((item) => new FavoriteResponse(item))
         : []
       wishlistHydrated.value = true
+      wishlistLocale.value = currentLocale
       return wishlist.value
     })()
 
@@ -72,6 +80,7 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
     if (existing) return existing
 
     const { data } = await usersApi.addFavorite(productId)
+    wishlistLocale.value = getCurrentLocale()
     return upsertFavorite(data)
   }
 
@@ -87,12 +96,14 @@ export const useWishlistStore = defineStore('accountWishlist', () => {
     wishlist.value = wishlist.value.filter((item) =>
       (item.productId || item.id) !== productId,
     )
+    wishlistLocale.value = getCurrentLocale()
     return true
   }
 
   function resetWishlistState() {
     wishlist.value = []
     wishlistHydrated.value = false
+    wishlistLocale.value = ''
     wishlistPromise = null
   }
 

@@ -12,6 +12,7 @@ import { calcLineTotal, formatCheckoutMoney } from '../utils/checkoutPricing'
 import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/stockGuards'
 import { consumeVoucherIntent } from '../lib/checkoutVoucherIntentStorage'
 import { useToast } from '@shared/composables/useToast'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 export function useCheckout() {
   const route = useRoute()
@@ -21,8 +22,10 @@ export function useCheckout() {
   const orderStore = useOrderStore()
   const checkoutStore = useCheckoutStore()
   const authStore = useAuthStore()
+  const localeStore = useLocaleStore()
 
   const checkoutState = storeToRefs(checkoutStore)
+  const { locale } = storeToRefs(localeStore)
   const { hydrateSession, refreshApplicableCombo, validateRequestedCombo, applyVoucherByCode, revalidateVouchers } = useCheckoutSession(checkoutStore)
   const showSuccess = ref(false)
   const { show: showToastGlobal } = useToast()
@@ -182,6 +185,9 @@ export function useCheckout() {
 
   // Explicit UI-triggered API call
   watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)
+  watch(locale, () => {
+    initCheckout().catch(() => null)
+  })
 
   return {
     ...checkoutState,

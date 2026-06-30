@@ -3,14 +3,31 @@ import { ref } from 'vue'
 import { pinia } from '@app/plugins/pinia'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { ordersApi } from '@shared/lib/api/services'
+import { i18n, normalizeLocale } from '@shared/i18n'
 import { OrderListResponse, OrderDetailResponse, canRetryOrderPayment } from '@shared/lib/api/services/orders/orders.model'
+
+function getCurrentLocale() {
+  return normalizeLocale(i18n.global.locale.value)
+}
 
 export const useOrderStore = defineStore('accountOrder', () => {
   const orders = ref([])
   const orderDetails = ref({})
   const loading = ref(false)
+  const cacheLocale = ref('')
+
+  function invalidateLocaleCacheIfNeeded() {
+    const currentLocale = getCurrentLocale()
+    if (cacheLocale.value === currentLocale) return currentLocale
+
+    orders.value = []
+    orderDetails.value = {}
+    cacheLocale.value = currentLocale
+    return currentLocale
+  }
 
   function findOrder(orderRef) {
+    if (cacheLocale.value !== getCurrentLocale()) return null
     if (!orderRef) return null
     if (typeof orderRef === 'object') return orderRef
 
@@ -21,10 +38,12 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
   async function fetchOrders() {
     try {
+      const currentLocale = invalidateLocaleCacheIfNeeded()
       loading.value = true
       const { data } = await ordersApi.getOrders()
       const rawItems = Array.isArray(data) ? data : data?.items ?? []
       orders.value = Array.isArray(rawItems) ? rawItems.map(item => new OrderListResponse(item)) : []
+      cacheLocale.value = currentLocale
       return orders.value
     } catch (error) {
       // Error handled by empty state
@@ -35,6 +54,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
 
   async function fetchOrderDetail(orderCode) {
     if (!orderCode) return null
+    const currentLocale = invalidateLocaleCacheIfNeeded()
     if (orderDetails.value[orderCode]) return orderDetails.value[orderCode]
 
     try {
@@ -43,6 +63,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
       const detail = new OrderDetailResponse(data)
       orderDetails.value[orderCode] = detail
       if (detail.id) orderDetails.value[detail.id] = detail
+      cacheLocale.value = currentLocale
       return detail
     } catch (error) {
       return null
@@ -52,12 +73,14 @@ export const useOrderStore = defineStore('accountOrder', () => {
   }
 
   function getOrderDetail(orderRef) {
+    if (cacheLocale.value !== getCurrentLocale()) return null
     return orderDetails.value[orderRef] ?? findOrder(orderRef)
   }
 
   function addOrderFromCheckout(payload) {
     if (payload.order) {
       const parsedOrder = new OrderDetailResponse(payload.order)
+      cacheLocale.value = getCurrentLocale()
       orders.value = [parsedOrder, ...orders.value]
       orderDetails.value = { ...orderDetails.value, [parsedOrder.orderCode || parsedOrder.id]: parsedOrder }
       return parsedOrder
@@ -148,6 +171,7 @@ export const useOrderStore = defineStore('accountOrder', () => {
     orders.value = []
     orderDetails.value = {}
     loading.value = false
+    cacheLocale.value = ''
   }
 
   return {

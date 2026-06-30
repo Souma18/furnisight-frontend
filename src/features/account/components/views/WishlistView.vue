@@ -1,13 +1,17 @@
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { storeToRefs } from 'pinia'
 import AccountSectionCard from '../AccountSectionCard.vue'
 import ProductGrid from '@shared/ui/ProductGrid.vue'
 import { useWishlistStore } from '../../store/wishlistStore'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 const emit = defineEmits(['notify'])
 const { t } = useI18n()
 const wishlistStore = useWishlistStore()
+const localeStore = useLocaleStore()
+const { locale } = storeToRefs(localeStore)
 
 const items = computed(() => wishlistStore.wishlist)
 const products = computed(() => items.value.map((item) => item.product || item).filter(Boolean))
@@ -24,6 +28,12 @@ async function removeFavorite(productId) {
 }
 
 onMounted(() => {
+  wishlistStore.loadWishlist().catch((error) => {
+    emit('notify', error?.response?.data?.message || t('account.wishlist.loadError'), 'error')
+  })
+})
+
+watch(locale, () => {
   wishlistStore.loadWishlist().catch((error) => {
     emit('notify', error?.response?.data?.message || t('account.wishlist.loadError'), 'error')
   })

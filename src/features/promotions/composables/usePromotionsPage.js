@@ -1,4 +1,4 @@
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
@@ -12,6 +12,7 @@ import { usePromotionsVouchers } from './usePromotionsVouchers'
 import { useVoucherRailDrag } from './useVoucherRailDrag'
 import { writeVoucherIntent } from '@features/checkout/lib/checkoutVoucherIntentStorage'
 import { useToast } from '@shared/composables/useToast'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 export function usePromotionsPage() {
   const route = useRoute()
@@ -19,7 +20,9 @@ export function usePromotionsPage() {
   const { t } = useI18n()
   const authStore = useAuthStore()
   const cartStore = useCartStore()
+  const localeStore = useLocaleStore()
   const { isAuthenticated } = storeToRefs(authStore)
+  const { locale } = storeToRefs(localeStore)
   const { items: cartItems } = storeToRefs(cartStore)
 
   const activeFilter = ref(route.query.tab === 'combo' ? 'combo' : 'all')
@@ -139,6 +142,10 @@ export function usePromotionsPage() {
   }
 
   onMounted(() => {
+    loadPageData()
+  })
+
+  watch(locale, () => {
     loadPageData()
   })
 

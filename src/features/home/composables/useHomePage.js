@@ -160,8 +160,12 @@ export function useHomePage() {
   watch(activeCategoryId, loadProductsForCategory)
   watch(locale, async () => {
     await loadCategories()
+    await loadCombos()
     await loadProductsForCategory(activeCategoryId.value)
     await loadTopReviews()
+    if (authStore.isAuthenticated) {
+      await wishlistStore.loadWishlist().catch(() => [])
+    }
   })
 
   onMounted(() => {

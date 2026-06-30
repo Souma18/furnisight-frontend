@@ -1,4 +1,4 @@
-import { computed, onMounted, ref, unref } from 'vue'
+import { computed, onMounted, ref, unref, watch } from 'vue'
 import { notificationsApi } from '@shared/lib/api/services'
 import { i18n } from '@shared/i18n'
 
@@ -200,6 +200,7 @@ export function useNotificationsCenter(emit, selectedCategory = 'all') {
   }
 
   onMounted(loadNotifications)
+  watch(() => i18n.global.locale.value, loadNotifications)
 
   return {
     loading,

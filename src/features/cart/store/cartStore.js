@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { pinia } from '@app/plugins/pinia'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { cartApi } from '@shared/lib/api/services'
+import { i18n, normalizeLocale } from '@shared/i18n'
 import { clampPurchaseQuantity, resolveStockLimit } from '../lib/stockGuards'
 
 const STORAGE_KEY = 'furnisight-cart-store-v4'
@@ -11,6 +12,10 @@ const LEGACY_STORAGE_KEYS = [
   'furnisight-cart-store-v2',
   'furnisight-cart-store-v3',
 ]
+
+function getCurrentLocale() {
+  return normalizeLocale(i18n.global.locale.value)
+}
 
 function cloneItems(items = []) {
   return items.map((item) => ({
@@ -42,10 +47,12 @@ export const useCartStore = defineStore('cart', () => {
   const items = ref([])
   const loading = ref(false)
   const hydrated = ref(false)
+  const hydratedLocale = ref('')
   let hydratePromise = null
 
   function restorePersistedItems() {
     if (typeof window === 'undefined') return false
+    const currentLocale = getCurrentLocale()
 
     try {
       for (const storageKey of LEGACY_STORAGE_KEYS) {
@@ -57,6 +64,10 @@ export const useCartStore = defineStore('cart', () => {
 
       const parsed = JSON.parse(raw)
       if (!Array.isArray(parsed?.items)) return false
+      if (parsed.locale !== currentLocale) {
+        window.localStorage.removeItem(STORAGE_KEY)
+        return false
+      }
       if (!parsed.items.every(isApiBackedCartLine)) {
         window.localStorage.removeItem(STORAGE_KEY)
         return false
@@ -64,6 +75,7 @@ export const useCartStore = defineStore('cart', () => {
 
       items.value = cloneItems(parsed.items)
       hydrated.value = true
+      hydratedLocale.value = currentLocale
       return true
     } catch {
       return false
@@ -74,12 +86,15 @@ export const useCartStore = defineStore('cart', () => {
     if (typeof window === 'undefined') return
 
     try {
+      const currentLocale = getCurrentLocale()
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
+          locale: currentLocale,
           items: items.value,
         }),
       )
+      hydratedLocale.value = currentLocale
     } catch {
       // Ignore storage write failures.
     }
@@ -89,6 +104,7 @@ export const useCartStore = defineStore('cart', () => {
     items.value = []
     loading.value = false
     hydrated.value = false
+    hydratedLocale.value = ''
     hydratePromise = null
 
     if (typeof window !== 'undefined') {
@@ -121,8 +137,9 @@ export const useCartStore = defineStore('cart', () => {
 
   async function hydrate(options = {}) {
     const { force = false } = options
+    const currentLocale = getCurrentLocale()
 
-    if (hydrated.value && !force) return items.value
+    if (hydrated.value && hydratedLocale.value === currentLocale && !force) return items.value
     if (hydratePromise && !force) return hydratePromise
 
     hydratePromise = (async () => {
@@ -133,6 +150,7 @@ export const useCartStore = defineStore('cart', () => {
         items.value = cloneItems(response?.data?.items ?? [])
         persistItems()
         hydrated.value = true
+        hydratedLocale.value = currentLocale
         return items.value
       } catch (error) {
         if (typeof window !== 'undefined' && error?.response?.status === 401) {

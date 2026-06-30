@@ -1,14 +1,18 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { storeToRefs } from 'pinia'
 import { ordersApi } from '@shared/lib/api/services'
 import { i18n } from '@shared/i18n'
 import {
   matchesVoucherTime,
   matchesVoucherType,
 } from '@features/promotions/lib/voucherPresentation'
+import { useLocaleStore } from '@shared/stores/localeStore'
 
 const t = (key, params) => i18n.global.t(key, params)
 
 export function useAccountVouchers(notify) {
+  const localeStore = useLocaleStore()
+  const { locale } = storeToRefs(localeStore)
   const loading = ref(false)
   const vouchers = ref([])
   const typeFilter = ref('all')
@@ -36,6 +40,7 @@ export function useAccountVouchers(notify) {
     .filter((voucher) => matchesVoucherTime(voucher, timeFilter.value)))
 
   onMounted(fetchVouchers)
+  watch(locale, fetchVouchers)
 
   async function fetchVouchers() {
     loading.value = true

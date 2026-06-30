@@ -4,6 +4,11 @@ import { buildCheckoutSummary } from '../utils/checkoutPricing'
 import { readPendingPayment, writePendingPayment } from '../lib/checkoutPendingPaymentStorage'
 import { normalizeCheckoutVoucher } from '../lib/checkoutNormalizers'
 import { ordersApi } from '@shared/lib/api/services'
+import { i18n, normalizeLocale } from '@shared/i18n'
+
+function getCurrentLocale() {
+  return normalizeLocale(i18n.global.locale.value)
+}
 
 export const useCheckoutStore = defineStore('checkout', () => {
   const loading = ref(false)
@@ -32,6 +37,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
 
   const lastOrder = ref(null)
   const pendingPayment = ref(readPendingPayment())
+  const hydratedLocale = ref('')
 
   const selectedShipping = computed(
     () => shippingOptions.value.find((item) => item.id === selectedShippingId.value) ?? null,
@@ -71,6 +77,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     shippingVoucher.value = null
     shopVouchers.value = []
     shippingVouchers.value = []
+    hydratedLocale.value = getCurrentLocale()
   }
 
   function resetCheckoutState() {
@@ -95,6 +102,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     hasInsurance.value = false
     agreedTerms.value = true
     lastOrder.value = null
+    hydratedLocale.value = ''
     clearPendingPayment()
   }
 
@@ -142,6 +150,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     shippingVoucher,
     lastOrder,
     pendingPayment,
+    hydratedLocale,
     selectedShipping,
     shipFee,
     buildSummary,

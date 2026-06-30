@@ -1,6 +1,11 @@
 import { ordersApi, promotionsApi } from '@shared/lib/api/services'
 import { normalizeCheckoutCombo, normalizeCheckoutVoucher } from '../lib/checkoutNormalizers'
 import { comboMatchesLines, comboValidateItems } from '../lib/checkoutComboMatching'
+import { i18n, normalizeLocale } from '@shared/i18n'
+
+function getCurrentLocale() {
+  return normalizeLocale(i18n.global.locale.value)
+}
 
 export function useCheckoutSession(checkoutStore) {
   async function refreshVouchers() {
@@ -15,7 +20,9 @@ export function useCheckoutSession(checkoutStore) {
 
   async function hydrateSession(options = {}) {
     const { loadCombos = true } = options
-    if (checkoutStore.hydrated && (!loadCombos || checkoutStore.combosHydrated)) {
+    const currentLocale = getCurrentLocale()
+    const localeMatches = checkoutStore.hydratedLocale === currentLocale
+    if (checkoutStore.hydrated && localeMatches && (!loadCombos || checkoutStore.combosHydrated)) {
       await refreshVouchers()
       return
     }
@@ -58,6 +65,7 @@ export function useCheckoutSession(checkoutStore) {
       checkoutStore.shippingVoucher = null
 
       checkoutStore.hydrated = true
+      checkoutStore.hydratedLocale = currentLocale
     } finally {
       checkoutStore.loading = false
     }
