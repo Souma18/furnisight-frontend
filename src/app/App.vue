@@ -177,9 +177,7 @@ onBeforeUnmount(() => {
         'app-main--account': isAccountPage,
       }"
     >
-      <div class="app-main-content">
-        <RouterView />
-      </div>
+      <RouterView />
       <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
     <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
@@ -226,12 +224,6 @@ onBeforeUnmount(() => {
   overflow: auto;
 }
 
-.app-main-content {
-  flex: 1 0 auto;
-  min-height: 0;
-  width: 100%;
-}
-
 .app-main--with-header {
   padding-top: calc(62px + 1rem);
 }
@@ -243,47 +235,26 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-.app-main--fluid .app-main-content {
-  flex: 1;
-}
-
-.app-main--home {
-  max-width: none;
-  padding: 56px 0 0;
-  background: var(--app-bg-deep);
-}
-
-.app-main--product-detail {
-  max-width: none;
-  margin: 0;
-  padding: 56px 0 0;
-}
-
-.app-main--products {
-  max-width: none;
-  margin: 0;
-  padding: 56px 0 0;
-  background: var(--app-bg);
-}
-
-.app-main--contact {
-  max-width: none;
-  margin: 0;
-  padding: 56px 0 0;
-  background: var(--app-bg);
-}
-
-.app-main--promotions {
-  max-width: none;
-  margin: 0;
-  padding: 56px 0 0;
-  background: var(--app-bg);
-}
-
+/* Tất cả trang full-width: reset max-width + padding mặc định của .app-main */
+.app-main--home,
+.app-main--product-detail,
+.app-main--products,
+.app-main--contact,
+.app-main--promotions,
 .app-main--checkout {
   max-width: none;
   margin: 0;
   padding: 56px 0 0;
+}
+
+.app-main--home {
+  background: var(--app-bg-deep);
+}
+
+.app-main--products,
+.app-main--contact,
+.app-main--promotions,
+.app-main--checkout {
   background: var(--app-bg);
 }
 
