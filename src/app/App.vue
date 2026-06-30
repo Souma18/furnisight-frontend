@@ -177,7 +177,9 @@ onBeforeUnmount(() => {
         'app-main--account': isAccountPage,
       }"
     >
-      <RouterView />
+      <div class="app-page-content">
+        <RouterView />
+      </div>
       <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
     <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
@@ -222,6 +224,12 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   overflow: auto;
+}
+
+/* Đẩy footer xuống đáy: content chiếm hết không gian còn lại */
+.app-page-content {
+  flex: 1 0 auto;
+  min-height: 0;
 }
 
 .app-main--with-header {

@@ -198,7 +198,7 @@ watch(() => route.query.otpCode, (newVal) => {
     </div>
 
     <RouterLink to="/room3d" class="visualize-btn">
-      <AppIcon name="map" :size="14" />
+      <AppIcon name="boxes" :size="14" />
       {{ t('header.visualize') }}
     </RouterLink>
   </header>

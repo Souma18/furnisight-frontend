@@ -1,6 +1,7 @@
 <script setup>
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import AppIcon from '@shared/ui/AppIcon.vue'
 import HomeRoomVisualizerPreview from './HomeRoomVisualizerPreview.vue'
 
 const { t } = useI18n()
@@ -23,7 +24,10 @@ const { t } = useI18n()
         </div>
 
         <div class="process-actions">
-          <RouterLink to="/room3d" class="btn-primary">{{ t('home.process.start') }}</RouterLink>
+          <RouterLink to="/room3d" class="btn-primary">
+            <AppIcon name="boxes" :size="16" :stroke-width="2" />
+            {{ t('home.process.start') }}
+          </RouterLink>
           <RouterLink to="/products" class="btn-outline btn-outline-dark">{{ t('home.process.products') }}</RouterLink>
         </div>
       </div>

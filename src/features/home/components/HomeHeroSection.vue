@@ -1,4 +1,5 @@
 <script setup>
+import AppIcon from '@shared/ui/AppIcon.vue'
 import AppImage from '@shared/ui/AppImage.vue'
 import { RouterLink } from 'vue-router'
 
@@ -28,7 +29,10 @@ function scrollToVisualizer() {
         </h1>
         <p class="hero-sub">{{ hero.subtitle }}</p>
         <div class="hero-actions">
-          <RouterLink to="/room3d" class="btn-primary">{{ hero.try3d }}</RouterLink>
+          <RouterLink to="/room3d" class="btn-primary">
+            <AppIcon name="boxes" :size="16" :stroke-width="2" />
+            {{ hero.try3d }}
+          </RouterLink>
           <RouterLink to="/products" class="btn-outline">{{ hero.exploreProducts }}</RouterLink>
         </div>
       </div>

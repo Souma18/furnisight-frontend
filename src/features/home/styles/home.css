@@ -312,6 +312,7 @@
   display: inline-flex;
   font-size: 0.9rem;
   font-weight: 760;
+  gap: 6px;
   justify-content: center;
   min-height: 40px;
   padding: 0 16px;
