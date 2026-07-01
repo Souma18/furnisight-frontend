@@ -124,7 +124,7 @@ const reviewHealth = computed(() => {
     { label: 'Đã phân tích', value: analyzedReviews },
     { label: 'Chờ xử lý', value: pendingReviews },
     { label: 'Lỗi', value: failedReviews },
-    { label: 'Tỉ lệ phủ', value: totalReviews ? formatPercent(analyzedReviews / totalReviews) : '0%' },
+    { label: 'Tỷ lệ đã phân tích', value: totalReviews ? formatPercent(analyzedReviews / totalReviews) : '0%' },
   ]
 })
 
@@ -210,7 +210,7 @@ bindCharts((charts, payload) => {
       <AdminKpiGrid :kpis="reviewKpis" compact />
 
       <div class="review-grid">
-        <AdminChartCard title="Phân bổ cảm xúc" subtitle="PhoBERT sentiment">
+        <AdminChartCard title="Phân bố cảm xúc" subtitle="PhoBERT sentiment">
           <canvas ref="reviewCanvas" />
         </AdminChartCard>
 
@@ -236,7 +236,7 @@ bindCharts((charts, payload) => {
             </div>
 
             <div class="negative-metrics">
-              <span>Tỉ lệ: {{ formatPercent(product.negativeRatio) }}</span>
+              <span>Tỷ lệ: {{ formatPercent(product.negativeRatio) }}</span>
               <span>Hiển thị: {{ product.visibleReviewCount }}</span>
               <span>Điểm TB: {{ Number(product.averageRating || 0).toFixed(1) }}</span>
             </div>
