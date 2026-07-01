@@ -2,12 +2,14 @@
 import { computed, ref } from 'vue'
 import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { adminApi, productsApi } from '@shared/lib/api/services'
+import { adminApi } from '@shared/lib/api/services'
 import { PriceFormatter } from '@shared/lib/formatters'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
 import AdminKpiGrid from '../../components/shared/AdminKpiGrid.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
+import AdminProductReviewModal from '../../components/shared/AdminProductReviewModal.vue'
 import { useAdminChartPage } from '../../composables/useAdminChartPage'
+import { useAdminProductReviews } from '../../composables/useAdminProductReviews'
 import { useAdminUiStore } from '../../store/adminUiStore'
 
 const ui = useAdminUiStore()
@@ -15,6 +17,7 @@ const userCanvas = ref(null)
 const catCanvas = ref(null)
 const reviewCanvas = ref(null)
 const { data, bindCharts } = useAdminChartPage(adminApi.fetchStats.bind(adminApi))
+const reviewModal = useAdminProductReviews()
 
 const formatCurrency = PriceFormatter.format
 const formatPercent = (value) => `${Math.round(Number(value || 0) * 1000) / 10}%`
@@ -164,59 +167,7 @@ bindCharts((charts, payload) => {
   )
 })
 
-// Review Modal Logic
-const isReviewModalOpen = ref(false)
-const selectedProduct = ref(null)
-const productReviews = ref([])
-const isLoadingReviews = ref(false)
-const sentimentFilter = ref('NEGATIVE')
 
-async function openReviewModal(product) {
-  selectedProduct.value = product
-  isReviewModalOpen.value = true
-  sentimentFilter.value = 'NEGATIVE'
-  await fetchProductReviews()
-}
-
-function closeReviewModal() {
-  isReviewModalOpen.value = false
-  selectedProduct.value = null
-  productReviews.value = []
-}
-
-async function fetchProductReviews() {
-  if (!selectedProduct.value) return
-  isLoadingReviews.value = true
-  try {
-    const params = { page: 0, size: 50 }
-    if (sentimentFilter.value) {
-      params.sentiment = sentimentFilter.value
-    }
-    const response = await productsApi.getReviews(selectedProduct.value.productId, params)
-    productReviews.value = response.data?.content || []
-  } catch (error) {
-    ui.showToast({ icon: 'alertTriangle', title: 'Lỗi', subtitle: 'Không thể tải đánh giá' })
-  } finally {
-    isLoadingReviews.value = false
-  }
-}
-
-function getSentimentLabel(sentiment) {
-  switch(sentiment) {
-    case 'POSITIVE': return 'Tích cực'
-    case 'NEGATIVE': return 'Tiêu cực'
-    case 'NEUTRAL': return 'Trung lập'
-    default: return sentiment || 'Chưa phân tích'
-  }
-}
-function getSentimentBadgeClass(sentiment) {
-  switch(sentiment) {
-    case 'POSITIVE': return 'b-success'
-    case 'NEGATIVE': return 'b-cancel'
-    case 'NEUTRAL': return 'b-gold'
-    default: return 'b-navy'
-  }
-}
 
 </script>
 
@@ -294,7 +245,7 @@ function getSentimentBadgeClass(sentiment) {
               <span>Tỷ lệ: {{ formatPercent(product.negativeRatio) }}</span>
               <span>Hiển thị: {{ product.visibleReviewCount }}</span>
               <span>Điểm TB: {{ Number(product.averageRating || 0).toFixed(1) }}</span>
-              <button class="tcard-action" style="margin-left: auto;" @click="openReviewModal(product)">
+              <button class="tcard-action" style="margin-left: auto;" @click="reviewModal.open(product)">
                 <AppIcon name="eye" /> Xem đánh giá
               </button>
             </div>
@@ -307,51 +258,15 @@ function getSentimentBadgeClass(sentiment) {
       </AdminChartCard>
     </section>
 
-    <!-- Review Modal -->
-    <Teleport to="body">
-      <div class="modal-overlay" :class="{ open: isReviewModalOpen }" @click.self="closeReviewModal">
-        <div class="modal-box modal-box--wide">
-          <div class="modal-head">
-            <h3 class="modal-title">Đánh giá <em>{{ selectedProduct?.productName || selectedProduct?.productId }}</em></h3>
-            <button class="modal-close" @click="closeReviewModal"><AppIcon name="x" /></button>
-          </div>
-          <div class="modal-body">
-            <div class="filter-bar">
-              <select class="filter-select" v-model="sentimentFilter" @change="fetchProductReviews">
-                <option value="">Tất cả cảm xúc</option>
-                <option value="POSITIVE">Tích cực</option>
-                <option value="NEUTRAL">Trung lập</option>
-                <option value="NEGATIVE">Tiêu cực</option>
-              </select>
-            </div>
-            
-            <div v-if="isLoadingReviews" style="padding: 20px; text-align: center; color: var(--text3);">
-              Đang tải đánh giá...
-            </div>
-            <div v-else-if="productReviews.length === 0" style="padding: 20px; text-align: center; color: var(--text3);">
-              Không có đánh giá nào phù hợp.
-            </div>
-            <div v-else class="review-dialog-list">
-              <div v-for="rev in productReviews" :key="rev.id" class="review-dialog-item">
-                <div class="rdi-head">
-                  <div class="flex-cell">
-                    <img v-if="rev.userAvatarUrl" :src="rev.userAvatarUrl" class="av" />
-                    <div v-else class="av av-gold">{{ rev.userName?.charAt(0) || 'U' }}</div>
-                    <div>
-                      <div class="cell-name">{{ rev.userName }}</div>
-                      <div class="cell-sub">{{ new Date(rev.createdAt).toLocaleString() }} - {{ rev.rating }} sao</div>
-                    </div>
-                  </div>
-                  <div class="badge" :class="getSentimentBadgeClass(rev.sentiment)">{{ getSentimentLabel(rev.sentiment) }}</div>
-                </div>
-                <div class="rdi-title">{{ rev.title }}</div>
-                <div class="rdi-content">{{ rev.content }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <AdminProductReviewModal
+      :is-open="reviewModal.isOpen.value"
+      :selected-product="reviewModal.selectedProduct.value"
+      :reviews="reviewModal.reviews.value"
+      :loading="reviewModal.loading.value"
+      :sentiment-filter="reviewModal.sentimentFilter.value"
+      @close="reviewModal.close()"
+      @update:sentiment-filter="reviewModal.changeSentiment($event)"
+    />
 
   </template>
 </template>
@@ -381,13 +296,13 @@ function getSentimentBadgeClass(sentiment) {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 700;
-  color: #12202e;
+  color: var(--text);
 }
 
 .review-section-sub {
   margin: 0.25rem 0 0;
   font-size: 0.84rem;
-  color: #667085;
+  color: var(--text3);
 }
 
 .review-grid {
@@ -407,15 +322,15 @@ function getSentimentBadgeClass(sentiment) {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid #e6e8ec;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fffdfa;
+  background: var(--white);
   font-size: 0.84rem;
-  color: #475467;
+  color: var(--text2);
 }
 
 .review-health-item strong {
-  color: #12202e;
+  color: var(--text);
   font-size: 0.95rem;
 }
 
@@ -428,9 +343,9 @@ function getSentimentBadgeClass(sentiment) {
   display: grid;
   gap: 6px;
   padding: 12px 14px;
-  border: 1px solid #ece5d8;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #fffdfa;
+  background: var(--white);
 }
 
 .negative-main {
@@ -441,14 +356,14 @@ function getSentimentBadgeClass(sentiment) {
 }
 
 .negative-main strong {
-  color: #12202e;
+  color: var(--text);
   font-size: 0.9rem;
 }
 
 .negative-main span,
 .negative-metrics span,
 .negative-empty {
-  color: #667085;
+  color: var(--text3);
   font-size: 0.8rem;
 }
 
@@ -474,34 +389,4 @@ function getSentimentBadgeClass(sentiment) {
   }
 }
 
-.review-dialog-list {
-  display: grid;
-  gap: 12px;
-  max-height: 400px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
-.review-dialog-item {
-  padding: 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--cream);
-}
-.rdi-head {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.rdi-title {
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-.rdi-content {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.5;
-}
 </style>

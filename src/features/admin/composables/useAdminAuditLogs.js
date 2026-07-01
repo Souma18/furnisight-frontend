@@ -21,6 +21,21 @@ function resolveLogMeta(log = {}, currentAdmin = {}) {
     || (isCurrentAdmin ? currentAdmin.name : '')
 }
 
+function resolveFromDate(period) {
+  const now = new Date()
+  if (period === 'today') {
+    now.setHours(0, 0, 0, 0)
+  } else if (period === '7d') {
+    now.setDate(now.getDate() - 7)
+  } else if (period === 'month') {
+    now.setDate(1)
+    now.setHours(0, 0, 0, 0)
+  } else {
+    return undefined
+  }
+  return now.toISOString()
+}
+
 export function useAdminAuditLogs() {
   const authStore = useAuthStore()
   const profileStore = useProfileStore()
@@ -39,10 +54,10 @@ export function useAdminAuditLogs() {
     try {
       const [res] = await Promise.all([
         adminApi.fetchAuditLogs({
-          search: search.value,
-          type: type.value,
-          result: result.value,
-          period: period.value,
+          search: search.value || undefined,
+          type: type.value === 'all' ? undefined : type.value,
+          result: result.value === 'all' ? undefined : result.value,
+          fromDate: resolveFromDate(period.value),
           page: page.value,
           pageSize: PAGE_SIZE,
         }),
