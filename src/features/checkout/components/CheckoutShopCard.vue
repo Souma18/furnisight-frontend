@@ -82,9 +82,9 @@ function selectShipping(id) {
         <div class="co-prod-unit">{{ formatMoney(line.price) }}</div>
       </div>
       <div class="co-qty">
-        <AppButton type="button" aria-label="Giảm" :disabled="Number(line.qty || 1) <= 1" @click="changeQty(line, -1)">−</AppButton>
+        <AppButton type="button" variant="unstyled" aria-label="Giảm" :disabled="Number(line.qty || 1) <= 1" @click="changeQty(line, -1)">−</AppButton>
         <span>{{ line.qty }}</span>
-        <AppButton type="button" aria-label="Tăng" :disabled="cannotIncrease(line)" @click="changeQty(line, 1)">+</AppButton>
+        <AppButton type="button" variant="unstyled" aria-label="Tăng" :disabled="cannotIncrease(line)" @click="changeQty(line, 1)">+</AppButton>
       </div>
       <div class="co-prod-total">{{ formatMoney(calcLineTotal(line)) }}</div>
     </div>

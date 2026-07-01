@@ -1,6 +1,7 @@
 import { apiClient } from '../../client'
 
 const catalogBaseUrl = '/catalog'
+const reviewBaseUrl = '/reviews'
 
 class ProductsApi {
   // ─── PRODUCTS ────────────────────────────────────────────────────────
@@ -60,7 +61,15 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<{content: import('./products.model').ReviewResponse[], totalElements: number}>>}
    */
   getReviews(productId, params) {
-    return apiClient.get(`${catalogBaseUrl}/reviews/product/${productId}`, { params })
+    return apiClient.get(`${reviewBaseUrl}/product/${productId}`, { params })
+  }
+
+  getMyOrderItemReviews(orderItemIds = []) {
+    return apiClient.get(`${reviewBaseUrl}/me/order-items`, {
+      params: {
+        orderItemIds: orderItemIds.filter(Boolean),
+      },
+    })
   }
 
   /**
@@ -70,7 +79,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').ReviewResponse>>}
    */
   submitReview(productId, payload) {
-    return apiClient.post(`${catalogBaseUrl}/reviews`, {
+    return apiClient.post(`${reviewBaseUrl}`, {
       ...payload,
       productId,
     })
@@ -82,7 +91,7 @@ class ProductsApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./products.model').ReviewResponse[]>>}
    */
   getTopRandomReviews(limit = 3) {
-    return apiClient.get(`${catalogBaseUrl}/reviews/top-random`, { params: { limit } })
+    return apiClient.get(`${reviewBaseUrl}/top-random`, { params: { limit } })
   }
 }
 

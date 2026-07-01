@@ -22,6 +22,7 @@ defineEmits(['back'])
       Thanh toán bảo mật
     </span>
     <AppButton
+      variant="unstyled"
       type="button"
       style="
         display: inline-flex;

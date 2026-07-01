@@ -76,7 +76,7 @@ export class ProductResponse {
 
 export class CategoryResponse {
   /**
-   * @param {Object} data 
+   * @param {Object} data
    */
   constructor(data = {}) {
     this.id = data.id || null
@@ -94,11 +94,12 @@ export class CategoryResponse {
 
 export class ReviewResponse {
   /**
-   * @param {Object} data 
+   * @param {Object} data
    */
   constructor(data = {}) {
     this.id = data.id || null
     this.productId = data.productId || null
+    this.orderItemId = data.orderItemId || null
     this.userId = data.userId || null
     this.userName = data.userName || data.user || 'Khách hàng'
     this.user = data.user || data.userName || 'Khách hàng'

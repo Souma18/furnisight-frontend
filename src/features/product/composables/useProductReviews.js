@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useProfileStore } from '@features/account/store/profileStore'
@@ -12,6 +13,8 @@ function createEmptyEligibility() {
     checked: false,
     purchased: false,
     orderItemId: null,
+    reviewed: false,
+    rating: null,
     error: null,
   }
 }
@@ -31,6 +34,7 @@ function normalizeReviewsPayload(data) {
 }
 
 export function useProductReviews(product) {
+  const route = useRoute()
   const authStore = useAuthStore()
   const profileStore = useProfileStore()
   const reviewEligibility = ref(createEmptyEligibility())
@@ -44,6 +48,7 @@ export function useProductReviews(product) {
     authStore.isAuthenticated &&
     reviewEligibility.value.purchased &&
     reviewEligibility.value.orderItemId &&
+    !reviewEligibility.value.reviewed &&
     !reviewEligibility.value.loading &&
     !reviewSubmitting.value &&
     String(reviewForm.value.content || '').trim() &&
@@ -73,7 +78,7 @@ export function useProductReviews(product) {
         const totalRating = product.value.reviews.reduce((total, review) => total + Number(review.rating || 0), 0)
         product.value.rating = totalRating / product.value.reviews.length
       }
-    } catch (error) {
+    } catch {
       // Silent fail
     }
   }
@@ -82,6 +87,7 @@ export function useProductReviews(product) {
     const currentProduct = product.value
     const requestId = ++reviewEligibilityRequestId
     reviewSubmitError.value = ''
+    const routeOrderItemId = resolveRouteOrderItemId(route.query.orderItemId)
 
     if (!currentProduct?.id) {
       reviewEligibility.value = createEmptyEligibility()
@@ -92,6 +98,16 @@ export function useProductReviews(product) {
       reviewEligibility.value = {
         ...createEmptyEligibility(),
         checked: true,
+      }
+      return
+    }
+
+    if (routeOrderItemId) {
+      reviewEligibility.value = {
+        ...createEmptyEligibility(),
+        checked: true,
+        purchased: true,
+        orderItemId: routeOrderItemId,
       }
       return
     }
@@ -109,6 +125,8 @@ export function useProductReviews(product) {
         checked: true,
         purchased: Boolean(response.data?.purchased),
         orderItemId: response.data?.orderItemId ?? null,
+        reviewed: Boolean(response.data?.reviewed),
+        rating: response.data?.rating ?? null,
         error: null,
       }
     } catch {
@@ -162,15 +180,23 @@ export function useProductReviews(product) {
 
     try {
       const reviewer = await getReviewerSnapshot()
+      const submittedRating = Number(reviewForm.value.rating) || 5
       await productsApi.submitReview(product.value.id, {
         orderItemId: reviewEligibility.value.orderItemId,
         title: String(reviewForm.value.title || '').trim(),
         content,
-        rating: Number(reviewForm.value.rating) || 5,
+        rating: submittedRating,
         userName: reviewer.userName,
         userAvatarMediaId: reviewer.userAvatarMediaId,
       })
       reviewForm.value = createEmptyReviewForm()
+      reviewEligibility.value = {
+        ...reviewEligibility.value,
+        purchased: false,
+        reviewed: true,
+        rating: submittedRating,
+        orderItemId: null,
+      }
       reviewSubmitSuccess.value = 'Đã gửi đánh giá của bạn.'
       await loadProductReviews(product.value.id)
     } catch {
@@ -230,4 +256,10 @@ export function useProductReviews(product) {
     submitReview,
     resetAuthenticatedReviewState,
   }
+}
+
+function resolveRouteOrderItemId(value) {
+  const rawValue = Array.isArray(value) ? value[0] : value
+  const normalized = String(rawValue || '').trim()
+  return normalized || null
 }

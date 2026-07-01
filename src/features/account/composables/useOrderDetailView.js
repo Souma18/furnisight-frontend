@@ -1,9 +1,12 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@features/auth/store/authStore'
 import { useAccountOrders } from './useAccountOrders'
 import { useCancelOrderDialog } from './useCancelOrderDialog'
 import { usePaymentCountdown } from './usePaymentCountdown'
 import { i18n } from '@shared/i18n'
+import { productsApi } from '@shared/lib/api/services/products/products.api'
+import { ReviewResponse } from '@shared/lib/api/services/products/products.model'
 import {
   canRetryOrderPayment,
   isOrderPaymentExpired,
@@ -21,6 +24,7 @@ const orderStatusLabel = (status) => t(`account.orders.status.${String(status ||
 
 export function useOrderDetailView(notify) {
   const router = useRouter()
+  const authStore = useAuthStore()
   const {
     selectedOrder: order,
     backToOrders,
@@ -41,6 +45,7 @@ export function useOrderDetailView(notify) {
   const cancelDialogOpen = computed(() => Boolean(cancelTarget.value))
   const confirmDialogOpen = ref(false)
   const confirming = ref(false)
+  const reviewedItems = ref({})
 
   const { formatCountdown, isPaymentTimeRemaining } = usePaymentCountdown()
   const formatMoney = PriceFormatter.format
@@ -122,6 +127,37 @@ export function useOrderDetailView(notify) {
     return t('account.orders.retryTitle.unavailable')
   })
 
+  async function loadReviewedItems() {
+    if (!authStore.isAuthenticated) {
+      reviewedItems.value = {}
+      return
+    }
+
+    const orderItemIds = Array.isArray(order.value?.items)
+      ? order.value.items.map((item) => item?.id).filter(Boolean)
+      : []
+
+    if (!orderItemIds.length) {
+      reviewedItems.value = {}
+      return
+    }
+
+    try {
+      const response = await productsApi.getMyOrderItemReviews(orderItemIds)
+      const reviews = Array.isArray(response.data)
+        ? response.data.map((review) => new ReviewResponse(review))
+        : []
+      reviewedItems.value = reviews.reduce((accumulator, review) => {
+        if (review.orderItemId) {
+          accumulator[review.orderItemId] = review
+        }
+        return accumulator
+      }, {})
+    } catch {
+      reviewedItems.value = {}
+    }
+  }
+
   function handleCancel() {
     if (!canCancelCurrentOrder.value) return
     openCancelDialog(order.value)
@@ -165,8 +201,24 @@ export function useOrderDetailView(notify) {
     router.push({
       name: 'product-detail',
       params: { id: productId },
-      query: { tab: 'review' },
+      query: {
+        tab: 'review',
+        orderItemId: item?.id || '',
+        orderCode: order.value?.orderCode || '',
+      },
     })
+  }
+
+  function itemReviewState(item) {
+    return reviewedItems.value[item?.id] || null
+  }
+
+  function hasReviewedItem(item) {
+    return Boolean(itemReviewState(item))
+  }
+
+  function itemReviewRating(item) {
+    return Number(itemReviewState(item)?.rating || 0)
   }
 
   function isCodOrder(current = order.value) {
@@ -182,6 +234,14 @@ export function useOrderDetailView(notify) {
   function orderItemProductId(item) {
     return item?.productSnapshot?.productId || item?.productId || ''
   }
+
+  watch(
+    () => order.value?.orderCode,
+    () => {
+      loadReviewedItems()
+    },
+    { immediate: true },
+  )
 
   return {
     order,
@@ -205,6 +265,9 @@ export function useOrderDetailView(notify) {
     formatDate,
     formatDateTime,
     orderItemProductId,
+    itemReviewState,
+    hasReviewedItem,
+    itemReviewRating,
     openProductDetail,
     reviewProduct,
     paymentMethodLabel,

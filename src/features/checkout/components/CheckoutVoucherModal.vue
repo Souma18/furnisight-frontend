@@ -1,8 +1,8 @@
 <script setup>
-import AppButton from '@shared/ui/AppButton.vue'
-import AppInput from '@shared/ui/AppInput.vue'
 import { ref, watch } from 'vue'
+import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import AppInput from '@shared/ui/AppInput.vue'
 import AppModal from '@shared/ui/AppModal.vue'
 
 const props = defineProps({
@@ -46,8 +46,8 @@ function handleApplyCode() {
   <AppModal :open="open" width="500px" no-bg @close="$emit('close')">
     <div class="co-modal" role="dialog" aria-modal="true">
       <div class="co-modal-head">
-        <p style="font-size: 1rem; font-weight: 600">Chọn <em style="font-style: italic; color: var(--co-gold, #c9922a)">Voucher</em></p>
-        <AppButton type="button" class="checkout-card-change" aria-label="Đóng" @click="$emit('close')">
+        <p style="font-size: 1rem; font-weight: 600">Chọn <em style="font-style: italic; color: var(--co-gold, #c9922a)">voucher</em></p>
+        <AppButton variant="unstyled" type="button" class="checkout-card-change" aria-label="Đóng" @click="$emit('close')">
           <AppIcon name="close" :size="16" />
         </AppButton>
       </div>
@@ -61,7 +61,7 @@ function handleApplyCode() {
             placeholder="Nhập mã voucher..."
             @keyup.enter="handleApplyCode"
           />
-          <AppButton type="button" class="co-voucher-btn" :disabled="applying" @click="handleApplyCode">
+          <AppButton variant="unstyled" type="button" class="co-voucher-btn" :disabled="applying" @click="handleApplyCode">
             Áp dụng
           </AppButton>
         </div>
@@ -86,8 +86,8 @@ function handleApplyCode() {
       </div>
 
       <div class="co-modal-foot">
-        <AppButton type="button" class="co-voucher-btn" @click="$emit('close')">Huỷ</AppButton>
-        <AppButton type="button" class="co-btn-order" style="width: auto; padding-inline: 1rem" :disabled="applying" @click="handleConfirm">
+        <AppButton variant="unstyled" type="button" class="co-voucher-btn" @click="$emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-btn-order" style="width: auto; padding-inline: 1rem" :disabled="applying" @click="handleConfirm">
           Xác nhận
         </AppButton>
       </div>

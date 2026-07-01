@@ -29,6 +29,8 @@ const {
   formatDate,
   formatDateTime,
   orderItemProductId,
+  hasReviewedItem,
+  itemReviewRating,
   openProductDetail,
   reviewProduct,
   paymentMethodLabel,
@@ -164,7 +166,7 @@ const {
               <span class="order-line-qty">{{ t('account.orders.quantityShort', { count: item.quantity }) }}</span>
               <span class="order-line-price">{{ formatMoney(item.price * item.quantity) }}</span>
               <AppButton
-                v-if="order.status === 'delivered' && item.productId"
+                v-if="order.status === 'delivered' && item.productId && !hasReviewedItem(item)"
                 type="button"
                 class="order-review-btn"
                 @click="reviewProduct(item)"
@@ -172,6 +174,14 @@ const {
                 <AppIcon name="star" :size="14" />
                 {{ t('account.orders.review') }}
               </AppButton>
+              <div
+                v-else-if="order.status === 'delivered' && hasReviewedItem(item)"
+                class="order-review-rating"
+              >
+                <AppIcon name="star" :size="14" />
+                <strong>{{ itemReviewRating(item) }}</strong>
+                <span>/5</span>
+              </div>
             </div>
           </div>
         </article>
@@ -530,6 +540,20 @@ const {
   white-space: nowrap;
 }
 .order-review-btn:hover { background: #c9922a; color: #fff; }
+.order-review-rating {
+  min-height: 34px;
+  padding: 0.4rem 0.7rem;
+  border-radius: 8px;
+  background: #f7f1e6;
+  color: #9a6817;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
 .summary-rows { display: grid; gap: 0.35rem; }
 .summary-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--auth-text-secondary); }
 .summary-row.total { font-weight: 600; color: var(--account-field-text); border-top: 1px solid var(--auth-border); padding-top: 0.5rem; margin-top: 0.25rem; }
@@ -552,7 +576,8 @@ const {
   .order-line { grid-template-columns: 64px minmax(0, 1fr); }
   .order-line-qty,
   .order-line-price,
-  .order-review-btn { grid-column: 2; justify-self: start; }
+  .order-review-btn,
+  .order-review-rating { grid-column: 2; justify-self: start; }
   .transaction-row { grid-template-columns: 1fr; gap: 0.2rem; }
   .transaction-row strong { text-align: left; }
 }

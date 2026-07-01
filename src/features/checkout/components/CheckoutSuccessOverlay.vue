@@ -51,11 +51,11 @@ defineEmits(['view-order', 'continue-shopping'])
       <div v-if="orderCode" class="checkout-success-order-id">Mã đơn: {{ orderCode }}</div>
 
       <div class="checkout-success-actions">
-        <AppButton type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
+        <AppButton variant="unstyled" type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
           <AppIcon name="package" :size="16" />
           Xem đơn hàng
         </AppButton>
-        <AppButton type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
+        <AppButton variant="unstyled" type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
           Tiếp tục mua sắm
         </AppButton>
       </div>
@@ -223,15 +223,5 @@ defineEmits(['view-order', 'continue-shopping'])
 .checkout-success-btn--ghost:hover {
   border-color: #12202e;
   color: #12202e;
-}
-
-@media (max-width: 480px) {
-  .checkout-success-actions {
-    grid-template-columns: 1fr;
-  }
-
-  .checkout-success-box {
-    padding: 36px 24px;
-  }
 }
 </style>

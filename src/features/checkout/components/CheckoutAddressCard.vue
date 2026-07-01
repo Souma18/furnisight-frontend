@@ -15,7 +15,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits(['select-address', 'open-create', 'open-edit'])
+defineEmits(['select-address', 'open-create', 'open-edit'])
 
 const selectedAddress = computed(
   () => props.addresses.find((item) => String(item.id) === String(props.selectedAddressId)) ?? props.addresses[0] ?? null,
@@ -29,7 +29,7 @@ const selectedAddress = computed(
         <AppIcon name="mapPin" :size="16" />
         Địa chỉ giao hàng
       </h2>
-      <AppButton type="button" class="checkout-card-change" @click="$emit('open-create')">Thêm địa chỉ</AppButton>
+      <AppButton variant="unstyled" type="button" class="checkout-card-change" @click="$emit('open-create')">Thêm địa chỉ</AppButton>
     </div>
 
     <div v-if="!addresses.length" class="co-empty">
@@ -57,7 +57,7 @@ const selectedAddress = computed(
           </div>
           <p class="co-addr-street">{{ formatVietnamAddress(address) }}</p>
         </div>
-        <AppButton type="button" class="co-address-edit" @click.prevent="$emit('open-edit', address)">Sửa</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-address-edit" @click.prevent="$emit('open-edit', address)">Sửa</AppButton>
       </label>
     </div>
   </section>

@@ -7,7 +7,7 @@ import { useVietnamAddress } from '@shared/composables/useVietnamAddress'
 
 const props = defineProps({
   open: { type: Boolean, default: false },
-  address: { type: Object, default: null }, // if null, it's create mode
+  address: { type: Object, default: null },
 })
 
 const emit = defineEmits(['close', 'save'])
@@ -58,7 +58,7 @@ watch(() => props.open, async (isOpen) => {
     } else {
       Object.assign(form, createEmptyForm())
     }
-    
+
     await fetchProvinces()
     if (form.provinceCode) {
       try {
@@ -79,7 +79,7 @@ async function onProvinceChange() {
   form.wardName = ''
   clearWards()
   formError.value = ''
-  
+
   if (form.provinceCode) {
     try {
       await fetchWards(form.provinceCode)
@@ -113,7 +113,7 @@ function submitAddress() {
     <div class="co-address-dialog" role="dialog" aria-modal="true">
       <div class="co-address-dialog-head">
         <h3>{{ address ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới' }}</h3>
-        <AppButton type="button" class="co-address-close" @click="$emit('close')">×</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-address-close" @click="$emit('close')">×</AppButton>
       </div>
 
       <div class="co-address-form">
@@ -169,8 +169,8 @@ function submitAddress() {
       <p v-if="formError" class="co-address-warning">{{ formError }}</p>
 
       <div class="co-address-dialog-actions">
-        <AppButton type="button" class="co-address-secondary" @click="$emit('close')">Huỷ</AppButton>
-        <AppButton type="button" class="co-address-primary" @click="submitAddress">
+        <AppButton variant="unstyled" type="button" class="co-address-secondary" @click="$emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-address-primary" @click="submitAddress">
           {{ address ? 'Cập nhật' : 'Lưu địa chỉ' }}
         </AppButton>
       </div>

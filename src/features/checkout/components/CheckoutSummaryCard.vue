@@ -12,7 +12,6 @@ defineProps({
 })
 
 defineEmits(['update-agreed', 'place-order'])
-
 </script>
 
 <template>
@@ -46,16 +45,16 @@ defineEmits(['update-agreed', 'place-order'])
         </div>
         <div v-if="summary.shippingDiscount" class="co-sum-row">
           <span>Voucher vận chuyển</span>
-          <span class="green">−{{ formatMoney(summary.shippingDiscount) }}</span>
+          <span class="green">-{{ formatMoney(summary.shippingDiscount) }}</span>
         </div>
         <div v-if="summary.comboDiscount" class="co-sum-row">
           <span>Combo khuyến mãi</span>
-          <span class="green">−{{ formatMoney(summary.comboDiscount) }}</span>
+          <span class="green">-{{ formatMoney(summary.comboDiscount) }}</span>
         </div>
         <div class="co-sum-row">
-          <span>Voucher Shop</span>
+          <span>Voucher shop</span>
           <span :class="{ green: summary.shopDiscount }">
-            {{ summary.shopDiscount ? `−${formatMoney(summary.shopDiscount)}` : 'Chưa áp dụng' }}
+            {{ summary.shopDiscount ? `-${formatMoney(summary.shopDiscount)}` : 'Chưa áp dụng' }}
           </span>
         </div>
         <div class="co-sum-row">
@@ -66,7 +65,7 @@ defineEmits(['update-agreed', 'place-order'])
         </div>
         <div v-if="summary.saved" class="co-sum-row">
           <span>Tiết kiệm được</span>
-          <span class="green">−{{ formatMoney(summary.saved) }}</span>
+          <span class="green">-{{ formatMoney(summary.saved) }}</span>
         </div>
       </div>
 
@@ -92,13 +91,14 @@ defineEmits(['update-agreed', 'place-order'])
           </span>
         </label>
         <AppButton
+          variant="unstyled"
           type="button"
           class="co-btn-order"
           :disabled="placing"
           @click="$emit('place-order')"
         >
           <AppIcon name="creditCard" :size="17" />
-          Đặt hàng – {{ formatMoney(summary.total) }}
+          Đặt hàng - {{ formatMoney(summary.total) }}
         </AppButton>
         <p class="co-btn-order-sub">
           <AppIcon name="lockKeyhole" :size="13" />
