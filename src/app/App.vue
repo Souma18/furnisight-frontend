@@ -69,8 +69,8 @@ async function closeAuthModal() {
   isAuthModalOpen.value = false
   initialAuthView.value = 'login'
 
-  if (route.query.otpCode) {
-    const query = { ...route.query }
+  if (route.value.query.otpCode) {
+    const query = { ...route.value.query }
     delete query.otpCode
     await router.replace({ query })
   }
