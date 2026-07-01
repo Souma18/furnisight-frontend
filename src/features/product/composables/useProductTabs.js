@@ -1,6 +1,8 @@
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export function useProductTabs(productRef, activeVariantRef) {
+  const { t } = useI18n()
   const reviewCountLabel = computed(() => productRef.value?.ratingCount ?? 0)
 
   const specsRows = computed(() => {
@@ -10,19 +12,19 @@ export function useProductTabs(productRef, activeVariantRef) {
     const variant = activeVariantRef?.value ?? product.variants?.[0] ?? null
     const rows = []
 
-    if (variant?.material) rows.push({ key: 'Chất liệu chính', value: variant.material })
-    if (variant?.color) rows.push({ key: 'Màu sắc', value: variant.color })
-    if (variant?.dimensionText) rows.push({ key: 'Kích thước', value: variant.dimensionText })
-    if (variant?.weight) rows.push({ key: 'Khối lượng', value: `${variant.weight} kg` })
-    if (variant?.warranty) rows.push({ key: 'Bảo hành', value: variant.warranty })
-    if (typeof variant?.stockQuantity === 'number') rows.push({ key: 'Tồn kho', value: `${variant.stockQuantity} sản phẩm` })
+    if (variant?.material) rows.push({ key: t('productDetail.spec.keys.material'), value: variant.material })
+    if (variant?.color) rows.push({ key: t('productDetail.spec.keys.color'), value: variant.color })
+    if (variant?.dimensionText) rows.push({ key: t('productDetail.spec.keys.dimension'), value: variant.dimensionText })
+    if (variant?.weight) rows.push({ key: t('productDetail.spec.keys.weight'), value: `${variant.weight} kg` })
+    if (variant?.warranty) rows.push({ key: t('productDetail.spec.keys.warranty'), value: variant.warranty })
+    if (typeof variant?.stockQuantity === 'number') rows.push({ key: t('productDetail.spec.keys.stock'), value: t('productDetail.spec.values.items', { count: variant.stockQuantity }) })
 
     if (!rows.length && product.category?.label) {
-      rows.push({ key: 'Danh mục', value: product.category.label })
+      rows.push({ key: t('productDetail.spec.keys.category'), value: product.category.label })
     }
 
     if (!rows.length && typeof product.stock === 'number') {
-      rows.push({ key: 'Tồn kho', value: `${product.stock} sản phẩm` })
+      rows.push({ key: t('productDetail.spec.keys.stock'), value: t('productDetail.spec.values.items', { count: product.stock }) })
     }
 
     return rows

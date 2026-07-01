@@ -3,9 +3,11 @@ import AppButton from '@shared/ui/AppButton.vue'
 import AppInput from '@shared/ui/AppInput.vue'
 import AppImage from '@shared/ui/AppImage.vue'
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useToast } from '@shared/composables/useToast'
 
+const { t } = useI18n()
 const props = defineProps({
   product: { type: Object, required: true },
   selectedColor: { type: String, required: false },
@@ -100,7 +102,7 @@ function handleOpen3D() {
   }) || variants.value.find((v) => !props.selectedColor || v.color === props.selectedColor) || variants.value[0]
 
   if (matched && !matched.supports3d && !matched.modelUrl) {
-    showToast('Phiên bản này chưa có mô hình 3D.')
+    showToast(t('productDetail.top.noModel3D'))
     return
   }
   emit('open-3d')
@@ -154,11 +156,11 @@ function handleOpen3D() {
             />
           </span>
           <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
-          <small>({{ product.ratingCount || 0 }} đánh giá)</small>
-          <small>Đã bán {{ product.soldCount || 0 }}</small>
+          <small>({{ t('productDetail.top.reviews', { count: product.ratingCount || 0 }) }})</small>
+          <small>{{ t('products.sold', { count: product.soldCount || 0 }) }}</small>
         </div>
         <div class="price-box">
-          <span>Giá niêm yết</span>
+          <span>{{ t('productDetail.top.listedPrice') }}</span>
           <p class="price">{{ product.formattedPrice }}</p>
         </div>
         <p v-if="product.description" class="pd-short-desc">{{ product.description }}</p>
@@ -211,7 +213,7 @@ function handleOpen3D() {
               min="1"
               :max="selectedStock || undefined"
               :disabled="isOutOfStock"
-              aria-label="Số lượng"
+              :aria-label="t('productDetail.top.quantity')"
               @input="handleQtyInput($event.target.value)"
               @blur="commitQtyInput"
               @keydown.enter.prevent="commitQtyInput"
@@ -220,7 +222,7 @@ function handleOpen3D() {
               <AppIcon name="plus" :size="15" />
             </AppButton>
           </div>
-          <span>{{ selectedStock > 0 ? `Còn hàng (${selectedStock} sản phẩm)` : 'Tạm hết hàng' }}</span>
+          <span>{{ selectedStock > 0 ? t('productDetail.top.inStock', { count: selectedStock }) : t('productDetail.top.outOfStock') }}</span>
         </div>
         <p v-if="isOutOfStock || cartError" class="pd-cart-error">
           {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
@@ -235,7 +237,7 @@ function handleOpen3D() {
           >
             <AppIcon v-if="cartAdded" name="check" :size="17" />
             <AppIcon v-else name="cart" :size="17" />
-            {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang thêm...' : cartAdded ? 'Đã thêm' : 'Thêm vào giỏ' }}
+            {{ isOutOfStock ? t('productDetail.top.soldOut') : cartAdding ? t('productDetail.top.adding') : cartAdded ? t('productDetail.top.added') : t('productDetail.top.add') }}
           </AppButton>
           <AppButton
             type="button"
@@ -244,7 +246,7 @@ function handleOpen3D() {
             @click="emit('buy-now')"
           >
             <AppIcon :name="isOutOfStock ? 'ban' : 'creditCard'" :size="17" />
-            {{ isOutOfStock ? 'Hết hàng' : cartAdding ? 'Đang xử lý...' : 'Mua ngay' }}
+            {{ isOutOfStock ? t('productDetail.top.soldOut') : cartAdding ? t('productDetail.top.processing') : t('productDetail.top.buyNow') }}
           </AppButton>
           <AppButton
             type="button"

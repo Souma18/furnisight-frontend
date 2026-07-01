@@ -1,5 +1,6 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
+import { useI18n } from 'vue-i18n'
 import AppIcon from "@shared/ui/AppIcon.vue";
 import AppModal from "@shared/ui/AppModal.vue";
 import { useProduct3DViewer } from '../composables/useProduct3DViewer'
@@ -7,10 +8,11 @@ import { useProduct3DViewer } from '../composables/useProduct3DViewer'
 const props = defineProps({
   open: { type: Boolean, default: false },
   modelUrl: { type: String, default: "" },
-  productName: { type: String, default: "Sản phẩm" },
+  productName: { type: String, default: "" },
   supports3d: { type: Boolean, default: false },
   roomTypeHint: { type: String, default: "bedroom" },
 });
+const { t } = useI18n()
 const emit = defineEmits(["close", "go-room3d"]);
 
 const {
@@ -26,8 +28,8 @@ const {
     <div class="pd-3d-modal">
       <div class="box">
       <div class="head">
-        <strong>Trực quan 3D – {{ productName }}</strong>
-        <AppButton type="button" aria-label="Đóng" @click="emit('close')">
+        <strong>{{ t('productDetail.modal.title', { name: productName || t('productDetail.modal.defaultProduct') }) }}</strong>
+        <AppButton type="button" :aria-label="t('productDetail.modal.close')" @click="emit('close')">
           <AppIcon name="close" :size="16" />
         </AppButton>
       </div>
@@ -39,7 +41,7 @@ const {
             :class="{ active: viewMode === 'product' }"
             @click="viewMode = 'product'"
           >
-            Sản phẩm
+            {{ t('productDetail.modal.tabProduct') }}
           </AppButton>
           <AppButton
             type="button"
@@ -47,7 +49,7 @@ const {
             :class="{ active: viewMode === 'room' }"
             @click="viewMode = 'room'"
           >
-            Phòng đầy đủ
+            {{ t('productDetail.modal.tabRoom') }}
           </AppButton>
         </div>
 
@@ -58,29 +60,29 @@ const {
           class="scene-viewport"
         ></div>
         <div v-if="!supports3d && viewMode === 'product'" class="scene-empty">
-          Mẫu này chưa có mô hình 3D thật. Bạn vẫn có thể xem thông tin và đặt
+          {{ t('productDetail.modal.noModelDesc') }}
           trong Room3D.
         </div>
         <div v-if="viewMode === 'room'" class="scene-room-mode">
           <p>
-            Để xem sản phẩm trong không gian phòng, chuyển qua Trực quan 3D và
-            đặt vào phòng mẫu.
+            {{ t('productDetail.modal.roomDesc') }}
+            
           </p>
           <AppButton
             type="button"
             class="room-cta-btn"
             @click="emit('go-room3d', { roomType: roomTypeHint })"
           >
-            Mở Trực quan 3D
+            {{ t('productDetail.modal.openRoom') }}
           </AppButton>
         </div>
-        <p v-if="isLoading" class="scene-status">Đang tải mô hình...</p>
+        <p v-if="isLoading" class="scene-status">{{ t('productDetail.modal.loadingModel') }}</p>
         <p v-if="loadError" class="scene-error">{{ loadError }}</p>
         <p class="scene-label">
           {{
             viewMode === "product"
-              ? "Đang hiển thị mô hình sản phẩm 3D"
-              : "Chế độ phòng đầy đủ - điều hướng sang Room3D"
+              ? t('productDetail.modal.showingModel')
+              : t('productDetail.modal.navigating')
           }}
         </p>
       </div>

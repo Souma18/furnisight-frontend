@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
-import { adminApi } from '@shared/lib/api/services'
+import { adminApi, productsApi } from '@shared/lib/api/services'
 import { PriceFormatter } from '@shared/lib/formatters'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
 import AdminKpiGrid from '../../components/shared/AdminKpiGrid.vue'
@@ -163,6 +163,61 @@ bindCharts((charts, payload) => {
     ['#2a7a50', '#c9922a', '#c0392b'],
   )
 })
+
+// Review Modal Logic
+const isReviewModalOpen = ref(false)
+const selectedProduct = ref(null)
+const productReviews = ref([])
+const isLoadingReviews = ref(false)
+const sentimentFilter = ref('NEGATIVE')
+
+async function openReviewModal(product) {
+  selectedProduct.value = product
+  isReviewModalOpen.value = true
+  sentimentFilter.value = 'NEGATIVE'
+  await fetchProductReviews()
+}
+
+function closeReviewModal() {
+  isReviewModalOpen.value = false
+  selectedProduct.value = null
+  productReviews.value = []
+}
+
+async function fetchProductReviews() {
+  if (!selectedProduct.value) return
+  isLoadingReviews.value = true
+  try {
+    const params = { page: 0, size: 50 }
+    if (sentimentFilter.value) {
+      params.sentiment = sentimentFilter.value
+    }
+    const response = await productsApi.getReviews(selectedProduct.value.productId, params)
+    productReviews.value = response.data?.content || []
+  } catch (error) {
+    ui.showToast({ icon: 'alertTriangle', title: 'Lỗi', subtitle: 'Không thể tải đánh giá' })
+  } finally {
+    isLoadingReviews.value = false
+  }
+}
+
+function getSentimentLabel(sentiment) {
+  switch(sentiment) {
+    case 'POSITIVE': return 'Tích cực'
+    case 'NEGATIVE': return 'Tiêu cực'
+    case 'NEUTRAL': return 'Trung lập'
+    default: return sentiment || 'Chưa phân tích'
+  }
+}
+function getSentimentBadgeClass(sentiment) {
+  switch(sentiment) {
+    case 'POSITIVE': return 'b-success'
+    case 'NEGATIVE': return 'b-cancel'
+    case 'NEUTRAL': return 'b-gold'
+    default: return 'b-navy'
+  }
+}
+
 </script>
 
 <template>
@@ -214,7 +269,7 @@ bindCharts((charts, payload) => {
           <canvas ref="reviewCanvas" />
         </AdminChartCard>
 
-        <AdminChartCard title="Trạng thái xử lý" subtitle="Review sentiment pipeline">
+        <AdminChartCard title="Trạng thái xử lý" subtitle="Review sentiment pipeline" flexible>
           <div class="review-health">
             <div v-for="item in reviewHealth" :key="item.label" class="review-health-item">
               <span>{{ item.label }}</span>
@@ -239,6 +294,9 @@ bindCharts((charts, payload) => {
               <span>Tỷ lệ: {{ formatPercent(product.negativeRatio) }}</span>
               <span>Hiển thị: {{ product.visibleReviewCount }}</span>
               <span>Điểm TB: {{ Number(product.averageRating || 0).toFixed(1) }}</span>
+              <button class="tcard-action" style="margin-left: auto;" @click="openReviewModal(product)">
+                <AppIcon name="eye" /> Xem đánh giá
+              </button>
             </div>
           </article>
         </div>
@@ -248,6 +306,53 @@ bindCharts((charts, payload) => {
         </div>
       </AdminChartCard>
     </section>
+
+    <!-- Review Modal -->
+    <Teleport to="body">
+      <div class="modal-overlay" :class="{ open: isReviewModalOpen }" @click.self="closeReviewModal">
+        <div class="modal-box modal-box--wide">
+          <div class="modal-head">
+            <h3 class="modal-title">Đánh giá <em>{{ selectedProduct?.productName || selectedProduct?.productId }}</em></h3>
+            <button class="modal-close" @click="closeReviewModal"><AppIcon name="x" /></button>
+          </div>
+          <div class="modal-body">
+            <div class="filter-bar">
+              <select class="filter-select" v-model="sentimentFilter" @change="fetchProductReviews">
+                <option value="">Tất cả cảm xúc</option>
+                <option value="POSITIVE">Tích cực</option>
+                <option value="NEUTRAL">Trung lập</option>
+                <option value="NEGATIVE">Tiêu cực</option>
+              </select>
+            </div>
+            
+            <div v-if="isLoadingReviews" style="padding: 20px; text-align: center; color: var(--text3);">
+              Đang tải đánh giá...
+            </div>
+            <div v-else-if="productReviews.length === 0" style="padding: 20px; text-align: center; color: var(--text3);">
+              Không có đánh giá nào phù hợp.
+            </div>
+            <div v-else class="review-dialog-list">
+              <div v-for="rev in productReviews" :key="rev.id" class="review-dialog-item">
+                <div class="rdi-head">
+                  <div class="flex-cell">
+                    <img v-if="rev.userAvatarUrl" :src="rev.userAvatarUrl" class="av" />
+                    <div v-else class="av av-gold">{{ rev.userName?.charAt(0) || 'U' }}</div>
+                    <div>
+                      <div class="cell-name">{{ rev.userName }}</div>
+                      <div class="cell-sub">{{ new Date(rev.createdAt).toLocaleString() }} - {{ rev.rating }} sao</div>
+                    </div>
+                  </div>
+                  <div class="badge" :class="getSentimentBadgeClass(rev.sentiment)">{{ getSentimentLabel(rev.sentiment) }}</div>
+                </div>
+                <div class="rdi-title">{{ rev.title }}</div>
+                <div class="rdi-content">{{ rev.content }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
   </template>
 </template>
 
@@ -367,5 +472,36 @@ bindCharts((charts, payload) => {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+.review-dialog-list {
+  display: grid;
+  gap: 12px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.review-dialog-item {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--cream);
+}
+.rdi-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.rdi-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.rdi-content {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
 }
 </style>

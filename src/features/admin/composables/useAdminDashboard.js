@@ -4,6 +4,66 @@ import { PriceFormatter } from '@shared/lib/formatters'
 import { applyOrderStatusMapping } from '@shared/lib/orders/orderStatusMapper'
 import { useAdminChartPage } from './useAdminChartPage'
 
+const KPI_META = {
+  USERS:        { icon: 'users',      label: 'Người dùng',   tone: 'blue',   suffix: null },
+  REVENUE:      { icon: 'trending',   label: 'Doanh thu (T)', tone: 'gold',  suffix: null },
+  ORDERS:       { icon: 'box',        label: 'Đơn hàng',      tone: 'green', suffix: null },
+  PRODUCTS:     { icon: 'grid',       label: 'Sản phẩm',     tone: 'navy',  suffix: null },
+  LOW_STOCK:    { icon: 'alert',      label: 'Sắp hết hàng', tone: 'warn',  suffix: null },
+  REVENUE_TOTAL:{ icon: 'creditCard', label: 'Tổng doanh thu', tone: 'gold', suffix: null },
+  ORDERS_TOTAL: { icon: 'box',        label: 'Tổng đơn',     tone: 'green', suffix: null },
+}
+
+const ALERT_META = {
+  ORDERS_TODAY: { icon: 'box',    tone: 'blue' },
+  LOW_STOCK:    { icon: 'alert',  tone: 'warn' },
+  NEW_USERS:    { icon: 'users',  tone: 'green' },
+}
+
+function formatKpiValue(type, value) {
+  if (type === 'REVENUE' || type === 'REVENUE_TOTAL' || type === 'REVENUE_MONTH') {
+    return PriceFormatter.format(value)
+  }
+  return Number(value ?? 0).toLocaleString()
+}
+
+function mapKpi(raw) {
+  const meta = KPI_META[raw.type] ?? { icon: 'bar', label: raw.type ?? '', tone: 'navy', suffix: null }
+  const value = raw.value ?? 0
+  const changeValue = raw.changeValue ?? 0
+  const up = changeValue >= 0
+  return {
+    key: raw.type,
+    icon: meta.icon,
+    label: meta.label,
+    tone: meta.tone,
+    value: formatKpiValue(raw.type, value),
+    suffix: meta.suffix,
+    change: `${up ? '+' : ''}${changeValue % 1 === 0 ? changeValue : changeValue.toFixed(1)}`,
+    up,
+  }
+}
+
+function mapAlert(raw) {
+  const meta = ALERT_META[raw.type] ?? { icon: 'info', tone: 'blue' }
+  const labelMap = {
+    ORDERS_TODAY: `${raw.count ?? 0} đơn hôm nay`,
+    LOW_STOCK:    `${raw.count ?? 0} sản phẩm sắp hết`,
+    NEW_USERS:    `${raw.count ?? 0} người dùng mới`,
+  }
+  const titleMap = {
+    ORDERS_TODAY: 'Đơn hôm nay',
+    LOW_STOCK:    'Sắp hết hàng',
+    NEW_USERS:    'Người dùng mới',
+  }
+  return {
+    icon: meta.icon,
+    tone: meta.tone,
+    title: titleMap[raw.type] ?? raw.type,
+    desc: labelMap[raw.type] ?? `${raw.count ?? 0}`,
+  }
+}
+
 export function useAdminDashboard() {
   const revenueCanvas = ref(null)
   const orderCanvas = ref(null)
@@ -12,6 +72,12 @@ export function useAdminDashboard() {
     if (!rawData.value) return null
     return {
       ...rawData.value,
+      kpis: Array.isArray(rawData.value.kpis)
+        ? rawData.value.kpis.map(mapKpi)
+        : [],
+      alerts: Array.isArray(rawData.value.alerts)
+        ? rawData.value.alerts.map(mapAlert)
+        : [],
       recentOrders: Array.isArray(rawData.value.recentOrders)
         ? rawData.value.recentOrders.map((order) => {
             const mapped = applyOrderStatusMapping(order)

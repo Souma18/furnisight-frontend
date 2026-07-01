@@ -6,6 +6,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
 import ProductDetailTopSection from '../components/ProductDetailTopSection.vue'
 import ProductDetailTabsSection from '../components/ProductDetailTabsSection.vue'
 import { useProductDetailPage } from '../composables/useProductDetailPage'
+import { useI18n } from 'vue-i18n'
 import '../styles/productDetail.css'
 
 const ProductDetail3DModal = defineAsyncComponent(() => import('../components/ProductDetail3DModal.vue'))
@@ -60,28 +61,28 @@ const {
     <!-- Loading state -->
     <div v-if="loading" class="pd-state-center">
       <div class="pd-spinner"></div>
-      <p>Đang tải sản phẩm...</p>
+      <p>{{ t('productDetail.page.loading') }}</p>
     </div>
 
     <!-- Not found state -->
     <div v-else-if="error === 'not_found'" class="pd-state-center">
       <AppIcon class="pd-state-icon" name="search" :size="34" />
-      <h2>Sản phẩm không tồn tại</h2>
-      <p>Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+      <h2>{{ t('productDetail.page.notFoundTitle') }}</h2>
+      <p>{{ t('productDetail.page.notFoundDesc') }}</p>
       <RouterLink class="pd-btn-back" :to="{ name: 'products' }">
         <AppIcon name="chevronLeft" :size="16" />
-        Quay lại danh sách
+        {{ t('productDetail.page.backToList') }}
       </RouterLink>
     </div>
 
     <!-- API error state -->
     <div v-else-if="error === 'api_error'" class="pd-state-center">
       <AppIcon class="pd-state-icon" name="alert" :size="34" />
-      <h2>Không thể tải sản phẩm</h2>
-      <p>Đã xảy ra lỗi kết nối. Vui lòng thử lại.</p>
+      <h2>{{ t('productDetail.page.errorTitle') }}</h2>
+      <p>{{ t('productDetail.page.errorDesc') }}</p>
       <AppButton class="pd-btn-retry" @click="retry">
         <AppIcon name="refresh" :size="16" />
-        Thử lại
+        {{ t('productDetail.page.retry') }}
       </AppButton>
     </div>
 

@@ -108,7 +108,7 @@ export function useProduct3DViewer(props) {
       activeModel.position.sub(center.multiplyScalar(fit))
       activeModel.position.y += 0.55
     } catch (err) {
-      loadError.value = `Không tải được mô hình 3D. (${err.message || err})`
+      loadError.value = `${t('productDetail.alerts.loadModelError')} (${err.message || err})`
     } finally {
       isLoading.value = false
     }

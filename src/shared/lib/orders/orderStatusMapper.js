@@ -1,3 +1,5 @@
+import { i18n } from '../../i18n'
+
 /**
  * Order Status Flow (matches backend OrderStatus enum exactly):
  *
@@ -143,12 +145,17 @@ export function isCodPayment(orderOrPaymentType = '') {
 export function getOrderStatusLabel(orderOrStatus = '') {
   const code = normalizeOrderStatusCode(orderOrStatus)
   const uiKey = STATUS_CODE_TO_UI_KEY[code]
+  
+  let resultKey = uiKey
   if (code === ORDER_STATUS_CODES.UNPAID && typeof orderOrStatus === 'object') {
-    return isCodPayment(orderOrStatus)
-      ? ORDER_STATUS_LABELS.unpaid_cod
-      : ORDER_STATUS_LABELS.unpaid
+    resultKey = isCodPayment(orderOrStatus) ? 'unpaid_cod' : 'unpaid'
   }
-  return ORDER_STATUS_LABELS[uiKey] || uiKey || String(orderOrStatus || '')
+  
+  if (i18n && i18n.global && i18n.global.te(`orders.status.${resultKey}`)) {
+    return i18n.global.t(`orders.status.${resultKey}`)
+  }
+  
+  return ORDER_STATUS_LABELS[resultKey] || resultKey || String(orderOrStatus || '')
 }
 
 export function getOrderStatusApiValue(label) {

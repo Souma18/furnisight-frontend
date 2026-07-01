@@ -136,7 +136,7 @@ export function useProductReviews(product) {
         checked: true,
         purchased: false,
         orderItemId: null,
-        error: 'Không thể kiểm tra điều kiện đánh giá. Vui lòng thử lại sau.',
+        error: t('productDetail.alerts.eligibilityError'),
       }
     }
   }
@@ -164,13 +164,13 @@ export function useProductReviews(product) {
     }
 
     if (!reviewEligibility.value.purchased || !reviewEligibility.value.orderItemId) {
-      reviewSubmitError.value = 'Bạn cần mua và nhận sản phẩm trước khi đánh giá.'
+      reviewSubmitError.value = t('productDetail.review.purchaseReq')
       return
     }
 
     const content = String(reviewForm.value.content || '').trim()
     if (!content) {
-      reviewSubmitError.value = 'Vui lòng nhập nội dung đánh giá.'
+      reviewSubmitError.value = t('productDetail.alerts.emptyContent')
       return
     }
 
@@ -197,10 +197,10 @@ export function useProductReviews(product) {
         rating: submittedRating,
         orderItemId: null,
       }
-      reviewSubmitSuccess.value = 'Đã gửi đánh giá của bạn.'
+      reviewSubmitSuccess.value = t('productDetail.alerts.submitSuccess')
       await loadProductReviews(product.value.id)
     } catch {
-      reviewSubmitError.value = 'Không thể gửi đánh giá. Có thể bạn đã đánh giá sản phẩm này rồi.'
+      reviewSubmitError.value = t('productDetail.alerts.submitError')
     } finally {
       reviewSubmitting.value = false
     }
@@ -227,7 +227,7 @@ export function useProductReviews(product) {
       .join(' ')
 
     return {
-      userName: profileName || authName || authUser?.email || 'Khách hàng',
+      userName: profileName || authName || authUser?.email || t('productDetail.review.customer'),
       userAvatarMediaId: profile?.avatarMediaId || null,
     }
   }

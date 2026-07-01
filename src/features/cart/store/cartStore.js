@@ -139,6 +139,13 @@ export const useCartStore = defineStore('cart', () => {
     const { force = false } = options
     const currentLocale = getCurrentLocale()
 
+    // Admins have no personal cart — skip entirely to avoid 401 errors
+    if (authStore.isAdmin) {
+      hydrated.value = true
+      hydratedLocale.value = currentLocale
+      return items.value
+    }
+
     if (hydrated.value && hydratedLocale.value === currentLocale && !force) return items.value
     if (hydratePromise && !force) return hydratePromise
 
@@ -146,7 +153,7 @@ export const useCartStore = defineStore('cart', () => {
       loading.value = true
 
       try {
-        const response = await cartApi.getCart(undefined, authStore.isAdmin ? { skipAuth: true } : {})
+        const response = await cartApi.getCart()
         items.value = cloneItems(response?.data?.items ?? [])
         persistItems()
         hydrated.value = true

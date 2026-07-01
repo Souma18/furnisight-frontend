@@ -2,6 +2,7 @@
 defineProps({
   title: { type: String, required: true },
   subtitle: { type: String, default: '' },
+  flexible: { type: Boolean, default: false },
 })
 </script>
 
@@ -14,7 +15,7 @@ defineProps({
       </div>
       <slot name="actions" />
     </div>
-    <div class="chart-wrap">
+    <div class="chart-wrap" :class="{ 'chart-wrap--flex': flexible }">
       <slot />
     </div>
   </div>

@@ -2,10 +2,12 @@ import { ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
+import { useI18n } from 'vue-i18n'
 
 export function useProductNavigation({ product }) {
   const router = useRouter()
   const authStore = useAuthStore()
+  const { t } = useI18n()
   const breadcrumbLinks = ref([])
 
   watch(product, (p) => {
@@ -17,7 +19,7 @@ export function useProductNavigation({ product }) {
     const trail = categoryTrail.length ? categoryTrail : fallbackCategory
 
     breadcrumbLinks.value = [
-      { label: 'Trang chủ', to: { name: 'home' } },
+      { label: t('nav.home'), to: { name: 'home' } },
       ...dedupeTrail(trail).map((crumb) => ({
         label: crumb.label ?? crumb.name ?? crumb,
         to: { name: 'products', query: { category: crumb.slug || crumb.id || crumb.label || crumb } },

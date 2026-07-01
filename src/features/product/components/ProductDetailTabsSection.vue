@@ -5,6 +5,7 @@ import AppImage from '@shared/ui/AppImage.vue'
 import { computed, toRef } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useProductTabs } from '../composables/useProductTabs'
+import { useI18n } from 'vue-i18n'
 
 const emit = defineEmits(['switch-tab', 'update-review-field', 'submit-review', 'open-login'])
 const props = defineProps({
@@ -20,6 +21,7 @@ const props = defineProps({
   reviewIsAuthenticated: { type: Boolean, default: false },
 })
 
+const { t } = useI18n()
 const {
   reviewCountLabel,
   specsRows,
@@ -27,11 +29,11 @@ const {
 } = useProductTabs(toRef(props, 'product'), toRef(props, 'activeVariant'))
 
 const reviewGateMessage = computed(() => {
-  if (props.reviewEligibility.loading) return 'Đang kiểm tra điều kiện đánh giá...'
+  if (props.reviewEligibility.loading) return t('productDetail.review.checking')
   if (props.reviewEligibility.error) return props.reviewEligibility.error
-  if (!props.reviewIsAuthenticated) return 'Đăng nhập để kiểm tra điều kiện đánh giá.'
-  if (!props.reviewEligibility.purchased) return 'Bạn cần mua và nhận sản phẩm trước khi đánh giá.'
-  if (!props.reviewEligibility.orderItemId) return 'Không tìm thấy dòng đơn hàng hợp lệ để đánh giá.'
+  if (!props.reviewIsAuthenticated) return t('productDetail.review.loginReq')
+  if (!props.reviewEligibility.purchased) return t('productDetail.review.purchaseReq')
+  if (!props.reviewEligibility.orderItemId) return t('productDetail.review.noOrder')
   return ''
 })
 
@@ -56,26 +58,26 @@ function updateReviewField(field, value) {
   <section class="pd-tabs" aria-label="Thông tin chi tiết sản phẩm">
     <div class="nav" aria-label="Chuyển nội dung sản phẩm">
       <AppButton type="button" :class="{ active: activeTab === 'desc' }" @click="emit('switch-tab', 'desc')">
-        Mô tả sản phẩm
+        {{ t('productDetail.tabs.desc') }}
       </AppButton>
       <AppButton type="button" :class="{ active: activeTab === 'spec' }" @click="emit('switch-tab', 'spec')">
-        Thông số kỹ thuật
+        {{ t('productDetail.tabs.spec') }}
       </AppButton>
       <AppButton type="button" :class="{ active: activeTab === 'review' }" @click="emit('switch-tab', 'review')">
-        Đánh giá ({{ reviewCountLabel }})
+        {{ t('productDetail.tabs.review', { count: reviewCountLabel }) }}
       </AppButton>
     </div>
     <div v-if="activeTab === 'desc'" class="pd-section-layout desc-grid">
       <div class="pd-content pd-story-panel">
-        <span class="pd-section-eyebrow">Tổng quan</span>
-        <h2>Mô tả sản phẩm</h2>
+        <span class="pd-section-eyebrow">{{ t('productDetail.desc.overview') }}</span>
+        <h2>{{ t('productDetail.desc.title') }}</h2>
         <p class="pd-description-text">{{ product.description }}</p>
         <ul>
           <li v-for="item in product.features" :key="item">{{ item }}</li>
         </ul>
       </div>
       <div class="spec-table pd-spec-summary">
-        <div class="spec-head">Thông số cơ bản</div>
+        <div class="spec-head">{{ t('productDetail.spec.basic') }}</div>
         <div v-for="row in specsRows.slice(0, 4)" :key="`sum-desc-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>
@@ -84,7 +86,7 @@ function updateReviewField(field, value) {
     </div>
     <div v-else-if="activeTab === 'spec'" class="pd-section-layout pd-spec">
       <div class="spec-table">
-        <div class="spec-head">Chi tiết kỹ thuật đầy đủ</div>
+        <div class="spec-head">{{ t('productDetail.spec.full') }}</div>
         <div v-for="row in specsRows" :key="`det-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>
@@ -104,7 +106,7 @@ function updateReviewField(field, value) {
               :class="{ active: star <= Math.round(product.rating || 5) }"
             />
           </p>
-          <p class="count">{{ reviewCountLabel }} đánh giá</p>
+          <p class="count">{{ reviewCountLabel }} </p>
         </div>
         <div class="review-bars">
           <div v-for="bar in reviewBars" :key="`bar-${bar.star}`" class="bar-row">
@@ -120,9 +122,9 @@ function updateReviewField(field, value) {
       <form class="review-form" @submit.prevent="emit('submit-review')">
         <div class="review-form-head">
           <div>
-            <h3>Viết đánh giá</h3>
+            <h3>{{ t('productDetail.review.write') }}</h3>
             <p v-if="reviewGateMessage" class="review-gate">{{ reviewGateMessage }}</p>
-            <p v-else class="review-gate ready">Chia sẻ trải nghiệm thực tế của bạn về sản phẩm.</p>
+            <p v-else class="review-gate ready">{{ t('productDetail.review.readyMsg') }}</p>
           </div>
           <AppButton
             v-if="!reviewIsAuthenticated && !reviewEligibility.loading"
@@ -130,7 +132,7 @@ function updateReviewField(field, value) {
             class="review-login-btn"
             @click="emit('open-login')"
           >
-            Đăng nhập
+            {{ t('productDetail.review.loginBtn') }}
           </AppButton>
         </div>
         <div class="rating-picker" aria-label="Chọn số sao">
@@ -148,12 +150,12 @@ function updateReviewField(field, value) {
           >
             <AppIcon name="star" :size="22" />
           </AppButton>
-          <span class="rating-picked-label">Đã chọn {{ Number(reviewForm.rating || 0) }} sao</span>
+          <span class="rating-picked-label">{{ t('productDetail.review.selectedStars', { n: Number(reviewForm.rating || 0) }) }}</span>
         </div>
         <AppInput
           class="review-title-input"
           type="text"
-          placeholder="Tiêu đề đánh giá"
+          :placeholder="t('productDetail.review.titlePlaceholder')"
           :value="reviewForm.title"
           :disabled="!reviewFormEnabled || reviewSubmitting"
           maxlength="255"
@@ -162,7 +164,7 @@ function updateReviewField(field, value) {
         <textarea
           class="review-content-input"
           rows="4"
-          placeholder="Cảm nhận của bạn về sản phẩm"
+          :placeholder="t('productDetail.review.contentPlaceholder')"
           :value="reviewForm.content"
           :disabled="!reviewFormEnabled || reviewSubmitting"
           @input="updateReviewField('content', $event.target.value)"
@@ -172,7 +174,7 @@ function updateReviewField(field, value) {
           <p v-else-if="reviewSubmitSuccess" class="review-submit-msg success">{{ reviewSubmitSuccess }}</p>
           <span v-else></span>
           <AppButton type="submit" class="review-submit-btn" :disabled="!reviewCanSubmit">
-            {{ reviewSubmitting ? 'Đang gửi...' : 'Gửi đánh giá' }}
+            {{ reviewSubmitting ? t('productDetail.review.submitting') : t('productDetail.review.submitBtn') }}
           </AppButton>
         </div>
       </form>
@@ -181,7 +183,7 @@ function updateReviewField(field, value) {
           <AppImage v-if="item.avatar" :src="item.avatar" alt="Avatar" class="avatar-img"  />
           <span v-else class="avatar">{{ (item.userName || item.user || 'K').slice(0, 1).toUpperCase() }}</span>
           <div>
-            <p class="name">{{ item.userName || item.user || 'Khách hàng' }}</p>
+            <p class="name">{{ item.userName || item.user || t('productDetail.review.customer') }}</p>
             <p class="date">{{ item.createdAtFormatted || item.createdAt }}</p>
           </div>
           <span class="stars" aria-label="Đánh giá">
@@ -201,6 +203,6 @@ function updateReviewField(field, value) {
         </div>
       </div>
     </div>
-    <div v-else class="pd-content muted">Nội dung tab đang được chuẩn hóa theo mẫu.</div>
+    <div v-else class="pd-content muted">{{ t('productDetail.muted') }}</div>
   </section>
 </template>

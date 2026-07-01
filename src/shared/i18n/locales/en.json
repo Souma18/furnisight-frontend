@@ -711,12 +711,30 @@
       "titleLine1": "Need to",
       "titleAccent": "know more?",
       "items": {
-        "free3d": { "q": "Is 3D visualization free?", "a": "Yes, completely free. Upload a room photo and AI will analyze it and create a 3D model right away. You do not need an account to try it." },
-        "shipping": { "q": "How long does delivery usually take?", "a": "Usually 3-5 working days in HCMC and Hanoi. Other provinces take 5-7 days. Custom products may need 2-4 weeks." },
-        "return": { "q": "Can I return products?", "a": "We offer a free 30-day return policy for manufacturer defects. Unused products in original condition can be exchanged within 7 days." },
-        "ai": { "q": "Can AI detect my room type accurately?", "a": "Room detection accuracy reaches 94% with clear photos. If AI detects incorrectly, you can manually choose again in two clicks and recommendations update immediately." },
-        "designFee": { "q": "Is design consultation charged?", "a": "The first consultation, online or at showroom, is completely free. Home consultations are free in HCMC and Hanoi for projects from 50 million VND." },
-        "showroom": { "q": "Can I view products before buying?", "a": "Yes. Our HCMC and Hanoi showrooms display more than 300 real products. You can book a visit or stop by during opening hours." }
+        "free3d": {
+          "q": "Is 3D visualization free?",
+          "a": "Yes, completely free. Upload a room photo and AI will analyze it and create a 3D model right away. You do not need an account to try it."
+        },
+        "shipping": {
+          "q": "How long does delivery usually take?",
+          "a": "Usually 3-5 working days in HCMC and Hanoi. Other provinces take 5-7 days. Custom products may need 2-4 weeks."
+        },
+        "return": {
+          "q": "Can I return products?",
+          "a": "We offer a free 30-day return policy for manufacturer defects. Unused products in original condition can be exchanged within 7 days."
+        },
+        "ai": {
+          "q": "Can AI detect my room type accurately?",
+          "a": "Room detection accuracy reaches 94% with clear photos. If AI detects incorrectly, you can manually choose again in two clicks and recommendations update immediately."
+        },
+        "designFee": {
+          "q": "Is design consultation charged?",
+          "a": "The first consultation, online or at showroom, is completely free. Home consultations are free in HCMC and Hanoi for projects from 50 million VND."
+        },
+        "showroom": {
+          "q": "Can I view products before buying?",
+          "a": "Yes. Our HCMC and Hanoi showrooms display more than 300 real products. You can book a visit or stop by during opening hours."
+        }
       }
     },
     "toast": {
@@ -824,6 +842,161 @@
     "badge": {
       "room": "Room",
       "detected": "Detected"
+    }
+  },
+  "productDetail": {
+    "tabs": {
+      "desc": "Description",
+      "spec": "Specifications",
+      "review": "Reviews ({count})"
+    },
+    "desc": {
+      "overview": "Overview",
+      "title": "Product description"
+    },
+    "spec": {
+      "basic": "Basic specifications",
+      "full": "Full technical details",
+      "keys": {
+        "material": "Main material",
+        "color": "Color",
+        "dimension": "Dimensions",
+        "weight": "Weight",
+        "warranty": "Warranty",
+        "stock": "In stock",
+        "category": "Category"
+      },
+      "values": {
+        "items": "{count} items"
+      }
+    },
+    "review": {
+      "count": "{count} reviews",
+      "write": "Write a review",
+      "checking": "Checking review eligibility...",
+      "loginReq": "Log in to check review eligibility.",
+      "purchaseReq": "You must purchase and receive this product to review it.",
+      "noOrder": "No eligible order item found for review.",
+      "readyMsg": "Share your real experience with this product.",
+      "loginBtn": "Log in",
+      "selectedStars": "{n} stars selected",
+      "titlePlaceholder": "Review title",
+      "contentPlaceholder": "Your thoughts on this product",
+      "submitting": "Submitting...",
+      "submitBtn": "Submit review",
+      "customer": "Customer"
+    },
+    "muted": "Tab content is being standardized.",
+    "top": {
+      "reviews": "{count} reviews",
+      "inStock": "In stock ({count} items)",
+      "outOfStock": "Out of stock",
+      "soldOut": "Sold out",
+      "adding": "Adding...",
+      "added": "Added",
+      "add": "Add to cart",
+      "processing": "Processing...",
+      "buyNow": "Buy now",
+      "noModel3D": "This variant does not have a 3D model.",
+      "listedPrice": "Listed price",
+      "quantity": "Quantity",
+      "optionsLabel": "Select variant"
+    },
+    "page": {
+      "loading": "Loading product...",
+      "notFoundTitle": "Product not found",
+      "notFoundDesc": "The product you are looking for does not exist or has been deleted.",
+      "backToList": "Back to list",
+      "errorTitle": "Cannot load product",
+      "errorDesc": "A connection error occurred. Please try again.",
+      "retry": "Retry"
+    },
+    "modal": {
+      "defaultProduct": "Product",
+      "title": "3D Visualizer – {name}",
+      "close": "Close",
+      "tabProduct": "Product",
+      "tabRoom": "Full room",
+      "noModelDesc": "This variant does not have a real 3D model. You can still view info and order.",
+      "roomDesc": "To view the product in a room space, switch to 3D Visualizer and place it in a template room.",
+      "openRoom": "Open 3D Visualizer",
+      "loadingModel": "Loading model...",
+      "showingModel": "Showing 3D product model",
+      "navigating": "Full room mode - navigating to Room3D"
+    },
+    "alerts": {
+      "eligibilityError": "Cannot check review eligibility. Please try again later.",
+      "emptyContent": "Please enter review content.",
+      "submitSuccess": "Your review has been submitted.",
+      "submitError": "Cannot submit review. You may have already reviewed this product.",
+      "loadModelError": "Failed to load 3D model."
+    }
+  },
+  "api": {
+    "errors": {
+      "GENERIC": "An error occurred. Please try again later.",
+      "NETWORK": "Cannot connect to the server. Please check your network and try again.",
+      "TIMEOUT": "The request took too long. Please try again.",
+      "ACCOUNT_NOT_FOUND": "Account not found.",
+      "ACCOUNT_ALREADY_EXISTS": "Account already exists.",
+      "ACCOUNT_BANNED": "Account is banned.",
+      "ACCOUNT_TEMPORARILY_LOCKED": "Account is temporarily locked. Please try again later.",
+      "ACCOUNT_NOT_VERIFIED": "Account is not verified.",
+      "INVALID_PASSWORD": "Incorrect password.",
+      "INVALID_TOKEN": "Invalid or expired authentication token.",
+      "TOKEN_EXPIRED": "Authentication session expired. Please try again.",
+      "TOKEN_ALREADY_USED": "Authentication token has already been used.",
+      "NOT_ENOUGH_PERMISSION": "You do not have permission to perform this action.",
+      "VALIDATION_ERROR": "Invalid information. Please check again.",
+      "BAD_REQUEST": "Invalid request information.",
+      "MISSING_PARAMETER": "Missing required information.",
+      "UNAUTHORIZED": "Please log in to continue.",
+      "FORBIDDEN": "You do not have permission to perform this action.",
+      "NOT_FOUND": "Requested data not found.",
+      "CONFLICT": "Data already exists or is conflicting.",
+      "PRODUCT_NOT_FOUND": "Product not found.",
+      "CATEGORY_NOT_FOUND": "Category not found.",
+      "PRODUCT_VARIANT_NOT_FOUND": "Product variant not found.",
+      "DUPLICATE_PRODUCT_NAME": "Product name already exists.",
+      "DUPLICATE_CATEGORY_SLUG": "Category slug already exists.",
+      "DUPLICATE_CATEGORY_NAME": "Category name already exists.",
+      "INSUFFICIENT_STOCK": "Insufficient product stock.",
+      "INVALID_STOCK_QUANTITY": "Invalid stock quantity.",
+      "INVALID_PRICE": "Invalid product price.",
+      "REVIEW_NOT_FOUND": "Review not found.",
+      "ORDER_NOT_FOUND": "Order not found.",
+      "INVALID_ORDER_STATUS": "Invalid order status.",
+      "INVALID_PAYMENT_METHOD": "Invalid payment method.",
+      "INVALID_PAYMENT_AMOUNT": "Invalid payment amount.",
+      "MEDIA_NOT_FOUND": "Uploaded file not found.",
+      "MEDIA_UPLOAD_FAILED": "Failed to upload file. Please try again.",
+      "MESSAGE_NOT_FOUND": "Conversation or message not found.",
+      "MESSAGE_FAILED": "Failed to send message. Please try again.",
+      "NOTIFICATION_TEMPLATE_NOT_FOUND": "Notification template not found.",
+      "INBOX_MESSAGE_NOT_FOUND": "Notification not found.",
+      "status": {
+        "413": "Uploaded file is too large.",
+        "415": "File format is not supported.",
+        "429": "You are performing actions too quickly. Please try again later.",
+        "502": "Service is interrupted. Please try again later.",
+        "503": "Service is temporarily unavailable. Please try again later.",
+        "504": "Service is taking too long to respond. Please try again later."
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "all": "All",
+      "unpaid": "Pending payment",
+      "unpaid_cod": "Order placed",
+      "payment_failed": "Payment failed",
+      "paid": "Paid",
+      "shipping": "Shipping",
+      "in_transit": "In transit",
+      "delivered": "Delivered",
+      "cancelled": "Cancelled",
+      "refund_pending": "Refund pending",
+      "refunded": "Refunded"
     }
   }
 }

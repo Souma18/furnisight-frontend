@@ -716,12 +716,30 @@
       "titleLine1": "Bạn cần",
       "titleAccent": "biết gì thêm?",
       "items": {
-        "free3d": { "q": "Tính năng trực quan 3D có miễn phí không?", "a": "Hoàn toàn miễn phí! Bạn chỉ cần tải ảnh phòng lên, AI sẽ phân tích và tạo mô hình 3D ngay lập tức. Không cần đăng ký tài khoản để dùng thử." },
-        "shipping": { "q": "Thời gian giao hàng trung bình bao lâu?", "a": "Thông thường 3-5 ngày làm việc trong nội thành TP.HCM và Hà Nội. Các tỉnh thành khác 5-7 ngày. Sản phẩm đặt riêng có thể cần 2-4 tuần." },
-        "return": { "q": "Có thể đổi trả sản phẩm không?", "a": "Chính sách đổi trả 30 ngày miễn phí nếu sản phẩm có lỗi từ nhà sản xuất. Sản phẩm nguyên vẹn chưa qua sử dụng có thể đổi trong 7 ngày." },
-        "ai": { "q": "AI có nhận diện đúng loại phòng của tôi không?", "a": "Độ chính xác nhận diện loại phòng đạt 94% với ảnh rõ ràng. Nếu AI nhận diện sai, bạn có thể chọn lại thủ công trong vòng 2 click - và AI sẽ cập nhật gợi ý ngay lập tức." },
-        "designFee": { "q": "Tư vấn thiết kế có tính phí không?", "a": "Buổi tư vấn đầu tiên (online hoặc tại showroom) hoàn toàn miễn phí. Tư vấn tại nhà bạn miễn phí trong TP.HCM và Hà Nội khi ngân sách dự án từ 50 triệu trở lên." },
-        "showroom": { "q": "Có thể xem sản phẩm thực tế trước khi mua không?", "a": "Có! Showroom của chúng tôi tại TP.HCM và Hà Nội trưng bày hơn 300 sản phẩm thực tế. Bạn có thể đặt lịch tham quan hoặc ghé thăm trong giờ làm việc mà không cần hẹn trước." }
+        "free3d": {
+          "q": "Tính năng trực quan 3D có miễn phí không?",
+          "a": "Hoàn toàn miễn phí! Bạn chỉ cần tải ảnh phòng lên, AI sẽ phân tích và tạo mô hình 3D ngay lập tức. Không cần đăng ký tài khoản để dùng thử."
+        },
+        "shipping": {
+          "q": "Thời gian giao hàng trung bình bao lâu?",
+          "a": "Thông thường 3-5 ngày làm việc trong nội thành TP.HCM và Hà Nội. Các tỉnh thành khác 5-7 ngày. Sản phẩm đặt riêng có thể cần 2-4 tuần."
+        },
+        "return": {
+          "q": "Có thể đổi trả sản phẩm không?",
+          "a": "Chính sách đổi trả 30 ngày miễn phí nếu sản phẩm có lỗi từ nhà sản xuất. Sản phẩm nguyên vẹn chưa qua sử dụng có thể đổi trong 7 ngày."
+        },
+        "ai": {
+          "q": "AI có nhận diện đúng loại phòng của tôi không?",
+          "a": "Độ chính xác nhận diện loại phòng đạt 94% với ảnh rõ ràng. Nếu AI nhận diện sai, bạn có thể chọn lại thủ công trong vòng 2 click - và AI sẽ cập nhật gợi ý ngay lập tức."
+        },
+        "designFee": {
+          "q": "Tư vấn thiết kế có tính phí không?",
+          "a": "Buổi tư vấn đầu tiên (online hoặc tại showroom) hoàn toàn miễn phí. Tư vấn tại nhà bạn miễn phí trong TP.HCM và Hà Nội khi ngân sách dự án từ 50 triệu trở lên."
+        },
+        "showroom": {
+          "q": "Có thể xem sản phẩm thực tế trước khi mua không?",
+          "a": "Có! Showroom của chúng tôi tại TP.HCM và Hà Nội trưng bày hơn 300 sản phẩm thực tế. Bạn có thể đặt lịch tham quan hoặc ghé thăm trong giờ làm việc mà không cần hẹn trước."
+        }
       }
     },
     "toast": {
@@ -829,6 +847,161 @@
     "badge": {
       "room": "Phòng",
       "detected": "Nhận diện"
+    }
+  },
+  "productDetail": {
+    "tabs": {
+      "desc": "Mô tả sản phẩm",
+      "spec": "Thông số kỹ thuật",
+      "review": "Đánh giá ({count})"
+    },
+    "desc": {
+      "overview": "Tổng quan",
+      "title": "Mô tả sản phẩm"
+    },
+    "spec": {
+      "basic": "Thông số cơ bản",
+      "full": "Chi tiết kỹ thuật đầy đủ",
+      "keys": {
+        "material": "Chất liệu chính",
+        "color": "Màu sắc",
+        "dimension": "Kích thước",
+        "weight": "Khối lượng",
+        "warranty": "Bảo hành",
+        "stock": "Tồn kho",
+        "category": "Danh mục"
+      },
+      "values": {
+        "items": "{count} sản phẩm"
+      }
+    },
+    "review": {
+      "count": "{count} đánh giá",
+      "write": "Viết đánh giá",
+      "checking": "Đang kiểm tra điều kiện đánh giá...",
+      "loginReq": "Đăng nhập để kiểm tra điều kiện đánh giá.",
+      "purchaseReq": "Bạn cần mua và nhận sản phẩm trước khi đánh giá.",
+      "noOrder": "Không tìm thấy dòng đơn hàng hợp lệ để đánh giá.",
+      "readyMsg": "Chia sẻ trải nghiệm thực tế của bạn về sản phẩm.",
+      "loginBtn": "Đăng nhập",
+      "selectedStars": "Đã chọn {n} sao",
+      "titlePlaceholder": "Tiêu đề đánh giá",
+      "contentPlaceholder": "Cảm nhận của bạn về sản phẩm",
+      "submitting": "Đang gửi...",
+      "submitBtn": "Gửi đánh giá",
+      "customer": "Khách hàng"
+    },
+    "muted": "Nội dung tab đang được chuẩn hóa theo mẫu.",
+    "top": {
+      "reviews": "{count} đánh giá",
+      "inStock": "Còn hàng ({count} sản phẩm)",
+      "outOfStock": "Tạm hết hàng",
+      "soldOut": "Hết hàng",
+      "adding": "Đang thêm...",
+      "added": "Đã thêm",
+      "add": "Thêm vào giỏ",
+      "processing": "Đang xử lý...",
+      "buyNow": "Mua ngay",
+      "noModel3D": "Phiên bản này chưa có mô hình 3D.",
+      "listedPrice": "Giá niêm yết",
+      "quantity": "Số lượng",
+      "optionsLabel": "Lựa chọn phiên bản"
+    },
+    "page": {
+      "loading": "Đang tải sản phẩm...",
+      "notFoundTitle": "Sản phẩm không tồn tại",
+      "notFoundDesc": "Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.",
+      "backToList": "Quay lại danh sách",
+      "errorTitle": "Không thể tải sản phẩm",
+      "errorDesc": "Đã xảy ra lỗi kết nối. Vui lòng thử lại.",
+      "retry": "Thử lại"
+    },
+    "modal": {
+      "defaultProduct": "Sản phẩm",
+      "title": "Trực quan 3D – {name}",
+      "close": "Đóng",
+      "tabProduct": "Sản phẩm",
+      "tabRoom": "Phòng đầy đủ",
+      "noModelDesc": "Mẫu này chưa có mô hình 3D thật. Bạn vẫn có thể xem thông tin và đặt",
+      "roomDesc": "Để xem sản phẩm trong không gian phòng, chuyển qua Trực quan 3D và đặt vào phòng mẫu.",
+      "openRoom": "Mở Trực quan 3D",
+      "loadingModel": "Đang tải mô hình...",
+      "showingModel": "Đang hiển thị mô hình sản phẩm 3D",
+      "navigating": "Chế độ phòng đầy đủ - điều hướng sang Room3D"
+    },
+    "alerts": {
+      "eligibilityError": "Không thể kiểm tra điều kiện đánh giá. Vui lòng thử lại sau.",
+      "emptyContent": "Vui lòng nhập nội dung đánh giá.",
+      "submitSuccess": "Đã gửi đánh giá của bạn.",
+      "submitError": "Không thể gửi đánh giá. Có thể bạn đã đánh giá sản phẩm này rồi.",
+      "loadModelError": "Không tải được mô hình 3D."
+    }
+  },
+  "api": {
+    "errors": {
+      "GENERIC": "Có lỗi xảy ra. Vui lòng thử lại sau.",
+      "NETWORK": "Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng và thử lại.",
+      "TIMEOUT": "Yêu cầu mất quá nhiều thời gian. Vui lòng thử lại.",
+      "ACCOUNT_NOT_FOUND": "Không tìm thấy tài khoản.",
+      "ACCOUNT_ALREADY_EXISTS": "Tài khoản đã tồn tại.",
+      "ACCOUNT_BANNED": "Tài khoản đã bị khóa.",
+      "ACCOUNT_TEMPORARILY_LOCKED": "Tài khoản đang tạm khóa. Vui lòng thử lại sau.",
+      "ACCOUNT_NOT_VERIFIED": "Tài khoản chưa được xác minh.",
+      "INVALID_PASSWORD": "Mật khẩu không chính xác.",
+      "INVALID_TOKEN": "Mã xác thực không hợp lệ hoặc đã hết hạn.",
+      "TOKEN_EXPIRED": "Phiên xác thực đã hết hạn. Vui lòng thử lại.",
+      "TOKEN_ALREADY_USED": "Mã xác thực đã được sử dụng.",
+      "NOT_ENOUGH_PERMISSION": "Bạn không có quyền thực hiện thao tác này.",
+      "VALIDATION_ERROR": "Thông tin chưa hợp lệ. Vui lòng kiểm tra lại.",
+      "BAD_REQUEST": "Thông tin gửi lên chưa hợp lệ.",
+      "MISSING_PARAMETER": "Thiếu thông tin bắt buộc.",
+      "UNAUTHORIZED": "Vui lòng đăng nhập để tiếp tục.",
+      "FORBIDDEN": "Bạn không có quyền thực hiện thao tác này.",
+      "NOT_FOUND": "Không tìm thấy dữ liệu yêu cầu.",
+      "CONFLICT": "Dữ liệu đã tồn tại hoặc đang bị trùng.",
+      "PRODUCT_NOT_FOUND": "Không tìm thấy sản phẩm.",
+      "CATEGORY_NOT_FOUND": "Không tìm thấy danh mục.",
+      "PRODUCT_VARIANT_NOT_FOUND": "Không tìm thấy phiên bản sản phẩm.",
+      "DUPLICATE_PRODUCT_NAME": "Tên sản phẩm đã tồn tại.",
+      "DUPLICATE_CATEGORY_SLUG": "Đường dẫn danh mục đã tồn tại.",
+      "DUPLICATE_CATEGORY_NAME": "Tên danh mục đã tồn tại.",
+      "INSUFFICIENT_STOCK": "Sản phẩm không đủ tồn kho.",
+      "INVALID_STOCK_QUANTITY": "Số lượng tồn kho không hợp lệ.",
+      "INVALID_PRICE": "Giá sản phẩm không hợp lệ.",
+      "REVIEW_NOT_FOUND": "Không tìm thấy đánh giá.",
+      "ORDER_NOT_FOUND": "Không tìm thấy đơn hàng.",
+      "INVALID_ORDER_STATUS": "Trạng thái đơn hàng không hợp lệ.",
+      "INVALID_PAYMENT_METHOD": "Phương thức thanh toán không hợp lệ.",
+      "INVALID_PAYMENT_AMOUNT": "Số tiền thanh toán không hợp lệ.",
+      "MEDIA_NOT_FOUND": "Không tìm thấy tệp đã tải lên.",
+      "MEDIA_UPLOAD_FAILED": "Không thể tải tệp lên. Vui lòng thử lại.",
+      "MESSAGE_NOT_FOUND": "Không tìm thấy cuộc trò chuyện hoặc tin nhắn.",
+      "MESSAGE_FAILED": "Không thể gửi tin nhắn. Vui lòng thử lại.",
+      "NOTIFICATION_TEMPLATE_NOT_FOUND": "Không tìm thấy mẫu thông báo.",
+      "INBOX_MESSAGE_NOT_FOUND": "Không tìm thấy thông báo.",
+      "status": {
+        "413": "Tệp tải lên quá lớn.",
+        "415": "Định dạng tệp không được hỗ trợ.",
+        "429": "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+        "502": "Dịch vụ đang gián đoạn. Vui lòng thử lại sau.",
+        "503": "Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.",
+        "504": "Dịch vụ phản hồi quá lâu. Vui lòng thử lại sau."
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "all": "Tất cả",
+      "unpaid": "Chờ thanh toán",
+      "unpaid_cod": "Đã đặt đơn",
+      "payment_failed": "Thanh toán thất bại",
+      "paid": "Đã thanh toán",
+      "shipping": "Đang vận chuyển",
+      "in_transit": "Đang giao",
+      "delivered": "Đã nhận",
+      "cancelled": "Đã hủy",
+      "refund_pending": "Chờ hoàn tiền",
+      "refunded": "Đã hoàn tiền"
     }
   }
 }

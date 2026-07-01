@@ -6,6 +6,7 @@ import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { productsApi, CategoryResponse } from '@shared/lib/api/services'
 import { useLocaleStore } from '@shared/stores/localeStore'
+import { useI18n } from 'vue-i18n'
 import {
   buildActiveProductTags,
   buildProductListParams,
@@ -37,6 +38,7 @@ export function useProductListPage() {
   const authStore = useAuthStore()
   const localeStore = useLocaleStore()
   const { locale } = storeToRefs(localeStore)
+  const { t } = useI18n()
   const { items, total, facets, loading, loadList } = useProducts()
   const { show: showToast } = useToast()
   const searchKeyword = ref('')
@@ -263,7 +265,7 @@ export function useProductListPage() {
       const categoryCount = sidebarCategories.value.length || facets.value.categories?.length || 0
 
       return {
-        breadcrumb: ['Trang chủ', 'Sản phẩm'],
+        breadcrumb: [t('nav.home'), t('nav.products')],
         title: 'Bộ sưu tập nội thất',
         subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
         stats: [
@@ -279,7 +281,7 @@ export function useProductListPage() {
     const label = subLabel || rootLabel
     
     return {
-      breadcrumb: ['Trang chủ', 'Sản phẩm', rootLabel, ...(subLabel ? [subLabel] : [])],
+      breadcrumb: [t('nav.home'), t('nav.products'), rootLabel, ...(subLabel ? [subLabel] : [])],
       title: label,
       subtitle: `${label} tinh tế và hiện đại`,
       stats: [
