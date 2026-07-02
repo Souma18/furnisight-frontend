@@ -388,7 +388,8 @@
         "done": "Completed",
         "refund_pending": "Refund pending",
         "refunded": "Refunded",
-        "cancel": "Cancelled"
+        "cancel": "Cancelled",
+        "cancelled_by_admin": "Cancelled by shop"
       }
     }
   },
@@ -486,7 +487,52 @@
     "sold": "Sold {count}",
     "ratingAria": "Product rating",
     "wishlist": "Wishlist",
-    "noImage": "No image"
+    "noImage": "No image",
+    "sidebar": {
+      "title": "Product Filters",
+      "categoryCount": "{count} products by category",
+      "close": "Close filters",
+      "category": "Category",
+      "priceRange": "Price Range",
+      "material": "Material",
+      "color": "Color",
+      "rating": "Rating",
+      "ratingAria": "Rating level",
+      "allProducts": "All products",
+      "allStars": "All",
+      "starsHint": "{star} stars+ ({count})",
+      "stars5Hint": "({count})",
+      "clearAll": "Clear all",
+      "clearAllLong": "Clear all filters",
+      "apply": "Apply filters"
+    },
+    "priceBands": {
+      "lt5m": "Under 5,000,000₫",
+      "5-15m": "5 - 15,000,000₫",
+      "15-30m": "15 - 30,000,000₫",
+      "gt30m": "Over 30,000,000₫"
+    },
+    "hero": {
+      "defaultTitle": "Furniture Collection",
+      "defaultSubtitle": "Explore our diverse furniture catalog",
+      "dynamicSubtitle": "Elegant and modern {label}",
+      "stats": {
+        "products": "Products",
+        "categories": "Categories",
+        "reviews": "Reviews",
+        "colors": "Colors",
+        "materials": "Materials"
+      }
+    },
+    "errors": {
+      "apiConn": "Cannot connect to server. Data might be incomplete.",
+      "retry": "Retry"
+    },
+    "toast": {
+      "wishlistFail": "Could not update wishlist"
+    },
+    "catalog": "Catalog",
+    "all": "All"
   },
   "promotions": {
     "loading": "Loading promotions...",
@@ -996,7 +1042,200 @@
       "delivered": "Delivered",
       "cancelled": "Cancelled",
       "refund_pending": "Refund pending",
-      "refunded": "Refunded"
+      "refunded": "Refunded",
+      "cancelled_by_admin": "Cancelled by shop"
+    }
+  },
+  "checkout": {
+    "page": {
+      "loading": "Loading payment information...",
+      "errorTitle": "Unable to load checkout",
+      "errorSubtitle": "Please try again later."
+    },
+    "callback": {
+      "title": "Payment Result",
+      "status": {
+        "processing": "Verifying",
+        "success": "Payment confirmed. Your order is being processed.",
+        "failed": "Payment incomplete or cancelled. Order has not been recorded as paid.",
+        "notFound": "Payment information not found for verification.",
+        "failedLabel": "Payment failed"
+      },
+      "orderCode": "Order code: {code}",
+      "viewOrder": "My Orders",
+      "retry": "Retry Payment"
+    },
+    "breadcrumb": {
+      "home": "Home",
+      "cart": "Cart",
+      "checkout": "Checkout"
+    },
+    "steps": {
+      "cart": "Cart",
+      "checkout": "Checkout",
+      "done": "Complete"
+    },
+    "address": {
+      "title": "Shipping Address",
+      "add": "Add Address",
+      "empty": "No shipping address found. You can add one right here.",
+      "default": "Default",
+      "edit": "Edit",
+      "modalAdd": "Add New Address",
+      "modalEdit": "Update Address",
+      "close": "Close",
+      "fullName": "Full Name",
+      "phone": "Phone Number",
+      "province": "Province/City",
+      "ward": "Ward/Commune",
+      "detail": "Specific Address",
+      "type": "Address Type",
+      "isDefault": "Set as default address",
+      "loading": "Loading...",
+      "chooseProvince": "Choose Province",
+      "chooseWard": "Choose Ward",
+      "types": {
+        "home": "Home",
+        "office": "Office",
+        "other": "Other"
+      },
+      "apiError": "Failed to load address data. Please try again.",
+      "validationError": "Please fill in all required fields (name, phone, address).",
+      "cancel": "Cancel",
+      "save": "Save Address",
+      "update": "Update"
+    },
+    "shop": {
+      "note": "Message:",
+      "notePlaceholder": "Note for seller...",
+      "shipping": "Shipping:",
+      "free": "Free",
+      "subtotal": "Subtotal ({qty} items):"
+    },
+    "voucher": {
+      "title": "FurniSight Voucher",
+      "shop": "Shop Voucher",
+      "combo": "Combo Discount",
+      "shipping": "Shipping Voucher",
+      "remove": "Remove voucher",
+      "choose": "Select voucher",
+      "noCombo": "Combo requirements not met",
+      "modalTitle": "Select Voucher",
+      "placeholder": "Enter voucher code...",
+      "apply": "Apply",
+      "yours": "Your Vouchers",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
+    "payment": {
+      "title": "Payment Method"
+    },
+    "summary": {
+      "title": "Your Order",
+      "count": "{count} items",
+      "subtotal": "Subtotal",
+      "shippingFee": "Shipping Fee",
+      "shippingVoucher": "Shipping Voucher",
+      "comboDiscount": "Combo Discount",
+      "shopVoucher": "Shop Voucher",
+      "notApplied": "Not applied",
+      "insurance": "Insurance",
+      "none": "None",
+      "saved": "You Saved",
+      "total": "Total",
+      "savedNote": "Saved {amount} compared to original price",
+      "termsPrefix": "By placing an order, you agree to FurniSight's",
+      "termsOfService": "Terms of Service",
+      "and": "and",
+      "privacyPolicy": "Privacy Policy",
+      "termsSuffix": ".",
+      "order": "Place Order",
+      "secure": "Payments are encrypted and secure"
+    },
+    "options": {
+      "shipping": {
+        "standard": "Standard Shipping",
+        "express": "Express Shipping"
+      },
+      "payment": {
+        "vnpay": "Pay via VNPAY",
+        "cod": "Cash on Delivery (COD)"
+      },
+      "insurance": {
+        "label": "Shipping Insurance (100% compensation for loss/damage)"
+      }
+    },
+    "toolbar": {
+      "secure": "Secure Checkout",
+      "cart": "Cart"
+    },
+    "success": {
+      "title": "Order",
+      "success": "Successful!",
+      "sub": "Thank you for choosing FurniSight. Your order is being processed and will be delivered to you soon.",
+      "steps": {
+        "ordered": "Ordered",
+        "processing": "Processing",
+        "shipping": "Shipping",
+        "done": "Complete"
+      },
+      "orderId": "Order Code: {code}",
+      "viewOrder": "View Order",
+      "continueShopping": "Continue Shopping"
+    },
+    "toast": {
+      "noAuth": {
+        "title": "Not authorized",
+        "sub": "Only customer accounts can place orders and make payments.",
+        "createSub": "Only customer accounts can place orders."
+      },
+      "noTerms": {
+        "title": "Please agree to the terms",
+        "sub": "You need to agree to the terms before placing an order."
+      },
+      "noAddress": {
+        "title": "No shipping address",
+        "sub": "Please select or add a shipping address."
+      },
+      "emptyCart": {
+        "title": "Empty cart",
+        "sub": "There are no items to checkout."
+      },
+      "overStock": {
+        "title": "Exceeds stock limit",
+        "sub": "{name} can only be purchased up to {limit}."
+      },
+      "incompleteAddress": {
+        "title": "Incomplete shipping address",
+        "sub": "Please update your full name, phone number, and detailed address."
+      },
+      "vnpayFailed": {
+        "title": "VNPAY payment failed",
+        "sub": "Response code: {status}"
+      },
+      "createFailed": {
+        "title": "Unable to create order",
+        "sub": "Please verify your payment information."
+      },
+      "addressUpdate": {
+        "titleEdit": "Address updated",
+        "titleAdd": "New address added",
+        "sub": "You can use this address for your current order."
+      },
+      "addressFailed": {
+        "title": "Unable to save address",
+        "sub": "Please check your address information."
+      },
+      "voucherFailed": {
+        "title": "Unable to apply voucher",
+        "sub": "System could not verify the voucher at this time."
+      },
+      "voucherApplied": {
+        "title": "Voucher applied"
+      },
+      "voucherSelected": {
+        "title": "Voucher selected"
+      }
     }
   }
 }

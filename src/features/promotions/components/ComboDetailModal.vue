@@ -33,7 +33,7 @@ const show = computed(() => !!props.combo)
           v-for="item in combo.items"
           :key="`modal-${item.productId}-${item.variantId}`"
           class="combo-modal-row"
-          :to="{ name: 'product-detail', params: { id: item.productId } }"
+          :to="{ name: 'product-detail', params: { slug: item.productSlug || item.productId } }"
           @click="emit('close')"
         >
           <span class="combo-product-image">

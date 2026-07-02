@@ -16,7 +16,7 @@ const monthCanvas = ref(null)
 
 const { data, error, loading, load, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
 const hasRevenueData = computed(() =>
-  Boolean(data.value?.kpis?.length || data.value?.monthlyRows?.length || data.value?.monthLabels?.length),
+  Boolean(data.value?.kpis?.length || data.value?.monthlyRows?.length || data.value?.months?.length || data.value?.monthLabels?.length),
 )
 
 const monthColumns = [
@@ -38,7 +38,7 @@ const topProductColumns = [
 ]
 
 bindCharts((charts, d) => {
-  let labels = d.monthLabels
+  let labels = d.monthLabels || d.months
   let chartData = d.monthData
 
   if ((!labels || !labels.length) && d.monthlyRows?.length) {

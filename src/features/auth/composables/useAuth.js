@@ -1,5 +1,5 @@
 import { storeToRefs } from 'pinia'
-import { useRouter } from 'vue-router'
+import { router } from '@/app/router'
 import { useAuthStore } from '../store/authStore'
 import { authApi } from '@shared/lib/api/services'
 import { normalizeAuthSession } from '../utils/normalizeAuthSession'
@@ -7,7 +7,6 @@ import { resetUserSessionState } from '../utils/resetUserSessionState'
 
 export function useAuth(pinia) {
   const store = useAuthStore(pinia)
-  const router = useRouter()
   const { user, isAuthenticated, isAdmin } = storeToRefs(store)
 
   async function renewToken() {
@@ -15,11 +14,12 @@ export function useAuth(pinia) {
     if (!refreshToken) {
       throw new Error('No refresh token available')
     }
-    
+
     const response = await authApi.renewAccessToken({ refreshToken })
     const session = normalizeAuthSession(response)
     store.setSession(session)
-    await store.ensureProfileLoaded()
+    // Không gọi ensureProfileLoaded() ở đây vì đang trong interceptor —
+    // sẽ gây thêm request API và có thể tạo vòng lặp retry.
     return session
   }
 
@@ -28,9 +28,8 @@ export function useAuth(pinia) {
     const { clearRemoteCart = true } = options
     await resetUserSessionState({ clearRemoteCart: clearRemoteCart && store.isAuthenticated })
     store.logout()
-    if (router) {
-      await router.push(redirectTo)
-    }
+    // Dùng router singleton thay vì useRouter() để hoạt động ngoài Vue context
+    await router.push(redirectTo)
   }
 
   return {

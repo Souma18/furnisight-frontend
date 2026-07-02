@@ -104,7 +104,7 @@ export function useProductDetailPage(props) {
   }
 
   function retry() {
-    loadProduct(props.id)
+    loadProduct(props.slug)
   }
 
   function changeQty(delta) {
@@ -140,8 +140,8 @@ export function useProductDetailPage(props) {
     }
   })
 
-  watch(() => props.id, (id) => loadProduct(id))
-  watch(locale, () => loadProduct(props.id))
+  watch(() => props.slug, (slug) => loadProduct(slug))
+  watch(locale, () => loadProduct(props.slug))
   watch(() => route.query.tab, (tab) => {
     if (tab === 'review') activeTab.value = 'review'
   })
@@ -153,7 +153,7 @@ export function useProductDetailPage(props) {
     }
     resetAuthenticatedReviewState()
   })
-  onMounted(() => loadProduct(props.id))
+  onMounted(() => loadProduct(props.slug))
 
   return {
     product,

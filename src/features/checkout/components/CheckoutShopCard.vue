@@ -97,27 +97,27 @@ function selectShipping(id) {
       >
       <AppIcon name="shield" :size="18" />
       <div class="co-addon-label">
-        <strong>{{ insuranceOption.label }}</strong>
+        <strong>{{ $t('checkout.options.insurance.label', insuranceOption.label) }}</strong>
         <span v-if="insuranceOption.badge" class="co-addon-badge">{{ insuranceOption.badge }}</span>
         <br>
-        {{ insuranceOption.description }}
+        {{ insuranceOption.description ? $t('checkout.options.insurance.description', insuranceOption.description) : '' }}
       </div>
       <span class="co-addon-price">+{{ formatMoney(insuranceOption.price) }}</span>
     </label>
 
     <div class="co-shop-options">
       <div class="co-opt-row">
-        <span class="co-opt-label">Lời nhắn:</span>
+        <span class="co-opt-label">{{ $t('checkout.shop.note') }}</span>
         <AppInput
           class="co-opt-input"
           type="text"
-          placeholder="Lưu ý cho người bán..."
+          :placeholder="$t('checkout.shop.notePlaceholder')"
           :value="sellerNote"
           @input="$emit('update-note', $event.target.value)"
         />
       </div>
       <div class="co-opt-row">
-        <span class="co-opt-label">Vận chuyển:</span>
+        <span class="co-opt-label">{{ $t('checkout.shop.shipping') }}</span>
         <div class="co-ship-options">
           <label
             v-for="option in shippingOptions"
@@ -134,7 +134,7 @@ function selectShipping(id) {
             >
             <div>
               <div class="co-ship-name">
-                {{ option.name }}
+                {{ $t(`checkout.options.shipping.${option.id}`, option.name) }}
                 <span
                   v-if="option.badge"
                   class="co-ship-badge"
@@ -145,7 +145,7 @@ function selectShipping(id) {
               <p v-if="option.note" class="co-ship-eta">{{ option.note }}</p>
             </div>
             <span class="co-ship-price" :class="{ free: option.isFree }">
-              {{ option.isFree ? 'Miễn phí' : formatMoney(option.fee) }}
+              {{ option.isFree ? $t('checkout.shop.free') : formatMoney(option.fee) }}
             </span>
           </label>
         </div>
@@ -153,7 +153,7 @@ function selectShipping(id) {
     </div>
 
     <div class="co-subtotal-row">
-      <span>Tổng số tiền ({{ itemQty }} sản phẩm):</span>
+      <span>{{ $t('checkout.shop.subtotal', { qty: itemQty }) }}</span>
       <span class="co-subtotal-val">{{ formatMoney(subtotal) }}</span>
     </div>
   </section>

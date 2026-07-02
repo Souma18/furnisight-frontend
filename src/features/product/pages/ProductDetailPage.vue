@@ -12,7 +12,7 @@ import '../styles/productDetail.css'
 const ProductDetail3DModal = defineAsyncComponent(() => import('../components/ProductDetail3DModal.vue'))
 
 const props = defineProps({
-  id: { type: String, required: true },
+  slug: { type: String, required: true },
 })
 
 const {

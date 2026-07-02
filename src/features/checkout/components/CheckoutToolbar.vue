@@ -19,7 +19,7 @@ defineEmits(['back'])
   >
     <span style="display: inline-flex; align-items: center; gap: 0.35rem">
       <AppIcon name="shield" :size="14" />
-      Thanh toán bảo mật
+      {{ $t('checkout.toolbar.secure') }}
     </span>
     <AppButton
       variant="unstyled"
@@ -40,7 +40,7 @@ defineEmits(['back'])
       @click="$emit('back')"
     >
       <AppIcon name="arrowLeft" :size="14" />
-      Giỏ hàng
+      {{ $t('checkout.toolbar.cart') }}
     </AppButton>
   </div>
 </template>

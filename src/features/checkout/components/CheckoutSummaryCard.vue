@@ -18,8 +18,8 @@ defineEmits(['update-agreed', 'place-order'])
   <aside class="checkout-summary">
     <div class="co-sum-card">
       <div class="co-sum-head">
-        <p class="co-sum-title">Đơn hàng <em>của bạn</em></p>
-        <p class="co-sum-count">{{ summary.itemQty }} sản phẩm</p>
+        <p class="co-sum-title" v-html="$t('checkout.summary.title')"></p>
+        <p class="co-sum-count">{{ $t('checkout.summary.count', { count: summary.itemQty }) }}</p>
       </div>
 
       <div class="co-sum-products">
@@ -36,45 +36,45 @@ defineEmits(['update-agreed', 'place-order'])
 
       <div class="co-sum-rows">
         <div class="co-sum-row">
-          <span>Tạm tính</span>
+          <span>{{ $t('checkout.summary.subtotal') }}</span>
           <span>{{ formatMoney(summary.subtotal) }}</span>
         </div>
         <div class="co-sum-row">
-          <span>Phí vận chuyển</span>
+          <span>{{ $t('checkout.summary.shippingFee') }}</span>
           <span>{{ formatMoney(summary.shipFee) }}</span>
         </div>
         <div v-if="summary.shippingDiscount" class="co-sum-row">
-          <span>Voucher vận chuyển</span>
+          <span>{{ $t('checkout.summary.shippingVoucher') }}</span>
           <span class="green">-{{ formatMoney(summary.shippingDiscount) }}</span>
         </div>
         <div v-if="summary.comboDiscount" class="co-sum-row">
-          <span>Combo khuyến mãi</span>
+          <span>{{ $t('checkout.summary.comboDiscount') }}</span>
           <span class="green">-{{ formatMoney(summary.comboDiscount) }}</span>
         </div>
         <div class="co-sum-row">
-          <span>Voucher shop</span>
+          <span>{{ $t('checkout.summary.shopVoucher') }}</span>
           <span :class="{ green: summary.shopDiscount }">
-            {{ summary.shopDiscount ? `-${formatMoney(summary.shopDiscount)}` : 'Chưa áp dụng' }}
+            {{ summary.shopDiscount ? `-${formatMoney(summary.shopDiscount)}` : $t('checkout.summary.notApplied') }}
           </span>
         </div>
         <div class="co-sum-row">
-          <span>Bảo hiểm</span>
+          <span>{{ $t('checkout.summary.insurance') }}</span>
           <span :class="{ green: summary.insuranceAmount }">
-            {{ summary.insuranceAmount ? formatMoney(summary.insuranceAmount) : 'Không' }}
+            {{ summary.insuranceAmount ? formatMoney(summary.insuranceAmount) : $t('checkout.summary.none') }}
           </span>
         </div>
         <div v-if="summary.saved" class="co-sum-row">
-          <span>Tiết kiệm được</span>
+          <span>{{ $t('checkout.summary.saved') }}</span>
           <span class="green">-{{ formatMoney(summary.saved) }}</span>
         </div>
       </div>
 
       <div class="co-sum-total">
-        <p style="font-size: 0.78rem; color: var(--co-text-mid, #555)">Tổng thanh toán</p>
+        <p style="font-size: 0.78rem; color: var(--co-text-mid, #555)">{{ $t('checkout.summary.total') }}</p>
         <p class="co-sum-total-val">{{ formatMoney(summary.total) }}</p>
         <p v-if="summary.saved" class="co-sum-saving">
           <AppIcon name="partyPopper" :size="14" />
-          Tiết kiệm {{ formatMoney(summary.saved) }} so với giá gốc
+          {{ $t('checkout.summary.savedNote', { amount: formatMoney(summary.saved) }) }}
         </p>
       </div>
 
@@ -86,8 +86,8 @@ defineEmits(['update-agreed', 'place-order'])
             @change="$emit('update-agreed', $event.target.checked)"
           >
           <span>
-            Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo
-            <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của FurniSight.
+            {{ $t('checkout.summary.termsPrefix') }}
+            <a href="#">{{ $t('checkout.summary.termsOfService') }}</a> {{ $t('checkout.summary.and') }} <a href="#">{{ $t('checkout.summary.privacyPolicy') }}</a> {{ $t('checkout.summary.termsSuffix') }}
           </span>
         </label>
         <AppButton
@@ -98,11 +98,11 @@ defineEmits(['update-agreed', 'place-order'])
           @click="$emit('place-order')"
         >
           <AppIcon name="creditCard" :size="17" />
-          Đặt hàng - {{ formatMoney(summary.total) }}
+          {{ $t('checkout.summary.order') }} - {{ formatMoney(summary.total) }}
         </AppButton>
         <p class="co-btn-order-sub">
           <AppIcon name="lockKeyhole" :size="13" />
-          Thanh toán được mã hoá và bảo mật
+          {{ $t('checkout.summary.secure') }}
         </p>
       </div>
     </div>

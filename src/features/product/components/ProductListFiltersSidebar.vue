@@ -75,21 +75,21 @@ onUnmounted(() => {
         type="button"
         variant="unstyled"
         class="pl-filter-backdrop"
-        aria-label="Đóng bộ lọc"
+        :aria-label="$t('products.sidebar.close')"
         @click="emit('close')"
       ></AppButton>
       
       <aside
         class="pl-sidebar-filters"
         :class="mode === 'drawer' ? 'pl-sidebar-filters--drawer' : `pl-sidebar-filters--${mode}`"
-        aria-label="Bộ lọc sản phẩm"
+        :aria-label="$t('products.sidebar.title')"
       >
         <header v-if="mode === 'drawer'" class="pl-filter-drawer-head">
           <div>
-            <p>Bộ lọc sản phẩm</p>
-            <strong>{{ totalCategoryCount }} sản phẩm theo danh mục</strong>
+            <p>{{ $t('products.sidebar.title') }}</p>
+            <strong>{{ $t('products.sidebar.categoryCount', { count: totalCategoryCount }) }}</strong>
           </div>
-          <AppButton type="button" variant="unstyled" class="pl-filter-close" aria-label="Đóng bộ lọc" @click="emit('close')">
+          <AppButton type="button" variant="unstyled" class="pl-filter-close" :aria-label="$t('products.sidebar.close')" @click="emit('close')">
             <AppIcon name="close" :size="18" />
           </AppButton>
         </header>
@@ -99,7 +99,7 @@ onUnmounted(() => {
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('cat')" @keydown.enter.prevent="toggleBlock('cat')">
               <div class="pl-fb-title">
                 <AppIcon class="pl-fb-icon" name="category" :size="16" />
-                Danh mục
+                {{ $t('products.sidebar.category') }}
                 <span class="pl-fb-count">{{ totalCategoryCount }}</span>
               </div>
               <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.cat }" name="chevronDown" :size="16" />
@@ -121,7 +121,7 @@ onUnmounted(() => {
 
           <div class="pl-filter-block">
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('price')" @keydown.enter.prevent="toggleBlock('price')">
-              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="banknote" :size="16" /> Khoảng giá</div>
+              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="banknote" :size="16" /> {{ $t('products.sidebar.priceRange') }}</div>
               <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.price }" name="chevronDown" :size="16" />
             </div>
             <div v-show="openBlocks.price" class="pl-filter-body">
@@ -146,7 +146,7 @@ onUnmounted(() => {
                     :checked="pending.priceBands.includes(opt.id)"
                     @change="togglePriceBand(opt.id)"
                   />
-                  <span>{{ opt.label }}</span>
+                  <span>{{ $t(`products.priceBands.${opt.id}`) }}</span>
                 </label>
               </div>
             </div>
@@ -154,7 +154,7 @@ onUnmounted(() => {
 
           <div v-if="displayMaterials.length" class="pl-filter-block">
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('mat')" @keydown.enter.prevent="toggleBlock('mat')">
-              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="box" :size="16" /> Chất liệu</div>
+              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="box" :size="16" /> {{ $t('products.sidebar.material') }}</div>
               <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.mat }" name="chevronDown" :size="16" />
             </div>
             <div v-show="openBlocks.mat" class="pl-filter-body">
@@ -169,7 +169,7 @@ onUnmounted(() => {
 
           <div v-if="displayColors.length" class="pl-filter-block">
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('color')" @keydown.enter.prevent="toggleBlock('color')">
-              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="palette" :size="16" /> Màu sắc</div>
+              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="palette" :size="16" /> {{ $t('products.sidebar.color') }}</div>
               <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.color }" name="chevronDown" :size="16" />
             </div>
             <div v-show="openBlocks.color" class="pl-filter-body">
@@ -192,14 +192,14 @@ onUnmounted(() => {
 
           <div class="pl-filter-block">
             <div class="pl-filter-block-header" role="button" tabindex="0" @click="toggleBlock('rating')" @keydown.enter.prevent="toggleBlock('rating')">
-              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="star" :size="16" /> Đánh giá</div>
+              <div class="pl-fb-title"><AppIcon class="pl-fb-icon" name="star" :size="16" /> {{ $t('products.sidebar.rating') }}</div>
               <AppIcon class="pl-fb-toggle" :class="{ open: openBlocks.rating }" name="chevronDown" :size="16" />
             </div>
             <div v-show="openBlocks.rating" class="pl-filter-body">
               <div class="pl-star-rows">
                 <label v-for="opt in displayRatings" :key="opt.value" class="pl-star-row">
                   <input type="radio" name="pl-star-filter" :value="opt.value" v-model="pending.minStar" />
-                  <span class="pl-star-icons" aria-label="Mức đánh giá">
+                  <span class="pl-star-icons" :aria-label="$t('products.sidebar.ratingAria')">
                     <AppIcon
                       v-for="star in 5"
                       :key="`${opt.value}-filter-star-${star}`"
@@ -208,11 +208,11 @@ onUnmounted(() => {
                       :class="{ active: star <= opt.value }"
                     />
                   </span>
-                  <span class="pl-star-num">{{ opt.hint }}</span>
+                  <span class="pl-star-num">{{ opt.value === 5 ? $t('products.sidebar.stars5Hint', { count: opt.count }) : $t('products.sidebar.starsHint', { star: opt.value, count: opt.count }) }}</span>
                 </label>
                 <label class="pl-star-row">
                   <input type="radio" name="pl-star-filter" :value="null" v-model="pending.minStar" />
-                  <span class="pl-star-num">Tất cả</span>
+                  <span class="pl-star-num">{{ $t('products.sidebar.allStars') }}</span>
                 </label>
               </div>
             </div>
@@ -222,15 +222,15 @@ onUnmounted(() => {
         <footer v-if="mode === 'drawer'" class="pl-filter-drawer-actions">
           <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
-            Xóa tất cả
+            {{ $t('products.sidebar.clearAll') }}
           </AppButton>
-          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">{{ $t('products.sidebar.apply') }}</AppButton>
         </footer>
         <div v-else class="pl-filter-block pl-filter-actions">
-          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">Áp dụng bộ lọc</AppButton>
+          <AppButton type="button" variant="unstyled" class="pl-filter-apply" @click="applyFilters">{{ $t('products.sidebar.apply') }}</AppButton>
           <AppButton type="button" variant="unstyled" class="pl-filter-clear" @click="clearAll">
             <AppIcon name="close" :size="15" />
-            Xóa tất cả bộ lọc
+            {{ $t('products.sidebar.clearAllLong') }}
           </AppButton>
         </div>
       </aside>

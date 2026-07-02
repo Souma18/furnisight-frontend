@@ -1,5 +1,6 @@
 <script setup>
 import '../styles/promotions.css'
+import { useI18n } from 'vue-i18n'
 import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import VoucherDetailModal from '../components/VoucherDetailModal.vue'
@@ -10,8 +11,9 @@ import PromotionsComboSection from '../components/PromotionsComboSection.vue'
 import PromotionsMineSection from '../components/PromotionsMineSection.vue'
 import { usePromotionsPage } from '../composables/usePromotionsPage'
 
+const { t } = useI18n()
+
 const {
-  t,
   isAuthenticated,
   activeFilter,
   selectedVoucher,

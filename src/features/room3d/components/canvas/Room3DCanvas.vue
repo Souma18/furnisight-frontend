@@ -98,6 +98,8 @@ const {
   fallbackProductIds,
   isCanvasBusy,
   busyText,
+  isRoomAvailable,
+  resetRoomScale,
 } = useRoom3DCanvas(props, emit)
 
 defineExpose({

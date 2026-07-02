@@ -393,7 +393,8 @@
         "delivered": "Đã nhận",
         "cancelled": "Đã hủy",
         "refund_pending": "Chờ hoàn tiền",
-        "refunded": "Đã hoàn tiền"
+        "refunded": "Đã hoàn tiền",
+        "cancelled_by_admin": "Hủy bởi shop"
       }
     }
   },
@@ -491,7 +492,52 @@
     "sold": "Đã bán {count}",
     "ratingAria": "Đánh giá sản phẩm",
     "wishlist": "Yêu thích",
-    "noImage": "Không có ảnh"
+    "noImage": "Không có ảnh",
+    "sidebar": {
+      "title": "Bộ lọc sản phẩm",
+      "categoryCount": "{count} sản phẩm theo danh mục",
+      "close": "Đóng bộ lọc",
+      "category": "Danh mục",
+      "priceRange": "Khoảng giá",
+      "material": "Chất liệu",
+      "color": "Màu sắc",
+      "rating": "Đánh giá",
+      "ratingAria": "Mức đánh giá",
+      "allProducts": "Tất cả sản phẩm",
+      "allStars": "Tất cả",
+      "starsHint": "{star} sao+ ({count})",
+      "stars5Hint": "({count})",
+      "clearAll": "Xóa tất cả",
+      "clearAllLong": "Xóa tất cả bộ lọc",
+      "apply": "Áp dụng bộ lọc"
+    },
+    "priceBands": {
+      "lt5m": "Dưới 5.000.000đ",
+      "5-15m": "5 - 15.000.000đ",
+      "15-30m": "15 - 30.000.000đ",
+      "gt30m": "Trên 30.000.000đ"
+    },
+    "hero": {
+      "defaultTitle": "Bộ sưu tập nội thất",
+      "defaultSubtitle": "Khám phá danh mục nội thất đa dạng của chúng tôi",
+      "dynamicSubtitle": "{label} tinh tế và hiện đại",
+      "stats": {
+        "products": "Sản phẩm",
+        "categories": "Danh mục",
+        "reviews": "Đánh giá",
+        "colors": "Màu sắc",
+        "materials": "Chất liệu"
+      }
+    },
+    "errors": {
+      "apiConn": "Không thể kết nối máy chủ. Dữ liệu có thể không đầy đủ.",
+      "retry": "Tải lại"
+    },
+    "toast": {
+      "wishlistFail": "Không thể cập nhật danh sách yêu thích"
+    },
+    "catalog": "Catalog",
+    "all": "Tất cả"
   },
   "promotions": {
     "loading": "Đang tải khuyến mãi...",
@@ -1001,7 +1047,200 @@
       "delivered": "Đã nhận",
       "cancelled": "Đã hủy",
       "refund_pending": "Chờ hoàn tiền",
-      "refunded": "Đã hoàn tiền"
+      "refunded": "Đã hoàn tiền",
+      "cancelled_by_admin": "Hủy bởi shop"
+    }
+  },
+  "checkout": {
+    "page": {
+      "loading": "Đang tải thông tin thanh toán...",
+      "errorTitle": "Không thể tải thanh toán",
+      "errorSubtitle": "Vui lòng thử lại sau."
+    },
+    "callback": {
+      "title": "Kết quả thanh toán",
+      "status": {
+        "processing": "Đang xác nhận",
+        "success": "Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.",
+        "failed": "Thanh toán chưa hoàn tất hoặc đã bị hủy. Đơn hàng chưa được ghi nhận là đã thanh toán.",
+        "notFound": "Không tìm thấy thông tin thanh toán để xác nhận.",
+        "failedLabel": "Thanh toán thất bại"
+      },
+      "orderCode": "Mã đơn: {code}",
+      "viewOrder": "Đơn hàng của tôi",
+      "retry": "Thử thanh toán lại"
+    },
+    "breadcrumb": {
+      "home": "Trang chủ",
+      "cart": "Giỏ hàng",
+      "checkout": "Thanh toán"
+    },
+    "steps": {
+      "cart": "Giỏ hàng",
+      "checkout": "Thanh toán",
+      "done": "Hoàn tất"
+    },
+    "address": {
+      "title": "Địa chỉ giao hàng",
+      "add": "Thêm địa chỉ",
+      "empty": "Chưa có địa chỉ giao hàng. Bạn có thể thêm địa chỉ ngay tại bước thanh toán.",
+      "default": "Mặc định",
+      "edit": "Sửa",
+      "modalAdd": "Thêm địa chỉ mới",
+      "modalEdit": "Cập nhật địa chỉ",
+      "close": "Đóng",
+      "fullName": "Họ tên",
+      "phone": "Số điện thoại",
+      "province": "Tỉnh/Thành",
+      "ward": "Phường/Xã",
+      "detail": "Địa chỉ cụ thể",
+      "type": "Loại địa chỉ",
+      "isDefault": "Đặt làm địa chỉ mặc định",
+      "loading": "Đang tải...",
+      "chooseProvince": "Chọn tỉnh thành",
+      "chooseWard": "Chọn phường xã",
+      "types": {
+        "home": "Nhà riêng",
+        "office": "Văn phòng",
+        "other": "Khác"
+      },
+      "apiError": "Không tải được dữ liệu tỉnh/thành. Vui lòng thử lại.",
+      "validationError": "Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ giao hàng.",
+      "cancel": "Hủy",
+      "save": "Lưu địa chỉ",
+      "update": "Cập nhật"
+    },
+    "shop": {
+      "note": "Lời nhắn:",
+      "notePlaceholder": "Lưu ý cho người bán...",
+      "shipping": "Vận chuyển:",
+      "free": "Miễn phí",
+      "subtotal": "Tổng số tiền ({qty} sản phẩm):"
+    },
+    "voucher": {
+      "title": "Voucher FurniSight",
+      "shop": "Voucher của shop",
+      "combo": "Combo khuyến mãi",
+      "shipping": "Voucher vận chuyển",
+      "remove": "Bỏ voucher",
+      "choose": "Chọn voucher",
+      "noCombo": "Chưa đủ sản phẩm combo",
+      "modalTitle": "Chọn voucher",
+      "placeholder": "Nhập mã voucher...",
+      "apply": "Áp dụng",
+      "yours": "Voucher của bạn",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "payment": {
+      "title": "Phương thức thanh toán"
+    },
+    "summary": {
+      "title": "Đơn hàng của bạn",
+      "count": "{count} sản phẩm",
+      "subtotal": "Tạm tính",
+      "shippingFee": "Phí vận chuyển",
+      "shippingVoucher": "Voucher vận chuyển",
+      "comboDiscount": "Combo khuyến mãi",
+      "shopVoucher": "Voucher shop",
+      "notApplied": "Chưa áp dụng",
+      "insurance": "Bảo hiểm",
+      "none": "Không",
+      "saved": "Tiết kiệm được",
+      "total": "Tổng thanh toán",
+      "savedNote": "Tiết kiệm {amount} so với giá gốc",
+      "termsPrefix": "Nhấn \"Đặt hàng\" đồng nghĩa với việc bạn đồng ý tuân theo",
+      "termsOfService": "Điều khoản dịch vụ",
+      "and": "và",
+      "privacyPolicy": "Chính sách bảo mật",
+      "termsSuffix": "của FurniSight.",
+      "order": "Đặt hàng",
+      "secure": "Thanh toán an toàn và bảo mật"
+    },
+    "options": {
+      "shipping": {
+        "standard": "Giao hàng tiêu chuẩn",
+        "express": "Giao hàng hỏa tốc"
+      },
+      "payment": {
+        "vnpay": "Thanh toán qua VNPAY",
+        "cod": "Thanh toán khi nhận hàng (COD)"
+      },
+      "insurance": {
+        "label": "Bảo hiểm hàng hóa (Bồi thường 100% nếu thất lạc/hư hỏng)"
+      }
+    },
+    "toolbar": {
+      "secure": "Thanh toán bảo mật",
+      "cart": "Giỏ hàng"
+    },
+    "success": {
+      "title": "Đặt hàng",
+      "success": "thành công!",
+      "sub": "Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.",
+      "steps": {
+        "ordered": "Đặt hàng",
+        "processing": "Xử lý",
+        "shipping": "Giao hàng",
+        "done": "Hoàn tất"
+      },
+      "orderId": "Mã đơn: {code}",
+      "viewOrder": "Xem đơn hàng",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "toast": {
+      "noAuth": {
+        "title": "Không có quyền đặt hàng",
+        "sub": "Chỉ tài khoản khách hàng mới có thể đặt hàng và thanh toán.",
+        "createSub": "Chỉ tài khoản khách hàng mới có thể đặt hàng."
+      },
+      "noTerms": {
+        "title": "Vui lòng đồng ý điều khoản",
+        "sub": "Bạn cần tick đồng ý trước khi đặt hàng."
+      },
+      "noAddress": {
+        "title": "Chưa có địa chỉ giao hàng",
+        "sub": "Vui lòng chọn hoặc thêm địa chỉ giao hàng."
+      },
+      "emptyCart": {
+        "title": "Giỏ hàng trống",
+        "sub": "Không có sản phẩm để thanh toán."
+      },
+      "overStock": {
+        "title": "Số lượng vượt tồn kho",
+        "sub": "{name} chỉ có thể mua {limit}."
+      },
+      "incompleteAddress": {
+        "title": "Địa chỉ giao hàng chưa đủ",
+        "sub": "Vui lòng cập nhật họ tên, số điện thoại và địa chỉ chi tiết."
+      },
+      "vnpayFailed": {
+        "title": "Thanh toán VNPAY thất bại",
+        "sub": "Mã phản hồi: {status}"
+      },
+      "createFailed": {
+        "title": "Không thể tạo đơn hàng",
+        "sub": "Vui lòng kiểm tra lại thông tin thanh toán."
+      },
+      "addressUpdate": {
+        "titleEdit": "Đã cập nhật địa chỉ",
+        "titleAdd": "Đã thêm địa chỉ mới",
+        "sub": "Bạn có thể dùng địa chỉ này cho đơn hàng hiện tại."
+      },
+      "addressFailed": {
+        "title": "Không lưu được địa chỉ",
+        "sub": "Vui lòng kiểm tra lại thông tin địa chỉ."
+      },
+      "voucherFailed": {
+        "title": "Không áp dụng được",
+        "sub": "Hệ thống chưa thể kiểm tra voucher."
+      },
+      "voucherApplied": {
+        "title": "Đã áp dụng voucher"
+      },
+      "voucherSelected": {
+        "title": "Đã chọn voucher"
+      }
     }
   }
 }

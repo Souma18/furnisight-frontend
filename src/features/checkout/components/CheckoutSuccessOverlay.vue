@@ -23,40 +23,40 @@ defineEmits(['view-order', 'continue-shopping'])
         <AppIcon name="partyPopper" :size="46" />
       </div>
       <h2 id="checkout-success-title" class="checkout-success-title">
-        Đặt hàng <em>thành công!</em>
+        {{ $t('checkout.success.title') }} <em>{{ $t('checkout.success.success') }}</em>
       </h2>
       <p class="checkout-success-sub">
-        Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.
+        {{ $t('checkout.success.sub') }}
       </p>
 
       <div class="checkout-success-steps">
         <div class="ss-item">
           <div class="ss-dot done"><AppIcon name="check" :size="14" /></div>
-          <div class="ss-label">Đặt hàng</div>
+          <div class="ss-label">{{ $t('checkout.success.steps.ordered') }}</div>
         </div>
         <div class="ss-item">
           <div class="ss-dot pend"><AppIcon name="package" :size="14" /></div>
-          <div class="ss-label">Xử lý</div>
+          <div class="ss-label">{{ $t('checkout.success.steps.processing') }}</div>
         </div>
         <div class="ss-item">
           <div class="ss-dot pend"><AppIcon name="truck" :size="14" /></div>
-          <div class="ss-label">Giao hàng</div>
+          <div class="ss-label">{{ $t('checkout.success.steps.shipping') }}</div>
         </div>
         <div class="ss-item">
           <div class="ss-dot pend"><AppIcon name="home" :size="14" /></div>
-          <div class="ss-label">Hoàn tất</div>
+          <div class="ss-label">{{ $t('checkout.success.steps.done') }}</div>
         </div>
       </div>
 
-      <div v-if="orderCode" class="checkout-success-order-id">Mã đơn: {{ orderCode }}</div>
+      <div v-if="orderCode" class="checkout-success-order-id">{{ $t('checkout.success.orderId', { code: orderCode }) }}</div>
 
       <div class="checkout-success-actions">
         <AppButton variant="unstyled" type="button" class="checkout-success-btn checkout-success-btn--primary" @click="$emit('view-order')">
           <AppIcon name="package" :size="16" />
-          Xem đơn hàng
+          {{ $t('checkout.success.viewOrder') }}
         </AppButton>
         <AppButton variant="unstyled" type="button" class="checkout-success-btn checkout-success-btn--ghost" @click="$emit('continue-shopping')">
-          Tiếp tục mua sắm
+          {{ $t('checkout.success.continueShopping') }}
         </AppButton>
       </div>
     </div>

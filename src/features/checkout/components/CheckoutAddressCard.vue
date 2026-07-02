@@ -27,13 +27,13 @@ const selectedAddress = computed(
     <div class="checkout-card-head">
       <h2 class="checkout-card-title">
         <AppIcon name="mapPin" :size="16" />
-        Địa chỉ giao hàng
+        {{ $t('checkout.address.title') }}
       </h2>
-      <AppButton variant="unstyled" type="button" class="checkout-card-change" @click="$emit('open-create')">Thêm địa chỉ</AppButton>
+      <AppButton variant="unstyled" type="button" class="checkout-card-change" @click="$emit('open-create')">{{ $t('checkout.address.add') }}</AppButton>
     </div>
 
     <div v-if="!addresses.length" class="co-empty">
-      Chưa có địa chỉ giao hàng. Bạn có thể thêm địa chỉ ngay tại bước thanh toán.
+      {{ $t('checkout.address.empty') }}
     </div>
 
     <div v-else class="co-address-list">
@@ -53,11 +53,11 @@ const selectedAddress = computed(
         <div class="co-address-main">
           <div class="co-addr-name">
             {{ address.fullName }} ({{ address.phone }})
-            <span v-if="address.isDefault" class="co-addr-default">Mặc định</span>
+            <span v-if="address.isDefault" class="co-addr-default">{{ $t('checkout.address.default') }}</span>
           </div>
           <p class="co-addr-street">{{ formatVietnamAddress(address) }}</p>
         </div>
-        <AppButton variant="unstyled" type="button" class="co-address-edit" @click.prevent="$emit('open-edit', address)">Sửa</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-address-edit" @click.prevent="$emit('open-edit', address)">{{ $t('checkout.address.edit') }}</AppButton>
       </label>
     </div>
   </section>

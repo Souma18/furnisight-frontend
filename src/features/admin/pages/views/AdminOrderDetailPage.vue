@@ -193,6 +193,11 @@ watch(() => props.orderCode, load, { immediate: true })
         <h3>Ghi chú khách hàng</h3>
         <p class="admin-detail-text">{{ order.customerNote }}</p>
       </article>
+
+      <article v-if="order.note" class="admin-detail-card">
+        <h3>Ghi chú nội bộ</h3>
+        <p class="admin-detail-text">{{ order.note }}</p>
+      </article>
     </aside>
   </section>
 

@@ -13,37 +13,38 @@ export function useCheckoutOrder({
   showSuccess,
   showToast,
   summary,
+  t,
 }) {
   function validateOrderInput() {
     if (!authStore.isCustomer) {
       return {
         icon: 'shield',
-        title: 'Không có quyền đặt hàng',
-        subtitle: 'Chỉ tài khoản khách hàng mới có thể đặt hàng và thanh toán.',
+        title: t('checkout.toast.noAuth.title'),
+        subtitle: t('checkout.toast.noAuth.sub'),
       }
     }
 
     if (!checkoutState.agreedTerms.value) {
       return {
         icon: 'shield',
-        title: 'Vui lòng đồng ý điều khoản',
-        subtitle: 'Bạn cần tick đồng ý trước khi đặt hàng.',
+        title: t('checkout.toast.noTerms.title'),
+        subtitle: t('checkout.toast.noTerms.sub'),
       }
     }
 
     if (!selectedAddress.value) {
       return {
         icon: 'mapPin',
-        title: 'Chưa có địa chỉ giao hàng',
-        subtitle: 'Vui lòng chọn hoặc thêm địa chỉ giao hàng.',
+        title: t('checkout.toast.noAddress.title'),
+        subtitle: t('checkout.toast.noAddress.sub'),
       }
     }
 
     if (!checkoutLines.value.length) {
       return {
         icon: 'cart',
-        title: 'Giỏ hàng trống',
-        subtitle: 'Không có sản phẩm để thanh toán.',
+        title: t('checkout.toast.emptyCart.title'),
+        subtitle: t('checkout.toast.emptyCart.sub'),
       }
     }
 
@@ -51,8 +52,11 @@ export function useCheckoutOrder({
     if (invalidLine) {
       return {
         icon: 'alert',
-        title: 'Số lượng vượt tồn kho',
-        subtitle: `${invalidLine.name || 'Sản phẩm'} chỉ có thể mua ${stockLimitLabel(invalidLine).toLowerCase()}.`,
+        title: t('checkout.toast.overStock.title'),
+        subtitle: t('checkout.toast.overStock.sub', { 
+          name: invalidLine.name || 'Sản phẩm', 
+          limit: stockLimitLabel(invalidLine).toLowerCase() 
+        }),
       }
     }
 
@@ -63,8 +67,8 @@ export function useCheckoutOrder({
     if (!shippingAddressName || !address.phone || !shippingAddressDetail) {
       return {
         icon: 'mapPin',
-        title: 'Địa chỉ giao hàng chưa đủ',
-        subtitle: 'Vui lòng cập nhật họ tên, số điện thoại và địa chỉ chi tiết.',
+        title: t('checkout.toast.incompleteAddress.title'),
+        subtitle: t('checkout.toast.incompleteAddress.sub'),
       }
     }
 
@@ -114,8 +118,8 @@ export function useCheckoutOrder({
     if (!paymentRes.ok) {
       showToast({
         icon: 'alert',
-        title: 'Thanh toán VNPAY thất bại',
-        subtitle: paymentRes.message || `Mã phản hồi: ${paymentRes.status}`,
+        title: t('checkout.toast.vnpayFailed.title'),
+        subtitle: paymentRes.message || t('checkout.toast.vnpayFailed.sub', { status: paymentRes.status }),
       })
       return false
     }
@@ -154,8 +158,8 @@ export function useCheckoutOrder({
     if (!authStore.isCustomer) {
       showToast({
         icon: 'alert',
-        title: 'Không thể tạo đơn hàng',
-        subtitle: 'Chỉ tài khoản khách hàng mới có thể đặt hàng.',
+        title: t('checkout.toast.noAuth.title'),
+        subtitle: t('checkout.toast.noAuth.createSub'),
       })
       return null
     }
@@ -169,8 +173,8 @@ export function useCheckoutOrder({
     } catch (error) {
       showToast({
         icon: 'alert',
-        title: 'Không thể tạo đơn hàng',
-        subtitle: error?.response?.data?.message || error.message || 'Vui lòng kiểm tra lại thông tin thanh toán.',
+        title: t('checkout.toast.createFailed.title'),
+        subtitle: error?.response?.data?.message || error.message || t('checkout.toast.createFailed.sub'),
       })
       return null
     } finally {

@@ -20,7 +20,7 @@ const { t } = useI18n()
   <div class="pl-body">
     <header class="pl-result-head">
       <div class="pl-result-copy">
-        <span>Catalog</span>
+        <span>{{ t('products.catalog') }}</span>
         <p>{{ t('products.resultCount', { count: total }) }}</p>
       </div>
       <div class="pl-result-controls">
@@ -28,7 +28,7 @@ const { t } = useI18n()
       </div>
     </header>
 
-    <div v-if="activeTags.length" class="pl-tags" aria-label="Bộ lọc đang áp dụng">
+    <div v-if="activeTags.length" class="pl-tags" :aria-label="t('products.sidebar.title')">
       <span v-for="tag in activeTags" :key="tag" class="pl-tag">{{ tag }}</span>
     </div>
 

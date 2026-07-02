@@ -7,7 +7,10 @@ import ProductListGrid from '../components/ProductListGrid.vue'
 import ProductListHeroSection from '../components/ProductListHeroSection.vue'
 import ProductListToolbar from '../components/ProductListToolbar.vue'
 import { useProductListPage } from '../composables/useProductListPage'
+import { useI18n } from 'vue-i18n'
 import '../styles/productList.css'
+
+const { t } = useI18n()
 
 const {
   items,
@@ -96,8 +99,8 @@ function applySidebarAndClose(payload) {
       <div class="pl-products-panel">
         <div v-if="apiError" class="pl-api-error">
           <AppIcon name="alert" :size="18" />
-          <span>Không thể kết nối máy chủ. Dữ liệu có thể không đầy đủ.</span>
-          <AppButton type="button" class="pl-api-error-retry" @click="reloadPage">Tải lại</AppButton>
+          <span>{{ t('products.errors.apiConn') }}</span>
+          <AppButton type="button" class="pl-api-error-retry" @click="reloadPage">{{ t('products.errors.retry') }}</AppButton>
         </div>
         <ProductListGrid
           :products="items"

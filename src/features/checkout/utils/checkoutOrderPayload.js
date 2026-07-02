@@ -39,6 +39,7 @@ export function buildOrderItemPayload(item = {}) {
     variantId: item.variantId || null,
     categoryName: item.categoryName || item.categoryLabel || '',
     productName: item.productName || item.name,
+    slug: item.slug || '',
     price: Number(item.price) || 0,
     quantity: clampPurchaseQuantity(item.qty ?? item.quantity, item),
     imageUrl: resolveLineImageUrl(item),

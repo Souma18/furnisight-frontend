@@ -15,7 +15,7 @@ defineEmits(['update-payment'])
     <div class="checkout-card-head">
       <h2 class="checkout-card-title">
         <AppIcon name="creditCard" :size="16" />
-        Phương thức thanh toán
+        {{ $t('checkout.payment.title') }}
       </h2>
     </div>
 
@@ -38,7 +38,7 @@ defineEmits(['update-payment'])
             <AppIcon v-if="method.icon" :name="method.icon" :size="18" />
           </span>
           <div>
-            <div class="co-pay-name">{{ method.name }}</div>
+            <div class="co-pay-name">{{ $t(`checkout.options.payment.${method.id}`, method.name) }}</div>
             <div class="co-pay-sub">{{ method.sub }}</div>
           </div>
           <AppIcon v-if="selectedPaymentId === method.id" class="co-pay-selected" name="check" :size="13" />

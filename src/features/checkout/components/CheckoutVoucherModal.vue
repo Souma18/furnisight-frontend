@@ -46,8 +46,8 @@ function handleApplyCode() {
   <AppModal :open="open" width="500px" no-bg @close="$emit('close')">
     <div class="co-modal" role="dialog" aria-modal="true">
       <div class="co-modal-head">
-        <p style="font-size: 1rem; font-weight: 600">Chọn <em style="font-style: italic; color: var(--co-gold, #c9922a)">voucher</em></p>
-        <AppButton variant="unstyled" type="button" class="checkout-card-change" aria-label="Đóng" @click="$emit('close')">
+        <p style="font-size: 1rem; font-weight: 600" v-html="$t('checkout.voucher.modalTitle')"></p>
+        <AppButton variant="unstyled" type="button" class="checkout-card-change" :aria-label="$t('checkout.address.close')" @click="$emit('close')">
           <AppIcon name="close" :size="16" />
         </AppButton>
       </div>
@@ -58,15 +58,15 @@ function handleApplyCode() {
             v-model="codeInput"
             class="co-opt-input"
             type="text"
-            placeholder="Nhập mã voucher..."
+            :placeholder="$t('checkout.voucher.placeholder')"
             @keyup.enter="handleApplyCode"
           />
           <AppButton variant="unstyled" type="button" class="co-voucher-btn" :disabled="applying" @click="handleApplyCode">
-            Áp dụng
+            {{ $t('checkout.voucher.apply') }}
           </AppButton>
         </div>
 
-        <p style="font-size: 0.78rem; font-weight: 600; margin-bottom: 0.45rem">Voucher của bạn</p>
+        <p style="font-size: 0.78rem; font-weight: 600; margin-bottom: 0.45rem">{{ $t('checkout.voucher.yours') }}</p>
 
         <label
           v-for="voucher in vouchers"
@@ -86,9 +86,9 @@ function handleApplyCode() {
       </div>
 
       <div class="co-modal-foot">
-        <AppButton variant="unstyled" type="button" class="co-voucher-btn" @click="$emit('close')">Hủy</AppButton>
+        <AppButton variant="unstyled" type="button" class="co-voucher-btn" @click="$emit('close')">{{ $t('checkout.voucher.cancel') }}</AppButton>
         <AppButton variant="unstyled" type="button" class="co-btn-order" style="width: auto; padding-inline: 1rem" :disabled="applying" @click="handleConfirm">
-          Xác nhận
+          {{ $t('checkout.voucher.confirm') }}
         </AppButton>
       </div>
     </div>

@@ -1,4 +1,6 @@
-.checkout-page {
+.checkout-page,
+.co-address-dialog,
+.co-modal {
   --co-navy: var(--app-navy);
   --co-gold: var(--app-gold);
   --co-gold-light: var(--brand-gold-400);
@@ -9,6 +11,9 @@
   --co-text-light: var(--app-text-muted);
   --co-green: var(--app-success);
   --co-red: var(--app-danger);
+}
+
+.checkout-page {
   background: var(--co-cream);
   min-height: 100%;
 }
@@ -234,7 +239,7 @@
 
 .co-address-option--active {
   border-color: rgba(201, 146, 42, .7);
-  background: linear-gradient(90deg, rgba(229, 184, 74, .12), #fff);
+  background: linear-gradient(90deg, rgba(229, 184, 74, .12), var(--app-surface));
   box-shadow: 0 10px 24px rgba(201, 146, 42, .08);
 }
 
@@ -245,7 +250,7 @@
 .co-address-edit {
   border: 1px solid var(--co-cream-mid);
   background: var(--app-surface);
-  color: var(--co-navy);
+  color: var(--app-heading);
   border-radius: 8px;
   padding: 0.35rem 0.6rem;
   font-size: 0.72rem;
@@ -289,7 +294,7 @@
 .co-address-dialog-head h3 {
   margin: 0;
   font-size: 1rem;
-  color: var(--co-navy);
+  color: var(--app-heading);
 }
 
 .co-address-close {
@@ -327,8 +332,8 @@
   padding: 0 0.7rem;
   font: inherit;
   font-size: 0.82rem;
-  color: var(--co-navy);
-  background: var(--app-surface);
+  color: var(--app-text);
+  background: var(--app-control-bg);
 }
 
 .co-address-form-full {
@@ -372,7 +377,7 @@
 
 .co-address-secondary {
   border: 1.5px solid var(--co-cream-mid);
-  background: var(--app-surface);
+  background: var(--app-control-bg);
   color: var(--co-text-mid);
 }
 
@@ -388,7 +393,7 @@
   gap: 0.55rem;
   padding: 0.75rem 1rem;
   border-bottom: 1px solid var(--co-cream-dark);
-  background: linear-gradient(90deg, var(--co-cream) 0%, #fff 100%);
+  background: linear-gradient(90deg, var(--co-cream) 0%, var(--app-surface) 100%);
 }
 
 .co-shop-icon {

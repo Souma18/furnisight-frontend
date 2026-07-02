@@ -82,7 +82,7 @@ export function useRoomCartBridge({
     if (!detailId) return
     router.push({
       name: 'product-detail',
-      params: { id: detailId },
+      params: { slug: String(product.slug || product.id) },
     })
   }
 

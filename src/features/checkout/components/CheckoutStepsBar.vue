@@ -1,12 +1,21 @@
 <script setup>
-import { CHECKOUT_STEPS } from '../composables/checkoutContent'
+import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
+const STEPS = computed(() => [
+  { id: 'cart', label: t('checkout.steps.cart'), status: 'done', to: '/account?view=cart' },
+  { id: 'checkout', label: t('checkout.steps.checkout'), status: 'active' },
+  { id: 'done', label: t('checkout.steps.done'), status: 'pending' },
+])
 </script>
 
 <template>
   <div class="checkout-steps-bar">
-    <template v-for="(step, index) in CHECKOUT_STEPS" :key="step.id">
+    <template v-for="(step, index) in STEPS" :key="step.id">
       <component
         :is="step.to ? RouterLink : 'div'"
         class="checkout-step"
@@ -20,7 +29,7 @@ import AppIcon from '@shared/ui/AppIcon.vue'
         {{ step.label }}
       </component>
       <span
-        v-if="index < CHECKOUT_STEPS.length - 1"
+        v-if="index < STEPS.length - 1"
         class="checkout-step-div"
         :class="{ done: step.status === 'done' }"
       />

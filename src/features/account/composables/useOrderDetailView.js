@@ -191,7 +191,7 @@ export function useOrderDetailView(notify) {
     if (!productId) return
     router.push({
       name: 'product-detail',
-      params: { id: productId },
+      params: { slug: item?.productSnapshot?.slug || item?.slug || productId },
     })
   }
 
@@ -200,7 +200,7 @@ export function useOrderDetailView(notify) {
     if (!productId || order.value?.status !== 'delivered') return
     router.push({
       name: 'product-detail',
-      params: { id: productId },
+      params: { slug: item?.productSlug || productId },
       query: {
         tab: 'review',
         orderItemId: item?.id || '',

@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import CheckoutAddressCard from '../components/CheckoutAddressCard.vue'
 import CheckoutAddressModal from '../components/CheckoutAddressModal.vue'
 import CheckoutBreadcrumb from '../components/CheckoutBreadcrumb.vue'
@@ -19,6 +20,7 @@ import { getApiErrorMessage } from '@shared/lib/api'
 import '../styles/checkoutPage.css'
 
 const router = useRouter()
+const { t } = useI18n()
 const checkoutStore = useCheckoutStore()
 
 const addressModalOpen = ref(false)
@@ -101,8 +103,8 @@ onMounted(async () => {
   } catch (error) {
     showToast({
       icon: 'alert',
-      title: 'Không thể tải thanh toán',
-      subtitle: getApiErrorMessage(error, 'Vui lòng thử lại sau.'),
+      title: t('checkout.page.errorTitle'),
+      subtitle: getApiErrorMessage(error, t('checkout.page.errorSubtitle')),
     })
   }
 })
@@ -133,7 +135,7 @@ function handleContinueShopping() {
     <CheckoutBreadcrumb />
 
     <div v-if="loading" style="padding: 2rem; text-align: center; color: var(--co-text-mid, #555)">
-      Đang tải thông tin thanh toán...
+      {{ $t('checkout.page.loading') }}
     </div>
 
     <template v-else-if="!isEmpty">

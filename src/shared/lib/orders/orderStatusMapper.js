@@ -29,6 +29,7 @@ export const ORDER_STATUS_CODES = Object.freeze({
   IN_TRANSIT: 'IN_TRANSIT',
   DELIVERED: 'DELIVERED',
   CANCELLED: 'CANCELLED',
+  CANCELLED_BY_ADMIN: 'CANCELLED_BY_ADMIN',
   REFUND_PENDING: 'REFUND_PENDING',
   REFUNDED: 'REFUNDED',
 })
@@ -44,6 +45,7 @@ export const ORDER_STATUS_LABELS = Object.freeze({
   in_transit: 'Đang giao',
   delivered: 'Đã nhận',
   cancelled: 'Đã hủy',
+  cancelled_by_admin: 'Hủy bởi shop',
   refund_pending: 'Chờ hoàn tiền',
   refunded: 'Đã hoàn tiền',
 })
@@ -65,6 +67,7 @@ const RAW_STATUS_TO_CODE = Object.freeze({
   CANCELLED: ORDER_STATUS_CODES.CANCELLED,
   CANCELED: ORDER_STATUS_CODES.CANCELLED,
   CANCEL: ORDER_STATUS_CODES.CANCELLED,
+  CANCELLED_BY_ADMIN: ORDER_STATUS_CODES.CANCELLED_BY_ADMIN,
   REFUND_PENDING: ORDER_STATUS_CODES.REFUND_PENDING,
   PENDING_REFUND: ORDER_STATUS_CODES.REFUND_PENDING,
   REFUNDED: ORDER_STATUS_CODES.REFUNDED,
@@ -79,6 +82,7 @@ const STATUS_CODE_TO_UI_KEY = Object.freeze({
   [ORDER_STATUS_CODES.IN_TRANSIT]: 'in_transit',
   [ORDER_STATUS_CODES.DELIVERED]: 'delivered',
   [ORDER_STATUS_CODES.CANCELLED]: 'cancelled',
+  [ORDER_STATUS_CODES.CANCELLED_BY_ADMIN]: 'cancelled_by_admin',
   [ORDER_STATUS_CODES.REFUND_PENDING]: 'refund_pending',
   [ORDER_STATUS_CODES.REFUNDED]: 'refunded',
 })
@@ -88,6 +92,7 @@ export const ORDER_STATUS_LABEL_TO_API = Object.freeze({
   'Đang vận chuyển': ORDER_STATUS_CODES.SHIPPING,
   'Đang giao': ORDER_STATUS_CODES.IN_TRANSIT,
   'Đã hủy': ORDER_STATUS_CODES.CANCELLED,
+  'Hủy bởi shop': ORDER_STATUS_CODES.CANCELLED_BY_ADMIN,
   'Chờ hoàn tiền': ORDER_STATUS_CODES.REFUND_PENDING,
   'Đã hoàn tiền': ORDER_STATUS_CODES.REFUNDED,
 })
@@ -172,7 +177,7 @@ export function getOrderStatusOptions(order = {}) {
   const cod = isCodPayment(order)
 
   // Terminal or user-only transitions
-  if ([ORDER_STATUS_CODES.DELIVERED, ORDER_STATUS_CODES.REFUNDED, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)) {
+  if ([ORDER_STATUS_CODES.DELIVERED, ORDER_STATUS_CODES.REFUNDED, ORDER_STATUS_CODES.CANCELLED, ORDER_STATUS_CODES.CANCELLED_BY_ADMIN].includes(code)) {
     return []
   }
 
@@ -184,17 +189,17 @@ export function getOrderStatusOptions(order = {}) {
     // COD: no payment, no refund
     if (code === ORDER_STATUS_CODES.UNPAID) options.push('Đang vận chuyển')
     if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đang giao')
-    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING].includes(code)) options.push('Đã hủy')
+    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)) options.push('Hủy bởi shop')
   } else {
     // VNPAY
     if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID].includes(code)) {
       options.push('Đang vận chuyển')
     }
     if (code === ORDER_STATUS_CODES.SHIPPING) options.push('Đang giao')
-    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING].includes(code)) {
-      options.push('Đã hủy')
+    if ([ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)) {
+      options.push('Hủy bởi shop')
     }
-    if ([ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.CANCELLED].includes(code)) {
+    if ([ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)) {
       options.push('Chờ hoàn tiền')
     }
   }
@@ -213,8 +218,8 @@ export function canUpdateOrderStatus(order = {}) {
 export function canCancelOrder(order = {}) {
   const code = normalizeOrderStatusCode(order)
   const cod = isCodPayment(order)
-  if (cod) return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING].includes(code)
-  return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING].includes(code)
+  if (cod) return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)
+  return [ORDER_STATUS_CODES.UNPAID, ORDER_STATUS_CODES.PAYMENT_FAILED, ORDER_STATUS_CODES.PAID, ORDER_STATUS_CODES.SHIPPING, ORDER_STATUS_CODES.IN_TRANSIT].includes(code)
 }
 
 export function canEditOrderTrackingCode(order = {}, nextStatusLabel = '') {

@@ -133,9 +133,9 @@ export function useProductListPage() {
         const category = new CategoryResponse(item)
         return { label: category.name, slug: category.slug ?? category.id }
       })
-      dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }, ...chips]
+      dynamicQuickFilters.value = [{ label: t('products.all'), slug: 'all' }, ...chips]
     } catch (e) {
-      dynamicQuickFilters.value = [{ label: 'Tất cả', slug: 'all' }]
+      dynamicQuickFilters.value = [{ label: t('products.all'), slug: 'all' }]
     }
   }
 
@@ -219,7 +219,7 @@ export function useProductListPage() {
         await wishlistStore.addFavorite(productId)
       }
     } catch (e) {
-      showToast('Không thể cập nhật danh sách yêu thích', 'error')
+      showToast(t('products.toast.wishlistFail'), 'error')
     }
   }
 
@@ -266,28 +266,28 @@ export function useProductListPage() {
 
       return {
         breadcrumb: [t('nav.home'), t('nav.products')],
-        title: 'Bộ sưu tập nội thất',
-        subtitle: facets.value.description ?? 'Khám phá danh mục nội thất đa dạng của chúng tôi',
+        title: t('products.hero.defaultTitle'),
+        subtitle: facets.value.description ?? t('products.hero.defaultSubtitle'),
         stats: [
-          { label: 'Sản phẩm', value: total.value },
-          { label: 'Danh mục', value: categoryCount },
-          { label: 'Đánh giá', value: facets.value.avgRating ? Number(facets.value.avgRating).toFixed(1) : '—' }
+          { label: t('products.hero.stats.products'), value: total.value },
+          { label: t('products.hero.stats.categories'), value: categoryCount },
+          { label: t('products.hero.stats.reviews'), value: facets.value.avgRating ? Number(facets.value.avgRating).toFixed(1) : '—' }
         ]
       }
     }
     
-    const rootLabel = categoryDisplayName(selectedCategory.value) || 'Sản phẩm'
+    const rootLabel = categoryDisplayName(selectedCategory.value) || t('products.hero.stats.products')
     const subLabel = categoryDisplayName(selectedSubcategory.value)
     const label = subLabel || rootLabel
     
     return {
       breadcrumb: [t('nav.home'), t('nav.products'), rootLabel, ...(subLabel ? [subLabel] : [])],
       title: label,
-      subtitle: `${label} tinh tế và hiện đại`,
+      subtitle: t('products.hero.dynamicSubtitle', { label: label.toLowerCase() }),
       stats: [
-        { label: 'Sản phẩm', value: total.value },
-        { label: 'Màu sắc', value: facets.value.colors?.length || 0 },
-        { label: 'Chất liệu', value: facets.value.materials?.length || 0 }
+        { label: t('products.hero.stats.products'), value: total.value },
+        { label: t('products.hero.stats.colors'), value: facets.value.colors?.length || 0 },
+        { label: t('products.hero.stats.materials'), value: facets.value.materials?.length || 0 }
       ]
     }
   })

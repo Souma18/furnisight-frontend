@@ -104,6 +104,7 @@ export class OrderDetailResponse {
     this.totalAmount = data.totalAmount
     this.savedAmount = data.savedAmount
     this.customerNote = data.customerNote ?? null
+    this.note = data.note ?? null
     this.fee = data.fee ?? null
     this.shippingDetail = data.shippingDetail ?? null
     this.paymentDetail = data.paymentDetail ?? null

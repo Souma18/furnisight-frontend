@@ -13,10 +13,12 @@ import { clampPurchaseQuantity, isPurchasableLine } from '@features/cart/lib/sto
 import { consumeVoucherIntent } from '../lib/checkoutVoucherIntentStorage'
 import { useToast } from '@shared/composables/useToast'
 import { useLocaleStore } from '@shared/stores/localeStore'
+import { useI18n } from 'vue-i18n'
 
 export function useCheckout() {
   const route = useRoute()
   const router = useRouter()
+  const { t } = useI18n()
   const cartStore = useCartStore()
   const addressStore = useAddressStore()
   const orderStore = useOrderStore()
@@ -66,6 +68,7 @@ export function useCheckout() {
     showSuccess,
     showToast,
     summary,
+    t,
   })
 
   function showToast(payload) {
@@ -74,14 +77,16 @@ export function useCheckout() {
     showToastGlobal(message, type)
   }
 
-  async function initCheckout() {
+  async function initCheckout(isLanguageChange = false) {
     checkoutStore.loading = true
     try {
       if (!authStore.isCustomer) {
         await router.replace({ name: authStore.isAdmin ? 'admin-dashboard' : 'home' })
         return
       }
-      checkoutStore.beginVoucherSession()
+      if (!isLanguageChange) {
+        checkoutStore.beginVoucherSession()
+      }
       await Promise.all([
         cartStore.ensureHydrated(),
         addressStore.fetchAddresses(),
@@ -148,14 +153,14 @@ export function useCheckout() {
       syncSelectedAddress()
       showToast({
         icon: 'mapPin',
-        title: addressId ? 'Đã cập nhật địa chỉ' : 'Đã thêm địa chỉ mới',
-        subtitle: 'Bạn có thể dùng địa chỉ này cho đơn hàng hiện tại.',
+        title: addressId ? t('checkout.toast.addressUpdate.titleEdit') : t('checkout.toast.addressUpdate.titleAdd'),
+        subtitle: t('checkout.toast.addressUpdate.sub'),
       })
     } catch (error) {
       showToast({
         icon: 'alert',
-        title: 'Không lưu được địa chỉ',
-        subtitle: error?.response?.data?.message || error.message || 'Vui lòng kiểm tra lại thông tin địa chỉ.',
+        title: t('checkout.toast.addressFailed.title'),
+        subtitle: error?.response?.data?.message || error.message || t('checkout.toast.addressFailed.sub'),
       })
     }
   }
@@ -186,7 +191,7 @@ export function useCheckout() {
   // Explicit UI-triggered API call
   watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)
   watch(locale, () => {
-    initCheckout().catch(() => null)
+    initCheckout(true).catch(() => null)
   })
 
   return {

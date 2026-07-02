@@ -90,6 +90,7 @@ export function useAdminCombos({
       stock: Number(variant.stockQuantity ?? variant.stock ?? item.stockQuantity ?? item.stock ?? 0),
       status: item.status || item.productStatus || 'Đang bán',
       image: item.image || item.thumbnailUrl || item.imageUrl || 'box',
+      slug: item.slug,
     }
   }
 
@@ -105,7 +106,7 @@ export function useAdminCombos({
     comboForm.startDate = toDatetimeLocal(row?.startDate)
     comboForm.endDate = toDatetimeLocal(row?.endDate)
     comboForm.active = row?.active ?? true
-    comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName })) : []
+    comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName, slug: item.productSlug || item.slug })) : []
   }
 
   async function openComboModal(row = null) {
@@ -170,6 +171,7 @@ export function useAdminCombos({
       items: comboForm.items.map((item) => ({
         productId: item.id,
         variantId: item.variantId,
+        productSlug: item.slug,
         quantity: Number(item.quantity || 1),
         productName: item.name || item.productName,
         sku: item.sku,

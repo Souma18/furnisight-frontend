@@ -1,4 +1,5 @@
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 export function useCheckoutVoucherModal({
   shopVouchers,
@@ -9,6 +10,7 @@ export function useCheckoutVoucherModal({
   removeVoucher,
   showToast,
 }) {
+  const { t } = useI18n()
   const voucherModalOpen = ref(false)
   const voucherModalType = ref('shop')
   const voucherApplying = ref(false)
@@ -31,17 +33,17 @@ export function useCheckoutVoucherModal({
     try {
       const result = await applyVoucherByCode(code, voucherModalType.value, summary.value.voucherSubtotal, summary.value.shipFee)
       if (!result.ok) {
-        showToast({ icon: 'badgePercent', title: 'Không áp dụng được', subtitle: result.message })
+        showToast({ icon: 'badgePercent', title: t('checkout.toast.voucherFailed.title'), subtitle: result.message })
         return
       }
 
-      showToast({ icon: 'check', title: 'Đã áp dụng voucher', subtitle: code })
+      showToast({ icon: 'check', title: t('checkout.toast.voucherApplied.title'), subtitle: code })
       closeVoucherModal()
     } catch (error) {
       showToast({
         icon: 'badgePercent',
-        title: 'Không áp dụng được',
-        subtitle: error.response?.data?.message || 'Hệ thống chưa thể kiểm tra voucher.',
+        title: t('checkout.toast.voucherFailed.title'),
+        subtitle: error.response?.data?.message || t('checkout.toast.voucherFailed.sub'),
       })
     } finally {
       voucherApplying.value = false
@@ -54,18 +56,18 @@ export function useCheckoutVoucherModal({
     try {
       const result = await applyVoucherByCode(voucher.code, voucherModalType.value, summary.value.voucherSubtotal, summary.value.shipFee)
       if (!result.ok) {
-        showToast({ icon: 'badgePercent', title: 'Không áp dụng được', subtitle: result.message })
+        showToast({ icon: 'badgePercent', title: t('checkout.toast.voucherFailed.title'), subtitle: result.message })
         return
       }
 
       applyVoucher(result.voucher || voucher, voucherModalType.value)
-      showToast({ icon: 'check', title: 'Đã chọn voucher', subtitle: voucher.code })
+      showToast({ icon: 'check', title: t('checkout.toast.voucherSelected.title'), subtitle: voucher.code })
       closeVoucherModal()
     } catch (error) {
       showToast({
         icon: 'badgePercent',
-        title: 'Không áp dụng được',
-        subtitle: error.response?.data?.message || 'Hệ thống chưa thể kiểm tra voucher.',
+        title: t('checkout.toast.voucherFailed.title'),
+        subtitle: error.response?.data?.message || t('checkout.toast.voucherFailed.sub'),
       })
     } finally {
       voucherApplying.value = false

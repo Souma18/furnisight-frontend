@@ -1,4 +1,5 @@
 import { reactive, computed, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { PriceFormatter } from '@shared/lib/formatters'
 
 const PRICE_BANDS = [
@@ -17,6 +18,7 @@ function bandByStep(step) {
 }
 
 export function useProductFiltersSidebar(props, emit) {
+  const { t } = useI18n()
   const openBlocks = reactive({
     cat: true,
     price: true,
@@ -76,7 +78,7 @@ export function useProductFiltersSidebar(props, emit) {
     const list = props.facets?.categories || []
     if (list.length > 0 && !list.some(c => c.id === 'all')) {
       const totalCount = list.reduce((sum, c) => sum + (c.count || 0), 0)
-      return [{ id: 'all', slug: 'all', label: 'Tất cả sản phẩm', count: totalCount }, ...list]
+      return [{ id: 'all', slug: 'all', label: t('products.sidebar.allProducts'), count: totalCount }, ...list]
     }
     return list
   })
@@ -89,7 +91,6 @@ export function useProductFiltersSidebar(props, emit) {
       const count = apiRatings[star] || 0
       return {
         value: star,
-        hint: star === 5 ? `(${count})` : `${star} sao+ (${count})`,
         count: count,
       }
     })

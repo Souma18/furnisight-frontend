@@ -2,6 +2,7 @@
 import AppButton from '@shared/ui/AppButton.vue'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '../store/checkoutStore'
@@ -9,11 +10,11 @@ import CheckoutSuccessOverlay from '../components/CheckoutSuccessOverlay.vue'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useI18n()
 const cartStore = useCartStore()
-const checkoutStore = useCheckoutStore()
 
 const status = ref('processing')
-const message = ref('Đang xác nhận kết quả thanh toán với hệ thống.')
+const message = ref('')
 const orderCode = ref('')
 
 const pendingPayment = computed(() => checkoutStore.pendingPayment)
@@ -85,7 +86,7 @@ async function processCallback() {
   if (route.name === 'payment-success') {
     status.value = 'success'
     orderCode.value = pendingPayment.value?.orderCode || ''
-    message.value = 'Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.'
+    message.value = t('checkout.callback.status.success')
     await removePaidCartLines()
     await redirectToOrderDetail()
     return
@@ -94,7 +95,7 @@ async function processCallback() {
   if (route.name === 'payment-failure') {
     status.value = 'failure'
     orderCode.value = pendingPayment.value?.orderCode || ''
-    message.value = 'Thanh toán chưa hoàn tất hoặc đã bị hủy. Đơn hàng chưa được ghi nhận là đã thanh toán.'
+    message.value = t('checkout.callback.status.failed')
     checkoutStore.clearPendingPayment()
     return
   }
@@ -106,7 +107,7 @@ async function processCallback() {
 
   if (!paymentMethod || !Object.keys(callbackParams).length) {
     status.value = 'failure'
-    message.value = 'Không tìm thấy thông tin thanh toán để xác nhận.'
+    message.value = t('checkout.callback.status.notFound')
     return
   }
 
@@ -115,14 +116,14 @@ async function processCallback() {
 
     if (isGatewaySuccess(paymentMethod, callbackParams)) {
       status.value = 'success'
-      message.value = 'Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.'
+      message.value = t('checkout.callback.status.success')
       await removePaidCartLines()
       await redirectToOrderDetail()
       return
     }
 
     status.value = 'failure'
-    message.value = 'Thanh toán chưa hoàn tất hoặc đã bị hủy. Đơn hàng chưa được ghi nhận là đã thanh toán.'
+    message.value = t('checkout.callback.status.failed')
     checkoutStore.clearPendingPayment()
   } catch (error) {
     status.value = 'failure'
@@ -142,7 +143,10 @@ function retryCheckout() {
   router.push('/checkout')
 }
 
-onMounted(processCallback)
+onMounted(() => {
+  message.value = t('checkout.callback.status.processing')
+  processCallback()
+})
 </script>
 
 <template>
@@ -170,21 +174,21 @@ onMounted(processCallback)
         />
       </div>
 
-      <p class="payment-eyebrow">Kết quả thanh toán</p>
+      <p class="payment-eyebrow">{{ $t('checkout.callback.title') }}</p>
       <h1>
-        <span v-if="status === 'processing'">Đang xác nhận</span>
-        <span v-else>Thanh toán thất bại</span>
+        <span v-if="status === 'processing'">{{ $t('checkout.callback.status.processing') }}</span>
+        <span v-else>{{ $t('checkout.callback.status.failedLabel') }}</span>
       </h1>
       <p class="payment-message">{{ message }}</p>
-      <p v-if="orderCode" class="payment-order">Mã đơn: {{ orderCode }}</p>
+      <p v-if="orderCode" class="payment-order">{{ $t('checkout.callback.orderCode', { code: orderCode }) }}</p>
 
       <div v-if="status !== 'processing'" class="payment-actions">
         <AppButton type="button" class="primary" @click="goOrders">
           <AppIcon name="box" :size="15" />
-          Đơn hàng của tôi
+          {{ $t('checkout.callback.viewOrder') }}
         </AppButton>
         <AppButton v-if="isFailure" type="button" class="ghost" @click="retryCheckout">
-          Thử thanh toán lại
+          {{ $t('checkout.callback.retry') }}
         </AppButton>
       </div>
     </section>

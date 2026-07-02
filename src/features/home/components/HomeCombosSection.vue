@@ -62,7 +62,7 @@ function openCombo(combo) {
             v-for="item in selectedCombo.items"
             :key="`home-modal-${item.productId}-${item.variantId}`"
             class="combo-modal-row"
-            :to="{ name: 'product-detail', params: { id: item.productId } }"
+            :to="{ name: 'product-detail', params: { slug: item.productSlug || item.productId } }"
             @click="selectedCombo = null"
           >
             <span class="combo-product-image">
