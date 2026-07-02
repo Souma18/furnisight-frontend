@@ -33,8 +33,7 @@ const variantLabel = computed(() => variantCombination.value || t('account.cart.
 const summaryLabel = computed(() => variantCombination.value || t('account.cart.defaultVariant'))
 
 const detailRoute = computed(() => {
-  const detailId = props.item?.detailId || props.item?.slug || props.item?.productId || ''
-  return detailId ? `/products/${detailId}` : ''
+  return props.item?.slug ? `/products/${props.item.slug}` : ''
 })
 
 const router = useRouter()
@@ -242,7 +241,7 @@ const formatPrice = PriceFormatter.format
   font-weight: 500;
   line-height: 1.3;
   font-size: 0.84rem;
-  color: #1a1a1a;
+  color: var(--app-heading, #1a1a1a);
   display: -webkit-box;
   overflow: hidden;
   -webkit-box-orient: vertical;

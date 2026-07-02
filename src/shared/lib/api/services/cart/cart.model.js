@@ -114,7 +114,6 @@ export class CartItemResponse {
     this.productKey = raw.productKey || this.id || ''
     this.productId = raw.productId ?? null
     this.variantId = raw.variantId || null
-    this.detailId = raw.detailId || raw.slug || null
     this.room3dProductId = raw.room3dProductId ?? null
     this.name = raw.name || raw.productName || ''
     this.slug = raw.slug || ''

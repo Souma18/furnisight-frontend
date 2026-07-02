@@ -15,6 +15,8 @@ const props = defineProps({
   slug: { type: String, required: true },
 })
 
+const { t } = useI18n()
+
 const {
   product,
   loading,
