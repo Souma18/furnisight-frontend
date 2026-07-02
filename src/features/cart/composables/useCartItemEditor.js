@@ -24,7 +24,7 @@ function normalizeEditorVariants(variants = []) {
 }
 
 function resolveProductDetailLookup(item) {
-  return item?.slug || ''
+  return item?.slug || item?.productId || ''
 }
 
 export function useCartItemEditor(items, updateItem) {

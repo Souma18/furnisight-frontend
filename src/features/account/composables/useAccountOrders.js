@@ -7,6 +7,16 @@ import { useLocaleStore } from '@shared/stores/localeStore'
 
 const t = (key, params) => i18n.global.t(key, params)
 
+function orderActionErrorMessage(error, fallbackKey) {
+  if (error.message === 'NOT_FOUND') return t('account.orders.notFound')
+
+  const code = error.code || error.response?.data?.code
+  if (code === 'ORDER_NOT_FOUND') return t('account.orders.notFound')
+  if (code === 'INVALID_ORDER_STATUS') return t('account.orders.invalidStatus')
+
+  return t(fallbackKey)
+}
+
 export function useAccountOrders(emitNotify) {
   const route = useRoute()
   const router = useRouter()
@@ -61,11 +71,7 @@ export function useAccountOrders(emitNotify) {
       }
       return true
     } catch (error) {
-      let msg = t('account.orders.cancelError')
-      if (error.message === 'NOT_FOUND') msg = t('account.orders.notFound')
-      else if (error.response?.data?.message) msg = error.response.data.message
-      
-      if (emitNotify) emitNotify(msg, 'error')
+      if (emitNotify) emitNotify(orderActionErrorMessage(error, 'account.orders.cancelError'), 'error')
       return false
     }
   }
@@ -76,11 +82,7 @@ export function useAccountOrders(emitNotify) {
       if (emitNotify) emitNotify(t('account.orders.confirmSuccess'), 'success')
       return true
     } catch (error) {
-      let msg = t('account.orders.confirmError')
-      if (error.message === 'NOT_FOUND') msg = t('account.orders.notFound')
-      else if (error.response?.data?.message) msg = error.response.data.message
-      
-      if (emitNotify) emitNotify(msg, 'error')
+      if (emitNotify) emitNotify(orderActionErrorMessage(error, 'account.orders.confirmError'), 'error')
       return false
     }
   }
@@ -100,7 +102,7 @@ export function useAccountOrders(emitNotify) {
       else if (error.message === 'EXPIRED_OR_UNAVAILABLE') msg = t('account.orders.retryExpiredOrUnavailable')
       else if (error.message === 'UNSUPPORTED_METHOD') msg = t('account.orders.retryMethodUnsupported')
       else if (error.message === 'PAYMENT_URL_MISSING') msg = t('account.orders.paymentUrlMissing')
-      else if (error.response?.data?.message) msg = error.response.data.message
+      else msg = orderActionErrorMessage(error, 'account.orders.paymentCreateError')
       
       if (emitNotify) emitNotify(msg, 'error')
       return false

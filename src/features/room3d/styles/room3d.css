@@ -81,10 +81,10 @@
 /* --- ProductCard3D.vue --- */
 .room3d-product-card {
   position: relative;
-  border: 1px solid #ddd3c6;
+  border: 1px solid var(--app-border, #ddd3c6);
   border-radius: 8px;
   overflow: hidden;
-  background: #ffffff;
+  background: var(--app-surface, #ffffff);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -113,14 +113,14 @@
 
 .room3d-product-card.added {
   border-color: #5ab36f;
-  background: #fbfffc;
+  background: var(--app-surface-soft, #fbfffc);
 }
 
 .preview {
   position: relative;
   min-height: calc(5.8rem + (var(--pc-step) * 0.3rem));
   flex: 0 0 auto;
-  background: #ede9e2;
+  background: var(--app-surface-soft, #ede9e2);
   display: grid;
   place-items: center;
   padding: calc(0.4rem * var(--pc-content-scale));
@@ -128,7 +128,7 @@
 }
 
 .room3d-product-card:hover .preview {
-  background: #f2ede5;
+  background: var(--app-control-hover, #f2ede5);
 }
 
 .product-icon {
@@ -171,7 +171,7 @@
 
 .content {
   position: relative;
-  background: #ffffff;
+  background: var(--app-surface, #ffffff);
   flex: 1 1 auto;
   min-height: 0;
   display: flex;
@@ -187,6 +187,7 @@
   line-height: 1.35;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -194,7 +195,7 @@
 
 .room3d-product-card .category {
   margin: 0.18rem 0 0;
-  color: #6f7b86;
+  color: var(--app-text-muted, #6f7b86);
   font-size: calc(0.58rem + (0.08rem * var(--pc-content-scale)));
   line-height: 1.2;
   white-space: nowrap;
@@ -215,7 +216,7 @@
   margin: 0;
   display: block;
   width: 100%;
-  color: #7a542a;
+  color: var(--app-gold, #7a542a);
   font-size: calc(0.56rem + (0.18rem * var(--pc-content-scale)));
   font-weight: 800;
   line-height: 1.25;
@@ -1640,6 +1641,12 @@
   padding: 0.6rem;
   border-top: 1px solid var(--app-border);
   background: var(--app-surface);
+}
+
+.group-content.grid {
+  display: grid;
+  grid-template-columns: repeat(var(--product-columns, 2), 1fr);
+  gap: 0.6rem;
 }
 
 /* --- Room3DTopbar.vue --- */

@@ -296,6 +296,12 @@
       "cancelDialogMessage": "Are you sure you want to cancel order {code}? This action cannot be undone.",
       "cancelConfirm": "Cancel order",
       "keepOrder": "Keep order",
+      "confirmReceived": "I have received the order",
+      "confirmReceivedDialogTitle": "Confirm order received",
+      "confirmReceivedDialogMessage": "Please confirm only after you have checked and received the products in good condition. This action cannot be undone.",
+      "confirmSuccess": "Order receipt confirmed.",
+      "confirmError": "Unable to confirm order receipt right now.",
+      "close": "Close",
       "transactionHistory": "Transaction history",
       "shippingStatus": "Shipping status",
       "purchasedProducts": "Purchased products",
@@ -310,7 +316,7 @@
       "total": "Total",
       "free": "Free",
       "paymentMethod": "Payment method",
-      "carrier": "Carrier",
+      "carrier": "Method",
       "notFound": "Order not found.",
       "noTime": "Time not recorded",
       "product": "product",
@@ -328,6 +334,7 @@
       "cancelNowError": "Unable to cancel this order right now.",
       "cancelRefundPending": "Order cancelled. Refund is pending.",
       "cancelSuccess": "Order cancelled.",
+      "invalidStatus": "This order status cannot be updated right now.",
       "retryError": "Unable to retry payment.",
       "redirectPayment": "Redirecting to payment gateway.",
       "retryNoCode": "Could not find an order code to retry payment.",
@@ -378,17 +385,16 @@
       },
       "status": {
         "all": "All",
-        "cod_pending_confirmation": "COD pending confirmation",
-        "cod_confirmed": "COD confirmed",
         "unpaid": "Pending payment",
+        "unpaid_cod": "Order placed",
         "payment_failed": "Payment failed",
         "paid": "Paid",
+        "shipping": "Shipping",
         "in_transit": "In transit",
-        "delivering": "Delivering",
-        "done": "Completed",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled",
         "refund_pending": "Refund pending",
         "refunded": "Refunded",
-        "cancel": "Cancelled",
         "cancelled_by_admin": "Cancelled by shop"
       }
     }
@@ -842,7 +848,10 @@
       "aiLabel": "FURNITURE SUGGESTIONS",
       "aiSmart": "MATCHED",
       "aiText": "Select products to add to cart or drag them into the 3D space.",
-      "empty": "No matching products yet."
+      "empty": "No matching products yet.",
+      "searchMatched": "Products matching search",
+      "searchEmpty": "No matching products found.",
+      "all": "All"
     },
     "overlay": {
       "uploadStart": "Upload an image to begin",
@@ -888,6 +897,15 @@
     "badge": {
       "room": "Room",
       "detected": "Detected"
+    },
+    "roomTypes": {
+      "bedroom": "Bedroom",
+      "living": "Living room",
+      "bathroom": "Bathroom",
+      "kitchen": "Kitchen",
+      "dining": "Dining room",
+      "office": "Office",
+      "apartment": "Whole apartment"
     }
   },
   "productDetail": {

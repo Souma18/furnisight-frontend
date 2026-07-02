@@ -22,6 +22,23 @@ const t = (key, params) => i18n.global.t(key, params)
 // Fallback for non-UNPAID statuses via i18n key
 const orderStatusLabel = (status) => t(`account.orders.status.${String(status || 'unpaid').toLowerCase()}`)
 
+const SHIPPING_METHOD_ALIASES = {
+  standard: 'standard',
+  'giao hàng tiêu chuẩn': 'standard',
+  'giao hang tieu chuan': 'standard',
+  'standard shipping': 'standard',
+  express: 'express',
+  'giao hàng hỏa tốc': 'express',
+  'giao hang hoa toc': 'express',
+  'giao hàng hoả tốc': 'express',
+  'giao hang hoả toc': 'express',
+  'express shipping': 'express',
+}
+
+function normalizeShippingMethod(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
 export function useOrderDetailView(notify) {
   const router = useRouter()
   const authStore = useAuthStore()
@@ -67,9 +84,7 @@ export function useOrderDetailView(notify) {
 
   const statusLabel = computed(() => {
     if (!order.value) return ''
-    // For UNPAID: differentiate COD ("Đã đặt đơn") vs VNPAY ("Chờ thanh toán")
-    if (order.value.status === 'unpaid') return getOrderStatusLabel(order.value)
-    return order.value.status ? orderStatusLabel(order.value.status) : (order.value.statusLabel || '')
+    return order.value.statusLabel || getOrderStatusLabel(order.value) || orderStatusLabel(order.value.status)
   })
 
   const paymentStatusLabel = computed(() => {
@@ -231,6 +246,12 @@ export function useOrderDetailView(notify) {
       : (current?.paymentDetail?.paymentMethod || current?.paymentMethod || t('account.orders.unknown'))
   }
 
+  function shippingMethodLabel(current = order.value) {
+    const rawMethod = current?.shippingDetail?.shippingMethod || current?.shippingMethod || ''
+    const methodKey = SHIPPING_METHOD_ALIASES[normalizeShippingMethod(rawMethod)]
+    return methodKey ? t(`checkout.options.shipping.${methodKey}`) : (rawMethod || t('account.orders.unknown'))
+  }
+
   function orderItemProductId(item) {
     return item?.productSnapshot?.productId || item?.productId || ''
   }
@@ -271,6 +292,7 @@ export function useOrderDetailView(notify) {
     openProductDetail,
     reviewProduct,
     paymentMethodLabel,
+    shippingMethodLabel,
     handleCancel,
     closeCancelDialog,
     confirmCancel,

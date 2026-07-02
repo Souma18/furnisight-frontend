@@ -59,7 +59,7 @@ export function buildOrderPayload({
     shippingAddressName,
     shippingAddressPhone: address.phone,
     shippingAddressDetail,
-    shippingMethod: checkoutState.selectedShipping.value?.name || checkoutState.selectedShippingId.value,
+    shippingMethod: checkoutState.selectedShipping.value?.id || checkoutState.selectedShippingId.value,
     customerNote: checkoutState.sellerNote.value,
     paymentMethod: checkoutState.selectedPaymentId.value,
     shopVoucherCode: checkoutState.shopVoucher.value?.code || null,

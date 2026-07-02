@@ -129,7 +129,7 @@ const categoryLabelMap = computed(() => ({
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  padding: 0.75rem 0 1rem;
+  padding: 0.75rem 0.85rem 1rem;
   border-bottom: 1px solid var(--auth-border);
 }
 

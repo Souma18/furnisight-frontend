@@ -37,7 +37,7 @@ const predictionConfidencePercent = computed(() =>
       <p v-else-if="predictionStatus === 'error'" class="note error-note">{{ t('room3d.setup.predictFailed') }}</p>
       <div v-else class="room-meta">
         <div class="tag-row">
-          <NTag type="warning">{{ predictionLabel || selectedRoom?.name || t('room3d.setup.unknownLabel') }}</NTag>
+          <NTag type="warning">{{ predictionLabel || (selectedRoom?.type ? t(`room3d.roomTypes.${selectedRoom.type}`) : null) || t('room3d.setup.unknownLabel') }}</NTag>
           <NTag v-if="hasPredictionConfidence" type="success">
             {{ predictionConfidencePercent }}%
           </NTag>

@@ -123,8 +123,12 @@ export const useOrderStore = defineStore('accountOrder', () => {
     if (!detail) throw new Error('NOT_FOUND')
     
     const orderCode = detail.orderCode || orderRef
-    await ordersApi.confirmOrderReceived(orderCode)
-    const updatedDetail = await fetchOrderDetail(orderCode)
+    const { data } = await ordersApi.confirmOrderReceived(orderCode)
+    delete orderDetails.value[orderCode]
+    if (detail.id) delete orderDetails.value[detail.id]
+    const updatedDetail = data && typeof data === 'object'
+      ? new OrderDetailResponse(data)
+      : await fetchOrderDetail(orderCode)
     
     if (updatedDetail) {
       orders.value = orders.value.map((order) =>
@@ -132,6 +136,11 @@ export const useOrderStore = defineStore('accountOrder', () => {
           ? new OrderListResponse({ ...order, ...updatedDetail })
           : order,
       )
+      orderDetails.value = {
+        ...orderDetails.value,
+        [orderCode]: updatedDetail,
+        ...(updatedDetail.id ? { [updatedDetail.id]: updatedDetail } : {}),
+      }
     } else {
       await fetchOrders()
     }

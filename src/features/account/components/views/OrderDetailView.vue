@@ -1,6 +1,7 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
 import AppImage from '@shared/ui/AppImage.vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
@@ -34,6 +35,7 @@ const {
   openProductDetail,
   reviewProduct,
   paymentMethodLabel,
+  shippingMethodLabel,
   handleCancel,
   closeCancelDialog,
   confirmCancel,
@@ -42,6 +44,17 @@ const {
   executeConfirmReceived,
   handleRetryPayment,
 } = useOrderDetailView((msg, type) => emit('notify', msg, type))
+
+const orderStatusClass = computed(() => {
+  const status = order.value?.status
+  if (status === 'shipping' || status === 'in_transit' || status === 'delivering') return 'shipping'
+  if (status === 'delivered' || status === 'refunded' || status === 'done') return 'done'
+  if (status === 'cancelled' || status === 'cancelled_by_admin' || status === 'cancel') return 'cancel'
+  if (status === 'refund_pending') return 'refund'
+  if (status === 'payment_failed') return 'failed'
+  if (status === 'paid') return 'paid'
+  return 'pending'
+})
 </script>
 
 <template>
@@ -60,7 +73,7 @@ const {
         </p>
       </div>
       <div class="order-detail-head-actions">
-        <span class="status-badge" :class="order.status">{{ statusLabel }}</span>
+        <span class="status-badge" :class="orderStatusClass">{{ statusLabel }}</span>
         <AppButton
           v-if="shouldShowRetryPayment(order)"
           type="button"
@@ -248,7 +261,7 @@ const {
             {{ t('account.orders.shippingInfo') }}
           </h2>
           <div class="summary-rows">
-            <div class="summary-row"><span>{{ t('account.orders.carrier') }}</span><span>{{ order.shippingDetail.shippingMethod }}</span></div>
+            <div class="summary-row"><span>{{ t('account.orders.carrier') }}</span><span>{{ shippingMethodLabel(order) }}</span></div>
           </div>
         </article>
       </aside>
@@ -325,7 +338,8 @@ const {
   color: #c9922a;
 }
 
-.status-badge.payment_failed {
+.status-badge.payment_failed,
+.status-badge.failed {
   background: #fff0df;
   color: #b95e00;
 }
@@ -340,12 +354,14 @@ const {
   color: #2364a8;
 }
 
+.status-badge.shipping,
 .status-badge.in_transit {
   background: #eaf5ef;
   color: #2a7a50;
 }
 
-.status-badge.refund_pending {
+.status-badge.refund_pending,
+.status-badge.refund {
   background: #fff6e6;
   color: #9a6500;
 }
@@ -360,7 +376,8 @@ const {
   color: #2a7a50;
 }
 
-.status-badge.delivered {
+.status-badge.delivered,
+.status-badge.done {
   background: #f0f0f0;
   color: #555;
 }

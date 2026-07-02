@@ -38,14 +38,14 @@ const roomHasModel = computed(() => Boolean(props.selectedRoom?.modelUrl))
           <AppIcon :name="room.icon || 'house'" :size="22" />
         </span>
         <span class="room-btn-content">
-          <strong>{{ room.name }}</strong>
-          <small>{{ t('room3d.products.count', { count: room.type === 'bedroom' ? 18 : room.type === 'living' ? 22 : room.type === 'dining' ? 14 : 16 }) }}</small>
+          <strong>{{ t(`room3d.roomTypes.${room.type}`) }}</strong>
+          <small>{{ t('room3d.products.count', { count: room.type === 'living' ? 22 : room.type === 'bedroom' ? 18 : room.type === 'kitchen' ? 25 : 12 }) }}</small>
         </span>
       </AppButton>
     </div>
 
     <div class="room-mode-note" v-if="selectedRoom">
-      <strong>{{ selectedRoom.name }}</strong>
+      <strong>{{ t(`room3d.roomTypes.${selectedRoom.type}`) }}</strong>
       <p v-if="roomHasModel">
         {{ t('room3d.setup.roomReady') }}
       </p>

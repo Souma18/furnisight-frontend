@@ -316,7 +316,7 @@
       "total": "Tổng cộng",
       "free": "Miễn phí",
       "paymentMethod": "Phương thức thanh toán",
-      "carrier": "Đơn vị",
+      "carrier": "Phương thức",
       "notFound": "Không tìm thấy đơn hàng.",
       "noTime": "Chưa ghi nhận thời điểm",
       "product": "sản phẩm",
@@ -334,6 +334,7 @@
       "cancelNowError": "Không thể huỷ đơn hàng lúc này.",
       "cancelRefundPending": "Đã hủy đơn. Đơn đang chờ hoàn tiền.",
       "cancelSuccess": "Đã huỷ đơn hàng.",
+      "invalidStatus": "Trạng thái đơn hàng hiện không thể cập nhật.",
       "retryError": "Không thể thanh toán lại.",
       "redirectPayment": "Đang chuyển sang cổng thanh toán.",
       "retryNoCode": "Không tìm thấy mã đơn hàng để thanh toán lại.",
@@ -847,7 +848,10 @@
       "aiLabel": "GỢI Ý NỘI THẤT",
       "aiSmart": "PHÙ HỢP",
       "aiText": "Chọn sản phẩm để thêm vào giỏ hàng hoặc kéo vào không gian 3D.",
-      "empty": "Chưa có sản phẩm nào phù hợp."
+      "empty": "Chưa có sản phẩm nào phù hợp.",
+      "searchMatched": "Sản phẩm khớp với tìm kiếm",
+      "searchEmpty": "Không tìm thấy sản phẩm nào khớp.",
+      "all": "Tất cả"
     },
     "overlay": {
       "uploadStart": "Tải ảnh để bắt đầu",
@@ -893,6 +897,15 @@
     "badge": {
       "room": "Phòng",
       "detected": "Nhận diện"
+    },
+    "roomTypes": {
+      "bedroom": "Phòng ngủ",
+      "living": "Phòng khách",
+      "bathroom": "Phòng tắm",
+      "kitchen": "Nhà bếp",
+      "dining": "Phòng ăn",
+      "office": "Phòng làm việc",
+      "apartment": "Toàn bộ căn hộ"
     }
   },
   "productDetail": {

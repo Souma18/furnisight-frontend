@@ -31,7 +31,7 @@ function roomIconName(type) {
 <template>
   <div v-if="hasRoom" class="room-badge">
     <span class="room-icon"><AppIcon :name="roomIconName(selectedRoom?.type)" :size="15" /></span>
-    <span class="room-name">{{ selectedRoom?.name || t('room3d.badge.room') }}</span>
+    <span class="room-name">{{ selectedRoom?.type ? t(`room3d.roomTypes.${selectedRoom.type}`) : (selectedRoom?.name || t('room3d.badge.room')) }}</span>
     <span class="room-ai">{{ t('room3d.badge.detected') }}</span>
   </div>
 </template>
