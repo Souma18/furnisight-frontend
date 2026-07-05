@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import AppImage from '@shared/ui/AppImage.vue'
 import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -38,6 +38,11 @@ function priceLabel(item) {
 
 function roundedRating(rating) {
   return Math.max(0, Math.min(5, Math.round(Number(rating) || 0)))
+}
+
+function getDimensions(variant) {
+  if (!variant) return ''
+  return `${variant.length || 0} x ${variant.width || 0} x ${variant.height || 0} cm`
 }
 </script>
 
@@ -85,6 +90,8 @@ function roundedRating(rating) {
         <div class="shared-product-card__media">
           <AppImage v-if="item.image" :src="item.image" :alt="item.name" class="shared-product-card__img"  />
           <span v-else>{{ t('products.noImage') }}</span>
+          
+          <span v-if="item.supports3d" class="shared-product-card__badge-3d">3D</span>
         </div>
 
         <div class="shared-product-card__body">
@@ -110,6 +117,17 @@ function roundedRating(rating) {
             <p class="shared-product-card__price">{{ priceLabel(item) }}</p>
             <span class="shared-product-card__sold">{{ t('products.sold', { count: item.soldCount ?? 0 }) }}</span>
           </div>
+          
+          <div class="shared-product-card__meta" v-if="item.variants?.length">
+            <span class="meta-item">
+              <AppIcon name="cube" :size="13" />
+              {{ getDimensions(item.variants[0]) }}
+            </span>
+            <span class="meta-item">
+              <AppIcon name="shield" :size="13" />
+              {{ item.variants[0].warranty }}
+            </span>
+          </div>
         </div>
       </RouterLink>
 
@@ -129,7 +147,7 @@ function roundedRating(rating) {
 <style scoped>
 .shared-product-grid {
   display: grid;
-  gap: 20px;
+  gap: 16px;
   grid-template-columns: repeat(var(--product-grid-columns), minmax(0, 1fr));
 }
 
@@ -146,8 +164,8 @@ function roundedRating(rating) {
 }
 
 .shared-product-grid--catalog .shared-product-card__body {
-  min-height: 150px;
-  padding: 13px 13px 14px;
+  min-height: 120px;
+  padding: 12px;
 }
 
 .shared-product-grid--catalog .shared-product-card__cat {
@@ -156,7 +174,7 @@ function roundedRating(rating) {
 }
 
 .shared-product-grid--catalog .shared-product-card__name {
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.35;
   margin-bottom: 7px;
   min-height: 38px;
@@ -173,7 +191,7 @@ function roundedRating(rating) {
 }
 
 .shared-product-grid--catalog .shared-product-card__price {
-  font-size: 17px;
+  font-size: 15px;
 }
 
 .shared-product-grid--catalog .shared-product-card__sold {
@@ -227,23 +245,23 @@ function roundedRating(rating) {
 .shared-product-card {
   background: var(--app-surface);
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: 14px;
   box-shadow: var(--app-shadow);
   display: flex;
   flex-direction: column;
   overflow: hidden;
   position: relative;
   transition:
-    border-color 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease;
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s ease;
 }
 
 .shared-product-card:hover,
 .shared-product-card:focus-within {
-  border-color: var(--app-border-strong);
-  box-shadow: var(--app-shadow);
-  transform: translateY(-2px);
+  border-color: var(--brand-gold-400, #c99538);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
 }
 
 .shared-product-card__link {
@@ -259,8 +277,8 @@ function roundedRating(rating) {
 .shared-product-card__link:focus,
 .shared-product-card__link:focus-visible {
   color: inherit;
-  outline: 2px solid rgba(201, 146, 42, 0.48);
-  outline-offset: -2px;
+  outline: none;
+  outline-offset: 0;
   text-decoration: none;
 }
 
@@ -277,7 +295,7 @@ function roundedRating(rating) {
 
 .shared-product-card__media {
   align-items: center;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 11;
   background:
     linear-gradient(145deg, color-mix(in srgb, var(--app-surface) 76%, transparent), color-mix(in srgb, var(--app-surface-muted) 82%, transparent)),
     var(--app-surface-soft);
@@ -285,6 +303,7 @@ function roundedRating(rating) {
   font-size: 72px;
   justify-items: center;
   overflow: hidden;
+  position: relative;
   text-decoration: none;
 }
 
@@ -298,39 +317,37 @@ function roundedRating(rating) {
   height: 100%;
   object-fit: cover;
   object-position: center center;
-  transition: transform 0.35s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   width: 100%;
 }
 
 .shared-product-card:hover .shared-product-card__img,
 .shared-product-card:focus-within .shared-product-card__img {
-  transform: scale(1.025);
+  transform: scale(1.02);
 }
 
 .shared-product-card__body {
   display: flex;
-  flex: 1 1 auto;
+  flex: none;
   flex-direction: column;
-  min-height: 174px;
-  padding: 17px 16px 18px;
+  padding: 10px 12px 12px;
 }
 
 .shared-product-card__cat {
   color: var(--app-text-muted);
   font-size: 11px;
   letter-spacing: 0.08em;
-  margin: 0 0 6px;
+  margin: 0 0 3px;
   text-transform: uppercase;
 }
 
 .shared-product-card__name {
   color: var(--app-heading);
-  display: block;
-  font-size: 15px;
+  display: -webkit-box;
+  font-size: 13px;
   font-weight: 650;
-  line-height: 1.4;
-  margin: 0 0 8px;
-  min-height: 42px;
+  line-height: 1.35;
+  margin: 0 0 6px;
   text-decoration: none;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
@@ -351,8 +368,8 @@ function roundedRating(rating) {
 .shared-product-card__rating {
   align-items: center;
   display: flex;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: 5px;
+  margin-bottom: 5px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -370,7 +387,7 @@ function roundedRating(rating) {
 
 .shared-product-card__rating strong,
 .shared-product-card__rating small {
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .shared-product-card__rating small {
@@ -382,14 +399,14 @@ function roundedRating(rating) {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-top: auto;
-  min-height: 28px;
+  margin-top: 5px;
+  min-height: 24px;
 }
 
 .shared-product-card__price {
   color: var(--app-gold);
   font-family: var(--sans);
-  font-size: 19px;
+  font-size: 15px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   margin: 0;
@@ -450,6 +467,38 @@ function roundedRating(rating) {
   color: var(--app-gold);
   outline: none;
   transform: translateY(-1px);
+}
+
+.shared-product-card__badge-3d {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: #00875a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 999px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+.shared-product-card__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--app-border, #eee);
+  font-size: 11px;
+  color: var(--app-text-muted);
+}
+
+.shared-product-card__meta .meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .shared-product-empty {
