@@ -1,27 +1,27 @@
 <script setup>
-import AppButton from '@shared/ui/AppButton.vue'
-import AppImage from '@shared/ui/AppImage.vue'
-import { ref } from 'vue'
-import { RouterLink } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import AppIcon from '@shared/ui/AppIcon.vue'
-import { PriceFormatter } from '@shared/lib/formatters'
-import ComboCard from '@features/promotions/components/ComboCard.vue'
-import { comboStockIssue } from '@features/promotions/lib/comboStock'
+import AppButton from "@shared/ui/AppButton.vue";
+import AppImage from "@shared/ui/AppImage.vue";
+import { ref } from "vue";
+import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
+import AppIcon from "@shared/ui/AppIcon.vue";
+import { PriceFormatter } from "@shared/lib/formatters";
+import ComboCard from "@features/promotions/components/ComboCard.vue";
+import { comboStockIssue } from "@features/promotions/lib/comboStock";
 
 defineProps({
   combos: { type: Array, default: () => [] },
-  buyingId: { type: String, default: '' },
-  addingId: { type: String, default: '' },
-})
+  buyingId: { type: String, default: "" },
+  addingId: { type: String, default: "" },
+});
 
-defineEmits(['buy', 'add'])
+defineEmits(["buy", "add"]);
 
-const selectedCombo = ref(null)
-const { t } = useI18n()
+const selectedCombo = ref(null);
+const { t } = useI18n();
 
 function openCombo(combo) {
-  selectedCombo.value = combo
+  selectedCombo.value = combo;
 }
 </script>
 
@@ -29,11 +29,14 @@ function openCombo(combo) {
   <section v-if="combos.length" class="home-combos">
     <header class="combo-heading">
       <div>
-        <p class="section-label">{{ t('home.combos.label') }}</p>
-        <h2 class="section-title">{{ t('home.combos.titlePrefix') }} <em>{{ t('home.combos.titleEmphasis') }}</em></h2>
+        <p class="section-label">{{ t("home.combos.label") }}</p>
+        <h2 class="section-title">
+          {{ t("home.combos.titlePrefix") }}
+          <em>{{ t("home.combos.titleEmphasis") }}</em>
+        </h2>
       </div>
       <RouterLink class="combo-all-link" to="/khuyen-mai?tab=combo">
-        {{ t('home.combos.viewAll') }}
+        {{ t("home.combos.viewAll") }}
         <AppIcon name="arrowRight" :size="16" />
       </RouterLink>
     </header>
@@ -50,9 +53,22 @@ function openCombo(combo) {
       />
     </div>
 
-    <div v-if="selectedCombo" class="modal-overlay" @click.self="selectedCombo = null">
-      <div class="modal-box wide" role="dialog" aria-modal="true" :aria-label="t('home.combos.detailAria', { name: selectedCombo.name })">
-        <AppButton class="modal-close" type="button" @click="selectedCombo = null">
+    <div
+      v-if="selectedCombo"
+      class="modal-overlay"
+      @click.self="selectedCombo = null"
+    >
+      <div
+        class="modal-box wide"
+        role="dialog"
+        aria-modal="true"
+        :aria-label="t('home.combos.detailAria', { name: selectedCombo.name })"
+      >
+        <AppButton
+          class="modal-close"
+          type="button"
+          @click="selectedCombo = null"
+        >
           <AppIcon name="close" :size="16" />
         </AppButton>
         <h3>{{ selectedCombo.name }}</h3>
@@ -62,11 +78,19 @@ function openCombo(combo) {
             v-for="item in selectedCombo.items"
             :key="`home-modal-${item.productId}-${item.variantId}`"
             class="combo-modal-row"
-            :to="{ name: 'product-detail', params: { slug: item.productSlug || item.productId } }"
+            :to="{
+              name: 'product-detail',
+              params: { slug: item.productSlug || item.productId },
+            }"
             @click="selectedCombo = null"
           >
             <span class="combo-product-image">
-              <AppImage v-if="item.imageUrl" :src="item.imageUrl" :alt="item.productName" loading="lazy" />
+              <AppImage
+                v-if="item.imageUrl"
+                :src="item.imageUrl"
+                :alt="item.productName"
+                loading="lazy"
+              />
               <AppIcon v-else name="image" :size="18" />
             </span>
             <span class="combo-product-info">
@@ -74,13 +98,27 @@ function openCombo(combo) {
               <small>x{{ item.quantity || 1 }}</small>
             </span>
             <b>{{ PriceFormatter.format(item.price) }}</b>
-            <AppIcon class="combo-product-arrow" name="chevronRight" :size="18" />
+            <AppIcon
+              class="combo-product-arrow"
+              name="chevronRight"
+              :size="18"
+            />
           </RouterLink>
         </div>
         <div class="modal-actions">
-          <AppButton type="button" class="combo-btn outline" @click="selectedCombo = null">{{ t('home.combos.close') }}</AppButton>
-          <AppButton v-if="comboStockIssue(selectedCombo)" type="button" class="combo-btn unavailable" disabled>
-            <AppIcon name="cart" :size="14" />{{ t('home.combos.soldOut') }}
+          <AppButton
+            type="button"
+            class="combo-btn outline"
+            @click="selectedCombo = null"
+            >{{ t("home.combos.close") }}</AppButton
+          >
+          <AppButton
+            v-if="comboStockIssue(selectedCombo)"
+            type="button"
+            class="combo-btn unavailable"
+            disabled
+          >
+            <AppIcon name="cart" :size="14" />{{ t("home.combos.soldOut") }}
           </AppButton>
           <AppButton
             v-else
@@ -89,7 +127,11 @@ function openCombo(combo) {
             :disabled="addingId === selectedCombo.id"
             @click="$emit('add', selectedCombo)"
           >
-            <AppIcon name="cart" :size="14" />{{ addingId === selectedCombo.id ? t('home.combos.adding') : t('home.combos.add') }}
+            <AppIcon name="cart" :size="14" />{{
+              addingId === selectedCombo.id
+                ? t("home.combos.adding")
+                : t("home.combos.add")
+            }}
           </AppButton>
           <AppButton
             v-if="!comboStockIssue(selectedCombo)"
@@ -98,7 +140,11 @@ function openCombo(combo) {
             :disabled="buyingId === selectedCombo.id"
             @click="$emit('buy', selectedCombo)"
           >
-            <AppIcon name="creditCard" :size="14" />{{ buyingId === selectedCombo.id ? t('home.combos.preparing') : t('home.combos.buy') }}
+            <AppIcon name="creditCard" :size="14" />{{
+              buyingId === selectedCombo.id
+                ? t("home.combos.preparing")
+                : t("home.combos.buy")
+            }}
           </AppButton>
         </div>
       </div>
@@ -108,8 +154,8 @@ function openCombo(combo) {
 
 <style scoped>
 .home-combos {
-  padding-top: clamp(46px, 6vw, 76px);
-  padding-bottom: clamp(46px, 6vw, 76px);
+  padding-top: clamp(32px, 4vw, 56px);
+  padding-bottom: clamp(32px, 4vw, 56px);
 }
 
 .combo-heading {
@@ -349,12 +395,30 @@ function openCombo(combo) {
   color: var(--app-gold, #9b8052);
 }
 @media (max-width: 760px) {
-  .combo-heading { align-items: flex-start; flex-direction: column; }
-  .modal-actions { align-items: stretch; flex-direction: column; }
-  .combo-btn { width: 100%; }
-  .combo-modal-row { grid-template-columns: 56px minmax(0, 1fr) 18px; }
-  .combo-product-image { width: 56px; height: 52px; }
-  .combo-modal-row > b { grid-column: 2; }
-  .combo-product-arrow { grid-column: 3; grid-row: 1 / span 2; }
+  .combo-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .modal-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .combo-btn {
+    width: 100%;
+  }
+  .combo-modal-row {
+    grid-template-columns: 56px minmax(0, 1fr) 18px;
+  }
+  .combo-product-image {
+    width: 56px;
+    height: 52px;
+  }
+  .combo-modal-row > b {
+    grid-column: 2;
+  }
+  .combo-product-arrow {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+  }
 }
 </style>

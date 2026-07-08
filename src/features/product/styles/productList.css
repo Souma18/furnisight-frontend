@@ -1,6 +1,6 @@
-.products-page { min-height: calc(100svh - 56px); background: var(--brand-cream-50); padding-bottom: 70px; }
-.pl-inner { max-width: 1300px; margin: 0 auto; padding: 0 60px; }
-.pl-page-body.pl-inner { padding-left: 60px; padding-right: 60px; }
+.products-page { min-height: calc(100svh - 56px); background: var(--brand-cream-50); padding-bottom: 56px; }
+.pl-inner { max-width: 1300px; margin: 0 auto; padding: 0 clamp(16px, 3vw, 32px); }
+.pl-page-body.pl-inner { padding-left: clamp(16px, 3vw, 32px); padding-right: clamp(16px, 3vw, 32px); }
 
 /* Cùng nền cream với .products-page — tránh dải trắng lệch tông so với header/nội dung */
 .pl-breadcrumb { background: var(--brand-cream-50); border-bottom: 1px solid var(--brand-cream-200); padding: 12px 0; }
@@ -35,7 +35,7 @@
   grid-template-columns: 260px 1fr;
   gap: 32px;
   align-items: start;
-  padding: 32px 60px 80px;
+  padding: 28px clamp(16px, 3vw, 32px) 56px;
 }
 
 .pl-sidebar-filters { position: sticky; top: 72px; align-self: start; }
@@ -207,10 +207,10 @@
 .pl-top-row select { margin-left: auto; border-radius: 10px; border: 1px solid var(--brand-cream-200); padding: 8px 12px; }
 
 @media (max-width: 980px) {
-  .pl-inner { padding: 0 24px; }
+  .pl-inner { padding: 0 16px; }
   .pl-page-body {
     grid-template-columns: 1fr;
-    padding: 24px 24px 60px;
+    padding: 20px 16px 48px;
   }
   .pl-sidebar-filters { position: static; }
   .pl-hero-inner { flex-direction: column; align-items: flex-start; }
@@ -647,7 +647,7 @@
 }
 
 .pl-hero {
-  padding: 58px 0 76px;
+  padding: 40px 0 52px;
 }
 
 .pl-hero-inner {
@@ -738,10 +738,10 @@
 .pl-page-body,
 .pl-page-body.pl-inner {
   display: block;
-  padding-bottom: 90px;
-  padding-left: clamp(20px, 4vw, 48px);
-  padding-right: clamp(20px, 4vw, 48px);
-  padding-top: 38px;
+  padding-bottom: 56px;
+  padding-left: clamp(16px, 3vw, 32px);
+  padding-right: clamp(16px, 3vw, 32px);
+  padding-top: 32px;
 }
 
 .pl-products-panel {

@@ -1,48 +1,49 @@
-﻿<script setup>
-import AppImage from '@shared/ui/AppImage.vue'
-import { RouterLink } from 'vue-router'
-import { useI18n } from 'vue-i18n'
-import AppIcon from './AppIcon.vue'
-import { PriceFormatter } from '@shared/lib/formatters'
+<script setup>
+import AppImage from "@shared/ui/AppImage.vue";
+import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
+import AppIcon from "./AppIcon.vue";
+import { PriceFormatter } from "@shared/lib/formatters";
 
 const props = defineProps({
   products: { type: Array, default: () => [] },
-  viewMode: { type: String, default: 'grid' },
+  viewMode: { type: String, default: "grid" },
   wishedProductIds: { type: Array, default: () => [] },
   loading: { type: Boolean, default: false },
-  emptyText: { type: String, default: '' },
-  loadingText: { type: String, default: '' },
+  emptyText: { type: String, default: "" },
+  loadingText: { type: String, default: "" },
   columns: { type: Number, default: 3 },
   showClearAction: { type: Boolean, default: false },
-  clearActionText: { type: String, default: '' },
-  layout: { type: String, default: 'standard' },
-})
+  clearActionText: { type: String, default: "" },
+  layout: { type: String, default: "standard" },
+});
 
-const emit = defineEmits(['toggle-wish', 'clear'])
-const { t } = useI18n()
+const emit = defineEmits(["toggle-wish", "clear"]);
+const { t } = useI18n();
 
 function detailRoute(item) {
-  const detailId = item.slug || item.detailId || item.id
-  return detailId ? `/products/${detailId}` : null
+  const detailId = item.slug || item.detailId || item.id;
+  return detailId ? `/products/${detailId}` : null;
 }
 
 function categoryLabel(item) {
-  if (item.categoryName) return item.categoryName
-  if (item.category?.name || item.category?.label) return item.category.name || item.category.label
-  return 'N/A'
+  if (item.categoryName) return item.categoryName;
+  if (item.category?.name || item.category?.label)
+    return item.category.name || item.category.label;
+  return "N/A";
 }
 
 function priceLabel(item) {
-  return item.formattedPrice || PriceFormatter.format(item.price)
+  return item.formattedPrice || PriceFormatter.format(item.price);
 }
 
 function roundedRating(rating) {
-  return Math.max(0, Math.min(5, Math.round(Number(rating) || 0)))
+  return Math.max(0, Math.min(5, Math.round(Number(rating) || 0)));
 }
 
 function getDimensions(variant) {
-  if (!variant) return ''
-  return `${variant.length || 0} x ${variant.width || 0} x ${variant.height || 0} cm`
+  if (!variant) return "";
+  return `${variant.length || 0} x ${variant.width || 0} x ${variant.height || 0} cm`;
 }
 </script>
 
@@ -54,8 +55,12 @@ function getDimensions(variant) {
     role="status"
     aria-live="polite"
   >
-    <span class="sr-only">{{ loadingText || t('products.loading') }}</span>
-    <article v-for="index in 6" :key="`product-skeleton-${index}`" class="shared-product-card shared-product-card--skeleton">
+    <span class="sr-only">{{ loadingText || t("products.loading") }}</span>
+    <article
+      v-for="index in 6"
+      :key="`product-skeleton-${index}`"
+      class="shared-product-card shared-product-card--skeleton"
+    >
       <div class="shared-product-card__media shared-skeleton-block"></div>
       <div class="shared-product-card__body">
         <span class="shared-skeleton-line short"></span>
@@ -68,8 +73,10 @@ function getDimensions(variant) {
 
   <div v-else-if="!products.length" class="shared-product-empty">
     <AppIcon name="search" :size="26" />
-    <p>{{ emptyText || t('products.emptyShort') }}</p>
-    <button v-if="showClearAction" type="button" @click="emit('clear')">{{ clearActionText || t('products.clearFilters') }}</button>
+    <p>{{ emptyText || t("products.emptyShort") }}</p>
+    <button v-if="showClearAction" type="button" @click="emit('clear')">
+      {{ clearActionText || t("products.clearFilters") }}
+    </button>
   </div>
 
   <div
@@ -86,21 +93,37 @@ function getDimensions(variant) {
       :key="item.id"
       class="shared-product-card"
     >
-      <RouterLink v-if="detailRoute(item)" :to="detailRoute(item)" class="shared-product-card__link">
+      <RouterLink
+        v-if="detailRoute(item)"
+        :to="detailRoute(item)"
+        class="shared-product-card__link"
+      >
         <div class="shared-product-card__media">
-          <AppImage v-if="item.image" :src="item.image" :alt="item.name" class="shared-product-card__img"  />
-          <span v-else>{{ t('products.noImage') }}</span>
-          
-          <span v-if="item.supports3d" class="shared-product-card__badge-3d">3D</span>
+          <AppImage
+            v-if="item.image"
+            :src="item.image"
+            :alt="item.name"
+            class="shared-product-card__img"
+          />
+          <span v-else>{{ t("products.noImage") }}</span>
+
+          <span v-if="item.supports3d" class="shared-product-card__badge-3d"
+            >3D</span
+          >
         </div>
 
         <div class="shared-product-card__body">
           <p class="shared-product-card__cat">{{ categoryLabel(item) }}</p>
           <div class="shared-product-card__name">{{ item.name }}</div>
-          <p v-if="viewMode === 'list'" class="shared-product-card__desc">{{ item.description || '' }}</p>
+          <p v-if="viewMode === 'list'" class="shared-product-card__desc">
+            {{ item.description || "" }}
+          </p>
 
           <div class="shared-product-card__rating">
-            <span class="shared-product-card__stars" :aria-label="t('products.ratingAria')">
+            <span
+              class="shared-product-card__stars"
+              :aria-label="t('products.ratingAria')"
+            >
               <AppIcon
                 v-for="star in 5"
                 :key="`${item.id}-product-star-${star}`"
@@ -115,9 +138,11 @@ function getDimensions(variant) {
 
           <div class="shared-product-card__price-row">
             <p class="shared-product-card__price">{{ priceLabel(item) }}</p>
-            <span class="shared-product-card__sold">{{ t('products.sold', { count: item.soldCount ?? 0 }) }}</span>
+            <span class="shared-product-card__sold">{{
+              t("products.sold", { count: item.soldCount ?? 0 })
+            }}</span>
           </div>
-          
+
           <div class="shared-product-card__meta" v-if="item.variants?.length">
             <span class="meta-item">
               <AppIcon name="cube" :size="13" />
@@ -205,20 +230,24 @@ function getDimensions(variant) {
   width: 32px;
 }
 
-.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__link {
+.shared-product-grid--catalog.shared-product-grid--list
+  .shared-product-card__link {
   grid-template-columns: minmax(180px, 23%) 1fr;
 }
 
-.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__media {
+.shared-product-grid--catalog.shared-product-grid--list
+  .shared-product-card__media {
   min-height: 150px;
 }
 
-.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__body {
+.shared-product-grid--catalog.shared-product-grid--list
+  .shared-product-card__body {
   min-height: 0;
   padding: 14px 16px;
 }
 
-.shared-product-grid--catalog.shared-product-grid--list .shared-product-card__desc {
+.shared-product-grid--catalog.shared-product-grid--list
+  .shared-product-card__desc {
   font-size: 12px;
   line-height: 1.5;
 }
@@ -228,17 +257,24 @@ function getDimensions(variant) {
   grid-template-columns: repeat(12, minmax(0, 1fr));
 }
 
-.shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card {
+.shared-product-grid--editorial:not(.shared-product-grid--list)
+  .shared-product-card {
   grid-column: span 4;
 }
 
-.shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 1),
-.shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 6) {
+.shared-product-grid--editorial:not(.shared-product-grid--list)
+  .shared-product-card:nth-child(8n + 1),
+.shared-product-grid--editorial:not(.shared-product-grid--list)
+  .shared-product-card:nth-child(8n + 6) {
   grid-column: span 6;
 }
 
-.shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 1) .shared-product-card__media,
-.shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 6) .shared-product-card__media {
+.shared-product-grid--editorial:not(.shared-product-grid--list)
+  .shared-product-card:nth-child(8n + 1)
+  .shared-product-card__media,
+.shared-product-grid--editorial:not(.shared-product-grid--list)
+  .shared-product-card:nth-child(8n + 6)
+  .shared-product-card__media {
   aspect-ratio: 16 / 10;
 }
 
@@ -297,7 +333,11 @@ function getDimensions(variant) {
   align-items: center;
   aspect-ratio: 16 / 11;
   background:
-    linear-gradient(145deg, color-mix(in srgb, var(--app-surface) 76%, transparent), color-mix(in srgb, var(--app-surface-muted) 82%, transparent)),
+    linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--app-surface) 76%, transparent),
+      color-mix(in srgb, var(--app-surface-muted) 82%, transparent)
+    ),
     var(--app-surface-soft);
   display: grid;
   font-size: 72px;
@@ -511,7 +551,7 @@ function getDimensions(variant) {
   gap: 14px;
   justify-items: center;
   min-height: 260px;
-  padding: 48px 20px;
+  padding: 32px 20px;
   text-align: center;
 }
 
@@ -558,7 +598,12 @@ function getDimensions(variant) {
 
 .shared-skeleton-block,
 .shared-skeleton-line {
-  background: linear-gradient(90deg, var(--app-surface-muted) 0%, var(--app-surface-soft) 46%, var(--app-surface-muted) 100%);
+  background: linear-gradient(
+    90deg,
+    var(--app-surface-muted) 0%,
+    var(--app-surface-soft) 46%,
+    var(--app-surface-muted) 100%
+  );
   background-size: 220% 100%;
   animation: sharedSkeleton 1.2s ease-in-out infinite;
 }
@@ -598,8 +643,12 @@ function getDimensions(variant) {
 }
 
 @keyframes sharedSkeleton {
-  0% { background-position: 120% 0; }
-  100% { background-position: -120% 0; }
+  0% {
+    background-position: 120% 0;
+  }
+  100% {
+    background-position: -120% 0;
+  }
 }
 
 @media (max-width: 980px) {
@@ -616,9 +665,12 @@ function getDimensions(variant) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card,
-  .shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 1),
-  .shared-product-grid--editorial:not(.shared-product-grid--list) .shared-product-card:nth-child(8n + 6) {
+  .shared-product-grid--editorial:not(.shared-product-grid--list)
+    .shared-product-card,
+  .shared-product-grid--editorial:not(.shared-product-grid--list)
+    .shared-product-card:nth-child(8n + 1),
+  .shared-product-grid--editorial:not(.shared-product-grid--list)
+    .shared-product-card:nth-child(8n + 6) {
     grid-column: auto;
   }
 }

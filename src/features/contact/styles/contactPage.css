@@ -9,7 +9,7 @@
 .ct-inner {
   max-width: 1300px;
   margin: 0 auto;
-  padding: 0 60px;
+  padding: 0 clamp(16px, 3vw, 32px);
 }
 
 .ct-breadcrumb {
@@ -25,8 +25,8 @@
   align-items: center;
   margin: 0 auto;
   max-width: 1440px;
-  padding-left: 60px;
-  padding-right: 60px;
+  padding-left: clamp(16px, 3vw, 32px);
+  padding-right: clamp(16px, 3vw, 32px);
 }
 
 .ct-breadcrumb a,
@@ -94,10 +94,10 @@
   z-index: 2;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 48px;
   align-items: center;
   padding-top: 18px;
-  padding-bottom: 56px;
+  padding-bottom: 40px;
 }
 
 .ct-h-label,
@@ -281,8 +281,8 @@
   grid-template-columns: 1fr 420px;
   gap: 56px;
   align-items: start;
-  padding-top: 60px;
-  padding-bottom: 80px;
+  padding-top: 40px;
+  padding-bottom: 48px;
 }
 
 .ct-form-card {
@@ -290,7 +290,7 @@
   border-radius: 20px;
   background: var(--app-surface);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.06);
-  padding: 40px;
+  padding: 24px;
 }
 
 .ct-form-header {
@@ -562,7 +562,7 @@ select.ct-fi {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 24px;
+  padding: 18px 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   background: linear-gradient(135deg, rgba(201, 146, 42, 0.2), rgba(201, 146, 42, 0.05));
 }
@@ -602,7 +602,7 @@ select.ct-fi {
 }
 
 .ct-cc-body {
-  padding: 20px 24px;
+  padding: 16px 20px;
 }
 
 .ct-cc-desc {
@@ -656,7 +656,7 @@ select.ct-fi {
   border: 1.5px solid var(--brand-cream-100);
   border-radius: 20px;
   background: var(--app-surface);
-  padding: 24px;
+  padding: 18px 20px;
 }
 
 .ct-ib-title {
@@ -789,7 +789,7 @@ select.ct-fi {
 
 .ct-booking-section {
   background: var(--brand-navy-800);
-  padding: 70px 0;
+  padding: 48px 0;
 }
 
 .ct-booking-head {

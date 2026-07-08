@@ -1,6 +1,6 @@
 .account-content {
   min-width: 0;
-  padding-bottom: 22px;
+  padding-bottom: 32px;
 }
 
 .card,
@@ -29,29 +29,16 @@
   border-color: var(--acc-line);
 }
 
-.account-nav {
-  align-items: center;
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--account-surface) 96%, transparent), color-mix(in srgb, var(--acc-soft) 88%, transparent)),
-    var(--account-surface);
-  border: 1px solid var(--acc-line);
-  border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 8px;
-}
-
-.nav-scroll {
+.account-sidebar {
   display: flex;
-  gap: 6px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.nav-scroll::-webkit-scrollbar {
-  display: none;
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .nav-tab,
@@ -97,11 +84,12 @@
   color: var(--app-heading-inverse);
 }
 
-.account-nav .logout-btn {
-  background: var(--app-control-bg);
+.account-sidebar .logout-btn {
+  background: transparent;
   border: 1px solid color-mix(in srgb, var(--acc-danger) 26%, transparent);
   color: var(--acc-danger);
   padding: 0 12px;
+  margin-top: auto;
 }
 
 .profile-simple {

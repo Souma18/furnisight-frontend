@@ -39,8 +39,18 @@ function isActive(key) {
 </script>
 
 <template>
-  <nav class="account-nav" :aria-label="t('account.nav.aria')">
-    <div class="nav-scroll">
+  <aside class="account-sidebar" :aria-label="t('account.nav.aria')">
+    <div class="sidebar-profile" v-if="profile">
+      <div class="sidebar-avatar">
+        <img v-if="profile.avatarUrl" :src="profile.avatarUrl" :alt="profile.displayName || profile.firstName" />
+        <span v-else class="sidebar-avatar-placeholder">{{ (profile.displayName || profile.firstName || profile.email || '?').charAt(0).toUpperCase() }}</span>
+      </div>
+      <div class="sidebar-profile-info">
+        <strong class="sidebar-name">{{ profile.displayName || [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.email }}</strong>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
       <AppButton
         v-for="item in navItems"
         :key="item.key"
@@ -49,43 +59,90 @@ function isActive(key) {
         :class="{ active: isActive(item.key) }"
         @click="$emit('change-view', item.key)"
       >
-        <AppIcon :name="item.icon" :size="16" />
+        <AppIcon :name="item.icon" :size="17" />
         <span>{{ item.label }}</span>
       </AppButton>
-    </div>
+    </nav>
 
     <AppButton type="button" class="logout-btn" @click="$emit('logout')">
-      <AppIcon name="logout" :size="16" />
+      <AppIcon name="logout" :size="17" />
       <span>{{ t('account.nav.logout') }}</span>
     </AppButton>
-  </nav>
+  </aside>
 </template>
 
 <style scoped>
-.account-nav {
-  align-items: center;
+.account-sidebar {
   background:
     linear-gradient(180deg, color-mix(in srgb, var(--app-surface, #fffdf9) 94%, transparent), color-mix(in srgb, var(--app-surface-soft, #f7f1e7) 84%, transparent)),
-    var(--app-surface, var(--account-surface, #fffdf9));
+    var(--app-surface, #fffdf9);
   border: 1px solid var(--app-border, rgba(224, 210, 184, 0.82));
   border-radius: 8px;
-  display: grid;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto;
-  padding: 8px;
-}
-
-.nav-scroll {
   display: flex;
+  flex-direction: column;
   gap: 6px;
-  min-width: 0;
-  overflow-x: auto;
+  padding: 10px 8px 10px;
+  position: sticky;
+  top: calc(62px + 10px);
+  max-height: calc(100svh - 62px - 30px);
+  overflow-y: auto;
   scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
-.nav-scroll::-webkit-scrollbar {
+.account-sidebar::-webkit-scrollbar {
   display: none;
+}
+
+/* Profile block ở đầu sidebar */
+.sidebar-profile {
+  align-items: center;
+  border-bottom: 1px solid var(--app-border, rgba(224, 210, 184, 0.7));
+  display: flex;
+  gap: 10px;
+  margin-bottom: 4px;
+  padding: 6px 6px 12px;
+}
+
+.sidebar-avatar {
+  align-items: center;
+  background: var(--app-surface-soft, #f7f1e7);
+  border: 1px solid var(--app-border, rgba(224, 210, 184, 0.82));
+  border-radius: 8px;
+  display: flex;
+  flex-shrink: 0;
+  height: 40px;
+  justify-content: center;
+  overflow: hidden;
+  width: 40px;
+}
+
+.sidebar-avatar img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.sidebar-avatar-placeholder {
+  color: var(--app-gold, #c9922a);
+  font-size: 1.05rem;
+  font-weight: 760;
+}
+
+.sidebar-name {
+  color: var(--app-heading, #1a2332);
+  font-size: 0.88rem;
+  font-weight: 720;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Nav items dọc */
+.sidebar-nav {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .nav-tab,
@@ -95,28 +152,28 @@ function isActive(key) {
   align-items: center;
   border-radius: 8px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   font: inherit;
   font-size: 0.88rem;
-  font-weight: 720;
-  gap: 7px;
-  justify-content: center;
+  font-weight: 680;
+  gap: 9px;
+  justify-content: flex-start;
   line-height: 1;
-  min-height: 38px;
+  min-height: 40px;
+  padding: 0 12px;
   transition:
     background 0.18s ease,
     border-color 0.18s ease,
     color 0.18s ease,
     transform 0.18s ease;
   white-space: nowrap;
+  width: 100%;
 }
 
 .nav-tab {
   background: transparent;
   border: 1px solid transparent;
   color: var(--app-text-muted, #4d5a65);
-  flex: 0 0 auto;
-  padding: 0 12px;
 }
 
 .nav-tab:hover,
@@ -133,11 +190,12 @@ function isActive(key) {
   color: var(--app-heading-inverse, #fffdf9);
 }
 
+/* Logout ở dưới cùng */
 .logout-btn {
-  background: var(--app-control-bg, #fffdf9);
+  background: transparent;
   border: 1px solid color-mix(in srgb, var(--app-danger, #b7352d) 26%, transparent);
   color: var(--app-danger, #b7352d);
-  padding: 0 12px;
+  margin-top: auto;
 }
 
 .logout-btn:hover,
@@ -147,20 +205,62 @@ function isActive(key) {
   outline: none;
 }
 
-
-
 .nav-tab:active,
 .logout-btn:active {
   transform: translateY(1px);
 }
 
-@media (max-width: 760px) {
-  .account-nav {
-    grid-template-columns: 1fr;
+/* Mobile: horizontal scroll nav */
+@media (max-width: 860px) {
+  .account-sidebar {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 6px;
+    max-height: none;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 8px;
+    position: static;
+  }
+
+  .sidebar-profile {
+    border-bottom: none;
+    border-right: 1px solid var(--app-border, rgba(224, 210, 184, 0.7));
+    flex-shrink: 0;
+    margin-bottom: 0;
+    padding: 2px 12px 2px 4px;
+  }
+
+  .sidebar-profile-info {
+    display: none;
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    flex: 1;
+    gap: 4px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sidebar-nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-tab {
+    flex-shrink: 0;
+    justify-content: center;
+    width: auto;
+    padding: 0 12px;
   }
 
   .logout-btn {
-    justify-self: stretch;
+    flex-shrink: 0;
+    justify-content: center;
+    margin-top: 0;
+    width: auto;
+    padding: 0 12px;
   }
 }
 </style>
