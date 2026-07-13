@@ -109,14 +109,21 @@ async function handleLogout() {
   --auth-brand-end: var(--brand-gold-700);
   --color-error: var(--app-danger);
 
-  align-content: start;
+  align-items: start;
   color: var(--acc-ink);
   display: grid;
-  gap: 14px;
-  grid-auto-rows: max-content;
+  gap: 24px;
+  grid-template-columns: 240px minmax(0, 1fr);
   margin: 0 auto;
-  max-width: 1180px;
+  max-width: 1360px;
   min-height: calc(100svh - 62px - 44px);
   width: 100%;
+}
+
+@media (max-width: 860px) {
+  .account-page {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
 </style>

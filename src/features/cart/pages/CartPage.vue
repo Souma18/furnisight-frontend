@@ -227,7 +227,7 @@ const {
 .cart-empty {
   background: #fff;
   border-radius: 24px;
-  padding: 60px 30px;
+  padding: 36px 24px;
   text-align: center;
   box-shadow: 0 10px 40px rgba(18, 32, 46, 0.05);
   border: 1px solid #ece2cf;
@@ -258,7 +258,7 @@ const {
 .cart-loading {
   background: #fff;
   border-radius: 24px;
-  padding: 60px 30px;
+  padding: 36px 24px;
   text-align: center;
   box-shadow: 0 10px 40px rgba(18, 32, 46, 0.05);
   border: 1px solid #ece2cf;

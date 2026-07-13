@@ -1,23 +1,23 @@
 <script setup>
-import AppImage from '@shared/ui/AppImage.vue'
-import { RouterLink } from 'vue-router'
-import { useI18n } from 'vue-i18n'
+import AppImage from "@shared/ui/AppImage.vue";
+import { RouterLink } from "vue-router";
+import { useI18n } from "vue-i18n";
 
 defineProps({
   categories: { type: Array, default: () => [] },
-})
+});
 
-const { t } = useI18n()
+const { t } = useI18n();
 
 function categoryRoute(category) {
   return {
-    name: 'products',
+    name: "products",
     query: { category: category.slug || category.name },
-  }
+  };
 }
 
 function categoryImage(category) {
-  return category.imageUrl || '/home/rooms/livingroom.jpeg'
+  return category.imageUrl || "/home/rooms/livingroom.jpeg";
 }
 </script>
 
@@ -26,8 +26,11 @@ function categoryImage(category) {
     <div class="rooms-inner">
       <div class="rooms-head">
         <div>
-          <div class="section-label">{{ t('home.categories.label') }}</div>
-          <h2 class="section-title">{{ t('home.categories.titlePrefix') }} <em>{{ t('home.categories.titleEmphasis') }}</em></h2>
+          <div class="section-label">{{ t("home.categories.label") }}</div>
+          <h2 class="section-title">
+            {{ t("home.categories.titlePrefix") }}
+            <em>{{ t("home.categories.titleEmphasis") }}</em>
+          </h2>
         </div>
       </div>
 
@@ -43,9 +46,9 @@ function categoryImage(category) {
               :alt="category.name"
               loading="lazy"
               @error="$event.target.src = '/home/rooms/livingroom.jpeg'"
-             />
+            />
             <div class="room-overlay">
-              <span class="room-badge">{{ t('home.categories.badge') }}</span>
+              <span class="room-badge">{{ t("home.categories.badge") }}</span>
               <div class="room-info">
                 <div class="room-name">{{ category.name }}</div>
                 <div class="room-count">{{ category.count }}</div>
@@ -61,9 +64,13 @@ function categoryImage(category) {
 <style scoped>
 .rooms-bg {
   background:
-    linear-gradient(180deg, rgba(255, 253, 249, 0.72), rgba(242, 234, 223, 0.78)),
+    linear-gradient(
+      180deg,
+      rgba(255, 253, 249, 0.72),
+      rgba(242, 234, 223, 0.78)
+    ),
     #faf6f0;
-  padding: clamp(46px, 6vw, 76px) 0;
+  padding: clamp(32px, 4vw, 56px) 0;
 }
 
 .rooms-inner {
@@ -164,7 +171,7 @@ function categoryImage(category) {
 
 @media (max-width: 720px) {
   .rooms-bg {
-    padding: 44px 0;
+    padding: 36px 0;
   }
 
   .rooms-grid {

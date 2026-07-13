@@ -269,7 +269,7 @@ onBeforeUnmount(() => {
 .app-main--account {
   max-width: none;
   margin: 0;
-  padding: calc(62px + 20px) 24px 24px;
+  padding: calc(62px + 20px) 16px 24px;
   background: var(--app-bg);
 }
 
