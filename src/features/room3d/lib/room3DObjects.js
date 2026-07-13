@@ -18,7 +18,11 @@ export function removeObject3D(object3D) {
 export function centerRoomModelOnXYGrid(model, scaleUniform = 0.9) {
   model.position.set(0, 0, 0)
   model.rotation.set(0, 0, 0)
-  model.scale.setScalar(scaleUniform)
+  if (typeof scaleUniform === 'number') {
+    model.scale.setScalar(scaleUniform)
+  } else if (scaleUniform && typeof scaleUniform === 'object') {
+    model.scale.set(scaleUniform.x ?? 1, scaleUniform.y ?? 1, scaleUniform.z ?? 1)
+  }
   model.updateMatrixWorld(true)
 
   const box = new Box3().setFromObject(model)

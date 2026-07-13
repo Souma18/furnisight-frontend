@@ -122,10 +122,13 @@ export function useRoom3DCanvas(props, emit) {
     roomScaleLabel,
     canDecreaseRoomScale,
     canIncreaseRoomScale,
+    useRealDimensions,
+    realDimensions,
     applyUserOverrides,
     syncRoomBoundsFromModel,
     clampFurnitureToScaledRoom,
     applyRoomScale,
+    applyRealDimensions,
     increaseRoomScale,
     decreaseRoomScale,
     resetRoomScale,
@@ -158,6 +161,7 @@ export function useRoom3DCanvas(props, emit) {
     focusCameraToRoom,
     resizeRendererToShell,
     fullSelectedProduct,
+    useRealDimensions,
   })
 
   const isCanvasBusy = computed(() => props.isAnalyzing || isModelLoading.value)
@@ -336,6 +340,9 @@ export function useRoom3DCanvas(props, emit) {
     roomScaleLabel,
     canDecreaseRoomScale,
     canIncreaseRoomScale,
+    useRealDimensions,
+    realDimensions,
+    applyRealDimensions,
     increaseRoomScale,
     decreaseRoomScale,
     fallbackProductIds,

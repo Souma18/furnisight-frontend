@@ -25,6 +25,7 @@ export function useRoomModelLoader({
   focusCameraToRoom,
   resizeRendererToShell,
   fullSelectedProduct,
+  useRealDimensions,
 }) {
   const isModelLoading = ref(false)
   let roomLoadToken = 0
@@ -63,10 +64,36 @@ export function useRoomModelLoader({
     const existingOverride = productOverrides.value[sceneItem.instanceId] ?? {}
     const originalBox = new Box3().setFromObject(model)
     const size = originalBox.getSize(new Vector3())
-    const sx = fallback.width / Math.max(size.x || 1, 0.001)
-    const sy = fallback.height / Math.max(size.y || 1, 0.001)
-    const sz = fallback.depth / Math.max(size.z || 1, 0.001)
-    const fitScale = Math.min(sx, sy, sz) * 0.98
+
+    let fitScale
+    // When real-dimension calibration is active, prefer variant.dimensions (in cm)
+    const isRealMode = useRealDimensions?.value
+    if (isRealMode) {
+      const variant = product?.variants?.find(v => v.id === sceneItem.variantId)
+        || product?.variants?.find(v => v.modelUrl || v.supports3d)
+      const dims = variant?.dimensions // { length, width, height } in cm
+      if (dims && dims.length > 0 && dims.width > 0 && dims.height > 0) {
+        // Convert cm → scene units (1 unit = 1 m)
+        const targetW = dims.length * 0.01
+        const targetH = dims.height * 0.01
+        const targetD = dims.width * 0.01
+        const sx = size.x > 0.001 ? targetW / size.x : 1
+        const sy = size.y > 0.001 ? targetH / size.y : 1
+        const sz = size.z > 0.001 ? targetD / size.z : 1
+        fitScale = Math.cbrt(sx * sy * sz) // geometric mean preserves proportions
+      } else {
+        // Fall back to fallback box when no variant dimensions available
+        const sx = fallback.width / Math.max(size.x || 1, 0.001)
+        const sy = fallback.height / Math.max(size.y || 1, 0.001)
+        const sz = fallback.depth / Math.max(size.z || 1, 0.001)
+        fitScale = Math.min(sx, sy, sz) * 0.98
+      }
+    } else {
+      const sx = fallback.width / Math.max(size.x || 1, 0.001)
+      const sy = fallback.height / Math.max(size.y || 1, 0.001)
+      const sz = fallback.depth / Math.max(size.z || 1, 0.001)
+      fitScale = Math.min(sx, sy, sz) * 0.98
+    }
 
     model.scale.setScalar(fitScale)
     model.userData.baseScale = model.scale.clone()

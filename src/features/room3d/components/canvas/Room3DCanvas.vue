@@ -8,7 +8,7 @@ import {
   Renderer,
   Scene,
 } from 'troisjs'
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoom3DCanvas } from '../../composables/useRoom3DCanvas'
 import { LIGHTING_PRESET } from '../../lib/room3DSceneVisuals'
@@ -18,6 +18,7 @@ import Room3DBadge from './Room3DBadge.vue'
 import Room3DBottomControls from './Room3DBottomControls.vue'
 import Room3DFurniturePanel from './Room3DFurniturePanel.vue'
 import Room3DOverlay from './Room3DOverlay.vue'
+import Room3DAdvancedModal from './Room3DAdvancedModal.vue'
 
 const props = defineProps({
   mode: {
@@ -93,6 +94,9 @@ const {
   roomScaleLabel,
   canDecreaseRoomScale,
   canIncreaseRoomScale,
+  useRealDimensions,
+  realDimensions,
+  applyRealDimensions,
   increaseRoomScale,
   decreaseRoomScale,
   fallbackProductIds,
@@ -101,6 +105,21 @@ const {
   isRoomAvailable,
   resetRoomScale,
 } = useRoom3DCanvas(props, emit)
+
+const isAdvancedOpen = ref(false)
+
+function handleApplyRealDimensions(dims) {
+  useRealDimensions.value = true
+  realDimensions.value = dims
+  applyRealDimensions(dims)
+}
+
+function handleToggleRealDimensions(enabled) {
+  useRealDimensions.value = enabled
+  if (!enabled) {
+    resetRoomScale()
+  }
+}
 
 defineExpose({
   resetView: focusCameraToRoom,
@@ -177,16 +196,42 @@ defineExpose({
       :has-room="hasRoom"
       :view-mode="viewMode"
       :is-fullscreen="isFullscreen"
-      :room-scale-label="roomScaleLabel"
-      :can-decrease-room-scale="canDecreaseRoomScale"
-      :can-increase-room-scale="canIncreaseRoomScale"
       @focus-camera="focusCameraToRoom"
       @set-top-view="setTopView"
       @set-front-view="setFrontView"
+      @open-advanced="isAdvancedOpen = true"
+    />
+
+    <!-- Advanced FAB button -->
+    <AppButton
+      v-if="hasRoom"
+      id="room3d-advanced-btn"
+      type="button"
+      variant="unstyled"
+      class="canvas-advanced-fab"
+      :class="{ active: isAdvancedOpen }"
+      :aria-label="t('room3d.advanced.fabLabel', 'Công cụ nâng cao')"
+      :title="t('room3d.advanced.fabLabel', 'Công cụ nâng cao')"
+      @click="isAdvancedOpen = !isAdvancedOpen"
+    >
+      <AppIcon name="layoutGrid" :size="18" />
+    </AppButton>
+
+    <Room3DAdvancedModal
+      :open="isAdvancedOpen"
+      :has-room="hasRoom"
+      :room-scale-label="roomScaleLabel"
+      :can-decrease-room-scale="canDecreaseRoomScale"
+      :can-increase-room-scale="canIncreaseRoomScale"
+      :use-real-dimensions="useRealDimensions"
+      :real-dimensions="realDimensions"
+      @close="isAdvancedOpen = false"
+      @toggle-fullscreen="toggleFullscreen"
       @decrease-room-scale="decreaseRoomScale"
       @increase-room-scale="increaseRoomScale"
       @reset-room-scale="resetRoomScale"
-      @toggle-fullscreen="toggleFullscreen"
+      @apply-real-dimensions="handleApplyRealDimensions"
+      @toggle-real-dimensions="handleToggleRealDimensions"
     />
 
     <Room3DFurniturePanel

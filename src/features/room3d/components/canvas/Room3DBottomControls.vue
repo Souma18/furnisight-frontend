@@ -1,7 +1,6 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
 import { useI18n } from 'vue-i18n'
-import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
   hasRoom: {
@@ -16,28 +15,13 @@ defineProps({
     type: Boolean,
     default: false,
   },
-  roomScaleLabel: {
-    type: String,
-    default: '0',
-  },
-  canDecreaseRoomScale: {
-    type: Boolean,
-    default: false,
-  },
-  canIncreaseRoomScale: {
-    type: Boolean,
-    default: false,
-  },
 })
 
 defineEmits([
   'focus-camera',
   'set-top-view',
   'set-front-view',
-  'toggle-fullscreen',
-  'decrease-room-scale',
-  'increase-room-scale',
-  'reset-room-scale',
+  'open-advanced',
 ])
 
 const { t } = useI18n()
@@ -52,37 +36,5 @@ const { t } = useI18n()
         {{ t('room3d.controls.front') }}
       </AppButton>
     </div>
-    <div class="scale-controls" :aria-label="t('room3d.controls.scaleAria')">
-      <span class="scale-label">{{ t('room3d.controls.scale') }}</span>
-      <div class="scale-stepper">
-        <AppButton
-          type="button"
-          variant="unstyled"
-          class="room3d-icon-btn"
-          :disabled="!canDecreaseRoomScale"
-          :aria-label="t('room3d.controls.scaleDown')"
-          @click="$emit('decrease-room-scale')"
-        >
-          <AppIcon name="minus" :size="14" />
-        </AppButton>
-        <AppButton type="button" variant="unstyled" class="scale-value" @click="$emit('reset-room-scale')">
-          {{ roomScaleLabel }}
-        </AppButton>
-        <AppButton
-          type="button"
-          variant="unstyled"
-          class="room3d-icon-btn"
-          :disabled="!canIncreaseRoomScale"
-          :aria-label="t('room3d.controls.scaleUp')"
-          @click="$emit('increase-room-scale')"
-        >
-          <AppIcon name="plus" :size="14" />
-        </AppButton>
-      </div>
-    </div>
-    <AppButton type="button" variant="unstyled" class="fullscreen-btn" @click="$emit('toggle-fullscreen')">
-      <AppIcon name="fullscreen" :size="14" />
-      <span>{{ t('room3d.controls.panorama') }}</span>
-    </AppButton>
   </div>
 </template>

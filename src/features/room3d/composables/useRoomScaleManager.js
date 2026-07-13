@@ -24,6 +24,12 @@ export function useRoomScaleManager({
   }
   const ROOM_BASE_SCALE = 0.9
 
+  // Real room dimension state (in cm)
+  const useRealDimensions = ref(false)
+  const realDimensions = ref({ length: 0, width: 0, height: 0 })
+  // The actual 3D scale applied when using real dimensions
+  const realDimensionScale = ref(null)
+
   const roomScaleMultiplier = computed(() => ROOM_SCALE_LEVELS[String(roomScaleStep.value)] ?? 1)
   const roomScaleLabel = computed(() => {
     if (roomScaleStep.value > 0) return `+${roomScaleStep.value}`
@@ -124,6 +130,54 @@ export function useRoomScaleManager({
     })
   }
 
+  /**
+   * Apply real physical room dimensions (in centimeters).
+   * Scales the room model so that the longest horizontal span matches the
+   * largest of length/width provided, maintaining correct proportions.
+   * Furniture models are re-scaled inside normalizeFurnitureModel via
+   * variant.dimensions when useRealDimensions is active.
+   *
+   * @param {{ length: number, width: number, height: number }} dims - in cm
+   */
+  function applyRealDimensions(dims) {
+    if (!roomModelGroup.value) return
+    const { length: lenCm, width: widCm, height: hgtCm } = dims
+
+    // Reset to neutral first so we measure the original bounding box
+    centerRoomModelOnXYGrid(roomModelGroup.value, ROOM_BASE_SCALE)
+    const box = new Box3().setFromObject(roomModelGroup.value)
+    const modelSpanX = Math.abs(box.max.x - box.min.x) // model units
+    const modelSpanZ = Math.abs(box.max.z - box.min.z) // model units
+    const modelSpanY = Math.abs(box.max.y - box.min.y) // model units
+
+    // 1 unit in 3D scene ≈ 1 metre → 1 cm = 0.01 units
+    const targetX = lenCm * 0.01 // desired X span in scene units
+    const targetZ = widCm * 0.01 // desired Z span
+    const targetY = hgtCm > 0 ? hgtCm * 0.01 : null
+
+    const scaleX = modelSpanX > 0.001 ? targetX / modelSpanX : 1
+    const scaleZ = modelSpanZ > 0.001 ? targetZ / modelSpanZ : 1
+    const scaleY = targetY && modelSpanY > 0.001 ? targetY / modelSpanY : Math.min(scaleX, scaleZ)
+
+    // Apply non-uniform scale to make the room exactly the specified dimensions
+    const nonUniformScale = {
+      x: scaleX * ROOM_BASE_SCALE,
+      y: scaleY * ROOM_BASE_SCALE,
+      z: scaleZ * ROOM_BASE_SCALE
+    }
+    realDimensionScale.value = nonUniformScale
+
+    centerRoomModelOnXYGrid(roomModelGroup.value, nonUniformScale)
+    syncRoomBoundsFromModel()
+
+    // Re-apply furniture overrides to keep furniture grounded correctly
+    furnitureGroups.value.forEach((model) => applyUserOverrides(model))
+
+    requestAnimationFrame(() => {
+      resizeRendererToShell()
+    })
+  }
+
   function increaseRoomScale() {
     if (!canIncreaseRoomScale.value) return
     roomScaleStep.value += 1
@@ -136,20 +190,28 @@ export function useRoomScaleManager({
 
   function resetRoomScale() {
     roomScaleStep.value = 0
+    useRealDimensions.value = false
+    realDimensions.value = { length: 0, width: 0, height: 0 }
+    realDimensionScale.value = null
   }
 
   watch(roomScaleStep, () => {
-    applyRoomScale()
+    if (!useRealDimensions.value) {
+      applyRoomScale()
+    }
   })
 
   return {
     roomScaleLabel,
     canDecreaseRoomScale,
     canIncreaseRoomScale,
+    useRealDimensions,
+    realDimensions,
     applyUserOverrides,
     syncRoomBoundsFromModel,
     clampFurnitureToScaledRoom,
     applyRoomScale,
+    applyRealDimensions,
     increaseRoomScale,
     decreaseRoomScale,
     resetRoomScale,
