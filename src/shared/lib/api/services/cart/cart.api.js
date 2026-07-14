@@ -38,7 +38,11 @@ function toCartResponse(response) {
 
 class CartApi {
   async getCart(params, config = {}) {
-    const response = await apiClient.get(baseUrl, { params, ...config })
+    const response = await apiClient.get(baseUrl, { 
+      skipAuthRedirect: true,
+      params, 
+      ...config 
+    })
     return toCartResponse(response)
   }
 

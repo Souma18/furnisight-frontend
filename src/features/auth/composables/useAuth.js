@@ -28,8 +28,9 @@ export function useAuth(pinia) {
     const { clearRemoteCart = true } = options
     await resetUserSessionState({ clearRemoteCart: clearRemoteCart && store.isAuthenticated })
     store.logout()
-    // Dùng router singleton thay vì useRouter() để hoạt động ngoài Vue context
-    await router.push(redirectTo)
+    if (redirectTo) {
+      await router.push(redirectTo)
+    }
   }
 
   return {
