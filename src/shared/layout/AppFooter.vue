@@ -43,10 +43,7 @@ const currentYear = computed(() => new Date().getFullYear())
           <a href="/room3d">{{ t('nav.room3d') }}</a>
           <a href="/room3d">{{ t('footer.aiSuggest') }}</a>
         </div>
-        <div class="col">
-          <h4>{{ t('footer.support') }}</h4>
-          <a href="/contact">{{ t('nav.contact') }}</a>
-        </div>
+
       </div>
       <div class="app-footer-bottom">
         <span>{{ t('footer.copyright', { year: currentYear }) }}</span>
@@ -69,7 +66,7 @@ const currentYear = computed(() => new Date().getFullYear())
 
 .app-footer-top {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  grid-template-columns: 1.4fr 1fr 1fr;
   gap: 2rem;
   padding-bottom: 1.4rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);

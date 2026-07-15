@@ -19,11 +19,7 @@ const routes = [
     component: () => import('@features/product/pages/ProductDetailPage.vue'),
     props: true,
   },
-  {
-    path: '/contact',
-    name: 'contact',
-    component: () => import('@features/contact/pages/ContactPage.vue'),
-  },
+
   {
     path: '/khuyen-mai',
     name: 'promotions',

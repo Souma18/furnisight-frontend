@@ -22,7 +22,7 @@ const isRoom3DPage = computed(() => route.value.path.startsWith('/room3d'))
 const isHomePage = computed(() => route.value.name === 'home')
 const isProductsPage = computed(() => route.value.name === 'products')
 const isProductDetailPage = computed(() => route.value.name === 'product-detail')
-const isContactPage = computed(() => route.value.name === 'contact')
+
 const isPromotionsPage = computed(() => route.value.name === 'promotions')
 const isCheckoutPage = computed(() => route.value.name === 'checkout')
 const isAccountPage = computed(() => route.value.path.startsWith('/account'))
@@ -165,13 +165,13 @@ onBeforeUnmount(() => {
           !isHomePage &&
           !isProductDetailPage &&
           !isProductsPage &&
-          !isContactPage &&
+
           !isPromotionsPage &&
           !isCheckoutPage,
         'app-main--home': isHomePage,
         'app-main--products': isProductsPage,
         'app-main--product-detail': isProductDetailPage,
-        'app-main--contact': isContactPage,
+
         'app-main--promotions': isPromotionsPage,
         'app-main--checkout': isCheckoutPage,
         'app-main--account': isAccountPage,
@@ -247,7 +247,6 @@ onBeforeUnmount(() => {
 .app-main--home,
 .app-main--product-detail,
 .app-main--products,
-.app-main--contact,
 .app-main--promotions,
 .app-main--checkout {
   max-width: none;
@@ -260,7 +259,6 @@ onBeforeUnmount(() => {
 }
 
 .app-main--products,
-.app-main--contact,
 .app-main--promotions,
 .app-main--checkout {
   background: var(--app-bg);

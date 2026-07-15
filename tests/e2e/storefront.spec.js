@@ -1,33 +1,50 @@
-import { test, expect } from '@playwright/test'
+import { test, expect } from '@playwright/test';
 
-test.describe('Storefront Flow', () => {
-  test('User can browse products and add to cart', async ({ page }) => {
-    // Navigate to homepage
-    await page.goto('/')
+test.describe('EPIC 2: Discover & Experience - Storefront', () => {
+  test('User can browse homepage and view banners', async ({ page }) => {
+    await page.goto('/');
     
-    // Check main sections are visible
-    await expect(page.locator('.hero')).toBeVisible()
+    // Check if hero banner or main categories are rendered
+    await expect(page.locator('main')).toBeVisible();
+    await expect(page.getByRole('heading', { name: /danh mục/i })).toBeVisible();
+  });
 
-    // Navigate to products
-    await page.getByRole('link', { name: 'Sản phẩm', exact: true }).first().click()
+  test('User can search and filter products', async ({ page }) => {
+    await page.goto('/products');
     
-    // Verify products page is loaded
-    await expect(page.locator('.products-page')).toBeVisible()
+    // Search
+    await page.getByPlaceholder(/tìm kiếm/i).fill('Sofa');
+    await page.keyboard.press('Enter');
+    
+    // Wait for search result
+    await expect(page.locator('.product-list, .grid')).toBeVisible();
 
-    // Wait for product grid to be populated
-    const productCards = page.locator('.product-card')
-    // At least one product should be shown
-    if (await productCards.count() > 0) {
-      const firstProduct = productCards.first()
-      await firstProduct.click()
-
-      // Product detail page
-      await expect(page.locator('.product-detail-page')).toBeVisible()
-      
-      // We don't want to actually click "Thêm vào giỏ" and mutate backend without a mock or test user
-      // But we can verify the button is visible
-      const addToCartBtn = page.getByRole('button', { name: /Thêm vào giỏ/i }).first()
-      await expect(addToCartBtn).toBeVisible()
+    // Filter by category
+    const filterBtn = page.getByRole('button', { name: /lọc/i });
+    if (await filterBtn.isVisible()) {
+      await filterBtn.click();
+      await page.getByLabel(/sofa/i).check();
+      await page.getByRole('button', { name: /áp dụng/i }).click();
     }
-  })
-})
+  });
+
+  test('User can view product details and select variants', async ({ page }) => {
+    await page.goto('/products');
+    
+    // Click first product
+    await page.locator('.product-card').first().click();
+    await expect(page).toHaveURL(/.*products\/.+/);
+
+    // Check title and price
+    await expect(page.getByRole('heading').first()).toBeVisible();
+    
+    // Select color variant if exists
+    const colorBtn = page.locator('.color-variant-selector').first();
+    if (await colorBtn.isVisible()) {
+      await colorBtn.click();
+    }
+    
+    // Check Add to Cart button
+    await expect(page.getByRole('button', { name: /thêm vào giỏ/i })).toBeVisible();
+  });
+});
