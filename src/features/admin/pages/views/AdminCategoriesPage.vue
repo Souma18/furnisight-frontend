@@ -8,7 +8,7 @@ import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { useAdminCategories } from '../../composables/useAdminCategories'
-
+import { formatDateTime } from '@shared/lib/formatters'
 const { filtered, search, columns, openAdd, openEdit, deleteCategory } = useAdminCategories()
 const deleteTarget = ref(null)
 const deleting = ref(false)
@@ -53,6 +53,9 @@ async function confirmDelete() {
     </template>
     <template #cell-visibleLabel="{ row }">
       <span class="badge" :class="row.visible ? 'b-success' : 'b-pending'">{{ row.visibleLabel }}</span>
+    </template>
+    <template #cell-createdAt="{ row }">
+      <span class="cell-muted">{{ formatDateTime(row.createdAt) || 'Chưa có dữ liệu' }}</span>
     </template>
     <template #cell-actions="{ row }">
       <div class="row-actions">

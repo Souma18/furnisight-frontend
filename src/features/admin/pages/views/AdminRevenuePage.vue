@@ -1,7 +1,7 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
 import AppImage from '@shared/ui/AppImage.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminChartCard from '../../components/shared/AdminChartCard.vue'
@@ -14,7 +14,53 @@ import { useAdminUiStore } from '../../store/adminUiStore'
 const ui = useAdminUiStore()
 const monthCanvas = ref(null)
 
-const { data, error, loading, load, bindCharts } = useAdminChartPage(adminApi.fetchRevenue.bind(adminApi))
+const selectedYear = ref(new Date().getFullYear())
+const { data, error, loading, load, bindCharts } = useAdminChartPage(() => adminApi.fetchRevenue({ year: selectedYear.value }))
+
+const availableYears = computed(() => {
+  const current = new Date().getFullYear()
+  const years = []
+  for (let y = current; y >= 2024; y--) {
+    years.push(y)
+  }
+  return years
+})
+
+watch(selectedYear, () => {
+  load()
+})
+
+const KPI_META = {
+  REVENUE_TOTAL: { icon: 'creditCard', label: 'Tổng doanh thu', tone: 'gold', suffix: null },
+  REVENUE_MONTH: { icon: 'trending', label: 'Doanh thu tháng này', tone: 'gold', suffix: null },
+  ORDERS_TOTAL: { icon: 'box', label: 'Tổng đơn hàng', tone: 'green', suffix: null },
+  ORDERS_MONTH: { icon: 'box', label: 'Đơn hàng tháng này', tone: 'green', suffix: null },
+}
+
+import { PriceFormatter } from '@shared/lib/formatters'
+
+const mappedKpis = computed(() => {
+  if (!data.value?.kpis) return []
+  return data.value.kpis.map(raw => {
+    const meta = KPI_META[raw.type] ?? { icon: 'bar', label: raw.type ?? '', tone: 'navy', suffix: null }
+    const value = raw.value ?? 0
+    const changeValue = raw.changeValue ?? 0
+    const up = changeValue >= 0
+    return {
+      key: raw.type,
+      icon: meta.icon,
+      label: meta.label,
+      tone: meta.tone,
+      value: (raw.type === 'REVENUE_TOTAL' || raw.type === 'REVENUE_MONTH') 
+        ? PriceFormatter.format(value) 
+        : Number(value).toLocaleString(),
+      suffix: meta.suffix,
+      change: changeValue ? `${up ? '+' : ''}${changeValue % 1 === 0 ? changeValue : changeValue.toFixed(1)}%` : null,
+      up,
+    }
+  })
+})
+
 const hasRevenueData = computed(() =>
   Boolean(data.value?.kpis?.length || data.value?.monthlyRows?.length || data.value?.months?.length || data.value?.monthLabels?.length),
 )
@@ -65,6 +111,9 @@ bindCharts((charts, d) => {
   <AdminPageHeader eyebrow="Tài chính" title-html="Doanh <em>thu</em>"
     :subtitle="data?.snapshotAt ? `Cập nhật lúc ${data.snapshotAt}` : 'Đang tải...'">
     <template #actions>
+      <select v-model="selectedYear" class="app-input" style="width: 120px; padding: 6px 12px; height: 32px;">
+        <option v-for="y in availableYears" :key="y" :value="y">Năm {{ y }}</option>
+      </select>
       <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
         <AppIcon name="download" :size="15" />Xuất báo cáo
       </AppButton>
@@ -91,7 +140,7 @@ bindCharts((charts, d) => {
   </div>
 
   <template v-if="data && hasRevenueData">
-    <AdminKpiGrid :kpis="data.kpis" variant="rev" />
+    <AdminKpiGrid :kpis="mappedKpis" variant="rev" />
     <div class="rev-charts">
       <AdminChartCard title="Doanh thu theo tháng" subtitle="12 tháng gần nhất · Triệu VNĐ">
         <canvas ref="monthCanvas" />
@@ -99,11 +148,11 @@ bindCharts((charts, d) => {
     </div>
     <AdminDataTable :columns="monthColumns" :rows="data.monthlyRows">
       <template #cell-revenue="{ row }">
-        <span style="font-weight:700;color:var(--gold)">{{ row.revenue }}</span>
+        <span style="font-weight:700;color:var(--gold)">{{ PriceFormatter.format(row.revenue) }}</span>
       </template>
       <template #cell-mom="{ row }">
-        <span :style="{ color: row.momClass === 'up' ? 'var(--green)' : 'var(--red)', fontWeight: 600, fontSize: '12px' }">
-          {{ row.mom }}
+        <span :style="{ color: row.mom >= 0 ? 'var(--green)' : 'var(--red)', fontWeight: 600, fontSize: '12px' }">
+          {{ row.mom != null ? (row.mom > 0 ? '+' : '') + (row.mom % 1 === 0 ? row.mom : row.mom.toFixed(1)) + '%' : '—' }}
         </span>
       </template>
       <template #cell-profit="{ row }">
@@ -125,13 +174,13 @@ bindCharts((charts, d) => {
           <span style="font-weight: 600; color: var(--text)">{{ row.productName }}</span>
         </template>
         <template #cell-price="{ row }">
-          <span style="color:var(--text3)">{{ row.price }}</span>
+          <span style="color:var(--text3)">{{ PriceFormatter.format(row.price) }}</span>
         </template>
         <template #cell-soldCount="{ row }">
           <span style="font-weight: 600; color: var(--text)">{{ row.soldCount }}</span>
         </template>
         <template #cell-totalRevenue="{ row }">
-          <span style="font-weight:700;color:var(--gold)">{{ row.totalRevenue }}</span>
+          <span style="font-weight:700;color:var(--gold)">{{ PriceFormatter.format(row.totalRevenue) }}</span>
         </template>
       </AdminDataTable>
     </div>

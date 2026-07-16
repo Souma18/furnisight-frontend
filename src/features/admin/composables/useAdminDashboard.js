@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { adminApi } from '@shared/lib/api/services'
 import { PriceFormatter } from '@shared/lib/formatters'
-import { applyOrderStatusMapping } from '@shared/lib/orders/orderStatusMapper'
+import { applyOrderStatusMapping, getOrderStatusLabel } from '@shared/lib/orders/orderStatusMapper'
 import { useAdminChartPage } from './useAdminChartPage'
 
 const KPI_META = {
@@ -78,6 +78,10 @@ export function useAdminDashboard() {
       alerts: Array.isArray(rawData.value.alerts)
         ? rawData.value.alerts.map(mapAlert)
         : [],
+      orderChart: rawData.value.orderChart ? {
+        ...rawData.value.orderChart,
+        labels: (rawData.value.orderChart.labels || []).map(label => getOrderStatusLabel(label))
+      } : null,
       recentOrders: Array.isArray(rawData.value.recentOrders)
         ? rawData.value.recentOrders.map((order) => {
             const mapped = applyOrderStatusMapping(order)
@@ -96,7 +100,8 @@ export function useAdminDashboard() {
       charts.renderLine(revenueCanvas.value, d.revenueChart.labels, d.revenueChart.data)
     }
     if (d.orderChart) {
-      charts.renderDoughnut(orderCanvas.value, d.orderChart.labels, d.orderChart.data)
+      const translatedLabels = (d.orderChart.labels || []).map(label => getOrderStatusLabel(label))
+      charts.renderDoughnut(orderCanvas.value, translatedLabels, d.orderChart.data)
     }
   })
 

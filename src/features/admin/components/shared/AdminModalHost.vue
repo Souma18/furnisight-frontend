@@ -10,7 +10,7 @@ import AdminIconPicker from '../forms/AdminIconPicker.vue'
 import AdminProductImagesUpload from '../forms/AdminProductImagesUpload.vue'
 import AdminPermissionPicker from '../forms/AdminPermissionPicker.vue'
 import { useAdminModal } from '../../composables/useAdminModal'
-import { PriceFormatter, formatDate } from '@shared/lib/formatters'
+import { PriceFormatter, formatDate, formatDateTime } from '@shared/lib/formatters'
 import {
   canEditOrderTrackingCode,
   getOrderStatusOptions,
@@ -170,7 +170,7 @@ watch(
         <div><dt>Vai trò</dt><dd>{{ modal.payload?.role || 'Khách hàng' }}</dd></div>
         <div><dt>Trạng thái</dt><dd>{{ modal.payload?.statusLabel || modal.payload?.status }}</dd></div>
         <div><dt>Số điện thoại</dt><dd>{{ modal.payload?.phone || 'Chưa cập nhật' }}</dd></div>
-        <div><dt>Ngày tạo</dt><dd>{{ formatDate(modal.payload?.createdAt) || 'Chưa có dữ liệu' }}</dd></div>
+        <div><dt>Ngày tạo</dt><dd>{{ formatDateTime(modal.payload?.createdAt) || 'Chưa có dữ liệu' }}</dd></div>
       </dl>
     </template>
 

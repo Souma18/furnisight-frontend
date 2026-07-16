@@ -9,6 +9,7 @@ import AdminDataTable from '../../components/shared/AdminDataTable.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { accountRoleNames, isAdminAccount } from '../../utils/adminAccountRoles'
+import { formatDateTime } from '@shared/lib/formatters'
 
 const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
 const userRows = computed(() => items.value
@@ -41,6 +42,7 @@ function normalizeUserRow(user = {}) {
     orders: user.orders ?? user.orderCount ?? '',
     avTone: user.avTone || 'blue',
     av: user.av || String(user.name || user.username || user.email || 'U').slice(0, 1).toUpperCase(),
+    createdAt: user.createdAt ? formatDateTime(user.createdAt) : '',
   }
 }
 
