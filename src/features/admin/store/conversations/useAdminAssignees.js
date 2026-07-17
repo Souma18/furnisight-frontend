@@ -40,7 +40,7 @@ function bestRoleName(account = {}) {
 function accountDisplayName(account = {}) {
   return account.name
     || account.displayName
-    || [account.lastName, account.firstName].filter(Boolean).join(' ')
+    || account.fullName
     || account.username
     || account.email
     || 'Admin'

@@ -21,11 +21,12 @@ let badgesLoaded = false
 
 const PENDING_ORDER_STATUSES = new Set(['pending', 'unpaid', 'payment_failed'])
 
-function buildInitials(firstName, lastName) {
-  const a = (firstName || '').trim()[0] || ''
-  const b = (lastName || '').trim()[0] || ''
-  const initials = (a + b).toUpperCase()
-  return initials || 'AD'
+function buildInitials(fullName) {
+  const words = (fullName || '').trim().split(/\s+/)
+  if (!words[0]) return 'AD'
+  const a = words[0][0]
+  const b = words.length > 1 ? words[words.length - 1][0] : ''
+  return (a + b).toUpperCase() || 'AD'
 }
 
 function unwrapList(data) {
@@ -105,11 +106,11 @@ export function useAdminLayout() {
     const cleanRole = String(firstRole).replace(/^ROLE_/i, '')
     const preset = ROLE_PRESETS[normalizedRole] || { role: cleanRole || 'Admin', roleTag: cleanRole || 'Admin', rtClass: 'rt-manager', roleIcon: 'shield' }
     const fallback = ADMIN_SIM_USERS.super
-    const fullName = profile.displayName || `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
+    const fullName = profile.displayName || profile.fullName || ''
 
     return {
       id: profile.id || fallback.id,
-      av: buildInitials(profile.firstName, profile.lastName),
+      av: buildInitials(profile.fullName || profile.displayName),
       name: fullName || fallback.name,
       email: profile.email || fallback.email,
       ...preset,

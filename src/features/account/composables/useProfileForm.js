@@ -12,8 +12,7 @@ export function useProfileForm(profile, notify) {
   const avatarUploading = ref(false)
 
   const form = reactive({
-    firstName: '',
-    lastName: '',
+    fullName: '',
     birthday: '',
     gender: 'MALE',
     bio: '',

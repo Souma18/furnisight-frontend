@@ -42,11 +42,11 @@ function isActive(key) {
   <aside class="account-sidebar" :aria-label="t('account.nav.aria')">
     <div class="sidebar-profile" v-if="profile">
       <div class="sidebar-avatar">
-        <img v-if="profile.avatarUrl" :src="profile.avatarUrl" :alt="profile.displayName || profile.firstName" />
-        <span v-else class="sidebar-avatar-placeholder">{{ (profile.displayName || profile.firstName || profile.email || '?').charAt(0).toUpperCase() }}</span>
+        <img v-if="profile.avatarUrl" :src="profile.avatarUrl" :alt="profile.displayName || profile.fullName" />
+        <span v-else class="sidebar-avatar-placeholder">{{ (profile.displayName || profile.fullName || profile.email || '?').charAt(0).toUpperCase() }}</span>
       </div>
       <div class="sidebar-profile-info">
-        <strong class="sidebar-name">{{ profile.displayName || [profile.firstName, profile.lastName].filter(Boolean).join(' ') || profile.email }}</strong>
+        <strong class="sidebar-name">{{ profile.displayName || profile.fullName || profile.email }}</strong>
       </div>
     </div>
 

@@ -82,7 +82,7 @@ function startResizeRightPanel(e) {
     const delta = startX - moveEvent.clientX
     let newWidth = startWidth + delta
     if (newWidth < 280) newWidth = 280
-    if (newWidth > 600) newWidth = 600
+    if (newWidth > 700) newWidth = 700
     rightPanelWidth.value = newWidth
   }
 
@@ -100,6 +100,13 @@ const isLoadingTemplatesValue = computed(() => Boolean(unref(isLoadingTemplates)
 const isRoomSelectionLocked = computed(
   () => Boolean(unref(isLoadingTemplates)) || Boolean(unref(isAnalyzing)) || isRoomModelLoading.value,
 )
+
+// Tự động tính số cột sản phẩm dựa trên chiều rộng panel phải
+const productColumns = computed(() => {
+  if (rightPanelWidth.value >= 540) return 3
+  if (rightPanelWidth.value >= 380) return 2
+  return 1
+})
 
 const workspaceViews = computed(() => [
   { key: 'setup', label: t('room3d.workspace.setup'), icon: 'settings' },
@@ -208,8 +215,8 @@ onMounted(() => {
           :placed-product-ids="cartProductIds"
           :cart-total="cartTotal"
           :format-currency="vm.formatCurrency"
-          :product-columns="1"
-          :product-card-step="1"
+          :product-columns="productColumns"
+          :product-card-step="productColumns > 1 ? 0 : 1"
           @search-change="vm.setSearchKeyword"
           @category-change="vm.setCategory"
           @add-product="vm.addProductToCart"

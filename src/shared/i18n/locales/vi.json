@@ -106,6 +106,7 @@
       "firstName": "Tên",
       "lastNamePlaceholder": "Nguyễn",
       "firstNamePlaceholder": "Văn A",
+      "fullNamePlaceholder": "Nguyễn Văn A",
       "birthday": "Ngày sinh",
       "bio": "Giới thiệu",
       "bioPlaceholder": "Viết một chút về bản thân...",

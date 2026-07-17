@@ -9,11 +9,12 @@ import { useAdminWorkspace } from './conversations/useAdminWorkspace'
 import { useAdminSocket } from './conversations/useAdminSocket'
 import { useAdminAssignees } from './conversations/useAdminAssignees'
 
-function buildInitials(firstName, lastName) {
-  const a = (firstName || '').trim()[0] || ''
-  const b = (lastName || '').trim()[0] || ''
-  const initials = (a + b).toUpperCase()
-  return initials || 'AD'
+function buildInitials(fullName) {
+  const words = (fullName || '').trim().split(/\s+/)
+  if (!words[0]) return 'AD'
+  const a = words[0][0]
+  const b = words.length > 1 ? words[words.length - 1][0] : ''
+  return (a + b).toUpperCase() || 'AD'
 }
 
 export const useAdminConversationStore = defineStore('adminConversation', () => {
@@ -24,10 +25,10 @@ export const useAdminConversationStore = defineStore('adminConversation', () => 
   const currentAdmin = computed(() => {
     const profile = authStore.user || {}
     const fallback = ADMIN_SIM_USERS.super
-    const fullName = profile.displayName || `${profile.lastName ?? ''} ${profile.firstName ?? ''}`.trim()
+    const fullName = profile.displayName || profile.fullName || ''
     return {
       id: profile.id || fallback.id,
-      av: buildInitials(profile.firstName, profile.lastName),
+      av: buildInitials(profile.fullName || profile.displayName),
       name: fullName || fallback.name,
       email: profile.email || fallback.email,
     }

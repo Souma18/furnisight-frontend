@@ -37,7 +37,7 @@ function normalizeUserRow(user = {}) {
   const roleNames = accountRoleNames(user)
   return {
     ...user,
-    name: user.name || [user.lastName, user.firstName].filter(Boolean).join(' ') || user.username || user.email,
+    name: user.name || user.fullName || user.username || user.email,
     role: user.role || roleNames[0] || '',
     orders: user.orders ?? user.orderCount ?? '',
     avTone: user.avTone || 'blue',

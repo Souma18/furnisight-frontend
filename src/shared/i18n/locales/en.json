@@ -106,6 +106,7 @@
       "firstName": "First name",
       "lastNamePlaceholder": "Nguyen",
       "firstNamePlaceholder": "Van A",
+      "fullNamePlaceholder": "Nguyen Van A",
       "birthday": "Birthday",
       "bio": "About",
       "bioPlaceholder": "Write a little about yourself...",

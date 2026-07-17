@@ -39,11 +39,7 @@ const genderLabels = computed(() => ({
 }))
 
 const profileName = computed(() => {
-  const nameParts = [form.lastName, form.firstName]
-    .map((part) => String(part || '').trim())
-    .filter(Boolean)
-
-  return nameParts.join(' ') || profile.value?.displayName || t('account.profile.defaultName')
+  return String(form.fullName || '').trim() || profile.value?.displayName || profile.value?.fullName || t('account.profile.defaultName')
 })
 
 const birthdayLabel = computed(() => formatBirthday(form.birthday))
@@ -71,8 +67,7 @@ function formatBirthday(value) {
 function resetFormFromProfile() {
   const value = profile.value || {}
   Object.assign(form, {
-    firstName: value.firstName || '',
-    lastName: value.lastName || '',
+    fullName: value.fullName || '',
     birthday: value.birthday || '',
     gender: value.gender || 'MALE',
     bio: value.bio || '',
@@ -184,8 +179,7 @@ onMounted(() => {
 
       <form v-else class="profile-form" @submit.prevent="handleSubmit">
         <div class="field-grid">
-          <label>{{ t('account.profile.lastName') }} <AppInput v-model="form.lastName" :placeholder="t('account.profile.lastNamePlaceholder')" required /></label>
-          <label>{{ t('account.profile.firstName') }} <AppInput v-model="form.firstName" :placeholder="t('account.profile.firstNamePlaceholder')" required /></label>
+          <label class="full">{{ t('account.profile.fullName') }} <AppInput v-model="form.fullName" :placeholder="t('account.profile.fullNamePlaceholder')" required /></label>
           <label>
             Email
             <div class="readonly-field">

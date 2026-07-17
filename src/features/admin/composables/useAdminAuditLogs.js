@@ -7,7 +7,7 @@ const PAGE_SIZE = 20
 
 function resolveCurrentAdminName(profile = {}) {
   return profile.displayName
-    || [profile.lastName, profile.firstName].filter(Boolean).join(' ').trim()
+    || profile.fullName
     || profile.email
     || ''
 }

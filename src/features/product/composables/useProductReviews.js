@@ -217,14 +217,8 @@ export function useProductReviews(product) {
 
     const profile = profileStore.profile
     const authUser = authStore.user
-    const profileName = [profile?.lastName, profile?.firstName]
-      .map((part) => String(part || '').trim())
-      .filter(Boolean)
-      .join(' ')
-    const authName = authUser?.displayName || [authUser?.lastName, authUser?.firstName]
-      .map((part) => String(part || '').trim())
-      .filter(Boolean)
-      .join(' ')
+    const profileName = String(profile?.fullName || '').trim()
+    const authName = authUser?.displayName || String(authUser?.fullName || '').trim()
 
     return {
       userName: profileName || authName || authUser?.email || t('productDetail.review.customer'),

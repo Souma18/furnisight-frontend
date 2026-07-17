@@ -11,7 +11,7 @@ export function mapPromotionRecipient(account = {}) {
   const name = account.displayName
     || account.fullName
     || account.name
-    || [account.lastName, account.firstName].filter(Boolean).join(' ')
+    || account.fullName
     || account.username
     || account.email
     || account.id

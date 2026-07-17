@@ -2319,8 +2319,9 @@ p {
 }
 
 @media (max-width: 1240px) {
+  /* Giữ nguyên CSS custom properties để drag resize hoạt động đúng */
   .room-body {
-    grid-template-columns: 240px minmax(0, 1fr) 290px;
+    grid-template-columns: var(--left-panel-width, 240px) minmax(0, 1fr) var(--right-panel-width, 290px);
   }
 }
 

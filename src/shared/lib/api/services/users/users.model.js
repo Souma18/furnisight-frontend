@@ -7,8 +7,7 @@ export class ProfileResponse {
     this.accountId = data.accountId || null
     this.email = data.email || ''
     this.displayName = data.displayName || data.name || ''
-    this.firstName = data.firstName || ''
-    this.lastName = data.lastName || ''
+    this.fullName = data.fullName || ''
     this.avatarMediaId = data.avatarMediaId || null
     this.avatarUrl = data.avatarUrl || ''
     this.role = data.role || ''
@@ -26,8 +25,7 @@ export class UserResponse {
   constructor(data = {}) {
     this.id = data.id || null
     this.email = data.email || ''
-    this.firstName = data.firstName || ''
-    this.lastName = data.lastName || ''
+    this.fullName = data.fullName || ''
     this.avatarUrl = data.avatarUrl || ''
     this.role = data.role || ''
     this.status = data.status || 'ACTIVE'

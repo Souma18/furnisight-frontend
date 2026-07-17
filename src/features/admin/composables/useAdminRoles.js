@@ -84,7 +84,7 @@ function normalizeAdminAccount(account = {}) {
   const roleKey = String(role || '').toLowerCase()
   return {
     ...account,
-    name: account.name || [account.lastName, account.firstName].filter(Boolean).join(' ') || account.username || account.email,
+    name: account.name || account.fullName || account.username || account.email,
     role,
     perms,
     roleIcon: account.roleIcon || roleIconMap[roleKey] || 'user',

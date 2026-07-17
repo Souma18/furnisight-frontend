@@ -24,8 +24,7 @@ function getAvatarUrl(payload) {
 
 function toProfilePayload(value = {}) {
   return {
-    firstName: value.firstName || '',
-    lastName: value.lastName || '',
+    fullName: value.fullName || '',
     birthday: value.birthday || value.dateOfBirth || '',
     gender: value.gender || 'MALE',
     bio: value.bio || '',
