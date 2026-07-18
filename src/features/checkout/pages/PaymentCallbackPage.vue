@@ -12,6 +12,7 @@ const route = useRoute()
 const router = useRouter()
 const { t } = useI18n()
 const cartStore = useCartStore()
+const checkoutStore = useCheckoutStore()
 
 const status = ref('processing')
 const message = ref('')

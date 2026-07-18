@@ -132,6 +132,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     loading,
     placing,
     hydrated,
+    combosHydrated,
     shippingOptions,
     paymentMethods,
     shopVouchers,
