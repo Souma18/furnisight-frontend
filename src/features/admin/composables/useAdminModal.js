@@ -27,7 +27,7 @@ import {
   releaseProductModelPreview,
   removeProductImage,
   removeProductModel,
-  validateProductVariants,
+  validateProductForm,
 } from './useAdminProductForm'
 import { useAdminUiStore } from '../store/adminUiStore'
 
@@ -404,7 +404,7 @@ export function useAdminModal() {
         if (form.categoryImageUpload) form.categoryImageUpload.persisted = true
       }
       if (type === 'addProd' || type === 'editProd') {
-        validateProductVariants(form)
+        validateProductForm(form)
         await completePendingProductImages(form)
         for (const v of form.variants || []) await completePendingVariantImages(v)
         for (const v of form.variants || []) await completePendingProductModel(v)

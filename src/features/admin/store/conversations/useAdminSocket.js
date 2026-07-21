@@ -73,6 +73,11 @@ export function useAdminSocket(ctx) {
   }
 
   function connectSocketForConversation(id) {
+    if (socket.connected && socket.client) {
+      subscribeAdminTopics(id)
+      return
+    }
+
     socket.client?.disconnect()
     socket.connected = false
 

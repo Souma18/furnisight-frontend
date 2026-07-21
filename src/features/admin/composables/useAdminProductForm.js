@@ -10,6 +10,7 @@ export const PRODUCT_FORM_DEFAULTS = {
   imageUrls: [],
   imageUploads: [],
   variantErrors: {},
+  errors: {},
   variants: [
     {
       id: '',
@@ -55,6 +56,7 @@ export function mapProductToForm(row) {
     imageUrls: productImages,
     imageUploads: [],
     variantErrors: {},
+    errors: {},
     variants: normalizeVariants(row.variants, row),
   }
 }
@@ -301,7 +303,7 @@ function fileNameFromUrl(url) {
 }
 
 export function buildProductPayload(form) {
-  validateProductVariants(form)
+  validateProductForm(form)
   const productSku = String(form.sku || '').trim().toUpperCase()
   const variants = normalizeVariants(form.variants, form).map((variant) => {
     let variantSku = variant.sku.trim().toUpperCase()
@@ -372,10 +374,21 @@ export function createEmptyVariant(seed = {}) {
   }
 }
 
-export function validateProductVariants(form) {
+export function validateProductForm(form) {
+  const errors = {}
+  const name = String(form.name || '').trim()
+  if (!name || name.length < 10 || name.length > 120) {
+    errors.name = 'Tên sản phẩm phải từ 10 đến 120 ký tự.'
+  }
+  const sku = String(form.sku || '').trim()
+  if (!sku) {
+    errors.sku = 'SKU sản phẩm là bắt buộc.'
+  }
+  form.errors = errors
+
   const variants = normalizeVariants(form.variants, form)
   const seen = new Set()
-  const errors = {}
+  const variantErrors = {}
   const productSku = String(form.sku || '').trim().toUpperCase()
   variants.forEach((variant, index) => {
     let variantSku = String(variant.sku || '').trim().toUpperCase()
@@ -384,21 +397,25 @@ export function validateProductVariants(form) {
     }
     variant.sku = variantSku
     if (!variantSku) {
-      errors[index] = 'SKU variant là bắt buộc.'
+      variantErrors[index] = 'SKU variant là bắt buộc.'
     } else if (seen.has(variantSku)) {
-      errors[index] = `SKU ${variantSku} bị trùng trong sản phẩm.`
+      variantErrors[index] = `SKU ${variantSku} bị trùng trong sản phẩm.`
     }
     seen.add(variantSku)
     const threshold = Number(variant.lowStockThreshold)
     if (!Number.isInteger(threshold) || threshold < 1 || threshold > 9999) {
-      errors[index] = errors[index] || 'Ngưỡng cảnh báo phải từ 1 đến 9999.'
+      variantErrors[index] = variantErrors[index] || 'Ngưỡng cảnh báo phải từ 1 đến 9999.'
     }
   })
   form.variants = variants
-  form.variantErrors = errors
-  const firstErrorIndex = Number(Object.keys(errors)[0])
+  form.variantErrors = variantErrors
+  const firstErrorIndex = Number(Object.keys(variantErrors)[0])
   if (Number.isInteger(firstErrorIndex)) form.activeVariantIndex = firstErrorIndex
-  if (Object.keys(errors).length) throw new Error(errors[firstErrorIndex])
+  
+  if (Object.keys(errors).length || Object.keys(variantErrors).length) {
+    const firstError = Object.values(errors)[0] || Object.values(variantErrors)[0]
+    throw new Error(firstError)
+  }
 }
 
 export function normalizeVariants(variants, fallback = {}) {

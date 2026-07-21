@@ -123,7 +123,7 @@ function getProductStock(p) {
               @click="mgr.selectProduct(p.id)"
             >
               <div class="sp-prod-img">
-                <AppImage v-if="p.imageUrls && p.imageUrls.length" :src="p.imageUrls[0]" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"  />
+                <AppImage v-if="(p.imageUrls && p.imageUrls.length) || p.image" :src="p.imageUrls?.[0] || p.image" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"  />
                 <div v-else style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: #eee; border-radius: 8px; color: #999;">No IMG</div>
                 <div class="sp-prod-check"><AppIcon name="check" :size="10" /></div>
               </div>

@@ -243,7 +243,11 @@ watch(
 
     <template v-else-if="modal.type === 'addProd' || modal.type === 'editProd'">
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">Tên sản phẩm *</label><AppInput v-model="form.name" class="mfi" /></div>
+        <div class="mform-group">
+          <label class="mfl">Tên sản phẩm *</label>
+          <AppInput v-model="form.name" class="mfi" />
+          <small v-if="form.errors?.name" class="variant-field-error" style="color:var(--red)">{{ form.errors.name }}</small>
+        </div>
         <div class="mform-group">
           <label class="mfl">Danh mục</label>
           <select v-model="form.category" class="mfi">
@@ -253,7 +257,11 @@ watch(
         </div>
       </div>
       <div class="mform-row">
-        <div class="mform-group"><label class="mfl">SKU Sản phẩm *</label><AppInput v-model="form.sku" class="mfi" /></div>
+        <div class="mform-group">
+          <label class="mfl">SKU Sản phẩm *</label>
+          <AppInput v-model="form.sku" class="mfi" />
+          <small v-if="form.errors?.sku" class="variant-field-error" style="color:var(--red)">{{ form.errors.sku }}</small>
+        </div>
       </div>
       <div class="mform-note">
         <AppIcon name="warehouse" :size="13" style="margin-right:5px;opacity:.7" />
