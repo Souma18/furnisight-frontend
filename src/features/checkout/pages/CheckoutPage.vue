@@ -130,8 +130,9 @@ function handleContinueShopping() {
 
 <template>
   <section class="checkout-page">
-    <CheckoutToolbar @back="goBackToCart" />
-    <CheckoutStepsBar />
+    <CheckoutToolbar @back="goBackToCart">
+      <CheckoutStepsBar />
+    </CheckoutToolbar>
     <CheckoutBreadcrumb />
 
     <div v-if="loading" style="padding: 2rem; text-align: center; color: var(--co-text-mid, #555)">

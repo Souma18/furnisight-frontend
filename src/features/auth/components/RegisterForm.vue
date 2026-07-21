@@ -10,17 +10,17 @@ const { form, loading, errorMessage, passwordStrength, submitRegister } = useReg
 <template>
   <form class="form" @submit.prevent="submitRegister">
     <div>
-      <label>Họ và tên</label>
-      <AppInput v-model="form.fullName" type="text" placeholder="Nguyễn Văn A" required />
+      <label>{{ $t('auth.register.fullName') }}</label>
+      <AppInput v-model="form.fullName" type="text" :placeholder="$t('auth.register.fullNamePlaceholder')" required />
     </div>
 
-    <label>Email</label>
-    <AppInput v-model="form.email" type="email" placeholder="hello@email.com" required />
+    <label>{{ $t('auth.login.email') }}</label>
+    <AppInput v-model="form.email" type="email" :placeholder="$t('auth.login.emailPlaceholder')" required />
 
-    <label>Mật khẩu</label>
+    <label>{{ $t('auth.login.password') }}</label>
     <PasswordField
       v-model="form.password"
-      placeholder="Tối thiểu 8 ký tự"
+      :placeholder="$t('auth.register.passwordPlaceholder')"
       autocomplete="new-password"
       minlength="8"
       required
@@ -31,12 +31,12 @@ const { form, loading, errorMessage, passwordStrength, submitRegister } = useReg
 
     <label class="checkbox">
       <input v-model="form.agree" type="checkbox" required />
-      <span>Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật</span>
+      <span>{{ $t('auth.register.agreeTerms') }}</span>
     </label>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <AppButton class="submit-btn" type="submit" :disabled="loading || !form.agree">
-      {{ loading ? 'Đang xử lý...' : 'Tạo tài khoản' }}
+      {{ loading ? $t('auth.login.processing') : $t('auth.register.submit') }}
     </AppButton>
   </form>
 </template>

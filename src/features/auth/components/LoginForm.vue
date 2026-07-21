@@ -24,33 +24,33 @@ const {
 
 <template>
   <form class="form" @submit.prevent="submitLogin">
-    <label>Email</label>
+    <label>{{ $t('auth.login.email') }}</label>
     <AppInput
       v-model.trim="form.email"
       type="email"
-      placeholder="hello@email.com"
+      :placeholder="$t('auth.login.emailPlaceholder')"
       autocomplete="email"
       autocapitalize="none"
       spellcheck="false"
       required
     />
 
-    <label>Mật khẩu</label>
+    <label>{{ $t('auth.login.password') }}</label>
     <PasswordField
       v-model="form.password"
-      placeholder="Nhập mật khẩu"
+      :placeholder="$t('auth.login.passwordPlaceholder')"
       autocomplete="current-password"
       minlength="8"
       required
     />
 
     <div class="right-link">
-      <AppButton type="button" class="text-btn" @click="openForgotPassword">Quên mật khẩu?</AppButton>
+      <AppButton type="button" class="text-btn" @click="openForgotPassword">{{ $t('auth.login.forgotPassword') }}</AppButton>
     </div>
 
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     <AppButton class="submit-btn" type="submit" :disabled="loading">
-      {{ loading ? 'Đang xử lý...' : 'Đăng nhập' }}
+      {{ loading ? $t('auth.login.processing') : $t('auth.login.submit') }}
     </AppButton>
     <AuthSocialButtons />
   </form>

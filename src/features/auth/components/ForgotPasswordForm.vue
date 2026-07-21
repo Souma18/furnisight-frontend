@@ -10,33 +10,33 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
 <template>
   <form class="form" @submit.prevent="submitForgot">
     <div class="intro">
-      <p class="title">Đặt lại mật khẩu</p>
-      <p class="desc" v-if="form.step !== 1">Tạo mật khẩu mới cho tài khoản của bạn.</p>
+      <p class="title">{{ $t('auth.forgot.title') }}</p>
+      <p class="desc" v-if="form.step !== 1">{{ $t('auth.forgot.desc') }}</p>
     </div>
 
     <template v-if="form.step === 1">
-      <label>Địa chỉ email</label>
+      <label>{{ $t('auth.forgot.email') }}</label>
       <div class="input-with-btn">
         <AppInput 
           v-model="form.destination" 
           type="email"
-          placeholder="hello@email.com"
+          :placeholder="$t('auth.login.emailPlaceholder')"
           required 
         />
         <AppButton variant="unstyled" type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
-          {{ (loading && !form.code) ? 'Đang gửi...' : 'Gửi mã' }}
+          {{ (loading && !form.code) ? $t('auth.forgot.sending') : $t('auth.forgot.sendCode') }}
         </AppButton>
       </div>
 
-      <label>Mã xác nhận</label>
-      <AppInput v-model="form.code" type="text" placeholder="Nhập mã 6 số" required />
+      <label>{{ $t('auth.forgot.code') }}</label>
+      <AppInput v-model="form.code" type="text" :placeholder="$t('auth.forgot.codePlaceholder')" required />
     </template>
 
     <template v-else>
-      <label>Mật khẩu mới</label>
+      <label>{{ $t('auth.forgot.newPassword') }}</label>
       <PasswordField
         v-model="form.newPassword"
-        placeholder="Tối thiểu 8 ký tự"
+        :placeholder="$t('auth.register.passwordPlaceholder')"
         autocomplete="new-password"
         minlength="8"
         required
@@ -46,10 +46,10 @@ const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = u
     <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     
     <AppButton class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
-      {{ loading ? 'Đang xử lý...' : (form.step === 1 ? 'Xác nhận mã' : 'Đổi mật khẩu') }}
+      {{ loading ? $t('auth.login.processing') : (form.step === 1 ? $t('auth.forgot.submitCode') : $t('auth.forgot.submitPassword')) }}
     </AppButton>
     <AppButton class="outline-btn" type="button" @click="goBackToLogin">
-      ← Quay lại {{ form.step === 1 ? 'đăng nhập' : '' }}
+      ← {{ form.step === 1 ? $t('auth.forgot.backToLogin') : $t('auth.forgot.back') }}
     </AppButton>
   </form>
 </template>

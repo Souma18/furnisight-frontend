@@ -1256,5 +1256,55 @@
         "title": "Voucher selected"
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Login",
+      "email": "Email",
+      "emailPlaceholder": "hello{'@'}email.com",
+      "password": "Password",
+      "passwordPlaceholder": "Enter password",
+      "forgotPassword": "Forgot password?",
+      "submit": "Login",
+      "processing": "Processing..."
+    },
+    "register": {
+      "title": "Register",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "John Doe",
+      "passwordPlaceholder": "Min 8 characters",
+      "agreeTerms": "I agree to the Terms of Service and Privacy Policy",
+      "submit": "Create account"
+    },
+    "forgot": {
+      "title": "Reset password",
+      "desc": "Create a new password for your account.",
+      "email": "Email address",
+      "sendCode": "Send code",
+      "sending": "Sending...",
+      "code": "Verification code",
+      "codePlaceholder": "Enter 6-digit code",
+      "newPassword": "New password",
+      "submitCode": "Confirm code",
+      "submitPassword": "Change password",
+      "backToLogin": "Back to login",
+      "back": "Go back"
+    },
+    "verify": {
+      "success": "Success!",
+      "failed": "Failed",
+      "processing": "Processing",
+      "backToLogin": "Back to login page"
+    },
+    "social": {
+      "orContinueWith": "or continue with"
+    },
+    "common": {
+      "brand": "FurniSight",
+      "brandSubtitle": "Premium furniture",
+      "close": "Close",
+      "hidePassword": "Hide password",
+      "showPassword": "Show password"
+    }
   }
 }

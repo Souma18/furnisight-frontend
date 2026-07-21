@@ -32,7 +32,7 @@ function togglePasswordVisibility() {
     <AppButton
       type="button"
       class="password-toggle"
-      :aria-label="passwordVisible ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'"
+      :aria-label="passwordVisible ? $t('auth.common.hidePassword') : $t('auth.common.showPassword')"
       :aria-pressed="passwordVisible"
       :disabled="disabled"
       @click="togglePasswordVisibility"

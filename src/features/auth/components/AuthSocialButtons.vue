@@ -11,7 +11,7 @@ const loginGoogle = () => authStore.loginGoogle()
   <div class="social-wrap">
     <div class="divider">
       <span />
-      <p>hoặc tiếp tục với</p>
+      <p>{{ $t('auth.social.orContinueWith') }}</p>
       <span />
     </div>
 

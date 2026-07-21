@@ -1256,5 +1256,55 @@
         "title": "Đã chọn voucher"
       }
     }
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "email": "Email",
+      "emailPlaceholder": "hello{'@'}email.com",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "processing": "Đang xử lý..."
+    },
+    "register": {
+      "title": "Đăng ký",
+      "fullName": "Họ và tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "agreeTerms": "Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật",
+      "submit": "Tạo tài khoản"
+    },
+    "forgot": {
+      "title": "Đặt lại mật khẩu",
+      "desc": "Tạo mật khẩu mới cho tài khoản của bạn.",
+      "email": "Địa chỉ email",
+      "sendCode": "Gửi mã",
+      "sending": "Đang gửi...",
+      "code": "Mã xác nhận",
+      "codePlaceholder": "Nhập mã 6 số",
+      "newPassword": "Mật khẩu mới",
+      "submitCode": "Xác nhận mã",
+      "submitPassword": "Đổi mật khẩu",
+      "backToLogin": "Quay lại đăng nhập",
+      "back": "Quay lại"
+    },
+    "verify": {
+      "success": "Thành công!",
+      "failed": "Thất bại",
+      "processing": "Đang xử lý",
+      "backToLogin": "Về trang đăng nhập"
+    },
+    "social": {
+      "orContinueWith": "hoặc tiếp tục với"
+    },
+    "common": {
+      "brand": "FurniSight",
+      "brandSubtitle": "Nội thất cao cấp",
+      "close": "Đóng",
+      "hidePassword": "Ẩn mật khẩu",
+      "showPassword": "Hiện mật khẩu"
+    }
   }
 }

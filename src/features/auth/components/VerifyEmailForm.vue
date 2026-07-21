@@ -28,7 +28,7 @@ const { status, message } = useEmailVerification(() => {
     </div>
 
     <h2 class="title">
-      {{ status === 'success' ? 'Thành công!' : status === 'error' ? 'Thất bại' : 'Đang xử lý' }}
+      {{ status === 'success' ? $t('auth.verify.success') : status === 'error' ? $t('auth.verify.failed') : $t('auth.verify.processing') }}
     </h2>
     <p class="message">
       {{ message }}
@@ -40,7 +40,7 @@ const { status, message } = useEmailVerification(() => {
         class="submit-btn" 
         @click="setView(AUTH_VIEWS.LOGIN)"
       >
-        Về trang đăng nhập
+        {{ $t('auth.verify.backToLogin') }}
       </AppButton>
     </div>
   </div>

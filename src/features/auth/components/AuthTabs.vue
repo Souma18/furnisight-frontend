@@ -18,7 +18,7 @@ defineEmits(['update:modelValue'])
       :class="{ 'auth-tab--active': modelValue === 'login' }"
       @click="$emit('update:modelValue', 'login')"
     >
-      Đăng nhập
+      {{ $t('auth.login.title') }}
     </AppButton>
     <AppButton
       type="button"
@@ -26,7 +26,7 @@ defineEmits(['update:modelValue'])
       :class="{ 'auth-tab--active': modelValue === 'register' }"
       @click="$emit('update:modelValue', 'register')"
     >
-      Đăng ký
+      {{ $t('auth.register.title') }}
     </AppButton>
   </div>
 </template>

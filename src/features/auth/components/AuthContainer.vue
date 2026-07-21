@@ -57,10 +57,10 @@ onBeforeUnmount(() => {
         <div class="brand-row">
           <div class="brand-icon"><AppIcon name="lock" :size="14" :stroke-width="2" /></div>
           <div>
-            <p class="brand-title">FurniSight</p>
-            <p class="brand-subtitle">Nội thất cao cấp</p>
+            <p class="brand-title">{{ $t('auth.common.brand') }}</p>
+            <p class="brand-subtitle">{{ $t('auth.common.brandSubtitle') }}</p>
           </div>
-          <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" aria-label="Đóng" @click="$emit('close')">
+          <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" :aria-label="$t('auth.common.close')" @click="$emit('close')">
             <AppIcon name="close" :size="14" :stroke-width="2" />
           </AppButton>
         </div>
