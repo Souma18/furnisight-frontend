@@ -25,6 +25,7 @@
     "troisjs": "^0.3.0",
     "vue": "^3.5.32",
     "vue-i18n": "^11.4.6",
+    "vue-i18n-routing": "^1.2.0",
     "vue-router": "^4.5.0"
   },
   "devDependencies": {

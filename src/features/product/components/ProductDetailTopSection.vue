@@ -123,7 +123,7 @@ function handleOpen3D() {
         </div>
         <AppButton type="button" class="pd-btn-3d" @click="handleOpen3D">
           <AppIcon name="box" :size="16" />
-          Xem mô hình 3D
+          {{ t('productDetail.top.view3D') }}
         </AppButton>
       </div>
       <div class="pd-thumbs">
@@ -168,7 +168,7 @@ function handleOpen3D() {
 
       <div class="pd-purchase-options">
         <div v-if="product.colors?.length" class="pd-option-group">
-          <p class="opt-label">Màu sắc <span>{{ selectedColor }}</span></p>
+          <p class="opt-label">{{ t('productDetail.top.color') }} <span>{{ selectedColor }}</span></p>
           <div class="colors">
             <AppButton
               v-for="color in product.colors"
@@ -184,7 +184,7 @@ function handleOpen3D() {
         </div>
 
         <div v-if="product.sizes?.length" class="pd-option-group">
-          <p class="opt-label">Kích thước <span>{{ selectedSize }}</span></p>
+          <p class="opt-label">{{ t('productDetail.top.size') }} <span>{{ selectedSize }}</span></p>
           <div class="sizes">
             <AppButton
               v-for="size in product.sizes"
@@ -225,7 +225,7 @@ function handleOpen3D() {
           <span>{{ selectedStock > 0 ? t('productDetail.top.inStock', { count: selectedStock }) : t('productDetail.top.outOfStock') }}</span>
         </div>
         <p v-if="isOutOfStock || cartError" class="pd-cart-error">
-          {{ cartError || 'Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau.' }}
+          {{ cartError || t('productDetail.top.outOfStockMessage') }}
         </p>
         <div class="actions">
           <AppButton

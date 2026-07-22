@@ -42,6 +42,7 @@ export function useProductListPage() {
   const { items, total, facets, loading, loadList } = useProducts()
   const { show: showToast } = useToast()
   const searchKeyword = ref('')
+  const currentPage = ref(1)
   const selectedCategory = ref('all')
   const selectedSubcategory = ref('all')
   const sortBy = ref('popular')
@@ -85,6 +86,7 @@ export function useProductListPage() {
     const preset = parseProductListQueryPreset(route.query)
     applyCategorySelection(preset.selectedCategory)
     searchKeyword.value = preset.searchKeyword
+    currentPage.value = 1
   }
 
   function applyCategorySelection(slug) {
@@ -163,6 +165,7 @@ export function useProductListPage() {
     suppressCategoryWatch.value = true
     selectedCategory.value = selectedCategory.value === chip.slug ? 'all' : chip.slug
     selectedSubcategory.value = 'all'
+    currentPage.value = 1
     loadSidebarCategories(selectedCategory.value).finally(() => {
       suppressCategoryWatch.value = false
     })
@@ -176,11 +179,13 @@ export function useProductListPage() {
     } else {
       selectedSubcategory.value = slug
     }
+    currentPage.value = 1
     requestList()
   }
 
   function onApplySidebar(payload) {
     appliedFilters.value = { ...createDefaultProductFilters(), ...payload }
+    currentPage.value = 1
     requestList()
   }
 
@@ -190,6 +195,7 @@ export function useProductListPage() {
     selectedCategory.value = 'all'
     selectedSubcategory.value = 'all'
     searchKeyword.value = ''
+    currentPage.value = 1
     requestList()
   }
 
@@ -201,6 +207,7 @@ export function useProductListPage() {
       selectedCategory: selectedCategory.value,
       selectedSubcategory: selectedSubcategory.value,
       sortBy: sortBy.value,
+      page: currentPage.value,
     }))
   }
 
@@ -233,8 +240,14 @@ export function useProductListPage() {
     loadSidebarCategories(newCat)
   })
 
+  watch(currentPage, () => {
+    if (suppressListWatch.value) return
+    requestList()
+  })
+
   watch([searchKeyword, sortBy, saleOnly], () => {
     if (suppressListWatch.value) return
+    currentPage.value = 1
     requestList()
   })
 
@@ -324,6 +337,7 @@ export function useProductListPage() {
     facets: enrichedFacets,
     loading,
     searchKeyword,
+    currentPage,
     selectedRootCategory: computed(() => selectedCategory.value),
     selectedCategory: computed(() =>
       selectedSubcategory.value !== 'all' ? selectedSubcategory.value : selectedCategory.value

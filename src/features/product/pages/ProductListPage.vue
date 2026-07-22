@@ -6,6 +6,7 @@ import ProductListFiltersSidebar from '../components/ProductListFiltersSidebar.v
 import ProductListGrid from '../components/ProductListGrid.vue'
 import ProductListHeroSection from '../components/ProductListHeroSection.vue'
 import ProductListToolbar from '../components/ProductListToolbar.vue'
+import AppPagination from '@shared/ui/AppPagination.vue'
 import { useProductListPage } from '../composables/useProductListPage'
 import { useI18n } from 'vue-i18n'
 import '../styles/productList.css'
@@ -18,6 +19,7 @@ const {
   facets,
   loading,
   searchKeyword,
+  currentPage,
   selectedRootCategory,
   selectedCategory,
   sortBy,
@@ -111,6 +113,12 @@ function applySidebarAndClose(payload) {
           :wished-product-ids="wishedProductIds"
           @toggle-wish="favoriteProduct"
           @clear="onClearFilters"
+        />
+        
+        <AppPagination 
+          v-model:current-page="currentPage" 
+          :total="total" 
+          :page-size="24"
         />
       </div>
     </main>

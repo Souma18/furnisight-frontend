@@ -7,12 +7,13 @@ import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
+import AdminPagination from '../../components/shared/AdminPagination.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter } from '@shared/lib/formatters'
 import { buildProductPayload, mapProductToForm } from '../../composables/useAdminProductForm'
 
-const { items, search, load, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi))
+const { items, search, currentPage, pagination, load, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi))
 const deleteTarget = ref(null)
 const deleting = ref(false)
 const statusTarget = ref(null)
@@ -207,6 +208,8 @@ async function confirmStatusChange() {
       </div>
     </template>
   </AdminDataTable>
+
+  <AdminPagination :info="pagination.info" :buttons="pagination.buttons" @page="currentPage = $event" />
 
   <ConfirmDialog
     :open="Boolean(statusTarget)"

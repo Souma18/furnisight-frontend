@@ -37,6 +37,7 @@ export function buildProductListParams({
   selectedCategory,
   selectedSubcategory,
   sortBy,
+  page,
 }) {
   let categorySlug = ''
   if (selectedSubcategory !== 'all') {
@@ -49,6 +50,7 @@ export function buildProductListParams({
     ...(searchKeyword ? { q: searchKeyword } : {}),
     ...(categorySlug ? { category: categorySlug } : {}),
     sort: sortBy,
+    ...(page > 0 ? { page } : {}),
     ...(appliedFilters.priceBands?.length ? { priceBands: appliedFilters.priceBands } : {}),
     ...(appliedFilters.priceSliderPct < 100 ? { priceSliderPct: appliedFilters.priceSliderPct } : {}),
     ...(appliedFilters.materials?.length ? { materials: appliedFilters.materials } : {}),

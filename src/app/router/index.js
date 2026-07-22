@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { i18n } from '../../shared/i18n'
 import { pinia } from '../plugins/pinia'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 
@@ -100,7 +101,7 @@ const routes = [
   },
 ]
 
-export const router = createRouter({
+const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
   scrollBehavior(to, from, savedPosition) {
@@ -108,6 +109,7 @@ export const router = createRouter({
     return { top: 0, left: 0, behavior: 'auto' }
   },
 })
+
 
 
 router.beforeEach(async (to, from, next) => {
@@ -151,4 +153,21 @@ router.beforeEach(async (to, from, next) => {
   next()
 })
 
+router.afterEach(() => {
+  // Sync localeStore with i18n locale that might have been changed by vue-i18n-routing
+  import('@shared/stores/localeStore').then(({ useLocaleStore }) => {
+    const localeStore = useLocaleStore(pinia)
+    if (localeStore.locale !== i18n.global.locale.value) {
+      localeStore.locale = i18n.global.locale.value
+      import('@shared/i18n').then(({ applyDocumentLocale, LOCALE_STORAGE_KEY }) => {
+        applyDocumentLocale(i18n.global.locale.value)
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(LOCALE_STORAGE_KEY, i18n.global.locale.value)
+        }
+      })
+    }
+  })
+})
+
 export default router
+export { router }

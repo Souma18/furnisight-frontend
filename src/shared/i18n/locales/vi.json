@@ -965,7 +965,11 @@
       "noModel3D": "Phiên bản này chưa có mô hình 3D.",
       "listedPrice": "Giá niêm yết",
       "quantity": "Số lượng",
-      "optionsLabel": "Lựa chọn phiên bản"
+      "optionsLabel": "Lựa chọn phiên bản",
+      "view3D": "Xem mô hình 3D",
+      "color": "Màu sắc",
+      "size": "Kích thước",
+      "outOfStockMessage": "Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau."
     },
     "page": {
       "loading": "Đang tải sản phẩm...",

@@ -965,7 +965,11 @@
       "noModel3D": "This variant does not have a 3D model.",
       "listedPrice": "Listed price",
       "quantity": "Quantity",
-      "optionsLabel": "Select variant"
+      "optionsLabel": "Select variant",
+      "view3D": "View 3D Model",
+      "color": "Color",
+      "size": "Size",
+      "outOfStockMessage": "Product is temporarily out of stock. You can browse other products or check back later."
     },
     "page": {
       "loading": "Loading product...",
