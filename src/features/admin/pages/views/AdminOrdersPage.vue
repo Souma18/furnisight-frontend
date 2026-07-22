@@ -1,11 +1,12 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import AdminPageHeader from '../../components/shared/AdminPageHeader.vue'
 import AdminFilterBar from '../../components/shared/AdminFilterBar.vue'
 import AdminDataTable from '../../components/shared/AdminDataTable.vue'
+import AdminPagination from '../../components/shared/AdminPagination.vue'
 import ConfirmDialog from '@shared/ui/ConfirmDialog.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
@@ -19,7 +20,7 @@ import {
 const router = useRouter()
 const statusFilter = ref('')
 const dateFilter = ref('')
-const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchOrders({ ...params, size: 500 }))
+const { items, search, load, ui, buildPagination } = useAdminListPage((params) => adminApi.fetchOrders({ ...params, size: 500 }))
 const columns = [
   { key: 'orderCode', label: 'Mã đơn' }, { key: 'customer', label: 'Khách hàng' }, { key: 'items', label: 'SP' },
   { key: 'total', label: 'Tổng tiền' }, { key: 'statusLabel', label: 'Trạng thái' }, { key: 'date', label: 'Ngày' }, { key: 'actions', label: 'Hành động' },
@@ -68,6 +69,20 @@ const filteredOrders = computed(() => {
   })
 })
 const hasActiveFilters = computed(() => Boolean(search.value || statusFilter.value || dateFilter.value))
+
+const orderCurrentPage = ref(1)
+const orderPageSize = 24
+
+const paginatedOrders = computed(() => {
+  const start = (orderCurrentPage.value - 1) * orderPageSize
+  return filteredOrders.value.slice(start, start + orderPageSize)
+})
+
+const orderPagination = computed(() => {
+  const totalElements = filteredOrders.value.length
+  const totalPages = Math.ceil(totalElements / orderPageSize)
+  return buildPagination(orderCurrentPage.value - 1, totalPages, totalElements)
+})
 
 function openDetail(row) {
   const orderCode = row.orderCode
@@ -137,10 +152,15 @@ function toInputDate(value) {
   return date.toISOString().slice(0, 10)
 }
 
+watch([search, statusFilter, dateFilter], () => {
+  orderCurrentPage.value = 1
+})
+
 function resetFilters() {
   search.value = ''
   statusFilter.value = ''
   dateFilter.value = ''
+  orderCurrentPage.value = 1
 }
 </script>
 
@@ -157,7 +177,7 @@ function resetFilters() {
       Xóa lọc
     </AppButton>
   </AdminFilterBar>
-  <AdminDataTable :columns="columns" :rows="filteredOrders">
+  <AdminDataTable :columns="columns" :rows="paginatedOrders">
     <template #cell-orderCode="{ row }">
       <AppButton variant="unstyled" type="button" class="admin-link-btn" :disabled="!row.orderCode" @click="openDetail(row)">{{ row.orderCode || 'Chưa có mã đơn' }}</AppButton>
     </template>
@@ -187,6 +207,8 @@ function resetFilters() {
       </div>
     </template>
   </AdminDataTable>
+  
+  <AdminPagination :info="orderPagination.info" :buttons="orderPagination.buttons" @page="orderCurrentPage = $event" />
 
   <ConfirmDialog
     :open="!!cancelTarget"
