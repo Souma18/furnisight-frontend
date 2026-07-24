@@ -256,7 +256,8 @@ export async function getRoomTemplates() {
 
 export async function getRoomRecommendations(roomType, options = {}) {
   const normalizedRoomType = String(roomType || '').trim().toLowerCase()
-  const filters = ROOM_RECOMMENDATION_FILTERS[normalizedRoomType]
+  const filters = normalizedRoomType === 'all' ? {} : ROOM_RECOMMENDATION_FILTERS[normalizedRoomType]
+  
   if (!filters) {
     return {
       recommendations: [],
@@ -271,7 +272,7 @@ export async function getRoomRecommendations(roomType, options = {}) {
   const response = await apiClient.get('/catalog/products', {
     params: {
       ...filters,
-      size: options.limit ?? 8,
+      size: options.limit ?? (normalizedRoomType === 'all' ? 50 : 24),
       sort: options.sort ?? 'popular',
     },
   })

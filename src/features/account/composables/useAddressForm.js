@@ -97,6 +97,13 @@ export function useAddressForm(emit) {
       emit('notify', t('account.address.requiredError'), 'error')
       return
     }
+
+    const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/
+    if (!phoneRegex.test(form.phone)) {
+      emit('notify', t('account.address.invalidPhone'), 'error')
+      return
+    }
+
     
     isSubmitting.value = true
     try {

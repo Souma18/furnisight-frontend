@@ -41,6 +41,7 @@ const {
   productFilters,
   uploadError,
   recommendationError,
+  showAllRooms,
 } = vm
 
 const canvasRef = ref(null)
@@ -217,8 +218,10 @@ onMounted(() => {
           :format-currency="vm.formatCurrency"
           :product-columns="productColumns"
           :product-card-step="productColumns > 1 ? 0 : 1"
+          :show-all-rooms="showAllRooms"
           @search-change="vm.setSearchKeyword"
           @category-change="vm.setCategory"
+          @toggle-show-all-rooms="vm.toggleShowAllRooms"
           @add-product="vm.addProductToCart"
           @open-product="vm.openProductDetail"
           @remove-product="vm.removeProductFromCart"

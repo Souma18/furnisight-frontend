@@ -315,7 +315,7 @@ export function buildProductPayload(form) {
       sku: variantSku,
       color: variant.color || '',
       material: variant.material || 'N/A',
-      warranty: variant.warranty || '',
+      warranty: Number(variant.warranty) > 0 ? `${Number(variant.warranty)} năm` : '',
       price: Number(variant.price) || 0,
       stock: Number(variant.stock) || 0,
       weight: Number(variant.weight) || 1,
@@ -341,12 +341,21 @@ export function buildProductPayload(form) {
 }
 
 export function createEmptyVariant(seed = {}) {
+  let warrantyYears = ''
+  if (seed.warranty) {
+    const str = String(seed.warranty).toLowerCase()
+    const num = parseInt(str.replace(/\D/g, ''), 10)
+    if (!isNaN(num) && num > 0) {
+      warrantyYears = str.includes('tháng') ? Math.max(1, Math.round(num / 12)) : num
+    }
+  }
+
   return {
     id: seed.id ?? '',
     sku: seed.sku ?? '',
     color: seed.color ?? '',
     material: seed.material ?? 'N/A',
-    warranty: seed.warranty ?? '',
+    warranty: warrantyYears,
     price: seed.price ?? '',
     stock: seed.stock ?? '',
     weight: seed.weight ?? 1,

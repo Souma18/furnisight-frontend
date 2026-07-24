@@ -186,6 +186,7 @@
       "addressDataError": "Unable to load address data. Please try again.",
       "wardLoadError": "Unable to load ward list. Please choose the province/city again.",
       "requiredError": "Please fill in the required information.",
+      "invalidPhone": "Invalid phone number (must be a valid Vietnam phone number).",
       "savedDefault": "Address saved and set as default.",
       "saved": "New address saved.",
       "saveError": "Unable to save address.",
@@ -1124,6 +1125,7 @@
       },
       "apiError": "Failed to load address data. Please try again.",
       "validationError": "Please fill in all required fields (name, phone, address).",
+      "invalidPhone": "Invalid phone number (must be a valid Vietnam phone number).",
       "cancel": "Cancel",
       "save": "Save Address",
       "update": "Update"

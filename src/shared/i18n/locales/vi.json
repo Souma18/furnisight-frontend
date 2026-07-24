@@ -186,6 +186,7 @@
       "addressDataError": "Không tải được dữ liệu địa chỉ. Vui lòng thử lại.",
       "wardLoadError": "Không tải được danh sách phường/xã. Vui lòng chọn lại tỉnh/thành.",
       "requiredError": "Vui lòng điền thông tin bắt buộc.",
+      "invalidPhone": "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam).",
       "savedDefault": "Đã lưu và đặt làm địa chỉ mặc định.",
       "saved": "Đã lưu địa chỉ mới.",
       "saveError": "Lỗi khi lưu địa chỉ.",
@@ -1124,6 +1125,7 @@
       },
       "apiError": "Không tải được dữ liệu tỉnh/thành. Vui lòng thử lại.",
       "validationError": "Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ giao hàng.",
+      "invalidPhone": "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam).",
       "cancel": "Hủy",
       "save": "Lưu địa chỉ",
       "update": "Cập nhật"

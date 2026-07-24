@@ -56,6 +56,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  showAllRooms: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 defineEmits([
@@ -65,6 +69,7 @@ defineEmits([
   "open-product",
   "remove-product",
   "open-checkout",
+  "toggle-show-all-rooms",
 ]);
 
 const { t } = useI18n();
@@ -76,7 +81,9 @@ const { searchKeywordLower, searchResults, subCategories, openGroups, toggleGrou
     <Room3DSearchPanel
       :search-keyword="searchKeyword"
       :filtered-products-count="filteredProducts.length"
+      :show-all-rooms="showAllRooms"
       @search-change="$emit('search-change', $event)"
+      @toggle-show-all-rooms="$emit('toggle-show-all-rooms')"
     />
 
     <div class="products-scroll">

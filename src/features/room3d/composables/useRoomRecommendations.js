@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { room3dApi } from '@shared/lib/api/services'
 const { getRoomRecommendations } = room3dApi
 
@@ -32,15 +32,15 @@ export function useRoomRecommendations({ store, state }) {
       return result
     })
 
-  async function selectRoomType(type) {
+  async function fetchRecommendations() {
     const requestId = ++manualRecommendationRequestId
     recommendationError.value = ''
-    store.selectTemplateRoom(type)
-    store.setCategory('all')
-    store.setSearchKeyword('')
+    
+    const targetRoomType = state.showAllRooms.value ? 'all' : state.selectedRoomType.value
+    if (!targetRoomType) return
 
     try {
-      const result = await getRoomRecommendations(type)
+      const result = await getRoomRecommendations(targetRoomType)
       if (requestId !== manualRecommendationRequestId) return
       store.applyManualRecommendations(result)
     } catch (error) {
@@ -48,14 +48,25 @@ export function useRoomRecommendations({ store, state }) {
       store.applyManualRecommendations({
         recommendations: [],
         recommendationMeta: {
-          roomType: type,
+          roomType: targetRoomType,
           source: 'manual',
           reason: 'catalog_unavailable',
         },
       })
-      recommendationError.value = 'Không thể tải gợi ý sản phẩm cho phòng này.'
+      recommendationError.value = 'Không thể tải gợi ý sản phẩm.'
     }
   }
+
+  async function selectRoomType(type) {
+    store.selectTemplateRoom(type)
+    store.setCategory('all')
+    store.setSearchKeyword('')
+    await fetchRecommendations()
+  }
+
+  watch(() => state.showAllRooms.value, () => {
+    fetchRecommendations()
+  })
 
   return {
     recommendationError,

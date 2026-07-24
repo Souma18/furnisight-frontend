@@ -6,6 +6,7 @@ import { useProfileStore } from '@features/account/store/profileStore'
 import { ordersApi } from '@shared/lib/api/services/orders/orders.api'
 import { productsApi } from '@shared/lib/api/services/products/products.api'
 import { ReviewResponse } from '@shared/lib/api/services/products/products.model'
+import { useI18n } from 'vue-i18n'
 
 function createEmptyEligibility() {
   return {
@@ -43,6 +44,8 @@ export function useProductReviews(product) {
   const reviewSubmitError = ref('')
   const reviewSubmitSuccess = ref('')
   let reviewEligibilityRequestId = 0
+
+  const { t } = useI18n()
 
   const reviewCanSubmit = computed(() => Boolean(
     authStore.isAuthenticated &&
@@ -189,6 +192,29 @@ export function useProductReviews(product) {
         userName: reviewer.userName,
         userAvatarMediaId: reviewer.userAvatarMediaId,
       })
+      
+      // Optimistic UI update
+      const newReview = new ReviewResponse({
+        id: `temp-${Date.now()}`,
+        productId: product.value.id,
+        orderItemId: reviewEligibility.value.orderItemId,
+        userId: profileStore.profile?.id || null,
+        user: reviewer.userName,
+        userName: reviewer.userName,
+        avatar: '',
+        title: String(reviewForm.value.title || '').trim(),
+        comment: content,
+        rating: submittedRating,
+        status: 'PENDING',
+        createdAt: new Date().toISOString()
+      })
+      
+      const newReviews = [newReview, ...(product.value.reviews || [])]
+      product.value.reviews = newReviews
+      product.value.ratingCount = (product.value.ratingCount || 0) + 1
+      const totalRating = newReviews.reduce((total, review) => total + Number(review.rating || 0), 0)
+      product.value.rating = totalRating / newReviews.length
+
       reviewForm.value = createEmptyReviewForm()
       reviewEligibility.value = {
         ...reviewEligibility.value,
@@ -198,8 +224,10 @@ export function useProductReviews(product) {
         orderItemId: null,
       }
       reviewSubmitSuccess.value = t('productDetail.alerts.submitSuccess')
-      await loadProductReviews(product.value.id)
-    } catch {
+      
+      loadProductReviews(product.value.id).catch(() => {})
+    } catch (e) {
+      console.error('Failed to submit review', e)
       reviewSubmitError.value = t('productDetail.alerts.submitError')
     } finally {
       reviewSubmitting.value = false

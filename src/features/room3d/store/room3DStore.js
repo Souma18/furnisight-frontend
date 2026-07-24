@@ -32,6 +32,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
   const selectedCategory = ref('all')
   const sceneItems = ref([])
   const isCartExpanded = ref(false)
+  const showAllRooms = ref(false)
 
   function restorePersistedState() {
     if (typeof window === 'undefined') return
@@ -267,6 +268,10 @@ export const useRoom3DStore = defineStore('room3d', () => {
     isCartExpanded.value = !isCartExpanded.value
   }
 
+  function toggleShowAllRooms() {
+    showAllRooms.value = !showAllRooms.value
+  }
+
   return {
     mode,
     isAnalyzing,
@@ -288,6 +293,7 @@ export const useRoom3DStore = defineStore('room3d', () => {
     selectedCategory,
     sceneItems,
     isCartExpanded,
+    showAllRooms,
     setMode,
     setAnalyzing,
     setSelectedRoomType,
@@ -311,5 +317,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     removeFromScene,
     updateSceneItemVariant,
     toggleCart,
+    toggleShowAllRooms,
   }
 })

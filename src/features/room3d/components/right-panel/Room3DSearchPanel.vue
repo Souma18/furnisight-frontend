@@ -12,9 +12,13 @@ defineProps({
     type: Number,
     default: 0,
   },
+  showAllRooms: {
+    type: Boolean,
+    default: false,
+  },
 });
 
-defineEmits(["search-change"]);
+defineEmits(["search-change", "toggle-show-all-rooms"]);
 
 const { t } = useI18n();
 </script>
@@ -37,6 +41,19 @@ const { t } = useI18n();
         :placeholder="t('room3d.products.search')"
         @input="$emit('search-change', $event.target.value)"
       />
+    </div>
+
+    <div class="all-rooms-toggle" style="margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+      <input 
+        type="checkbox" 
+        id="show-all-rooms" 
+        :checked="showAllRooms"
+        @change="$emit('toggle-show-all-rooms')"
+        style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--color-primary, #667eea);"
+      />
+      <label for="show-all-rooms" style="cursor: pointer; font-size: 13px; color: var(--text-color, #4a5568); user-select: none;">
+        Hiển thị đồ nội thất từ các phòng khác
+      </label>
     </div>
 
     <div v-if="filteredProductsCount > 0" class="ai-strip">

@@ -289,7 +289,7 @@ watch(
               <div class="mform-row">
                 <div class="mform-group"><label class="mfl">Màu</label><AppInput v-model="variant.color" class="mfi" placeholder="Nâu" /></div>
                 <div class="mform-group"><label class="mfl">Chất liệu</label><AppInput v-model="variant.material" class="mfi" placeholder="Gỗ / Da / Vải" /></div>
-                <div class="mform-group"><label class="mfl">Bảo hành</label><AppInput v-model="variant.warranty" class="mfi" placeholder="12 tháng" /></div>
+                <div class="mform-group"><label class="mfl">Bảo hành (năm)</label><AppInput v-model="variant.warranty" class="mfi" type="number" min="1" placeholder="1" /></div>
               </div>
               <div class="mform-row">
                 <div class="mform-group"><label class="mfl">Giá</label><AppInput v-model="variant.price" class="mfi" type="number" min="0" /></div>

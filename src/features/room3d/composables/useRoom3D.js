@@ -114,6 +114,7 @@ export function useRoom3D() {
     setSearchKeyword: store.setSearchKeyword,
     setCategory: store.setCategory,
     toggleCart: store.toggleCart,
+    toggleShowAllRooms: store.toggleShowAllRooms,
     goCheckout,
     initRoomTemplates,
     handleUploadImage,

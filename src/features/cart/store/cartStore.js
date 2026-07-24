@@ -237,7 +237,10 @@ export const useCartStore = defineStore('cart', () => {
 
   async function updateQty(lineId, nextQty) {
     const line = items.value.find((item) => item.id === lineId)
-    return updateItem(lineId, { qty: clampPurchaseQuantity(nextQty, line) })
+    return updateItem(lineId, { 
+      qty: clampPurchaseQuantity(nextQty, line),
+      variantId: line?.variantId ?? null
+    })
   }
 
   async function removeItem(lineId) {
