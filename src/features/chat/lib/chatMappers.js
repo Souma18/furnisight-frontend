@@ -56,13 +56,36 @@ function pickAvatarPalette(seed) {
   return AVATAR_PALETTE[Math.abs(n) % AVATAR_PALETTE.length]
 }
 
+function extractProducts(raw) {
+  const text = raw.content ?? ''
+  if (text.startsWith('PRODUCT_DATA:')) {
+    try {
+      const data = JSON.parse(text.substring('PRODUCT_DATA:'.length))
+      return [data]
+    } catch (e) {
+      return [{
+        id: 'debug-error',
+        name: 'Lỗi: ' + e.message,
+        category: text,
+        price: 0,
+        image: ''
+      }]
+    }
+  }
+  return []
+}
+
 function messageContent(raw) {
   if (!raw) return ''
+  const text = raw.content ?? ''
+  if (text.startsWith('PRODUCT_DATA:')) {
+    return 'Đã chia sẻ 1 sản phẩm'
+  }
   if (raw.messageType && raw.messageType !== 'TEXT') {
     const firstAttachment = Array.isArray(raw.attachments) ? raw.attachments[0] : null
-    return raw.content || raw.attachmentName || firstAttachment?.name || '[Đính kèm]'
+    return text || raw.attachmentName || firstAttachment?.name || '[Đính kèm]'
   }
-  return raw.content ?? ''
+  return text
 }
 
 function mapAttachment(raw = {}) {
@@ -124,7 +147,7 @@ export function mapMessageToCustomer(raw, buyerId) {
     content: messageContent(raw),
     attachment: attachments[0] || null,
     attachments,
-    products: [],
+    products: extractProducts(raw),
     createdAt: raw.createdAt ?? new Date().toISOString(),
     clientTempId: raw.clientTempId,
     senderId,
@@ -140,6 +163,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
       text: messageContent(raw),
       attachment: attachments[0] || null,
       attachments,
+      products: extractProducts(raw),
       time: formatTimeLabel(raw.createdAt),
       createdAt: raw.createdAt ?? new Date().toISOString(),
       senderName: staffName || `Admin #${raw.senderId}`,
@@ -155,6 +179,7 @@ export function mapMessageToAdminTimeline(raw, { buyerId, staffId, staffName } =
     text: messageContent(raw),
     attachment: attachments[0] || null,
     attachments,
+    products: extractProducts(raw),
     time: formatTimeLabel(raw.createdAt),
     createdAt: raw.createdAt ?? new Date().toISOString(),
     senderName: isCustomer ? `Khách #${buyerId}` : staffName || `Admin #${staffId}`,

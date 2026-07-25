@@ -1,5 +1,6 @@
 import { ref } from 'vue'
 import { productsApi } from '@shared/lib/api/services'
+import { useAdminConversationStore } from '../../store/adminConversationStore'
 
 export function useChatProducts(uiStore) {
   const products = ref([])
@@ -22,8 +23,26 @@ export function useChatProducts(uiStore) {
     selectedProdId.value = id
   }
 
-  function sendProductToChat(product) {
-    uiStore.showToast({ icon: 'armchair', title: 'Đã gửi sản phẩm', subtitle: product.name })
+  async function sendProductToChat(product) {
+    const store = useAdminConversationStore()
+    const productData = {
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image: product.image ?? product.thumbnail ?? product.images?.[0] ?? '',
+      category: product.category?.name ?? product.category ?? '',
+      slug: product.slug || '',
+    }
+    
+    const content = `PRODUCT_DATA:${JSON.stringify(productData)}`
+    
+    try {
+      await store.sendCustomerReply(content, [])
+      uiStore.showToast({ icon: 'armchair', title: 'Đã gửi sản phẩm', subtitle: product.name })
+    } catch (e) {
+      uiStore.showToast({ icon: 'alert', title: 'Lỗi gửi sản phẩm', subtitle: 'Không thể gửi sản phẩm này.' })
+    }
+    
     selectedProdId.value = null
   }
 

@@ -1,22 +1,26 @@
 <script setup>
-import AppButton from '@shared/ui/AppButton.vue'
+
 import AppImage from '@shared/ui/AppImage.vue'
 import { PriceFormatter } from '@shared/lib/formatters'
 
-defineProps({
+const props = defineProps({
   product: {
     type: Object,
     required: true,
   },
 })
 
-const emit = defineEmits(['add-to-cart'])
 
 const formatPrice = PriceFormatter.format
+
+function openProduct() {
+  const url = props.product.slug ? `/san-pham/${props.product.slug}` : `/san-pham/${props.product.id}`
+  window.open(url, '_blank')
+}
 </script>
 
 <template>
-  <article class="chat-product-card" @click="emit('add-to-cart', product)">
+  <article class="chat-product-card" style="cursor: pointer;" @click="openProduct">
     <div class="cpc-img">
       <AppImage :src="product.image" :alt="product.name" loading="lazy"  />
     </div>
@@ -25,7 +29,6 @@ const formatPrice = PriceFormatter.format
       <div class="cpc-name">{{ product.name }}</div>
       <div class="cpc-row">
         <span class="cpc-price">{{ formatPrice(product.price) }}</span>
-        <AppButton type="button" class="cpc-add" @click.stop="emit('add-to-cart', product)">+ Giỏ</AppButton>
       </div>
     </div>
   </article>

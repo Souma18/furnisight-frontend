@@ -3,7 +3,7 @@ export const ADMIN_NAV_SECTIONS = [
     label: 'Tổng quan',
     items: [
       { name: 'admin-dashboard', label: 'Dashboard', icon: 'layoutDashboard' },
-      { name: 'admin-stats', label: 'Thống kê & Báo cáo', icon: 'chartBar' },
+      { name: 'admin-stats', label: 'Thống kê', icon: 'chartBar' },
     ],
   },
   {
@@ -31,7 +31,7 @@ export const ADMIN_NAV_SECTIONS = [
 
 export const ADMIN_PAGE_TITLES = {
   'admin-dashboard': 'Tổng quan <em>Dashboard</em>',
-  'admin-stats': 'Thống kê <em>& Báo cáo</em>',
+  'admin-stats': 'Thống kê',
   'admin-users': 'Quản lý <em>Người dùng</em>',
   'admin-categories': 'Quản lý <em>Danh mục</em>',
   'admin-products': 'Quản lý <em>Sản phẩm</em>',

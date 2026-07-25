@@ -568,7 +568,7 @@ textarea.mfi{resize:vertical}
     <div class="sb-section">
       <div class="sb-section-label">Tổng quan</div>
       <button class="sb-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard sb-icon"></i> Dashboard</button>
-      <button class="sb-item" onclick="showPage('stats',this)"><i class="ti ti-chart-bar sb-icon"></i> Thống kê & Báo cáo</button>
+      <button class="sb-item" onclick="showPage('stats',this)"><i class="ti ti-chart-bar sb-icon"></i> Thống kê</button>
     </div>
     <div class="sb-section">
       <div class="sb-section-label">Quản lý</div>
@@ -876,8 +876,7 @@ textarea.mfi{resize:vertical}
     ══════════════════════════════════════ -->
     <div class="page" id="page-stats">
       <div class="page-header">
-        <div class="ph-left"><div class="ph-eyebrow">Phân tích</div><div class="ph-title">Thống kê <em>&amp; Báo cáo</em></div><div class="ph-sub">Tổng hợp dữ liệu kinh doanh</div></div>
-        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất báo cáo','Đang tạo file PDF...')"><i class="ti ti-download"></i>Xuất PDF</button></div>
+        <div class="ph-left"><div class="ph-eyebrow">Phân tích</div><div class="ph-title">Thống kê</div><div class="ph-sub">Tổng hợp dữ liệu kinh doanh</div></div>
       </div>
       <div class="kpi-grid">
         <div class="kpi-card kpi-gold"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-coin"></i>Tổng doanh thu YTD</div><div class="kpi-value">12.4<small style="font-size:18px">tỷ</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+24% so với 2025</div></div>
@@ -1168,7 +1167,7 @@ function showPage(id, btn) {
     orders: 'Quản lý <em>Đơn hàng</em>',
     inventory: 'Quản lý <em>Kho hàng</em>',
     revenue: 'Quản lý <em>Doanh thu</em>',
-    stats: 'Thống kê <em>&amp; Báo cáo</em>',
+    stats: 'Thống kê',
     roles: 'Vai trò <em>&amp; Quyền hạn</em>',
     'audit-logs': 'Nhật ký <em>thao tác</em>',
     'my-account': 'Trang <em>của tôi</em>',

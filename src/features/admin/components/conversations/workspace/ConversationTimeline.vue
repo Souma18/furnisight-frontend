@@ -4,6 +4,7 @@ import AppImage from '@shared/ui/AppImage.vue'
 import { ref, onMounted, nextTick } from 'vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { downloadChatAttachment } from '@features/chat/lib/chatAttachmentDownload'
+import ChatProductCard from '@features/chat/components/ChatProductCard.vue'
 
 const props = defineProps({
   loading: { type: Boolean, default: false },
@@ -96,6 +97,13 @@ defineExpose({
                   </template>
                 </a>
               </div>
+              <div v-if="msg.products?.length" class="tl-product-list" style="margin-top: 8px;">
+                <ChatProductCard
+                  v-for="product in msg.products"
+                  :key="product.id"
+                  :product="product"
+                />
+              </div>
             </div>
             <div class="tl-msg-meta">{{ msg.time }}</div>
           </div>
@@ -123,6 +131,13 @@ defineExpose({
                     <small>{{ formatBytes(attachment.size) }}</small>
                   </template>
                 </a>
+              </div>
+              <div v-if="msg.products?.length" class="tl-product-list" style="margin-top: 8px;">
+                <ChatProductCard
+                  v-for="product in msg.products"
+                  :key="product.id"
+                  :product="product"
+                />
               </div>
             </div>
             <div class="tl-msg-meta">

@@ -903,9 +903,11 @@
     "roomTypes": {
       "bedroom": "Bedroom",
       "living": "Living room",
+      "livingroom": "Living room",
       "bathroom": "Bathroom",
       "kitchen": "Kitchen",
       "dining": "Dining room",
+      "diningroom": "Dining room",
       "office": "Office",
       "apartment": "Whole apartment"
     }

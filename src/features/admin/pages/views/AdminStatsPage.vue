@@ -1,6 +1,5 @@
 <script setup>
 import { computed, ref } from 'vue'
-import AppButton from '@shared/ui/AppButton.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { adminApi } from '@shared/lib/api/services'
 import { PriceFormatter } from '@shared/lib/formatters'
@@ -174,21 +173,9 @@ bindCharts((charts, payload) => {
 <template>
   <AdminPageHeader
     eyebrow="Phân tích"
-    title-html="Thống kê <em>& Báo cáo</em>"
+    title-html="Thống kê"
     subtitle="Tổng hợp dữ liệu kinh doanh"
-  >
-    <template #actions>
-      <AppButton
-        variant="unstyled"
-        type="button"
-        class="btn-export"
-        @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo', subtitle: 'Đang tạo file PDF...' })"
-      >
-        <AppIcon name="download" :size="15" />
-        Xuất PDF
-      </AppButton>
-    </template>
-  </AdminPageHeader>
+  />
 
   <template v-if="data">
     <AdminKpiGrid :kpis="kpis" />
