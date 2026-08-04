@@ -36,7 +36,13 @@ export class ProductResponse {
     this.soldCount = data.soldCount ?? data.soldQuantity ?? data.sold ?? 0
     this.supports3d = Boolean(data.supports3d)
     this.features = normalizeLocalizedArray(data, 'features')
-    this.specifications = typeof data.specifications === 'object' && data.specifications ? data.specifications : {}
+    this.specifications = (() => {
+      if (typeof data.specifications === 'object' && data.specifications) return data.specifications
+      if (typeof data.specifications === 'string' && data.specifications.trim()) {
+        try { return JSON.parse(data.specifications) } catch (err) {}
+      }
+      return {}
+    })()
     this.modelUrl = data.modelUrl || ''
     this.roomTypeHint = resolveLocalizedValue(data, 'roomTypeHint')
     this.reviews = Array.isArray(data.reviews)
@@ -133,7 +139,13 @@ export class ProductVariantResponse {
     this.color = resolveLocalizedValue(data, 'color')
     this.warranty = resolveLocalizedValue(data, 'warranty')
     this.supports3d = Boolean(data.supports3d)
-    this.specifications = typeof data.specifications === 'object' && data.specifications ? data.specifications : {}
+    this.specifications = (() => {
+      if (typeof data.specifications === 'object' && data.specifications) return data.specifications
+      if (typeof data.specifications === 'string' && data.specifications.trim()) {
+        try { return JSON.parse(data.specifications) } catch (err) {}
+      }
+      return {}
+    })()
     this.modelUrl = data.modelUrl || ''
     this.imageUrls = normalizeGallery(data)
     this.image = this.imageUrls[0] || ''

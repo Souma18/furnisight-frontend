@@ -342,27 +342,29 @@ export function buildProductPayload(form) {
       supports3d: Boolean(variant.modelUrl && variant.supports3d),
       features: String(variant.features || '').split('\n').map(f => f.trim()).filter(Boolean),
       specifications: (() => {
-        if (!variant.specifications || !variant.specifications.trim()) return null
+        if (!variant.specifications || !variant.specifications.trim()) return ""
         let specStr = variant.specifications.trim()
         if (!specStr.startsWith('{')) specStr = `{\n${specStr}\n}`
         try {
-          return JSON.parse(specStr)
+          JSON.parse(specStr)
+          return specStr
         } catch {
-          return null
+          return ""
         }
       })(),
     }
   })
-  let specsObj = null
+  let specsObj = ""
   if (form.specifications && form.specifications.trim()) {
     let specStr = form.specifications.trim()
     if (!specStr.startsWith('{')) {
       specStr = `{\n${specStr}\n}`
     }
     try {
-      specsObj = JSON.parse(specStr)
+      JSON.parse(specStr)
+      specsObj = specStr
     } catch (err) {
-      specsObj = null
+      specsObj = ""
     }
   }
 
