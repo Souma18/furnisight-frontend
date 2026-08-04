@@ -46,6 +46,8 @@ const MODAL_TITLES = {
   stockIn: 'Nhập <em>kho</em>',
   addVoucher: 'Tạo <em>voucher</em>',
   editVoucher: 'Sửa <em>voucher</em>',
+  addRoomType: 'Thêm loại phòng',
+  editRoomType: 'Cập nhật loại phòng',
 }
 
 const WIDE_MODALS = new Set(['addRole', 'editRole', 'addProd', 'editProd'])
@@ -107,7 +109,7 @@ export function useAdminModal() {
     accountStatus: 'ACTIVE',
     password: '',
     slug: '',
-    iconId: 'house',
+    roomTypeId: '',
     visible: true,
     description: '',
     imageUrl: '',
@@ -196,6 +198,13 @@ export function useAdminModal() {
       form.name = payload?.name ?? ''
       form.roleDescription = payload?.note ?? ''
       form.permissions = normalizePermissions(payload?.permissionIds)
+    }
+    if (type === 'addRoomType' || type === 'editRoomType') {
+      form.name = payload?.name ?? ''
+      form.slug = payload?.slug ?? ''
+      form.description = payload?.description ?? ''
+      form.visible = payload?.visible ?? true
+      form.imageUrl = payload?.imageUrl ?? ''
     }
   }
 
@@ -462,6 +471,25 @@ export function useAdminModal() {
       if (type === 'editRole') {
         if (!modal.value.payload?.id) throw new Error('Thiếu vai trò cần cập nhật.')
         assertActionResult(await adminApi.updateRole(modal.value.payload.id, buildRolePayload(form)))
+      }
+      if (type === 'addRoomType') {
+        await adminApi.createRoomType({
+          name: form.name,
+          slug: form.slug,
+          description: form.description,
+          visible: form.visible,
+          imageUrl: form.imageUrl
+        })
+      }
+      if (type === 'editRoomType') {
+        if (!modal.value.payload?.id) throw new Error('Thiếu loại phòng cần cập nhật.')
+        await adminApi.updateRoomType(modal.value.payload.id, {
+          name: form.name,
+          slug: form.slug,
+          description: form.description,
+          visible: form.visible,
+          imageUrl: form.imageUrl
+        })
       }
       if (type === 'addAdmin') {
         if (!form.adminRole) {

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { getApiErrorMessage } from '@shared/lib/api'
 import { useAdminUiStore } from '../store/adminUiStore'
 
-export function useAdminListPage(fetcher) {
+export function useAdminListPage(fetcher, extraFilters = ref({})) {
   const ui = useAdminUiStore()
   const { reloadTick } = storeToRefs(ui)
   const items = ref([])
@@ -48,6 +48,7 @@ export function useAdminListPage(fetcher) {
     try {
       const params = {
         ...(search.value ? { query: search.value } : {}),
+        ...extraFilters.value,
         page: currentPage.value,
         size: 24
       }
@@ -71,6 +72,10 @@ export function useAdminListPage(fetcher) {
   onMounted(load)
   watch(reloadTick, load)
   watch(currentPage, load)
+  watch(extraFilters, () => {
+    currentPage.value = 1
+    load()
+  }, { deep: true })
   watch(search, () => {
     currentPage.value = 1
     clearTimeout(searchTimer)

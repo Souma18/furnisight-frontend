@@ -42,22 +42,20 @@ export function useHomePage() {
 
   useRevealOnScroll('.fade-up')
 
-  async function loadCategories() {
+  async function loadRoomTypes() {
     try {
-      const response = await productsApi.getRootCategories()
+      const response = await productsApi.getRoomTypes()
       const data = response?.data
-      const items = Array.isArray(data)
-        ? data
-        : data?.items ?? []
+      const items = Array.isArray(data) ? data : data?.items ?? []
 
-      categories.value = items.map((item) => {
-        const category = new CategoryResponse(item)
-        return {
-          ...category,
-          icon: category.iconUrl || 'sofa',
-          count: t('home.categories.count', { count: category.productCount || 0 }),
-        }
-      })
+      categories.value = items.map((item) => ({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        imageUrl: item.imageUrl,
+        icon: item.iconUrl || 'sofa',
+        count: t('home.categories.count', { count: item.productCount || 0 }),
+      }))
 
       if (categories.value.length > 0 && !activeCategoryId.value) {
         activeCategoryId.value = categories.value[0].id
@@ -159,7 +157,7 @@ export function useHomePage() {
 
   watch(activeCategoryId, loadProductsForCategory)
   watch(locale, async () => {
-    await loadCategories()
+    await loadRoomTypes()
     await loadCombos()
     await loadProductsForCategory(activeCategoryId.value)
     await loadTopReviews()
@@ -169,7 +167,7 @@ export function useHomePage() {
   })
 
   onMounted(() => {
-    loadCategories()
+    loadRoomTypes()
     loadCombos()
     loadTopReviews()
 

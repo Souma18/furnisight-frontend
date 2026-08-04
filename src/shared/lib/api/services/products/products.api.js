@@ -52,6 +52,16 @@ class ProductsApi {
     return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}`)
   }
 
+  // ─── ROOM TYPES ────────────────────────────────────────────────────────
+
+  /**
+   * Retrieves all visible room types
+   * @returns {Promise<import('axios').AxiosResponse<Array<{id: string, name: string, slug: string, iconUrl?: string, imageUrl?: string}>>>}
+   */
+  getRoomTypes() {
+    return apiClient.get(`${catalogBaseUrl}/room-types`)
+  }
+
   // ─── REVIEWS ────────────────────────────────────────────────────────
 
   /**

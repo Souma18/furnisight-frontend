@@ -17,7 +17,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['project-name-change', 'mesh-quality-change', 'quality-change'])
-const { t } = useI18n()
+const { t, te } = useI18n()
 
 const roomHasModel = computed(() => Boolean(props.selectedRoom?.modelUrl))
 const hasPredictionConfidence = computed(
@@ -37,7 +37,7 @@ const predictionConfidencePercent = computed(() =>
       <p v-else-if="predictionStatus === 'error'" class="note error-note">{{ t('room3d.setup.predictFailed') }}</p>
       <div v-else class="room-meta">
         <div class="tag-row">
-          <NTag type="warning">{{ predictionLabel || (selectedRoom?.type ? t(`room3d.roomTypes.${selectedRoom.type}`) : null) || t('room3d.setup.unknownLabel') }}</NTag>
+          <NTag type="warning">{{ (selectedRoom?.type ? (te(`room3d.roomTypes.${selectedRoom.type}`) ? t(`room3d.roomTypes.${selectedRoom.type}`) : selectedRoom.type) : (predictionLabel ? (te(`room3d.roomTypes.${predictionLabel.toLowerCase().replace(/ /g, '')}`) ? t(`room3d.roomTypes.${predictionLabel.toLowerCase().replace(/ /g, '')}`) : predictionLabel) : null)) || t('room3d.setup.unknownLabel') }}</NTag>
           <NTag v-if="hasPredictionConfidence" type="success">
             {{ predictionConfidencePercent }}%
           </NTag>

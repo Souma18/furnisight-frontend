@@ -30,6 +30,20 @@ export function useProductTabs(productRef, activeVariantRef) {
     return rows
   })
 
+  const groupedSpecs = computed(() => {
+    const product = productRef.value
+    if (!product) return []
+
+    const variant = activeVariantRef?.value ?? product.variants?.[0] ?? null
+    const rawSpecs = variant?.specifications || product?.specifications
+
+    if (rawSpecs?.specGroups && Array.isArray(rawSpecs.specGroups) && rawSpecs.specGroups.length > 0) {
+      return rawSpecs.specGroups
+    }
+
+    return []
+  })
+
   const reviewBars = computed(() => {
     const bars = [5, 4, 3, 2, 1].map((star) => ({ star, count: 0, percent: 0 }))
     const reviews = productRef.value?.reviews || []
@@ -52,6 +66,7 @@ export function useProductTabs(productRef, activeVariantRef) {
   return {
     reviewCountLabel,
     specsRows,
+    groupedSpecs,
     reviewBars,
   }
 }

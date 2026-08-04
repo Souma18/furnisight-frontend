@@ -129,6 +129,12 @@ export function useProductDetailPage(props) {
     }
     qty.value = Math.min(qty.value, selectedStock.value)
   })
+  watch(activeVariant, (variant) => {
+    if (variant && variant.image) {
+      activeImage.value = variant.image
+    }
+  })
+
   watch(activeGallery, (gallery) => {
     const nextGallery = Array.isArray(gallery) ? gallery : []
     if (!nextGallery.length) {

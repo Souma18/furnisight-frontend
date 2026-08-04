@@ -11,6 +11,7 @@ export const ADMIN_NAV_SECTIONS = [
     items: [
       { name: 'admin-users', label: 'Người dùng', icon: 'users', permission: 'ACCOUNT_MANAGE' },
       { name: 'admin-categories', label: 'Danh mục', icon: 'category', permission: 'PRODUCT_MANAGE' },
+      { name: 'admin-room-types', label: 'Loại phòng', icon: 'home', permission: 'PRODUCT_MANAGE' },
       { name: 'admin-products', label: 'Sản phẩm', icon: 'armchair', permission: 'PRODUCT_MANAGE' },
       { name: 'admin-orders', label: 'Đơn hàng', icon: 'box', badge: 'orders', badgeTone: 'red', permission: 'ORDER_MANAGE' },
       { name: 'admin-vouchers', label: 'Marketing Center', icon: 'badgePercent', permission: 'VOUCHER_MANAGE' },

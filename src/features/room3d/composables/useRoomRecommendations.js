@@ -64,6 +64,12 @@ export function useRoomRecommendations({ store, state }) {
     await fetchRecommendations()
   }
 
+  watch(() => state.selectedRoomType.value, (newVal) => {
+    if (newVal) {
+      fetchRecommendations()
+    }
+  })
+
   watch(() => state.showAllRooms.value, () => {
     fetchRecommendations()
   })

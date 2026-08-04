@@ -62,7 +62,25 @@ export class OrderItemResponse {
     this.imageUrl = resolveOrderItemImageUrl(data) || null
     this.price = data.price
     this.quantity = data.quantity
+    this.variantLabel = resolveOrderItemVariant(data)
   }
+}
+
+export function resolveOrderItemVariant(item = {}) {
+  const snapshot = item.productSnapshot || {}
+  const color = snapshot.color || item.color || item.selectedColor || ''
+  let size = snapshot.size || snapshot.dimensionText || item.size || item.selectedSize || ''
+  
+  if (!size && snapshot.dimensions) {
+    const { length, width, height } = snapshot.dimensions
+    if (length && width && height) {
+      size = `${length} × ${width} × ${height} cm`
+    }
+  }
+  
+  const material = snapshot.material || item.material || ''
+  
+  return [color, size, material].filter(Boolean).join(' - ')
 }
 
 export class OrderListResponse {

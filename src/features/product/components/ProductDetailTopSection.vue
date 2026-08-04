@@ -6,6 +6,7 @@ import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 import { useToast } from '@shared/composables/useToast'
+import { useDragScroll } from '@shared/composables/useDragScroll'
 
 const { t } = useI18n()
 const props = defineProps({
@@ -107,6 +108,9 @@ function handleOpen3D() {
   }
   emit('open-3d')
 }
+
+const thumbsRef = ref(null)
+useDragScroll(thumbsRef)
 </script>
 
 <template>
@@ -126,7 +130,7 @@ function handleOpen3D() {
           {{ t('productDetail.top.view3D') }}
         </AppButton>
       </div>
-      <div class="pd-thumbs">
+      <div class="pd-thumbs" ref="thumbsRef">
         <AppButton
           v-for="imgUrl in displayGallery"
           :key="imgUrl"

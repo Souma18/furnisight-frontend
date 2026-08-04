@@ -3,23 +3,21 @@ import { ROOM_TEMPLATES } from '@features/room3d/core/mockData'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {
-  bedroom: 'bedroom',
-  living: 'living',
-  'living room': 'living',
-  dining: 'dining',
-  'dining room': 'dining',
-  office: 'office',
-  'home office': 'office',
+  bedroom: 'phong-ngu',
+  living: 'phong-khach',
+  'living room': 'phong-khach',
+  livingroom: 'phong-khach',
+  dining: 'phong-bep',
+  'dining room': 'phong-bep',
+  kitchen: 'phong-bep',
+  bathroom: 'phong-tam',
 }
 
 const ROOM_RECOMMENDATION_FILTERS = {
-  living: { category: 'living-room' },
-  livingroom: { category: 'living-room' },
-  bedroom: { category: 'bedroom' },
-  dining: { category: 'kitchen' },
-  kitchen: { category: 'kitchen' },
-  bathroom: { category: 'bathroom' },
-  office: { q: 'bàn' },
+  'phong-khach': { roomType: 'phong-khach' },
+  'phong-ngu': { roomType: 'phong-ngu' },
+  'phong-bep': { roomType: 'phong-bep' },
+  'phong-tam': { roomType: 'phong-tam' },
 }
 
 export function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
@@ -283,11 +281,11 @@ export async function getRoomRecommendations(roomType, options = {}) {
 
   return {
     recommendations: products.map((item) => ({
-      ...normalizeRecommendation(item, filters.category || ''),
+      ...normalizeRecommendation(item, filters.roomType || ''),
       roomTypes: [normalizedRoomType],
     })),
     recommendationMeta: {
-      categorySlug: filters.category || '',
+      categorySlug: filters.roomType || '',
       query: filters.q || '',
       roomType: normalizedRoomType,
       source: 'manual',

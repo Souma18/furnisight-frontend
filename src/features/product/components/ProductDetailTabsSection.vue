@@ -25,6 +25,7 @@ const { t } = useI18n()
 const {
   reviewCountLabel,
   specsRows,
+  groupedSpecs,
   reviewBars,
 } = useProductTabs(toRef(props, 'product'), toRef(props, 'activeVariant'))
 
@@ -85,8 +86,16 @@ function updateReviewField(field, value) {
       </div>
     </div>
     <div v-else-if="activeTab === 'spec'" class="pd-section-layout pd-spec">
-      <div class="spec-table">
-        <div class="spec-head">{{ t('productDetail.spec.full') }}</div>
+      <template v-if="groupedSpecs.length">
+        <div v-for="group in groupedSpecs" :key="group.group" class="spec-table spec-group-card" style="margin-bottom: 20px;">
+          <div class="spec-head">{{ group.group }}</div>
+          <div v-for="item in group.items" :key="item.name" class="spec-row">
+            <div class="spec-key">{{ item.name }}</div>
+            <div class="spec-val">{{ item.value }} {{ item.unit || '' }}</div>
+          </div>
+        </div>
+      </template>
+      <div v-else class="spec-table">
         <div v-for="row in specsRows" :key="`det-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>

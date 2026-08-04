@@ -39,7 +39,6 @@ const roomHasModel = computed(() => Boolean(props.selectedRoom?.modelUrl))
         </span>
         <span class="room-btn-content">
           <strong>{{ t(`room3d.roomTypes.${room.type}`) }}</strong>
-          <small>{{ t('room3d.products.count', { count: room.type === 'living' ? 22 : room.type === 'bedroom' ? 18 : room.type === 'kitchen' ? 25 : 12 }) }}</small>
         </span>
       </AppButton>
     </div>

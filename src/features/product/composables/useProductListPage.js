@@ -27,6 +27,7 @@ function mapCategoryToOption(raw = {}) {
     name: category.name,
     parentId: category.parentId,
     path: category.path,
+    roomTypeId: category.roomTypeId,
     productCount,
     count: productCount,
   }
@@ -130,10 +131,9 @@ export function useProductListPage() {
 
   async function loadQuickFilters() {
     try {
-      const { data } = await productsApi.getRootCategories()
+      const { data } = await productsApi.getRoomTypes()
       const chips = data.map((item) => {
-        const category = new CategoryResponse(item)
-        return { label: category.name, slug: category.slug ?? category.id }
+        return { id: item.id, label: item.name, slug: item.slug ?? item.id }
       })
       dynamicQuickFilters.value = [{ label: t('products.all'), slug: 'all' }, ...chips]
     } catch (e) {
@@ -144,12 +144,18 @@ export function useProductListPage() {
   async function loadSidebarCategories(rootSlug) {
     try {
       if (!rootSlug || rootSlug === 'all') {
-        sidebarCategories.value = allCategories.value.filter((category) => category.parentId)
+        sidebarCategories.value = allCategories.value.filter((category) => !category.parentId)
         return
       }
 
-      const { data } = await productsApi.getSubcategories(rootSlug)
-      sidebarCategories.value = (Array.isArray(data) ? data : []).map(mapCategoryToOption)
+      const roomType = dynamicQuickFilters.value.find((rt) => rt.slug === rootSlug)
+      if (roomType && roomType.id && roomType.slug !== 'all') {
+        sidebarCategories.value = allCategories.value.filter(
+          (category) => category.roomTypeId === roomType.id
+        )
+      } else {
+        sidebarCategories.value = []
+      }
     } catch (e) {
       sidebarCategories.value = []
     }

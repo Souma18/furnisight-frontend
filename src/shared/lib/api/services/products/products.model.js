@@ -36,6 +36,7 @@ export class ProductResponse {
     this.soldCount = data.soldCount ?? data.soldQuantity ?? data.sold ?? 0
     this.supports3d = Boolean(data.supports3d)
     this.features = normalizeLocalizedArray(data, 'features')
+    this.specifications = typeof data.specifications === 'object' && data.specifications ? data.specifications : {}
     this.modelUrl = data.modelUrl || ''
     this.roomTypeHint = resolveLocalizedValue(data, 'roomTypeHint')
     this.reviews = Array.isArray(data.reviews)
@@ -87,6 +88,7 @@ export class CategoryResponse {
     this.path = data.path || ''
     this.parentLabel = resolveLocalizedValue(data, 'parentLabel', ['parentName'])
     this.productCount = data.productCount ?? 0
+    this.roomTypeId = data.roomTypeId || null
     this.imageUrl = data.imageUrl || data.image || ''
     this.iconUrl = data.iconUrl || ''
   }
@@ -131,6 +133,7 @@ export class ProductVariantResponse {
     this.color = resolveLocalizedValue(data, 'color')
     this.warranty = resolveLocalizedValue(data, 'warranty')
     this.supports3d = Boolean(data.supports3d)
+    this.specifications = typeof data.specifications === 'object' && data.specifications ? data.specifications : {}
     this.modelUrl = data.modelUrl || ''
     this.imageUrls = normalizeGallery(data)
     this.image = this.imageUrls[0] || ''
