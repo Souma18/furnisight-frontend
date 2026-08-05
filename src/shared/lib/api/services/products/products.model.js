@@ -53,6 +53,11 @@ export class ProductResponse {
     this.fallbackMaterial = resolveLocalizedValue(data, 'material') || primaryVariant?.material || ''
     this.fallbackWarranty = resolveLocalizedValue(data, 'warranty') || primaryVariant?.warranty || ''
     this.fallbackStock = data.stockQuantity ?? data.stock ?? primaryVariant?.stockQuantity ?? 0
+    // Product-level dimensions (used as fallback when variant has no dims)
+    this.length = data.length ?? data.dimensions?.length ?? null
+    this.width = data.width ?? data.dimensions?.width ?? null
+    this.height = data.height ?? data.dimensions?.height ?? null
+    this.weight = data.weight ?? data.dimensions?.weight ?? null
   }
 
   get colors() {
@@ -126,23 +131,28 @@ export class ReviewResponse {
 export class ProductVariantResponse {
   /**
    * @param {Object} data
+   * @param {Object} parentData
    */
-  constructor(data = {}) {
+  constructor(data = {}, parentData = {}) {
     this.id = data.id || null
-    this.price = data.price ?? 0
+    this.price = data.price ?? parentData.price ?? 0
     this.stockQuantity = data.stockQuantity ?? 0
-    this.length = data.length ?? data.dimensions?.length ?? null
-    this.width = data.width ?? data.dimensions?.width ?? null
-    this.height = data.height ?? data.dimensions?.height ?? null
-    this.weight = data.weight ?? data.dimensions?.weight ?? null
-    this.material = resolveLocalizedValue(data, 'material')
-    this.color = resolveLocalizedValue(data, 'color')
-    this.warranty = resolveLocalizedValue(data, 'warranty')
-    this.supports3d = Boolean(data.supports3d)
+    this.length = data.length ?? data.dimensions?.length ?? parentData.length ?? parentData.dimensions?.length ?? null
+    this.width = data.width ?? data.dimensions?.width ?? parentData.width ?? parentData.dimensions?.width ?? null
+    this.height = data.height ?? data.dimensions?.height ?? parentData.height ?? parentData.dimensions?.height ?? null
+    this.weight = data.weight ?? data.dimensions?.weight ?? parentData.weight ?? parentData.dimensions?.weight ?? null
+    this.material = resolveLocalizedValue(data, 'material') || resolveLocalizedValue(parentData, 'material')
+    this.color = resolveLocalizedValue(data, 'color') || resolveLocalizedValue(parentData, 'color')
+    this.warranty = resolveLocalizedValue(data, 'warranty') || resolveLocalizedValue(parentData, 'warranty')
+    this.supports3d = Boolean(data.supports3d ?? parentData.supports3d)
     this.specifications = (() => {
       if (typeof data.specifications === 'object' && data.specifications) return data.specifications
       if (typeof data.specifications === 'string' && data.specifications.trim()) {
         try { return JSON.parse(data.specifications) } catch (err) {}
+      }
+      if (typeof parentData.specifications === 'object' && parentData.specifications) return parentData.specifications
+      if (typeof parentData.specifications === 'string' && parentData.specifications.trim()) {
+        try { return JSON.parse(parentData.specifications) } catch (err) {}
       }
       return {}
     })()
@@ -195,7 +205,7 @@ function buildCategoryTrail(category) {
 
 function normalizeVariants(data = {}) {
   if (Array.isArray(data.variants) && data.variants.length) {
-    return data.variants.map((variant) => new ProductVariantResponse(variant))
+    return data.variants.map((variant) => new ProductVariantResponse(variant, data))
   }
 
   const fallbackVariant = {
@@ -220,7 +230,7 @@ function normalizeVariants(data = {}) {
     return true
   })
 
-  return hasFallbackVariant ? [new ProductVariantResponse(fallbackVariant)] : []
+  return hasFallbackVariant ? [new ProductVariantResponse(fallbackVariant, data)] : []
 }
 
 function normalizeGallery(data = {}) {

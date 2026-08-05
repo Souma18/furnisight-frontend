@@ -1,5 +1,6 @@
 import { apiClient } from '@shared/lib/api/client'
 import { ROOM_TEMPLATES } from '@features/room3d/core/mockData'
+import { ProductVariantResponse } from '../products/products.model'
 
 /** Map nhan backend (label) -> type trong ROOM_TEMPLATES */
 const LABEL_TO_ROOM_TYPE = {
@@ -22,11 +23,13 @@ const ROOM_RECOMMENDATION_FILTERS = {
 
 export function normalizeRecommendation(item = {}, predictedCategorySlug = '') {
   const product = item.product && typeof item.product === 'object' ? item.product : {}
-  const variants = Array.isArray(item.variants)
+  const rawVariants = Array.isArray(item.variants)
     ? item.variants
     : Array.isArray(product.variants)
       ? product.variants
       : []
+  const variants = rawVariants.map((v) => new ProductVariantResponse(v, item))
+  
   const primaryVariant = variants[0] ?? null
   const id = item.productId ?? item.id ?? product.id ?? ''
   const variantId = item.variantId ?? item.defaultVariantId ?? primaryVariant?.id ?? null

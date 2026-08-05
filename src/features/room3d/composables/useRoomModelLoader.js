@@ -1,5 +1,7 @@
 import { computed, ref } from 'vue'
-import { Box3, Vector3 } from 'three'
+import { Box3, Vector3, Cache } from 'three'
+
+Cache.enabled = true
 import { PRODUCTS_3D } from '../core/mockData'
 import {
   applyColorToModel,
@@ -66,29 +68,35 @@ export function useRoomModelLoader({
     const size = originalBox.getSize(new Vector3())
 
     let fitScale
-    // When real-dimension calibration is active, prefer variant.dimensions (in cm)
-    const isRealMode = useRealDimensions?.value
-    if (isRealMode) {
-      const variant = product?.variants?.find(v => v.id === sceneItem.variantId)
-        || product?.variants?.find(v => v.modelUrl || v.supports3d)
-      const dims = variant?.dimensions // { length, width, height } in cm
-      if (dims && dims.length > 0 && dims.width > 0 && dims.height > 0) {
-        // Convert cm → scene units (1 unit = 1 m)
-        const targetW = dims.length * 0.01
-        const targetH = dims.height * 0.01
-        const targetD = dims.width * 0.01
-        const sx = size.x > 0.001 ? targetW / size.x : 1
-        const sy = size.y > 0.001 ? targetH / size.y : 1
-        const sz = size.z > 0.001 ? targetD / size.z : 1
-        fitScale = Math.cbrt(sx * sy * sz) // geometric mean preserves proportions
-      } else {
-        // Fall back to fallback box when no variant dimensions available
-        const sx = fallback.width / Math.max(size.x || 1, 0.001)
-        const sy = fallback.height / Math.max(size.y || 1, 0.001)
-        const sz = fallback.depth / Math.max(size.z || 1, 0.001)
-        fitScale = Math.min(sx, sy, sz) * 0.98
-      }
+
+    const variant = product?.variants?.find(v => v.id === sceneItem.variantId)
+      || product?.variants?.find(v => v.modelUrl || v.supports3d)
+    
+    // 1st priority: variant-level dimensions
+    const rLength = variant?.length ?? variant?.dimensions?.length
+    const rWidth = variant?.width ?? variant?.dimensions?.width
+    const rHeight = variant?.height ?? variant?.dimensions?.height
+
+    // 2nd priority: product-level dimensions (fallback when variant has no dims)
+    const pLength = product?.length ?? product?.dimensions?.length
+    const pWidth = product?.width ?? product?.dimensions?.width
+    const pHeight = product?.height ?? product?.dimensions?.height
+
+    const finalLength = (rLength > 0 ? rLength : null) ?? (pLength > 0 ? pLength : null)
+    const finalWidth  = (rWidth  > 0 ? rWidth  : null) ?? (pWidth  > 0 ? pWidth  : null)
+    const finalHeight = (rHeight > 0 ? rHeight : null) ?? (pHeight > 0 ? pHeight : null)
+
+    if (finalLength > 0 && finalWidth > 0 && finalHeight > 0) {
+      // Convert cm → scene units (1 unit = 1 m)
+      const targetW = finalWidth * 0.01
+      const targetH = finalHeight * 0.01
+      const targetD = finalLength * 0.01
+      const sx = size.x > 0.001 ? targetW / size.x : 1
+      const sy = size.y > 0.001 ? targetH / size.y : 1
+      const sz = size.z > 0.001 ? targetD / size.z : 1
+      fitScale = Math.cbrt(sx * sy * sz) // geometric mean preserves proportions
     } else {
+      // 3rd priority: fallback box when no dimensions available at all
       const sx = fallback.width / Math.max(size.x || 1, 0.001)
       const sy = fallback.height / Math.max(size.y || 1, 0.001)
       const sz = fallback.depth / Math.max(size.z || 1, 0.001)
