@@ -12,8 +12,20 @@ import { adminApi } from '@shared/lib/api/services'
 import { useAdminListPage } from '../../composables/useAdminListPage'
 import { PriceFormatter } from '@shared/lib/formatters'
 import { buildProductPayload, mapProductToForm } from '../../composables/useAdminProductForm'
+import { onMounted } from 'vue'
 
-const { items, search, currentPage, pagination, load, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi))
+const categoryOptions = ref([])
+const extraFilters = ref({ category: '' })
+const { items, search, currentPage, pagination, load, ui } = useAdminListPage(adminApi.fetchProducts.bind(adminApi), extraFilters)
+
+onMounted(async () => {
+  try {
+    const res = await adminApi.fetchCategories({ size: 100 })
+    categoryOptions.value = Array.isArray(res.data) ? res.data : res.data?.items || []
+  } catch (err) {
+    console.error('Failed to load categories', err)
+  }
+})
 const deleteTarget = ref(null)
 const deleting = ref(false)
 const statusTarget = ref(null)
@@ -144,7 +156,12 @@ async function confirmStatusChange() {
       <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('addProd')"><AppIcon name="plus" :size="15" />Thêm sản phẩm</AppButton>
     </template>
   </AdminPageHeader>
-  <AdminFilterBar v-model:search="search" placeholder="Tìm sản phẩm theo tên hoặc SKU..." />
+  <AdminFilterBar v-model:search="search" placeholder="Tìm sản phẩm theo tên hoặc SKU...">
+    <select v-model="extraFilters.category" class="cat-filter">
+      <option value="">Tất cả danh mục</option>
+      <option v-for="cat in categoryOptions" :key="cat.id" :value="cat.name">{{ cat.name }}</option>
+    </select>
+  </AdminFilterBar>
 
   <AdminDataTable :columns="columns" :rows="productRows">
     <template #cell-name="{ row }">
@@ -274,5 +291,17 @@ async function confirmStatusChange() {
 .stock-low {
   color: var(--red);
   font-weight: 600;
+}
+
+.cat-filter {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  min-width: 160px;
 }
 </style>

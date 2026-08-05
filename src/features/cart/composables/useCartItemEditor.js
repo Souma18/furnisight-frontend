@@ -61,14 +61,40 @@ export function useCartItemEditor(items, updateItem) {
 
   watch(
     () => activeDraft.value?.selectedColor,
-    () => {
-      if (!activeItem.value || !activeDraft.value) return
+    (newColor) => {
+      if (!activeItem.value || !activeDraft.value || !newColor) return
 
-      const nextSizes = getVariantOptions(activeItem.value, 'sizes')
-      if (!nextSizes.length) return
+      const variants = activeItem.value.variants || []
+      const currentSize = activeDraft.value.selectedSize
 
-      if (!nextSizes.includes(activeDraft.value.selectedSize)) {
-        activeDraft.value.selectedSize = nextSizes[0]
+      if (currentSize) {
+        const isValid = variants.some(v => v.color === newColor && variantSizeLabel(v) === currentSize)
+        if (!isValid) {
+          const validVariant = variants.find(v => v.color === newColor)
+          if (validVariant) {
+            activeDraft.value.selectedSize = variantSizeLabel(validVariant)
+          }
+        }
+      }
+    },
+  )
+
+  watch(
+    () => activeDraft.value?.selectedSize,
+    (newSize) => {
+      if (!activeItem.value || !activeDraft.value || !newSize) return
+
+      const variants = activeItem.value.variants || []
+      const currentColor = activeDraft.value.selectedColor
+
+      if (currentColor) {
+        const isValid = variants.some(v => variantSizeLabel(v) === newSize && v.color === currentColor)
+        if (!isValid) {
+          const validVariant = variants.find(v => variantSizeLabel(v) === newSize)
+          if (validVariant) {
+            activeDraft.value.selectedColor = validVariant.color
+          }
+        }
       }
     },
   )

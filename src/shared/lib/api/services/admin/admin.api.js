@@ -52,6 +52,22 @@ class AdminApi {
     return apiClient.get('/admin/categories/icon-options')
   }
 
+  fetchRoomTypes(params) {
+    return apiClient.get('/admin/room-types', { params })
+  }
+
+  createRoomType(payload) {
+    return apiClient.post('/admin/room-types', payload)
+  }
+
+  updateRoomType(id, payload) {
+    return apiClient.put(`/admin/room-types/${id}`, payload)
+  }
+
+  deleteRoomType(id) {
+    return apiClient.delete(`/admin/room-types/${id}`)
+  }
+
   fetchProducts(params) {
     return apiClient.get('/admin/products', { params })
   }

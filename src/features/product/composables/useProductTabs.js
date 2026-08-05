@@ -27,6 +27,31 @@ export function useProductTabs(productRef, activeVariantRef) {
       rows.push({ key: t('productDetail.spec.keys.stock'), value: t('productDetail.spec.values.items', { count: product.stock }) })
     }
 
+    const rawSpecs = variant?.specifications || product?.specifications
+    if (rawSpecs && typeof rawSpecs === 'object') {
+      // Handle the 'details' string format from seeded data
+      if (typeof rawSpecs.details === 'string') {
+        const lines = rawSpecs.details.split('\n')
+        lines.forEach(line => {
+          const parts = line.split(':')
+          if (parts.length >= 2) {
+            const name = parts[0].trim()
+            const val = parts.slice(1).join(':').trim()
+            if (name && val) {
+              rows.push({ key: name, value: val })
+            }
+          }
+        })
+      }
+      
+      // Handle arbitrary key-value pairs
+      Object.entries(rawSpecs).forEach(([k, v]) => {
+        if (k !== 'details' && v) {
+          rows.push({ key: k, value: String(v) })
+        }
+      })
+    }
+
     return rows
   })
 

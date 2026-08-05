@@ -34,6 +34,22 @@ export function resolveLineImageUrl(item = {}) {
 }
 
 export function buildOrderItemPayload(item = {}) {
+  const snapshot = item.productSnapshot || {}
+  let dimensions = item.dimensions || item.product?.dimensions || snapshot.dimensions || null
+  
+  if (!dimensions && item.length != null && item.width != null && item.height != null) {
+    dimensions = {
+      length: item.length,
+      width: item.width,
+      height: item.height,
+      weight: item.weight,
+    }
+  }
+
+  const warranty = item.warranty || item.product?.warranty || snapshot.warranty || ''
+  const color = item.color || item.selectedColor || snapshot.color || ''
+  const material = item.material || snapshot.material || ''
+  
   return {
     productId: item.productId,
     variantId: item.variantId || null,
@@ -43,6 +59,10 @@ export function buildOrderItemPayload(item = {}) {
     price: Number(item.price) || 0,
     quantity: clampPurchaseQuantity(item.qty ?? item.quantity, item),
     imageUrl: resolveLineImageUrl(item),
+    color,
+    material,
+    warranty,
+    dimensions,
   }
 }
 

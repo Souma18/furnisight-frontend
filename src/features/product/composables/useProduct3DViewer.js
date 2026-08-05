@@ -1,4 +1,5 @@
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import {
   Scene,
   PerspectiveCamera,
@@ -13,6 +14,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 
 export function useProduct3DViewer(props) {
+  const { t } = useI18n()
   const viewportRef = ref(null)
   const isLoading = ref(false)
   const loadError = ref('')

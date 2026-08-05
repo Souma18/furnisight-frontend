@@ -172,8 +172,8 @@ const orderStatusClass = computed(() => {
                   {{ item.productSnapshot?.productName || t('account.orders.product') }}
                 </AppButton>
                 <p v-else class="order-line-name">{{ item.productSnapshot?.productName || t('account.orders.product') }}</p>
-                <p v-if="item.productSnapshot?.color || item.productSnapshot?.material" class="order-line-var">
-                  {{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}
+                <p v-if="item.variantLabel" class="order-line-var">
+                  {{ item.variantLabel }}
                 </p>
               </div>
               <span class="order-line-qty">{{ t('account.orders.quantityShort', { count: item.quantity }) }}</span>

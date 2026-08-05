@@ -125,7 +125,7 @@ watch(() => props.orderCode, load, { immediate: true })
           </span>
           <div>
             <strong>{{ itemName(item) }}</strong>
-            <p>{{ [item.productSnapshot?.color, item.productSnapshot?.material].filter(Boolean).join(' - ') }}</p>
+            <p v-if="item.variantLabel">{{ item.variantLabel }}</p>
           </div>
           <span>SL: {{ item.quantity }}</span>
           <strong>{{ formatMoney(item.price * item.quantity) }}</strong>

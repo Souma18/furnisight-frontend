@@ -7,6 +7,7 @@ export const CATEGORY_FORM_DEFAULTS = {
   visible: true,
   description: '',
   imageUrl: '',
+  roomTypeId: '',
 }
 
 export function mapCategoryToForm(row) {
@@ -18,6 +19,7 @@ export function mapCategoryToForm(row) {
     visible: row.visible !== false,
     description: row.description ?? '',
     imageUrl: row.imageUrl ?? '',
+    roomTypeId: row.roomTypeId ?? '',
   }
 }
 
@@ -29,5 +31,6 @@ export function buildCategoryPayload(form) {
     visible: form.visible,
     description: form.description,
     imageUrl: form.imageUrl,
+    roomTypeId: form.roomTypeId,
   }
 }

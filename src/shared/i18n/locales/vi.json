@@ -901,15 +901,15 @@
       "detected": "Nhận diện"
     },
     "roomTypes": {
+      "phong-ngu": "Phòng ngủ",
+      "phong-khach": "Phòng khách",
+      "phong-tam": "Phòng tắm",
+      "phong-bep": "Nhà bếp",
       "bedroom": "Phòng ngủ",
       "living": "Phòng khách",
       "livingroom": "Phòng khách",
       "bathroom": "Phòng tắm",
-      "kitchen": "Nhà bếp",
-      "dining": "Phòng ăn",
-      "diningroom": "Phòng ăn",
-      "office": "Phòng làm việc",
-      "apartment": "Toàn bộ căn hộ"
+      "kitchen": "Nhà bếp"
     }
   },
   "productDetail": {

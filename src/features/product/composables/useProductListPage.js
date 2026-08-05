@@ -27,6 +27,7 @@ function mapCategoryToOption(raw = {}) {
     name: category.name,
     parentId: category.parentId,
     path: category.path,
+    roomTypeId: category.roomTypeId,
     productCount,
     count: productCount,
   }
@@ -159,12 +160,18 @@ export function useProductListPage() {
   async function loadSidebarCategories(rootSlug) {
     try {
       if (!rootSlug || rootSlug === 'all') {
-        sidebarCategories.value = allCategories.value.filter((category) => category.parentId)
+        sidebarCategories.value = allCategories.value.filter((category) => !category.parentId)
         return
       }
 
-      const { data } = await productsApi.getSubcategories(rootSlug)
-      sidebarCategories.value = (Array.isArray(data) ? data : []).map(mapCategoryToOption)
+      const roomType = dynamicQuickFilters.value.find((rt) => rt.slug === rootSlug)
+      if (roomType && roomType.id && roomType.slug !== 'all') {
+        sidebarCategories.value = allCategories.value.filter(
+          (category) => category.roomTypeId === roomType.id
+        )
+      } else {
+        sidebarCategories.value = []
+      }
     } catch (e) {
       sidebarCategories.value = []
     }
@@ -182,7 +189,7 @@ export function useProductListPage() {
     selectedCategory.value = 'all'
     selectedSubcategory.value = 'all'
     currentPage.value = 1
-    loadSidebarCategories('all').finally(() => {
+    loadSidebarCategories(selectedRoomType.value).finally(() => {
       suppressCategoryWatch.value = false
     })
     requestList()

@@ -1028,3 +1028,13 @@
     padding-right: 16px;
   }
 }
+
+/* Hide scrollbar for .pd-thumbs */
+.pd-thumbs::-webkit-scrollbar {
+    display: none;
+}
+.pd-thumbs {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+

@@ -42,13 +42,11 @@ export function useHomePage() {
 
   useRevealOnScroll('.fade-up')
 
-  async function loadCategories() {
+  async function loadRoomTypes() {
     try {
       const response = await productsApi.getRoomTypes()
       const data = response?.data
-      const items = Array.isArray(data)
-        ? data
-        : data?.items ?? []
+      const items = Array.isArray(data) ? data : data?.items ?? []
 
       categories.value = items.map((item) => {
         const category = new RoomTypeResponse(item)
@@ -158,7 +156,7 @@ export function useHomePage() {
 
   watch(activeCategoryId, loadProductsForCategory)
   watch(locale, async () => {
-    await loadCategories()
+    await loadRoomTypes()
     await loadCombos()
     await loadProductsForCategory(activeCategoryId.value)
     await loadTopReviews()
@@ -168,7 +166,7 @@ export function useHomePage() {
   })
 
   onMounted(() => {
-    loadCategories()
+    loadRoomTypes()
     loadCombos()
     loadTopReviews()
 

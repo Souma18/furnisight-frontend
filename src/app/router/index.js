@@ -87,6 +87,16 @@ const routes = [
       { path: 'stats', name: 'admin-stats', component: () => import('@features/admin/pages/views/AdminStatsPage.vue') },
       { path: 'users', name: 'admin-users', component: () => import('@features/admin/pages/views/AdminUsersPage.vue'), meta: { permission: 'ACCOUNT_MANAGE' } },
       { path: 'categories', name: 'admin-categories', component: () => import('@features/admin/pages/views/AdminCategoriesPage.vue'), meta: { permission: 'PRODUCT_MANAGE' } },
+      {
+        path: 'room-types',
+        name: 'admin-room-types',
+        component: () => import('@/features/admin/pages/views/AdminRoomTypesPage.vue'),
+        meta: { 
+          title: 'Loại phòng',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      },
       { path: 'products', name: 'admin-products', component: () => import('@features/admin/pages/views/AdminProductsPage.vue'), meta: { permission: 'PRODUCT_MANAGE' } },
       { path: 'orders', name: 'admin-orders', component: () => import('@features/admin/pages/views/AdminOrdersPage.vue'), meta: { permission: 'ORDER_MANAGE' } },
       { path: 'orders/:orderCode', name: 'admin-order-detail', component: () => import('@features/admin/pages/views/AdminOrderDetailPage.vue'), props: true, meta: { permission: 'ORDER_MANAGE' } },

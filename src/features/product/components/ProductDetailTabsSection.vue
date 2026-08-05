@@ -86,7 +86,6 @@ function updateReviewField(field, value) {
     </div>
     <div v-else-if="activeTab === 'spec'" class="pd-section-layout pd-spec">
       <div class="spec-table">
-        <div class="spec-head">{{ t('productDetail.spec.full') }}</div>
         <div v-for="row in specsRows" :key="`det-${row.key}`" class="spec-row">
           <div class="spec-key">{{ row.key }}</div>
           <div class="spec-val">{{ row.value }}</div>

@@ -4,6 +4,9 @@ export const PRODUCT_MODEL_MAX_SIZE = 100 * 1024 * 1024
 
 export const PRODUCT_FORM_DEFAULTS = {
   name: '',
+  description: '',
+  features: 'Thiết kế hiện đại, sang trọng\nChất liệu cao cấp, bền bỉ\nDễ dàng vệ sinh và bảo quản',
+  specifications: '  "Chất liệu khung": "",\n  "Chất liệu bọc": "",\n  "Trọng lượng (kg)": "",\n  "Tải trọng tối đa (kg)": "",\n  "Xuất xứ": "",\n  "Hướng dẫn bảo quản": ""',
   category: 'Phòng ngủ',
   sku: '',
   status: 'Còn hàng',
@@ -27,6 +30,8 @@ export const PRODUCT_FORM_DEFAULTS = {
       lowStockThreshold: 5,
       imageUrls: [],
       imageUploads: [],
+      features: '',
+      specifications: '{\n  \n}',
     },
   ],
 }
@@ -47,9 +52,17 @@ const PRODUCT_STATUS_TO_LABEL = {
 export function mapProductToForm(row) {
   if (!row) return { ...PRODUCT_FORM_DEFAULTS }
   const productImages = normalizeImageUrls(row).slice(0, 1)
+  let specStr = row.specifications ? JSON.stringify(row.specifications, null, 2) : ''
+  if (specStr.startsWith('{') && specStr.endsWith('}')) {
+    specStr = specStr.substring(1, specStr.length - 1).trim()
+  }
+
   return {
     ...PRODUCT_FORM_DEFAULTS,
     name: row.name ?? '',
+    description: row.description ?? '',
+    features: Array.isArray(row.features) ? row.features.join('\n') : '',
+    specifications: specStr,
     category: row.category ?? 'Phòng ngủ',
     sku: row.sku ?? '',
     status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
@@ -327,10 +340,39 @@ export function buildProductPayload(form) {
       modelUrl: variant.modelUrl || '',
       modelMediaId: variant.modelMediaId || '',
       supports3d: Boolean(variant.modelUrl && variant.supports3d),
+      features: String(variant.features || '').split('\n').map(f => f.trim()).filter(Boolean),
+      specifications: (() => {
+        if (!variant.specifications || !variant.specifications.trim()) return ""
+        let specStr = variant.specifications.trim()
+        if (!specStr.startsWith('{')) specStr = `{\n${specStr}\n}`
+        try {
+          JSON.parse(specStr)
+          return specStr
+        } catch {
+          return ""
+        }
+      })(),
     }
   })
+  let specsObj = ""
+  if (form.specifications && form.specifications.trim()) {
+    let specStr = form.specifications.trim()
+    if (!specStr.startsWith('{')) {
+      specStr = `{\n${specStr}\n}`
+    }
+    try {
+      JSON.parse(specStr)
+      specsObj = specStr
+    } catch (err) {
+      specsObj = ""
+    }
+  }
+
   return {
     name: form.name,
+    description: form.description,
+    features: String(form.features || '').split('\n').map(f => f.trim()).filter(Boolean),
+    specifications: specsObj,
     category: form.category,
     sku: form.sku,
     status: PRODUCT_STATUS_TO_API[form.status] ?? form.status,
@@ -380,6 +422,8 @@ export function createEmptyVariant(seed = {}) {
     modelUploadProgress: seed.modelUploadProgress ?? 0,
     modelUploading: seed.modelUploading ?? false,
     modelUploadError: seed.modelUploadError ?? '',
+    features: Array.isArray(seed.features) ? seed.features.join('\n') : (seed.features ?? ''),
+    specifications: seed.specifications && typeof seed.specifications === 'object' ? JSON.stringify(seed.specifications, null, 2) : (seed.specifications ?? '{\n  \n}'),
   }
 }
 
@@ -393,6 +437,19 @@ export function validateProductForm(form) {
   if (!sku) {
     errors.sku = 'SKU sản phẩm là bắt buộc.'
   }
+
+  if (form.specifications && form.specifications.trim()) {
+    let specStr = form.specifications.trim()
+    if (!specStr.startsWith('{')) {
+      specStr = `{\n${specStr}\n}`
+    }
+    try {
+      JSON.parse(specStr)
+    } catch (err) {
+      errors.specifications = 'Thông số kỹ thuật không hợp lệ. Vui lòng kiểm tra lại cú pháp (dấu ngoặc kép, dấu phẩy,...).'
+    }
+  }
+
   form.errors = errors
 
   const variants = normalizeVariants(form.variants, form)
