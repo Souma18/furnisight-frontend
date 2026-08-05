@@ -17,10 +17,12 @@ export function createDefaultProductFilters() {
 
 export function parseProductListQueryPreset(query = {}) {
   const qCategory = String(query.category ?? '').trim()
+  const qRoomType = String(query.roomType ?? '').trim()
   const qBreadcrumb = String(query.breadcrumb ?? '').trim()
   const qKeyword = String(query.q ?? '').trim()
 
   return {
+    selectedRoomType: qRoomType && qRoomType !== 'all' ? qRoomType : 'all',
     selectedCategory: qCategory && qCategory !== 'all'
       ? qCategory
       : qBreadcrumb && qBreadcrumb !== 'sản phẩm'
@@ -34,6 +36,7 @@ export function buildProductListParams({
   appliedFilters,
   saleOnly,
   searchKeyword,
+  selectedRoomType = 'all',
   selectedCategory,
   selectedSubcategory,
   sortBy,
@@ -48,6 +51,7 @@ export function buildProductListParams({
 
   return {
     ...(searchKeyword ? { q: searchKeyword } : {}),
+    ...(selectedRoomType !== 'all' ? { roomType: selectedRoomType } : {}),
     ...(categorySlug ? { category: categorySlug } : {}),
     sort: sortBy,
     ...(page > 0 ? { page } : {}),

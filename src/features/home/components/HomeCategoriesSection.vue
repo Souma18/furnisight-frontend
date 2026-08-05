@@ -12,7 +12,7 @@ const { t } = useI18n();
 function categoryRoute(category) {
   return {
     name: "products",
-    query: { category: category.slug || category.name },
+    query: { roomType: category.slug || category.name },
   };
 }
 

@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
-import { productsApi, CategoryResponse } from '@shared/lib/api/services'
+import { productsApi, CategoryResponse, RoomTypeResponse } from '@shared/lib/api/services'
 import { useLocaleStore } from '@shared/stores/localeStore'
 import { useI18n } from 'vue-i18n'
 import {
@@ -32,6 +32,20 @@ function mapCategoryToOption(raw = {}) {
   }
 }
 
+function mapRoomTypeToOption(raw = {}) {
+  const roomType = new RoomTypeResponse(raw)
+  const productCount = Number(roomType.productCount || 0)
+
+  return {
+    id: roomType.id,
+    slug: roomType.slug || roomType.id,
+    label: roomType.name,
+    name: roomType.name,
+    productCount,
+    count: productCount,
+  }
+}
+
 export function useProductListPage() {
   const route = useRoute()
   const wishlistStore = useWishlistStore()
@@ -43,6 +57,7 @@ export function useProductListPage() {
   const { show: showToast } = useToast()
   const searchKeyword = ref('')
   const currentPage = ref(1)
+  const selectedRoomType = ref('all')
   const selectedCategory = ref('all')
   const selectedSubcategory = ref('all')
   const sortBy = ref('popular')
@@ -66,6 +81,7 @@ export function useProductListPage() {
 
   const activeTags = computed(() => {
     const categoryTags = [
+      selectedRoomType.value !== 'all' ? selectedRoomType.value : '',
       categoryDisplayName(selectedCategory.value),
       categoryDisplayName(selectedSubcategory.value),
     ].filter(Boolean)
@@ -84,6 +100,7 @@ export function useProductListPage() {
 
   function parseQueryPreset() {
     const preset = parseProductListQueryPreset(route.query)
+    selectedRoomType.value = preset.selectedRoomType || 'all'
     applyCategorySelection(preset.selectedCategory)
     searchKeyword.value = preset.searchKeyword
     currentPage.value = 1
@@ -130,11 +147,9 @@ export function useProductListPage() {
 
   async function loadQuickFilters() {
     try {
-      const { data } = await productsApi.getRootCategories()
-      const chips = data.map((item) => {
-        const category = new CategoryResponse(item)
-        return { label: category.name, slug: category.slug ?? category.id }
-      })
+      const { data } = await productsApi.getRoomTypes()
+      const items = Array.isArray(data) ? data : data?.items ?? []
+      const chips = items.map(mapRoomTypeToOption)
       dynamicQuickFilters.value = [{ label: t('products.all'), slug: 'all' }, ...chips]
     } catch (e) {
       dynamicQuickFilters.value = [{ label: t('products.all'), slug: 'all' }]
@@ -163,10 +178,11 @@ export function useProductListPage() {
 
   function toggleCategory(chip) {
     suppressCategoryWatch.value = true
-    selectedCategory.value = selectedCategory.value === chip.slug ? 'all' : chip.slug
+    selectedRoomType.value = selectedRoomType.value === chip.slug ? 'all' : chip.slug
+    selectedCategory.value = 'all'
     selectedSubcategory.value = 'all'
     currentPage.value = 1
-    loadSidebarCategories(selectedCategory.value).finally(() => {
+    loadSidebarCategories('all').finally(() => {
       suppressCategoryWatch.value = false
     })
     requestList()
@@ -174,6 +190,7 @@ export function useProductListPage() {
 
   function selectSidebarCategory(id) {
     const slug = String(id).toLowerCase()
+    selectedRoomType.value = 'all'
     if (slug === 'all') {
       selectedSubcategory.value = 'all'
     } else {
@@ -192,6 +209,7 @@ export function useProductListPage() {
   function onClearFilters() {
     appliedFilters.value = createDefaultProductFilters()
     saleOnly.value = false
+    selectedRoomType.value = 'all'
     selectedCategory.value = 'all'
     selectedSubcategory.value = 'all'
     searchKeyword.value = ''
@@ -204,6 +222,7 @@ export function useProductListPage() {
       appliedFilters: appliedFilters.value,
       saleOnly: saleOnly.value,
       searchKeyword: searchKeyword.value,
+      selectedRoomType: selectedRoomType.value,
       selectedCategory: selectedCategory.value,
       selectedSubcategory: selectedSubcategory.value,
       sortBy: sortBy.value,
@@ -274,6 +293,21 @@ export function useProductListPage() {
   })
 
   const dynamicHero = computed(() => {
+    if (selectedRoomType.value !== 'all') {
+      const roomLabel = categoryDisplayName(selectedRoomType.value) || selectedRoomType.value
+
+      return {
+        breadcrumb: [t('nav.home'), t('nav.products'), roomLabel],
+        title: roomLabel,
+        subtitle: t('products.hero.dynamicSubtitle', { label: roomLabel.toLowerCase() }),
+        stats: [
+          { label: t('products.hero.stats.products'), value: total.value },
+          { label: t('products.hero.stats.colors'), value: facets.value.colors?.length || 0 },
+          { label: t('products.hero.stats.materials'), value: facets.value.materials?.length || 0 }
+        ]
+      }
+    }
+
     if (selectedCategory.value === 'all') {
       const categoryCount = sidebarCategories.value.length || facets.value.categories?.length || 0
 
@@ -338,7 +372,7 @@ export function useProductListPage() {
     loading,
     searchKeyword,
     currentPage,
-    selectedRootCategory: computed(() => selectedCategory.value),
+    selectedRootCategory: computed(() => selectedRoomType.value),
     selectedCategory: computed(() =>
       selectedSubcategory.value !== 'all' ? selectedSubcategory.value : selectedCategory.value
     ),

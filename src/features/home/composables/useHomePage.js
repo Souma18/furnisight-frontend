@@ -5,7 +5,7 @@ import { useToast } from '@shared/composables/useToast'
 import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useAuthStore } from '@features/auth/store/authStore'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
-import { CategoryResponse, ProductResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
+import { ProductResponse, RoomTypeResponse, productsApi, promotionsApi } from '@shared/lib/api/services'
 import { useLocaleStore } from '@shared/stores/localeStore'
 import { useComboCart } from '@features/promotions/composables/useComboCart'
 import { comboStockIssue } from '@features/promotions/lib/comboStock'
@@ -44,17 +44,16 @@ export function useHomePage() {
 
   async function loadCategories() {
     try {
-      const response = await productsApi.getRootCategories()
+      const response = await productsApi.getRoomTypes()
       const data = response?.data
       const items = Array.isArray(data)
         ? data
         : data?.items ?? []
 
       categories.value = items.map((item) => {
-        const category = new CategoryResponse(item)
+        const category = new RoomTypeResponse(item)
         return {
           ...category,
-          icon: category.iconUrl || 'sofa',
           count: t('home.categories.count', { count: category.productCount || 0 }),
         }
       })
@@ -112,7 +111,7 @@ export function useHomePage() {
 
     try {
       const { data } = await productsApi.getProducts({
-        category: selectedCategory.slug || selectedCategory.name,
+        roomType: selectedCategory.slug || selectedCategory.name,
         size: 8,
       })
       const rawProducts = Array.isArray(data) ? data : data?.items ?? []

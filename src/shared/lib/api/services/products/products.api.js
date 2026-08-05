@@ -39,6 +39,10 @@ class ProductsApi {
     return apiClient.get(`${catalogBaseUrl}/categories/roots`)
   }
 
+  getRoomTypes() {
+    return apiClient.get(`${catalogBaseUrl}/room-types`)
+  }
+
   getSubcategories(slugOrId) {
     return apiClient.get(`${catalogBaseUrl}/categories/${slugOrId}/subcategories`)
   }

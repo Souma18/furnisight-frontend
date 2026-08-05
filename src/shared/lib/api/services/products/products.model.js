@@ -92,6 +92,22 @@ export class CategoryResponse {
   }
 }
 
+export class RoomTypeResponse {
+  /**
+   * @param {Object} data
+   */
+  constructor(data = {}) {
+    this.id = data.id || null
+    this.slug = data.slug || ''
+    this.name = resolveLocalizedValue(data, 'name', ['label'])
+    this.label = resolveLocalizedValue(data, 'label', ['name']) || this.name
+    this.description = resolveLocalizedValue(data, 'description')
+    this.productCount = data.productCount ?? 0
+    this.imageUrl = data.imageUrl || data.image || ''
+    this.visible = data.visible !== false
+  }
+}
+
 export class ReviewResponse {
   /**
    * @param {Object} data
