@@ -38,3 +38,7 @@ temp/
 # Test artifacts
 test-results/
 playwright-report/
+
+# 3D Models
+public/models/model_*.glb
+public/models/*.glb
