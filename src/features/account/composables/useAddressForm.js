@@ -17,7 +17,7 @@ function normalizeAddressType(type) {
     .replace(/[_\s-]+/g, '')
 }
 
-export function useAddressForm(emit) {
+export function useAddressForm(notify) {
   const addressStore = useAddressStore()
   const showModal = ref(false)
   const provinces = ref([])
@@ -54,7 +54,7 @@ export function useAddressForm(emit) {
       addressApiUnavailable.value = false
     } catch (_error) {
       addressApiUnavailable.value = true
-      emit('notify', t('account.address.addressDataError'), 'error')
+      notify(t('account.address.addressDataError'), 'error')
     } finally {
       loadingProvince.value = false
     }
@@ -77,7 +77,7 @@ export function useAddressForm(emit) {
     try {
       wards.value = await getWardsByProvince(form.provinceCode)
     } catch (_error) {
-      emit('notify', t('account.address.wardLoadError'), 'error')
+      notify(t('account.address.wardLoadError'), 'error')
     } finally {
       loadingWard.value = false
     }
@@ -94,13 +94,13 @@ export function useAddressForm(emit) {
     if (isSubmitting.value) return
 
     if (!form.fullName || !form.phone || !form.detail || !form.provinceCode || !form.wardCode) {
-      emit('notify', t('account.address.requiredError'), 'error')
+      notify(t('account.address.requiredError'), 'error')
       return
     }
 
     const phoneRegex = /^(0|84)(3|5|7|8|9)[0-9]{8}$/
     if (!phoneRegex.test(form.phone)) {
-      emit('notify', t('account.address.invalidPhone'), 'error')
+      notify(t('account.address.invalidPhone'), 'error')
       return
     }
 
@@ -108,10 +108,10 @@ export function useAddressForm(emit) {
     isSubmitting.value = true
     try {
       await addressStore.addAddress({ ...form })
-      emit('notify', form.isDefault ? t('account.address.savedDefault') : t('account.address.saved'))
+      notify(form.isDefault ? t('account.address.savedDefault') : t('account.address.saved'))
       showModal.value = false
     } catch (error) {
-      emit('notify', t('account.address.saveError'), 'error')
+      notify(t('account.address.saveError'), 'error')
     } finally {
       isSubmitting.value = false
     }
@@ -120,16 +120,16 @@ export function useAddressForm(emit) {
   async function setAsDefault(addressId) {
     try {
       await addressStore.setDefaultAddress(addressId)
-      emit('notify', t('account.address.defaultUpdated'))
+      notify(t('account.address.defaultUpdated'))
     } catch (error) {
-      emit('notify', error.response?.data?.message || t('account.address.defaultError'), 'error')
+      notify(error.response?.data?.message || t('account.address.defaultError'), 'error')
     }
   }
 
   async function deleteAddress(addressId) {
     if (!confirm(t('account.address.deleteConfirm'))) return
     await addressStore.deleteAddress(addressId)
-    emit('notify', t('account.address.deleted'))
+    notify(t('account.address.deleted'))
   }
 
   function getTypeLabel(type) {

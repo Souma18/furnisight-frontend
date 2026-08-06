@@ -153,10 +153,10 @@ export class ProductVariantResponse {
     this.id = data.id || null
     this.price = data.price ?? parentData.price ?? 0
     this.stockQuantity = data.stockQuantity ?? 0
-    this.length = data.length ?? data.dimensions?.length ?? parentData.length ?? parentData.dimensions?.length ?? null
-    this.width = data.width ?? data.dimensions?.width ?? parentData.width ?? parentData.dimensions?.width ?? null
-    this.height = data.height ?? data.dimensions?.height ?? parentData.height ?? parentData.dimensions?.height ?? null
-    this.weight = data.weight ?? data.dimensions?.weight ?? parentData.weight ?? parentData.dimensions?.weight ?? null
+    this.length = data.length || data.dimensions?.length || parentData.length || parentData.dimensions?.length || null
+    this.width = data.width || data.dimensions?.width || parentData.width || parentData.dimensions?.width || null
+    this.height = data.height || data.dimensions?.height || parentData.height || parentData.dimensions?.height || null
+    this.weight = data.weight || data.dimensions?.weight || parentData.weight || parentData.dimensions?.weight || null
     this.material = resolveLocalizedValue(data, 'material') || resolveLocalizedValue(parentData, 'material')
     this.color = resolveLocalizedValue(data, 'color') || resolveLocalizedValue(parentData, 'color')
     this.warranty = resolveLocalizedValue(data, 'warranty') || resolveLocalizedValue(parentData, 'warranty')

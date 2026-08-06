@@ -160,7 +160,7 @@ export function useAdminModal() {
       email: payload?.email ?? '',
       role: payload?.role ?? 'Khách hàng',
       roleId: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
-      accountStatus: payload?.status === 'blocked' || payload?.status === 'banned' ? 'BANNED' : 'ACTIVE',
+      accountStatus: ['blocked', 'banned', 'locked'].includes(String(payload?.status || '').toLowerCase()) ? 'BANNED' : 'ACTIVE',
       password: '',
       orderStatus: getNextOrderStatusLabel(payload),
       trackingCode: resolveTrackingCode(payload),
@@ -399,7 +399,7 @@ export function useAdminModal() {
           assertActionResult(await adminApi.updateAdminUserRole(user.id, form.roleId, 'ASSIGN'))
         }
 
-        const previousStatus = user.status === 'blocked' || user.status === 'banned' ? 'BANNED' : 'ACTIVE'
+        const previousStatus = ['blocked', 'banned', 'locked'].includes(String(user.status || '').toLowerCase()) ? 'BANNED' : 'ACTIVE'
         if (form.accountStatus && form.accountStatus !== previousStatus) {
           assertActionResult(await adminApi.updateAdminUserStatus(user.id, form.accountStatus))
         }

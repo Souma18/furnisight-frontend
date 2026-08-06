@@ -440,6 +440,7 @@ watch(
         <div class="mform-group">
           <label class="mfl">Danh mục</label>
           <select v-model="form.category" class="mfi">
+            <option value="">-- Chọn danh mục --</option>
             <option
               v-for="category in categoryOptions"
               :key="category.id"
@@ -447,10 +448,13 @@ watch(
             >
               {{ category.name }}
             </option>
-            <option v-if="!categoryOptions.length" value="">
-              Chưa có danh mục
-            </option>
           </select>
+          <small
+            v-if="form.errors?.category"
+            class="variant-field-error"
+            style="color: var(--red)"
+            >{{ form.errors.category }}</small
+          >
         </div>
       </div>
       <div class="mform-row">

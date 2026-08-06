@@ -6,7 +6,7 @@ function buildCartLineId(raw = {}) {
 }
 
 function buildDimensionLabel(raw = {}) {
-  const dims = [raw.length, raw.width, raw.height].filter((value) => value != null && value !== '')
+  const dims = [raw.length, raw.width, raw.height].filter((value) => value != null && value !== '' && Number(value) !== 0)
   return dims.length === 3 ? `${dims.join(' × ')} cm` : ''
 }
 
@@ -41,19 +41,23 @@ export function resolveCartImageUrl(raw = {}) {
   return imageCandidates.find(Boolean) || ''
 }
 
-function normalizeVariant(raw = {}) {
+function normalizeVariant(raw = {}, parent = {}) {
+  const length = raw.length || parent.length || null
+  const width = raw.width || parent.width || null
+  const height = raw.height || parent.height || null
+
   return {
     id: raw.id || null,
     color: raw.color || '',
-    size: buildDimensionLabel(raw),
-    price: raw.price ?? null,
-    stockQuantity: raw.stockQuantity ?? null,
-    length: raw.length ?? null,
-    width: raw.width ?? null,
-    height: raw.height ?? null,
-    weight: raw.weight ?? null,
-    material: raw.material || '',
-    warranty: raw.warranty || '',
+    size: buildDimensionLabel({ length, width, height }),
+    price: raw.price ?? parent.price ?? null,
+    stockQuantity: raw.stockQuantity ?? parent.stockQuantity ?? null,
+    length,
+    width,
+    height,
+    weight: raw.weight || parent.weight || null,
+    material: raw.material || parent.material || '',
+    warranty: raw.warranty || parent.warranty || '',
   }
 }
 
@@ -78,10 +82,10 @@ function normalizeTopLevel(raw = {}, activeVariant = null) {
   return {
     price: raw.price ?? activeVariant?.price ?? 0,
     stockQuantity: raw.stockQuantity ?? activeVariant?.stockQuantity ?? null,
-    length: raw.length ?? activeVariant?.length ?? null,
-    width: raw.width ?? activeVariant?.width ?? null,
-    height: raw.height ?? activeVariant?.height ?? null,
-    weight: raw.weight ?? activeVariant?.weight ?? null,
+    length: raw.length || activeVariant?.length || null,
+    width: raw.width || activeVariant?.width || null,
+    height: raw.height || activeVariant?.height || null,
+    weight: raw.weight || activeVariant?.weight || null,
     color: raw.color || activeVariant?.color || '',
     material: raw.material || activeVariant?.material || '',
     warranty: raw.warranty || activeVariant?.warranty || '',
@@ -104,7 +108,7 @@ export class CartResponse {
 export class CartItemResponse {
   constructor(raw = {}) {
     this.variants = Array.isArray(raw.variants)
-      ? raw.variants.map((variant) => normalizeVariant(variant))
+      ? raw.variants.map((variant) => normalizeVariant(variant, raw))
       : []
 
     const activeVariant = resolveActiveVariant(raw, this.variants)
@@ -117,7 +121,7 @@ export class CartItemResponse {
     this.room3dProductId = raw.room3dProductId ?? null
     this.name = raw.name || raw.productName || ''
     this.slug = raw.slug || ''
-    this.categoryLabel = raw.categoryLabel || 'Sản phẩm'
+    this.categoryLabel = raw.categoryLabel || ''
     this.imageUrl = resolveCartImageUrl(raw)
     this.imageFallback = raw.imageFallback || ''
     this.emoji = raw.emoji || ''

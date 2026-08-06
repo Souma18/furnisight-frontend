@@ -7,7 +7,7 @@ export const PRODUCT_FORM_DEFAULTS = {
   description: '',
   features: 'Thiết kế hiện đại, sang trọng\nChất liệu cao cấp, bền bỉ\nDễ dàng vệ sinh và bảo quản',
   specifications: '  "Chất liệu khung": "",\n  "Chất liệu bọc": "",\n  "Trọng lượng (kg)": "",\n  "Tải trọng tối đa (kg)": "",\n  "Xuất xứ": "",\n  "Hướng dẫn bảo quản": ""',
-  category: 'Phòng ngủ',
+  category: '',
   sku: '',
   status: 'Còn hàng',
   imageUrls: [],
@@ -63,7 +63,7 @@ export function mapProductToForm(row) {
     description: row.description ?? '',
     features: Array.isArray(row.features) ? row.features.join('\n') : '',
     specifications: specStr,
-    category: row.category ?? 'Phòng ngủ',
+    category: row.category ?? '',
     sku: row.sku ?? '',
     status: row.statusLabel ?? PRODUCT_STATUS_TO_LABEL[String(row.status || '').toUpperCase()] ?? 'Còn hàng',
     imageUrls: productImages,
@@ -436,6 +436,10 @@ export function validateProductForm(form) {
   const sku = String(form.sku || '').trim()
   if (!sku) {
     errors.sku = 'SKU sản phẩm là bắt buộc.'
+  }
+  const category = String(form.category || '').trim()
+  if (!category) {
+    errors.category = 'Vui lòng chọn danh mục cho sản phẩm.'
   }
 
   if (form.specifications && form.specifications.trim()) {

@@ -183,6 +183,9 @@ export function useCheckoutOrder({
 
     if (!order) return null
 
+    // Đơn hàng đã tạo thành công trên backend -> Xóa ngay các sản phẩm này khỏi giỏ hàng
+    await removeOrderedLines(linesSnapshot)
+
     if (checkoutState.selectedPaymentId.value === 'vnpay') {
       const redirected = await redirectToVnpay(order, linesSnapshot)
       return redirected ? order : null
@@ -195,7 +198,6 @@ export function useCheckoutOrder({
       address: selectedAddress.value,
     })
     showSuccess.value = true
-    await removeOrderedLines(linesSnapshot)
 
     return order
   }

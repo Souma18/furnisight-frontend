@@ -44,7 +44,8 @@ function roundedRating(rating) {
 
 function getDimensions(variant) {
   if (!variant) return "";
-  return `${variant.length || 0} x ${variant.width || 0} x ${variant.height || 0} cm`;
+  if (!variant.length || !variant.width || !variant.height) return "";
+  return `${variant.length} x ${variant.width} x ${variant.height} cm`;
 }
 
 const panPos = reactive({});

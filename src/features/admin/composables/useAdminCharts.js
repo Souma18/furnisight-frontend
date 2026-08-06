@@ -94,17 +94,38 @@ export function useAdminCharts() {
   function renderDoughnut(canvas, labels, data, colors = [GREEN, BLUE, GOLD, RED]) {
     if (!canvas) return null
     const ctx = canvas.getContext('2d')
+    
+    const isEmpty = !data || data.length === 0 || data.every(v => Number(v) === 0)
+    const renderLabels = isEmpty ? ['Chưa có dữ liệu'] : labels
+    const renderData = isEmpty ? [1] : data
+    const renderColors = isEmpty ? ['#e2e8f0'] : colors
+
     return track(
       new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels,
-          datasets: [{ data, backgroundColor: colors, borderWidth: 0, hoverOffset: 6 }],
+          labels: renderLabels,
+          datasets: [{ 
+            data: renderData, 
+            backgroundColor: renderColors, 
+            borderWidth: 0, 
+            hoverOffset: isEmpty ? 0 : 6 
+          }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } },
+          plugins: { 
+            legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  if (isEmpty) return ' Chưa có dữ liệu'
+                  return ` ${context.label}: ${context.raw}`
+                }
+              }
+            }
+          },
           cutout: '66%',
         },
       }),
@@ -147,17 +168,33 @@ export function useAdminCharts() {
   function renderPie(canvas, labels, data) {
     if (!canvas) return null
     const ctx = canvas.getContext('2d')
+    
+    const isEmpty = !data || data.length === 0 || data.every(v => Number(v) === 0)
+    const renderLabels = isEmpty ? ['Chưa có dữ liệu'] : labels
+    const renderData = isEmpty ? [1] : data
+    const renderColors = isEmpty ? ['#e2e8f0'] : [NAVY, GOLD, BLUE, GREEN, PURPLE]
+
     return track(
       new Chart(ctx, {
         type: 'pie',
         data: {
-          labels,
-          datasets: [{ data, backgroundColor: [NAVY, GOLD, BLUE, GREEN, PURPLE], borderWidth: 0 }],
+          labels: renderLabels,
+          datasets: [{ data: renderData, backgroundColor: renderColors, borderWidth: 0 }],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } } },
+          plugins: { 
+            legend: { position: 'right', labels: { boxWidth: 10, font: { size: 11 } } },
+            tooltip: {
+              callbacks: {
+                label: (context) => {
+                  if (isEmpty) return ' Chưa có dữ liệu'
+                  return ` ${context.label}: ${context.raw}`
+                }
+              }
+            }
+          },
         },
       }),
     )
