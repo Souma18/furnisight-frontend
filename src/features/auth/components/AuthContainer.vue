@@ -61,7 +61,7 @@ onBeforeUnmount(() => {
             <p class="brand-subtitle">{{ $t('auth.common.brandSubtitle') }}</p>
           </div>
           <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" :aria-label="$t('auth.common.close')" @click="$emit('close')">
-            <AppIcon name="close" :size="14" :stroke-width="2" />
+            <AppIcon name="close" :size="20" :stroke-width="2.5" />
           </AppButton>
         </div>
         <AuthTabs v-if="showTabs" :model-value="activeView" @update:model-value="handleTabChange" />
@@ -161,8 +161,8 @@ onBeforeUnmount(() => {
 
 .close-btn {
   margin-left: auto;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 2.35rem;
+  height: 2.35rem;
   border-radius: var(--auth-radius-sm);
   border: 1px solid var(--auth-border);
   background: var(--auth-surface-secondary);

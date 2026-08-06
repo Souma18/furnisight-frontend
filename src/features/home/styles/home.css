@@ -515,6 +515,15 @@
   font-style: italic;
 }
 
+.home-testimonials .section-head {
+  display: block;
+}
+
+.home-testimonials .section-title {
+  max-width: 1080px;
+  white-space: nowrap;
+}
+
 .home-combo-message {
   background: rgba(183, 53, 45, 0.08);
   border: 1px solid rgba(183, 53, 45, 0.18);
@@ -813,6 +822,10 @@
 
   .testimonials-grid {
     grid-template-columns: 1fr;
+  }
+
+  .home-testimonials .section-title {
+    white-space: normal;
   }
 
   .newsletter-form {

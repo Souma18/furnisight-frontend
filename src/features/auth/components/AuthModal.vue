@@ -21,6 +21,7 @@ defineEmits(['close', 'authenticated'])
     :open="open"
     width="430px"
     no-bg
+    :close-on-backdrop="false"
     @close="$emit('close')"
   >
     <AuthContainer embedded :initialView="initialView" @close="$emit('close')" @authenticated="$emit('authenticated')" />

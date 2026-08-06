@@ -9,7 +9,7 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="fade-up">
+  <section class="home-testimonials fade-up">
     <div class="section-head">
       <div>
         <div class="section-label">{{ t('home.testimonials.label') }}</div>

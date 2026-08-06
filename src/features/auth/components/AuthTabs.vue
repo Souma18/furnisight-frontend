@@ -39,9 +39,11 @@ defineEmits(['update:modelValue'])
 }
 
 .auth-tab {
+  box-shadow: none;
   padding: 0.62rem;
   border: none;
   border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
   color: var(--auth-text-secondary);
@@ -49,8 +51,9 @@ defineEmits(['update:modelValue'])
 }
 
 .auth-tab--active {
-  color: var(--auth-brand-start);
-  border-bottom-color: var(--auth-brand-end);
+  background: transparent;
+  color: #7a5413;
+  border-bottom-color: #9b6a16;
   font-weight: 600;
 }
 </style>

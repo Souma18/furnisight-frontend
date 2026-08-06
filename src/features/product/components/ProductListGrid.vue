@@ -35,7 +35,7 @@ const { t } = useI18n()
     <ProductGrid
       :products="products"
       :view-mode="viewMode"
-      layout="standard"
+      layout="catalog"
       :columns="4"
       :loading="loading"
       :wished-product-ids="wishedProductIds"

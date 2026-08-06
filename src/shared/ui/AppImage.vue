@@ -22,6 +22,10 @@ const props = defineProps({
   lazy: {
     type: Boolean,
     default: false
+  },
+  objectPosition: {
+    type: String,
+    default: '50% 50%'
   }
 })
 
@@ -63,6 +67,7 @@ function onLoad() {
       :src="src"
       :alt="alt"
       :loading="lazy ? 'lazy' : 'eager'"
+      :style="{ objectPosition: props.objectPosition }"
       @error="onError"
       @load="onLoad"
       class="app-image-content"
@@ -87,7 +92,7 @@ function onLoad() {
   width: 100%;
   height: 100%;
   object-fit: inherit;
-  border-radius: inherit; /* inherit from wrapper */
+  border-radius: inherit;
   opacity: 0;
   transition: opacity 0.3s ease;
   display: block;

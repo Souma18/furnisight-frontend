@@ -24,13 +24,13 @@ const {
 </script>
 
 <template>
-  <AppModal :open="open" width="700px" no-bg @close="emit('close')">
+  <AppModal :open="open" width="700px" no-bg :close-on-backdrop="false" @close="emit('close')">
     <div class="pd-3d-modal">
       <div class="box">
       <div class="head">
         <strong>{{ t('productDetail.modal.title', { name: productName || t('productDetail.modal.defaultProduct') }) }}</strong>
         <AppButton type="button" :aria-label="t('productDetail.modal.close')" @click="emit('close')">
-          <AppIcon name="close" :size="16" />
+          <AppIcon name="close" :size="22" :stroke-width="2.5" />
         </AppButton>
       </div>
       <div class="scene">

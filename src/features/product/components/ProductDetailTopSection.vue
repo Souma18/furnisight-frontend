@@ -164,8 +164,8 @@ useDragScroll(thumbsRef)
           <small>{{ t('products.sold', { count: product.soldCount || 0 }) }}</small>
         </div>
         <div class="price-box">
-          <span>{{ t('productDetail.top.listedPrice') }}</span>
           <p class="price">{{ product.formattedPrice }}</p>
+          <span>{{ t('productDetail.top.listedPrice') }}</span>
         </div>
         <p v-if="product.description" class="pd-short-desc">{{ product.description }}</p>
       </div>

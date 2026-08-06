@@ -68,7 +68,14 @@ export function useProductDetailPage(props) {
   const has3dModel = computed(() => activeVariant.value?.supports3d ?? false)
   const activeModelUrl = computed(() => activeVariant.value?.modelUrl || '')
 
+  function scrollDetailToTop() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+    document.documentElement.scrollTop = 0
+    document.body.scrollTop = 0
+  }
+
   async function loadProduct(id) {
+    scrollDetailToTop()
     loading.value = true
     error.value = null
     product.value = null

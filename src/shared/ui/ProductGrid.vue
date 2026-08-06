@@ -2,6 +2,7 @@
 import AppImage from "@shared/ui/AppImage.vue";
 import { RouterLink } from "vue-router";
 import { useI18n } from "vue-i18n";
+import { reactive } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { PriceFormatter } from "@shared/lib/formatters";
 
@@ -44,6 +45,19 @@ function roundedRating(rating) {
 function getDimensions(variant) {
   if (!variant) return "";
   return `${variant.length || 0} x ${variant.width || 0} x ${variant.height || 0} cm`;
+}
+
+const panPos = reactive({});
+
+function onMediaMouseMove(e, id) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+  const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+  panPos[id] = `${x}% ${y}%`;
+}
+
+function onMediaMouseLeave(id) {
+  panPos[id] = null;
 }
 </script>
 
@@ -98,7 +112,12 @@ function getDimensions(variant) {
         :to="detailRoute(item)"
         class="shared-product-card__link"
       >
-        <div class="shared-product-card__media">
+        <div 
+          class="shared-product-card__media"
+          @mousemove="onMediaMouseMove($event, item.id)"
+          @mouseleave="onMediaMouseLeave(item.id)"
+          :style="{ '--img-object-position': panPos[item.id] || 'center bottom' }"
+        >
           <AppImage
             v-if="item.image"
             :src="item.image"
@@ -113,45 +132,48 @@ function getDimensions(variant) {
         </div>
 
         <div class="shared-product-card__body">
-          <p class="shared-product-card__cat">{{ categoryLabel(item) }}</p>
+          <div class="shared-product-card__eyebrow">
+            <p class="shared-product-card__cat">{{ categoryLabel(item) }}</p>
+            <div class="shared-product-card__rating">
+              <span
+                class="shared-product-card__stars"
+                :aria-label="t('products.ratingAria')"
+              >
+                <AppIcon
+                  v-for="star in 5"
+                  :key="`${item.id}-product-star-${star}`"
+                  name="star"
+                  :size="13"
+                  :class="{ active: star <= roundedRating(item.rating) }"
+                />
+              </span>
+              <strong>{{ item.rating ?? 0 }}</strong>
+              <small>({{ item.ratingCount ?? 0 }})</small>
+            </div>
+          </div>
           <div class="shared-product-card__name">{{ item.name }}</div>
           <p v-if="viewMode === 'list'" class="shared-product-card__desc">
             {{ item.description || "" }}
           </p>
 
-          <div class="shared-product-card__rating">
-            <span
-              class="shared-product-card__stars"
-              :aria-label="t('products.ratingAria')"
-            >
-              <AppIcon
-                v-for="star in 5"
-                :key="`${item.id}-product-star-${star}`"
-                name="star"
-                :size="13"
-                :class="{ active: star <= roundedRating(item.rating) }"
-              />
-            </span>
-            <strong>{{ item.rating ?? 0 }}</strong>
-            <small>({{ item.ratingCount ?? 0 }})</small>
-          </div>
+          <div class="shared-product-card__footer">
+            <div class="shared-product-card__price-row">
+              <p class="shared-product-card__price">{{ priceLabel(item) }}</p>
+              <span class="shared-product-card__sold">{{
+                t("products.sold", { count: item.soldCount ?? 0 })
+              }}</span>
+            </div>
 
-          <div class="shared-product-card__price-row">
-            <p class="shared-product-card__price">{{ priceLabel(item) }}</p>
-            <span class="shared-product-card__sold">{{
-              t("products.sold", { count: item.soldCount ?? 0 })
-            }}</span>
-          </div>
-
-          <div class="shared-product-card__meta" v-if="item.variants?.length">
-            <span class="meta-item">
-              <AppIcon name="cube" :size="13" />
-              {{ getDimensions(item.variants[0]) }}
-            </span>
-            <span class="meta-item">
-              <AppIcon name="shield" :size="13" />
-              {{ item.variants[0].warranty }}
-            </span>
+            <div class="shared-product-card__meta" v-if="item.variants?.length">
+              <span class="meta-item">
+                <AppIcon name="cube" :size="13" />
+                {{ getDimensions(item.variants[0]) }}
+              </span>
+              <span class="meta-item">
+                <AppIcon name="shield" :size="13" />
+                {{ item.variants[0].warranty }}
+              </span>
+            </div>
           </div>
         </div>
       </RouterLink>
@@ -181,33 +203,55 @@ function getDimensions(variant) {
 }
 
 .shared-product-grid--catalog {
-  gap: 16px;
+  column-gap: clamp(10px, 1vw, 14px);
+  row-gap: clamp(28px, 3vw, 40px);
+  align-items: start;
+}
+
+.shared-product-grid--catalog .shared-product-card {
+  background: var(--app-surface);
+  border: 1px solid color-mix(in srgb, var(--app-gold) 45%, var(--app-border));
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(18, 32, 46, 0.07);
+  overflow: hidden;
+}
+
+.shared-product-grid--catalog .shared-product-card:hover,
+.shared-product-grid--catalog .shared-product-card:focus-within {
+  border-color: var(--app-gold);
+  box-shadow: 0 12px 28px rgba(18, 32, 46, 0.12);
+  transform: translateY(-3px);
 }
 
 .shared-product-grid--catalog .shared-product-card__media {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.shared-product-grid--catalog :deep(.shared-product-card__img) {
+  object-position: center bottom;
 }
 
 .shared-product-grid--catalog .shared-product-card__body {
-  min-height: 120px;
-  padding: 12px;
+  min-height: 0;
+  padding: 10px 12px 12px;
 }
 
 .shared-product-grid--catalog .shared-product-card__cat {
-  font-size: 10px;
-  margin-bottom: 5px;
+  font-size: 11px;
 }
 
 .shared-product-grid--catalog .shared-product-card__name {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.35;
-  margin-bottom: 7px;
-  min-height: 38px;
+  margin-bottom: 8px;
+  min-height: 40px;
 }
 
 .shared-product-grid--catalog .shared-product-card__rating {
   gap: 5px;
-  margin-bottom: 10px;
 }
 
 .shared-product-grid--catalog .shared-product-card__rating strong,
@@ -216,18 +260,18 @@ function getDimensions(variant) {
 }
 
 .shared-product-grid--catalog .shared-product-card__price {
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .shared-product-grid--catalog .shared-product-card__sold {
-  font-size: 11px;
+  font-size: 12px;
 }
 
 .shared-product-grid--catalog .shared-product-card__wish {
-  height: 32px;
-  right: 10px;
-  top: 10px;
-  width: 32px;
+  height: 34px;
+  right: 14px;
+  top: 14px;
+  width: 34px;
 }
 
 .shared-product-grid--catalog.shared-product-grid--list
@@ -356,29 +400,42 @@ function getDimensions(variant) {
   display: block;
   height: 100%;
   object-fit: cover;
-  object-position: center center;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.4s ease-out, object-position 0.1s ease-out;
   width: 100%;
 }
 
 .shared-product-card:hover .shared-product-card__img,
 .shared-product-card:focus-within .shared-product-card__img {
-  transform: scale(1.02);
+  transform: scale(1.15);
 }
 
 .shared-product-card__body {
   display: flex;
-  flex: none;
+  flex: 1 1 auto;
   flex-direction: column;
   padding: 10px 12px 12px;
 }
 
+.shared-product-card__eyebrow {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  min-width: 0;
+}
+
 .shared-product-card__cat {
   color: var(--app-text-muted);
+  flex: 1 1 auto;
   font-size: 11px;
   letter-spacing: 0.08em;
-  margin: 0 0 3px;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .shared-product-card__name {
@@ -408,9 +465,10 @@ function getDimensions(variant) {
 .shared-product-card__rating {
   align-items: center;
   display: flex;
+  flex: 0 0 auto;
   gap: 5px;
-  margin-bottom: 5px;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .shared-product-card__stars {
@@ -441,6 +499,10 @@ function getDimensions(variant) {
   gap: 10px;
   margin-top: 5px;
   min-height: 24px;
+}
+
+.shared-product-card__footer {
+  margin-top: auto;
 }
 
 .shared-product-card__price {
@@ -657,7 +719,7 @@ function getDimensions(variant) {
   }
 
   .shared-product-grid--catalog {
-    gap: 14px;
+    gap: 12px;
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
@@ -682,7 +744,7 @@ function getDimensions(variant) {
   }
 
   .shared-product-grid--catalog {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .shared-product-grid--catalog.shared-product-grid--list {

@@ -639,7 +639,7 @@
 
 /* Editorial catalog layout */
 .products-page {
-  --pl-page-max: 1440px;
+  --pl-page-max: min(1680px, calc(100vw - 28px));
 }
 
 .pl-inner {
@@ -1246,9 +1246,9 @@
 
 /* Shared product container alignment */
 .pl-inner {
-  max-width: 1220px;
-  padding-left: clamp(20px, 4vw, 48px);
-  padding-right: clamp(20px, 4vw, 48px);
+  max-width: var(--pl-page-max, 1680px);
+  padding-left: clamp(14px, 2vw, 28px);
+  padding-right: clamp(14px, 2vw, 28px);
 }
 
 @media (max-width: 980px) {

@@ -1,6 +1,7 @@
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
+  ACESFilmicToneMapping,
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
@@ -9,6 +10,7 @@ import {
   Box3,
   Vector3,
   GridHelper,
+  SRGBColorSpace,
 } from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
@@ -27,7 +29,12 @@ export function useProduct3DViewer(props) {
   let controls = null
   let rafId = null
   let activeModel = null
+  let floorGrid = null
   let resizeObserver = null
+
+  function isDarkTheme() {
+    return document.documentElement.dataset.theme === 'dark'
+  }
 
   function clearModel() {
     if (!activeModel) return
@@ -53,16 +60,29 @@ export function useProduct3DViewer(props) {
     renderer = new WebGLRenderer({ antialias: true, alpha: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2))
     renderer.setSize(el.clientWidth, el.clientHeight)
+    renderer.outputColorSpace = SRGBColorSpace
+    renderer.toneMapping = ACESFilmicToneMapping
+    renderer.toneMappingExposure = 1.35
+    renderer.setClearColor(isDarkTheme() ? 0x111827 : 0xf7f4ee, 1)
     el.appendChild(renderer.domElement)
 
-    scene.add(new AmbientLight(0xffffff, 1.05))
-    const key = new DirectionalLight(0xffffff, 1.2)
+    scene.add(new AmbientLight(0xffffff, 1.08))
+    const key = new DirectionalLight(0xffffff, 1.28)
     key.position.set(5, 8, 4)
     scene.add(key)
-    const fill = new DirectionalLight(0xffffff, 0.7)
+    const fill = new DirectionalLight(0xffffff, 0.72)
     fill.position.set(-4, 5, -5)
     scene.add(fill)
-    scene.add(new GridHelper(10, 20, 0xc9922a, 0xc9922a))
+    floorGrid = new GridHelper(8, 16, 0xb7bdc4, 0xd0d5db)
+    floorGrid.position.set(0, 0, 0)
+    const gridMaterials = Array.isArray(floorGrid.material) ? floorGrid.material : [floorGrid.material]
+    gridMaterials.forEach((material) => {
+      material.depthWrite = false
+      material.polygonOffset = true
+      material.polygonOffsetFactor = 1
+      material.polygonOffsetUnits = 1
+    })
+    scene.add(floorGrid)
 
     controls = new OrbitControls(camera, renderer.domElement)
     controls.enableDamping = true
@@ -105,10 +125,13 @@ export function useProduct3DViewer(props) {
       const box = new Box3().setFromObject(activeModel)
       const size = box.getSize(new Vector3())
       const center = box.getCenter(new Vector3())
-      const fit = 2.2 / Math.max(size.x || 1, size.y || 1, size.z || 1)
+      const fit = 2 / Math.max(size.x || 1, size.y || 1, size.z || 1)
       activeModel.scale.setScalar(fit)
-      activeModel.position.sub(center.multiplyScalar(fit))
-      activeModel.position.y += 0.55
+      activeModel.position.x = -center.x * fit
+      activeModel.position.z = -center.z * fit
+      activeModel.position.y = -box.min.y * fit + 0.02
+      controls.target.set(0, Math.min(1.2, Math.max(0.45, size.y * fit * 0.45)), 0)
+      controls.update()
     } catch (err) {
       loadError.value = `${t('productDetail.alerts.loadModelError')} (${err.message || err})`
     } finally {
@@ -146,6 +169,7 @@ export function useProduct3DViewer(props) {
     clearModel()
     controls?.dispose?.()
     renderer?.dispose?.()
+    floorGrid = null
     scene = null
     camera = null
     renderer = null
