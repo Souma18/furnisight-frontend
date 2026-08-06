@@ -3,8 +3,6 @@ import { computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useLocaleStore } from '@shared/stores/localeStore'
-import { useRouter } from 'vue-router'
-import { useSwitchLocalePath } from 'vue-i18n-routing'
 import AppIcon from './AppIcon.vue'
 
 defineProps({
@@ -17,17 +15,11 @@ defineProps({
 const { t } = useI18n()
 const localeStore = useLocaleStore()
 const { locale } = storeToRefs(localeStore)
-const router = useRouter()
-const switchLocalePath = useSwitchLocalePath()
 
 const selectedLocale = computed({
   get: () => locale.value,
   set: (value) => {
     localeStore.setLocale(value)
-    const switchPath = switchLocalePath(value)
-    if (switchPath) {
-      router.push(switchPath)
-    }
   },
 })
 </script>
