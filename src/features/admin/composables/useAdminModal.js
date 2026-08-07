@@ -104,7 +104,7 @@ export function useAdminModal() {
   const form = reactive({
     name: '',
     email: '',
-    role: 'Khách hàng',
+    role: '',
     roleId: '',
     accountStatus: 'ACTIVE',
     password: '',
@@ -127,7 +127,7 @@ export function useAdminModal() {
     imageUploads: [],
     roleDescription: '',
     permissions: [],
-    adminRole: 'Manager',
+    adminRole: '',
     stockSku: '',
     stockProductId: '',
     stockVariantId: '',
@@ -158,7 +158,7 @@ export function useAdminModal() {
     Object.assign(form, {
       name: payload?.name ?? '',
       email: payload?.email ?? '',
-      role: payload?.role ?? 'Khách hàng',
+      role: payload?.role ?? '',
       roleId: payload?.roleId ?? payload?.roles?.[0]?.id ?? '',
       accountStatus: ['blocked', 'banned', 'locked'].includes(String(payload?.status || '').toLowerCase()) ? 'BANNED' : 'ACTIVE',
       password: '',
@@ -184,8 +184,8 @@ export function useAdminModal() {
       discountValue: payload?.discountValue ?? '',
       maxDiscount: payload?.maxDiscount ?? '',
       minOrder: payload?.minOrder ?? '',
-      startDate: toDateTimeLocal(payload?.startDate),
-      endDate: toDateTimeLocal(payload?.endDate),
+      startDate: toDateTimeLocal(payload?.startDate) || defaultVoucherStartDate(),
+      endDate: toDateTimeLocal(payload?.endDate) || defaultVoucherEndDate(),
       voucherActive: payload?.active ?? true,
     })
     if (type === 'addCat' || type === 'editCat') {
@@ -379,14 +379,15 @@ export function useAdminModal() {
     try {
       const type = modal.value.type
       if (type === 'addUser') {
-        assertActionResult(await adminApi.createAdminUser({
+        const payload = {
           name: form.name?.trim(),
           email: form.email?.trim(),
-          role: form.roleId || form.role,
           password: form.password,
-        }))
+        }
+        if (form.roleId) payload.role = form.roleId
+        assertActionResult(await adminApi.createUser(payload))
       }
-      if (type === 'editUser') {
+      if (type === 'editUser' || type === 'editAdmin') {
         const user = modal.value.payload
         if (!user?.id) throw new Error('Thiếu người dùng cần cập nhật.')
 
@@ -502,9 +503,9 @@ export function useAdminModal() {
           password: form.password,
         }))
       }
+      ui.requestReload()
       ui.closeModal()
       ui.showToast({ title: 'Đã lưu thành công', subtitle: 'Dữ liệu đã được cập nhật.' })
-      ui.requestReload()
     } catch (e) {
       ui.showToast({ icon: 'x', title: 'Lỗi', subtitle: e?.response?.data?.message ?? e.message })
     } finally {
@@ -550,4 +551,17 @@ function toDateTimeLocal(value) {
 function fromDateTimeLocal(value) {
   if (!value) return ''
   return value.length === 16 ? `${value}:00` : value
+}
+
+function defaultVoucherStartDate() {
+  const d = new Date()
+  d.setHours(0, 0, 0, 0)
+  return toDateTimeLocal(d.toISOString())
+}
+
+function defaultVoucherEndDate() {
+  const d = new Date()
+  d.setDate(d.getDate() + 30)
+  d.setHours(23, 59, 0, 0)
+  return toDateTimeLocal(d.toISOString())
 }

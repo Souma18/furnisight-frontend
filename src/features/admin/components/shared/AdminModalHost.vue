@@ -27,6 +27,11 @@ const AdminModel3dUpload = defineAsyncComponent(
 const iconOptions = ref([]);
 const roomTypeOptions = ref([]);
 const roleOptions = ref([]);
+const adminRoleOptions = computed(() => {
+  return roleOptions.value.filter(
+    (role) => !['USER', 'KHÁCH HÀNG'].includes(role.name.trim().toUpperCase())
+  )
+});
 const categoryOptions = ref([]);
 const productOptions = ref([]);
 const loadedOptions = new Set();
@@ -170,7 +175,7 @@ watch(
     openSync();
 
     const loaders = [];
-    if (["addUser", "editUser", "addAdmin"].includes(type))
+    if (["addUser", "editUser", "addAdmin", "editAdmin"].includes(type))
       loaders.push(loadRoleOptions());
     if (["addCat", "editCat"].includes(type)) {
       loaders.push(loadRoomTypeOptions());
@@ -230,7 +235,7 @@ watch(
       </dl>
     </template>
 
-    <template v-else-if="modal.type === 'addUser' || modal.type === 'editUser'">
+    <template v-else-if="modal.type === 'addUser' || modal.type === 'editUser' || modal.type === 'editAdmin'">
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Họ tên *</label
@@ -247,11 +252,11 @@ watch(
         </div>
       </div>
       <div class="mform-row">
-        <div class="mform-group">
+        <div class="mform-group" v-if="modal.type === 'editAdmin'">
           <label class="mfl">Vai trò</label>
           <select v-model="form.roleId" class="mfi">
             <option value="">Giữ nguyên vai trò</option>
-            <option v-for="role in roleOptions" :key="role.id" :value="role.id">
+            <option v-for="role in adminRoleOptions" :key="role.id" :value="role.id">
               {{ role.name }}
             </option>
           </select>
@@ -818,7 +823,7 @@ watch(
           <label class="mfl">Vai trò</label>
           <select v-model="form.adminRole" class="mfi">
             <option value="">Chọn vai trò</option>
-            <option v-for="role in roleOptions" :key="role.id" :value="role.id">
+            <option v-for="role in adminRoleOptions" :key="role.id" :value="role.id">
               {{ role.name }}
             </option>
           </select>

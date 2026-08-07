@@ -130,7 +130,7 @@ async function confirmDeleteAdmin() {
         <template #cell-statusLabel="{ row }"><span class="badge badge--sm b-success">{{ accountStatusLabel(row) }}</span></template>
         <template #cell-actions="{ row }">
           <div class="row-actions row-actions--sm">
-            <AppButton variant="unstyled" type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editUser', row)"><AppIcon name="edit" :size="12" /></AppButton>
+            <AppButton variant="unstyled" type="button" class="ra-btn ra-btn--sm ra-edit" @click="ui.openModal('editAdmin', row)"><AppIcon name="edit" :size="12" /></AppButton>
             <AppButton variant="unstyled" type="button" class="ra-btn ra-btn--sm ra-del" @click="requestDeleteAdmin(row)"><AppIcon name="trash2" :size="12" /></AppButton>
           </div>
         </template>

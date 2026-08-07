@@ -34,10 +34,9 @@ export function useAdminRoles() {
     try {
       const [roleRes, userRes] = await Promise.all([
         adminApi.fetchRoles(),
-        adminApi.fetchAdminUsers({ size: 100, scope: 'ADMIN' }),
+        adminApi.fetchAdminUsers({ size: 100, isAdmin: true }),
       ])
       const adminAccounts = (Array.isArray(userRes.data) ? userRes.data : userRes.data?.items ?? [])
-        .filter(isAdminAccount)
         .map(normalizeAdminAccount)
       const roles = (Array.isArray(roleRes.data) ? roleRes.data : roleRes.data?.items ?? [])
         .map((role) => normalizeRole(role, adminAccounts))
@@ -54,7 +53,7 @@ export function useAdminRoles() {
   }
 
   onMounted(load)
-  watch(reloadTick, load)
+  watch(reloadTick, load, { flush: 'post' })
 
   return { data, loading, error, load }
 }

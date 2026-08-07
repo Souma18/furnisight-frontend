@@ -12,8 +12,12 @@ class AdminApi {
     return apiClient.get('/admin/users', { params })
   }
 
-  createAdminUser(payload) {
+  createUser(payload) {
     return apiClient.post('/admin/users', payload)
+  }
+
+  createAdminUser(payload) {
+    return apiClient.post('/admin/users/create-admin', payload)
   }
 
   updateAdminUser(id, payload) {

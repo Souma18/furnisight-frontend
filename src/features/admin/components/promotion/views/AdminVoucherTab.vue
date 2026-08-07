@@ -34,6 +34,12 @@ const emit = defineEmits(['load', 'open-modal', 'open-publish', 'delete'])
         <option value="PERSONAL">PERSONAL</option>
         <option value="MARKETING">MARKETING</option>
       </select>
+      <select v-model="filters.discountType" class="mc-select" @change="emit('load')">
+        <option value="">Tất cả loại giảm</option>
+        <option value="PERCENT">Phần trăm (%)</option>
+        <option value="FIXED">Số tiền cố định</option>
+        <option value="SHIPPING_CAP">Giảm vận chuyển</option>
+      </select>
       <select v-model="filters.status" class="mc-select" @change="emit('load')">
         <option value="">Tất cả trạng thái</option>
         <option value="active">Đang bật</option>

@@ -49,7 +49,12 @@ export function useAdminVouchers({
         }),
         adminApi.fetchVoucherStats().catch(() => ({ data: stats.value })),
       ])
-      vouchers.value = sortByCreatedAtDesc(getListPayload(listRes?.data))
+      let items = sortByCreatedAtDesc(getListPayload(listRes?.data))
+      if (filters.voucher.discountType) {
+        const dt = filters.voucher.discountType.toUpperCase()
+        items = items.filter((v) => String(v.discountType || '').toUpperCase() === dt)
+      }
+      vouchers.value = items
       stats.value = { ...stats.value, ...(statsRes?.data || {}) }
     } finally {
       loading.value = false

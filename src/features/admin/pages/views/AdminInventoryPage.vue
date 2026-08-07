@@ -41,9 +41,6 @@ watch(reloadTick, load)
       <AppButton variant="unstyled" v-if="data" type="button" class="btn-ghost" @click="collapseAll">
         <AppIcon name="chevronRight" :size="13" />Thu tất cả
       </AppButton>
-      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo kho' })">
-        <AppIcon name="download" :size="15" />Báo cáo
-      </AppButton>
       <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('stockIn')">
         <AppIcon name="plus" :size="15" />Nhập kho
       </AppButton>

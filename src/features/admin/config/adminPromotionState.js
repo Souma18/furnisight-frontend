@@ -32,7 +32,7 @@ export function createAdminPromotionStats() {
 
 export function createAdminPromotionFilters() {
   return {
-    voucher: { query: '', type: '', status: '' },
+    voucher: { query: '', type: '', status: '', discountType: '' },
     campaign: { query: '', status: '' },
     combo: { query: '', status: '' },
     notify: { query: '', status: '' },

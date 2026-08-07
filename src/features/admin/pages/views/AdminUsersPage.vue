@@ -11,9 +11,8 @@ import { useAdminListPage } from '../../composables/useAdminListPage'
 import { accountRoleNames, isAdminAccount } from '../../utils/adminAccountRoles'
 import { formatDateTime } from '@shared/lib/formatters'
 
-const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, scope: 'CUSTOMER' }))
+const { items, search, load, ui } = useAdminListPage((params) => adminApi.fetchAdminUsers({ ...params, isAdmin: false }))
 const userRows = computed(() => items.value
-  .filter((item) => !isAdminAccount(item))
   .map((item, index) => ({ ...normalizeUserRow(item), stt: index + 1 })))
 const statusTarget = ref(null)
 const updatingStatus = ref(false)
