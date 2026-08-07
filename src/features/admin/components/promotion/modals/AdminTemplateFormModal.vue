@@ -54,6 +54,14 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
             <AppInput v-model="form.code" required placeholder="HOLIDAY_COUPON_01"/>
           </label>
         </div>
+        <label>Loại mẫu
+          <select v-model="form.type" style="padding: 8px; border-radius: 6px; border: 1px solid var(--app-border); background: var(--app-control-bg); color: var(--app-text); width: 100%;">
+            <option value="PROMOTION">Khuyến mãi (Promotion)</option>
+            <option value="SYSTEM">Hệ thống (System)</option>
+            <option value="REVIEW">Đánh giá (Review)</option>
+            <option value="ORDER">Đơn hàng (Order)</option>
+          </select>
+        </label>
         <label>Tiêu đề mẫu (Template)
           <AppInput v-model="form.titleTemplate" placeholder="Tặng bạn mã ưu đãi {{coupon_code}}"/>
         </label>

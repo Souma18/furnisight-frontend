@@ -181,10 +181,10 @@ function downloadAttachment(file) {
           <label class="cdp-message-search-field">
             <AppIcon name="search" :size="14" />
             <AppInput
-              :value="searchState.query"
+              :modelValue="searchState.query"
               type="search"
               placeholder="Tìm tin nhắn..."
-              @input="(event) => store.setConversationSearchQuery(event.target.value)"
+              @update:modelValue="(val) => store.setConversationSearchQuery(val)"
               @keydown.enter.prevent="store.goToNextConversationSearchResult()"
             />
           </label>

@@ -146,6 +146,7 @@ export function createTemplateFormState() {
   return {
     code: '',
     name: '',
+    type: 'PROMOTION',
     titleTemplate: '',
     bodyTemplate: '',
   }

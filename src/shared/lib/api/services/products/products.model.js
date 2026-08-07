@@ -274,10 +274,6 @@ function normalizeGallery(data = {}) {
   imageCandidates.push(
     data.image,
     data.imageUrl,
-    data.thumbnail,
-    data.thumbnailUrl,
-    data.coverImage,
-    data.coverImageUrl,
   )
 
   return [...new Set(imageCandidates.filter(Boolean))]

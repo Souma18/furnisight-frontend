@@ -71,27 +71,49 @@ export function useAdminCombos({
     try {
       const response = await adminApi.fetchProducts({ size: 500 })
       const items = getListPayload(response?.data)
-      products.value = items.map(mapProduct)
+      products.value = items.flatMap(mapProduct)
     } catch (error) {
       products.value = []
       notify(error?.response?.data?.message || error.message || 'Không tải được sản phẩm')
     }
   }
 
-  function mapProduct(item) {
-    const variant = item.variants?.[0] || item.defaultVariant || item
-    return {
-      id: item.id,
-      variantId: variant.id || item.variantId || item.id,
-      name: item.name,
-      sku: variant.sku || item.sku || item.slug || item.id,
-      category: item.categoryName || item.category?.name || item.category || 'Sản phẩm',
-      price: Number(variant.price || item.price || item.minPrice || 0),
-      stock: Number(variant.stockQuantity ?? variant.stock ?? item.stockQuantity ?? item.stock ?? 0),
-      status: item.status || item.productStatus || 'Đang bán',
-      image: item.image || item.thumbnailUrl || item.imageUrl || 'box',
-      slug: item.slug,
+  function extractFirstImage(val) {
+    if (!val) return null
+    if (Array.isArray(val)) return val[0]
+    if (typeof val === 'string' && val.trim().startsWith('[')) {
+      try {
+        const parsed = JSON.parse(val)
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed[0]
+      } catch (e) {}
     }
+    return typeof val === 'string' ? val : null
+  }
+
+  function mapProduct(item) {
+    const variants = (item.variants && item.variants.length > 0) ? item.variants : [item.defaultVariant || item]
+    
+    return variants.map(variant => {
+      const variantName = variant.name || variant.title
+      const displayName = (variantName && variantName !== item.name) ? `${item.name} - ${variantName}` : item.name
+      
+      const rawImage = variant.imageUrls ?? item.image ?? item.imageUrls
+      const finalImage = extractFirstImage(rawImage) || 'box'
+      
+      return {
+        id: variant.id || item.variantId || item.id, // Use variant ID as the unique key in the picker
+        productId: item.id,
+        variantId: variant.id || item.variantId || item.id,
+        name: displayName,
+        sku: variant.sku || item.sku || item.slug || item.id,
+        category: item.categoryName || item.category?.name || item.category || 'Sản phẩm',
+        price: Number(variant.price || item.price || item.minPrice || 0),
+        stock: Number(variant.stockQuantity ?? variant.stock ?? item.stockQuantity ?? item.stock ?? 0),
+        status: item.status || item.productStatus || 'Đang bán',
+        image: finalImage,
+        slug: item.slug,
+      }
+    })
   }
 
   function resetComboForm(row = null) {
@@ -106,7 +128,14 @@ export function useAdminCombos({
     comboForm.startDate = toDatetimeLocal(row?.startDate)
     comboForm.endDate = toDatetimeLocal(row?.endDate)
     comboForm.active = row?.active ?? true
-    comboForm.items = row?.items ? row.items.map((item) => ({ ...item, id: item.id || item.productId, name: item.name || item.productName, category: item.category || item.categoryName, slug: item.productSlug || item.slug })) : []
+    comboForm.items = row?.items ? row.items.map((item) => ({ 
+      ...item, 
+      id: item.variantId || item.productId || item.id, // Use variantId as unique key to match picker
+      productId: item.productId || item.id,
+      name: item.name || item.productName, 
+      category: item.category || item.categoryName, 
+      slug: item.productSlug || item.slug 
+    })) : []
   }
 
   async function openComboModal(row = null) {
@@ -169,7 +198,7 @@ export function useAdminCombos({
       endDate: comboForm.endDate || null,
       active: comboForm.active,
       items: comboForm.items.map((item) => ({
-        productId: item.id,
+        productId: item.productId || item.id,
         variantId: item.variantId,
         productSlug: item.slug,
         quantity: Number(item.quantity || 1),

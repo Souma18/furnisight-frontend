@@ -512,6 +512,6 @@ function normalizeImageUrls(data = {}) {
       return item?.url || item?.imageUrl || item?.src || ''
     }))
   }
-  candidates.push(data.image, data.imageUrl, data.thumbnail, data.thumbnailUrl)
+  candidates.push(data.image, data.imageUrl)
   return [...new Set(candidates.filter(Boolean))]
 }

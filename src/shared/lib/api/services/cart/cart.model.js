@@ -17,14 +17,7 @@ function unique(values = []) {
 export function resolveCartImageUrl(raw = {}) {
   const imageCandidates = [
     raw.imageUrl,
-    raw.productImageUrl,
     raw.image,
-    raw.thumbnail,
-    raw.thumbnailUrl,
-    raw.coverImage,
-    raw.coverImageUrl,
-    raw.product?.imageUrl,
-    raw.product?.image,
   ]
 
   if (Array.isArray(raw.gallery)) {

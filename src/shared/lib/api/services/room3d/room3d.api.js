@@ -98,16 +98,11 @@ function parsePriceNumber(value) {
 function resolveProductImage(item = {}, product = {}) {
   const imageCandidates = [
     item.imageUrl,
-    item.productImageUrl,
     item.image,
-    item.thumbnail,
-    item.thumbnailUrl,
     item.coverImage,
     item.coverImageUrl,
     product.imageUrl,
     product.image,
-    product.thumbnail,
-    product.thumbnailUrl,
   ]
 
   for (const gallery of [item.gallery, item.images, product.gallery, product.images]) {

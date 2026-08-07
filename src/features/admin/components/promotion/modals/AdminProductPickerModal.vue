@@ -94,8 +94,8 @@ const emit = defineEmits([
         </div>
       </div>
       <footer>
-        <AppButton variant="unstyled" type="button" class="mc-cancel" @click="emit('close')">Hủy</AppButton>
-        <AppButton variant="unstyled" type="button" class="mc-primary" @click="emit('apply')">
+        <AppButton variant="cancel" type="button" @click="emit('close')">Hủy</AppButton>
+        <AppButton variant="primary" type="button" @click="emit('apply')">
           <AppIcon name="check" />Thêm vào combo
         </AppButton>
       </footer>

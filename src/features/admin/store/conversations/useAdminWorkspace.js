@@ -326,10 +326,11 @@ export function useAdminWorkspace(ctx) {
         title: 'Lưu ghi chú thất bại',
         subtitle: error.message || '',
       })
+      throw error
     }
   }
 
-  async function sendCustomerReply(text, attachments = []) {
+  async function sendCustomerReply(text, attachments = [], overrideType = null) {
     const trimmed = String(text ?? '').trim()
     const attachmentPayload = buildAttachmentPayload(attachments)
     if ((!trimmed && !attachmentPayload.list.length) || !workspace.convId) return
@@ -341,7 +342,7 @@ export function useAdminWorkspace(ctx) {
       senderId: getStaffId(),
       receiverId: conv?.buyerId ?? null,
       content,
-      messageType: attachmentPayload.messageType,
+      messageType: overrideType || attachmentPayload.messageType,
       ...attachmentPayload.dtoFields,
       isInternal: false,
     }
@@ -373,6 +374,7 @@ export function useAdminWorkspace(ctx) {
         title: 'Gửi tin nhắn thất bại',
         subtitle: formatChatError(error, 'Không gửi được tin nhắn. Vui lòng kiểm tra kết nối hoặc thử lại.'),
       })
+      throw error
     }
   }
 

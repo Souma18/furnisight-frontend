@@ -61,6 +61,7 @@ function extractProducts(raw) {
   if (text.startsWith('PRODUCT_DATA:')) {
     try {
       const data = JSON.parse(text.substring('PRODUCT_DATA:'.length))
+      if (!data.image && raw.attachmentUrl) data.image = raw.attachmentUrl
       return [data]
     } catch (e) {
       return [{

@@ -33,6 +33,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     editing.template = row
     templateForm.code = row?.code || ''
     templateForm.name = row?.name || ''
+    templateForm.type = row?.type || 'PROMOTION'
     templateForm.titleTemplate = row?.titleTemplate || ''
     templateForm.bodyTemplate = row?.bodyTemplate || ''
   }
@@ -50,6 +51,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
   let unlayerInitialized = false
   let unlayerCallback = null
   let unlayerContent = ''
+  let unlayerReadyHandlerAdded = false
 
   function loadCurrentDesign() {
     if (!window.unlayer) return
@@ -124,6 +126,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     return {
       code: templateForm.code.trim(),
       name: templateForm.name.trim(),
+      type: templateForm.type,
       titleTemplate: templateForm.titleTemplate.trim(),
       bodyTemplate: templateForm.bodyTemplate.trim(),
     }

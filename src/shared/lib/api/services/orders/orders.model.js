@@ -43,10 +43,6 @@ function resolveOrderItemImageUrl(data = {}) {
   const snapshot = data.productSnapshot || {}
   return data.imageUrl
     || snapshot.imageUrl
-    || snapshot.productImageUrl
-    || snapshot.image
-    || snapshot.thumbnailUrl
-    || snapshot.thumbnail
     || ''
 }
 
