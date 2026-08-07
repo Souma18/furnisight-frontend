@@ -97,7 +97,8 @@ export function useAdminDashboard() {
 
   bindCharts((charts, d) => {
     if (d.revenueChart) {
-      charts.renderLine(revenueCanvas.value, d.revenueChart.labels, d.revenueChart.data)
+      const formattedData = (d.revenueChart.data || []).map(val => Number(val) > 0 ? Number(val) / 1000000 : 0)
+      charts.renderLine(revenueCanvas.value, d.revenueChart.labels, formattedData)
     }
     if (d.orderChart) {
       const translatedLabels = (d.orderChart.labels || []).map(label => getOrderStatusLabel(label))

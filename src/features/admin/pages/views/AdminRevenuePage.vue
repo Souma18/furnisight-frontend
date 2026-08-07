@@ -94,15 +94,15 @@ bindCharts((charts, d) => {
     labels = rows.map((r) => r.month)
     chartData = rows.map((r) => {
       if (typeof r.revenue === 'string') {
-        const val = parseFloat(r.revenue.replace(/[^0-9.-]+/g, ''))
-        return val > 1000000 ? val / 1000000 : val
+        return parseFloat(r.revenue.replace(/[^0-9.-]+/g, ''))
       }
-      return typeof r.revenue === 'number' ? (r.revenue > 1000000 ? r.revenue / 1000000 : r.revenue) : 0
+      return typeof r.revenue === 'number' ? r.revenue : 0
     })
   }
 
   if (monthCanvas.value && labels?.length) {
-    charts.renderRevenueBar(monthCanvas.value, labels, chartData)
+    const formattedData = (chartData || []).map(val => Number(val) > 0 ? Number(val) / 1000000 : 0)
+    charts.renderRevenueBar(monthCanvas.value, labels, formattedData)
   }
 })
 </script>

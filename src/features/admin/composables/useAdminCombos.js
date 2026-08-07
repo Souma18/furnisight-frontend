@@ -134,7 +134,8 @@ export function useAdminCombos({
       productId: item.productId || item.id,
       name: item.name || item.productName, 
       category: item.category || item.categoryName, 
-      slug: item.productSlug || item.slug 
+      slug: item.productSlug || item.slug,
+      image: extractFirstImage(item.image)
     })) : []
   }
 
