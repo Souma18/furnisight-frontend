@@ -6,9 +6,9 @@ import { computed, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
-import { mapInboxMessageToFrontend } from '@features/account/composables/useNotificationsCenter'
 import { openAuthModal } from '@features/auth/lib/authModalBus'
 import { useAuthStore } from '@features/auth/store/authStore'
+import { useNotificationStore } from '@features/account/store/notificationStore'
 import { getApiErrorMessage } from '@shared/lib/api'
 import { notificationsApi } from '@shared/lib/api/services'
 import AppIcon from '@shared/ui/AppIcon.vue'
@@ -22,17 +22,11 @@ const route = useRoute()
 const { t } = useI18n()
 const authStore = useAuthStore()
 const { isAuthenticated, isAdmin } = storeToRefs(authStore)
-const notifications = ref([])
 
+const notificationStore = useNotificationStore()
+const { notifications, unreadCount: unreadNotificationCount } = storeToRefs(notificationStore)
 
-const unreadNotificationCount = computed(() => notifications.value.filter((item) => !item.isRead).length)
 const previewNotifications = computed(() => notifications.value.slice(0, 5))
-
-async function loadNotifications() {
-  const response = await notificationsApi.getInboxMessages()
-  const data = response.data?.items ?? response.data ?? []
-  notifications.value = data.map(mapInboxMessageToFrontend)
-}
 
 async function openAccountNotifications() {
   if (!isAuthenticated.value) {
@@ -46,10 +40,7 @@ async function openAccountNotifications() {
 async function handleNotificationClick(item) {
   try {
     if (!item.isRead) {
-      await notificationsApi.markAsRead(item.id)
-      notifications.value = notifications.value.map((notification) =>
-        notification.id === item.id ? { ...notification, isRead: true } : notification,
-      )
+      await notificationStore.markAsRead(item.id)
     }
 
     await openAccountNotifications()
@@ -61,8 +52,7 @@ async function handleNotificationClick(item) {
 async function markAllNotificationsRead() {
   if (!unreadNotificationCount.value) return
   try {
-    await notificationsApi.markAllAsRead()
-    notifications.value = notifications.value.map((item) => ({ ...item, isRead: true }))
+    await notificationStore.markAllAsRead()
   } catch (error) {
     console.warn('[Header] mark all notifications failed:', getApiErrorMessage(error))
   }
@@ -84,13 +74,10 @@ function handleUserAction() {
   openAuthModal()
 }
 
-const notificationsLoaded = ref(false)
-
 async function loadNotificationsOnce() {
-  if (!isAuthenticated.value || notificationsLoaded.value) return
+  if (!isAuthenticated.value) return
   try {
-    await loadNotifications()
-    notificationsLoaded.value = true
+    await notificationStore.loadNotifications()
   } catch (error) {
     console.warn('[Header] load notifications failed:', getApiErrorMessage(error))
   }
@@ -98,10 +85,7 @@ async function loadNotificationsOnce() {
 
 watch(isAuthenticated, (newVal) => {
   if (!newVal) {
-    notifications.value = []
-    notificationsLoaded.value = false
-  } else {
-    notificationsLoaded.value = false
+    notificationStore.clearNotifications()
   }
 })
 

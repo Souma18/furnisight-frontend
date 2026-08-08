@@ -853,7 +853,8 @@
       "empty": "Chưa có sản phẩm nào phù hợp.",
       "searchMatched": "Sản phẩm khớp với tìm kiếm",
       "searchEmpty": "Không tìm thấy sản phẩm nào khớp.",
-      "all": "Tất cả"
+      "all": "Tất cả",
+      "showAllRooms": "Hiển thị đồ nội thất từ các phòng khác"
     },
     "overlay": {
       "uploadStart": "Tải ảnh để bắt đầu",

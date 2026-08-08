@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
+import AppIcon from './AppIcon.vue'
 
 const props = defineProps({
   modelValue: {
@@ -26,26 +27,80 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'blur', 'focus'])
 
+const isPasswordVisible = ref(false)
+
+const computedType = computed(() => {
+  if (props.type === 'password') {
+    return isPasswordVisible.value ? 'text' : 'password'
+  }
+  return props.type
+})
+
 const onInput = (event) => {
   emit('update:modelValue', event.target.value)
+}
+
+const togglePasswordVisibility = () => {
+  isPasswordVisible.value = !isPasswordVisible.value
 }
 </script>
 
 <template>
-  <input
-    :type="type"
-    class="app-input"
-    :value="modelValue"
-    :placeholder="placeholder"
-    :disabled="disabled"
-    :required="required"
-    @input="onInput"
-    @blur="emit('blur', $event)"
-    @focus="emit('focus', $event)"
-  />
+  <div class="app-input-wrapper" :class="{ 'has-icon': type === 'password' }">
+    <input
+      :type="computedType"
+      class="app-input"
+      :value="modelValue"
+      :placeholder="placeholder"
+      :disabled="disabled"
+      :required="required"
+      @input="onInput"
+      @blur="emit('blur', $event)"
+      @focus="emit('focus', $event)"
+    />
+    <button 
+      v-if="type === 'password'" 
+      type="button" 
+      class="password-toggle"
+      @click="togglePasswordVisibility"
+      tabindex="-1"
+    >
+      <AppIcon :name="isPasswordVisible ? 'eyeOff' : 'eye'" :size="16" />
+    </button>
+  </div>
 </template>
 
 <style scoped>
+.app-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.app-input-wrapper.has-icon .app-input {
+  padding-right: 36px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 4px;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  background: none;
+  border: none;
+  padding: 0 8px;
+  cursor: pointer;
+  color: var(--app-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.password-toggle:hover {
+  color: var(--app-text);
+}
+
 .app-input {
   width: 100%;
   box-sizing: border-box;

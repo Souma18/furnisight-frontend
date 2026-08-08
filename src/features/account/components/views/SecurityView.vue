@@ -21,7 +21,7 @@ const {
       <article class="security-card">
         <header class="security-card-head">{{ t('account.security.changePassword') }}</header>
         <form class="security-card-body" @submit.prevent="submitPassword">
-          <label>{{ t('account.security.currentPassword') }} <AppInput v-model="passwordForm.currentPassword" type="password" required :disabled="isPasswordLoading" /></label>
+          <label>{{ t('account.security.currentPassword') }} <AppInput v-model="passwordForm.currentPassword" type="password" :disabled="isPasswordLoading" /></label>
           <label>{{ t('account.security.newPassword') }} <AppInput v-model="passwordForm.newPassword" type="password" required :disabled="isPasswordLoading" /></label>
           <label>{{ t('account.security.confirmPassword') }} <AppInput v-model="passwordForm.confirmPassword" type="password" required :disabled="isPasswordLoading" /></label>
           <AppButton class="primary" type="submit" :disabled="isPasswordLoading">{{ t('account.security.updatePassword') }}</AppButton>

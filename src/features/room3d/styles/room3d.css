@@ -453,7 +453,7 @@
   height: 100vh;
   background: #e9ecef;
 }
-:deep(canvas) {
+canvas {
   width: 100% !important;
   height: 100% !important;
   display: block;
@@ -1577,7 +1577,7 @@
   color: var(--app-text-muted);
 }
 
-:deep(.room-meta .n-tag) {
+.room-meta .n-tag {
   border-radius: 0.7rem;
   padding: 0.2rem 0.55rem;
 }

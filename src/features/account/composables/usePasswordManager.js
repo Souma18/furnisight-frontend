@@ -14,10 +14,7 @@ export function usePasswordManager(emitNotify) {
   const isLoading = ref(false)
 
   async function submit() {
-    if (!form.currentPassword) {
-      if (emitNotify) emitNotify(t('account.security.currentRequired'), 'error')
-      return
-    }
+
     if (!form.newPassword || form.newPassword !== form.confirmPassword) {
       if (emitNotify) emitNotify(t('account.security.confirmMismatch'), 'error')
       return

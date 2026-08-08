@@ -853,7 +853,8 @@
       "empty": "No matching products yet.",
       "searchMatched": "Products matching search",
       "searchEmpty": "No matching products found.",
-      "all": "All"
+      "all": "All",
+      "showAllRooms": "Show furniture from other rooms"
     },
     "overlay": {
       "uploadStart": "Upload an image to begin",

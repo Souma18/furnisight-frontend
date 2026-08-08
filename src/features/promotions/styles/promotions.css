@@ -378,12 +378,26 @@
 }
 
 .voucher-rail {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(135, 145, 160, 0.4) transparent;
 }
 
 .voucher-rail::-webkit-scrollbar {
-  display: none;
+  height: 6px;
+}
+
+.voucher-rail::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.voucher-rail::-webkit-scrollbar-thumb {
+  background: rgba(135, 145, 160, 0.4);
+  border-radius: 4px;
+}
+
+.voucher-rail::-webkit-scrollbar-thumb:hover {
+  background: rgba(135, 145, 160, 0.6);
 }
 
 .voucher-card {

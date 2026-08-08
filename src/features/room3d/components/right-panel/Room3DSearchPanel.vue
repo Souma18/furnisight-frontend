@@ -52,7 +52,7 @@ const { t } = useI18n();
         style="cursor: pointer; width: 16px; height: 16px; accent-color: var(--color-primary, #667eea);"
       />
       <label for="show-all-rooms" style="cursor: pointer; font-size: 13px; color: var(--text-color, #4a5568); user-select: none;">
-        Hiển thị đồ nội thất từ các phòng khác
+        {{ t("room3d.products.showAllRooms") }}
       </label>
     </div>
 
