@@ -369,7 +369,7 @@ function downloadAttachment(file) {
         <div class="cm-modal-body">
           <div class="cdp-gallery-search">
             <AppIcon name="search" :size="15" />
-            <AppInput v-model="mediaSearch" type="search" :placeholder="mediaSearchPlaceholder" />
+            <input v-model="mediaSearch" type="search" :placeholder="mediaSearchPlaceholder" />
           </div>
 
           <div class="cdp-gallery-date-row">

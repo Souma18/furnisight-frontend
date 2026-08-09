@@ -1,5 +1,4 @@
 <script setup>
-import AppInput from '@shared/ui/AppInput.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 const search = defineModel('search', { type: String, default: '' })
@@ -11,8 +10,8 @@ const period = defineModel('period', { type: String, default: 'today' })
 <template>
   <div class="filter-bar">
     <div class="filter-search">
-      <AppIcon name="search" :size="16" />
-      <AppInput v-model="search" type="text" placeholder="Tìm theo tên admin, IP, hành động..." />
+      <AppIcon name="search" :size="15" />
+      <input v-model="search" type="text" placeholder="Tìm theo tên admin, IP, hành động..." />
     </div>
     <select v-model="type" class="filter-select">
       <option value="all">Tất cả loại</option>

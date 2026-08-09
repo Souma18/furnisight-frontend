@@ -14,7 +14,7 @@ const { t } = useI18n()
       <p class="newsletter-sub">{{ t('home.newsletter.subtitle') }}</p>
     </div>
     <form class="newsletter-form" @submit.prevent>
-      <AppInput class="newsletter-input" type="email" :placeholder="t('home.newsletter.placeholder')" />
+      <input class="newsletter-input" type="email" :placeholder="t('home.newsletter.placeholder')" />
       <AppButton class="newsletter-btn" type="submit">{{ t('home.newsletter.submit') }}</AppButton>
     </form>
   </div>

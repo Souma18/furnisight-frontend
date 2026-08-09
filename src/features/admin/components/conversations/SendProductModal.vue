@@ -98,7 +98,7 @@ function getProductStock(p) {
         <div class="sp-body" @scroll="onScroll">
           <div class="sp-search-wrap">
             <AppIcon name="search" />
-            <AppInput v-model="searchQuery" type="text" placeholder="Tìm theo tên, SKU, danh mục..." />
+            <input v-model="searchQuery" type="text" placeholder="Tìm theo tên, SKU, danh mục..." />
           </div>
 
           <div class="sp-cats">

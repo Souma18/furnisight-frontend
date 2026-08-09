@@ -132,7 +132,7 @@ function handleUnlayer() {
         </label>
         <div class="form-row">
           <label>Tiêu đề thông báo
-            <AppInput v-model="form.notificationTitle" placeholder="Bạn vừa nhận voucher mới" class="large-input"/>
+            <AppInput v-model="form.notificationTitle" placeholder="Bạn vừa nhận voucher mới"/>
           </label>
           <label>Trạng thái
             <select v-model="form.active">

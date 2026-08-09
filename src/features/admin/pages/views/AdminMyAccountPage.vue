@@ -145,8 +145,8 @@ const menuItems = [
       <template v-else-if="activeTab === 'profile'">
         <div class="form-section-title"><AppIcon name="user" :size="16" />Thông tin cá nhân</div>
         <div class="form-grid">
-          <div class="form-group full"><label class="form-label">Họ và tên</label><AppInput v-model="profile.displayName" class="form-input" /></div>
-          <div class="form-group"><label class="form-label">Email</label><AppInput v-model="profile.email" class="form-input" readonly /></div>
+          <div class="form-group full"><label class="form-label">Họ và tên</label><AppInput v-model="profile.displayName" /></div>
+          <div class="form-group"><label class="form-label">Email</label><AppInput v-model="profile.email" readonly /></div>
           <div class="form-group"><label class="form-label">Ngày sinh</label><input v-model="profile.birthday" class="form-input" type="date" /></div>
           <div class="form-group">
             <label class="form-label">Giới tính</label>

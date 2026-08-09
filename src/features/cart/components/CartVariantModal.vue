@@ -61,7 +61,7 @@ const emit = defineEmits(['close', 'save', 'change-qty', 'set-qty'])
             <span>Số lượng</span>
             <div class="modal-qty">
               <AppButton type="button" :disabled="loading" @click="emit('change-qty', -1)">−</AppButton>
-              <AppInput
+              <input
                 :value="activeDraft.qty"
                 type="number"
                 inputmode="numeric"

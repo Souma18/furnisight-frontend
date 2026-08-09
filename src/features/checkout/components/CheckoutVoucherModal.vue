@@ -54,7 +54,7 @@ function handleApplyCode() {
 
       <div class="co-modal-body">
         <div style="display: flex; gap: 0.45rem; margin-bottom: 0.75rem">
-          <AppInput
+          <input
             v-model="codeInput"
             class="co-opt-input"
             type="text"

@@ -157,7 +157,7 @@ const formatPrice = PriceFormatter.format
             <span>{{ t('account.cart.quantity') }}</span>
             <div class="modal-qty">
               <AppButton type="button" :disabled="editorLoading" @click="changeDraftQty(-1)">−</AppButton>
-              <AppInput
+              <input
                 :value="activeDraft.qty"
                 type="number"
                 inputmode="numeric"

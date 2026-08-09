@@ -100,7 +100,7 @@ onUnmounted(() => {
       </div>
       <div v-if="searchOpen" class="clp-search">
         <AppIcon name="search" />
-        <AppInput v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
+        <input v-model="store.filters.query" type="text" placeholder="Tìm tên, email..." />
       </div>
       <div class="clp-filter-row">
         <select

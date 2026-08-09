@@ -108,7 +108,7 @@ function selectShipping(id) {
     <div class="co-shop-options">
       <div class="co-opt-row">
         <span class="co-opt-label">{{ $t('checkout.shop.note') }}</span>
-        <AppInput
+        <input
           class="co-opt-input"
           type="text"
           :placeholder="$t('checkout.shop.notePlaceholder')"

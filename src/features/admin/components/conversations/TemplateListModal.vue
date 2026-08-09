@@ -75,7 +75,7 @@ async function deleteTemplate(id) {
         <div class="tpl-toolbar">
           <div class="tpl-search">
             <AppIcon name="search" />
-            <AppInput v-model="searchQuery" type="text" placeholder="Tìm tên, nội dung template..." />
+            <input v-model="searchQuery" type="text" placeholder="Tìm tên, nội dung template..." />
           </div>
           <select v-model="filterCategory" class="tpl-cat-select">
             <option value="all">Tất cả danh mục</option>

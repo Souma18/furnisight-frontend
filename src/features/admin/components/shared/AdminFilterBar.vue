@@ -1,5 +1,4 @@
 <script setup>
-import AppInput from '@shared/ui/AppInput.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
 defineProps({
@@ -14,7 +13,7 @@ const emit = defineEmits(['update:search'])
   <div class="filter-bar">
     <div class="filter-search">
       <AppIcon name="search" :size="15" />
-      <AppInput
+      <input
         :value="search"
         type="text"
         :placeholder="placeholder"
