@@ -182,7 +182,7 @@ onBeforeUnmount(() => {
       </div>
       <AppFooter v-if="!isRoom3DPage && !isAccountPage && !isAdminPage" />
     </main>
-    <ChatWidget v-if="chatWidgetReady && !isRoom3DPage && !isAdminPage" />
+    <ChatWidget v-if="authStore.isAuthenticated && chatWidgetReady && !isRoom3DPage && !isAdminPage" />
     <Transition name="back-to-top">
       <button
         v-if="showBackToTop && !isRoom3DPage && !isAdminPage"

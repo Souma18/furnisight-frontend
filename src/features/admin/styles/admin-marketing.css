@@ -131,6 +131,8 @@
 .modal-unlayer .actions { display: flex; gap: 10px; }
 .unlayer-body { padding: 0 !important; overflow: hidden; background: var(--cream); flex-grow: 1; }
 .large-input { font-size: 16px; padding: 12px; font-weight: 600; }
+.app-input-wrapper.large-input { padding: 0 !important; }
+.app-input-wrapper.large-input .app-input { font-size: 16px; padding: 12px; font-weight: 600; }
 .large-textarea { font-size: 15px; padding: 12px; line-height: 1.6; resize: vertical; }
 .user-picker-wrapper { background: var(--cream); padding: 15px; border-radius: 6px; margin-bottom: 15px; border: 1px solid var(--border); }
 

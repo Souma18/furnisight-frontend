@@ -252,9 +252,18 @@ watch(reloadTick, load)
 .stock-num { font-size: 12px; font-weight: 600; color: var(--text); min-width: 24px; text-align: right; }
 
 /* Threshold input */
-.inventory-threshold-input {
+.inventory-threshold-input.app-input-wrapper {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  height: auto !important;
+  min-height: 0 !important;
   width: 60px;
+}
+.inventory-threshold-input.app-input-wrapper :deep(.app-input) {
   height: 28px;
+  min-height: 28px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--white);
@@ -263,7 +272,10 @@ watch(reloadTick, load)
   font-size: 12px;
   padding: 0 6px;
 }
-.inventory-threshold-input:focus { outline: none; border-color: var(--gold); }
+.inventory-threshold-input.app-input-wrapper :deep(.app-input:focus) { 
+  outline: none; 
+  border-color: var(--gold); 
+}
 
 /* Badges */
 .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }

@@ -405,6 +405,7 @@ select {
 }
 .ghost {
   background: var(--account-ghost-bg);
+  color: var(--auth-text-primary, #333);
 }
 .primary {
   color: var(--color-white);
