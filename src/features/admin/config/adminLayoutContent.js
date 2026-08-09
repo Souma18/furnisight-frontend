@@ -1,0 +1,32 @@
+export const ADMIN_SIM_USERS = {
+  super: {
+    id: 'ADM001',
+    av: 'AD',
+    name: 'Admin Chính',
+    role: 'Super Administrator',
+    email: 'admin@furnisight.store',
+    roleTag: 'Super Admin',
+    rtClass: 'rt-super',
+    roleIcon: 'crown',
+  },
+  manager: {
+    id: 'ADM002',
+    av: 'MH',
+    name: 'Trần Minh Hoàng',
+    role: 'Manager',
+    email: 'hoang@furnisight.store',
+    roleTag: 'Manager',
+    rtClass: 'rt-manager',
+    roleIcon: 'shield',
+  },
+  staff: {
+    id: 'ADM003',
+    av: 'TH',
+    name: 'Nguyễn Thu Hà',
+    role: 'Staff',
+    email: 'ha@furnisight.store',
+    roleTag: 'Staff',
+    rtClass: 'rt-staff',
+    roleIcon: 'user',
+  },
+}

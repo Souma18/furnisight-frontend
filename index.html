@@ -2,9 +2,25 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/brand/furnisight-logo-mark.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>interior-3d-frontend</title>
+    <title>FurniSight</title>
+    <script>
+      ;(() => {
+        const localeKey = 'furnisight:locale'
+        const locale = ['vi', 'en'].includes(localStorage.getItem(localeKey)) ? localStorage.getItem(localeKey) : 'vi'
+        document.documentElement.lang = locale
+
+        const key = 'furnisight:theme'
+        const stored = localStorage.getItem(key)
+        const preference = ['system', 'light', 'dark'].includes(stored) ? stored : 'system'
+        const system = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        const theme = preference === 'system' ? system : preference
+        document.documentElement.dataset.theme = theme
+        document.documentElement.classList.add(`theme-${theme}`)
+        document.documentElement.style.colorScheme = theme
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

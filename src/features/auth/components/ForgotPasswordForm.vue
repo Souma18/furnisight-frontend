@@ -1,133 +1,66 @@
 <script setup>
-defineProps({
-  form: {
-    type: Object,
-    required: true,
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  error: {
-    type: String,
-    default: '',
-  },
-})
+import AppButton from '@shared/ui/AppButton.vue'
+import AppInput from '@shared/ui/AppInput.vue'
+import { useForgotPasswordForm } from '../composables/useForgotPasswordForm'
+import PasswordField from './PasswordField.vue'
 
-defineEmits(['submit', 'back', 'send-code'])
+const { form, loading, errorMessage, goBackToLogin, sendCode, submitForgot } = useForgotPasswordForm()
 </script>
 
 <template>
-  <form class="form" @submit.prevent="$emit('submit')">
+  <form class="form" @submit.prevent="submitForgot">
     <div class="intro">
-      <p class="title">Đặt lại mật khẩu</p>
-      <p class="desc" v-if="form.step === 1">Chọn phương thức và nhận mã xác nhận.</p>
-      <p class="desc" v-else>Tạo mật khẩu mới cho tài khoản của bạn.</p>
+      <p class="title">{{ $t('auth.forgot.title') }}</p>
+      <p class="desc" v-if="form.step !== 1">{{ $t('auth.forgot.desc') }}</p>
     </div>
 
     <template v-if="form.step === 1">
-      <div class="method-toggle">
-        <button type="button" :class="{ active: form.method === 'EMAIL' }" @click="form.method = 'EMAIL'">Email</button>
-        <button type="button" :class="{ active: form.method === 'PHONE' }" @click="form.method = 'PHONE'">Số điện thoại</button>
-      </div>
-
-      <label>{{ form.method === 'EMAIL' ? 'Địa chỉ email' : 'Số điện thoại' }}</label>
+      <label>{{ $t('auth.forgot.email') }}</label>
       <div class="input-with-btn">
-        <input 
+        <AppInput 
           v-model="form.destination" 
-          :type="form.method === 'EMAIL' ? 'email' : 'tel'" 
-          :placeholder="form.method === 'EMAIL' ? 'hello@email.com' : '0901 234 567'" 
+          type="email"
+          :placeholder="$t('auth.login.emailPlaceholder')"
           required 
         />
-        <button type="button" class="send-btn" @click="$emit('send-code')" :disabled="loading || !form.destination">
-          {{ (loading && !form.code) ? 'Đang gửi...' : 'Gửi mã' }}
-        </button>
+        <AppButton variant="unstyled" type="button" class="send-btn" @click="sendCode" :disabled="loading || !form.destination">
+          {{ (loading && !form.code) ? $t('auth.forgot.sending') : $t('auth.forgot.sendCode') }}
+        </AppButton>
       </div>
 
-      <label>Mã xác nhận</label>
-      <input v-model="form.code" type="text" placeholder="Nhập mã 6 số" required />
+      <label>{{ $t('auth.forgot.code') }}</label>
+      <AppInput v-model="form.code" type="text" :placeholder="$t('auth.forgot.codePlaceholder')" required />
     </template>
 
     <template v-else>
-      <label>Mật khẩu mới</label>
-      <input v-model="form.newPassword" type="password" placeholder="Tối thiểu 8 ký tự" minlength="8" required />
+      <label>{{ $t('auth.forgot.newPassword') }}</label>
+      <PasswordField
+        v-model="form.newPassword"
+        :placeholder="$t('auth.register.passwordPlaceholder')"
+        autocomplete="new-password"
+        minlength="8"
+        required
+      />
     </template>
 
-    <p v-if="error" class="error">{{ error }}</p>
+    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
     
-    <button class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
-      {{ loading ? 'Đang xử lý...' : (form.step === 1 ? 'Xác nhận mã' : 'Đổi mật khẩu') }}
-    </button>
-    <button class="outline-btn" type="button" @click="$emit('back')">
-      ← Quay lại {{ form.step === 1 ? 'đăng nhập' : '' }}
-    </button>
+    <AppButton class="submit-btn" type="submit" :disabled="loading || (form.step === 1 && !form.code)">
+      {{ loading ? $t('auth.login.processing') : (form.step === 1 ? $t('auth.forgot.submitCode') : $t('auth.forgot.submitPassword')) }}
+    </AppButton>
+    <AppButton class="outline-btn" type="button" @click="goBackToLogin">
+      ← {{ form.step === 1 ? $t('auth.forgot.backToLogin') : $t('auth.forgot.back') }}
+    </AppButton>
   </form>
 </template>
 
 <style scoped>
-.form {
-  display: grid;
-  gap: 0.55rem;
-}
-.intro .title {
-  margin: 0 0 0.2rem;
-  color: var(--auth-text-primary);
-  font-weight: 600;
-}
-.intro .desc {
-  margin: 0;
-  color: var(--auth-text-secondary);
-  font-size: 0.83rem;
-}
-label {
-  color: var(--auth-text-secondary);
-  font-size: 0.76rem;
-  margin-top: 0.2rem;
-}
-input {
-  min-height: 2.55rem;
-  border-radius: var(--auth-radius-md);
-  border: 1px solid var(--auth-border);
-  background: var(--auth-surface-secondary);
-  color: var(--auth-text-primary);
-  padding: 0 0.72rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--auth-focus-ring);
-}
-
-.method-toggle {
-  display: flex;
-  background: var(--auth-surface-secondary);
-  border-radius: var(--auth-radius-md);
-  padding: 0.2rem;
-  margin-bottom: 0.2rem;
-}
-.method-toggle button {
-  flex: 1;
-  border: none;
-  background: transparent;
-  padding: 0.45rem;
-  color: var(--auth-text-secondary);
-  border-radius: var(--auth-radius-sm);
-  cursor: pointer;
-  transition: all 0.2s;
-  font-size: 0.85rem;
-}
-.method-toggle button.active {
-  background: var(--auth-surface);
-  color: var(--auth-text-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-}
 
 .input-with-btn {
   display: flex;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
-.input-with-btn input {
+.input-with-btn :deep(input) {
   flex: 1;
   min-width: 0; /* prevent input from blowing out flex container */
 }
@@ -152,20 +85,8 @@ input:focus {
   cursor: not-allowed;
 }
 
-.submit-btn {
-  min-height: 2.7rem;
-  border: none;
-  border-radius: var(--auth-radius-md);
-  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 0.5rem;
-}
-.submit-btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
+
+
 .outline-btn {
   min-height: 2.45rem;
   border-radius: var(--auth-radius-md);
@@ -174,9 +95,5 @@ input:focus {
   color: var(--auth-text-secondary);
   cursor: pointer;
 }
-.error {
-  margin: 0;
-  color: #b91c1c;
-  font-size: 0.8rem;
-}
+
 </style>

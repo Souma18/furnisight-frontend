@@ -1,31 +1,53 @@
-:root {
-  --text: #374151;
-  --text-muted: #6b7280;
-  --text-heading: #111827;
-  --bg: #ffffff;
-  --border: #e5e7eb;
-  --accent: #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-soft: rgba(124, 58, 237, 0.08);
-  --radius: 8px;
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+@import './design-tokens.css';
 
-  /* Auth tokens */
+:root {
+  --text: var(--app-text);
+  --text-muted: var(--app-text-muted);
+  --text-heading: var(--app-heading);
+  --bg: var(--app-bg);
+  --border: var(--app-border);
+  --accent: var(--app-gold);
+  --accent-hover: var(--brand-gold-400);
+  --accent-soft: var(--app-gold-soft);
+  --radius: 8px;
+  --sans: var(--font-sans);
+  --mono: var(--font-mono);
   --auth-bg-overlay: rgba(11, 57, 84, 0.55);
-  --auth-surface: #ffffff;
-  --auth-surface-secondary: #f8fafc;
-  --auth-border: #e2e8f0;
-  --auth-text-primary: #0f172a;
-  --auth-text-secondary: #64748b;
+  --auth-surface: var(--app-surface);
+  --auth-surface-secondary: var(--app-surface-soft);
+  --auth-border: var(--app-border);
+  --auth-text-primary: var(--app-heading);
+  --auth-text-secondary: var(--app-text-muted);
   --auth-brand-start: #947458;
   --auth-brand-end: #ffb128;
-  --auth-focus-ring: rgba(255, 177, 40, 0.35);
+  --auth-focus-ring: var(--app-focus-ring);
   --auth-success: #27ae60;
   --auth-radius-sm: 8px;
   --auth-radius-md: 10px;
   --auth-radius-lg: 14px;
   --auth-radius-xl: 18px;
+  --account-bg: var(--app-bg);
+  --account-surface: var(--app-surface);
+  --account-border: var(--app-border);
+  --account-text-muted: var(--app-text-muted);
+  --account-text-strong: var(--app-heading);
+  --account-stat-default: #0f3f5c;
+  --account-stat-delivering: #9a744f;
+  --account-stat-success: var(--app-success);
+  --account-stat-danger: var(--app-danger);
+  --account-badge: #9a744f;
+  --account-ghost-bg: var(--app-surface-soft);
+  --account-toast-bg: #0f3f5c;
+  --account-toast-error: #b91c1c;
+  --color-white: #ffffff;
+  --account-field-bg: var(--app-surface);
+  --account-field-border: var(--app-border);
+  --account-field-text: var(--app-text);
+  --account-field-placeholder: color-mix(in srgb, var(--app-text-muted) 75%, transparent);
+  --account-field-focus: var(--app-focus-ring);
+  --account-upload-bg: #0f3f5c;
+  --account-upload-text: #ffffff;
+  --account-upload-hover: #0c3148;
 
   font: 16px/1.5 var(--sans);
   color: var(--text);
@@ -36,25 +58,20 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #e5e7eb;
-    --text-muted: #9ca3af;
-    --text-heading: #f9fafb;
-    --bg: #111827;
-    --border: #374151;
-    --accent: #a78bfa;
-    --accent-hover: #c4b5fd;
-    --accent-soft: rgba(167, 139, 250, 0.12);
-
-    --auth-bg-overlay: rgba(2, 20, 34, 0.68);
-    --auth-surface: #0f172a;
-    --auth-surface-secondary: #111f35;
-    --auth-border: #31425e;
-    --auth-text-primary: #e2e8f0;
-    --auth-text-secondary: #94a3b8;
-    --auth-focus-ring: rgba(255, 177, 40, 0.4);
-  }
+[data-theme='dark'] {
+  color-scheme: dark;
+  --auth-bg-overlay: rgba(2, 20, 34, 0.72);
+  --auth-brand-start: #c8923a;
+  --auth-brand-end: #e2b64f;
+  --auth-success: #4ade80;
+  --account-stat-default: #7dd3fc;
+  --account-stat-delivering: #fbbf24;
+  --account-badge: #fbbf24;
+  --account-toast-bg: #0b3954;
+  --account-toast-error: #dc2626;
+  --account-upload-bg: #1e293b;
+  --account-upload-text: #cbd5e1;
+  --account-upload-hover: #334155;
 }
 
 *,
@@ -65,6 +82,24 @@
 
 body {
   margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  /* Hide scrollbar but keep functionality */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
 }
 
 h1,
@@ -91,7 +126,7 @@ a {
 
 a:hover {
   color: var(--accent-hover);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 code {

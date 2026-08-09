@@ -1,38 +1,128 @@
 <script setup>
-import { computed, onMounted, unref } from 'vue'
+import '../styles/room3d.css'
+import AppButton from '@shared/ui/AppButton.vue'
+import { computed, defineAsyncComponent, onMounted, ref, unref } from 'vue'
 import { NConfigProvider } from 'naive-ui'
+import { useI18n } from 'vue-i18n'
 import { useRoom3D } from '../composables/useRoom3D'
-import Room3DTopbar from '../components/Room3DTopbar.vue'
-import Room3DLeftPanel from '../components/Room3DLeftPanel.vue'
-import Room3DCanvas from '../components/Room3DCanvas.vue'
-import Room3DRightPanel from '../components/Room3DRightPanel.vue'
-import CheckoutModal from '../components/CheckoutModal.vue'
-import SuccessModal from '../components/SuccessModal.vue'
+import Room3DTopbar from '../components/layout/Room3DTopbar.vue'
+import Room3DLeftPanel from '../components/left-panel/Room3DLeftPanel.vue'
+import Room3DRightPanel from '../components/right-panel/Room3DRightPanel.vue'
+import AppIcon from '@shared/ui/AppIcon.vue'
 
+const Room3DCanvas = defineAsyncComponent(() => import('../components/canvas/Room3DCanvas.vue'))
+
+const { t } = useI18n()
 const vm = useRoom3D()
 const {
   mode,
   roomTemplates,
   selectedRoomType,
   selectedRoom,
+  imageType,
+  meshQuality,
   quality,
   isAnalyzing,
+  predictionStatus,
+  predictionResponseType,
+  aiRecognitionLabel,
+  aiRecognitionConfidence,
   isLoadingTemplates,
   projectName,
   selectedCategory,
   searchKeyword,
   filteredProducts,
   cartItems,
+  sceneItems,
   placedProductIds,
+  cartProductIds,
   cartTotal,
   cartCount,
-  isCheckoutOpen,
-  isSuccessOpen,
-  orderCode,
+  productFilters,
+  uploadError,
+  recommendationError,
+  showAllRooms,
 } = vm
 
+const canvasRef = ref(null)
+const mobileView = ref('canvas')
+const isRoomModelLoading = ref(false)
+const leftPanelWidth = ref(264)
+const rightPanelWidth = ref(324)
+
+function startResizeLeftPanel(e) {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = leftPanelWidth.value
+
+  function onMouseMove(moveEvent) {
+    const delta = moveEvent.clientX - startX
+    let newWidth = startWidth + delta
+    if (newWidth < 220) newWidth = 220
+    if (newWidth > 500) newWidth = 500
+    leftPanelWidth.value = newWidth
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+    document.body.style.cursor = ''
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+  document.body.style.cursor = 'ew-resize'
+}
+
+function startResizeRightPanel(e) {
+  e.preventDefault()
+  const startX = e.clientX
+  const startWidth = rightPanelWidth.value
+
+  function onMouseMove(moveEvent) {
+    const delta = startX - moveEvent.clientX
+    let newWidth = startWidth + delta
+    if (newWidth < 280) newWidth = 280
+    if (newWidth > 700) newWidth = 700
+    rightPanelWidth.value = newWidth
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mousemove', onMouseMove)
+    document.removeEventListener('mouseup', onMouseUp)
+    document.body.style.cursor = ''
+  }
+
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', onMouseUp)
+  document.body.style.cursor = 'ew-resize'
+}
 const isLoadingTemplatesValue = computed(() => Boolean(unref(isLoadingTemplates)))
-const orderCodeValue = computed(() => String(unref(orderCode) ?? ''))
+const isRoomSelectionLocked = computed(
+  () => Boolean(unref(isLoadingTemplates)) || Boolean(unref(isAnalyzing)) || isRoomModelLoading.value,
+)
+
+// Tự động tính số cột sản phẩm dựa trên chiều rộng panel phải
+const productColumns = computed(() => {
+  if (rightPanelWidth.value >= 540) return 3
+  if (rightPanelWidth.value >= 380) return 2
+  return 1
+})
+
+const workspaceViews = computed(() => [
+  { key: 'setup', label: t('room3d.workspace.setup'), icon: 'settings' },
+  { key: 'canvas', label: t('room3d.workspace.canvas'), icon: 'cube' },
+  { key: 'products', label: t('room3d.workspace.products'), icon: 'armchair' },
+])
+
+function toggleFullscreen() {
+  canvasRef.value?.toggleFullscreen?.()
+}
+
+function handleSelectRoomType(roomType) {
+  if (isRoomSelectionLocked.value) return
+  vm.selectRoomType(roomType)
+}
 
 onMounted(() => {
   vm.initRoomTemplates()
@@ -40,106 +130,105 @@ onMounted(() => {
 </script>
 
 <template>
-  <NConfigProvider>
+  <NConfigProvider style="display: contents">
     <section class="room-page">
       <Room3DTopbar
         :selected-room="selectedRoom"
+        :cart-items="cartItems"
+        :cart-total="cartTotal"
         :cart-count="cartCount"
-        @open-checkout="vm.openCheckout"
+        @open-checkout="vm.goCheckout"
+        @update-cart-qty="vm.updateCartQty"
+        @remove-product="vm.removeProductFromCart"
+        @toggle-fullscreen="toggleFullscreen"
       />
 
-      <div class="room-body">
-        <Room3DLeftPanel
+      <nav class="workspace-nav" :aria-label="t('room3d.workspace.aria')">
+        <AppButton
+          v-for="view in workspaceViews"
+          :key="view.key"
+          type="button"
+          :class="{ active: mobileView === view.key }"
+          @click="mobileView = view.key"
+        >
+          <AppIcon :name="view.icon" :size="16" />
+          <span>{{ view.label }}</span>
+        </AppButton>
+      </nav>
+
+      <div class="room-body" :data-mobile-view="mobileView" :style="{ '--left-panel-width': leftPanelWidth + 'px', '--right-panel-width': rightPanelWidth + 'px' }">
+        <div class="room-pane room-pane--setup" :class="{ active: mobileView === 'setup' }" style="position: relative;">
+          <div class="panel-resizer panel-resizer--right" @mousedown="startResizeLeftPanel"></div>
+          <Room3DLeftPanel
           :mode="mode"
           :room-templates="roomTemplates"
           :selected-room-type="selectedRoomType"
           :selected-room="selectedRoom"
+          :image-type="imageType"
+          :mesh-quality="meshQuality"
           :quality="quality"
           :is-analyzing="isAnalyzing"
+          :prediction-status="predictionStatus"
+          :prediction-response-type="predictionResponseType"
+          :prediction-label="aiRecognitionLabel"
+          :prediction-confidence="aiRecognitionConfidence"
           :is-loading-templates="isLoadingTemplatesValue"
+          :is-room-model-loading="isRoomModelLoading"
           :project-name="projectName"
-          :upload-error="vm.uploadError"
+          :upload-error="uploadError"
           @switch-mode="vm.setMode"
           @upload-image="vm.handleUploadImage"
-          @select-room-type="vm.selectRoomType"
+          @select-room-type="handleSelectRoomType"
+          @image-type-change="vm.setImageType"
+          @mesh-quality-change="vm.setMeshQuality"
           @quality-change="vm.setQuality"
           @project-name-change="projectName = $event"
-        />
+          />
+        </div>
 
-        <Room3DCanvas
-          :mode="mode"
-          :is-analyzing="isAnalyzing"
-          :selected-room="selectedRoom"
-          :placed-product-ids="placedProductIds"
-          @add-product="vm.addProductToCart"
-          @remove-product="vm.removeProductFromCart"
-        />
+        <div class="room-pane room-pane--canvas" :class="{ active: mobileView === 'canvas' }">
+          <Room3DCanvas
+            ref="canvasRef"
+            :mode="mode"
+            :is-analyzing="isAnalyzing"
+            :selected-room="selectedRoom"
+            :scene-items="sceneItems"
+            :cart-product-ids="placedProductIds"
+            :available-products="filteredProducts"
+            @add-product="vm.addProductToCart"
+            @add-scene-product="vm.addProductToScene"
+            @remove-scene-item="vm.removeProductFromScene"
+            @update-variant="vm.handleUpdateVariant"
+            @room-loading-change="isRoomModelLoading = $event"
+          />
+        </div>
 
-        <Room3DRightPanel
+        <div class="room-pane room-pane--products" :class="{ active: mobileView === 'products' }" style="position: relative;">
+          <div class="panel-resizer panel-resizer--left" @mousedown="startResizeRightPanel"></div>
+          <Room3DRightPanel
           :selected-room="selectedRoom"
           :selected-category="selectedCategory"
           :search-keyword="searchKeyword"
-          :product-filters="vm.productFilters"
+          :product-filters="productFilters"
           :filtered-products="filteredProducts"
+          :recommendation-error="recommendationError"
           :cart-items="cartItems"
-          :placed-product-ids="placedProductIds"
+          :placed-product-ids="cartProductIds"
           :cart-total="cartTotal"
           :format-currency="vm.formatCurrency"
-          :product-columns="2"
-          :product-card-step="1"
+          :product-columns="productColumns"
+          :product-card-step="productColumns > 1 ? 0 : 1"
+          :show-all-rooms="showAllRooms"
           @search-change="vm.setSearchKeyword"
           @category-change="vm.setCategory"
+          @toggle-show-all-rooms="vm.toggleShowAllRooms"
           @add-product="vm.addProductToCart"
+          @open-product="vm.openProductDetail"
           @remove-product="vm.removeProductFromCart"
-          @open-checkout="vm.openCheckout"
-        />
+          @open-checkout="vm.goCheckout"
+          />
+        </div>
       </div>
     </section>
-
-    <CheckoutModal
-      :show="isCheckoutOpen"
-      :cart-items="cartItems"
-      :cart-total="cartTotal"
-      :format-currency="vm.formatCurrency"
-      @update:show="(show) => (show ? vm.openCheckout() : vm.closeCheckout())"
-      @submit="vm.submitCheckoutMock"
-    />
-
-    <SuccessModal
-      :show="isSuccessOpen"
-      :order-code="orderCodeValue"
-      @update:show="(show) => (!show ? vm.closeSuccess() : null)"
-    />
   </NConfigProvider>
 </template>
-
-<style scoped>
-.room-page {
-  height: 100svh;
-  overflow: hidden;
-  background: #f4f1eb;
-}
-.room-body {
-  display: grid;
-  grid-template-columns: 250px minmax(0, 1fr) 300px;
-  height: calc(100% - 56px);
-  min-height: 0;
-}
-
-@media (max-width: 1240px) {
-  .room-body {
-    grid-template-columns: 230px minmax(0, 1fr) 280px;
-  }
-}
-
-@media (max-width: 980px) {
-  .room-page {
-    height: auto;
-    min-height: 100svh;
-  }
-  .room-body {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-}
-</style>

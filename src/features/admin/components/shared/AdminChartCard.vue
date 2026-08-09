@@ -1,0 +1,22 @@
+<script setup>
+defineProps({
+  title: { type: String, required: true },
+  subtitle: { type: String, default: '' },
+  flexible: { type: Boolean, default: false },
+})
+</script>
+
+<template>
+  <div class="chart-card">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">{{ title }}</div>
+        <div v-if="subtitle" class="chart-sub">{{ subtitle }}</div>
+      </div>
+      <slot name="actions" />
+    </div>
+    <div class="chart-wrap" :class="{ 'chart-wrap--flex': flexible }">
+      <slot />
+    </div>
+  </div>
+</template>

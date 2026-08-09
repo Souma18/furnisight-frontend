@@ -1,39 +1,49 @@
 <script setup>
-import { useAuthViewState } from '../composables/useAuthViewState'
-import { useAuthForms } from '../composables/useAuthForms'
+import AppButton from '@shared/ui/AppButton.vue'
+import { onBeforeUnmount } from 'vue'
+import { provideAuthViewState, useAuthViewState } from '../composables/useAuthViewState'
 import AuthTabs from './AuthTabs.vue'
 import LoginForm from './LoginForm.vue'
 import RegisterForm from './RegisterForm.vue'
 import ForgotPasswordForm from './ForgotPasswordForm.vue'
 import AuthSuccessState from './AuthSuccessState.vue'
+import VerifyEmailForm from './VerifyEmailForm.vue'
 import AppIcon from '@shared/ui/AppIcon.vue'
+import '../assets/auth-forms.css'
 
 const props = defineProps({
   embedded: {
     type: Boolean,
     default: false,
   },
+  initialView: {
+    type: String,
+    default: 'login',
+  },
 })
 
 const emit = defineEmits(['close', 'authenticated'])
+let authenticatedTimer = null
 
-const authViewState = useAuthViewState()
+const authViewState = useAuthViewState(props.initialView)
+provideAuthViewState(authViewState)
 const { AUTH_VIEWS, activeView, successState, showTabs, setView } = authViewState
 
-const {
-  loading,
-  errorMessage,
-  showPassword,
-  loginForm,
-  registerForm,
-  forgotForm,
-  passwordStrength,
-  submitLogin,
-  submitRegister,
-  submitForgot,
-  handleSendCode,
-  handleTabChange,
-} = useAuthForms({ emit, props, authViewState })
+function handleTabChange(tab) {
+  setView(tab)
+}
+
+function handleAuthenticated(payload = {}) {
+  if (authenticatedTimer) clearTimeout(authenticatedTimer)
+  authenticatedTimer = setTimeout(() => {
+    authenticatedTimer = null
+    emit('authenticated', payload)
+  }, 500)
+}
+
+onBeforeUnmount(() => {
+  if (authenticatedTimer) clearTimeout(authenticatedTimer)
+})
 </script>
 
 <template>
@@ -47,12 +57,12 @@ const {
         <div class="brand-row">
           <div class="brand-icon"><AppIcon name="lock" :size="14" :stroke-width="2" /></div>
           <div>
-            <p class="brand-title">LUXNEST</p>
-            <p class="brand-subtitle">Nội thất cao cấp</p>
+            <p class="brand-title">{{ $t('auth.common.brand') }}</p>
+            <p class="brand-subtitle">{{ $t('auth.common.brandSubtitle') }}</p>
           </div>
-          <button v-if="embedded" class="close-btn" type="button" @click="$emit('close')">
-            <AppIcon name="close" :size="14" :stroke-width="2" />
-          </button>
+          <AppButton v-if="embedded" variant="unstyled" class="close-btn" type="button" :aria-label="$t('auth.common.close')" @click="$emit('close')">
+            <AppIcon name="close" :size="20" :stroke-width="2.5" />
+          </AppButton>
         </div>
         <AuthTabs v-if="showTabs" :model-value="activeView" @update:model-value="handleTabChange" />
       </div>
@@ -61,36 +71,17 @@ const {
         <Transition name="form-fade" mode="out-in">
           <LoginForm
             v-if="activeView === AUTH_VIEWS.LOGIN"
-            :form="loginForm"
-            :loading="loading"
-            :error="errorMessage"
-            :show-password="showPassword"
-            @submit="submitLogin"
-            @forgot="setView(AUTH_VIEWS.FORGOT)"
-            @toggle-password="showPassword = !showPassword"
+            :embedded="embedded"
+            @authenticated="handleAuthenticated"
           />
-          <RegisterForm
-            v-else-if="activeView === AUTH_VIEWS.REGISTER"
-            :form="registerForm"
-            :loading="loading"
-            :error="errorMessage"
-            :password-strength="passwordStrength"
-            @submit="submitRegister"
-          />
-          <ForgotPasswordForm
-            v-else-if="activeView === AUTH_VIEWS.FORGOT"
-            :form="forgotForm"
-            :loading="loading"
-            :error="errorMessage"
-            @submit="submitForgot"
-            @send-code="handleSendCode"
-            @back="setView(AUTH_VIEWS.LOGIN)"
-          />
+          <RegisterForm v-else-if="activeView === AUTH_VIEWS.REGISTER" />
+          <ForgotPasswordForm v-else-if="activeView === AUTH_VIEWS.FORGOT" />
+          <VerifyEmailForm v-else-if="activeView === AUTH_VIEWS.VERIFY" />
           <AuthSuccessState
             v-else
             :title="successState.title"
             :message="successState.message"
-            :loading="loading || successState.mode === AUTH_VIEWS.LOGIN"
+            :loading="successState.loading"
           />
         </Transition>
       </div>
@@ -100,13 +91,18 @@ const {
 
 <style scoped>
 .auth-shell {
-  min-height: 580px;
-  border-radius: var(--auth-radius-lg);
-  background: var(--auth-bg-overlay);
+  flex: 1;
+  width: 100%;
+  min-height: calc(100svh - 56px);
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 177, 40, 0.22), transparent 28%),
+    var(--auth-bg-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  box-sizing: border-box;
 }
 
 .auth-shell--embedded {
@@ -165,13 +161,17 @@ const {
 
 .close-btn {
   margin-left: auto;
-  width: 1.8rem;
-  height: 1.8rem;
+  width: 2.35rem;
+  height: 2.35rem;
   border-radius: var(--auth-radius-sm);
   border: 1px solid var(--auth-border);
   background: var(--auth-surface-secondary);
   color: var(--auth-text-secondary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
 }
 
 .auth-body {

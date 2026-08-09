@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUXNEST – Nội thất thông minh</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #12202e;
+    --navy-light: #1c3148;
+    --gold: #c9922a;
+    --gold-light: #e5b84a;
+    --gold-pale: #f5e6c8;
+    --cream: #faf6f0;
+    --cream-dark: #f0e9dd;
+    --text-dark: #1a1a1a;
+    --text-mid: #555;
+    --text-light: #888;
+    --white: #ffffff;
+    --radius: 12px;
+    --radius-lg: 20px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text-dark);
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--navy);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px;
+    height: 58px;
+    box-shadow: 0 2px 20px rgba(0,0,0,.35);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px; font-weight: 600; letter-spacing: 2px;
+    color: var(--white);
+  }
+
+  nav { display: flex; align-items: center; gap: 4px; }
+  nav a {
+    color: rgba(255,255,255,.75);
+    text-decoration: none;
+    font-size: 14px; font-weight: 400;
+    padding: 6px 16px; border-radius: 8px;
+    transition: all .2s;
+  }
+  nav a:hover { color: #fff; background: rgba(255,255,255,.08); }
+  nav a.active {
+    color: var(--navy);
+    background: rgba(201,146,42,.2);
+    color: var(--gold-light);
+    font-weight: 500;
+  }
+
+  .header-right { display: flex; align-items: center; gap: 10px; }
+
+  .btn-3d {
+    display: flex; align-items: center; gap: 7px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--navy); font-size: 13px; font-weight: 600;
+    padding: 8px 18px; border-radius: 22px; border: none; cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(201,146,42,.4);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-3d:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(201,146,42,.55); }
+
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,.08); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.8); font-size: 16px; text-decoration: none;
+    transition: background .2s;
+  }
+  .icon-btn:hover { background: rgba(255,255,255,.15); }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative; overflow: hidden;
+    background: var(--navy);
+    min-height: 88vh;
+    display: flex; align-items: center;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 70% at 70% 40%, rgba(201,146,42,.13) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 20% 80%, rgba(28,49,72,.8) 0%, transparent 60%);
+  }
+
+  /* Animated floating orbs */
+  .orb {
+    position: absolute; border-radius: 50%;
+    filter: blur(60px); opacity: .18;
+    animation: floatOrb 8s ease-in-out infinite alternate;
+  }
+  .orb1 { width: 350px; height: 350px; background: var(--gold); top: -80px; right: 15%; animation-delay: 0s; }
+  .orb2 { width: 250px; height: 250px; background: #3a7bd5; bottom: 10%; left: 5%; animation-delay: -3s; }
+  .orb3 { width: 180px; height: 180px; background: var(--gold-light); top: 40%; right: 5%; animation-delay: -5s; }
+
+  @keyframes floatOrb {
+    0% { transform: translate(0,0) scale(1); }
+    100% { transform: translate(20px, -30px) scale(1.1); }
+  }
+
+  .hero-content {
+    position: relative; z-index: 2;
+    max-width: 1300px; margin: 0 auto; width: 100%;
+    padding: 80px 60px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 80px;
+    align-items: center;
+  }
+
+  .hero-left {}
+
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(201,146,42,.15); border: 1px solid rgba(201,146,42,.3);
+    color: var(--gold-light); font-size: 12px; font-weight: 500; letter-spacing: 1.5px;
+    padding: 6px 14px; border-radius: 20px; margin-bottom: 24px;
+    text-transform: uppercase;
+  }
+  .hero-tag::before { content: '✦'; font-size: 10px; }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 62px; line-height: 1.1; font-weight: 300;
+    color: var(--white); margin-bottom: 20px;
+  }
+  .hero-title em { font-style: italic; color: var(--gold-light); }
+  .hero-title strong { font-weight: 600; display: block; }
+
+  .hero-sub {
+    color: rgba(255,255,255,.6); font-size: 15px; line-height: 1.7;
+    margin-bottom: 36px; max-width: 440px;
+  }
+
+  .hero-actions { display: flex; gap: 14px; flex-wrap: wrap; }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    color: var(--navy); font-size: 14px; font-weight: 600;
+    padding: 14px 28px; border-radius: 30px; border: none; cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 6px 24px rgba(201,146,42,.45);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(201,146,42,.6); }
+
+  .btn-outline {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent;
+    border: 1.5px solid rgba(255,255,255,.25);
+    color: rgba(255,255,255,.85); font-size: 14px; font-weight: 400;
+    padding: 14px 28px; border-radius: 30px; cursor: pointer;
+    text-decoration: none;
+    transition: all .2s;
+  }
+  .btn-outline:hover { border-color: var(--gold-light); color: var(--gold-light); }
+
+  .hero-stats {
+    display: flex; gap: 36px; margin-top: 48px; padding-top: 36px;
+    border-top: 1px solid rgba(255,255,255,.1);
+  }
+  .stat-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 600; color: var(--gold-light);
+    line-height: 1;
+  }
+  .stat-label { font-size: 12px; color: rgba(255,255,255,.5); margin-top: 4px; letter-spacing: .5px; }
+
+  /* Hero Right – 3D Preview card */
+  .hero-right { position: relative; }
+
+  .preview-card {
+    background: rgba(255,255,255,.06);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,.5);
+  }
+
+  .preview-card-header {
+    padding: 14px 20px;
+    background: rgba(255,255,255,.05);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .preview-dots { display: flex; gap: 6px; }
+  .preview-dots span {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(255,255,255,.2);
+  }
+  .preview-dots span:first-child { background: #ff6058; }
+  .preview-dots span:nth-child(2) { background: #ffbd2e; }
+  .preview-dots span:nth-child(3) { background: #28ca41; }
+  .preview-label {
+    font-size: 11px; color: rgba(255,255,255,.4); margin-left: 6px;
+    font-family: monospace; letter-spacing: .5px;
+  }
+  .ai-badge {
+    margin-left: auto;
+    background: linear-gradient(135deg, #7c3aed, #a855f7);
+    color: #fff; font-size: 10px; font-weight: 600; padding: 3px 10px;
+    border-radius: 10px; letter-spacing: .5px;
+  }
+
+  .preview-scene {
+    position: relative; height: 300px;
+    background: linear-gradient(180deg, #1a2535 0%, #0e1822 100%);
+    overflow: hidden;
+  }
+
+  /* Animated grid floor */
+  .grid-floor {
+    position: absolute; bottom: 0; left: -30%; width: 160%;
+    height: 200px; transform: perspective(400px) rotateX(65deg);
+    transform-origin: bottom center;
+    background-image:
+      linear-gradient(rgba(201,146,42,.2) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,146,42,.2) 1px, transparent 1px);
+    background-size: 40px 40px;
+    animation: gridMove 4s linear infinite;
+  }
+  @keyframes gridMove {
+    from { background-position: 0 0; }
+    to { background-position: 0 40px; }
+  }
+
+  /* 3D Cube decoration */
+  .cube-wrap {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -60%);
+  }
+  .cube {
+    width: 70px; height: 70px;
+    position: relative;
+    transform-style: preserve-3d;
+    animation: rotateCube 6s linear infinite;
+    transform: rotateX(-20deg) rotateY(30deg);
+  }
+  @keyframes rotateCube {
+    from { transform: rotateX(-20deg) rotateY(0deg); }
+    to { transform: rotateX(-20deg) rotateY(360deg); }
+  }
+  .face {
+    position: absolute; width: 70px; height: 70px;
+    border: 1.5px solid rgba(201,146,42,.5);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .front  { background: rgba(201,146,42,.12); transform: translateZ(35px); }
+  .back   { background: rgba(201,146,42,.06); transform: rotateY(180deg) translateZ(35px); }
+  .left   { background: rgba(201,146,42,.08); transform: rotateY(-90deg) translateZ(35px); }
+  .right  { background: rgba(201,146,42,.08); transform: rotateY(90deg)  translateZ(35px); }
+  .top    { background: rgba(201,146,42,.15); transform: rotateX(90deg)  translateZ(35px); }
+  .bottom { background: rgba(201,146,42,.04); transform: rotateX(-90deg) translateZ(35px); }
+
+  .scan-line {
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-light), transparent);
+    animation: scan 3s ease-in-out infinite;
+  }
+  @keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  .corner { position: absolute; width: 14px; height: 14px; }
+  .corner-tl { top: 12px; left: 12px; border-top: 2px solid var(--gold); border-left: 2px solid var(--gold); }
+  .corner-tr { top: 12px; right: 12px; border-top: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+  .corner-bl { bottom: 12px; left: 12px; border-bottom: 2px solid var(--gold); border-left: 2px solid var(--gold); }
+  .corner-br { bottom: 12px; right: 12px; border-bottom: 2px solid var(--gold); border-right: 2px solid var(--gold); }
+
+  .preview-footer {
+    padding: 18px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .preview-text { font-size: 13px; color: rgba(255,255,255,.55); }
+  .preview-text strong { display: block; color: rgba(255,255,255,.85); font-size: 14px; font-weight: 500; }
+  .preview-start {
+    background: var(--gold); color: var(--navy); font-size: 12px; font-weight: 600;
+    padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer;
+    transition: transform .15s;
+  }
+  .preview-start:hover { transform: scale(1.05); }
+
+  /* Floating badges */
+  .float-badge {
+    position: absolute;
+    background: var(--white);
+    border-radius: 14px;
+    padding: 10px 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,.25);
+    display: flex; align-items: center; gap: 9px;
+    animation: floatBadge 3s ease-in-out infinite alternate;
+  }
+  @keyframes floatBadge {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+  }
+  .float-badge-1 { bottom: -20px; left: -30px; animation-delay: 0s; }
+  .float-badge-2 { top: 20px; right: -30px; animation-delay: -1.5s; }
+  .badge-icon { font-size: 22px; }
+  .badge-info { }
+  .badge-title { font-size: 12px; font-weight: 600; color: var(--text-dark); }
+  .badge-sub { font-size: 11px; color: var(--text-light); }
+
+  /* ── FEATURES STRIP ── */
+  .features-strip {
+    background: var(--navy-light);
+    padding: 28px 60px;
+    display: flex; align-items: center; justify-content: center; gap: 60px;
+    border-top: 1px solid rgba(201,146,42,.2);
+    border-bottom: 1px solid rgba(201,146,42,.2);
+  }
+  .feat-item { display: flex; align-items: center; gap: 10px; }
+  .feat-icon { font-size: 22px; }
+  .feat-text { font-size: 13px; color: rgba(255,255,255,.7); }
+  .feat-text strong { color: #fff; display: block; font-size: 14px; }
+
+  /* ── SECTION COMMON ── */
+  section { padding: 80px 60px; max-width: 1300px; margin: 0 auto; }
+
+  .section-label {
+    font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--gold); font-weight: 600; margin-bottom: 10px;
+  }
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px; font-weight: 300; line-height: 1.2;
+    color: var(--text-dark); margin-bottom: 14px;
+  }
+  .section-title em { font-style: italic; color: var(--gold); }
+  .section-sub { color: var(--text-light); font-size: 15px; line-height: 1.7; max-width: 500px; }
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 44px; }
+  .see-all {
+    font-size: 13px; color: var(--gold); text-decoration: none; font-weight: 500;
+    display: flex; align-items: center; gap: 5px;
+    border-bottom: 1px solid transparent; transition: border-color .2s;
+  }
+  .see-all:hover { border-color: var(--gold); }
+
+  /* ── CATEGORIES ── */
+  .categories-grid {
+    display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px;
+  }
+  .cat-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: all .25s;
+    box-shadow: 0 2px 12px rgba(0,0,0,.05);
+  }
+  .cat-card:hover, .cat-card.active {
+    border-color: var(--gold);
+    box-shadow: 0 8px 30px rgba(201,146,42,.2);
+    transform: translateY(-4px);
+  }
+  .cat-icon { font-size: 32px; margin-bottom: 10px; }
+  .cat-name { font-size: 13px; font-weight: 500; color: var(--text-dark); }
+  .cat-count { font-size: 11px; color: var(--text-light); margin-top: 3px; }
+
+  /* ── ROOM COLLECTION ── */
+  .rooms-bg { background: var(--navy); padding: 80px 0; }
+  .rooms-inner { max-width: 1300px; margin: 0 auto; padding: 0 60px; }
+
+  .rooms-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 40px; }
+  .rooms-head .section-title { color: var(--white); }
+  .rooms-head .section-label { color: var(--gold-light); }
+  .rooms-head .section-sub { color: rgba(255,255,255,.55); }
+
+  .room-filters { display: flex; gap: 8px; margin-bottom: 28px; }
+  .room-filter {
+    padding: 7px 18px; border-radius: 20px; font-size: 13px;
+    border: 1.5px solid rgba(255,255,255,.2); color: rgba(255,255,255,.7);
+    cursor: pointer; background: transparent; transition: all .2s;
+  }
+  .room-filter.active {
+    background: var(--gold); border-color: var(--gold);
+    color: var(--navy); font-weight: 600;
+  }
+  .room-filter:hover:not(.active) { border-color: var(--gold); color: var(--gold-light); }
+
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    grid-template-rows: 240px 240px;
+    gap: 14px;
+  }
+  .room-card {
+    position: relative; overflow: hidden; border-radius: 16px; cursor: pointer;
+  }
+  .room-card.big { grid-row: 1 / 3; }
+  .room-card img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .5s ease;
+  }
+  .room-card:hover img { transform: scale(1.06); }
+  .room-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.7) 0%, transparent 50%);
+    display: flex; align-items: flex-end; padding: 22px;
+    opacity: .85; transition: opacity .3s;
+  }
+  .room-card:hover .room-overlay { opacity: 1; }
+  .room-badge {
+    background: var(--gold); color: var(--navy);
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 10px; border-radius: 8px; text-transform: uppercase;
+  }
+  .room-info { margin-left: 10px; }
+  .room-name { font-size: 16px; font-weight: 600; color: #fff; }
+  .room-count { font-size: 12px; color: rgba(255,255,255,.65); }
+
+  /* Room cards use gradient placeholder backgrounds */
+  .room-ph-1 { background: linear-gradient(135deg, #2d3a4a 0%, #1a2535 100%); }
+  .room-ph-2 { background: linear-gradient(135deg, #3a2d20 0%, #261c14 100%); }
+  .room-ph-3 { background: linear-gradient(135deg, #1e2d3a 0%, #131e28 100%); }
+  .room-ph-4 { background: linear-gradient(135deg, #2d2820 0%, #1e1a14 100%); }
+  .room-ph-5 { background: linear-gradient(135deg, #2a2040 0%, #1a1428 100%); }
+
+  .room-img-placeholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 56px; opacity: .4;
+  }
+
+  /* ── PRODUCTS ── */
+  .products-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px;
+  }
+  .product-card {
+    background: var(--white);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    transition: all .3s; cursor: pointer;
+    position: relative;
+  }
+  .product-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(0,0,0,.14);
+  }
+  .product-img {
+    height: 200px; background: var(--cream-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 64px; position: relative; overflow: hidden;
+    transition: background .3s;
+  }
+  .product-card:hover .product-img { background: #ece2cf; }
+
+  .product-tag {
+    position: absolute; top: 12px; left: 12px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 3px 9px; border-radius: 6px; text-transform: uppercase;
+  }
+  .tag-new { background: var(--navy); color: #fff; }
+  .tag-hot { background: #e64444; color: #fff; }
+  .tag-ai { background: linear-gradient(135deg, #7c3aed, #a855f7); color: #fff; }
+  .tag-sale { background: var(--gold); color: var(--navy); }
+
+  .product-wish {
+    position: absolute; top: 12px; right: 12px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,.85); border: none; cursor: pointer;
+    font-size: 14px; display: flex; align-items: center; justify-content: center;
+    transition: all .2s; opacity: 0;
+  }
+  .product-card:hover .product-wish { opacity: 1; }
+  .product-wish:hover { background: #fff; transform: scale(1.1); }
+
+  .product-body { padding: 16px; }
+  .product-cat { font-size: 11px; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+  .product-name { font-size: 15px; font-weight: 500; color: var(--text-dark); margin-bottom: 10px; line-height: 1.35; }
+  .product-footer { display: flex; align-items: center; justify-content: space-between; }
+  .product-price { font-size: 16px; font-weight: 600; color: var(--gold); }
+  .product-price-old { font-size: 12px; color: var(--text-light); text-decoration: line-through; margin-left: 6px; }
+  .add-btn {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    border: none; cursor: pointer; font-size: 18px; color: var(--navy); font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 12px rgba(201,146,42,.4);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .add-btn:hover { transform: scale(1.12); box-shadow: 0 6px 16px rgba(201,146,42,.6); }
+
+  /* ── 3D CTA SECTION ── */
+  .cta-3d-wrap {
+    background: var(--navy);
+    border-radius: 28px;
+    overflow: hidden;
+    position: relative;
+    display: grid; grid-template-columns: 1fr 1fr;
+    min-height: 380px;
+  }
+  .cta-3d-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 80% 50%, rgba(201,146,42,.15) 0%, transparent 50%),
+      radial-gradient(circle at 10% 80%, rgba(28,49,72,.9) 0%, transparent 60%);
+  }
+  .cta-3d-left {
+    position: relative; z-index: 2;
+    padding: 60px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .cta-3d-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: rgba(201,146,42,.15); border: 1px solid rgba(201,146,42,.3);
+    color: var(--gold-light); font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+    padding: 5px 12px; border-radius: 20px; margin-bottom: 22px;
+    text-transform: uppercase; width: fit-content;
+  }
+  .cta-3d-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 44px; font-weight: 300; line-height: 1.15;
+    color: var(--white); margin-bottom: 18px;
+  }
+  .cta-3d-title em { font-style: italic; color: var(--gold-light); }
+  .cta-3d-sub {
+    color: rgba(255,255,255,.6); font-size: 14px; line-height: 1.75;
+    margin-bottom: 32px;
+  }
+  .cta-steps {
+    display: flex; flex-direction: column; gap: 14px; margin-bottom: 34px;
+  }
+  .cta-step { display: flex; align-items: center; gap: 12px; }
+  .cta-step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(201,146,42,.2); border: 1.5px solid var(--gold);
+    color: var(--gold-light); font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cta-step-text { font-size: 13px; color: rgba(255,255,255,.7); }
+
+  .cta-3d-right {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; justify-content: center;
+    padding: 40px;
+  }
+
+  .cta-preview-box {
+    width: 100%; max-width: 340px;
+    background: rgba(255,255,255,.07);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+  .cta-preview-scene {
+    height: 220px;
+    background: linear-gradient(135deg, #1a2535, #0e1820);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cta-grid {
+    position: absolute; bottom: 0; left: -20%; width: 140%; height: 140px;
+    transform: perspective(300px) rotateX(60deg);
+    transform-origin: bottom;
+    background-image:
+      linear-gradient(rgba(201,146,42,.25) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201,146,42,.25) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  .cta-cube {
+    position: relative; z-index: 2;
+    width: 60px; height: 60px;
+    transform-style: preserve-3d;
+    animation: rotateCube 5s linear infinite;
+  }
+  .cta-face {
+    position: absolute; width: 60px; height: 60px;
+    border: 1.5px solid rgba(201,146,42,.5);
+  }
+  .cta-face.f { background: rgba(201,146,42,.14); transform: translateZ(30px); }
+  .cta-face.b { background: rgba(201,146,42,.06); transform: rotateY(180deg) translateZ(30px); }
+  .cta-face.l { background: rgba(201,146,42,.09); transform: rotateY(-90deg) translateZ(30px); }
+  .cta-face.r { background: rgba(201,146,42,.09); transform: rotateY(90deg) translateZ(30px); }
+  .cta-face.t { background: rgba(201,146,42,.18); transform: rotateX(90deg) translateZ(30px); }
+  .cta-face.bo { background: rgba(201,146,42,.04); transform: rotateX(-90deg) translateZ(30px); }
+
+  .cta-progress-bar {
+    height: 3px; background: rgba(201,146,42,.3);
+    position: relative; overflow: hidden;
+  }
+  .cta-progress-fill {
+    height: 100%; background: var(--gold-light);
+    width: 65%; animation: progressAnim 3s ease-in-out infinite alternate;
+  }
+  @keyframes progressAnim { 0% { width: 20%; } 100% { width: 90%; } }
+
+  .cta-preview-info { padding: 16px; }
+  .cta-preview-row { display: flex; justify-content: space-between; align-items: center; }
+  .cta-preview-label { font-size: 12px; color: rgba(255,255,255,.55); }
+  .cta-preview-value { font-size: 13px; font-weight: 500; color: rgba(255,255,255,.85); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px;
+  }
+  .testi-card {
+    background: var(--white);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 2px 16px rgba(0,0,0,.06);
+    position: relative;
+    transition: transform .3s, box-shadow .3s;
+  }
+  .testi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,.1); }
+  .testi-quote { font-size: 32px; color: var(--gold); line-height: 1; margin-bottom: 14px; font-family: Georgia, serif; }
+  .testi-text { font-size: 14px; color: var(--text-mid); line-height: 1.75; margin-bottom: 22px; }
+  .testi-footer { display: flex; align-items: center; gap: 12px; }
+  .testi-avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--cream-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    border: 2px solid var(--gold-pale);
+  }
+  .testi-name { font-size: 14px; font-weight: 600; color: var(--text-dark); }
+  .testi-role { font-size: 12px; color: var(--text-light); }
+  .testi-stars { margin-left: auto; color: var(--gold); font-size: 12px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy); color: rgba(255,255,255,.65);
+    padding: 60px;
+  }
+  .footer-inner { max-width: 1300px; margin: 0 auto; }
+  .footer-top {
+    display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 60px;
+    padding-bottom: 44px;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    margin-bottom: 32px;
+  }
+  .footer-brand {}
+  .footer-logo {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+    text-decoration: none;
+  }
+  .footer-logo-icon {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .footer-logo-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px; font-weight: 600; letter-spacing: 2px; color: var(--white);
+  }
+  .footer-desc { font-size: 13px; line-height: 1.75; color: rgba(255,255,255,.5); max-width: 260px; }
+  .footer-socials { display: flex; gap: 10px; margin-top: 22px; }
+  .social-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,.08); border: none; cursor: pointer;
+    color: rgba(255,255,255,.65); font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .2s; text-decoration: none;
+  }
+  .social-btn:hover { background: var(--gold); color: var(--navy); }
+
+  .footer-col h4 {
+    font-size: 13px; font-weight: 600; color: var(--white); letter-spacing: 1px;
+    text-transform: uppercase; margin-bottom: 18px;
+  }
+  .footer-col ul { list-style: none; }
+  .footer-col ul li { margin-bottom: 10px; }
+  .footer-col ul li a {
+    font-size: 13px; color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s;
+  }
+  .footer-col ul li a:hover { color: var(--gold-light); }
+
+  .footer-bottom { display: flex; align-items: center; justify-content: space-between; }
+  .footer-copy { font-size: 12px; color: rgba(255,255,255,.3); }
+  .footer-legal { display: flex; gap: 20px; }
+  .footer-legal a { font-size: 12px; color: rgba(255,255,255,.3); text-decoration: none; transition: color .2s; }
+  .footer-legal a:hover { color: rgba(255,255,255,.6); }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .fade-up {
+    opacity: 0; transform: translateY(30px);
+    transition: opacity .7s ease, transform .7s ease;
+  }
+  .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── NEWSLETTER BANNER ── */
+  .newsletter-wrap {
+    background: linear-gradient(135deg, var(--gold) 0%, #b8841f 100%);
+    border-radius: 24px;
+    padding: 48px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 40px;
+    margin: 0 60px 80px;
+    max-width: 1300px;
+    margin-left: auto; margin-right: auto;
+  }
+  .newsletter-left {}
+  .newsletter-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 34px; font-weight: 600; color: var(--navy); margin-bottom: 8px;
+  }
+  .newsletter-sub { font-size: 14px; color: rgba(18,32,46,.7); }
+  .newsletter-form { display: flex; gap: 10px; flex-shrink: 0; }
+  .newsletter-input {
+    padding: 12px 20px; border-radius: 30px; border: none;
+    font-size: 14px; width: 280px; outline: none;
+    background: rgba(255,255,255,.9); color: var(--text-dark);
+  }
+  .newsletter-btn {
+    padding: 12px 26px; border-radius: 30px; border: none;
+    background: var(--navy); color: #fff; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity .2s;
+  }
+  .newsletter-btn:hover { opacity: .85; }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">🪺</div>
+    <span class="logo-text">LUXNEST</span>
+  </a>
+
+  <nav>
+    <a href="#" class="active">Trang Chủ</a>
+    <a href="#">Sản phẩm</a>
+    <a href="#">Trực quan 3D</a>
+    <a href="#">Dự án</a>
+    <a href="#">Liên hệ</a>
+  </nav>
+
+  <div class="header-right">
+    <a href="#" class="btn-3d">
+      <span>🏠</span> Trực quan hoa
+    </a>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🛒</button>
+    <button class="icon-btn">👤</button>
+  </div>
+</header>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+
+  <div class="hero-content">
+    <div class="hero-left">
+      <div class="hero-tag">✦ AI-Powered 3D Interior Design</div>
+      <h1 class="hero-title">
+        Trang trí nhà với<br>
+        <em>trí tuệ</em><br>
+        <strong>nhân tạo trực quan</strong>
+      </h1>
+      <p class="hero-sub">
+        Tải ảnh phòng của bạn — AI phân tích không gian, gợi ý nội thất phù hợp và trực quan hóa ngay dạng mô hình 3D tương tác.
+      </p>
+      <div class="hero-actions">
+        <a href="#" class="btn-primary">🎯 Thử trực quan 3D</a>
+        <a href="#" class="btn-outline">Khám phá sản phẩm →</a>
+      </div>
+
+      <div class="hero-stats">
+        <div>
+          <div class="stat-num">300+</div>
+          <div class="stat-label">Sản phẩm 3D</div>
+        </div>
+        <div>
+          <div class="stat-num">12K</div>
+          <div class="stat-label">Dự án hoàn thành</div>
+        </div>
+        <div>
+          <div class="stat-num">1 Năm</div>
+          <div class="stat-label">Đồng hành</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="preview-card">
+        <div class="preview-card-header">
+          <div class="preview-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="preview-label">luxnest://room-visualizer</span>
+          <span class="ai-badge">✨ AI</span>
+        </div>
+        <div class="preview-scene">
+          <div class="scan-line"></div>
+          <div class="grid-floor"></div>
+          <div class="corner corner-tl"></div>
+          <div class="corner corner-tr"></div>
+          <div class="corner corner-bl"></div>
+          <div class="corner corner-br"></div>
+          <div class="cube-wrap">
+            <div class="cube">
+              <div class="face front"></div>
+              <div class="face back"></div>
+              <div class="face left"></div>
+              <div class="face right"></div>
+              <div class="face top"></div>
+              <div class="face bottom"></div>
+            </div>
+          </div>
+        </div>
+        <div class="preview-footer">
+          <div class="preview-text">
+            <strong>Trực quan căn nhà của bạn</strong>
+            Tải ảnh phòng hoặc chọn phòng có sẵn để bắt đầu.
+          </div>
+          <button class="preview-start">Bắt đầu →</button>
+        </div>
+      </div>
+
+      <div class="float-badge float-badge-1">
+        <div class="badge-icon">🛋️</div>
+        <div class="badge-info">
+          <div class="badge-title">Sofa Nordic 3 chỗ</div>
+          <div class="badge-sub">8.500.000 đ · Phù hợp 92%</div>
+        </div>
+      </div>
+
+      <div class="float-badge float-badge-2">
+        <div class="badge-icon">🤖</div>
+        <div class="badge-info">
+          <div class="badge-title">AI đã phân tích</div>
+          <div class="badge-sub">Phòng ngủ · 18m² · Modern</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FEATURES STRIP ── -->
+<div class="features-strip">
+  <div class="feat-item">
+    <span class="feat-icon">🚚</span>
+    <div class="feat-text"><strong>Miễn phí giao hàng</strong>Đơn từ 5 triệu VNĐ</div>
+  </div>
+  <div class="feat-item">
+    <span class="feat-icon">🔄</span>
+    <div class="feat-text"><strong>Đổi trả 30 ngày</strong>Không cần lý do</div>
+  </div>
+  <div class="feat-item">
+    <span class="feat-icon">🛡️</span>
+    <div class="feat-text"><strong>Bảo hành 2 năm</strong>Toàn bộ sản phẩm</div>
+  </div>
+  <div class="feat-item">
+    <span class="feat-icon">📞</span>
+    <div class="feat-text"><strong>Hỗ trợ 24/7</strong>Tư vấn thiết kế</div>
+  </div>
+</div>
+
+<!-- ── CATEGORIES ── -->
+<section class="fade-up">
+  <div class="section-head">
+    <div>
+      <div class="section-label">Danh mục sản phẩm</div>
+      <h2 class="section-title">Tìm kiếm theo<br><em>phong cách</em></h2>
+    </div>
+    <a href="#" class="see-all">Tất cả danh mục →</a>
+  </div>
+  <div class="categories-grid">
+    <div class="cat-card active">
+      <div class="cat-icon">🪑</div>
+      <div class="cat-name">Ghế</div>
+      <div class="cat-count">19 sản phẩm</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🛏️</div>
+      <div class="cat-name">Giường</div>
+      <div class="cat-count">12 sản phẩm</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🪞</div>
+      <div class="cat-name">Bàn</div>
+      <div class="cat-count">24 sản phẩm</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">🛋️</div>
+      <div class="cat-name">Sofa</div>
+      <div class="cat-count">8 sản phẩm</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">📚</div>
+      <div class="cat-name">Tủ kệ</div>
+      <div class="cat-count">16 sản phẩm</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon">💡</div>
+      <div class="cat-name">Đèn</div>
+      <div class="cat-count">31 sản phẩm</div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ROOM COLLECTION ── -->
+<div class="rooms-bg">
+  <div class="rooms-inner">
+    <div class="rooms-head">
+      <div>
+        <div class="section-label">Bộ sưu tập</div>
+        <h2 class="section-title">Khám phá <em>không gian</em> sống</h2>
+        <p class="section-sub">Lấy cảm hứng từ những không gian được thiết kế bởi chuyên gia và hệ thống AI của chúng tôi.</p>
+      </div>
+      <a href="#" class="see-all" style="color:var(--gold-light)">Xem tất cả →</a>
+    </div>
+
+    <div class="room-filters">
+      <button class="room-filter active">Tất cả</button>
+      <button class="room-filter">Phòng ngủ</button>
+      <button class="room-filter">Phòng khách</button>
+      <button class="room-filter">Phòng bếp</button>
+      <button class="room-filter">Phòng làm việc</button>
+    </div>
+
+    <div class="rooms-grid">
+      <div class="room-card big room-ph-1">
+        <div class="room-img-placeholder">🛏️</div>
+        <div class="room-overlay">
+          <span class="room-badge">PHÒNG NGỦ</span>
+          <div class="room-info">
+            <div class="room-name">Bộ sưu tập Modern Oak</div>
+            <div class="room-count">12 sản phẩm</div>
+          </div>
+        </div>
+      </div>
+      <div class="room-card room-ph-2">
+        <div class="room-img-placeholder">🛋️</div>
+        <div class="room-overlay">
+          <span class="room-badge">PHÒNG KHÁCH</span>
+          <div class="room-info">
+            <div class="room-name">Nordic Living</div>
+            <div class="room-count">8 sản phẩm</div>
+          </div>
+        </div>
+      </div>
+      <div class="room-card room-ph-3">
+        <div class="room-img-placeholder">💼</div>
+        <div class="room-overlay">
+          <span class="room-badge">VĂN PHÒNG</span>
+          <div class="room-info">
+            <div class="room-name">Work From Home</div>
+            <div class="room-count">6 sản phẩm</div>
+          </div>
+        </div>
+      </div>
+      <div class="room-card room-ph-4">
+        <div class="room-img-placeholder">🍳</div>
+        <div class="room-overlay">
+          <span class="room-badge">BẾP & ĂN</span>
+          <div class="room-info">
+            <div class="room-name">Kitchen Essential</div>
+            <div class="room-count">15 sản phẩm</div>
+          </div>
+        </div>
+      </div>
+      <div class="room-card room-ph-5">
+        <div class="room-img-placeholder">🌿</div>
+        <div class="room-overlay">
+          <span class="room-badge">BAN CÔNG</span>
+          <div class="room-info">
+            <div class="room-name">Outdoor Chill</div>
+            <div class="room-count">9 sản phẩm</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRODUCTS ── -->
+<section class="fade-up">
+  <div class="section-head">
+    <div>
+      <div class="section-label">Sản phẩm bán chạy</div>
+      <h2 class="section-title">Được yêu thích<br><em>nhất tuần</em></h2>
+    </div>
+    <a href="#" class="see-all">Xem tất cả →</a>
+  </div>
+
+  <div class="products-grid">
+    <div class="product-card">
+      <div class="product-img">
+        🪑
+        <span class="product-tag tag-hot">HOT</span>
+        <button class="product-wish">♡</button>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Ghế văn phòng</div>
+        <div class="product-name">Ghế Ergonomic ProFlex</div>
+        <div class="product-footer">
+          <div>
+            <span class="product-price">1.200.000 đ</span>
+          </div>
+          <button class="add-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        🛏️
+        <span class="product-tag tag-new">NEW</span>
+        <button class="product-wish">♡</button>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Giường ngủ</div>
+        <div class="product-name">Giường Gỗ Sồi Minimalist</div>
+        <div class="product-footer">
+          <div>
+            <span class="product-price">5.200.000 đ</span>
+          </div>
+          <button class="add-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        🛋️
+        <span class="product-tag tag-sale">SALE</span>
+        <button class="product-wish">♡</button>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Sofa</div>
+        <div class="product-name">Sofa Nordic 3 chỗ</div>
+        <div class="product-footer">
+          <div>
+            <span class="product-price">8.500.000 đ</span>
+            <span class="product-price-old">10.200.000 đ</span>
+          </div>
+          <button class="add-btn">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="product-card">
+      <div class="product-img">
+        🌿
+        <span class="product-tag tag-ai">AI+</span>
+        <button class="product-wish">♡</button>
+      </div>
+      <div class="product-body">
+        <div class="product-cat">Trang trí</div>
+        <div class="product-name">Đôn trà tròn Minimalist</div>
+        <div class="product-footer">
+          <div>
+            <span class="product-price">860.000 đ</span>
+          </div>
+          <button class="add-btn">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 3D CTA ── -->
+<section style="padding-top:0;">
+  <div class="cta-3d-wrap fade-up">
+    <div class="cta-3d-bg"></div>
+    <div class="cta-3d-left">
+      <div class="cta-3d-tag">✦ Công nghệ AI · 3D Vision</div>
+      <h2 class="cta-3d-title">Trực quan hóa<br><em>căn nhà của bạn</em></h2>
+      <p class="cta-3d-sub">
+        Chỉ cần tải lên ảnh phòng — AI sẽ nhận diện kiểu phòng, đề xuất nội thất phù hợp và dựng mô hình 3D để bạn kéo-thả sản phẩm thử ngay.
+      </p>
+      <div class="cta-steps">
+        <div class="cta-step">
+          <div class="cta-step-num">1</div>
+          <div class="cta-step-text">Tải ảnh phòng 2D lên hệ thống</div>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">2</div>
+          <div class="cta-step-text">AI phân tích và tạo mô hình 3D</div>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">3</div>
+          <div class="cta-step-text">Kéo-thả nội thất vào không gian</div>
+        </div>
+        <div class="cta-step">
+          <div class="cta-step-num">4</div>
+          <div class="cta-step-text">Mua ngay những sản phẩm bạn yêu thích</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <a href="#" class="btn-primary">🎯 Bắt đầu ngay</a>
+        <a href="#" class="btn-outline">Xem demo →</a>
+      </div>
+    </div>
+
+    <div class="cta-3d-right">
+      <div class="cta-preview-box">
+        <div class="cta-preview-scene">
+          <div class="cta-grid"></div>
+          <div class="cta-cube">
+            <div class="cta-face f"></div>
+            <div class="cta-face b"></div>
+            <div class="cta-face l"></div>
+            <div class="cta-face r"></div>
+            <div class="cta-face t"></div>
+            <div class="cta-face bo"></div>
+          </div>
+        </div>
+        <div class="cta-progress-bar"><div class="cta-progress-fill"></div></div>
+        <div class="cta-preview-info">
+          <div class="cta-preview-row" style="margin-bottom:8px">
+            <span class="cta-preview-label">Loại phòng</span>
+            <span class="cta-preview-value">Phòng ngủ · Modern</span>
+          </div>
+          <div class="cta-preview-row" style="margin-bottom:8px">
+            <span class="cta-preview-label">Diện tích ước tính</span>
+            <span class="cta-preview-value">~18 m²</span>
+          </div>
+          <div class="cta-preview-row">
+            <span class="cta-preview-label">Gợi ý AI</span>
+            <span class="cta-preview-value" style="color:var(--gold-light)">6 sản phẩm</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── NEWSLETTER ── -->
+<div class="newsletter-wrap fade-up">
+  <div class="newsletter-left">
+    <h3 class="newsletter-title">Nhận ưu đãi độc quyền</h3>
+    <p class="newsletter-sub">Đăng ký nhận thông báo sản phẩm mới và khuyến mãi hàng tuần.</p>
+  </div>
+  <div class="newsletter-form">
+    <input class="newsletter-input" type="email" placeholder="Email của bạn...">
+    <button class="newsletter-btn">Đăng ký</button>
+  </div>
+</div>
+
+<!-- ── TESTIMONIALS ── -->
+<section class="fade-up">
+  <div class="section-head">
+    <div>
+      <div class="section-label">Đánh giá</div>
+      <h2 class="section-title">Khách hàng<br><em>nói gì</em></h2>
+    </div>
+  </div>
+
+  <div class="testimonials-grid">
+    <div class="testi-card">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">Tính năng trực quan 3D thực sự ấn tượng. Tôi có thể nhìn thấy chiếc sofa phù hợp với phòng khách của mình trước khi mua. Tiết kiệm rất nhiều thời gian và tiền bạc!</p>
+      <div class="testi-footer">
+        <div class="testi-avatar">👩</div>
+        <div>
+          <div class="testi-name">Nguyễn Thị Hoa</div>
+          <div class="testi-role">Khách hàng tại Hà Nội</div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">Chưa bao giờ mua nội thất dễ dàng đến vậy. AI gợi ý chính xác những gì tôi cần cho phòng ngủ nhỏ của mình. Rất hài lòng với chất lượng sản phẩm thực tế.</p>
+      <div class="testi-footer">
+        <div class="testi-avatar">👨</div>
+        <div>
+          <div class="testi-name">Trần Minh Đức</div>
+          <div class="testi-role">Khách hàng tại TP.HCM</div>
+        </div>
+        <div class="testi-stars">★★★★★</div>
+      </div>
+    </div>
+
+    <div class="testi-card">
+      <div class="testi-quote">"</div>
+      <p class="testi-text">Tôi đã tải ảnh phòng bếp lên và ngay lập tức có được danh sách nội thất hoàn hảo. Dịch vụ giao hàng cũng rất nhanh và đóng gói cẩn thận.</p>
+      <div class="testi-footer">
+        <div class="testi-avatar">👩</div>
+        <div>
+          <div class="testi-name">Lê Thu Phương</div>
+          <div class="testi-role">Khách hàng tại Đà Nẵng</div>
+        </div>
+        <div class="testi-stars">★★★★☆</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="footer-logo" href="#">
+          <div class="footer-logo-icon">🪺</div>
+          <span class="footer-logo-text">LUXNEST</span>
+        </a>
+        <p class="footer-desc">Nền tảng nội thất thông minh đầu tiên tại Việt Nam ứng dụng AI và trực quan 3D để giúp bạn thiết kế không gian sống lý tưởng.</p>
+        <div class="footer-socials">
+          <a class="social-btn" href="#">f</a>
+          <a class="social-btn" href="#">ig</a>
+          <a class="social-btn" href="#">yt</a>
+          <a class="social-btn" href="#">tk</a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Sản phẩm</h4>
+        <ul>
+          <li><a href="#">Ghế văn phòng</a></li>
+          <li><a href="#">Giường ngủ</a></li>
+          <li><a href="#">Sofa & Ghế sofa</a></li>
+          <li><a href="#">Bàn ăn</a></li>
+          <li><a href="#">Kệ & Tủ</a></li>
+          <li><a href="#">Đèn trang trí</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Tính năng</h4>
+        <ul>
+          <li><a href="#">Trực quan 3D</a></li>
+          <li><a href="#">AI gợi ý nội thất</a></li>
+          <li><a href="#">Dự án của tôi</a></li>
+          <li><a href="#">Kho mẫu phòng</a></li>
+          <li><a href="#">Tư vấn thiết kế</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Hỗ trợ</h4>
+        <ul>
+          <li><a href="#">Liên hệ</a></li>
+          <li><a href="#">Chính sách giao hàng</a></li>
+          <li><a href="#">Đổi trả & Hoàn tiền</a></li>
+          <li><a href="#">Bảo hành sản phẩm</a></li>
+          <li><a href="#">Câu hỏi thường gặp</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 LUXNEST. All rights reserved.</div>
+      <div class="footer-legal">
+        <a href="#">Điều khoản dịch vụ</a>
+        <a href="#">Chính sách bảo mật</a>
+        <a href="#">Cookie</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll animation
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+  // Category filter click
+  document.querySelectorAll('.cat-card').forEach(card => {
+    card.addEventListener('click', function() {
+      document.querySelectorAll('.cat-card').forEach(c => c.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Room filter click
+  document.querySelectorAll('.room-filter').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.room-filter').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // Wishlist toggle
+  document.querySelectorAll('.product-wish').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.textContent = this.textContent === '♡' ? '♥' : '♡';
+      this.style.color = this.textContent === '♥' ? '#e64444' : '';
+    });
+  });
+</script>
+</body>
+</html>

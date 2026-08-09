@@ -1,0 +1,50 @@
+/* Common styles for Auth Forms */
+.auth-body form.form {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-body label {
+  color: var(--auth-text-secondary);
+  font-size: 0.76rem;
+  margin-top: 0.2rem;
+}
+
+.auth-body input[type='text'],
+.auth-body input[type='email'],
+.auth-body input[type='tel'] {
+  min-height: 2.55rem;
+  border-radius: var(--auth-radius-md);
+  border: 1px solid var(--auth-border);
+  background: var(--auth-surface-secondary);
+  color: var(--auth-text-primary);
+  padding: 0 0.72rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.auth-body input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--auth-focus-ring);
+}
+
+.auth-body .submit-btn {
+  min-height: 2.7rem;
+  border: none;
+  border-radius: var(--auth-radius-md);
+  background: linear-gradient(135deg, var(--auth-brand-start), var(--auth-brand-end));
+  color: var(--color-white);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.auth-body .submit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.auth-body .error {
+  margin: 0;
+  color: var(--account-toast-error);
+  font-size: 0.8rem;
+}

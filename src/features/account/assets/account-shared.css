@@ -1,0 +1,433 @@
+.account-content {
+  min-width: 0;
+  padding-bottom: 32px;
+}
+
+.card,
+.detail-card,
+.order-card,
+.item,
+.voucher-card,
+.notification-item,
+.security-card,
+.row,
+.select-all-row,
+.variant-modal,
+.modal {
+  background: var(--acc-surface);
+  border: 1px solid var(--acc-line);
+  border-radius: 8px;
+  box-shadow: 0 12px 30px rgba(18, 32, 46, 0.045);
+}
+
+.card-head,
+.variant-modal-head,
+.detail-card-title,
+.order-card-head,
+.vouchers-head,
+.review-form-head {
+  border-color: var(--acc-line);
+}
+
+.account-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-tab,
+.account-nav .logout-btn,
+.edit-btn,
+.avatar-action,
+.ghost,
+.primary {
+  appearance: none;
+  -webkit-appearance: none;
+  align-items: center;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 720;
+  gap: 7px;
+  justify-content: center;
+  line-height: 1;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.nav-tab {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--acc-muted);
+  flex: 0 0 auto;
+  padding: 0 12px;
+}
+
+.nav-tab:hover,
+.nav-tab:focus-visible {
+  background: color-mix(in srgb, var(--acc-gold) 10%, var(--acc-surface));
+  border-color: color-mix(in srgb, var(--acc-gold) 24%, transparent);
+  color: var(--acc-gold);
+}
+
+.nav-tab.active {
+  background: var(--app-navy-soft);
+  border-color: var(--app-navy-soft);
+  color: var(--app-heading-inverse);
+}
+
+.account-sidebar .logout-btn {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--acc-danger) 26%, transparent);
+  color: var(--acc-danger);
+  padding: 0 12px;
+  margin-top: auto;
+}
+
+.profile-simple {
+  display: grid;
+  gap: 18px;
+}
+
+.profile-summary {
+  align-items: start;
+  border-bottom: 1px solid rgba(224, 210, 184, 0.74);
+  display: grid;
+  gap: 18px;
+  grid-template-columns: auto minmax(0, 1fr);
+  padding-bottom: 18px;
+}
+
+.avatar-button {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--acc-soft);
+  border: 1px solid rgba(224, 210, 184, 0.92);
+  border-radius: 8px;
+  color: var(--acc-gold);
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  font-size: 1.35rem;
+  font-weight: 780;
+  height: 74px;
+  overflow: hidden;
+  padding: 0;
+  place-items: center;
+  position: relative;
+  width: 74px;
+}
+
+.avatar-button img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.avatar-camera {
+  align-items: center;
+  background: rgba(18, 32, 46, 0.9);
+  border: 1px solid rgba(255, 253, 249, 0.58);
+  border-radius: 999px;
+  bottom: 6px;
+  color: var(--app-heading-inverse)df9;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  position: absolute;
+  right: 6px;
+  width: 24px;
+}
+
+.profile-identity {
+  align-items: start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.profile-summary .summary-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.summary-kicker {
+  color: var(--acc-gold);
+  font-size: 0.72rem;
+  font-weight: 780;
+  letter-spacing: 0.11em;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.profile-summary h4 {
+  color: var(--acc-ink);
+  font-size: clamp(1.28rem, 2.3vw, 1.8rem);
+  line-height: 1.12;
+  margin: 0;
+}
+
+.profile-summary p:not(.summary-kicker) {
+  color: var(--acc-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 3px;
+}
+
+.read-list {
+  display: grid;
+  gap: 0;
+}
+
+.read-row {
+  align-items: baseline;
+  border-bottom: 1px solid rgba(224, 210, 184, 0.58);
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(120px, 0.28fr) minmax(0, 1fr);
+  padding: 15px 0;
+}
+
+.read-row span {
+  color: var(--acc-muted);
+  font-size: 0.82rem;
+  font-weight: 650;
+}
+
+.read-row strong {
+  color: var(--acc-ink);
+  font-size: 0.95rem;
+  font-weight: 680;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+h1,
+h2,
+h3,
+h4,
+.orders-title,
+.voucher-title,
+.order-detail-title,
+.detail-card-title,
+.item-title,
+.name,
+.cell-name {
+  color: var(--acc-ink);
+  letter-spacing: 0;
+}
+
+.meta,
+.email,
+.item-desc,
+.order-meta,
+.timeline-sub,
+.date,
+.count,
+.empty,
+.empty-state,
+.state-card {
+  color: var(--acc-muted);
+}
+
+.orders-view,
+.order-detail,
+.security-layout,
+.vouchers-view,
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.orders-title,
+.order-detail-title {
+  font-size: clamp(1.28rem, 2vw, 1.72rem);
+  line-height: 1.14;
+  margin: 0;
+}
+
+.orders-filters,
+.voucher-filters,
+.notification-tabs,
+.toolbar {
+  align-items: center;
+  background: color-mix(in srgb, var(--acc-surface) 72%, transparent);
+  border: 1px solid var(--acc-line);
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px;
+}
+
+.orders-filters button,
+.voucher-filters button,
+.notification-tabs button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--acc-muted);
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.chip.active,
+.voucher-filters button.active,
+.orders-filters button.active {
+  background: color-mix(in srgb, var(--acc-gold) 14%, var(--acc-surface));
+  border-color: color-mix(in srgb, var(--acc-gold) 36%, transparent);
+  color: var(--acc-gold);
+}
+
+.orders-list,
+.voucher-list,
+.notification-list,
+.groups {
+  display: grid;
+  gap: 12px;
+}
+
+.order-detail-grid {
+  align-items: start;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.34fr);
+}
+
+.order-detail-main,
+.order-detail-side {
+  display: grid;
+  gap: 14px;
+}
+
+.order-detail-side {
+  position: sticky;
+  top: 76px;
+}
+
+.order-detail-back {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #8a601c;
+  display: inline-flex;
+  gap: 7px;
+  justify-self: start;
+  padding: 0;
+}
+
+.status-badge,
+.badge,
+.voucher-status,
+.item-tag {
+  border-radius: 999px;
+  font-weight: 720;
+}
+
+.price,
+.total,
+.amount,
+.order-total,
+.summary-row,
+.stat strong,
+.stats strong,
+.date,
+.modal-qty input,
+.order-line-price,
+.voucher-discount {
+  font-variant-numeric: tabular-nums;
+}
+
+button,
+input,
+select,
+textarea,
+.readonly-field {
+  border-radius: 8px;
+}
+
+input,
+select,
+textarea,
+.readonly-field {
+  background: var(--app-control-bg);
+  border: 1px solid var(--acc-line);
+  color: var(--acc-ink);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid rgba(201, 146, 42, 0.28);
+  outline-offset: 2px;
+}
+
+button {
+  transition:
+    background 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    transform 0.18s ease;
+}
+
+button:not(:disabled:active) {
+  transform: translateY(1px);
+}
+
+.primary,
+.primary-btn,
+.order-pay-btn,
+.refresh-btn,
+.mark-all-btn {
+  background: var(--app-navy-soft);
+  border: 1px solid var(--app-navy-soft);
+  color: var(--app-heading-inverse);
+}
+
+.primary:hover:not(:disabled),
+.primary-btn:hover:not(:disabled),
+.order-pay-btn:hover:not(:disabled),
+.refresh-btn:hover:not(:disabled),
+.mark-all-btn:hover:not(:disabled) {
+  background: #1b3044;
+  border-color: #1b3044;
+}
+
+.ghost,
+.ghost-btn,
+.secondary-btn,
+.order-detail-btn,
+.text-btn,
+.copy-btn {
+  color: var(--acc-gold);
+}
+
+.empty,
+.empty-state,
+.state-card,
+.orders-empty,
+.voucher-state,
+.order-detail-missing {
+  background: color-mix(in srgb, var(--acc-surface) 72%, transparent);
+  border: 1px dashed var(--acc-line);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+}

@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Thanh toán – LUXNEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#12202e; --navy-light:#1c3148;
+  --gold:#c9922a; --gold-light:#e5b84a; --gold-pale:#f5e6c8;
+  --cream:#faf6f0; --cream-dark:#f0e9dd; --cream-mid:#ece2cf;
+  --text-dark:#1a1a1a; --text-mid:#555; --text-light:#888;
+  --white:#fff; --red:#e53e3e; --green:#2d9e6b;
+  --r:12px; --r-lg:18px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark)}
+
+/* ══ HEADER ══ */
+header{
+  position:sticky;top:0;z-index:200;
+  background:var(--navy);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 40px;height:58px;
+  box-shadow:0 2px 20px rgba(0,0,0,.35);
+}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:2px;color:#fff}
+.header-center{display:flex;align-items:center;gap:0}
+.step-wrap{display:flex;align-items:center;gap:0}
+.step{display:flex;align-items:center;gap:8px;padding:0 20px;font-size:13px;color:rgba(255,255,255,.4);position:relative}
+.step.active{color:var(--gold-light);font-weight:600}
+.step.done{color:rgba(255,255,255,.55)}
+.step-num{
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;border:2px solid rgba(255,255,255,.2);
+  flex-shrink:0;
+}
+.step.active .step-num{background:var(--gold);border-color:var(--gold);color:var(--navy)}
+.step.done .step-num{background:var(--green);border-color:var(--green);color:#fff}
+.step-div{width:40px;height:1px;background:rgba(255,255,255,.15)}
+.step-div.done{background:var(--green)}
+.header-right{display:flex;align-items:center;gap:8px}
+.hdr-secure{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.5)}
+.hdr-back{display:flex;align-items:center;gap:6px;font-size:13px;color:rgba(255,255,255,.65);text-decoration:none;padding:7px 14px;border-radius:8px;border:1px solid rgba(255,255,255,.15);transition:all .2s}
+.hdr-back:hover{color:#fff;border-color:rgba(255,255,255,.35)}
+
+/* ══ BREADCRUMB ══ */
+.breadcrumb{background:var(--white);border-bottom:1px solid var(--cream-dark)}
+.bc{max-width:1200px;margin:0 auto;padding:10px 40px;display:flex;align-items:center;gap:8px}
+.bc a,.bc span{font-size:13px;color:var(--text-light);text-decoration:none}
+.bc a:hover{color:var(--gold)}
+.bc .cur{color:var(--text-dark);font-weight:500}
+
+/* ══ PAGE LAYOUT ══ */
+.page{max-width:1200px;margin:28px auto;padding:0 40px 80px;display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start}
+
+/* ══ CARDS ══ */
+.card{background:var(--white);border-radius:var(--r-lg);border:1.5px solid var(--cream-dark);margin-bottom:16px;overflow:hidden}
+.card:last-child{margin-bottom:0}
+.card-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 22px;border-bottom:1px solid var(--cream-dark);
+}
+.card-title{font-size:15px;font-weight:700;color:var(--text-dark);display:flex;align-items:center;gap:9px}
+.card-title-icon{font-size:18px}
+.card-change{font-size:13px;color:var(--gold);font-weight:500;cursor:pointer;border:none;background:none;transition:color .2s;padding:0}
+.card-change:hover{color:var(--gold-light)}
+
+/* ══ ADDRESS ══ */
+.addr-wrap{padding:18px 22px}
+.addr-row{display:flex;align-items:flex-start;gap:14px}
+.addr-avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--navy);flex-shrink:0}
+.addr-info{}
+.addr-name{font-size:15px;font-weight:600;color:var(--text-dark);margin-bottom:3px;display:flex;align-items:center;gap:10px}
+.addr-default{font-size:10px;font-weight:700;letter-spacing:.5px;padding:2px 8px;border-radius:5px;background:rgba(201,146,42,.15);color:var(--gold);text-transform:uppercase}
+.addr-phone{color:var(--text-mid)}
+.addr-street{font-size:13px;color:var(--text-mid);margin-top:4px;line-height:1.55}
+
+/* ══ PRODUCT LIST ══ */
+.shop-section{padding:0}
+.shop-header{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 22px;
+  background:linear-gradient(90deg,var(--cream) 0%,var(--white) 100%);
+  border-bottom:1px solid var(--cream-dark);
+}
+.shop-icon{width:30px;height:30px;border-radius:8px;background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:14px}
+.shop-name{font-size:14px;font-weight:600;color:var(--text-dark)}
+.shop-chat{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--green);font-weight:500;margin-left:4px;text-decoration:none;padding:4px 10px;border-radius:8px;border:1px solid rgba(45,158,107,.3);background:rgba(45,158,107,.05);transition:all .2s}
+.shop-chat:hover{background:rgba(45,158,107,.12)}
+
+/* product row */
+.prod-row{
+  display:grid;grid-template-columns:56px 1fr auto auto auto;
+  align-items:center;gap:14px;
+  padding:16px 22px;border-bottom:1px solid var(--cream-dark);
+}
+.prod-row:last-of-type{border-bottom:none}
+.prod-thumb{
+  width:56px;height:56px;border-radius:10px;
+  background:var(--cream-dark);display:flex;align-items:center;justify-content:center;
+  font-size:28px;flex-shrink:0;border:1px solid var(--cream-mid);
+}
+.prod-info{}
+.prod-name{font-size:14px;font-weight:500;color:var(--text-dark);margin-bottom:4px;line-height:1.35}
+.prod-variant{font-size:12px;color:var(--text-light)}
+.prod-variant span{background:var(--cream);padding:2px 8px;border-radius:5px;border:1px solid var(--cream-mid);margin-right:4px}
+.prod-unit{font-size:15px;font-weight:600;color:var(--text-dark);text-align:right;white-space:nowrap}
+.prod-unit-old{font-size:11px;color:var(--text-light);text-decoration:line-through;text-align:right}
+.prod-qty{text-align:center}
+.qty-display{
+  display:inline-flex;align-items:center;gap:0;
+  border:1.5px solid var(--cream-mid);border-radius:8px;overflow:hidden;
+}
+.qty-btn{width:30px;height:30px;background:var(--cream);border:none;cursor:pointer;font-size:15px;font-weight:600;color:var(--text-mid);transition:background .15s;display:flex;align-items:center;justify-content:center}
+.qty-btn:hover{background:var(--cream-mid)}
+.qty-num{width:34px;height:30px;text-align:center;font-size:13px;font-weight:600;border:none;border-left:1.5px solid var(--cream-mid);border-right:1.5px solid var(--cream-mid);background:var(--white);color:var(--text-dark)}
+.prod-total{font-size:16px;font-weight:700;color:var(--gold);text-align:right;white-space:nowrap}
+
+/* Add-on insurance row */
+.addon-row{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 22px;
+  background:linear-gradient(90deg,rgba(59,130,246,.04),transparent);
+  border-bottom:1px solid var(--cream-dark);
+}
+.addon-check{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.addon-icon{font-size:16px}
+.addon-label{font-size:13px;color:var(--text-mid);flex:1;line-height:1.5}
+.addon-label strong{color:var(--text-dark)}
+.addon-label a{color:var(--gold);text-decoration:none;font-weight:500}
+.addon-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;background:var(--red);color:#fff;letter-spacing:.3px;flex-shrink:0}
+.addon-price{font-size:14px;font-weight:600;color:var(--text-dark);text-align:right;white-space:nowrap;flex-shrink:0}
+
+/* shop options row */
+.shop-options{padding:16px 22px;border-top:1px solid var(--cream-dark);display:flex;flex-direction:column;gap:14px}
+.opt-row{display:grid;grid-template-columns:140px 1fr auto;align-items:start;gap:12px}
+.opt-label{font-size:13px;color:var(--text-light);padding-top:2px}
+.opt-note-input{
+  padding:8px 12px;border:1.5px solid var(--cream-mid);border-radius:9px;
+  font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text-dark);
+  background:var(--cream);outline:none;transition:all .2s;width:100%;
+}
+.opt-note-input:focus{border-color:var(--gold);background:var(--white)}
+.opt-note-input::placeholder{color:var(--text-light)}
+
+/* Shipping option */
+.ship-options{display:flex;flex-direction:column;gap:8px;flex:1}
+.ship-option{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:11px 14px;border-radius:10px;border:1.5px solid var(--cream-mid);
+  cursor:pointer;transition:all .2s;
+}
+.ship-option:hover{border-color:var(--gold-pale)}
+.ship-option.active{border-color:var(--gold);background:var(--gold-pale)}
+.ship-radio{width:16px;height:16px;accent-color:var(--gold);flex-shrink:0;margin-top:2px;cursor:pointer}
+.ship-info{}
+.ship-name{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:2px;display:flex;align-items:center;gap:7px}
+.ship-badge{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:rgba(45,158,107,.12);color:var(--green)}
+.ship-eta{font-size:12px;color:var(--text-mid)}
+.ship-note{font-size:11px;color:var(--text-light);margin-top:2px}
+.ship-price{margin-left:auto;font-size:14px;font-weight:700;color:var(--text-dark);flex-shrink:0;white-space:nowrap}
+.ship-price.free{color:var(--green)}
+.ship-price.free-line{text-decoration:line-through;color:var(--text-light);font-size:12px;font-weight:400}
+
+.subtotal-row{
+  display:flex;align-items:center;justify-content:flex-end;gap:8px;
+  padding:14px 22px;border-top:1px solid var(--cream-dark);
+  font-size:14px;
+}
+.subtotal-label{color:var(--text-mid)}
+.subtotal-val{font-size:17px;font-weight:700;color:var(--gold)}
+
+/* ══ VOUCHER SECTION ══ */
+.voucher-wrap{padding:16px 22px;display:flex;flex-direction:column;gap:14px}
+.voucher-row{display:flex;align-items:center;gap:12px}
+.voucher-icon{font-size:20px;flex-shrink:0}
+.voucher-label{font-size:14px;font-weight:500;color:var(--text-dark);flex:1}
+.voucher-applied{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--green);font-weight:500}
+.voucher-applied-code{background:rgba(45,158,107,.1);border:1px dashed var(--green);padding:3px 10px;border-radius:6px;font-size:12px}
+.voucher-select-btn{
+  font-size:13px;color:var(--gold);font-weight:600;
+  background:none;border:none;cursor:pointer;
+  padding:6px 14px;border-radius:8px;border:1.5px solid var(--gold-pale);
+  transition:all .2s;white-space:nowrap;
+}
+.voucher-select-btn:hover{background:var(--gold-pale);color:var(--navy)}
+.voucher-divider{height:1px;background:var(--cream-dark)}
+
+/* ══ PAYMENT METHODS ══ */
+.payment-wrap{padding:16px 22px}
+.pay-methods{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:0}
+.pay-method{
+  display:flex;align-items:center;gap:10px;
+  padding:13px 16px;border-radius:11px;
+  border:2px solid var(--cream-mid);cursor:pointer;transition:all .2s;
+  position:relative;
+}
+.pay-method:hover{border-color:var(--cream-mid);background:var(--cream)}
+.pay-method.active{border-color:var(--gold);background:var(--gold-pale)}
+.pay-method.active::after{
+  content:'✓';position:absolute;top:6px;right:8px;
+  font-size:10px;font-weight:700;color:var(--gold);
+}
+.pm-radio{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.pm-icon{font-size:22px;flex-shrink:0}
+.pm-info{}
+.pm-name{font-size:13px;font-weight:600;color:var(--text-dark);line-height:1.2}
+.pm-sub{font-size:11px;color:var(--text-light);margin-top:1px}
+
+/* COD detail note */
+.cod-note{
+  display:none;
+  margin-top:12px;padding:12px 14px;
+  background:var(--cream);border-radius:9px;border:1px solid var(--cream-mid);
+  font-size:12px;color:var(--text-mid);line-height:1.65;
+}
+.cod-note.show{display:block}
+
+/* ══ ORDER SUMMARY (right column) ══ */
+.summary-card{
+  background:var(--white);border-radius:var(--r-lg);border:1.5px solid var(--cream-dark);
+  position:sticky;top:76px;overflow:hidden;
+}
+.sum-header{
+  padding:18px 22px 14px;border-bottom:1px solid var(--cream-dark);
+  background:linear-gradient(135deg,var(--navy),var(--navy-light));
+  position:relative;overflow:hidden;
+}
+.sum-header::after{content:'';position:absolute;top:-30px;right:-30px;width:100px;height:100px;border-radius:50%;background:rgba(201,146,42,.12);filter:blur(20px)}
+.sum-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:#fff}
+.sum-title em{font-style:italic;color:var(--gold-light)}
+.sum-item-count{font-size:12px;color:rgba(255,255,255,.45);margin-top:3px}
+
+/* mini product preview */
+.sum-products{padding:14px 18px;border-bottom:1px solid var(--cream-dark)}
+.sum-prod-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--cream-dark)}
+.sum-prod-item:last-child{border-bottom:none}
+.spi-thumb{width:38px;height:38px;border-radius:8px;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:1px solid var(--cream-mid);position:relative}
+.spi-qty-badge{position:absolute;top:-5px;right:-5px;width:16px;height:16px;border-radius:50%;background:var(--navy);color:#fff;font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.spi-name{flex:1;font-size:12px;color:var(--text-mid);line-height:1.35;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.spi-price{font-size:13px;font-weight:600;color:var(--text-dark);flex-shrink:0}
+
+/* summary rows */
+.sum-rows{padding:14px 18px;border-bottom:1px solid var(--cream-dark)}
+.sum-row{display:flex;align-items:center;justify-content:space-between;padding:7px 0;font-size:14px}
+.sr-label{color:var(--text-mid)}
+.sr-val{font-weight:500;color:var(--text-dark)}
+.sr-val.green{color:var(--green)}
+.sr-val.red{color:var(--red)}
+.sr-val.strike{text-decoration:line-through;color:var(--text-light);font-weight:400}
+.sum-divider{height:1px;background:var(--cream-dark);margin:4px 0}
+
+/* total */
+.sum-total{padding:16px 18px;background:linear-gradient(135deg,rgba(201,146,42,.06),rgba(201,146,42,.02));border-bottom:1px solid var(--cream-dark)}
+.st-label{font-size:13px;color:var(--text-mid);margin-bottom:4px}
+.st-val{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--gold);line-height:1}
+.st-val span{font-size:20px}
+.st-saving{font-size:12px;color:var(--green);margin-top:4px;display:flex;align-items:center;gap:4px}
+
+/* confirm area */
+.sum-confirm{padding:16px 18px}
+.agree-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.agree-row input{width:15px;height:15px;accent-color:var(--gold);margin-top:2px;flex-shrink:0;cursor:pointer}
+.agree-text{font-size:12px;color:var(--text-light);line-height:1.65}
+.agree-text a{color:var(--gold);text-decoration:none;font-weight:500}
+.agree-text a:hover{text-decoration:underline}
+
+.btn-order{
+  width:100%;padding:16px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:var(--navy);font-size:16px;font-weight:700;font-family:'DM Sans',sans-serif;
+  border:none;border-radius:12px;cursor:pointer;
+  box-shadow:0 6px 22px rgba(201,146,42,.45);
+  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:9px;
+}
+.btn-order:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(201,146,42,.6)}
+.btn-order:active{transform:translateY(0)}
+.btn-order-sub{text-align:center;font-size:11px;color:var(--text-light);margin-top:10px;display:flex;align-items:center;justify-content:center;gap:5px}
+
+/* ══ VOUCHER MODAL ══ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(10,18,28,.65);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-box{
+  background:var(--white);border-radius:22px;width:100%;max-width:480px;
+  box-shadow:0 30px 80px rgba(0,0,0,.3);overflow:hidden;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{
+  padding:20px 24px;border-bottom:1px solid var(--cream-dark);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--text-dark)}
+.modal-title em{font-style:italic;color:var(--gold)}
+.modal-close{width:34px;height:34px;border-radius:8px;border:none;background:var(--cream);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.modal-close:hover{background:var(--cream-mid)}
+.modal-body{padding:20px 24px}
+.voucher-input-wrap{display:flex;gap:10px;margin-bottom:18px}
+.voucher-code-input{
+  flex:1;padding:11px 14px;border:1.5px solid var(--cream-mid);border-radius:10px;
+  font-size:14px;font-family:'DM Sans',sans-serif;background:var(--cream);
+  color:var(--text-dark);outline:none;text-transform:uppercase;letter-spacing:1px;
+  transition:all .2s;
+}
+.voucher-code-input:focus{border-color:var(--gold);background:var(--white)}
+.voucher-code-input::placeholder{text-transform:none;letter-spacing:0}
+.btn-apply-code{
+  padding:11px 20px;border-radius:10px;
+  background:var(--navy);color:#fff;font-size:13px;font-weight:600;
+  border:none;cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.btn-apply-code:hover{background:var(--navy-light)}
+.voucher-list-title{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text-light);margin-bottom:12px}
+.voucher-options{display:flex;flex-direction:column;gap:10px}
+.voucher-opt{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 16px;border-radius:12px;border:2px solid var(--cream-mid);
+  cursor:pointer;transition:all .2s;
+}
+.voucher-opt:hover{border-color:var(--gold-pale)}
+.voucher-opt.active{border-color:var(--gold);background:var(--gold-pale)}
+.vo-radio{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0}
+.vo-icon{font-size:24px;flex-shrink:0}
+.vo-info{}
+.vo-name{font-size:14px;font-weight:600;color:var(--text-dark);margin-bottom:2px}
+.vo-desc{font-size:12px;color:var(--text-mid)}
+.vo-expire{font-size:11px;color:var(--text-light);margin-top:3px}
+.vo-val{margin-left:auto;font-size:15px;font-weight:700;color:var(--gold);flex-shrink:0;text-align:right}
+.vo-val small{display:block;font-size:11px;font-weight:400;color:var(--text-light)}
+.modal-foot{padding:16px 24px;border-top:1px solid var(--cream-dark);display:flex;gap:10px;justify-content:flex-end}
+.btn-modal-cancel{padding:10px 20px;border-radius:10px;border:1.5px solid var(--cream-mid);background:var(--white);color:var(--text-mid);font-size:14px;cursor:pointer;transition:all .2s}
+.btn-modal-cancel:hover{border-color:var(--navy);color:var(--navy)}
+.btn-modal-confirm{padding:10px 24px;border-radius:10px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 14px rgba(201,146,42,.35);transition:all .2s}
+.btn-modal-confirm:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(201,146,42,.5)}
+
+/* ══ SUCCESS OVERLAY ══ */
+.success-overlay{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(10,18,28,.7);backdrop-filter:blur(8px);
+  display:none;align-items:center;justify-content:center;
+}
+.success-overlay.open{display:flex;animation:fadeIn .3s ease}
+.success-box{
+  background:var(--white);border-radius:24px;
+  width:100%;max-width:460px;padding:48px 40px;text-align:center;
+  box-shadow:0 40px 100px rgba(0,0,0,.35);
+  animation:popIn .4s cubic-bezier(.22,.68,0,1.3);
+}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.success-icon{font-size:64px;margin-bottom:18px;animation:bounceIn .6s ease .2s both}
+@keyframes bounceIn{0%{transform:scale(0)}70%{transform:scale(1.15)}100%{transform:scale(1)}}
+.success-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--text-dark);margin-bottom:10px}
+.success-title em{font-style:italic;color:var(--gold)}
+.success-sub{font-size:14px;color:var(--text-mid);line-height:1.75;margin-bottom:24px}
+.success-order-id{
+  background:var(--cream);border:1px dashed var(--cream-mid);border-radius:10px;
+  padding:12px 18px;font-size:14px;font-weight:600;color:var(--navy);
+  margin-bottom:26px;letter-spacing:.5px;
+}
+.success-actions{display:flex;gap:10px;justify-content:center}
+.success-btn-track{padding:12px 24px;border-radius:12px;background:var(--navy);color:#fff;font-size:14px;font-weight:600;border:none;cursor:pointer;transition:opacity .2s}
+.success-btn-track:hover{opacity:.85}
+.success-btn-home{padding:12px 24px;border-radius:12px;background:var(--white);border:1.5px solid var(--cream-mid);color:var(--text-mid);font-size:14px;cursor:pointer;transition:all .2s}
+.success-btn-home:hover{border-color:var(--navy);color:var(--navy)}
+.success-steps{display:flex;justify-content:center;gap:0;margin-bottom:24px}
+.ss-item{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;position:relative}
+.ss-item:not(:last-child)::after{content:'';position:absolute;top:14px;left:60%;right:-40%;height:2px;background:linear-gradient(90deg,var(--green),var(--cream-mid))}
+.ss-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;z-index:1}
+.ss-dot.done{background:var(--green);color:#fff}
+.ss-dot.pend{background:var(--cream-mid);color:var(--text-light)}
+.ss-label{font-size:10px;color:var(--text-light);text-align:center;margin-top:3px}
+
+/* ══ TOAST ══ */
+.toast{
+  position:fixed;bottom:26px;right:26px;z-index:999;
+  background:var(--navy);color:#fff;
+  padding:13px 18px;border-radius:13px;
+  display:flex;align-items:center;gap:11px;
+  box-shadow:0 8px 32px rgba(0,0,0,.25);
+  border:1px solid rgba(201,146,42,.2);
+  transform:translateY(80px);opacity:0;
+  transition:all .4s cubic-bezier(.22,.68,0,1.2);
+  pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.t-icon{font-size:18px}
+.t-title{font-size:13px;font-weight:600}
+.t-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:1px}
+
+/* ══ RESPONSIVE UTILITY ══ */
+.col-gap{display:flex;flex-direction:column;gap:0}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#"><div class="logo-icon">🪺</div><span class="logo-text">LUXNEST</span></a>
+
+  <div class="header-center">
+    <div class="step-wrap">
+      <div class="step done"><div class="step-num">✓</div> Giỏ hàng</div>
+      <div class="step-div done"></div>
+      <div class="step active"><div class="step-num">2</div> Thanh toán</div>
+      <div class="step-div"></div>
+      <div class="step"><div class="step-num">3</div> Hoàn tất</div>
+    </div>
+  </div>
+
+  <div class="header-right">
+    <div class="hdr-secure">🔒 Thanh toán bảo mật</div>
+    <a href="#" class="hdr-back">← Giỏ hàng</a>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb"><div class="bc">
+  <a href="#">Trang chủ</a><span>›</span>
+  <a href="#">Giỏ hàng</a><span>›</span>
+  <span class="cur">Thanh toán</span>
+</div></div>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- LEFT COLUMN -->
+  <div class="col-gap">
+
+    <!-- 1. ADDRESS -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">📍</span> Địa chỉ giao hàng</div>
+        <button class="card-change" onclick="showToast('📍','Mở trang đổi địa chỉ giao hàng','')">Thay Đổi</button>
+      </div>
+      <div class="addr-wrap">
+        <div class="addr-row">
+          <div class="addr-avatar">NA</div>
+          <div class="addr-info">
+            <div class="addr-name">
+              Nguyễn Văn A (+84) 901 234 567
+              <span class="addr-default">Mặc định</span>
+            </div>
+            <div class="addr-street">Ký Túc Xá ĐHQG TP.HCM, Khu B, Phường Đông Hòa,<br>Thành phố Thủ Đức, TP. Hồ Chí Minh</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. PRODUCTS -->
+    <div class="card">
+      <div class="shop-section">
+        <div class="shop-header">
+          <div class="shop-icon">🪺</div>
+          <div class="shop-name">LUXNEST Official Store</div>
+          <a href="#" class="shop-chat">💬 Chat ngay</a>
+        </div>
+
+        <!-- Product 1 -->
+        <div class="prod-row">
+          <div class="prod-thumb">🛏️</div>
+          <div class="prod-info">
+            <div class="prod-name">Giường ngủ Walnut Premium Heritage Collection 2024</div>
+            <div class="prod-variant">
+              <span>1m6 × 2m</span><span>Walnut Nâu</span>
+            </div>
+          </div>
+          <div>
+            <div class="prod-unit">12.500.000đ</div>
+            <div class="prod-unit-old">15.600.000đ</div>
+          </div>
+          <div class="prod-qty">
+            <div class="qty-display">
+              <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+              <input class="qty-num" id="q1" type="number" value="1" min="1" max="10" onchange="calcTotal()">
+              <button class="qty-btn" onclick="changeQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="prod-total" id="p1-total">12.500.000đ</div>
+        </div>
+
+        <!-- Product 2 -->
+        <div class="prod-row">
+          <div class="prod-thumb">🗄️</div>
+          <div class="prod-info">
+            <div class="prod-name">Tủ đầu giường Walnut 2 ngăn kéo – Heritage</div>
+            <div class="prod-variant">
+              <span>Walnut Nâu</span>
+            </div>
+          </div>
+          <div>
+            <div class="prod-unit">3.800.000đ</div>
+            <div class="prod-unit-old">4.300.000đ</div>
+          </div>
+          <div class="prod-qty">
+            <div class="qty-display">
+              <button class="qty-btn" onclick="changeQty(this,-1)">−</button>
+              <input class="qty-num" id="q2" type="number" value="2" min="1" max="10" onchange="calcTotal()">
+              <button class="qty-btn" onclick="changeQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="prod-total" id="p2-total">7.600.000đ</div>
+        </div>
+
+        <!-- Add-on insurance -->
+        <div class="addon-row">
+          <input class="addon-check" type="checkbox" id="insuranceCheck" onchange="calcTotal()">
+          <span class="addon-icon">🛡️</span>
+          <div class="addon-label">
+            <strong>Bảo hiểm nội thất LUXNEST</strong>
+            <span class="addon-badge">MỚI</span><br>
+            Bảo vệ sản phẩm khỏi hư hỏng vật lý trong 2 năm sử dụng.
+            <a href="#">Tìm hiểu thêm</a>
+          </div>
+          <div class="addon-price">+450.000đ</div>
+        </div>
+
+        <!-- Shop options: note + shipping -->
+        <div class="shop-options">
+          <!-- Note -->
+          <div class="opt-row">
+            <div class="opt-label">Lời nhắn:</div>
+            <input class="opt-note-input" type="text" placeholder="Lưu ý cho người bán...">
+          </div>
+
+          <!-- Shipping -->
+          <div class="opt-row" style="align-items:start">
+            <div class="opt-label" style="padding-top:12px">Vận chuyển:</div>
+            <div class="ship-options">
+              <label class="ship-option active" onclick="selectShip(this,'28700')">
+                <input class="ship-radio" type="radio" name="ship" value="28700" checked>
+                <div class="ship-info">
+                  <div class="ship-name">Nhanh <span class="ship-badge">Khuyến nghị</span></div>
+                  <div class="ship-eta">Nhận từ 16 Th05 – 20 Th05</div>
+                  <div class="ship-note">Dùng voucher vận chuyển để miễn phí</div>
+                </div>
+                <div>
+                  <div class="ship-price" id="ship-price-1">28.700đ</div>
+                </div>
+              </label>
+              <label class="ship-option" onclick="selectShip(this,'15000')">
+                <input class="ship-radio" type="radio" name="ship" value="15000">
+                <div class="ship-info">
+                  <div class="ship-name">Tiêu chuẩn</div>
+                  <div class="ship-eta">Nhận từ 18 Th05 – 22 Th05</div>
+                </div>
+                <div class="ship-price" id="ship-price-2">15.000đ</div>
+              </label>
+              <label class="ship-option" onclick="selectShip(this,'0')">
+                <input class="ship-radio" type="radio" name="ship" value="0">
+                <div class="ship-info">
+                  <div class="ship-name">Lắp ráp tại nhà <span class="ship-badge" style="background:rgba(201,146,42,.15);color:var(--gold)">LUXNEST</span></div>
+                  <div class="ship-eta">Đặt lịch 19 Th05 – 25 Th05</div>
+                  <div class="ship-note">Bao gồm phí lắp ráp chuyên nghiệp</div>
+                </div>
+                <div class="ship-price free">Miễn phí</div>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtotal-row">
+          <span class="subtotal-label">Tổng số tiền (3 sản phẩm):</span>
+          <span class="subtotal-val" id="subtotalDisplay">20.100.000đ</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. VOUCHER -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">🎫</span> Voucher LUXNEST</div>
+      </div>
+      <div class="voucher-wrap">
+        <!-- Shop voucher -->
+        <div class="voucher-row">
+          <span class="voucher-icon">🏷️</span>
+          <span class="voucher-label">Voucher của Shop</span>
+          <div id="shopVoucherDisplay">
+            <button class="voucher-select-btn" onclick="openVoucherModal('shop')">Chọn Voucher</button>
+          </div>
+        </div>
+        <div class="voucher-divider"></div>
+        <!-- Freeship voucher -->
+        <div class="voucher-row">
+          <span class="voucher-icon">🚚</span>
+          <span class="voucher-label">Voucher vận chuyển</span>
+          <div id="shipVoucherDisplay">
+            <div class="voucher-applied">
+              <span class="voucher-applied-code">FREESHIP50K</span>
+              <span style="color:var(--green)">−28.700đ ✓</span>
+              <button onclick="removeVoucher('ship')" style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:14px">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. PAYMENT METHOD -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title"><span class="card-title-icon">💳</span> Phương thức thanh toán</div>
+      </div>
+      <div class="payment-wrap">
+        <div class="pay-methods">
+          <label class="pay-method" onclick="selectPay(this,'card')">
+            <input class="pm-radio" type="radio" name="pay" value="card">
+            <span class="pm-icon">💳</span>
+            <div class="pm-info"><div class="pm-name">Thẻ tín dụng/Ghi nợ</div><div class="pm-sub">Visa, Mastercard, JCB</div></div>
+          </label>
+          <label class="pay-method" onclick="selectPay(this,'banking')">
+            <input class="pm-radio" type="radio" name="pay" value="banking">
+            <span class="pm-icon">🏦</span>
+            <div class="pm-info"><div class="pm-name">Thẻ nội địa NAPAS</div><div class="pm-sub">Internet Banking</div></div>
+          </label>
+          <label class="pay-method" onclick="selectPay(this,'momo')">
+            <input class="pm-radio" type="radio" name="pay" value="momo">
+            <span class="pm-icon">💜</span>
+            <div class="pm-info"><div class="pm-name">Ví MoMo</div><div class="pm-sub">Thanh toán nhanh</div></div>
+          </label>
+          <label class="pay-method active" onclick="selectPay(this,'cod')">
+            <input class="pm-radio" type="radio" name="pay" value="cod" checked>
+            <span class="pm-icon">💵</span>
+            <div class="pm-info"><div class="pm-name">Thanh toán khi nhận hàng</div><div class="pm-sub">COD – Tiền mặt / QR</div></div>
+          </label>
+        </div>
+        <div class="cod-note show" id="codNote">
+          <strong>Thanh toán khi nhận hàng (COD)</strong><br>
+          Phí thu hộ: 0đ. Ưu đãi về phí vận chuyển (nếu có) áp dụng cả với phí thu hộ.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /left column -->
+
+  <!-- RIGHT COLUMN: ORDER SUMMARY -->
+  <div>
+    <div class="summary-card">
+      <div class="sum-header">
+        <div class="sum-title">Đơn hàng <em>của bạn</em></div>
+        <div class="sum-item-count">3 sản phẩm</div>
+      </div>
+
+      <!-- Mini product list -->
+      <div class="sum-products">
+        <div class="sum-prod-item">
+          <div class="spi-thumb">🛏️<span class="spi-qty-badge">1</span></div>
+          <div class="spi-name">Giường Walnut Premium Heritage 1m6</div>
+          <div class="spi-price">12.500.000đ</div>
+        </div>
+        <div class="sum-prod-item">
+          <div class="spi-thumb">🗄️<span class="spi-qty-badge">2</span></div>
+          <div class="spi-name">Tủ đầu giường Walnut 2 ngăn</div>
+          <div class="spi-price">7.600.000đ</div>
+        </div>
+      </div>
+
+      <!-- Rows -->
+      <div class="sum-rows">
+        <div class="sum-row">
+          <span class="sr-label">Tạm tính</span>
+          <span class="sr-val" id="sum-subtotal">20.100.000đ</span>
+        </div>
+        <div class="sum-row">
+          <span class="sr-label">Phí vận chuyển</span>
+          <span class="sr-val" id="sum-ship">28.700đ</span>
+        </div>
+        <div class="sum-row">
+          <span class="sr-label">Voucher vận chuyển</span>
+          <span class="sr-val green" id="sum-ship-voucher">−28.700đ</span>
+        </div>
+        <div class="sum-row">
+          <span class="sr-label">Voucher Shop</span>
+          <span class="sr-val" id="sum-shop-voucher" style="color:var(--text-light)">Chưa áp dụng</span>
+        </div>
+        <div class="sum-row">
+          <span class="sr-label">Bảo hiểm</span>
+          <span class="sr-val" id="sum-insurance" style="color:var(--text-light)">Không</span>
+        </div>
+        <div class="sum-divider"></div>
+        <div class="sum-row">
+          <span class="sr-label">Tiết kiệm được</span>
+          <span class="sr-val green" id="sum-saved">−6.028.700đ</span>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="sum-total">
+        <div class="st-label">Tổng thanh toán</div>
+        <div class="st-val" id="sumTotal">20.100.000<span>đ</span></div>
+        <div class="st-saving" id="sumSaving">🎉 Tiết kiệm 6.028.700đ so với giá gốc</div>
+      </div>
+
+      <!-- Confirm -->
+      <div class="sum-confirm">
+        <div class="agree-row">
+          <input type="checkbox" id="agreeCheck" checked>
+          <div class="agree-text">
+            Nhấn "Đặt hàng" đồng nghĩa với việc bạn đồng ý tuân theo <a href="#">Điều khoản dịch vụ</a> và <a href="#">Chính sách bảo mật</a> của LUXNEST.
+          </div>
+        </div>
+        <button class="btn-order" onclick="placeOrder()">
+          ✦ Đặt hàng – 20.100.000đ
+        </button>
+        <div class="btn-order-sub">🔒 Thanh toán được mã hoá và bảo mật</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<!-- VOUCHER MODAL -->
+<div class="modal-overlay" id="voucherModal" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">Chọn <em>Voucher</em></div>
+      <button class="modal-close" onclick="closeVoucherModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="voucher-input-wrap">
+        <input class="voucher-code-input" type="text" placeholder="Nhập mã voucher..." id="voucherCodeInput">
+        <button class="btn-apply-code" onclick="applyVoucherCode()">Áp dụng</button>
+      </div>
+      <div class="voucher-list-title">Voucher của bạn</div>
+      <div class="voucher-options">
+        <label class="voucher-opt" onclick="selectVoucherOpt(this,'LUXNEST15','Giảm 15%','15%')">
+          <input class="vo-radio" type="radio" name="voucherOpt">
+          <span class="vo-icon">🏷️</span>
+          <div class="vo-info">
+            <div class="vo-name">Giảm 15% đơn hàng</div>
+            <div class="vo-desc">Áp dụng cho đơn từ 10.000.000đ · Tối đa 3.000.000đ</div>
+            <div class="vo-expire">Hết hạn: 31/05/2025</div>
+          </div>
+          <div class="vo-val">−15%<small>Tối đa 3tr</small></div>
+        </label>
+        <label class="voucher-opt" onclick="selectVoucherOpt(this,'HERITAGE30','Giảm 30% Heritage','30%')">
+          <input class="vo-radio" type="radio" name="voucherOpt">
+          <span class="vo-icon">✨</span>
+          <div class="vo-info">
+            <div class="vo-name">Flash Sale – Giảm 30% Heritage</div>
+            <div class="vo-desc">Chỉ áp dụng cho bộ sưu tập Heritage · Tối đa 5.000.000đ</div>
+            <div class="vo-expire">Hết hạn: 19/05/2025</div>
+          </div>
+          <div class="vo-val">−30%<small>Tối đa 5tr</small></div>
+        </label>
+        <label class="voucher-opt" onclick="selectVoucherOpt(this,'NEWUSER500','Tặng 500K','500000')">
+          <input class="vo-radio" type="radio" name="voucherOpt">
+          <span class="vo-icon">🎁</span>
+          <div class="vo-info">
+            <div class="vo-name">Khách hàng mới – Giảm 500.000đ</div>
+            <div class="vo-desc">Đơn từ 5.000.000đ · Dùng 1 lần</div>
+            <div class="vo-expire">Hết hạn: 30/06/2025</div>
+          </div>
+          <div class="vo-val">−500K<small>Cố định</small></div>
+        </label>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeVoucherModal()">Huỷ</button>
+      <button class="btn-modal-confirm" onclick="confirmVoucher()">Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS OVERLAY -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-box">
+    <div class="success-icon">🎉</div>
+    <h2 class="success-title">Đặt hàng <em>thành công!</em></h2>
+    <p class="success-sub">Cảm ơn bạn đã tin tưởng LUXNEST. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.</p>
+
+    <div class="success-steps">
+      <div class="ss-item">
+        <div class="ss-dot done">✓</div>
+        <div class="ss-label">Đặt hàng</div>
+      </div>
+      <div class="ss-item">
+        <div class="ss-dot pend">📦</div>
+        <div class="ss-label">Xử lý</div>
+      </div>
+      <div class="ss-item">
+        <div class="ss-dot pend">🚚</div>
+        <div class="ss-label">Giao hàng</div>
+      </div>
+      <div class="ss-item">
+        <div class="ss-dot pend">🏠</div>
+        <div class="ss-label">Hoàn tất</div>
+      </div>
+    </div>
+
+    <div class="success-order-id" id="successOrderId">Mã đơn: #LX-2025-0893</div>
+    <div class="success-actions">
+      <button class="success-btn-track" onclick="document.getElementById('successOverlay').classList.remove('open')">📦 Theo dõi đơn hàng</button>
+      <button class="success-btn-home" onclick="document.getElementById('successOverlay').classList.remove('open')">Về trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl">
+  <div class="t-icon" id="tIcon">✅</div>
+  <div><div class="t-title" id="tTitle"></div><div class="t-sub" id="tSub"></div></div>
+</div>
+
+<script>
+/* ── State ── */
+let shipFee = 28700;
+let shipVoucher = 28700;  // freeship applied by default
+let shopDiscount = 0;
+let hasInsurance = false;
+let selectedVoucherCode = null;
+let selectedVoucherOpt = null;
+
+const PRICES = { p1: 12500000, p2: 3800000 };
+
+/* ── Qty ── */
+function changeQty(btn, delta) {
+  const input = btn.parentElement.querySelector('.qty-num');
+  let v = parseInt(input.value) + delta;
+  v = Math.max(1, Math.min(10, v));
+  input.value = v;
+  calcTotal();
+}
+
+/* ── Calc ── */
+function calcTotal() {
+  const q1 = parseInt(document.getElementById('q1').value) || 1;
+  const q2 = parseInt(document.getElementById('q2').value) || 1;
+  hasInsurance = document.getElementById('insuranceCheck').checked;
+
+  const p1 = PRICES.p1 * q1;
+  const p2 = PRICES.p2 * q2;
+  const insurance = hasInsurance ? 450000 : 0;
+  const sub = p1 + p2 + insurance;
+  const ship = shipFee;
+  const total = sub + ship - shipVoucher - shopDiscount;
+
+  // Update product totals
+  document.getElementById('p1-total').textContent = fmt(p1) + 'đ';
+  document.getElementById('p2-total').textContent = fmt(p2) + 'đ';
+
+  // Update subtotal row
+  document.getElementById('subtotalDisplay').textContent = fmt(sub + ship - shipVoucher - shopDiscount) + 'đ';
+
+  // Summary
+  document.getElementById('sum-subtotal').textContent = fmt(sub) + 'đ';
+  document.getElementById('sum-ship').textContent = fmt(ship) + 'đ';
+  document.getElementById('sum-ship-voucher').textContent = shipVoucher > 0 ? '−' + fmt(shipVoucher) + 'đ' : 'Không';
+  document.getElementById('sum-ship-voucher').style.color = shipVoucher > 0 ? 'var(--green)' : 'var(--text-light)';
+  document.getElementById('sum-insurance').textContent = hasInsurance ? '+450.000đ' : 'Không';
+  document.getElementById('sum-insurance').style.color = hasInsurance ? 'var(--text-dark)' : 'var(--text-light)';
+
+  if (shopDiscount > 0) {
+    document.getElementById('sum-shop-voucher').textContent = '−' + fmt(shopDiscount) + 'đ';
+    document.getElementById('sum-shop-voucher').style.color = 'var(--green)';
+  } else {
+    document.getElementById('sum-shop-voucher').textContent = 'Chưa áp dụng';
+    document.getElementById('sum-shop-voucher').style.color = 'var(--text-light)';
+  }
+
+  // Savings
+  const origTotal = (15600000 * q1) + (4300000 * q2) + ship;
+  const saved = origTotal - total;
+  document.getElementById('sum-saved').textContent = '−' + fmt(saved) + 'đ';
+  document.getElementById('sumSaving').textContent = `🎉 Tiết kiệm ${fmt(saved)}đ so với giá gốc`;
+
+  // Total
+  document.getElementById('sumTotal').innerHTML = fmt(total) + '<span>đ</span>';
+
+  // Order button
+  document.querySelector('.btn-order').innerHTML = `✦ Đặt hàng – ${fmt(total)}đ`;
+}
+
+function fmt(n) {
+  return n.toLocaleString('vi-VN');
+}
+
+/* ── Shipping select ── */
+function selectShip(label, fee) {
+  document.querySelectorAll('.ship-option').forEach(o => o.classList.remove('active'));
+  label.classList.add('active');
+  shipFee = parseInt(fee);
+  // If free, no freeship voucher needed
+  if (fee === '0') {
+    shipVoucher = 0;
+    document.getElementById('shipVoucherDisplay').innerHTML = `<button class="voucher-select-btn" onclick="openVoucherModal('ship')">Chọn Voucher</button>`;
+  }
+  calcTotal();
+}
+
+/* ── Payment select ── */
+function selectPay(label, type) {
+  document.querySelectorAll('.pay-method').forEach(m => m.classList.remove('active'));
+  label.classList.add('active');
+  const note = document.getElementById('codNote');
+  note.classList.toggle('show', type === 'cod');
+  showToast('💳', `Đã chọn: ${label.querySelector('.pm-name').textContent}`, '');
+}
+
+/* ── Voucher Modal ── */
+function openVoucherModal(type) {
+  document.getElementById('voucherModal').classList.add('open');
+}
+function closeVoucherModal() {
+  document.getElementById('voucherModal').classList.remove('open');
+}
+function closeModalOutside(e) {
+  if (e.target === document.getElementById('voucherModal')) closeVoucherModal();
+}
+function selectVoucherOpt(el, code, name, val) {
+  document.querySelectorAll('.voucher-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  selectedVoucherCode = code;
+  selectedVoucherOpt = { code, name, val };
+}
+function applyVoucherCode() {
+  const code = document.getElementById('voucherCodeInput').value.trim().toUpperCase();
+  if (!code) return;
+  showToast('🔍', `Đang kiểm tra mã "${code}"...`, '');
+  setTimeout(() => {
+    if (code === 'HERITAGE30') {
+      shopDiscount = 3000000;
+      confirmVoucher(code, 'Giảm 30% Heritage');
+    } else if (code === 'NEWUSER500') {
+      shopDiscount = 500000;
+      confirmVoucher(code, 'Tặng 500K khách mới');
+    } else {
+      showToast('❌', 'Mã không hợp lệ', 'Vui lòng kiểm tra lại mã voucher.');
+    }
+  }, 600);
+}
+function confirmVoucher(code, name) {
+  if (!code && selectedVoucherOpt) {
+    code = selectedVoucherOpt.code;
+    name = selectedVoucherOpt.name;
+    const val = selectedVoucherOpt.val;
+    if (val.includes('%')) {
+      const pct = parseInt(val) / 100;
+      shopDiscount = Math.min(Math.round(20100000 * pct), 5000000);
+    } else {
+      shopDiscount = parseInt(val);
+    }
+  }
+  if (!code) { closeVoucherModal(); return; }
+  document.getElementById('shopVoucherDisplay').innerHTML = `
+    <div class="voucher-applied">
+      <span class="voucher-applied-code">${code}</span>
+      <span style="color:var(--green)">−${fmt(shopDiscount)}đ ✓</span>
+      <button onclick="removeVoucher('shop')" style="background:none;border:none;cursor:pointer;color:var(--text-light);font-size:14px">✕</button>
+    </div>`;
+  closeVoucherModal();
+  calcTotal();
+  showToast('🎉', 'Áp dụng voucher thành công!', `Giảm ${fmt(shopDiscount)}đ cho đơn hàng này.`);
+}
+function removeVoucher(type) {
+  if (type === 'shop') {
+    shopDiscount = 0;
+    document.getElementById('shopVoucherDisplay').innerHTML = `<button class="voucher-select-btn" onclick="openVoucherModal('shop')">Chọn Voucher</button>`;
+    showToast('🗑️','Đã xoá voucher shop','');
+  } else {
+    shipVoucher = 0;
+    document.getElementById('shipVoucherDisplay').innerHTML = `<button class="voucher-select-btn" onclick="openVoucherModal('ship')">Chọn Voucher</button>`;
+    showToast('🗑️','Đã xoá voucher vận chuyển','');
+  }
+  calcTotal();
+}
+
+/* ── Place order ── */
+function placeOrder() {
+  if (!document.getElementById('agreeCheck').checked) {
+    showToast('⚠️','Vui lòng đồng ý điều khoản dịch vụ','');
+    return;
+  }
+  const btn = document.querySelector('.btn-order');
+  btn.textContent = '⏳ Đang xử lý...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✦ Đặt hàng';
+    btn.disabled = false;
+    const orderId = '#LX-2025-' + (Math.floor(Math.random()*900)+100);
+    document.getElementById('successOrderId').textContent = 'Mã đơn: ' + orderId;
+    document.getElementById('successOverlay').classList.add('open');
+  }, 1800);
+}
+
+/* ── Toast ── */
+let tTimer;
+function showToast(icon, title, sub) {
+  clearTimeout(tTimer);
+  document.getElementById('tIcon').textContent = icon;
+  document.getElementById('tTitle').textContent = title;
+  document.getElementById('tSub').textContent = sub;
+  const el = document.getElementById('toastEl');
+  el.classList.add('show');
+  tTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+/* ── Init ── */
+calcTotal();
+</script>
+</body>
+</html>

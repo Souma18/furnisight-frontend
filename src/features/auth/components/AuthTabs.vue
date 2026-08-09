@@ -1,4 +1,5 @@
 <script setup>
+import AppButton from '@shared/ui/AppButton.vue'
 defineProps({
   modelValue: {
     type: String,
@@ -11,22 +12,22 @@ defineEmits(['update:modelValue'])
 
 <template>
   <div class="auth-tabs">
-    <button
+    <AppButton
       type="button"
       class="auth-tab"
       :class="{ 'auth-tab--active': modelValue === 'login' }"
       @click="$emit('update:modelValue', 'login')"
     >
-      Đăng nhập
-    </button>
-    <button
+      {{ $t('auth.login.title') }}
+    </AppButton>
+    <AppButton
       type="button"
       class="auth-tab"
       :class="{ 'auth-tab--active': modelValue === 'register' }"
       @click="$emit('update:modelValue', 'register')"
     >
-      Đăng ký
-    </button>
+      {{ $t('auth.register.title') }}
+    </AppButton>
   </div>
 </template>
 
@@ -38,9 +39,11 @@ defineEmits(['update:modelValue'])
 }
 
 .auth-tab {
+  box-shadow: none;
   padding: 0.62rem;
   border: none;
   border-bottom: 2px solid transparent;
+  border-radius: 0;
   background: transparent;
   cursor: pointer;
   color: var(--auth-text-secondary);
@@ -48,8 +51,9 @@ defineEmits(['update:modelValue'])
 }
 
 .auth-tab--active {
-  color: var(--auth-brand-start);
-  border-bottom-color: var(--auth-brand-end);
+  background: transparent;
+  color: #7a5413;
+  border-bottom-color: #9b6a16;
   font-weight: 600;
 }
 </style>

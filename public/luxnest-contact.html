@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liên Hệ – LUXNEST</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#12202e;--navy-light:#1c3148;
+  --gold:#c9922a;--gold-light:#e5b84a;--gold-pale:#f5e6c8;
+  --cream:#faf6f0;--cream-dark:#f0e9dd;--cream-mid:#ece2cf;
+  --text-dark:#1a1a1a;--text-mid:#555;--text-light:#888;
+  --white:#fff;--red:#e53e3e;--green:#2d9e6b;
+  --r:12px;--r-lg:20px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text-dark);overflow-x:hidden}
+
+/* ── HEADER ── */
+header{position:sticky;top:0;z-index:200;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 32px;height:58px;box-shadow:0 2px 20px rgba(0,0,0,.35)}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-light),var(--gold));display:flex;align-items:center;justify-content:center;font-size:16px}
+.logo-text{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;letter-spacing:2px;color:#fff}
+nav{display:flex;align-items:center;gap:4px}
+nav a{color:rgba(255,255,255,.75);text-decoration:none;font-size:14px;padding:6px 16px;border-radius:8px;transition:all .2s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:var(--gold-light);background:rgba(201,146,42,.15);font-weight:500}
+.header-right{display:flex;align-items:center;gap:10px}
+.btn-3d-hdr{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);font-size:13px;font-weight:600;padding:8px 18px;border-radius:22px;border:none;cursor:pointer;text-decoration:none;box-shadow:0 4px 14px rgba(201,146,42,.4);transition:transform .2s}
+.btn-3d-hdr:hover{transform:translateY(-1px)}
+.icon-btn{width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,.08);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.8);font-size:16px;text-decoration:none;transition:background .2s}
+.icon-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ── BREADCRUMB ── */
+.breadcrumb{background:var(--white);border-bottom:1px solid var(--cream-dark)}
+.bc-inner{max-width:1300px;margin:0 auto;padding:11px 60px;display:flex;align-items:center;gap:8px}
+.bc-inner a,.bc-inner span{font-size:13px;color:var(--text-light);text-decoration:none}
+.bc-inner a:hover{color:var(--gold)}
+.bc-inner .cur{color:var(--text-dark);font-weight:500}
+
+/* ── HERO ── */
+.hero{background:var(--navy);position:relative;overflow:hidden;min-height:300px;display:flex;align-items:center}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse 55% 80% at 80% 40%,rgba(201,146,42,.13) 0%,transparent 60%),radial-gradient(ellipse 30% 50% at 5% 80%,rgba(28,49,72,.9) 0%,transparent 60%)}
+.orb{position:absolute;border-radius:50%;filter:blur(65px);opacity:.15}
+.o1{width:280px;height:280px;background:var(--gold);top:-60px;right:8%;animation:of 9s ease-in-out infinite alternate}
+.o2{width:160px;height:160px;background:#3a6db5;bottom:-20px;left:15%;animation:of 7s ease-in-out infinite alternate;animation-delay:-3s}
+@keyframes of{0%{transform:translate(0,0)}100%{transform:translate(14px,-22px)}}
+.hero-inner{position:relative;z-index:2;max-width:1300px;margin:0 auto;padding:56px 60px;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+.h-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-weight:600;margin-bottom:12px}
+.h-title{font-family:'Cormorant Garamond',serif;font-size:50px;font-weight:300;color:#fff;line-height:1.15;margin-bottom:14px}
+.h-title em{font-style:italic;color:var(--gold-light)}
+.h-sub{font-size:15px;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:28px}
+.h-quick{display:flex;gap:12px}
+.hq-btn{display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .2s;border:none}
+.hq-primary{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy);box-shadow:0 4px 16px rgba(201,146,42,.4)}
+.hq-primary:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(201,146,42,.55)}
+.hq-ghost{background:rgba(255,255,255,.08);border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+.hq-ghost:hover{border-color:var(--gold-light);color:var(--gold-light);background:rgba(255,255,255,.12)}
+
+/* Hero info cards */
+.h-info-cards{display:flex;flex-direction:column;gap:12px}
+.h-info-card{display:flex;align-items:center;gap:16px;padding:18px 22px;border-radius:14px;background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);transition:all .3s;cursor:pointer}
+.h-info-card:hover{background:rgba(255,255,255,.09);border-color:rgba(201,146,42,.25);transform:translateX(4px)}
+.hic-icon{width:44px;height:44px;border-radius:12px;background:rgba(201,146,42,.15);border:1px solid rgba(201,146,42,.25);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.hic-body{}
+.hic-label{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.hic-value{font-size:14px;color:rgba(255,255,255,.85);font-weight:500}
+.hic-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
+.hic-arrow{margin-left:auto;color:rgba(255,255,255,.25);font-size:18px;transition:color .2s,transform .2s}
+.h-info-card:hover .hic-arrow{color:var(--gold-light);transform:translateX(3px)}
+
+/* ── MAIN CONTENT ── */
+.main-wrap{max-width:1300px;margin:0 auto;padding:60px 60px 80px;display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:start}
+
+/* ── CONTACT FORM ── */
+.form-card{background:var(--white);border-radius:var(--r-lg);border:1.5px solid var(--cream-dark);padding:40px;box-shadow:0 4px 30px rgba(0,0,0,.06)}
+.form-header{margin-bottom:32px}
+.form-tag{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px}
+.form-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:300;color:var(--text-dark);line-height:1.3}
+.form-title em{font-style:italic;color:var(--gold)}
+
+/* Intent tabs */
+.intent-tabs{display:flex;gap:6px;margin-bottom:28px;padding:5px;background:var(--cream);border-radius:12px}
+.it-tab{flex:1;padding:9px 10px;border-radius:9px;font-size:12px;font-weight:500;border:none;background:transparent;cursor:pointer;color:var(--text-mid);transition:all .2s;text-align:center;white-space:nowrap}
+.it-tab:hover{color:var(--text-dark)}
+.it-tab.active{background:var(--white);color:var(--navy);font-weight:600;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+
+/* Form fields */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.form-group.full{grid-column:1/-1}
+.fl{font-size:12px;font-weight:600;color:var(--text-dark);letter-spacing:.3px}
+.fl span{color:var(--red);margin-left:3px}
+.fi{
+  width:100%;padding:12px 16px;
+  border:1.5px solid var(--cream-mid);border-radius:10px;
+  font-size:14px;font-family:'DM Sans',sans-serif;
+  background:var(--cream);color:var(--text-dark);
+  outline:none;transition:all .2s;
+}
+.fi:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,146,42,.1)}
+.fi::placeholder{color:var(--text-light)}
+textarea.fi{resize:vertical;min-height:110px;line-height:1.65}
+select.fi{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+
+/* Budget range pills */
+.budget-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.bp{padding:7px 16px;border-radius:20px;font-size:12px;border:1.5px solid var(--cream-mid);background:var(--white);cursor:pointer;color:var(--text-mid);transition:all .2s}
+.bp:hover{border-color:var(--gold);color:var(--gold)}
+.bp.active{background:var(--gold-pale);border-color:var(--gold);color:var(--navy);font-weight:600}
+
+/* File drop */
+.file-drop{
+  border:2px dashed var(--cream-mid);border-radius:12px;
+  padding:24px;text-align:center;cursor:pointer;
+  transition:all .2s;margin-bottom:16px;
+}
+.file-drop:hover{border-color:var(--gold);background:var(--gold-pale)}
+.fd-icon{font-size:28px;margin-bottom:8px}
+.fd-title{font-size:13px;font-weight:500;color:var(--text-dark);margin-bottom:4px}
+.fd-sub{font-size:12px;color:var(--text-light)}
+.fd-sub span{color:var(--gold);font-weight:500}
+
+/* Submit */
+.form-submit{
+  width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  color:var(--navy);font-size:15px;font-weight:700;font-family:'DM Sans',sans-serif;
+  border:none;border-radius:12px;cursor:pointer;
+  box-shadow:0 6px 20px rgba(201,146,42,.4);
+  transition:all .25s;display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:8px;
+}
+.form-submit:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(201,146,42,.55)}
+.form-note{font-size:12px;color:var(--text-light);text-align:center;margin-top:12px;line-height:1.6}
+
+/* Success toast */
+.toast{
+  position:fixed;bottom:32px;right:32px;z-index:999;
+  background:var(--navy);color:#fff;
+  padding:16px 22px;border-radius:14px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 8px 32px rgba(0,0,0,.3);
+  border:1px solid rgba(201,146,42,.25);
+  transform:translateY(80px);opacity:0;
+  transition:all .4s cubic-bezier(.22,.68,0,1.2);
+  pointer-events:none;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.toast-icon{font-size:22px}
+.toast-title{font-size:14px;font-weight:600}
+.toast-sub{font-size:12px;color:rgba(255,255,255,.55);margin-top:2px}
+
+/* ── SIDEBAR ── */
+.contact-sidebar{display:flex;flex-direction:column;gap:16px}
+
+/* Consultant card */
+.consultant-card{
+  background:var(--navy);border-radius:var(--r-lg);overflow:hidden;
+  border:1px solid rgba(201,146,42,.15);
+}
+.cc-header{
+  background:linear-gradient(135deg,rgba(201,146,42,.2),rgba(201,146,42,.05));
+  padding:24px;border-bottom:1px solid rgba(255,255,255,.07);
+  display:flex;align-items:center;gap:14px;
+}
+.cc-avatar{
+  width:52px;height:52px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold-light),var(--gold));
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  border:3px solid rgba(255,255,255,.2);flex-shrink:0;
+}
+.cc-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:3px}
+.cc-role{font-size:12px;color:rgba(255,255,255,.5)}
+.cc-online{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);margin-top:4px}
+.cc-online-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+.cc-body{padding:20px 24px}
+.cc-desc{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:16px}
+.cc-actions{display:flex;flex-direction:column;gap:8px}
+.cc-btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;border:none;text-decoration:none}
+.cc-btn-primary{background:linear-gradient(135deg,var(--gold-light),var(--gold));color:var(--navy)}
+.cc-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(201,146,42,.45)}
+.cc-btn-ghost{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);color:rgba(255,255,255,.75)}
+.cc-btn-ghost:hover{border-color:rgba(255,255,255,.3);color:#fff}
+
+/* Info blocks */
+.info-block{background:var(--white);border-radius:var(--r-lg);border:1.5px solid var(--cream-dark);padding:24px}
+.ib-title{font-size:13px;font-weight:600;color:var(--text-dark);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.ib-title-icon{font-size:16px}
+.info-rows{display:flex;flex-direction:column;gap:0}
+.info-row{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--cream-dark)}
+.info-row:last-child{border-bottom:none}
+.ir-icon{width:36px;height:36px;border-radius:10px;background:var(--cream-dark);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin-top:1px}
+.ir-body{}
+.ir-label{font-size:11px;color:var(--text-light);margin-bottom:3px}
+.ir-value{font-size:13px;font-weight:500;color:var(--text-dark);line-height:1.5}
+.ir-value a{color:var(--gold);text-decoration:none}
+.ir-value a:hover{text-decoration:underline}
+
+/* Hours */
+.hours-grid{display:flex;flex-direction:column;gap:6px}
+.hours-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--cream-dark)}
+.hours-row:last-child{border-bottom:none}
+.hr-day{color:var(--text-mid)}
+.hr-time{color:var(--text-dark);font-weight:500}
+.hr-closed{color:var(--text-light);font-style:italic}
+
+/* Social */
+.social-row{display:flex;gap:10px;margin-top:4px}
+.soc-btn{width:40px;height:40px;border-radius:10px;background:var(--cream-dark);border:none;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;transition:all .2s;text-decoration:none}
+.soc-btn:hover{background:var(--navy);transform:translateY(-2px)}
+
+/* ── BOOKING SECTION ── */
+.booking-section{background:var(--navy);padding:70px 0}
+.booking-inner{max-width:1300px;margin:0 auto;padding:0 60px}
+.booking-head{text-align:center;margin-bottom:44px}
+.b-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);font-weight:600;margin-bottom:8px}
+.b-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:#fff;line-height:1.2}
+.b-title em{font-style:italic;color:var(--gold-light)}
+.b-sub{font-size:14px;color:rgba(255,255,255,.5);margin-top:10px;line-height:1.7}
+
+.booking-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.booking-card{
+  background:rgba(255,255,255,.05);backdrop-filter:blur(10px);
+  border:1px solid rgba(255,255,255,.1);border-radius:var(--r-lg);
+  padding:28px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;
+}
+.booking-card::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 80% 20%,rgba(201,146,42,.1),transparent 60%);opacity:0;transition:opacity .3s}
+.booking-card:hover::before{opacity:1}
+.booking-card:hover{border-color:rgba(201,146,42,.35);transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.bc-icon-wrap{width:54px;height:54px;border-radius:14px;background:rgba(201,146,42,.15);border:1px solid rgba(201,146,42,.25);display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:16px}
+.bc-type{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gold-light);text-transform:uppercase;margin-bottom:8px}
+.bc-name{font-size:18px;font-weight:600;color:#fff;margin-bottom:8px}
+.bc-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.65;margin-bottom:20px}
+.bc-duration{display:flex;align-items:center;gap:6px;font-size:12px;color:rgba(255,255,255,.4);margin-bottom:16px}
+.bc-btn{width:100%;padding:11px;background:rgba(201,146,42,.18);border:1.5px solid rgba(201,146,42,.3);color:var(--gold-light);font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;transition:all .2s}
+.bc-btn:hover{background:rgba(201,146,42,.3);border-color:var(--gold-light)}
+.bc-popular{position:absolute;top:16px;right:16px;background:var(--gold);color:var(--navy);font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;letter-spacing:.5px}
+
+/* ── FAQ ── */
+.faq-section{max-width:1300px;margin:0 auto;padding:70px 60px 80px}
+.faq-title-wrap{text-align:center;margin-bottom:44px}
+.sec-label{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:8px}
+.sec-title{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:300;color:var(--text-dark)}
+.sec-title em{font-style:italic;color:var(--gold)}
+
+.faq-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.faq-item{background:var(--white);border-radius:var(--r);border:1.5px solid var(--cream-dark);overflow:hidden;transition:border-color .2s}
+.faq-item:hover{border-color:var(--cream-mid)}
+.faq-q{padding:18px 22px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.faq-q-text{font-size:14px;font-weight:500;color:var(--text-dark);line-height:1.45}
+.faq-toggle{color:var(--gold);font-size:18px;flex-shrink:0;transition:transform .3s;font-weight:300}
+.faq-a{padding:0 22px 18px;font-size:13px;color:var(--text-mid);line-height:1.75;display:none}
+.faq-item.open .faq-a{display:block}
+.faq-item.open .faq-toggle{transform:rotate(45deg)}
+.faq-item.open{border-color:var(--gold-pale)}
+
+/* ── ANIMATIONS ── */
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#"><div class="logo-icon">🪺</div><span class="logo-text">LUXNEST</span></a>
+  <nav>
+    <a href="#">Trang Chủ</a>
+    <a href="#">Sản phẩm</a>
+    <a href="#">Trực quan 3D</a>
+    <a href="#">Dự án</a>
+    <a href="#" class="active">Liên hệ</a>
+  </nav>
+  <div class="header-right">
+    <a href="#" class="btn-3d-hdr">🏠 Trực quan hoa</a>
+    <button class="icon-btn">🔔</button>
+    <button class="icon-btn">🛒</button>
+    <button class="icon-btn">👤</button>
+  </div>
+</header>
+
+<!-- BREADCRUMB -->
+<div class="breadcrumb"><div class="bc-inner">
+  <a href="#">Trang chủ</a><span>›</span><span class="cur">Liên hệ</span>
+</div></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg"></div>
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div class="hero-inner">
+    <div>
+      <div class="h-label">Liên hệ & Tư vấn</div>
+      <h1 class="h-title">Chúng tôi sẵn sàng<br>lắng nghe <em>bạn</em></h1>
+      <p class="h-sub">Từ câu hỏi về sản phẩm đến tư vấn thiết kế toàn bộ căn nhà — đội ngũ LUXNEST luôn ở đây để đồng hành cùng bạn.</p>
+      <div class="h-quick">
+        <a href="#form" class="hq-btn hq-primary">✉️ Gửi tin nhắn</a>
+        <a href="#booking" class="hq-btn hq-ghost">📅 Đặt lịch tư vấn</a>
+      </div>
+    </div>
+    <div class="h-info-cards">
+      <div class="h-info-card">
+        <div class="hic-icon">📞</div>
+        <div class="hic-body">
+          <div class="hic-label">Hotline</div>
+          <div class="hic-value">1800 6868 (miễn phí)</div>
+          <div class="hic-sub">Thứ 2 – Chủ nhật · 8:00 – 21:00</div>
+        </div>
+        <div class="hic-arrow">→</div>
+      </div>
+      <div class="h-info-card">
+        <div class="hic-icon">💬</div>
+        <div class="hic-body">
+          <div class="hic-label">Chat trực tuyến</div>
+          <div class="hic-value">Phản hồi trong &lt; 5 phút</div>
+          <div class="hic-sub" style="color:#2d9e6b;display:flex;align-items:center;gap:5px"><span style="width:7px;height:7px;border-radius:50%;background:#2d9e6b;display:inline-block;animation:pulse 2s infinite"></span> Đang online – 3 tư vấn viên</div>
+        </div>
+        <div class="hic-arrow">→</div>
+      </div>
+      <div class="h-info-card">
+        <div class="hic-icon">🏪</div>
+        <div class="hic-body">
+          <div class="hic-label">Showroom</div>
+          <div class="hic-value">123 Nguyễn Đình Chiểu, Q.3, TP.HCM</div>
+          <div class="hic-sub">Xem thực tế 300+ sản phẩm</div>
+        </div>
+        <div class="hic-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main-wrap" id="form">
+
+  <!-- CONTACT FORM -->
+  <div class="form-card fade-up">
+    <div class="form-header">
+      <div class="form-tag">Gửi yêu cầu</div>
+      <h2 class="form-title">Hãy kể cho chúng tôi<br>về <em>không gian của bạn</em></h2>
+    </div>
+
+    <!-- Intent Tabs -->
+    <div class="intent-tabs">
+      <button class="it-tab active" onclick="switchIntent(this,'general')">💬 Hỏi chung</button>
+      <button class="it-tab" onclick="switchIntent(this,'design')">🏠 Tư vấn TK</button>
+      <button class="it-tab" onclick="switchIntent(this,'order')">📦 Đơn hàng</button>
+      <button class="it-tab" onclick="switchIntent(this,'partner')">🤝 Hợp tác</button>
+    </div>
+
+    <div id="intent-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="fl">Họ và tên <span>*</span></label>
+          <input class="fi" type="text" placeholder="Nguyễn Văn A">
+        </div>
+        <div class="form-group">
+          <label class="fl">Số điện thoại <span>*</span></label>
+          <input class="fi" type="tel" placeholder="090 xxx xxxx">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="fl">Email</label>
+        <input class="fi" type="email" placeholder="email@example.com">
+      </div>
+
+      <!-- Design-specific fields (shown when intent = design) -->
+      <div id="design-fields" style="display:none">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="fl">Loại phòng</label>
+            <select class="fi">
+              <option value="">Chọn loại phòng</option>
+              <option>Phòng ngủ</option>
+              <option>Phòng khách</option>
+              <option>Phòng ăn</option>
+              <option>Nhà bếp</option>
+              <option>Văn phòng</option>
+              <option>Toàn bộ căn hộ</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="fl">Diện tích ước tính</label>
+            <select class="fi">
+              <option value="">Chọn diện tích</option>
+              <option>Dưới 15m²</option>
+              <option>15 – 25m²</option>
+              <option>25 – 40m²</option>
+              <option>40 – 70m²</option>
+              <option>Trên 70m²</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="fl">Ngân sách dự kiến</label>
+          <div class="budget-pills">
+            <button class="bp" onclick="selectBudget(this)">Dưới 30tr</button>
+            <button class="bp active" onclick="selectBudget(this)">30 – 80tr</button>
+            <button class="bp" onclick="selectBudget(this)">80 – 150tr</button>
+            <button class="bp" onclick="selectBudget(this)">150tr – 300tr</button>
+            <button class="bp" onclick="selectBudget(this)">Trên 300tr</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="fl">Tải ảnh phòng (để AI phân tích)</label>
+          <div class="file-drop" onclick="document.getElementById('fileInput').click()">
+            <div class="fd-icon">📸</div>
+            <div class="fd-title">Kéo thả ảnh hoặc nhấn để chọn</div>
+            <div class="fd-sub">JPG, PNG, WEBP · Tối đa 20MB · <span>AI sẽ phân tích và tư vấn phù hợp hơn</span></div>
+            <input id="fileInput" type="file" accept="image/*" style="display:none" multiple onchange="handleFiles(this)">
+          </div>
+          <div id="file-preview" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="fl">Nội dung <span>*</span></label>
+        <textarea class="fi" id="msgTextarea" placeholder="Mô tả yêu cầu của bạn...&#10;Ví dụ: Tôi muốn thiết kế lại phòng ngủ 20m², phong cách tối giản, ngân sách khoảng 60 triệu."></textarea>
+      </div>
+
+      <button class="form-submit" onclick="submitForm()">
+        <span>✉️</span> Gửi yêu cầu ngay
+      </button>
+      <div class="form-note">Chúng tôi sẽ phản hồi trong vòng <strong>2 giờ làm việc</strong>.<br>Thông tin của bạn được bảo mật tuyệt đối.</div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="contact-sidebar">
+
+    <!-- Consultant -->
+    <div class="consultant-card fade-up" style="transition-delay:.1s">
+      <div class="cc-header">
+        <div class="cc-avatar">👨‍💼</div>
+        <div>
+          <div class="cc-name">Huỳnh Minh Hiển</div>
+          <div class="cc-role">Chuyên gia tư vấn thiết kế</div>
+          <div class="cc-online"><span class="cc-online-dot"></span> Đang trực tuyến</div>
+        </div>
+      </div>
+      <div class="cc-body">
+        <div class="cc-desc">Hơn 8 năm kinh nghiệm trong thiết kế nội thất. Sẵn sàng tư vấn miễn phí cho dự án của bạn.</div>
+        <div class="cc-actions">
+          <a href="#" class="cc-btn cc-btn-primary">💬 Chat ngay – Miễn phí</a>
+          <a href="#booking" class="cc-btn cc-btn-ghost">📅 Đặt lịch gọi video</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Info -->
+    <div class="info-block fade-up" style="transition-delay:.15s">
+      <div class="ib-title"><span class="ib-title-icon">📍</span> Thông tin liên hệ</div>
+      <div class="info-rows">
+        <div class="info-row">
+          <div class="ir-icon">📞</div>
+          <div class="ir-body">
+            <div class="ir-label">Hotline (miễn phí)</div>
+            <div class="ir-value"><a href="tel:18006868">1800 6868</a></div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="ir-icon">✉️</div>
+          <div class="ir-body">
+            <div class="ir-label">Email</div>
+            <div class="ir-value"><a href="mailto:hello@luxnest.vn">hello@luxnest.vn</a></div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="ir-icon">📍</div>
+          <div class="ir-body">
+            <div class="ir-label">Showroom TP.HCM</div>
+            <div class="ir-value">123 Nguyễn Đình Chiểu, Q.3, TP.HCM</div>
+          </div>
+        </div>
+        <div class="info-row">
+          <div class="ir-icon">📍</div>
+          <div class="ir-body">
+            <div class="ir-label">Showroom Hà Nội</div>
+            <div class="ir-value">456 Trần Duy Hưng, Cầu Giấy, Hà Nội</div>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="ir-label" style="margin-bottom:10px">Mạng xã hội</div>
+        <div class="social-row">
+          <a class="soc-btn" href="#" title="Facebook">f</a>
+          <a class="soc-btn" href="#" title="Instagram">📷</a>
+          <a class="soc-btn" href="#" title="YouTube">▶</a>
+          <a class="soc-btn" href="#" title="TikTok">♪</a>
+          <a class="soc-btn" href="#" title="Zalo">Z</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hours -->
+    <div class="info-block fade-up" style="transition-delay:.2s">
+      <div class="ib-title"><span class="ib-title-icon">🕐</span> Giờ làm việc</div>
+      <div class="hours-grid">
+        <div class="hours-row"><span class="hr-day">Thứ 2 – Thứ 6</span><span class="hr-time">8:00 – 21:00</span></div>
+        <div class="hours-row"><span class="hr-day">Thứ 7</span><span class="hr-time">8:00 – 20:00</span></div>
+        <div class="hours-row"><span class="hr-day">Chủ nhật</span><span class="hr-time">9:00 – 18:00</span></div>
+        <div class="hours-row"><span class="hr-day">Chat online</span><span class="hr-time" style="color:var(--green)">24/7</span></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- BOOKING -->
+<div class="booking-section" id="booking">
+  <div class="booking-inner">
+    <div class="booking-head fade-up">
+      <div class="b-label">Đặt lịch</div>
+      <h2 class="b-title">Chọn hình thức <em>tư vấn</em> phù hợp</h2>
+      <p class="b-sub">Miễn phí hoàn toàn — các chuyên gia của chúng tôi sẽ giúp bạn định hình không gian lý tưởng.</p>
+    </div>
+    <div class="booking-cards fade-up" style="transition-delay:.1s">
+
+      <div class="booking-card">
+        <div class="bc-popular">Phổ biến</div>
+        <div class="bc-icon-wrap">🎥</div>
+        <div class="bc-type">Online</div>
+        <div class="bc-name">Tư vấn Video Call</div>
+        <div class="bc-desc">Kết nối trực tiếp với chuyên gia qua Zoom/Meet. Chia sẻ màn hình và xem demo 3D cùng nhau.</div>
+        <div class="bc-duration">⏱️ 30 – 60 phút · Miễn phí</div>
+        <button class="bc-btn" onclick="bookSession('video')">📅 Đặt lịch ngay</button>
+      </div>
+
+      <div class="booking-card">
+        <div class="bc-icon-wrap">🏪</div>
+        <div class="bc-type">Trực tiếp</div>
+        <div class="bc-name">Tham quan Showroom</div>
+        <div class="bc-desc">Đến showroom trải nghiệm thực tế 300+ sản phẩm và thử chức năng 3D trên màn hình lớn.</div>
+        <div class="bc-duration">⏱️ Linh hoạt · Miễn phí</div>
+        <button class="bc-btn" onclick="bookSession('showroom')">📅 Đặt lịch tham quan</button>
+      </div>
+
+      <div class="booking-card">
+        <div class="bc-icon-wrap">🏠</div>
+        <div class="bc-type">Tại nhà</div>
+        <div class="bc-name">Tư vấn tại nhà bạn</div>
+        <div class="bc-desc">Chuyên gia đến tận nơi, đo đạc không gian thực tế và tư vấn chi tiết theo nhu cầu cụ thể.</div>
+        <div class="bc-duration">⏱️ 1 – 2 giờ · TP.HCM & Hà Nội</div>
+        <button class="bc-btn" onclick="bookSession('home')">📅 Đặt lịch hẹn</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="faq-section fade-up">
+  <div class="faq-title-wrap">
+    <div class="sec-label">Câu hỏi thường gặp</div>
+    <h2 class="sec-title">Bạn cần <em>biết gì thêm?</em></h2>
+  </div>
+  <div class="faq-grid">
+    <div class="faq-item open">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Tính năng trực quan 3D có miễn phí không?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Hoàn toàn miễn phí! Bạn chỉ cần tải ảnh phòng lên, AI sẽ phân tích và tạo mô hình 3D ngay lập tức. Không cần đăng ký tài khoản để dùng thử.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Thời gian giao hàng trung bình bao lâu?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Thông thường 3–5 ngày làm việc trong nội thành TP.HCM và Hà Nội. Các tỉnh thành khác 5–7 ngày. Sản phẩm đặt riêng có thể cần 2–4 tuần.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Có thể đổi trả sản phẩm không?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Chính sách đổi trả 30 ngày miễn phí nếu sản phẩm có lỗi từ nhà sản xuất. Sản phẩm nguyên vẹn chưa qua sử dụng có thể đổi trong 7 ngày.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">AI có nhận diện đúng loại phòng của tôi không?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Độ chính xác nhận diện loại phòng đạt 94% với ảnh rõ ràng. Nếu AI nhận diện sai, bạn có thể chọn lại thủ công trong vòng 2 click — và AI sẽ cập nhật gợi ý ngay lập tức.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Tư vấn thiết kế có tính phí không?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Buổi tư vấn đầu tiên (online hoặc tại showroom) hoàn toàn miễn phí. Tư vấn tại nhà bạn miễn phí trong TP.HCM và Hà Nội khi ngân sách dự án từ 50 triệu trở lên.</div>
+    </div>
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">
+        <span class="faq-q-text">Có thể xem sản phẩm thực tế trước khi mua không?</span>
+        <span class="faq-toggle">+</span>
+      </div>
+      <div class="faq-a">Có! Showroom của chúng tôi tại TP.HCM và Hà Nội trưng bày hơn 300 sản phẩm thực tế. Bạn có thể đặt lịch tham quan hoặc ghé thăm trong giờ làm việc mà không cần hẹn trước.</div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon">✅</div>
+  <div>
+    <div class="toast-title">Đã gửi thành công!</div>
+    <div class="toast-sub">Chúng tôi sẽ phản hồi trong vòng 2 giờ làm việc.</div>
+  </div>
+</div>
+
+<script>
+// Intent tabs
+function switchIntent(btn, type) {
+  document.querySelectorAll('.it-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  const df = document.getElementById('design-fields');
+  const ta = document.getElementById('msgTextarea');
+  if (type === 'design') {
+    df.style.display = 'block';
+    ta.placeholder = 'Mô tả thêm yêu cầu của bạn...';
+  } else {
+    df.style.display = 'none';
+    const placeholders = {
+      general: 'Bạn có câu hỏi gì? Chúng tôi sẽ trả lời sớm nhất có thể...',
+      order: 'Mã đơn hàng, sản phẩm, vấn đề cần hỗ trợ...',
+      partner: 'Giới thiệu về công ty bạn và hình thức hợp tác mong muốn...',
+    };
+    ta.placeholder = placeholders[type] || '';
+  }
+}
+
+// Budget pills
+function selectBudget(btn) {
+  document.querySelectorAll('.bp').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// File upload preview
+function handleFiles(input) {
+  const preview = document.getElementById('file-preview');
+  preview.innerHTML = '';
+  [...input.files].forEach(file => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const div = document.createElement('div');
+      div.style.cssText = 'width:64px;height:64px;border-radius:8px;background:var(--cream-dark);border:1.5px solid var(--cream-mid);display:flex;align-items:center;justify-content:center;font-size:24px';
+      div.textContent = '🖼️';
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// File drop
+const fd = document.querySelector('.file-drop');
+if (fd) {
+  fd.addEventListener('dragover', e => { e.preventDefault(); fd.style.borderColor = 'var(--gold)'; fd.style.background = 'var(--gold-pale)'; });
+  fd.addEventListener('dragleave', () => { fd.style.borderColor = ''; fd.style.background = ''; });
+}
+
+// Submit form
+function submitForm() {
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 4000);
+}
+
+// Booking
+function bookSession(type) {
+  const labels = { video: 'Tư vấn Video Call', showroom: 'Tham quan Showroom', home: 'Tư vấn tại nhà' };
+  alert(`→ Đặt lịch: ${labels[type]}\n(Tích hợp Calendly/Google Calendar trong phiên bản thực tế)`);
+}
+
+// FAQ
+function toggleFaq(btn) {
+  const item = btn.parentElement;
+  item.classList.toggle('open');
+}
+
+// Scroll reveal
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

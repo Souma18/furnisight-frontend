@@ -1,10 +1,13 @@
-import { ref, computed } from 'vue'
+import { computed, inject, provide, ref } from 'vue'
 
-const AUTH_VIEWS = {
+const AUTH_VIEW_STATE_KEY = Symbol('authViewState')
+
+export const AUTH_VIEWS = {
   LOGIN: 'login',
   REGISTER: 'register',
   FORGOT: 'forgot',
   SUCCESS: 'success',
+  VERIFY: 'verify',
 }
 
 export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
@@ -13,6 +16,7 @@ export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
     title: '',
     message: '',
     mode: AUTH_VIEWS.LOGIN,
+    loading: false,
   })
 
   const showTabs = computed(
@@ -23,8 +27,8 @@ export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
     activeView.value = view
   }
 
-  function showSuccess({ title, message, mode = AUTH_VIEWS.LOGIN }) {
-    successState.value = { title, message, mode }
+  function showSuccess({ title, message, mode = AUTH_VIEWS.LOGIN, loading = false }) {
+    successState.value = { title, message, mode, loading }
     activeView.value = AUTH_VIEWS.SUCCESS
   }
 
@@ -36,4 +40,13 @@ export function useAuthViewState(initialView = AUTH_VIEWS.LOGIN) {
     setView,
     showSuccess,
   }
+}
+
+export function provideAuthViewState(authViewState) {
+  provide(AUTH_VIEW_STATE_KEY, authViewState)
+  return authViewState
+}
+
+export const useAuthViewStateContext = () => {
+  return inject(AUTH_VIEW_STATE_KEY, null) ?? useAuthViewState()
 }

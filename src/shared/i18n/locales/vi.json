@@ -1,0 +1,1319 @@
+{
+  "common": {
+    "brand": "FurniSight",
+    "loading": "Đang tải...",
+    "retry": "Thử lại",
+    "close": "Đóng",
+    "save": "Lưu",
+    "cancel": "Huỷ",
+    "all": "Tất cả",
+    "apply": "Áp dụng",
+    "clear": "Xóa",
+    "viewAll": "Xem tất cả",
+    "backToTop": "Lên đầu trang"
+  },
+  "nav": {
+    "home": "Trang Chủ",
+    "products": "Sản phẩm",
+    "room3d": "Trực quan 3D",
+    "promotions": "Khuyến mãi",
+    "contact": "Liên hệ",
+    "main": "Chính"
+  },
+  "language": {
+    "label": "Ngôn ngữ",
+    "vi": "Tiếng Việt",
+    "en": "English",
+    "shortVi": "VI",
+    "shortEn": "EN"
+  },
+  "theme": {
+    "label": "Giao diện",
+    "mode": "Chế độ hiển thị",
+    "description": "Chọn sáng, tối hoặc tự đồng bộ theo thiết bị.",
+    "system": "Theo thiết bị",
+    "light": "Sáng",
+    "dark": "Tối",
+    "toggleToLight": "Chuyển sang giao diện sáng",
+    "toggleToDark": "Chuyển sang giao diện tối"
+  },
+  "header": {
+    "visualize": "Trực quan 3D",
+    "notifications": "Thông báo",
+    "markAllRead": "Đọc tất cả",
+    "emptyNotifications": "Không có thông báo nào.",
+    "account": "Tài khoản",
+    "login": "Đăng nhập",
+    "openMenu": "Mở menu",
+    "closeMenu": "Đóng menu"
+  },
+  "footer": {
+    "description": "Nền tảng nội thất thông minh đầu tiên tại Việt Nam ứng dụng AI và trực quan 3D để giúp bạn thiết kế không gian sống lý tưởng.",
+    "products": "Sản phẩm",
+    "features": "Tính năng",
+    "support": "Hỗ trợ",
+    "officeChair": "Ghế văn phòng",
+    "bed": "Giường ngủ",
+    "sofa": "Sofa và ghế sofa",
+    "diningTable": "Bàn ăn",
+    "cabinet": "Kệ và tủ",
+    "decorLight": "Đèn trang trí",
+    "aiSuggest": "AI gợi ý nội thất",
+    "copyright": "© {year} FurniSight. All rights reserved."
+  },
+  "cart": {
+    "title": "Giỏ hàng",
+    "open": "Giỏ hàng",
+    "view": "Xem giỏ"
+  },
+  "settings": {
+    "appearance": "Giao diện",
+    "language": "Ngôn ngữ",
+    "languageDescription": "Chọn ngôn ngữ hiển thị cho giao diện.",
+    "notifications": "Cài đặt thông báo",
+    "on": "Bật",
+    "off": "Tắt"
+  },
+  "account": {
+    "nav": {
+      "aria": "Điều hướng tài khoản",
+      "profile": "Hồ sơ",
+      "address": "Địa chỉ",
+      "notifications": "Thông báo",
+      "cart": "Giỏ hàng",
+      "orders": "Đơn hàng",
+      "wishlist": "Yêu thích",
+      "security": "Bảo mật",
+      "settings": "Cài đặt",
+      "room3d": "3D",
+      "logout": "Đăng xuất"
+    },
+    "toast": {
+      "logoutSuccess": "Đăng xuất thành công."
+    },
+    "profile": {
+      "title": "Hồ sơ cá nhân",
+      "info": "Thông tin hồ sơ",
+      "edit": "Chỉnh sửa",
+      "editing": "Đang chỉnh sửa",
+      "saveChanges": "Lưu thay đổi",
+      "saving": "Đang lưu...",
+      "defaultName": "Khách hàng FurniSight",
+      "notUpdated": "Chưa cập nhật",
+      "noEmail": "Chưa liên kết email",
+      "fullName": "Họ tên",
+      "lastName": "Họ",
+      "firstName": "Tên",
+      "lastNamePlaceholder": "Nguyễn",
+      "firstNamePlaceholder": "Văn A",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "birthday": "Ngày sinh",
+      "bio": "Giới thiệu",
+      "bioPlaceholder": "Viết một chút về bản thân...",
+      "changeAvatar": "Đổi ảnh",
+      "removeAvatar": "Xoá ảnh",
+      "avatarUploading": "Đang tải ảnh đại diện",
+      "changeAvatarAria": "Đổi ảnh đại diện",
+      "loadError": "Không tải được thông tin cá nhân.",
+      "saved": "Đã lưu thông tin cá nhân.",
+      "chooseImage": "Vui lòng chọn file ảnh.",
+      "avatarTooLarge": "Ảnh đại diện không được vượt quá 5MB.",
+      "avatarUpdated": "Đã cập nhật ảnh đại diện.",
+      "avatarUrlMissing": "Không lấy được URL ảnh sau khi upload.",
+      "avatarUpdateFailed": "Không thể cập nhật ảnh đại diện.",
+      "avatarRemoved": "Đã xoá ảnh đại diện.",
+      "avatarRemoveFailed": "Không thể xoá ảnh đại diện.",
+      "gender": {
+        "label": "Giới tính",
+        "male": "Nam",
+        "female": "Nữ",
+        "other": "Khác"
+      }
+    },
+    "cart": {
+      "title": "Giỏ hàng",
+      "selectAll": "Chọn tất cả",
+      "selectedCount": "{selected} / {total} sản phẩm",
+      "chooseVariant": "Chọn phân loại",
+      "defaultVariant": "Phân loại mặc định",
+      "variantLabel": "Phân loại: {value}",
+      "color": "Màu",
+      "size": "Kích thước",
+      "quantity": "Số lượng",
+      "noColorData": "Không có dữ liệu màu",
+      "noSizeData": "Không có dữ liệu kích thước",
+      "variantLoadFailed": "Không tải được dữ liệu phân loại cho sản phẩm này. Vui lòng xóa sản phẩm và thêm lại từ trang chi tiết nếu cần đổi phân loại.",
+      "outOfStock": "Hết hàng",
+      "maxStock": "Tối đa {count} sản phẩm",
+      "selectItem": "Chọn {name}",
+      "product": "Sản phẩm",
+      "decreaseQty": "Giảm số lượng",
+      "increaseQty": "Tăng số lượng",
+      "removeItem": "Xóa sản phẩm",
+      "checkoutNow": "Thanh toán ngay",
+      "totalLabel": "Tổng cộng ({count} sản phẩm): {total}",
+      "emptyTitle": "Giỏ hàng đang trống",
+      "emptySub": "Thêm vài món để xem nhanh tại đây.",
+      "moreItems": "+{count} sản phẩm khác trong giỏ",
+      "total": "Tổng cộng",
+      "viewCart": "Xem giỏ hàng",
+      "checkout": "Thanh toán",
+      "checkoutWithCount": "Thanh toán ({count})"
+    },
+    "address": {
+      "title": "Địa chỉ giao hàng",
+      "addNew": "Thêm địa chỉ mới",
+      "empty": "Chưa có địa chỉ giao hàng. Thêm địa chỉ để thanh toán nhanh hơn.",
+      "setDefault": "Đặt làm mặc định",
+      "deleteTitle": "Xóa địa chỉ",
+      "delete": "Xóa",
+      "modalTitle": "Thêm địa chỉ",
+      "fullName": "Họ tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "phone": "Số điện thoại",
+      "province": "Tỉnh/Thành",
+      "chooseProvince": "Chọn tỉnh thành",
+      "ward": "Phường/Xã",
+      "chooseWard": "Chọn phường xã",
+      "provinceLoadError": "Không tải được dữ liệu tỉnh/thành.",
+      "retrying": "Đang thử lại...",
+      "detail": "Địa chỉ cụ thể",
+      "detailPlaceholder": "Số nhà, tên đường...",
+      "type": "Loại địa chỉ",
+      "defaultAddress": "Đặt làm địa chỉ mặc định",
+      "save": "Lưu địa chỉ",
+      "loadError": "Không tải được danh sách địa chỉ.",
+      "addressDataError": "Không tải được dữ liệu địa chỉ. Vui lòng thử lại.",
+      "wardLoadError": "Không tải được danh sách phường/xã. Vui lòng chọn lại tỉnh/thành.",
+      "requiredError": "Vui lòng điền thông tin bắt buộc.",
+      "invalidPhone": "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam).",
+      "savedDefault": "Đã lưu và đặt làm địa chỉ mặc định.",
+      "saved": "Đã lưu địa chỉ mới.",
+      "saveError": "Lỗi khi lưu địa chỉ.",
+      "defaultUpdated": "Đã cập nhật địa chỉ mặc định.",
+      "defaultError": "Không thể đặt địa chỉ mặc định.",
+      "deleteConfirm": "Bạn có chắc chắn muốn xóa địa chỉ này?",
+      "deleted": "Đã xóa địa chỉ.",
+      "types": {
+        "home": "nhà riêng",
+        "office": "văn phòng",
+        "other": "khác"
+      }
+    },
+    "notifications": {
+      "title": "Trung tâm thông báo",
+      "introPrefix": "Theo dõi hoạt động tài khoản theo nhóm",
+      "total": "{count} thông báo",
+      "markAllRead": "Đánh dấu tất cả đã đọc",
+      "allRead": "Đã đọc hết",
+      "loading": "Đang tải thông báo...",
+      "emptyTitle": "Không có thông báo nào",
+      "emptySub": "Khi có hoạt động mới, chúng sẽ hiển thị ở đây.",
+      "hideDetail": "Ẩn chi tiết",
+      "viewDetail": "Xem chi tiết",
+      "loadError": "Không thể tải thông báo.",
+      "markedRead": "Đã đánh dấu thông báo là đã đọc.",
+      "markedAllRead": "Đã đánh dấu tất cả thông báo là đã đọc.",
+      "updateError": "Không thể cập nhật thông báo.",
+      "actionSelected": "Đã chọn: {label}.",
+      "status": {
+        "all": "Tất cả",
+        "unread": "Chưa đọc",
+        "read": "Đã đọc"
+      },
+      "categories": {
+        "all": "Tất cả",
+        "order": "Đơn hàng",
+        "promo": "Khuyến mãi",
+        "system": "Hệ thống",
+        "review": "Đánh giá"
+      },
+      "time": {
+        "justNow": "Vừa xong",
+        "minutesAgo": "{count} phút trước",
+        "hoursAgo": "{count} giờ trước"
+      },
+      "groups": {
+        "today": "Hôm nay",
+        "yesterday": "Hôm qua",
+        "thisWeek": "Tuần này",
+        "earlier": "Trước đó",
+        "other": "Khác"
+      },
+      "detail": {
+        "time": "Thời gian",
+        "type": "Loại thông báo",
+        "notification": "Thông báo"
+      }
+    },
+    "wishlist": {
+      "title": "Sản phẩm yêu thích",
+      "empty": "Chưa có sản phẩm nào trong danh sách yêu thích.",
+      "removed": "Đã bỏ sản phẩm khỏi danh sách yêu thích.",
+      "removeError": "Không thể bỏ yêu thích sản phẩm. Vui lòng thử lại.",
+      "loadError": "Không tải được danh sách yêu thích."
+    },
+    "security": {
+      "title": "Bảo mật tài khoản",
+      "changePassword": "Thay đổi mật khẩu",
+      "currentPassword": "Mật khẩu hiện tại",
+      "newPassword": "Mật khẩu mới",
+      "confirmPassword": "Xác nhận mật khẩu",
+      "updatePassword": "Cập nhật mật khẩu",
+      "currentRequired": "Vui lòng nhập mật khẩu hiện tại.",
+      "confirmMismatch": "Mật khẩu xác nhận chưa khớp.",
+      "updateSuccess": "Đã cập nhật mật khẩu thành công.",
+      "updateError": "Có lỗi xảy ra khi đổi mật khẩu."
+    },
+    "vouchers": {
+      "title": "Voucher của tôi",
+      "refresh": "Làm mới",
+      "type": "Loại voucher",
+      "time": "Thời gian",
+      "loading": "Đang tải voucher...",
+      "expiryShort": "HSD",
+      "copy": "Sao chép",
+      "empty": "Không có voucher phù hợp bộ lọc.",
+      "loadError": "Không tải được danh sách voucher.",
+      "copied": "Đã sao chép mã {code}.",
+      "copyError": "Không sao chép được mã voucher."
+    },
+    "projects": {
+      "title": "Dự án trực quan 3D",
+      "updated": "Cập nhật: {date} · {count} sản phẩm",
+      "noData": "Chưa có dữ liệu",
+      "create": "Tạo dự án mới"
+    },
+    "orders": {
+      "title": "Đơn hàng của tôi",
+      "back": "Quay lại đơn hàng",
+      "detailTitle": "Đơn hàng {code}",
+      "createdAt": "Đặt ngày {date}",
+      "cancel": "Huỷ đơn",
+      "creatingPayment": "Đang tạo thanh toán...",
+      "retryPayment": "Thanh toán lại",
+      "viewDetail": "Xem chi tiết",
+      "empty": "Không có đơn hàng ở trạng thái này.",
+      "cancelDialogTitle": "Xác nhận hủy đơn",
+      "cancelDialogMessage": "Bạn có chắc muốn hủy đơn {code}? Thao tác này không thể hoàn tác.",
+      "cancelConfirm": "Hủy đơn",
+      "keepOrder": "Giữ đơn",
+      "confirmReceived": "Đã nhận được hàng",
+      "confirmReceivedDialogTitle": "Xác nhận đã nhận hàng",
+      "confirmReceivedDialogMessage": "Vui lòng chỉ xác nhận khi bạn đã kiểm tra và nhận được sản phẩm nguyên vẹn. Thao tác này không thể hoàn tác.",
+      "confirmSuccess": "Xác nhận nhận hàng thành công.",
+      "confirmError": "Không thể xác nhận nhận hàng lúc này.",
+      "close": "Đóng",
+      "transactionHistory": "Lịch sử giao dịch",
+      "shippingStatus": "Trạng thái vận chuyển",
+      "purchasedProducts": "Sản phẩm đặt mua",
+      "paymentSummary": "Tóm tắt thanh toán",
+      "transactionInfo": "Thông tin giao dịch",
+      "shippingAddress": "Địa chỉ giao hàng",
+      "shippingInfo": "Thông tin vận chuyển",
+      "subtotal": "Tạm tính",
+      "shippingFee": "Phí vận chuyển",
+      "shippingDiscount": "Giảm giá vận chuyển",
+      "discount": "Giảm giá",
+      "total": "Tổng cộng",
+      "free": "Miễn phí",
+      "paymentMethod": "Phương thức thanh toán",
+      "carrier": "Phương thức",
+      "notFound": "Không tìm thấy đơn hàng.",
+      "noTime": "Chưa ghi nhận thời điểm",
+      "product": "sản phẩm",
+      "viewProductDetail": "Xem chi tiết {name}",
+      "quantityShort": "SL: {count}",
+      "review": "Đánh giá",
+      "noCode": "Chưa có mã đơn",
+      "notRecorded": "Chưa ghi nhận",
+      "none": "Chưa có",
+      "notApplicable": "Không áp dụng",
+      "unknown": "Chưa rõ",
+      "deadlineList": "Còn {time} để thanh toán",
+      "deadlineDetail": "Còn {time} để hoàn tất thanh toán",
+      "cancelError": "Không thể huỷ đơn.",
+      "cancelNowError": "Không thể huỷ đơn hàng lúc này.",
+      "cancelRefundPending": "Đã hủy đơn. Đơn đang chờ hoàn tiền.",
+      "cancelSuccess": "Đã huỷ đơn hàng.",
+      "invalidStatus": "Trạng thái đơn hàng hiện không thể cập nhật.",
+      "retryError": "Không thể thanh toán lại.",
+      "redirectPayment": "Đang chuyển sang cổng thanh toán.",
+      "retryNoCode": "Không tìm thấy mã đơn hàng để thanh toán lại.",
+      "retryExpiredOrUnavailable": "Đơn hàng đã quá hạn thanh toán hoặc không thể thanh toán lại.",
+      "retryMethodUnsupported": "Phương thức thanh toán này chưa hỗ trợ thanh toán lại.",
+      "paymentUrlMissing": "Không nhận được liên kết thanh toán.",
+      "paymentCreateError": "Không thể tạo lại thanh toán lúc này.",
+      "retryTitle": {
+        "available": "Tiếp tục thanh toán đơn hàng",
+        "expired": "Đơn hàng đã quá hạn thanh toán",
+        "unavailable": "Đơn hàng không thể thanh toán lại"
+      },
+      "payment": {
+        "cod": "Thanh toán khi nhận hàng",
+        "paid": "Đã thanh toán",
+        "failed": "Thanh toán thất bại",
+        "pending": "Chờ thanh toán",
+        "refundPending": "Chờ hoàn tiền",
+        "refunded": "Đã hoàn tiền",
+        "whenReceived": "Khi nhận hàng"
+      },
+      "transaction": {
+        "code": "Mã giao dịch",
+        "status": "Trạng thái",
+        "codAmount": "Số tiền cần thu",
+        "paidAmount": "Số tiền ghi nhận",
+        "paymentTime": "Thời điểm thanh toán",
+        "paymentDeadline": "Hạn thanh toán"
+      },
+      "timeline": {
+        "createdTitle": "Đơn hàng được tạo",
+        "createdSub": "Hệ thống đã ghi nhận đơn hàng.",
+        "initiatedTitle": "Khởi tạo thanh toán",
+        "initiatedSub": "Phương thức {method}.",
+        "codTitle": "Thanh toán khi nhận hàng",
+        "codSub": "Khách sẽ thanh toán tiền mặt khi nhận hàng.",
+        "completedTitle": "Thanh toán thành công",
+        "completedSub": "Đã ghi nhận {amount}.",
+        "failedTitle": "Thanh toán thất bại",
+        "failedSub": "Giao dịch chưa được cổng thanh toán chấp nhận.",
+        "pendingTitle": "Chờ thanh toán",
+        "pendingCanPay": "Bạn vẫn có thể tiếp tục thanh toán đơn hàng.",
+        "pendingExpired": "Đơn hàng đã hết thời gian thanh toán.",
+        "refundPendingTitle": "Chờ hoàn tiền",
+        "refundPendingSub": "Đơn đã thanh toán được hủy trước khi giao và đang chờ xử lý hoàn tiền.",
+        "refundedTitle": "Đã hoàn tiền",
+        "refundedSub": "Admin đã xác nhận hoàn tiền cho đơn hàng."
+      },
+      "status": {
+        "all": "Tất cả",
+        "unpaid": "Chờ thanh toán",
+        "unpaid_cod": "Đã đặt đơn",
+        "payment_failed": "Thanh toán thất bại",
+        "paid": "Đã thanh toán",
+        "shipping": "Đang vận chuyển",
+        "in_transit": "Đang giao",
+        "delivered": "Đã nhận",
+        "cancelled": "Đã hủy",
+        "refund_pending": "Chờ hoàn tiền",
+        "refunded": "Đã hoàn tiền",
+        "cancelled_by_admin": "Hủy bởi shop"
+      }
+    }
+  },
+  "home": {
+    "hero": {
+      "tag": "Nội thất tuyển chọn · Trực quan 3D",
+      "titleTop": "Không gian sống",
+      "titleEmphasis": "tinh giản",
+      "titleBottom": "và có chiều sâu",
+      "subtitle": "Khám phá nội thất theo từng căn phòng, thử phối trong không gian 3D và chọn những món đồ thật sự hợp với nhịp sống của bạn.",
+      "try3d": "Thử trực quan 3D",
+      "exploreProducts": "Khám phá sản phẩm",
+      "galleryAria": "Không gian nội thất FurniSight",
+      "mainAlt": "Phòng khách hiện đại với sofa và ánh sáng tự nhiên",
+      "smallAlt": "Phòng ngủ ấm áp phong cách quiet luxury",
+      "noteLabel": "Trải nghiệm 3D",
+      "noteText": "Thử bố cục phòng trước khi quyết định"
+    },
+    "features": {
+      "shippingTitle": "Miễn phí giao hàng",
+      "shippingSubtitle": "Đơn từ 5 triệu VND",
+      "returnTitle": "Đổi trả 30 ngày",
+      "returnSubtitle": "Không cần lý do",
+      "warrantyTitle": "Bảo hành 2 năm",
+      "warrantySubtitle": "Toàn bộ sản phẩm",
+      "supportTitle": "Hỗ trợ 24/7",
+      "supportSubtitle": "Tư vấn thiết kế"
+    },
+    "categories": {
+      "label": "Room stories",
+      "titlePrefix": "Chọn nội thất theo",
+      "titleEmphasis": "không gian sống",
+      "badge": "Không gian",
+      "count": "{count} sản phẩm"
+    },
+    "combos": {
+      "label": "Curated sets",
+      "titlePrefix": "Bộ phối sẵn cho",
+      "titleEmphasis": "nhịp sống tinh gọn",
+      "viewAll": "Xem tất cả",
+      "detailAria": "Chi tiết {name}",
+      "close": "Đóng",
+      "soldOut": "Hết hàng",
+      "adding": "Đang thêm",
+      "add": "Thêm combo",
+      "preparing": "Đang chuẩn bị",
+      "buy": "Mua combo"
+    },
+    "products": {
+      "label": "Selected pieces",
+      "titlePrefix": "Những món đồ",
+      "titleEmphasis": "đáng chú ý",
+      "empty": "Chưa có sản phẩm nổi bật."
+    },
+    "process": {
+      "label": "Công nghệ AI · 3D Vision",
+      "title": "Thử bố cục phòng trước khi quyết định",
+      "subtitle": "Tải ảnh không gian thật, xem gợi ý nội thất phù hợp và lưu lại những món đồ bạn muốn mua.",
+      "step1Title": "Tải ảnh phòng",
+      "step1Text": "Chọn phòng có sẵn hoặc dùng ảnh của bạn.",
+      "step2Title": "Nhận gợi ý",
+      "step2Text": "AI đề xuất sản phẩm theo không gian.",
+      "step3Title": "Chốt lựa chọn",
+      "step3Text": "Thêm sản phẩm từ thiết kế vào giỏ hàng.",
+      "start": "Bắt đầu trực quan 3D",
+      "products": "Xem sản phẩm",
+      "previewText": "Tải ảnh phòng hoặc chọn phòng có sẵn để bắt đầu.",
+      "previewStart": "Bắt đầu",
+      "previewAria": "Khối lập phương FurniSight xoay tự động"
+    },
+    "testimonials": {
+      "label": "Đánh giá",
+      "title": "Khách hàng chọn FurniSight vì điều gì",
+      "stars": "{count} sao",
+      "anonymous": "Khách hàng ẩn danh"
+    },
+    "newsletter": {
+      "label": "FurniSight journal",
+      "title": "Nhận gợi ý phối nội thất và ưu đãi mới",
+      "subtitle": "Một email ngắn mỗi tuần về sản phẩm, combo và ý tưởng bố trí phòng.",
+      "placeholder": "Email của bạn...",
+      "submit": "Đăng ký"
+    }
+  },
+  "products": {
+    "searchPlaceholder": "Tìm kiếm sản phẩm...",
+    "filters": "Bộ lọc",
+    "gridView": "Hiển thị dạng lưới",
+    "listView": "Hiển thị dạng danh sách",
+    "resultCount": "Tìm thấy {count} sản phẩm",
+    "clearFilters": "Xóa bộ lọc",
+    "empty": "Không có sản phẩm phù hợp bộ lọc hiện tại.",
+    "emptyShort": "Không có sản phẩm phù hợp.",
+    "loading": "Đang tải sản phẩm...",
+    "sold": "Đã bán {count}",
+    "ratingAria": "Đánh giá sản phẩm",
+    "wishlist": "Yêu thích",
+    "noImage": "Không có ảnh",
+    "sidebar": {
+      "title": "Bộ lọc sản phẩm",
+      "categoryCount": "{count} sản phẩm theo danh mục",
+      "close": "Đóng bộ lọc",
+      "category": "Danh mục",
+      "priceRange": "Khoảng giá",
+      "material": "Chất liệu",
+      "color": "Màu sắc",
+      "rating": "Đánh giá",
+      "ratingAria": "Mức đánh giá",
+      "allProducts": "Tất cả sản phẩm",
+      "allStars": "Tất cả",
+      "starsHint": "{star} sao+ ({count})",
+      "stars5Hint": "({count})",
+      "clearAll": "Xóa tất cả",
+      "clearAllLong": "Xóa tất cả bộ lọc",
+      "apply": "Áp dụng bộ lọc"
+    },
+    "priceBands": {
+      "lt5m": "Dưới 5.000.000đ",
+      "5-15m": "5 - 15.000.000đ",
+      "15-30m": "15 - 30.000.000đ",
+      "gt30m": "Trên 30.000.000đ"
+    },
+    "hero": {
+      "defaultTitle": "Bộ sưu tập nội thất",
+      "defaultSubtitle": "Khám phá danh mục nội thất đa dạng của chúng tôi",
+      "dynamicSubtitle": "{label} tinh tế và hiện đại",
+      "stats": {
+        "products": "Sản phẩm",
+        "categories": "Danh mục",
+        "reviews": "Đánh giá",
+        "colors": "Màu sắc",
+        "materials": "Chất liệu"
+      }
+    },
+    "errors": {
+      "apiConn": "Không thể kết nối máy chủ. Dữ liệu có thể không đầy đủ.",
+      "retry": "Tải lại"
+    },
+    "toast": {
+      "wishlistFail": "Không thể cập nhật danh sách yêu thích"
+    },
+    "catalog": "Catalog",
+    "all": "Tất cả"
+  },
+  "promotions": {
+    "loading": "Đang tải khuyến mãi...",
+    "errorTitle": "Không thể tải khuyến mãi",
+    "errorCopy": "Đã xảy ra lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.",
+    "hero": {
+      "eyebrow": "Khuyến mãi nội thất tháng này",
+      "titlePrefix": "Ưu đãi đúng món,",
+      "titleEmphasis": "tiết kiệm đúng lúc",
+      "subtitle": "Lưu voucher để dùng khi thanh toán hoặc chọn combo nội thất đã được phối theo từng không gian.",
+      "claimVoucher": "Nhận voucher",
+      "viewCombos": "Xem combo",
+      "overviewAria": "Tổng quan khuyến mãi",
+      "overviewLabel": "Đang áp dụng",
+      "availableVouchers": "Voucher khả dụng",
+      "comboDeals": "Combo ưu đãi",
+      "highlightSaving": "Mức tiết kiệm nổi bật",
+      "overviewNote": "Ưu đãi hợp lệ sẽ được kiểm tra lại khi thanh toán."
+    },
+    "tabs": {
+      "all": "Tất cả",
+      "voucher": "Voucher",
+      "combo": "Combo nội thất",
+      "freeship": "Freeship",
+      "expiring": "Sắp hết hạn",
+      "saved": "Đã lưu"
+    },
+    "filters": {
+      "allTypes": "Tất cả loại",
+      "shopVoucher": "Voucher đơn hàng",
+      "shippingVoucher": "Voucher vận chuyển",
+      "public": "Công khai",
+      "personal": "Cá nhân",
+      "marketing": "Marketing",
+      "allTimes": "Tất cả thời gian",
+      "active": "Đang dùng được",
+      "expiring": "Sắp hết hạn",
+      "upcoming": "Sắp diễn ra",
+      "expired": "Đã hết hạn",
+      "mineTypeAria": "Lọc loại voucher của tôi",
+      "mineTimeAria": "Lọc thời gian voucher của tôi"
+    },
+    "sections": {
+      "voucherKicker": "Ưu đãi dành cho bạn",
+      "voucherTitle": "Voucher nổi bật",
+      "comboKicker": "Phối sẵn, tiết kiệm hơn",
+      "comboTitle": "Combo nội thất đang ưu đãi",
+      "mineKicker": "Tài khoản của bạn",
+      "mineTitle": "Voucher của tôi"
+    },
+    "voucher": {
+      "count": "{count} voucher",
+      "detail": "Chi tiết voucher",
+      "expires": "Hết hạn {date}",
+      "used": "Đã dùng",
+      "saved": "Đã lưu",
+      "notClaimed": "Chưa nhận",
+      "claim": "Nhận",
+      "useNow": "Dùng ngay",
+      "code": "Mã voucher: {code}",
+      "discountType": "Loại giảm: {type}",
+      "shipping": "Vận chuyển",
+      "shop": "Voucher shop",
+      "discountShipping": "Giảm ship {amount}",
+      "discountPercent": "Giảm {percent}%",
+      "discountPercentMax": "Giảm {percent}% tối đa {amount}",
+      "discountAmount": "Giảm {amount}",
+      "noMinOrder": "Không yêu cầu đơn tối thiểu",
+      "minOrder": "Đơn tối thiểu {amount}",
+      "unlimited": "Không giới hạn",
+      "loadMore": "Xem thêm",
+      "status": {
+        "off": "Đang tắt",
+        "upcoming": "Sắp diễn ra",
+        "expired": "Đã hết hạn",
+        "expiring": "Sắp hết hạn",
+        "active": "Đang dùng được"
+      }
+    },
+    "combo": {
+      "count": "{count} combo",
+      "defaultName": "Combo nội thất",
+      "defaultRoom": "Nội thất",
+      "defaultProduct": "Sản phẩm nội thất",
+      "detailAria": "Chi tiết {name}",
+      "saveAmount": "Tiết kiệm {amount}",
+      "itemCount": "{count} sản phẩm",
+      "originalPrice": "Giá gốc",
+      "comboPrice": "Giá combo",
+      "view": "Xem combo",
+      "soldOut": "Hết hàng",
+      "preparing": "Đang chuẩn bị",
+      "buy": "Mua combo",
+      "adding": "Đang thêm",
+      "add": "Thêm combo",
+      "loadMore": "Xem thêm combo"
+    },
+    "sort": {
+      "saveDesc": "Tiết kiệm nhiều nhất",
+      "priceAsc": "Giá thấp đến cao",
+      "priceDesc": "Giá cao đến thấp",
+      "newest": "Mới nhất"
+    },
+    "empty": {
+      "vouchers": "Chưa có voucher phù hợp với bộ lọc này.",
+      "savedFiltered": "Không có voucher phù hợp bộ lọc.",
+      "savedNone": "Bạn chưa lưu voucher nào.",
+      "loginToSave": "Đăng nhập để lưu voucher và sử dụng khi thanh toán."
+    },
+    "toast": {
+      "comboError": "Không thể xử lý combo"
+    }
+  },
+  "contact": {
+    "hero": {
+      "label": "Liên hệ & Tư vấn",
+      "titleLine1": "Chúng tôi sẵn sàng",
+      "titleLine2Prefix": "lắng nghe ",
+      "titleAccent": "bạn",
+      "subtitle": "Từ câu hỏi về sản phẩm đến tư vấn thiết kế toàn bộ căn nhà - đội ngũ FurniSight luôn ở đây để đồng hành cùng bạn.",
+      "message": "Gửi tin nhắn",
+      "booking": "Đặt lịch tư vấn",
+      "hotline": "Hotline",
+      "hotlineValue": "1800 6868 (miễn phí)",
+      "hotlineSub": "Thứ 2 - Chủ nhật · 8:00 - 21:00",
+      "chat": "Chat trực tuyến",
+      "chatValue": "Phản hồi trong < 5 phút",
+      "chatSub": "Đang online - 3 tư vấn viên",
+      "showroom": "Showroom",
+      "showroomValue": "123 Nguyễn Đình Chiểu, Q.3, TP.HCM",
+      "showroomSub": "Xem thực tế 300+ sản phẩm"
+    },
+    "form": {
+      "tag": "Gửi yêu cầu",
+      "titleLine1": "Hãy kể cho chúng tôi",
+      "titleLine2Prefix": "về ",
+      "titleAccent": "không gian của bạn",
+      "note": "Chúng tôi sẽ phản hồi trong vòng 2 giờ làm việc. Thông tin của bạn được bảo mật tuyệt đối.",
+      "fullName": "Họ và tên",
+      "phone": "Số điện thoại",
+      "roomType": "Loại phòng",
+      "chooseRoomType": "Chọn loại phòng",
+      "area": "Diện tích ước tính",
+      "chooseArea": "Chọn diện tích",
+      "budget": "Ngân sách dự kiến",
+      "uploadRoom": "Tải ảnh phòng (để AI phân tích)",
+      "dropTitle": "Kéo thả ảnh hoặc nhấn để chọn",
+      "dropSub": "JPG, PNG, WEBP · Tối đa 20MB",
+      "dropAi": "AI sẽ phân tích và tư vấn phù hợp hơn",
+      "message": "Nội dung",
+      "submit": "Gửi yêu cầu ngay",
+      "intents": {
+        "general": "Hỏi chung",
+        "design": "Tư vấn TK",
+        "order": "Đơn hàng",
+        "partner": "Hợp tác"
+      },
+      "placeholders": {
+        "general": "Bạn có câu hỏi gì? Chúng tôi sẽ trả lời sớm nhất có thể...",
+        "design": "Mô tả thêm yêu cầu của bạn...",
+        "order": "Mã đơn hàng, sản phẩm, vấn đề cần hỗ trợ...",
+        "partner": "Giới thiệu về công ty bạn và hình thức hợp tác mong muốn..."
+      },
+      "roomTypes": {
+        "bedroom": "Phòng ngủ",
+        "living": "Phòng khách",
+        "dining": "Phòng ăn",
+        "kitchen": "Nhà bếp",
+        "office": "Văn phòng",
+        "apartment": "Toàn bộ căn hộ"
+      },
+      "areas": {
+        "under15": "Dưới 15m²",
+        "over70": "Trên 70m²"
+      },
+      "budgets": {
+        "under30": "Dưới 30tr",
+        "over300": "Trên 300tr"
+      }
+    },
+    "sidebar": {
+      "role": "Chuyên gia tư vấn thiết kế",
+      "online": "Đang trực tuyến",
+      "description": "Hơn 8 năm kinh nghiệm trong thiết kế nội thất. Sẵn sàng tư vấn miễn phí cho dự án của bạn.",
+      "chatNow": "Chat ngay - Miễn phí",
+      "videoCall": "Đặt lịch gọi video",
+      "hotline": "Hotline (miễn phí)",
+      "showroomHcm": "Showroom TP.HCM",
+      "showroomHn": "Showroom Hà Nội",
+      "weekday": "Thứ 2 - Thứ 6",
+      "saturday": "Thứ 7",
+      "sunday": "Chủ nhật",
+      "onlineChat": "Chat online",
+      "contactInfo": "Thông tin liên hệ",
+      "social": "Mạng xã hội",
+      "hours": "Giờ làm việc"
+    },
+    "booking": {
+      "label": "Đặt lịch",
+      "titleLine1": "Chọn hình thức",
+      "titleLine2Prefix": "tư vấn",
+      "titleLine2Suffix": " phù hợp",
+      "subtitle": "Miễn phí hoàn toàn - các chuyên gia của chúng tôi sẽ giúp bạn định hình không gian lý tưởng.",
+      "popular": "Phổ biến",
+      "videoName": "Tư vấn Video Call",
+      "videoDesc": "Kết nối trực tiếp với chuyên gia qua Zoom/Meet. Chia sẻ màn hình và xem demo 3D cùng nhau.",
+      "videoDuration": "30 - 60 phút · Miễn phí",
+      "videoButton": "Đặt lịch ngay",
+      "showroomType": "Trực tiếp",
+      "showroomName": "Tham quan Showroom",
+      "showroomDesc": "Đến showroom trải nghiệm thực tế 300+ sản phẩm và thử chức năng 3D trên màn hình lớn.",
+      "showroomDuration": "Linh hoạt · Miễn phí",
+      "showroomButton": "Đặt lịch tham quan",
+      "homeType": "Tại nhà",
+      "homeName": "Tư vấn tại nhà bạn",
+      "homeDesc": "Chuyên gia đến tận nơi, đo đạc không gian thực tế và tư vấn chi tiết theo nhu cầu cụ thể.",
+      "homeDuration": "1 - 2 giờ · TP.HCM & Hà Nội",
+      "homeButton": "Đặt lịch hẹn"
+    },
+    "faq": {
+      "label": "Câu hỏi thường gặp",
+      "titleLine1": "Bạn cần",
+      "titleAccent": "biết gì thêm?",
+      "items": {
+        "free3d": {
+          "q": "Tính năng trực quan 3D có miễn phí không?",
+          "a": "Hoàn toàn miễn phí! Bạn chỉ cần tải ảnh phòng lên, AI sẽ phân tích và tạo mô hình 3D ngay lập tức. Không cần đăng ký tài khoản để dùng thử."
+        },
+        "shipping": {
+          "q": "Thời gian giao hàng trung bình bao lâu?",
+          "a": "Thông thường 3-5 ngày làm việc trong nội thành TP.HCM và Hà Nội. Các tỉnh thành khác 5-7 ngày. Sản phẩm đặt riêng có thể cần 2-4 tuần."
+        },
+        "return": {
+          "q": "Có thể đổi trả sản phẩm không?",
+          "a": "Chính sách đổi trả 30 ngày miễn phí nếu sản phẩm có lỗi từ nhà sản xuất. Sản phẩm nguyên vẹn chưa qua sử dụng có thể đổi trong 7 ngày."
+        },
+        "ai": {
+          "q": "AI có nhận diện đúng loại phòng của tôi không?",
+          "a": "Độ chính xác nhận diện loại phòng đạt 94% với ảnh rõ ràng. Nếu AI nhận diện sai, bạn có thể chọn lại thủ công trong vòng 2 click - và AI sẽ cập nhật gợi ý ngay lập tức."
+        },
+        "designFee": {
+          "q": "Tư vấn thiết kế có tính phí không?",
+          "a": "Buổi tư vấn đầu tiên (online hoặc tại showroom) hoàn toàn miễn phí. Tư vấn tại nhà bạn miễn phí trong TP.HCM và Hà Nội khi ngân sách dự án từ 50 triệu trở lên."
+        },
+        "showroom": {
+          "q": "Có thể xem sản phẩm thực tế trước khi mua không?",
+          "a": "Có! Showroom của chúng tôi tại TP.HCM và Hà Nội trưng bày hơn 300 sản phẩm thực tế. Bạn có thể đặt lịch tham quan hoặc ghé thăm trong giờ làm việc mà không cần hẹn trước."
+        }
+      }
+    },
+    "toast": {
+      "successTitle": "Đã gửi thành công!",
+      "successSubtitle": "Chúng tôi sẽ phản hồi trong vòng 2 giờ làm việc.",
+      "bookingTitle": "Đã nhận yêu cầu: {name}",
+      "bookingSubtitle": "Đội ngũ FurniSight sẽ liên hệ để chốt thời gian phù hợp."
+    }
+  },
+  "room3d": {
+    "workspace": {
+      "aria": "Khu vực thiết kế",
+      "setup": "Thiết lập",
+      "canvas": "Không gian",
+      "products": "Nội thất"
+    },
+    "topbar": {
+      "title": "Trực quan hóa 3D",
+      "smart": "Gợi ý thông minh",
+      "fullscreen": "Toàn màn hình"
+    },
+    "setup": {
+      "kicker": "Không gian",
+      "title": "Thiết lập phòng",
+      "imageMode": "Hình ảnh",
+      "roomMode": "Phòng ở",
+      "uploadLabel": "TẢI ẢNH PHÒNG LÊN",
+      "normalImage": "Ảnh thường",
+      "image360": "Ảnh 360",
+      "dropTitle": "Nhập / Kéo Thả / Dán Hình Ảnh",
+      "dropSub": "JPG, PNG, WEBP · Tối đa 50MB",
+      "aiDetect": "AI sẽ tự nhận diện loại phòng",
+      "selectedFile": "Đã chọn",
+      "generating": "Đang tạo mô hình...",
+      "useAi": "Sử dụng AI",
+      "roomSource": "NGUỒN DỮ LIỆU PHÒNG",
+      "loadingTemplates": "Đang tải phòng mẫu...",
+      "roomReady": "Trực quan 3D đang sẵn sàng. Có thể xoay, zoom, và đặt sản phẩm.",
+      "modelPending": "Phòng này đang được bổ sung model.",
+      "roomInfo": "THÔNG TIN PHÒNG",
+      "noPrediction": "Chưa có kết quả dự đoán.",
+      "predicting": "Đang dự đoán...",
+      "predictFailed": "Nhận diện thất bại.",
+      "unknownLabel": "Không rõ label",
+      "projectName": "TÊN DỰ ÁN",
+      "projectPlaceholder": "Đặt tên cho ngôi nhà của bạn",
+      "meshQuality": "CHẤT LƯỢNG LƯỚI",
+      "low": "Thấp",
+      "medium": "Trung Bình",
+      "high": "Cao",
+      "meshHint": "Chất lượng Trung Bình được khuyến nghị để có thời gian phản hồi tốt nhất.",
+      "resolutionHint": "Khuyến nghị 256 hoặc 512 để cân bằng tốc độ và chất lượng."
+    },
+    "products": {
+      "kicker": "Nội thất",
+      "title": "Gợi ý cho không gian",
+      "count": "{count} sản phẩm",
+      "search": "Tìm kiếm nội thất...",
+      "aiLabel": "GỢI Ý NỘI THẤT",
+      "aiSmart": "PHÙ HỢP",
+      "aiText": "Chọn sản phẩm để thêm vào giỏ hàng hoặc kéo vào không gian 3D.",
+      "empty": "Chưa có sản phẩm nào phù hợp.",
+      "searchMatched": "Sản phẩm khớp với tìm kiếm",
+      "searchEmpty": "Không tìm thấy sản phẩm nào khớp.",
+      "all": "Tất cả",
+      "showAllRooms": "Hiển thị đồ nội thất từ các phòng khác"
+    },
+    "overlay": {
+      "uploadStart": "Tải ảnh để bắt đầu",
+      "pendingTitle": "Đang bổ sung",
+      "pendingCopy": "Loại phòng này chưa có mô hình 3D.",
+      "dropHint": "Thả sản phẩm vào đây để đặt trong phòng"
+    },
+    "cart": {
+      "checkout": "Thanh toán",
+      "checkoutNow": "Thanh toán ngay",
+      "empty": "Chưa có sản phẩm nào."
+    },
+    "controls": {
+      "top": "Mặt bằng",
+      "front": "Mặt đứng",
+      "panorama": "Xem toàn cảnh 3D",
+      "scale": "Kích thước phòng",
+      "scaleAria": "Điều chỉnh kích thước phòng",
+      "scaleDown": "Giảm kích thước phòng",
+      "scaleUp": "Tăng kích thước phòng"
+    },
+    "product": {
+      "contactPrice": "Liên hệ",
+      "detailAria": "Xem chi tiết {name}",
+      "new": "Mới",
+      "added": "Đã thêm vào giỏ hàng",
+      "addToCart": "Thêm vào giỏ hàng"
+    },
+    "canvas": {
+      "processing": "Đang xử lý ảnh...",
+      "loadingModel": "Đang tải mô hình, vui lòng chờ..."
+    },
+    "furniture": {
+      "width": "Rộng",
+      "height": "Cao",
+      "depth": "Sâu",
+      "color": "Màu",
+      "rotate": "Xoay",
+      "dragHint": "Kéo thả trực tiếp trên sàn để đặt vật thể vào vị trí mong muốn.",
+      "defaultColor": "Màu mặc định",
+      "remove": "Xóa khỏi phòng"
+    },
+    "badge": {
+      "room": "Phòng",
+      "detected": "Nhận diện"
+    },
+    "roomTypes": {
+      "phong-ngu": "Phòng ngủ",
+      "phong-khach": "Phòng khách",
+      "phong-tam": "Phòng tắm",
+      "phong-bep": "Nhà bếp",
+      "bedroom": "Phòng ngủ",
+      "living": "Phòng khách",
+      "livingroom": "Phòng khách",
+      "bathroom": "Phòng tắm",
+      "kitchen": "Nhà bếp"
+    }
+  },
+  "productDetail": {
+    "tabs": {
+      "desc": "Mô tả sản phẩm",
+      "spec": "Thông số kỹ thuật",
+      "review": "Đánh giá ({count})"
+    },
+    "desc": {
+      "overview": "Tổng quan",
+      "title": "Mô tả sản phẩm"
+    },
+    "spec": {
+      "basic": "Thông số cơ bản",
+      "full": "Chi tiết kỹ thuật đầy đủ",
+      "keys": {
+        "material": "Chất liệu chính",
+        "color": "Màu sắc",
+        "dimension": "Kích thước",
+        "weight": "Khối lượng",
+        "warranty": "Bảo hành",
+        "stock": "Tồn kho",
+        "category": "Danh mục"
+      },
+      "values": {
+        "items": "{count} sản phẩm"
+      }
+    },
+    "review": {
+      "count": "{count} đánh giá",
+      "write": "Viết đánh giá",
+      "checking": "Đang kiểm tra điều kiện đánh giá...",
+      "loginReq": "Đăng nhập để kiểm tra điều kiện đánh giá.",
+      "purchaseReq": "Bạn cần mua và nhận sản phẩm trước khi đánh giá.",
+      "noOrder": "Không tìm thấy dòng đơn hàng hợp lệ để đánh giá.",
+      "readyMsg": "Chia sẻ trải nghiệm thực tế của bạn về sản phẩm.",
+      "loginBtn": "Đăng nhập",
+      "selectedStars": "Đã chọn {n} sao",
+      "titlePlaceholder": "Tiêu đề đánh giá",
+      "contentPlaceholder": "Cảm nhận của bạn về sản phẩm",
+      "submitting": "Đang gửi...",
+      "submitBtn": "Gửi đánh giá",
+      "customer": "Khách hàng"
+    },
+    "muted": "Nội dung tab đang được chuẩn hóa theo mẫu.",
+    "top": {
+      "reviews": "{count} đánh giá",
+      "inStock": "Còn hàng ({count} sản phẩm)",
+      "outOfStock": "Tạm hết hàng",
+      "soldOut": "Hết hàng",
+      "adding": "Đang thêm...",
+      "added": "Đã thêm",
+      "add": "Thêm vào giỏ",
+      "processing": "Đang xử lý...",
+      "buyNow": "Mua ngay",
+      "noModel3D": "Phiên bản này chưa có mô hình 3D.",
+      "listedPrice": "Giá niêm yết",
+      "quantity": "Số lượng",
+      "optionsLabel": "Lựa chọn phiên bản",
+      "view3D": "Xem mô hình 3D",
+      "color": "Màu sắc",
+      "size": "Kích thước",
+      "outOfStockMessage": "Sản phẩm tạm hết hàng. Bạn có thể xem sản phẩm khác hoặc quay lại sau."
+    },
+    "page": {
+      "loading": "Đang tải sản phẩm...",
+      "notFoundTitle": "Sản phẩm không tồn tại",
+      "notFoundDesc": "Sản phẩm bạn tìm kiếm không tồn tại hoặc đã bị xóa.",
+      "backToList": "Quay lại danh sách",
+      "errorTitle": "Không thể tải sản phẩm",
+      "errorDesc": "Đã xảy ra lỗi kết nối. Vui lòng thử lại.",
+      "retry": "Thử lại"
+    },
+    "modal": {
+      "defaultProduct": "Sản phẩm",
+      "title": "Trực quan 3D – {name}",
+      "close": "Đóng",
+      "tabProduct": "Sản phẩm",
+      "tabRoom": "Phòng đầy đủ",
+      "noModelDesc": "Mẫu này chưa có mô hình 3D thật. Bạn vẫn có thể xem thông tin và đặt",
+      "roomDesc": "Để xem sản phẩm trong không gian phòng, chuyển qua Trực quan 3D và đặt vào phòng mẫu.",
+      "openRoom": "Mở Trực quan 3D",
+      "loadingModel": "Đang tải mô hình...",
+      "showingModel": "Đang hiển thị mô hình sản phẩm 3D",
+      "navigating": "Chế độ phòng đầy đủ - điều hướng sang Room3D"
+    },
+    "alerts": {
+      "eligibilityError": "Không thể kiểm tra điều kiện đánh giá. Vui lòng thử lại sau.",
+      "emptyContent": "Vui lòng nhập nội dung đánh giá.",
+      "submitSuccess": "Đã gửi đánh giá của bạn.",
+      "submitError": "Không thể gửi đánh giá. Có thể bạn đã đánh giá sản phẩm này rồi.",
+      "loadModelError": "Không tải được mô hình 3D."
+    }
+  },
+  "api": {
+    "errors": {
+      "GENERIC": "Có lỗi xảy ra. Vui lòng thử lại sau.",
+      "NETWORK": "Không thể kết nối tới máy chủ. Vui lòng kiểm tra mạng và thử lại.",
+      "TIMEOUT": "Yêu cầu mất quá nhiều thời gian. Vui lòng thử lại.",
+      "ACCOUNT_NOT_FOUND": "Không tìm thấy tài khoản.",
+      "ACCOUNT_ALREADY_EXISTS": "Tài khoản đã tồn tại.",
+      "ACCOUNT_BANNED": "Tài khoản đã bị khóa.",
+      "ACCOUNT_TEMPORARILY_LOCKED": "Tài khoản đang tạm khóa. Vui lòng thử lại sau.",
+      "ACCOUNT_NOT_VERIFIED": "Tài khoản chưa được xác minh.",
+      "INVALID_PASSWORD": "Mật khẩu không chính xác.",
+      "INVALID_TOKEN": "Mã xác thực không hợp lệ hoặc đã hết hạn.",
+      "TOKEN_EXPIRED": "Phiên xác thực đã hết hạn. Vui lòng thử lại.",
+      "TOKEN_ALREADY_USED": "Mã xác thực đã được sử dụng.",
+      "NOT_ENOUGH_PERMISSION": "Bạn không có quyền thực hiện thao tác này.",
+      "VALIDATION_ERROR": "Thông tin chưa hợp lệ. Vui lòng kiểm tra lại.",
+      "BAD_REQUEST": "Thông tin gửi lên chưa hợp lệ.",
+      "MISSING_PARAMETER": "Thiếu thông tin bắt buộc.",
+      "UNAUTHORIZED": "Vui lòng đăng nhập để tiếp tục.",
+      "FORBIDDEN": "Bạn không có quyền thực hiện thao tác này.",
+      "NOT_FOUND": "Không tìm thấy dữ liệu yêu cầu.",
+      "CONFLICT": "Dữ liệu đã tồn tại hoặc đang bị trùng.",
+      "PRODUCT_NOT_FOUND": "Không tìm thấy sản phẩm.",
+      "CATEGORY_NOT_FOUND": "Không tìm thấy danh mục.",
+      "PRODUCT_VARIANT_NOT_FOUND": "Không tìm thấy phiên bản sản phẩm.",
+      "DUPLICATE_PRODUCT_NAME": "Tên sản phẩm đã tồn tại.",
+      "DUPLICATE_CATEGORY_SLUG": "Đường dẫn danh mục đã tồn tại.",
+      "DUPLICATE_CATEGORY_NAME": "Tên danh mục đã tồn tại.",
+      "INSUFFICIENT_STOCK": "Sản phẩm không đủ tồn kho.",
+      "INVALID_STOCK_QUANTITY": "Số lượng tồn kho không hợp lệ.",
+      "INVALID_PRICE": "Giá sản phẩm không hợp lệ.",
+      "REVIEW_NOT_FOUND": "Không tìm thấy đánh giá.",
+      "ORDER_NOT_FOUND": "Không tìm thấy đơn hàng.",
+      "INVALID_ORDER_STATUS": "Trạng thái đơn hàng không hợp lệ.",
+      "INVALID_PAYMENT_METHOD": "Phương thức thanh toán không hợp lệ.",
+      "INVALID_PAYMENT_AMOUNT": "Số tiền thanh toán không hợp lệ.",
+      "MEDIA_NOT_FOUND": "Không tìm thấy tệp đã tải lên.",
+      "MEDIA_UPLOAD_FAILED": "Không thể tải tệp lên. Vui lòng thử lại.",
+      "MESSAGE_NOT_FOUND": "Không tìm thấy cuộc trò chuyện hoặc tin nhắn.",
+      "MESSAGE_FAILED": "Không thể gửi tin nhắn. Vui lòng thử lại.",
+      "NOTIFICATION_TEMPLATE_NOT_FOUND": "Không tìm thấy mẫu thông báo.",
+      "INBOX_MESSAGE_NOT_FOUND": "Không tìm thấy thông báo.",
+      "status": {
+        "413": "Tệp tải lên quá lớn.",
+        "415": "Định dạng tệp không được hỗ trợ.",
+        "429": "Bạn thao tác quá nhanh. Vui lòng thử lại sau.",
+        "502": "Dịch vụ đang gián đoạn. Vui lòng thử lại sau.",
+        "503": "Dịch vụ tạm thời không khả dụng. Vui lòng thử lại sau.",
+        "504": "Dịch vụ phản hồi quá lâu. Vui lòng thử lại sau."
+      }
+    }
+  },
+  "orders": {
+    "status": {
+      "all": "Tất cả",
+      "unpaid": "Chờ thanh toán",
+      "unpaid_cod": "Đã đặt đơn",
+      "payment_failed": "Thanh toán thất bại",
+      "paid": "Đã thanh toán",
+      "shipping": "Đang vận chuyển",
+      "in_transit": "Đang giao",
+      "delivered": "Đã nhận",
+      "cancelled": "Đã hủy",
+      "refund_pending": "Chờ hoàn tiền",
+      "refunded": "Đã hoàn tiền",
+      "cancelled_by_admin": "Hủy bởi shop"
+    }
+  },
+  "checkout": {
+    "page": {
+      "loading": "Đang tải thông tin thanh toán...",
+      "errorTitle": "Không thể tải thanh toán",
+      "errorSubtitle": "Vui lòng thử lại sau."
+    },
+    "callback": {
+      "title": "Kết quả thanh toán",
+      "status": {
+        "processing": "Đang xác nhận",
+        "success": "Thanh toán đã được xác nhận. Đơn hàng của bạn đang được xử lý.",
+        "failed": "Thanh toán chưa hoàn tất hoặc đã bị hủy. Đơn hàng chưa được ghi nhận là đã thanh toán.",
+        "notFound": "Không tìm thấy thông tin thanh toán để xác nhận.",
+        "failedLabel": "Thanh toán thất bại"
+      },
+      "orderCode": "Mã đơn: {code}",
+      "viewOrder": "Đơn hàng của tôi",
+      "retry": "Thử thanh toán lại"
+    },
+    "breadcrumb": {
+      "home": "Trang chủ",
+      "cart": "Giỏ hàng",
+      "checkout": "Thanh toán"
+    },
+    "steps": {
+      "cart": "Giỏ hàng",
+      "checkout": "Thanh toán",
+      "done": "Hoàn tất"
+    },
+    "address": {
+      "title": "Địa chỉ giao hàng",
+      "add": "Thêm địa chỉ",
+      "empty": "Chưa có địa chỉ giao hàng. Bạn có thể thêm địa chỉ ngay tại bước thanh toán.",
+      "default": "Mặc định",
+      "edit": "Sửa",
+      "modalAdd": "Thêm địa chỉ mới",
+      "modalEdit": "Cập nhật địa chỉ",
+      "close": "Đóng",
+      "fullName": "Họ tên",
+      "phone": "Số điện thoại",
+      "province": "Tỉnh/Thành",
+      "ward": "Phường/Xã",
+      "detail": "Địa chỉ cụ thể",
+      "type": "Loại địa chỉ",
+      "isDefault": "Đặt làm địa chỉ mặc định",
+      "loading": "Đang tải...",
+      "chooseProvince": "Chọn tỉnh thành",
+      "chooseWard": "Chọn phường xã",
+      "types": {
+        "home": "Nhà riêng",
+        "office": "Văn phòng",
+        "other": "Khác"
+      },
+      "apiError": "Không tải được dữ liệu tỉnh/thành. Vui lòng thử lại.",
+      "validationError": "Vui lòng điền đầy đủ họ tên, số điện thoại và địa chỉ giao hàng.",
+      "invalidPhone": "Số điện thoại không hợp lệ (phải là số điện thoại Việt Nam).",
+      "cancel": "Hủy",
+      "save": "Lưu địa chỉ",
+      "update": "Cập nhật"
+    },
+    "shop": {
+      "note": "Lời nhắn:",
+      "notePlaceholder": "Lưu ý cho người bán...",
+      "shipping": "Vận chuyển:",
+      "free": "Miễn phí",
+      "subtotal": "Tổng số tiền ({qty} sản phẩm):"
+    },
+    "voucher": {
+      "title": "Voucher FurniSight",
+      "shop": "Voucher của shop",
+      "combo": "Combo khuyến mãi",
+      "shipping": "Voucher vận chuyển",
+      "remove": "Bỏ voucher",
+      "choose": "Chọn voucher",
+      "noCombo": "Chưa đủ sản phẩm combo",
+      "modalTitle": "Chọn voucher",
+      "placeholder": "Nhập mã voucher...",
+      "apply": "Áp dụng",
+      "yours": "Voucher của bạn",
+      "cancel": "Hủy",
+      "confirm": "Xác nhận"
+    },
+    "payment": {
+      "title": "Phương thức thanh toán"
+    },
+    "summary": {
+      "title": "Đơn hàng của bạn",
+      "count": "{count} sản phẩm",
+      "subtotal": "Tạm tính",
+      "shippingFee": "Phí vận chuyển",
+      "shippingVoucher": "Voucher vận chuyển",
+      "comboDiscount": "Combo khuyến mãi",
+      "shopVoucher": "Voucher shop",
+      "notApplied": "Chưa áp dụng",
+      "insurance": "Bảo hiểm",
+      "none": "Không",
+      "saved": "Tiết kiệm được",
+      "total": "Tổng thanh toán",
+      "savedNote": "Tiết kiệm {amount} so với giá gốc",
+      "termsPrefix": "Nhấn \"Đặt hàng\" đồng nghĩa với việc bạn đồng ý tuân theo",
+      "termsOfService": "Điều khoản dịch vụ",
+      "and": "và",
+      "privacyPolicy": "Chính sách bảo mật",
+      "termsSuffix": "của FurniSight.",
+      "order": "Đặt hàng",
+      "secure": "Thanh toán an toàn và bảo mật"
+    },
+    "options": {
+      "shipping": {
+        "standard": "Giao hàng tiêu chuẩn",
+        "express": "Giao hàng hỏa tốc"
+      },
+      "payment": {
+        "vnpay": "Thanh toán qua VNPAY",
+        "cod": "Thanh toán khi nhận hàng (COD)"
+      },
+      "insurance": {
+        "label": "Bảo hiểm hàng hóa (Bồi thường 100% nếu thất lạc/hư hỏng)"
+      }
+    },
+    "toolbar": {
+      "secure": "Thanh toán bảo mật",
+      "cart": "Giỏ hàng"
+    },
+    "success": {
+      "title": "Đặt hàng",
+      "success": "thành công!",
+      "sub": "Cảm ơn bạn đã tin tưởng FurniSight. Đơn hàng của bạn đang được xử lý và sẽ sớm được giao đến tay bạn.",
+      "steps": {
+        "ordered": "Đặt hàng",
+        "processing": "Xử lý",
+        "shipping": "Giao hàng",
+        "done": "Hoàn tất"
+      },
+      "orderId": "Mã đơn: {code}",
+      "viewOrder": "Xem đơn hàng",
+      "continueShopping": "Tiếp tục mua sắm"
+    },
+    "toast": {
+      "noAuth": {
+        "title": "Không có quyền đặt hàng",
+        "sub": "Chỉ tài khoản khách hàng mới có thể đặt hàng và thanh toán.",
+        "createSub": "Chỉ tài khoản khách hàng mới có thể đặt hàng."
+      },
+      "noTerms": {
+        "title": "Vui lòng đồng ý điều khoản",
+        "sub": "Bạn cần tick đồng ý trước khi đặt hàng."
+      },
+      "noAddress": {
+        "title": "Chưa có địa chỉ giao hàng",
+        "sub": "Vui lòng chọn hoặc thêm địa chỉ giao hàng."
+      },
+      "emptyCart": {
+        "title": "Giỏ hàng trống",
+        "sub": "Không có sản phẩm để thanh toán."
+      },
+      "overStock": {
+        "title": "Số lượng vượt tồn kho",
+        "sub": "{name} chỉ có thể mua {limit}."
+      },
+      "incompleteAddress": {
+        "title": "Địa chỉ giao hàng chưa đủ",
+        "sub": "Vui lòng cập nhật họ tên, số điện thoại và địa chỉ chi tiết."
+      },
+      "vnpayFailed": {
+        "title": "Thanh toán VNPAY thất bại",
+        "sub": "Mã phản hồi: {status}"
+      },
+      "createFailed": {
+        "title": "Không thể tạo đơn hàng",
+        "sub": "Vui lòng kiểm tra lại thông tin thanh toán."
+      },
+      "addressUpdate": {
+        "titleEdit": "Đã cập nhật địa chỉ",
+        "titleAdd": "Đã thêm địa chỉ mới",
+        "sub": "Bạn có thể dùng địa chỉ này cho đơn hàng hiện tại."
+      },
+      "addressFailed": {
+        "title": "Không lưu được địa chỉ",
+        "sub": "Vui lòng kiểm tra lại thông tin địa chỉ."
+      },
+      "voucherFailed": {
+        "title": "Không áp dụng được",
+        "sub": "Hệ thống chưa thể kiểm tra voucher."
+      },
+      "voucherApplied": {
+        "title": "Đã áp dụng voucher"
+      },
+      "voucherSelected": {
+        "title": "Đã chọn voucher"
+      }
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Đăng nhập",
+      "email": "Email",
+      "emailPlaceholder": "hello{'@'}email.com",
+      "password": "Mật khẩu",
+      "passwordPlaceholder": "Nhập mật khẩu",
+      "forgotPassword": "Quên mật khẩu?",
+      "submit": "Đăng nhập",
+      "processing": "Đang xử lý..."
+    },
+    "register": {
+      "title": "Đăng ký",
+      "fullName": "Họ và tên",
+      "fullNamePlaceholder": "Nguyễn Văn A",
+      "passwordPlaceholder": "Tối thiểu 8 ký tự",
+      "agreeTerms": "Tôi đồng ý với Điều khoản dịch vụ và Chính sách bảo mật",
+      "submit": "Tạo tài khoản"
+    },
+    "forgot": {
+      "title": "Đặt lại mật khẩu",
+      "desc": "Tạo mật khẩu mới cho tài khoản của bạn.",
+      "email": "Địa chỉ email",
+      "sendCode": "Gửi mã",
+      "sending": "Đang gửi...",
+      "code": "Mã xác nhận",
+      "codePlaceholder": "Nhập mã 6 số",
+      "newPassword": "Mật khẩu mới",
+      "submitCode": "Xác nhận mã",
+      "submitPassword": "Đổi mật khẩu",
+      "backToLogin": "Quay lại đăng nhập",
+      "back": "Quay lại"
+    },
+    "verify": {
+      "success": "Thành công!",
+      "failed": "Thất bại",
+      "processing": "Đang xử lý",
+      "backToLogin": "Về trang đăng nhập"
+    },
+    "social": {
+      "orContinueWith": "hoặc tiếp tục với"
+    },
+    "common": {
+      "brand": "FurniSight",
+      "brandSubtitle": "Nội thất cao cấp",
+      "close": "Đóng",
+      "hidePassword": "Ẩn mật khẩu",
+      "showPassword": "Hiện mật khẩu"
+    }
+  }
+}

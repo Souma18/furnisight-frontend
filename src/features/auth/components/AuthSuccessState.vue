@@ -12,7 +12,7 @@ defineProps({
   },
   loading: {
     type: Boolean,
-    default: true,
+    default: false,
   },
 })
 </script>
@@ -24,7 +24,7 @@ defineProps({
     </div>
     <p class="title">{{ title }}</p>
     <p class="message">{{ message }}</p>
-    <p class="loading">{{ loading ? 'Đang tải...' : '' }}</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
   </div>
 </template>
 

@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1440">
+<title>LUXNEST Admin — Hệ thống quản trị</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root{
+  --navy:#0c1820;--navy2:#12202e;--navy3:#1c3148;--navy4:#243650;
+  --gold:#c9922a;--gold2:#d4a030;--gold3:#e5b84a;--gold4:#f0cc6e;--gold-pale:#fdf6e8;--gold-dim:#a07320;
+  --cream:#faf6f0;--cream2:#f0e9dd;--cream3:#ece2cf;--cream4:#e4d8c4;
+  --white:#ffffff;
+  --text:#1a1812;--text2:#3d3830;--text3:#6b6050;--text4:#9a9088;
+  --green:#2a7a50;--green2:#1e5c3c;--green-bg:#eaf5ef;--green-pale:#f0faf4;
+  --blue:#2563eb;--blue-bg:#eff6ff;
+  --red:#c0392b;--red2:#991f16;--red-bg:#fdf0ee;
+  --purple:#6d28d9;--purple-bg:#f5f3ff;
+  --orange:#c05621;--orange-bg:#fff7ed;
+  --border:#e8e0d4;--border2:#d8cfc0;
+  --sb-w:252px;
+  --topbar-h:60px;
+  --r:10px;--r-lg:14px;--r-xl:18px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.05);
+  --shadow-lg:0 12px 32px rgba(0,0,0,.12),0 4px 8px rgba(0,0,0,.06);
+  --shadow-xl:0 24px 60px rgba(0,0,0,.16);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);display:flex;font-size:14px}
+
+/* ════════════════════════════════
+   SIDEBAR
+════════════════════════════════ */
+.sidebar{
+  width:var(--sb-w);flex-shrink:0;
+  background:var(--navy);
+  display:flex;flex-direction:column;
+  height:100vh;overflow:hidden;
+  position:relative;z-index:100;
+  box-shadow:2px 0 20px rgba(0,0,0,.18);
+}
+/* decorative gold line */
+.sidebar::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(201,146,42,.25) 20%,rgba(201,146,42,.25) 80%,transparent);
+}
+
+.sb-logo{
+  padding:18px 20px 16px;
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  flex-shrink:0;
+}
+.sb-logo-mark{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;box-shadow:0 3px 10px rgba(201,146,42,.35);
+}
+.sb-logo-mark i{font-size:18px;color:var(--navy)}
+.sb-logo-info{}
+.sb-logo-text{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;letter-spacing:2px;color:#fff;line-height:1}
+.sb-logo-badge{font-size:9px;font-weight:600;letter-spacing:.8px;color:rgba(201,146,42,.7);text-transform:uppercase;margin-top:1px}
+
+.sb-profile{
+  margin:12px;padding:12px 14px;
+  background:rgba(255,255,255,.05);border-radius:var(--r);
+  display:flex;align-items:center;gap:10px;
+  border:1px solid rgba(255,255,255,.07);flex-shrink:0;
+  cursor:pointer;transition:all .2s;
+}
+.sb-profile:hover{background:rgba(255,255,255,.09);border-color:rgba(201,146,42,.3)}
+.sb-av{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--navy);flex-shrink:0;
+}
+.sb-profile-name{font-size:13px;font-weight:500;color:#fff;line-height:1.2}
+.sb-profile-role{font-size:10px;color:var(--gold3);margin-top:2px;font-weight:400}
+.sb-online{display:flex;align-items:center;gap:4px;font-size:10px;color:#4ade80;margin-left:auto}
+.sb-online-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.85)}}
+
+.sb-nav{flex:1;overflow-y:auto;padding:6px 0;scrollbar-width:none}
+.sb-nav::-webkit-scrollbar{display:none}
+.sb-section{padding:0 10px;margin-bottom:4px}
+.sb-section-label{
+  font-size:9px;font-weight:600;letter-spacing:1.8px;text-transform:uppercase;
+  color:rgba(255,255,255,.22);padding:12px 10px 5px;
+}
+.sb-item{
+  display:flex;align-items:center;gap:9px;
+  padding:8.5px 12px;border-radius:8px;
+  cursor:pointer;transition:all .18s;
+  color:rgba(255,255,255,.52);font-size:13px;
+  border:none;background:none;width:100%;text-align:left;
+  position:relative;font-family:'DM Sans',sans-serif;
+}
+.sb-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);transform:translateX(2px)}
+.sb-item.active{background:linear-gradient(135deg,rgba(201,146,42,.2),rgba(201,146,42,.12));color:var(--gold3);font-weight:500}
+.sb-item.active::before{
+  content:'';position:absolute;left:0;top:18%;bottom:18%;width:2.5px;
+  background:linear-gradient(180deg,var(--gold3),var(--gold));border-radius:0 3px 3px 0;
+}
+.sb-icon{font-size:16px;flex-shrink:0;display:flex;align-items:center;justify-content:center;width:20px}
+.sb-badge{margin-left:auto;font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;min-width:20px;text-align:center}
+.sb-badge.red{background:rgba(192,57,43,.25);color:#f87171}
+.sb-badge.gold{background:rgba(201,146,42,.2);color:var(--gold3)}
+.sb-badge.blue{background:rgba(37,99,235,.2);color:#93c5fd}
+
+.sb-footer{padding:10px;border-top:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.sb-logout{
+  display:flex;align-items:center;gap:9px;padding:9px 12px;
+  border-radius:8px;cursor:pointer;
+  color:rgba(255,255,255,.4);font-size:13px;
+  border:none;background:none;width:100%;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.sb-logout:hover{background:rgba(192,57,43,.12);color:#f87171}
+.sb-logout i{font-size:16px}
+
+/* ════════════════════════════════
+   MAIN AREA
+════════════════════════════════ */
+.main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{
+  height:var(--topbar-h);flex-shrink:0;
+  background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:14px;padding:0 28px;
+  box-shadow:var(--shadow-sm);
+}
+.topbar-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:300;color:var(--text)}
+.topbar-title em{font-style:italic;color:var(--gold)}
+.tb-divider{width:1px;height:20px;background:var(--border)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.topbar-search{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 14px;border-radius:20px;
+  background:var(--cream);border:1.5px solid var(--border);
+  transition:all .2s;min-width:200px;
+}
+.topbar-search:focus-within{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,146,42,.08)}
+.topbar-search i{font-size:15px;color:var(--text4)}
+.topbar-search input{border:none;background:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);width:140px}
+.topbar-search input::placeholder{color:var(--text4)}
+.tb-date{font-size:12px;color:var(--text3);padding:6px 12px;background:var(--cream);border-radius:8px;border:1px solid var(--border);white-space:nowrap;display:flex;align-items:center;gap:5px}
+.tb-date i{font-size:13px;color:var(--gold)}
+.tb-btn{
+  width:36px;height:36px;border-radius:9px;
+  background:var(--cream);border:1px solid var(--border);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:17px;color:var(--text3);transition:all .2s;position:relative;
+}
+.tb-btn:hover{background:var(--cream2);color:var(--text);border-color:var(--border2)}
+.tb-notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--white)}
+
+/* user sim */
+.sim-select{
+  padding:6px 10px;border-radius:8px;font-size:11px;font-family:'DM Sans',sans-serif;
+  border:1.5px dashed rgba(201,146,42,.5);background:var(--gold-pale);color:var(--text);
+  font-weight:500;cursor:pointer;outline:none;transition:all .2s;
+}
+.sim-select:hover{border-color:var(--gold);background:#fff}
+.sim-label{font-size:11px;font-weight:500;color:var(--text3);white-space:nowrap}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow-y:auto;padding:24px 28px;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+.page{display:none}
+.page.active{display:block;animation:pgIn .22s ease-out}
+@keyframes pgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ════════════════════════════════
+   COMMON COMPONENTS
+════════════════════════════════ */
+
+/* Page header */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:22px}
+.ph-left{}
+.ph-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;color:var(--gold);text-transform:uppercase;margin-bottom:4px}
+.ph-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:400;color:var(--text);line-height:1.1}
+.ph-title em{font-style:italic;color:var(--gold)}
+.ph-sub{font-size:13px;color:var(--text3);margin-top:4px}
+.ph-actions{display:flex;gap:8px;align-items:center}
+
+/* Buttons */
+.btn-add{
+  display:flex;align-items:center;gap:7px;padding:9px 18px;border-radius:9px;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy);
+  font-size:13px;font-weight:600;border:none;cursor:pointer;
+  box-shadow:0 4px 14px rgba(201,146,42,.3);transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-add:hover{transform:translateY(-1px);box-shadow:0 7px 20px rgba(201,146,42,.45)}
+.btn-add i{font-size:15px}
+.btn-export{
+  display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:9px;
+  background:var(--white);border:1.5px solid var(--border);
+  color:var(--text2);font-size:13px;font-weight:400;cursor:pointer;transition:all .2s;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-export:hover{border-color:var(--gold2);color:var(--gold2)}
+.btn-export i{font-size:15px}
+
+/* Filter bar */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.filter-search{
+  display:flex;align-items:center;gap:8px;padding:8px 14px;
+  border-radius:9px;border:1.5px solid var(--border);background:var(--white);flex:1;min-width:200px;
+  transition:border-color .2s;
+}
+.filter-search:focus-within{border-color:var(--gold)}
+.filter-search i{font-size:15px;color:var(--text4)}
+.filter-search input{border:none;background:none;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+.filter-search input::placeholder{color:var(--text4)}
+.filter-select{
+  padding:8px 12px;border-radius:9px;border:1.5px solid var(--border);
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  background:var(--white);color:var(--text);cursor:pointer;outline:none;transition:border-color .2s;
+}
+.filter-select:focus{border-color:var(--gold)}
+
+/* Table card */
+.tcard{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;margin-bottom:18px;box-shadow:var(--shadow-sm)}
+.tcard-header{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+.tcard-title{font-size:13px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:8px}
+.tcard-title i{font-size:17px;color:var(--gold)}
+.tcard-action{font-size:12px;color:var(--gold);font-weight:500;cursor:pointer;border:none;background:none;transition:color .2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px}
+.tcard-action:hover{color:var(--gold2)}
+.tcard-action i{font-size:13px}
+
+/* Full table */
+.full-table-wrap{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow-sm)}
+.full-table{width:100%;border-collapse:collapse}
+.full-table thead tr{background:linear-gradient(90deg,var(--navy) 0%,var(--navy3) 100%)}
+.full-table thead th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.6);padding:12px 16px;text-align:left;white-space:nowrap}
+.full-table tbody tr{border-bottom:1px solid var(--border);transition:background .14s}
+.full-table tbody tr:last-child{border-bottom:none}
+.full-table tbody tr:hover{background:rgba(250,246,240,.8)}
+.full-table td{font-size:13px;padding:11px 16px;color:var(--text);vertical-align:middle}
+
+/* Mini table */
+.mini-table{width:100%;border-collapse:collapse}
+.mini-table th{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;color:var(--text4);padding:9px 14px;text-align:left;background:var(--cream);border-bottom:1px solid var(--border)}
+.mini-table td{font-size:13px;color:var(--text);padding:10px 14px;border-bottom:1px solid var(--border)}
+.mini-table tr:last-child td{border-bottom:none}
+.mini-table tr:hover td{background:var(--cream)}
+
+/* Pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-top:1px solid var(--border);background:var(--cream)}
+.pg-info{font-size:12px;color:var(--text3)}
+.pg-info strong{color:var(--text)}
+.pg-btns{display:flex;gap:4px}
+.pg-btn{width:32px;height:32px;border-radius:7px;border:1px solid var(--border);background:var(--white);font-size:13px;cursor:pointer;color:var(--text3);display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:'DM Sans',sans-serif}
+.pg-btn:hover{border-color:var(--gold);color:var(--gold)}
+.pg-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600}
+
+/* Row actions */
+.row-actions{display:flex;gap:5px}
+.ra-btn{width:30px;height:30px;border-radius:7px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .14s}
+.ra-btn i{font-size:14px}
+.ra-view{background:rgba(45,122,80,.1);color:var(--green)}.ra-view:hover{background:rgba(45,122,80,.2)}
+.ra-edit{background:rgba(37,99,235,.1);color:var(--blue)}.ra-edit:hover{background:rgba(37,99,235,.2)}
+.ra-del{background:rgba(192,57,43,.1);color:var(--red)}.ra-del:hover{background:rgba(192,57,43,.2)}
+.ra-lock{background:rgba(109,40,217,.1);color:var(--purple)}.ra-lock:hover{background:rgba(109,40,217,.2)}
+
+/* Status badges */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;white-space:nowrap}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.b-success{background:var(--green-bg);color:var(--green2)}.b-success::before{background:var(--green)}
+.b-pending{background:var(--orange-bg);color:var(--orange)}.b-pending::before{background:var(--orange)}
+.b-shipping{background:var(--blue-bg);color:var(--blue)}.b-shipping::before{background:var(--blue)}
+.b-cancel{background:var(--red-bg);color:var(--red2)}.b-cancel::before{background:var(--red)}
+.b-low{background:#fff8e8;color:#a06010}.b-low::before{background:#e8a020}
+.b-ok{background:var(--green-bg);color:var(--green2)}.b-ok::before{background:var(--green)}
+.b-navy{background:rgba(18,32,46,.08);color:var(--navy3)}.b-navy::before{background:var(--navy3)}
+.b-purple{background:var(--purple-bg);color:var(--purple)}.b-purple::before{background:var(--purple)}
+.b-gold{background:var(--gold-pale);color:var(--gold-dim)}.b-gold::before{background:var(--gold)}
+
+/* Flex cell */
+.flex-cell{display:flex;align-items:center;gap:10px}
+.cell-name{font-weight:500;color:var(--text)}
+.cell-sub{font-size:11px;color:var(--text4);margin-top:1px}
+
+/* Avatar */
+.av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.av-gold{background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy)}
+.av-blue{background:linear-gradient(135deg,#60a5fa,#2563eb);color:#fff}
+.av-green{background:linear-gradient(135deg,#4ade80,#16a34a);color:#fff}
+.av-purple{background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff}
+.av-red{background:linear-gradient(135deg,#f87171,#dc2626);color:#fff}
+
+/* Cell img */
+.cell-img{width:32px;height:32px;border-radius:8px;background:var(--cream2);display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--border);flex-shrink:0}
+
+/* Stock bar */
+.stock-bar{display:flex;align-items:center;gap:8px}
+.stock-track{flex:1;height:5px;background:var(--cream3);border-radius:3px;overflow:hidden;max-width:70px}
+.stock-fill{height:100%;border-radius:3px;transition:width .3s}
+.sf-ok{background:var(--green)}
+.sf-low{background:#e8a020}
+.sf-empty{background:var(--red)}
+.stock-num{font-size:12px;font-weight:600;white-space:nowrap}
+
+/* KPI cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{
+  background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);
+  padding:18px 20px;position:relative;overflow:hidden;
+  transition:transform .2s,box-shadow .2s;cursor:default;box-shadow:var(--shadow-sm);
+}
+.kpi-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.kpi-accent{position:absolute;top:-16px;right:-16px;width:80px;height:80px;border-radius:50%;opacity:.08}
+.kpi-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.kpi-label i{font-size:16px}
+.kpi-value{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:600;line-height:1;margin-bottom:7px}
+.kpi-change{font-size:12px;display:flex;align-items:center;gap:4px}
+.kpi-change i{font-size:13px}
+.kpi-up{color:var(--green)}
+.kpi-down{color:var(--red)}
+/* KPI color variants */
+.kpi-gold .kpi-label i,.kpi-gold .kpi-value{color:var(--gold)}
+.kpi-gold .kpi-accent{background:var(--gold)}
+.kpi-blue .kpi-label i,.kpi-blue .kpi-value{color:var(--blue)}
+.kpi-blue .kpi-accent{background:var(--blue)}
+.kpi-green .kpi-label i,.kpi-green .kpi-value{color:var(--green)}
+.kpi-green .kpi-accent{background:var(--green)}
+.kpi-red .kpi-label i,.kpi-red .kpi-value{color:var(--red)}
+.kpi-red .kpi-accent{background:var(--red)}
+.kpi-purple .kpi-label i,.kpi-purple .kpi-value{color:var(--purple)}
+.kpi-purple .kpi-accent{background:var(--purple)}
+
+/* Charts */
+.chart-card{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);padding:20px;box-shadow:var(--shadow-sm)}
+.chart-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+.chart-title{font-size:13px;font-weight:500;color:var(--text)}
+.chart-sub{font-size:11px;color:var(--text4);margin-top:2px}
+.chart-period{display:flex;gap:4px}
+.cp-btn{padding:4px 10px;border-radius:6px;font-size:11px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--text3);transition:all .14s;font-family:'DM Sans',sans-serif}
+.cp-btn.active,.cp-btn:hover{background:var(--navy);border-color:var(--navy);color:#fff}
+.chart-wrap{position:relative;height:200px}
+
+/* Alert cards */
+.alert-card{background:var(--white);border-radius:var(--r-lg);border:1px solid var(--border);padding:16px 18px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow-sm)}
+.alert-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.alert-icon i{font-size:19px}
+.ai-warn{background:rgba(192,86,33,.1)}.ai-warn i{color:var(--orange)}
+.ai-danger{background:rgba(192,57,43,.1)}.ai-danger i{color:var(--red)}
+.ai-info{background:rgba(37,99,235,.1)}.ai-info i{color:var(--blue)}
+.alert-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.alert-desc{font-size:12px;color:var(--text3);line-height:1.55}
+
+/* ════════════════════════════════
+   DASHBOARD PAGE
+════════════════════════════════ */
+.welcome-banner{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);
+  border-radius:var(--r-xl);padding:24px 28px;margin-bottom:20px;
+  display:flex;align-items:center;justify-content:space-between;
+  position:relative;overflow:hidden;
+}
+.welcome-banner::before{
+  content:'';position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23c9922a' fill-opacity='0.04'%3E%3Cpath d='M50 50c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10s-10-4.477-10-10 4.477-10 10-10zM10 10c0-5.523 4.477-10 10-10s10 4.477 10 10-4.477 10-10 10c0 5.523-4.477 10-10 10S0 25.523 0 20s4.477-10 10-10zm10 8c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zm40 40c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  pointer-events:none;
+}
+.welcome-left{position:relative;z-index:1}
+.welcome-greeting{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:6px;letter-spacing:.05em}
+.welcome-name{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:500;color:#fff;line-height:1.2}
+.welcome-name span{color:var(--gold3);font-style:italic}
+.welcome-desc{font-size:13px;color:rgba(255,255,255,.45);margin-top:6px;max-width:480px;line-height:1.6}
+.welcome-stats{display:flex;gap:0;position:relative;z-index:1}
+.welcome-stat{padding:0 28px;text-align:center;border-right:1px solid rgba(255,255,255,.1)}
+.welcome-stat:last-child{border-right:none;padding-right:0}
+.ws-val{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--gold3)}
+.ws-label{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+
+/* ════════════════════════════════
+   ROLES & PERMISSIONS
+════════════════════════════════ */
+.roles-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:18px;margin-bottom:20px}
+.perm-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:6px;font-size:11px;font-weight:600;margin:2px}
+.perm-badge i{font-size:12px}
+.p-view{background:rgba(37,99,235,.1);color:var(--blue)}
+.p-create{background:rgba(45,122,80,.1);color:var(--green)}
+.p-edit{background:rgba(201,146,42,.12);color:var(--gold-dim)}
+.p-delete{background:rgba(192,57,43,.1);color:var(--red)}
+
+.role-card-list{display:flex;flex-direction:column;gap:10px;padding:16px}
+.role-card{border:1.5px solid var(--border);border-radius:10px;padding:14px 16px;transition:border .2s;cursor:pointer}
+.role-card:hover{border-color:var(--gold3)}
+.role-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.role-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:7px;font-size:12px;font-weight:600}
+.rt-super{background:var(--gold-pale);color:var(--gold-dim)}
+.rt-manager{background:var(--blue-bg);color:var(--blue)}
+.rt-staff{background:var(--green-bg);color:var(--green2)}
+.role-user-count{font-size:11px;color:var(--text3);display:flex;align-items:center;gap:4px}
+.role-user-count i{font-size:13px}
+
+.perm-check-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--cream);padding:12px;border-radius:8px;border:1px solid var(--border)}
+.perm-check-item{display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer;padding:4px 6px;border-radius:6px;transition:background .15s}
+.perm-check-item:hover{background:var(--cream2)}
+.perm-check-item input{accent-color:var(--gold);cursor:pointer}
+
+/* ════════════════════════════════
+   AUDIT LOG
+════════════════════════════════ */
+.log-item{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.log-item:last-child{border-bottom:none}
+.log-dot-wrap{display:flex;flex-direction:column;align-items:center;gap:0;flex-shrink:0;padding-top:2px}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.log-dot.success{background:var(--green)}
+.log-dot.danger{background:var(--red)}
+.log-dot.warn{background:var(--orange)}
+.log-dot.info{background:var(--blue)}
+.log-body{flex:1;min-width:0}
+.log-action{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.log-detail{font-size:12px;color:var(--text3);line-height:1.5}
+.log-meta{font-size:11px;color:var(--text4);margin-top:4px;display:flex;align-items:center;gap:10px}
+.log-meta i{font-size:12px}
+.log-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px}
+.ls-success{background:var(--green-bg);color:var(--green2)}
+.ls-error{background:var(--red-bg);color:var(--red2)}
+
+/* ════════════════════════════════
+   MY ACCOUNT
+════════════════════════════════ */
+.account-layout{display:grid;grid-template-columns:270px 1fr;gap:20px;align-items:start}
+.account-sidebar-card{
+  background:var(--white);border-radius:var(--r-xl);border:1px solid var(--border);
+  padding:24px;text-align:center;box-shadow:var(--shadow-sm);
+}
+.acct-av-big{
+  width:76px;height:76px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold3),var(--gold));
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:700;color:var(--navy);
+  margin:0 auto 14px;box-shadow:0 6px 18px rgba(201,146,42,.3);
+}
+.acct-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:500;color:var(--text);margin-bottom:3px}
+.acct-role-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:14px}
+.acct-stats{display:flex;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.acct-stat{flex:1;padding:12px 8px;text-align:center;border-right:1px solid var(--border)}
+.acct-stat:last-child{border-right:none}
+.acct-stat-val{font-size:18px;font-weight:600;color:var(--text)}
+.acct-stat-val.gold{color:var(--gold)}
+.acct-stat-val.green{color:var(--green)}
+.acct-stat-label{font-size:11px;color:var(--text4);margin-top:2px}
+.acct-menu-item{display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif;margin-bottom:2px}
+.acct-menu-item:hover{background:var(--cream);color:var(--text)}
+.acct-menu-item.active{background:var(--gold-pale);color:var(--gold-dim)}
+.acct-menu-item i{font-size:16px;color:inherit}
+
+.account-detail-card{background:var(--white);border-radius:var(--r-xl);border:1px solid var(--border);padding:24px;box-shadow:var(--shadow-sm)}
+.form-section-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.form-section-title i{font-size:16px;color:var(--gold)}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.form-input{padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);outline:none;transition:all .2s;width:100%}
+.form-input:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,146,42,.08)}
+select.form-input{cursor:pointer}
+
+/* ════════════════════════════════
+   REVENUE PAGE
+════════════════════════════════ */
+.rev-kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.rev-charts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+
+/* ════════════════════════════════
+   MODAL
+════════════════════════════════ */
+.modal-overlay{
+  position:fixed;inset:0;z-index:900;
+  background:rgba(8,16,26,.55);backdrop-filter:blur(5px);
+  display:none;align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.open{display:flex;animation:mfade .2s ease}
+@keyframes mfade{from{opacity:0}to{opacity:1}}
+.modal-box{
+  background:var(--white);border-radius:var(--r-xl);width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;
+  box-shadow:var(--shadow-xl);border:1px solid var(--border);
+  animation:mslide .25s ease;
+}
+@keyframes mslide{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-head{
+  padding:18px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;background:var(--white);z-index:2;
+}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:400;color:var(--text)}
+.modal-title em{font-style:italic;color:var(--gold)}
+.modal-close{width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--text3)}
+.modal-close:hover{background:var(--cream2);color:var(--text);border-color:var(--border2)}
+.modal-close i{font-size:16px}
+.modal-body{padding:22px 24px}
+.mform-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.mform-group{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.mfl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.mfi{
+  padding:9px 13px;border:1.5px solid var(--border);border-radius:9px;
+  font-size:13px;font-family:'DM Sans',sans-serif;
+  background:var(--cream);color:var(--text);outline:none;transition:all .2s;width:100%;
+}
+.mfi:focus{border-color:var(--gold);background:var(--white);box-shadow:0 0 0 3px rgba(201,146,42,.08)}
+select.mfi{cursor:pointer;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+textarea.mfi{resize:vertical}
+.modal-foot{padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;background:var(--cream)}
+.btn-modal-cancel{padding:9px 20px;border-radius:9px;border:1.5px solid var(--border);background:var(--white);color:var(--text2);font-size:13px;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-modal-cancel:hover{border-color:var(--navy);color:var(--navy)}
+.btn-modal-save{padding:9px 22px;border-radius:9px;background:linear-gradient(135deg,var(--gold3),var(--gold));color:var(--navy);font-size:13px;font-weight:600;border:none;cursor:pointer;box-shadow:0 4px 12px rgba(201,146,42,.3);transition:all .2s;font-family:'DM Sans',sans-serif}
+.btn-modal-save:hover{transform:translateY(-1px);box-shadow:0 7px 18px rgba(201,146,42,.45)}
+
+/* ════════════════════════════════
+   TOAST
+════════════════════════════════ */
+.toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  background:var(--navy);color:#fff;
+  padding:12px 16px;border-radius:12px;
+  display:flex;align-items:center;gap:11px;
+  box-shadow:0 8px 28px rgba(0,0,0,.22);
+  border:1px solid rgba(201,146,42,.2);border-left:3px solid var(--gold);
+  transform:translateY(80px);opacity:0;
+  transition:all .32s cubic-bezier(.22,.68,0,1.2);pointer-events:none;max-width:300px;
+}
+.toast.show{transform:translateY(0);opacity:1}
+.t-icon-wrap{width:32px;height:32px;border-radius:8px;background:rgba(201,146,42,.15);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.t-icon-wrap i{font-size:16px;color:var(--gold3)}
+.t-title{font-size:13px;font-weight:500;line-height:1.3}
+.t-sub{font-size:11px;color:rgba(255,255,255,.45);margin-top:1px}
+</style>
+</head>
+<body>
+
+<!-- ════════ SIDEBAR ════════ -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-mark"><i class="ti ti-home-2"></i></div>
+    <div class="sb-logo-info">
+      <div class="sb-logo-text">LUXNEST</div>
+      <div class="sb-logo-badge">Admin System</div>
+    </div>
+  </div>
+
+  <div class="sb-profile" onclick="showPage('my-account',null)" title="Xem trang cá nhân">
+    <div class="sb-av" id="sbAv">AD</div>
+    <div>
+      <div class="sb-profile-name" id="sbName">Admin Chính</div>
+      <div class="sb-profile-role" id="sbRole">Super Administrator</div>
+    </div>
+    <div class="sb-online"><span class="sb-online-dot"></span></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">
+      <div class="sb-section-label">Tổng quan</div>
+      <button class="sb-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard sb-icon"></i> Dashboard</button>
+      <button class="sb-item" onclick="showPage('stats',this)"><i class="ti ti-chart-bar sb-icon"></i> Thống kê</button>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Quản lý</div>
+      <button class="sb-item" onclick="showPage('users',this)"><i class="ti ti-users sb-icon"></i> Người dùng <span class="sb-badge gold">1.2K</span></button>
+      <button class="sb-item" onclick="showPage('categories',this)"><i class="ti ti-category sb-icon"></i> Danh mục</button>
+      <button class="sb-item" onclick="showPage('products',this)"><i class="ti ti-armchair sb-icon"></i> Sản phẩm <span class="sb-badge red">3</span></button>
+      <button class="sb-item" onclick="showPage('orders',this)"><i class="ti ti-package sb-icon"></i> Đơn hàng <span class="sb-badge red">8</span></button>
+      <button class="sb-item" onclick="showPage('inventory',this)"><i class="ti ti-building-warehouse sb-icon"></i> Kho hàng</button>
+      <button class="sb-item" onclick="showPage('revenue',this)"><i class="ti ti-cash sb-icon"></i> Doanh thu</button>
+    </div>
+    <div class="sb-section">
+      <div class="sb-section-label">Bảo mật & Hệ thống</div>
+      <button class="sb-item" onclick="showPage('roles',this)"><i class="ti ti-lock sb-icon"></i> Vai trò & Quyền hạn</button>
+      <button class="sb-item" onclick="showPage('audit-logs',this)"><i class="ti ti-clipboard-list sb-icon"></i> Nhật ký thao tác</button>
+      <button class="sb-item" onclick="showPage('my-account',this)"><i class="ti ti-user-circle sb-icon"></i> Trang của tôi</button>
+    </div>
+  </nav>
+
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="toast('check','Đã đăng xuất','Hẹn gặp lại!')">
+      <i class="ti ti-logout" style="font-size:16px"></i> Đăng xuất
+    </button>
+  </div>
+</aside>
+
+<!-- ════════ MAIN ════════ -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topTitle">Tổng quan <em>Dashboard</em></div>
+    </div>
+    <div class="tb-divider"></div>
+    <div class="topbar-search">
+      <i class="ti ti-search"></i>
+      <input type="text" placeholder="Tìm kiếm toàn hệ thống...">
+    </div>
+    <div class="topbar-right">
+      <span class="sim-label">Giả lập:</span>
+      <select class="sim-select" onchange="switchUser(this.value)">
+        <option value="super">Admin Chính · Super Admin</option>
+        <option value="manager">Trần Minh Hoàng · Manager</option>
+        <option value="staff">Nguyễn Thu Hà · Staff</option>
+      </select>
+      <div class="tb-date"><i class="ti ti-calendar"></i> 20/05/2026</div>
+      <button class="tb-btn" onclick="toast('bell','3 thông báo mới','Kiểm tra mục thông báo.')">
+        <i class="ti ti-bell"></i><span class="tb-notif-dot"></span>
+      </button>
+      <button class="tb-btn" onclick="showPage('my-account',null)">
+        <i class="ti ti-user"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ══════════════════════════════════════
+         DASHBOARD
+    ══════════════════════════════════════ -->
+    <div class="page active" id="page-dashboard">
+
+      <div class="welcome-banner">
+        <div class="welcome-left">
+          <div class="welcome-greeting">Xin chào trở lại 👋</div>
+          <div class="welcome-name">Admin <span id="welcomeName">Chính</span></div>
+          <div class="welcome-desc">Hệ thống vận hành ổn định. Mọi thao tác đang được ghi nhận tại nhật ký bảo mật. Chúc bạn một ngày làm việc hiệu quả!</div>
+        </div>
+        <div class="welcome-stats">
+          <div class="welcome-stat"><div class="ws-val">2.84<small style="font-size:16px">tỷ</small></div><div class="ws-label">Doanh thu T5</div></div>
+          <div class="welcome-stat"><div class="ws-val">147</div><div class="ws-label">Đơn hôm nay</div></div>
+          <div class="welcome-stat"><div class="ws-val">1.2K</div><div class="ws-label">Người dùng</div></div>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-gold"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-coin"></i>Doanh thu tháng</div><div class="kpi-value">2.84<small style="font-size:18px">tỷ</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+18.4% so với tháng trước</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-package"></i>Đơn hàng hôm nay</div><div class="kpi-value">147</div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+23 so với hôm qua</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-users"></i>Người dùng mới</div><div class="kpi-value">312</div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+12% tuần này</div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-alert-triangle"></i>Sắp hết hàng</div><div class="kpi-value">8</div><div class="kpi-change kpi-down"><i class="ti ti-alert-circle"></i>Cần bổ sung ngay</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:14px;margin-bottom:18px">
+        <div class="chart-card">
+          <div class="chart-head">
+            <div><div class="chart-title">Doanh thu theo thời gian</div><div class="chart-sub">Triệu VNĐ</div></div>
+            <div class="chart-period">
+              <button class="cp-btn" onclick="setPeriod(this,'7d')">7N</button>
+              <button class="cp-btn active" onclick="setPeriod(this,'30d')">30N</button>
+              <button class="cp-btn" onclick="setPeriod(this,'12m')">12T</button>
+            </div>
+          </div>
+          <div class="chart-wrap"><canvas id="revenueChart"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-head"><div><div class="chart-title">Đơn theo trạng thái</div><div class="chart-sub">Tháng này</div></div></div>
+          <div class="chart-wrap"><canvas id="orderChart"></canvas></div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">
+        <div class="tcard">
+          <div class="tcard-header">
+            <div class="tcard-title"><i class="ti ti-package"></i>Đơn hàng gần đây</div>
+            <button class="tcard-action" onclick="showPage('orders',document.querySelector('[onclick*=orders]'))"><i class="ti ti-arrow-right"></i>Xem tất cả</button>
+          </div>
+          <table class="mini-table">
+            <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Tổng tiền</th><th>Trạng thái</th></tr></thead>
+            <tbody>
+              <tr><td><span style="font-weight:500">#LX-0892</span></td><td>Nguyễn Văn A</td><td style="font-weight:600;color:var(--gold)">12.5tr</td><td><span class="badge b-shipping">Đang giao</span></td></tr>
+              <tr><td><span style="font-weight:500">#LX-0891</span></td><td>Trần Thị B</td><td style="font-weight:600;color:var(--gold)">8.2tr</td><td><span class="badge b-success">Hoàn thành</span></td></tr>
+              <tr><td><span style="font-weight:500">#LX-0890</span></td><td>Lê Minh C</td><td style="font-weight:600;color:var(--gold)">24.1tr</td><td><span class="badge b-pending">Chờ xác nhận</span></td></tr>
+              <tr><td><span style="font-weight:500">#LX-0889</span></td><td>Phạm Thu D</td><td style="font-weight:600;color:var(--gold)">6.8tr</td><td><span class="badge b-success">Hoàn thành</span></td></tr>
+              <tr><td><span style="font-weight:500">#LX-0888</span></td><td>Hoàng Văn E</td><td style="font-weight:600;color:var(--gold)">3.4tr</td><td><span class="badge b-cancel">Đã hủy</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="tcard">
+          <div class="tcard-header">
+            <div class="tcard-title"><i class="ti ti-alert-triangle"></i>Sắp hết hàng</div>
+            <button class="tcard-action" onclick="showPage('inventory',document.querySelector('[onclick*=inventory]'))"><i class="ti ti-arrow-right"></i>Quản lý kho</button>
+          </div>
+          <table class="mini-table">
+            <thead><tr><th>Sản phẩm</th><th>Danh mục</th><th>Tồn kho</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><span class="cell-name">Giường Walnut 1m6</span></td><td>Phòng ngủ</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-low" style="width:15%"></div></div><span class="stock-num">3</span></div></td><td><span class="badge b-low">Thấp</span></td></tr>
+              <tr><td><span class="cell-name">Ghế Ergonomic Pro</span></td><td>Văn phòng</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-low" style="width:20%"></div></div><span class="stock-num">5</span></div></td><td><span class="badge b-low">Thấp</span></td></tr>
+              <tr><td><span class="cell-name">Sofa Nordic 3 chỗ</span></td><td>Phòng khách</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-empty" style="width:4%"></div></div><span class="stock-num">0</span></div></td><td><span class="badge b-cancel">Hết</span></td></tr>
+              <tr><td><span class="cell-name">Đèn Nordic Brass</span></td><td>Đèn</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-low" style="width:25%"></div></div><span class="stock-num">7</span></div></td><td><span class="badge b-low">Thấp</span></td></tr>
+              <tr><td><span class="cell-name">Bàn Ăn Sồi 6 ghế</span></td><td>Phòng ăn</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-empty" style="width:0%"></div></div><span class="stock-num">0</span></div></td><td><span class="badge b-cancel">Hết</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+        <div class="alert-card"><div class="alert-icon ai-warn"><i class="ti ti-package"></i></div><div><div class="alert-title">8 sản phẩm sắp hết hàng</div><div class="alert-desc">Cần bổ sung trong 3–5 ngày để tránh gián đoạn đơn hàng.</div></div></div>
+        <div class="alert-card"><div class="alert-icon ai-danger"><i class="ti ti-clock"></i></div><div><div class="alert-title">3 đơn hàng chờ > 24h</div><div class="alert-desc">Đơn #0888, #0886, #0883 chưa xử lý. Cần kiểm tra ngay.</div></div></div>
+        <div class="alert-card"><div class="alert-icon ai-info"><i class="ti ti-report"></i></div><div><div class="alert-title">Báo cáo tháng 4 sẵn sàng</div><div class="alert-desc">Doanh thu tháng 4 đã được tổng hợp. Nhấn xem chi tiết.</div></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         USERS
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-users">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Quản lý hệ thống</div><div class="ph-title">Người <em>dùng</em></div><div class="ph-sub">1.243 tài khoản đã đăng ký</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất danh sách','Đang tạo file Excel...')"><i class="ti ti-download"></i>Xuất Excel</button><button class="btn-add" onclick="openModal('addUser')"><i class="ti ti-plus"></i>Thêm người dùng</button></div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="ti ti-search"></i><input type="text" placeholder="Tìm theo tên, email, SĐT..."></div>
+        <select class="filter-select"><option>Tất cả vai trò</option><option>Khách hàng</option><option>Admin</option></select>
+        <select class="filter-select"><option>Tất cả trạng thái</option><option>Hoạt động</option><option>Đã khóa</option></select>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>#</th><th>Người dùng</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Đơn hàng</th><th>Trạng thái</th><th>Ngày tạo</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text3)">1</td><td><div class="flex-cell"><div class="av av-gold">NA</div><div><div class="cell-name">Nguyễn Văn A</div></div></div></td><td style="color:var(--text3)">nguyenvana@gmail.com</td><td style="color:var(--text3)">0901 234 567</td><td><span class="badge b-navy">Khách hàng</span></td><td><strong>8</strong></td><td><span class="badge b-success">Hoạt động</span></td><td style="color:var(--text3)">01/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('editUser')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-lock" onclick="toast('lock','Đã khóa tài khoản','Tài khoản Nguyễn Văn A bị khóa.')"><i class="ti ti-lock"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">2</td><td><div class="flex-cell"><div class="av av-blue">TT</div><div><div class="cell-name">Trần Thị B</div></div></div></td><td style="color:var(--text3)">tranthib@gmail.com</td><td style="color:var(--text3)">0912 345 678</td><td><span class="badge b-navy">Khách hàng</span></td><td><strong>14</strong></td><td><span class="badge b-success">Hoạt động</span></td><td style="color:var(--text3)">15/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('editUser')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-lock" onclick="toast('lock','Đã khóa tài khoản','')"><i class="ti ti-lock"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">3</td><td><div class="flex-cell"><div class="av av-green">LM</div><div><div class="cell-name">Lê Minh C</div></div></div></td><td style="color:var(--text3)">leminhc@gmail.com</td><td style="color:var(--text3)">0923 456 789</td><td><span class="badge b-gold">Admin</span></td><td><strong>2</strong></td><td><span class="badge b-success">Hoạt động</span></td><td style="color:var(--text3)">20/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('editUser')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-lock" onclick="toast('lock','Đã khóa tài khoản','')"><i class="ti ti-lock"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">4</td><td><div class="flex-cell"><div class="av av-purple">PT</div><div><div class="cell-name">Phạm Thu D</div></div></div></td><td style="color:var(--text3)">phamthud@gmail.com</td><td style="color:var(--text3)">0934 567 890</td><td><span class="badge b-navy">Khách hàng</span></td><td><strong>3</strong></td><td><span class="badge b-cancel">Đã khóa</span></td><td style="color:var(--text3)">05/02/2025</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('editUser')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-lock" onclick="toast('unlock','Đã mở khóa','Tài khoản đã được mở khóa.')"><i class="ti ti-lock-open"></i></button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–10</strong> / 1.243 người dùng</div><div class="pg-btns"><button class="pg-btn"><i class="ti ti-chevron-left"></i></button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn"><i class="ti ti-chevron-right"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         CATEGORIES
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-categories">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Quản lý hệ thống</div><div class="ph-title">Danh <em>mục</em></div><div class="ph-sub">8 danh mục sản phẩm</div></div>
+        <div class="ph-actions"><button class="btn-add" onclick="openModal('addCat')"><i class="ti ti-plus"></i>Thêm danh mục</button></div>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>ID</th><th>Danh mục</th><th>Slug</th><th>Số SP</th><th>Hiển thị</th><th>Ngày tạo</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text3)">1</td><td><div class="flex-cell"><span style="font-size:20px">🛏️</span><span class="cell-name">Phòng ngủ</span></div></td><td><code style="font-size:11px;color:var(--text3);background:var(--cream);padding:2px 6px;border-radius:4px">phong-ngu</code></td><td><strong>87</strong></td><td><span class="badge b-success">Hiển thị</span></td><td style="color:var(--text3)">01/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editCat')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa danh mục','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">2</td><td><div class="flex-cell"><span style="font-size:20px">🛋️</span><span class="cell-name">Phòng khách</span></div></td><td><code style="font-size:11px;color:var(--text3);background:var(--cream);padding:2px 6px;border-radius:4px">phong-khach</code></td><td><strong>64</strong></td><td><span class="badge b-success">Hiển thị</span></td><td style="color:var(--text3)">01/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editCat')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa danh mục','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">3</td><td><div class="flex-cell"><span style="font-size:20px">🍳</span><span class="cell-name">Nhà bếp</span></div></td><td><code style="font-size:11px;color:var(--text3);background:var(--cream);padding:2px 6px;border-radius:4px">nha-bep</code></td><td><strong>42</strong></td><td><span class="badge b-success">Hiển thị</span></td><td style="color:var(--text3)">01/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editCat')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa danh mục','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">4</td><td><div class="flex-cell"><span style="font-size:20px">💼</span><span class="cell-name">Văn phòng</span></div></td><td><code style="font-size:11px;color:var(--text3);background:var(--cream);padding:2px 6px;border-radius:4px">van-phong</code></td><td><strong>38</strong></td><td><span class="badge b-pending">Ẩn</span></td><td style="color:var(--text3)">10/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editCat')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa danh mục','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3)">5</td><td><div class="flex-cell"><span style="font-size:20px">💡</span><span class="cell-name">Đèn trang trí</span></div></td><td><code style="font-size:11px;color:var(--text3);background:var(--cream);padding:2px 6px;border-radius:4px">den-trang-tri</code></td><td><strong>31</strong></td><td><span class="badge b-success">Hiển thị</span></td><td style="color:var(--text3)">15/01/2025</td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editCat')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa danh mục','')"><i class="ti ti-trash"></i></button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–8</strong> / 8 danh mục</div><div class="pg-btns"><button class="pg-btn active">1</button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         PRODUCTS
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-products">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Quản lý hệ thống</div><div class="ph-title">Sản <em>phẩm</em></div><div class="ph-sub">248 sản phẩm · 3 sắp hết hàng</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất danh sách','')"><i class="ti ti-download"></i>Xuất</button><button class="btn-add" onclick="openModal('addProd')"><i class="ti ti-plus"></i>Thêm sản phẩm</button></div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="ti ti-search"></i><input type="text" placeholder="Tìm sản phẩm..."></div>
+        <select class="filter-select"><option>Tất cả danh mục</option><option>Phòng ngủ</option><option>Phòng khách</option><option>Nhà bếp</option></select>
+        <select class="filter-select"><option>Tất cả trạng thái</option><option>Còn hàng</option><option>Sắp hết</option><option>Hết hàng</option></select>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>ID</th><th>Sản phẩm</th><th>Danh mục</th><th>Giá bán</th><th>Giá gốc</th><th>Tồn kho</th><th>Đã bán</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text3);font-size:12px">001</td><td><div class="flex-cell"><div class="cell-img">🛏️</div><div><div class="cell-name">Giường Walnut Premium</div><div class="cell-sub">Heritage 2024 · 1m6×2m</div></div></div></td><td>Phòng ngủ</td><td style="font-weight:600;color:var(--gold)">12.500.000đ</td><td style="color:var(--text4);text-decoration:line-through;font-size:12px">15.600.000đ</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-low" style="width:15%"></div></div><span class="stock-num">3</span></div></td><td>342</td><td><span class="badge b-low">Sắp hết</span></td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('addProd')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa sản phẩm','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3);font-size:12px">002</td><td><div class="flex-cell"><div class="cell-img">🛋️</div><div><div class="cell-name">Sofa Nordic 3 chỗ</div><div class="cell-sub">Màu xám · Vải cao cấp</div></div></div></td><td>Phòng khách</td><td style="font-weight:600;color:var(--gold)">8.500.000đ</td><td style="color:var(--text4);text-decoration:line-through;font-size:12px">10.200.000đ</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-empty" style="width:0%"></div></div><span class="stock-num">0</span></div></td><td>128</td><td><span class="badge b-cancel">Hết hàng</span></td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('addProd')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa sản phẩm','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3);font-size:12px">003</td><td><div class="flex-cell"><div class="cell-img">🪑</div><div><div class="cell-name">Ghế Ergonomic ProFlex</div><div class="cell-sub">Đen · Mesh lưới</div></div></div></td><td>Văn phòng</td><td style="font-weight:600;color:var(--gold)">1.200.000đ</td><td>—</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-ok" style="width:75%"></div></div><span class="stock-num">47</span></div></td><td>891</td><td><span class="badge b-ok">Còn hàng</span></td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('addProd')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa sản phẩm','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            <tr><td style="color:var(--text3);font-size:12px">004</td><td><div class="flex-cell"><div class="cell-img">💡</div><div><div class="cell-name">Đèn Nordic Brass Edition</div><div class="cell-sub">Đồng thau · E27</div></div></div></td><td>Đèn</td><td style="font-weight:600;color:var(--gold)">1.260.000đ</td><td style="color:var(--text4);text-decoration:line-through;font-size:12px">1.800.000đ</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-ok" style="width:60%"></div></div><span class="stock-num">24</span></div></td><td>214</td><td><span class="badge b-ok">Còn hàng</span></td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('addProd')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã xóa sản phẩm','')"><i class="ti ti-trash"></i></button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–10</strong> / 248 sản phẩm</div><div class="pg-btns"><button class="pg-btn"><i class="ti ti-chevron-left"></i></button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn"><i class="ti ti-chevron-right"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ORDERS
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-orders">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Quản lý hệ thống</div><div class="ph-title">Đơn <em>hàng</em></div><div class="ph-sub">8 đơn chờ xử lý</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất đơn hàng','')"><i class="ti ti-download"></i>Xuất Excel</button></div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="ti ti-search"></i><input type="text" placeholder="Tìm mã đơn, khách hàng..."></div>
+        <select class="filter-select"><option>Tất cả trạng thái</option><option>Chờ xác nhận</option><option>Đang giao</option><option>Hoàn thành</option><option>Đã hủy</option></select>
+        <select class="filter-select"><option>Hôm nay</option><option>7 ngày qua</option><option>Tháng này</option></select>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Sản phẩm</th><th>Tổng tiền</th><th>Thanh toán</th><th>Trạng thái</th><th>Ngày đặt</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600">#LX-0892</td><td><div class="flex-cell"><div class="av av-gold" style="width:26px;height:26px;font-size:10px">NA</div>Nguyễn Văn A</div></td><td style="color:var(--text3)">Giường Walnut × 1</td><td style="font-weight:600;color:var(--gold)">12.500.000đ</td><td><span class="badge b-success">COD</span></td><td><span class="badge b-shipping">Đang giao</span></td><td style="color:var(--text3)">18/05/2026</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="toast('check','Xác nhận đơn hàng','#LX-0892 đã được xác nhận.')"><i class="ti ti-check"></i></button><button class="ra-btn ra-del" onclick="toast('x','Đã hủy đơn','#LX-0892 đã bị hủy.')"><i class="ti ti-x"></i></button></div></td></tr>
+            <tr><td style="font-weight:600">#LX-0891</td><td><div class="flex-cell"><div class="av av-blue" style="width:26px;height:26px;font-size:10px">TT</div>Trần Thị B</div></td><td style="color:var(--text3)">Sofa Nordic 3 chỗ × 1</td><td style="font-weight:600;color:var(--gold)">8.500.000đ</td><td><span class="badge b-shipping">MoMo</span></td><td><span class="badge b-success">Hoàn thành</span></td><td style="color:var(--text3)">17/05/2026</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="openModal('editOrder')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('x','Đã hủy đơn','')"><i class="ti ti-x"></i></button></div></td></tr>
+            <tr><td style="font-weight:600">#LX-0890</td><td><div class="flex-cell"><div class="av av-green" style="width:26px;height:26px;font-size:10px">LM</div>Lê Minh C</div></td><td style="color:var(--text3)">Bàn Ăn Sồi 6 ghế × 1</td><td style="font-weight:600;color:var(--gold)">24.100.000đ</td><td><span class="badge b-pending">Chờ TT</span></td><td><span class="badge b-pending">Chờ xác nhận</span></td><td style="color:var(--text3)">17/05/2026</td><td><div class="row-actions"><button class="ra-btn ra-view"><i class="ti ti-eye"></i></button><button class="ra-btn ra-edit" onclick="toast('check','Xác nhận đơn hàng','#LX-0890 đã được xác nhận.')"><i class="ti ti-check"></i></button><button class="ra-btn ra-del" onclick="toast('x','Đã hủy đơn','')"><i class="ti ti-x"></i></button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–10</strong> / 312 đơn hàng</div><div class="pg-btns"><button class="pg-btn"><i class="ti ti-chevron-left"></i></button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn"><i class="ti ti-chevron-right"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         INVENTORY
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-inventory">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Quản lý hệ thống</div><div class="ph-title">Kho <em>hàng</em></div><div class="ph-sub">8 sản phẩm cần bổ sung</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất báo cáo kho','')"><i class="ti ti-download"></i>Báo cáo</button><button class="btn-add" onclick="toast('package','Nhập kho','Mở form nhập kho.')"><i class="ti ti-plus"></i>Nhập kho</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px">
+        <div class="kpi-card kpi-green" style="padding:14px 16px"><div class="kpi-accent"></div><div class="kpi-label" style="margin-bottom:6px"><i class="ti ti-package"></i>Tổng SKU</div><div class="kpi-value" style="font-size:28px">248</div></div>
+        <div class="kpi-card kpi-gold" style="padding:14px 16px"><div class="kpi-accent"></div><div class="kpi-label" style="margin-bottom:6px"><i class="ti ti-check"></i>Còn hàng</div><div class="kpi-value" style="font-size:28px">231</div></div>
+        <div class="kpi-card kpi-red" style="padding:14px 16px"><div class="kpi-accent"></div><div class="kpi-label" style="margin-bottom:6px"><i class="ti ti-alert-triangle"></i>Sắp hết</div><div class="kpi-value" style="font-size:28px">8</div></div>
+        <div class="kpi-card kpi-red" style="padding:14px 16px"><div class="kpi-accent"></div><div class="kpi-label" style="margin-bottom:6px"><i class="ti ti-ban"></i>Hết hàng</div><div class="kpi-value" style="font-size:28px">9</div></div>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>SKU</th><th>Sản phẩm</th><th>Danh mục</th><th>Tồn hiện tại</th><th>Ngưỡng cảnh báo</th><th>Nhập gần nhất</th><th>Xuất T5</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+          <tbody>
+            <tr><td><code style="font-size:11px;color:var(--text3)">LX-BED-001</code></td><td><span class="cell-name">Giường Walnut Premium</span></td><td>Phòng ngủ</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-low" style="width:15%"></div></div><span class="stock-num">3</span></div></td><td>10</td><td style="color:var(--text3)">01/04/2025</td><td>28</td><td><span class="badge b-low">Sắp hết</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="toast('package','Nhập thêm hàng','Đang mở form nhập kho.')"><i class="ti ti-package-import"></i></button></div></td></tr>
+            <tr><td><code style="font-size:11px;color:var(--text3)">LX-SFA-002</code></td><td><span class="cell-name">Sofa Nordic 3 chỗ</span></td><td>Phòng khách</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-empty" style="width:0%"></div></div><span class="stock-num">0</span></div></td><td>5</td><td style="color:var(--text3)">15/03/2025</td><td>12</td><td><span class="badge b-cancel">Hết hàng</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="toast('package','Nhập thêm hàng','')"><i class="ti ti-package-import"></i></button></div></td></tr>
+            <tr><td><code style="font-size:11px;color:var(--text3)">LX-CHR-003</code></td><td><span class="cell-name">Ghế Ergonomic ProFlex</span></td><td>Văn phòng</td><td><div class="stock-bar"><div class="stock-track"><div class="stock-fill sf-ok" style="width:75%"></div></div><span class="stock-num">47</span></div></td><td>15</td><td style="color:var(--text3)">10/05/2025</td><td>38</td><td><span class="badge b-ok">Đủ hàng</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="toast('package','Nhập thêm hàng','')"><i class="ti ti-package-import"></i></button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–10</strong> / 248 SKU</div><div class="pg-btns"><button class="pg-btn"><i class="ti ti-chevron-left"></i></button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn"><i class="ti ti-chevron-right"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         REVENUE
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-revenue">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Tài chính</div><div class="ph-title">Doanh <em>thu</em></div><div class="ph-sub">Tháng 5/2026</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất báo cáo doanh thu','')"><i class="ti ti-download"></i>Xuất báo cáo</button></div>
+      </div>
+      <div class="rev-kpi">
+        <div class="kpi-card kpi-gold"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-coin"></i>Doanh thu tháng 5</div><div class="kpi-value">2.84<small style="font-size:18px">tỷ</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+18.4% MoM</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-chart-pie"></i>Lợi nhuận gộp</div><div class="kpi-value">38<small style="font-size:18px">%</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+2.1pp</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-shopping-cart"></i>AOV trung bình</div><div class="kpi-value">19.3<small style="font-size:18px">tr</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+5.2%</div></div>
+      </div>
+      <div class="rev-charts">
+        <div class="chart-card"><div class="chart-head"><div><div class="chart-title">Doanh thu theo tháng</div><div class="chart-sub">12 tháng gần nhất · Tỷ VNĐ</div></div></div><div style="position:relative;height:220px"><canvas id="revMonthChart"></canvas></div></div>
+        <div class="chart-card"><div class="chart-head"><div><div class="chart-title">Doanh thu theo danh mục</div><div class="chart-sub">Tháng 5/2026</div></div></div><div style="position:relative;height:220px"><canvas id="revCatChart"></canvas></div></div>
+      </div>
+      <div class="full-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>Tháng</th><th>Đơn hàng</th><th>Doanh thu</th><th>So tháng trước</th><th>Lợi nhuận gộp</th><th>Hoàn trả</th></tr></thead>
+          <tbody>
+            <tr><td><strong>T5/2026</strong></td><td>1.247</td><td style="font-weight:700;color:var(--gold)">2.840.000.000đ</td><td><span style="color:var(--green);font-weight:600;font-size:12px">▲ +18.4%</span></td><td style="color:var(--text3)">1.079.200.000đ (38%)</td><td style="color:var(--red);font-size:12px">−42.600.000đ</td></tr>
+            <tr><td><strong>T4/2026</strong></td><td>1.089</td><td style="font-weight:700;color:var(--gold)">2.398.000.000đ</td><td><span style="color:var(--green);font-weight:600;font-size:12px">▲ +9.2%</span></td><td style="color:var(--text3)">887.260.000đ (37%)</td><td style="color:var(--red);font-size:12px">−35.970.000đ</td></tr>
+            <tr><td><strong>T3/2026</strong></td><td>987</td><td style="font-weight:700;color:var(--gold)">2.196.000.000đ</td><td><span style="color:var(--red);font-weight:600;font-size:12px">▼ −3.1%</span></td><td style="color:var(--text3)">791.560.000đ (36%)</td><td style="color:var(--red);font-size:12px">−29.400.000đ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         STATS
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-stats">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Phân tích</div><div class="ph-title">Thống kê</div><div class="ph-sub">Tổng hợp dữ liệu kinh doanh</div></div>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-gold"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-coin"></i>Tổng doanh thu YTD</div><div class="kpi-value">12.4<small style="font-size:18px">tỷ</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+24% so với 2025</div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-package"></i>Tổng đơn hàng</div><div class="kpi-value">4.821</div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+31% so với 2025</div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-users"></i>Tổng người dùng</div><div class="kpi-value">1.243</div><div class="kpi-change kpi-up"><i class="ti ti-trending-up"></i>+18% so với 2025</div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-accent"></div><div class="kpi-label"><i class="ti ti-refresh"></i>Tỷ lệ hoàn trả</div><div class="kpi-value">1.8<small style="font-size:18px">%</small></div><div class="kpi-change kpi-up"><i class="ti ti-trending-down"></i>−0.3pp cải thiện</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px">
+        <div class="chart-card"><div class="chart-head"><div><div class="chart-title">Người dùng mới theo tháng</div><div class="chart-sub">2026</div></div></div><div class="chart-wrap"><canvas id="userChart"></canvas></div></div>
+        <div class="chart-card"><div class="chart-head"><div><div class="chart-title">Top danh mục bán chạy</div><div class="chart-sub">Theo doanh thu</div></div></div><div class="chart-wrap"><canvas id="catChart"></canvas></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         ROLES & PERMISSIONS (từ test.html)
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-roles">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Bảo mật hệ thống</div><div class="ph-title">Vai trò <em>&amp; Quyền hạn</em></div><div class="ph-sub">Quản lý phân quyền động cho toàn bộ hệ thống</div></div>
+        <div class="ph-actions"><button class="btn-add" onclick="openModal('addRole')"><i class="ti ti-plus"></i>Tạo vai trò mới</button></div>
+      </div>
+
+      <div class="roles-grid">
+        <!-- Role list -->
+        <div class="tcard">
+          <div class="tcard-header">
+            <div class="tcard-title"><i class="ti ti-key"></i>Nhóm vai trò (Role Groups)</div>
+          </div>
+          <div class="role-card-list">
+            <div class="role-card">
+              <div class="role-card-head">
+                <span class="role-tag rt-super"><i class="ti ti-crown" style="font-size:14px"></i>Super Admin</span>
+                <div class="row-actions">
+                  <button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button>
+                  <button class="ra-btn ra-del" onclick="toast('x','Không thể xóa','Vai trò hệ thống không thể xóa.')"><i class="ti ti-trash"></i></button>
+                </div>
+              </div>
+              <div style="margin-bottom:8px">
+                <span class="perm-badge p-view"><i class="ti ti-eye"></i>Xem</span>
+                <span class="perm-badge p-create"><i class="ti ti-plus"></i>Tạo</span>
+                <span class="perm-badge p-edit"><i class="ti ti-edit"></i>Sửa</span>
+                <span class="perm-badge p-delete"><i class="ti ti-trash"></i>Xóa</span>
+                <span class="perm-badge" style="background:rgba(109,40,217,.1);color:var(--purple)"><i class="ti ti-settings"></i>Cấu hình</span>
+              </div>
+              <div class="role-user-count"><i class="ti ti-user"></i>1 tài khoản · <i class="ti ti-lock-open"></i>Toàn quyền hệ thống</div>
+            </div>
+
+            <div class="role-card">
+              <div class="role-card-head">
+                <span class="role-tag rt-manager"><i class="ti ti-shield-check" style="font-size:14px"></i>Manager</span>
+                <div class="row-actions">
+                  <button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button>
+                  <button class="ra-btn ra-del" onclick="toast('trash','Đã xóa vai trò','')"><i class="ti ti-trash"></i></button>
+                </div>
+              </div>
+              <div style="margin-bottom:8px">
+                <span class="perm-badge p-view"><i class="ti ti-eye"></i>Xem</span>
+                <span class="perm-badge p-create"><i class="ti ti-plus"></i>Tạo</span>
+                <span class="perm-badge p-edit"><i class="ti ti-edit"></i>Sửa</span>
+              </div>
+              <div class="role-user-count"><i class="ti ti-users"></i>3 tài khoản · <i class="ti ti-ban"></i>Không có quyền xóa</div>
+            </div>
+
+            <div class="role-card">
+              <div class="role-card-head">
+                <span class="role-tag rt-staff"><i class="ti ti-user" style="font-size:14px"></i>Staff</span>
+                <div class="row-actions">
+                  <button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button>
+                  <button class="ra-btn ra-del" onclick="toast('trash','Đã xóa vai trò','')"><i class="ti ti-trash"></i></button>
+                </div>
+              </div>
+              <div style="margin-bottom:8px">
+                <span class="perm-badge p-view"><i class="ti ti-eye"></i>Xem</span>
+              </div>
+              <div class="role-user-count"><i class="ti ti-users"></i>8 tài khoản · <i class="ti ti-eye"></i>Chỉ xem</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin accounts -->
+        <div class="tcard">
+          <div class="tcard-header">
+            <div class="tcard-title"><i class="ti ti-users"></i>Tài khoản quản trị hệ thống</div>
+            <button class="btn-add" style="font-size:12px;padding:6px 12px" onclick="openModal('addAdmin')"><i class="ti ti-plus"></i>Cấp tài khoản</button>
+          </div>
+          <table class="full-table">
+            <thead><tr><th>Tài khoản</th><th>Vai trò</th><th>Quyền hiện tại</th><th>Ngày tạo</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+            <tbody>
+              <tr><td><div class="flex-cell"><div class="av av-gold">AD</div><div><div class="cell-name">Admin Chính</div><div class="cell-sub">admin@luxnest.vn</div></div></div></td><td><span class="role-tag rt-super" style="font-size:11px;padding:3px 8px"><i class="ti ti-crown" style="font-size:12px"></i>Super Admin</span></td><td><span class="perm-badge p-view" style="font-size:10px">Xem</span><span class="perm-badge p-create" style="font-size:10px">Tạo</span><span class="perm-badge p-edit" style="font-size:10px">Sửa</span><span class="perm-badge p-delete" style="font-size:10px">Xóa</span></td><td style="color:var(--text3)">01/01/2024</td><td><span class="badge b-success">Hoạt động</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button></div></td></tr>
+              <tr><td><div class="flex-cell"><div class="av av-blue">MH</div><div><div class="cell-name">Trần Minh Hoàng</div><div class="cell-sub">hoang@luxnest.vn</div></div></div></td><td><span class="role-tag rt-manager" style="font-size:11px;padding:3px 8px"><i class="ti ti-shield-check" style="font-size:12px"></i>Manager</span></td><td><span class="perm-badge p-view" style="font-size:10px">Xem</span><span class="perm-badge p-create" style="font-size:10px">Tạo</span><span class="perm-badge p-edit" style="font-size:10px">Sửa</span></td><td style="color:var(--text3)">15/03/2024</td><td><span class="badge b-success">Hoạt động</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã thu hồi tài khoản','')"><i class="ti ti-trash"></i></button></div></td></tr>
+              <tr><td><div class="flex-cell"><div class="av av-green">TH</div><div><div class="cell-name">Nguyễn Thu Hà</div><div class="cell-sub">ha@luxnest.vn</div></div></div></td><td><span class="role-tag rt-staff" style="font-size:11px;padding:3px 8px"><i class="ti ti-user" style="font-size:12px"></i>Staff</span></td><td><span class="perm-badge p-view" style="font-size:10px">Xem</span></td><td style="color:var(--text3)">01/06/2024</td><td><span class="badge b-success">Hoạt động</span></td><td><div class="row-actions"><button class="ra-btn ra-edit" onclick="openModal('editRole')"><i class="ti ti-edit"></i></button><button class="ra-btn ra-del" onclick="toast('trash','Đã thu hồi tài khoản','')"><i class="ti ti-trash"></i></button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Permission matrix -->
+      <div class="tcard">
+        <div class="tcard-header"><div class="tcard-title"><i class="ti ti-table"></i>Ma trận quyền hạn chi tiết</div></div>
+        <div style="padding:16px 20px">
+          <div style="display:grid;grid-template-columns:1fr repeat(3,140px);gap:0;border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <div style="padding:10px 14px;background:var(--navy);color:rgba(255,255,255,.6);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em">Chức năng</div>
+            <div style="padding:10px 14px;background:var(--navy);color:var(--gold3);font-size:11px;font-weight:600;text-align:center;border-left:1px solid rgba(255,255,255,.08)">Super Admin</div>
+            <div style="padding:10px 14px;background:var(--navy);color:#93c5fd;font-size:11px;font-weight:600;text-align:center;border-left:1px solid rgba(255,255,255,.08)">Manager</div>
+            <div style="padding:10px 14px;background:var(--navy);color:#86efac;font-size:11px;font-weight:600;text-align:center;border-left:1px solid rgba(255,255,255,.08)">Staff</div>
+            <!-- rows -->
+            <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px">Dashboard</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ Đầy đủ</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ Đầy đủ</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ Xem</div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px">Người dùng</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--blue)">✓ CR+U</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--text4)">✗ Không</div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px">Sản phẩm</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ Xem</div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px">Đơn hàng</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--blue)">✓ Xem+U</div>
+            <div style="padding:10px 14px;border-top:1px solid var(--border);font-size:13px">Phân quyền</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--green)">✓ CRUD</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--text4)">✗ Không</div><div style="padding:10px;border-top:1px solid var(--border);border-left:1px solid var(--border);text-align:center;color:var(--text4)">✗ Không</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         AUDIT LOGS (từ test.html)
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-audit-logs">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Bảo mật hệ thống</div><div class="ph-title">Nhật ký <em>thao tác</em></div><div class="ph-sub">Ghi nhận toàn bộ hành vi trong hệ thống</div></div>
+        <div class="ph-actions"><button class="btn-export" onclick="toast('download','Xuất nhật ký','Đang tạo file CSV...')"><i class="ti ti-download"></i>Xuất CSV</button></div>
+      </div>
+      <div class="filter-bar">
+        <div class="filter-search"><i class="ti ti-search"></i><input type="text" placeholder="Tìm theo tên, IP, hành động..."></div>
+        <select class="filter-select"><option>Tất cả loại</option><option>Đăng nhập</option><option>Tạo mới</option><option>Cập nhật</option><option>Xóa</option></select>
+        <select class="filter-select"><option>Tất cả kết quả</option><option>Thành công</option><option>Lỗi</option></select>
+        <select class="filter-select"><option>Hôm nay</option><option>7 ngày qua</option><option>Tháng này</option></select>
+      </div>
+      <div class="tcard">
+        <div class="tcard-header">
+          <div class="tcard-title"><i class="ti ti-activity"></i>Hoạt động gần đây</div>
+          <span style="font-size:12px;color:var(--text3)">Cập nhật realtime · 20/05/2026</span>
+        </div>
+        <div style="padding:0 20px">
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot success"></div></div>
+            <div class="log-body">
+              <div class="log-action">Đăng nhập hệ thống thành công</div>
+              <div class="log-detail">Tài khoản <strong>Admin Chính (ADM001)</strong> đăng nhập từ Chrome · Windows 11</div>
+              <div class="log-meta"><i class="ti ti-clock"></i>09:22:14 · <i class="ti ti-map-pin"></i>IP: 118.70.xx.xx · TP. Hồ Chí Minh</div>
+            </div>
+            <span class="log-status ls-success">Thành công</span>
+          </div>
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot warn"></div></div>
+            <div class="log-body">
+              <div class="log-action">Cập nhật quyền tài khoản Manager</div>
+              <div class="log-detail">Tài khoản <strong>Admin Chính</strong> đã thêm quyền <em>Tạo sản phẩm</em> cho <strong>Trần Minh Hoàng (ADM002)</strong></div>
+              <div class="log-meta"><i class="ti ti-clock"></i>09:15:02 · <i class="ti ti-user"></i>ADM001 · Module: Phân quyền</div>
+            </div>
+            <span class="log-status ls-success">Thành công</span>
+          </div>
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot danger"></div></div>
+            <div class="log-body">
+              <div class="log-action">Xóa sản phẩm thất bại — không đủ quyền</div>
+              <div class="log-detail">Tài khoản <strong>Nguyễn Thu Hà (ADM003)</strong> cố xóa <em>Giường Walnut Premium</em> nhưng vai trò Staff không có quyền DELETE</div>
+              <div class="log-meta"><i class="ti ti-clock"></i>08:54:33 · <i class="ti ti-user"></i>ADM003 · Module: Sản phẩm</div>
+            </div>
+            <span class="log-status ls-error">Bị từ chối</span>
+          </div>
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot success"></div></div>
+            <div class="log-body">
+              <div class="log-action">Tạo đơn hàng mới #LX-2026-0948</div>
+              <div class="log-detail">Tài khoản <strong>Trần Minh Hoàng (ADM002)</strong> tạo đơn hàng mới tổng giá trị <strong>21.400.000đ</strong> cho khách Nguyễn Văn A</div>
+              <div class="log-meta"><i class="ti ti-clock"></i>08:31:05 · <i class="ti ti-user"></i>ADM002 · Module: Đơn hàng</div>
+            </div>
+            <span class="log-status ls-success">Thành công</span>
+          </div>
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot danger"></div></div>
+            <div class="log-body">
+              <div class="log-action">Đăng nhập thất bại liên tiếp 3 lần</div>
+              <div class="log-detail">Phát hiện IP <strong>14.161.xx.xx</strong> thử đăng nhập sai mật khẩu 3 lần vào tài khoản <em>admin@luxnest.vn</em>. Tài khoản đã tự động khóa tạm 15 phút.</div>
+              <div class="log-meta"><i class="ti ti-clock"></i>07:12:48 · <i class="ti ti-alert-triangle"></i>Cảnh báo bảo mật · IP: 14.161.xx.xx · Hà Nội</div>
+            </div>
+            <span class="log-status ls-error">Nguy hiểm</span>
+          </div>
+          <div class="log-item">
+            <div class="log-dot-wrap"><div class="log-dot success"></div></div>
+            <div class="log-body">
+              <div class="log-action">Cập nhật tồn kho sản phẩm</div>
+              <div class="log-detail">Tài khoản <strong>Trần Minh Hoàng</strong> nhập thêm 50 đơn vị <em>Ghế Ergonomic ProFlex</em> vào kho HCM</div>
+              <div class="log-meta"><i class="ti ti-clock"></i>06:58:22 · <i class="ti ti-user"></i>ADM002 · Module: Kho hàng</div>
+            </div>
+            <span class="log-status ls-success">Thành công</span>
+          </div>
+        </div>
+        <div class="pagination"><div class="pg-info">Hiển thị <strong>1–20</strong> / 1.847 bản ghi</div><div class="pg-btns"><button class="pg-btn"><i class="ti ti-chevron-left"></i></button><button class="pg-btn active">1</button><button class="pg-btn">2</button><button class="pg-btn">3</button><button class="pg-btn"><i class="ti ti-chevron-right"></i></button></div></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         MY ACCOUNT (từ test.html)
+    ══════════════════════════════════════ -->
+    <div class="page" id="page-my-account">
+      <div class="page-header">
+        <div class="ph-left"><div class="ph-eyebrow">Hồ sơ cá nhân</div><div class="ph-title">Trang <em>của tôi</em></div></div>
+      </div>
+      <div class="account-layout">
+        <!-- Sidebar card -->
+        <div class="account-sidebar-card">
+          <div class="acct-av-big" id="acctAvBig">AD</div>
+          <div class="acct-name" id="acctNameBig">Admin Chính</div>
+          <div style="margin-bottom:14px"><span class="acct-role-tag rt-super" id="acctRoleTag"><i class="ti ti-crown" style="font-size:13px"></i>Super Admin</span></div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:16px" id="acctEmail">admin@luxnest.vn</div>
+          <div class="acct-stats" style="margin-bottom:20px">
+            <div class="acct-stat"><div class="acct-stat-val gold">∞</div><div class="acct-stat-label">Quyền hạn</div></div>
+            <div class="acct-stat"><div class="acct-stat-val green">12</div><div class="acct-stat-label">Module</div></div>
+            <div class="acct-stat"><div class="acct-stat-val">1</div><div class="acct-stat-label">Vai trò</div></div>
+          </div>
+          <div style="text-align:left">
+            <button class="acct-menu-item active"><i class="ti ti-user"></i> Thông tin cá nhân</button>
+            <button class="acct-menu-item"><i class="ti ti-lock"></i> Đổi mật khẩu</button>
+            <button class="acct-menu-item"><i class="ti ti-shield-lock"></i> Xác thực 2FA</button>
+            <button class="acct-menu-item"><i class="ti ti-bell"></i> Tùy chỉnh thông báo</button>
+            <button class="acct-menu-item"><i class="ti ti-activity"></i> Phiên đăng nhập</button>
+          </div>
+        </div>
+        <!-- Detail card -->
+        <div class="account-detail-card">
+          <div class="form-section-title"><i class="ti ti-user-circle"></i>Thông tin cá nhân</div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Họ tên</label><input class="form-input" value="Admin Chính" id="acctFieldName"></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="admin@luxnest.vn" id="acctFieldEmail"></div>
+            <div class="form-group"><label class="form-label">Số điện thoại</label><input class="form-input" value="0901 000 001"></div>
+            <div class="form-group"><label class="form-label">Ngày sinh</label><input class="form-input" type="date" value="1990-01-01"></div>
+            <div class="form-group"><label class="form-label">Vai trò</label><input class="form-input" value="Super Administrator" readonly style="background:var(--cream2);cursor:not-allowed"></div>
+            <div class="form-group"><label class="form-label">Trạng thái</label><input class="form-input" value="Đang hoạt động" readonly style="background:var(--green-bg);color:var(--green2);cursor:not-allowed"></div>
+          </div>
+          <div class="form-section-title" style="margin-top:4px"><i class="ti ti-map-pin"></i>Thông tin hệ thống</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;background:var(--cream);border-radius:10px;border:1px solid var(--border);padding:16px;margin-bottom:18px">
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">ID Tài khoản</div><strong>ADM001</strong></div>
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">Ngày tạo</div><strong>01/01/2024</strong></div>
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">Đăng nhập cuối</div><strong>20/05/2026 09:22</strong></div>
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">IP cuối</div><strong>118.70.xx.xx</strong></div>
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">Thiết bị</div><strong>Chrome · Windows</strong></div>
+            <div style="font-size:12px"><div style="color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-size:10px;letter-spacing:.05em">Xác thực 2FA</div><span class="badge b-success">Đã bật</span></div>
+          </div>
+          <div style="display:flex;justify-content:flex-end;gap:10px">
+            <button class="btn-export" onclick="toast('x','Đã hủy thay đổi','')"><i class="ti ti-x"></i>Hủy</button>
+            <button class="btn-add" onclick="toast('check','Đã lưu thành công','Thông tin cá nhân đã được cập nhật.')"><i class="ti ti-device-floppy"></i>Lưu thay đổi</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<!-- ════════ MODAL ════════ -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title" id="modalTitle">Modal</div>
+      <button class="modal-close" onclick="closeModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-foot">
+      <button class="btn-modal-cancel" onclick="closeModal()">Huỷ</button>
+      <button class="btn-modal-save" onclick="saveModal()"><i class="ti ti-device-floppy" style="font-size:14px;margin-right:5px"></i>Lưu thay đổi</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TOAST ════════ -->
+<div class="toast" id="toastEl">
+  <div class="t-icon-wrap"><i class="ti ti-check" id="tIcon"></i></div>
+  <div><div class="t-title" id="tTitle"></div><div class="t-sub" id="tSub"></div></div>
+</div>
+
+<script>
+/* ─── NAVIGATION ─── */
+function showPage(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + id);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i => i.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const titles = {
+    dashboard: 'Tổng quan <em>Dashboard</em>',
+    users: 'Quản lý <em>Người dùng</em>',
+    categories: 'Quản lý <em>Danh mục</em>',
+    products: 'Quản lý <em>Sản phẩm</em>',
+    orders: 'Quản lý <em>Đơn hàng</em>',
+    inventory: 'Quản lý <em>Kho hàng</em>',
+    revenue: 'Quản lý <em>Doanh thu</em>',
+    stats: 'Thống kê',
+    roles: 'Vai trò <em>&amp; Quyền hạn</em>',
+    'audit-logs': 'Nhật ký <em>thao tác</em>',
+    'my-account': 'Trang <em>của tôi</em>',
+  };
+  document.getElementById('topTitle').innerHTML = titles[id] || id;
+  if (['revenue','stats'].includes(id)) setTimeout(initExtraCharts, 80);
+}
+
+/* ─── USER SIMULATION ─── */
+const users = {
+  super: { av:'AD', name:'Admin Chính', role:'Super Administrator', email:'admin@luxnest.vn', roleTag:'Super Admin', rtClass:'rt-super', roleIcon:'ti-crown' },
+  manager: { av:'MH', name:'Trần Minh Hoàng', role:'Manager', email:'hoang@luxnest.vn', roleTag:'Manager', rtClass:'rt-manager', roleIcon:'ti-shield-check' },
+  staff: { av:'TH', name:'Nguyễn Thu Hà', role:'Staff', email:'ha@luxnest.vn', roleTag:'Staff', rtClass:'rt-staff', roleIcon:'ti-user' },
+};
+function switchUser(val) {
+  const u = users[val];
+  document.getElementById('sbAv').textContent = u.av;
+  document.getElementById('sbName').textContent = u.name;
+  document.getElementById('sbRole').textContent = u.role;
+  document.getElementById('welcomeName').textContent = u.name.split(' ').pop();
+  document.getElementById('acctAvBig').textContent = u.av;
+  document.getElementById('acctNameBig').textContent = u.name;
+  document.getElementById('acctEmail').textContent = u.email;
+  const roleTag = document.getElementById('acctRoleTag');
+  roleTag.className = 'acct-role-tag ' + u.rtClass;
+  roleTag.innerHTML = `<i class="ti ${u.roleIcon}" style="font-size:13px"></i>${u.roleTag}`;
+  toast('users', 'Đã chuyển tài khoản', 'Đang xem với quyền: ' + u.role);
+}
+
+/* ─── MODAL ─── */
+const modals = {
+  addUser: { title:'Thêm <em>người dùng</em>', body:`<div class="mform-row"><div class="mform-group"><label class="mfl">Họ tên *</label><input class="mfi" placeholder="Nguyễn Văn A"></div><div class="mform-group"><label class="mfl">Email *</label><input class="mfi" type="email" placeholder="email@gmail.com"></div></div><div class="mform-row"><div class="mform-group"><label class="mfl">Số điện thoại</label><input class="mfi" placeholder="09xx xxx xxx"></div><div class="mform-group"><label class="mfl">Vai trò</label><select class="mfi"><option>Khách hàng</option><option>Admin</option></select></div></div><div class="mform-group"><label class="mfl">Mật khẩu tạm</label><input class="mfi" type="password" placeholder="••••••••"></div>` },
+  editUser: { title:'Chỉnh sửa <em>người dùng</em>', body:`<div class="mform-row"><div class="mform-group"><label class="mfl">Họ tên</label><input class="mfi" value="Nguyễn Văn A"></div><div class="mform-group"><label class="mfl">Email</label><input class="mfi" value="nguyenvana@gmail.com"></div></div><div class="mform-row"><div class="mform-group"><label class="mfl">Số điện thoại</label><input class="mfi" value="0901 234 567"></div><div class="mform-group"><label class="mfl">Trạng thái</label><select class="mfi"><option>Đang hoạt động</option><option>Đã khóa</option></select></div></div>` },
+  addCat: { title:'Thêm <em>danh mục</em>', body:`<div class="mform-group"><label class="mfl">Tên danh mục *</label><input class="mfi" placeholder="Vd: Phòng ngủ"></div><div class="mform-group"><label class="mfl">Slug</label><input class="mfi" placeholder="phong-ngu"></div><div class="mform-row"><div class="mform-group"><label class="mfl">Icon (emoji)</label><input class="mfi" placeholder="🛏️"></div><div class="mform-group"><label class="mfl">Trạng thái</label><select class="mfi"><option>Hiển thị</option><option>Ẩn</option></select></div></div><div class="mform-group"><label class="mfl">Mô tả</label><textarea class="mfi" rows="3" placeholder="Mô tả ngắn..."></textarea></div>` },
+  editCat: { title:'Sửa <em>danh mục</em>', body:`<div class="mform-group"><label class="mfl">Tên danh mục</label><input class="mfi" value="Phòng ngủ"></div><div class="mform-group"><label class="mfl">Slug</label><input class="mfi" value="phong-ngu"></div><div class="mform-group"><label class="mfl">Trạng thái</label><select class="mfi"><option>Hiển thị</option><option>Ẩn</option></select></div>` },
+  addProd: { title:'Thêm / Sửa <em>sản phẩm</em>', body:`<div class="mform-row"><div class="mform-group"><label class="mfl">Tên sản phẩm *</label><input class="mfi" placeholder="Giường Walnut Premium..."></div><div class="mform-group"><label class="mfl">Danh mục</label><select class="mfi"><option>Phòng ngủ</option><option>Phòng khách</option><option>Văn phòng</option><option>Đèn</option></select></div></div><div class="mform-row"><div class="mform-group"><label class="mfl">Giá bán (đ)</label><input class="mfi" type="number" placeholder="12500000"></div><div class="mform-group"><label class="mfl">Giá gốc (đ)</label><input class="mfi" type="number" placeholder="15600000"></div></div><div class="mform-row"><div class="mform-group"><label class="mfl">Tồn kho</label><input class="mfi" type="number" placeholder="50"></div><div class="mform-group"><label class="mfl">SKU</label><input class="mfi" placeholder="LX-BED-001"></div></div><div class="mform-group"><label class="mfl">Mô tả ngắn</label><textarea class="mfi" rows="3" placeholder="Mô tả sản phẩm..."></textarea></div><div class="mform-group"><label class="mfl">Trạng thái</label><select class="mfi"><option>Còn hàng</option><option>Hết hàng</option><option>Ngừng bán</option></select></div>` },
+  editOrder: { title:'Cập nhật <em>đơn hàng</em>', body:`<div class="mform-group"><label class="mfl">Trạng thái đơn hàng</label><select class="mfi"><option>Chờ xác nhận</option><option>Đã xác nhận</option><option>Đang giao</option><option>Hoàn thành</option><option>Đã hủy</option></select></div><div class="mform-group"><label class="mfl">Mã vận đơn</label><input class="mfi" placeholder="SPXVN..."></div><div class="mform-group"><label class="mfl">Ghi chú nội bộ</label><textarea class="mfi" rows="3" placeholder="Ghi chú cho admin..."></textarea></div>` },
+  addRole: { title:'Tạo <em>vai trò mới</em>', body:`<div class="mform-group"><label class="mfl">Tên vai trò *</label><input class="mfi" placeholder="Vd: Editor"></div><div class="mform-group"><label class="mfl">Mô tả</label><input class="mfi" placeholder="Vai trò dành cho..."></div><div class="mform-group"><label class="mfl">Quyền hạn</label><div class="perm-check-grid"><label class="perm-check-item"><input type="checkbox" checked> Xem Dashboard</label><label class="perm-check-item"><input type="checkbox"> Tạo sản phẩm</label><label class="perm-check-item"><input type="checkbox"> Sửa sản phẩm</label><label class="perm-check-item"><input type="checkbox"> Xóa sản phẩm</label><label class="perm-check-item"><input type="checkbox"> Xem đơn hàng</label><label class="perm-check-item"><input type="checkbox"> Cập nhật đơn</label><label class="perm-check-item"><input type="checkbox"> Xem người dùng</label><label class="perm-check-item"><input type="checkbox"> Quản lý kho</label><label class="perm-check-item"><input type="checkbox"> Xem báo cáo</label></div></div>` },
+  editRole: { title:'Chỉnh sửa <em>vai trò</em>', body:`<div class="mform-group"><label class="mfl">Tên vai trò</label><input class="mfi" value="Manager"></div><div class="mform-group"><label class="mfl">Quyền hạn</label><div class="perm-check-grid"><label class="perm-check-item"><input type="checkbox" checked> Xem Dashboard</label><label class="perm-check-item"><input type="checkbox" checked> Tạo sản phẩm</label><label class="perm-check-item"><input type="checkbox" checked> Sửa sản phẩm</label><label class="perm-check-item"><input type="checkbox"> Xóa sản phẩm</label><label class="perm-check-item"><input type="checkbox" checked> Xem đơn hàng</label><label class="perm-check-item"><input type="checkbox" checked> Cập nhật đơn</label><label class="perm-check-item"><input type="checkbox" checked> Xem người dùng</label><label class="perm-check-item"><input type="checkbox" checked> Quản lý kho</label><label class="perm-check-item"><input type="checkbox" checked> Xem báo cáo</label></div></div>` },
+  addAdmin: { title:'Cấp <em>tài khoản quản trị</em>', body:`<div class="mform-row"><div class="mform-group"><label class="mfl">Họ tên *</label><input class="mfi" placeholder="Nguyễn Văn X"></div><div class="mform-group"><label class="mfl">Email *</label><input class="mfi" type="email" placeholder="email@luxnest.vn"></div></div><div class="mform-row"><div class="mform-group"><label class="mfl">Vai trò</label><select class="mfi"><option>Manager</option><option>Staff</option></select></div><div class="mform-group"><label class="mfl">Mật khẩu tạm</label><input class="mfi" type="password" placeholder="••••••••"></div></div>` },
+};
+function openModal(type) {
+  const cfg = modals[type]; if (!cfg) return;
+  document.getElementById('modalTitle').innerHTML = cfg.title;
+  document.getElementById('modalBody').innerHTML = cfg.body;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+function saveModal() { closeModal(); toast('check','Đã lưu thành công','Dữ liệu đã được cập nhật.'); }
+
+/* ─── TOAST ─── */
+const iconMap = { check:'ti-check', x:'ti-x', download:'ti-download', trash:'ti-trash', lock:'ti-lock', unlock:'ti-lock-open', bell:'ti-bell', users:'ti-users', package:'ti-package', report:'ti-chart-bar' };
+let tTimer;
+function toast(icon, title, sub) {
+  clearTimeout(tTimer);
+  document.getElementById('tIcon').className = 'ti ' + (iconMap[icon] || 'ti-info-circle');
+  document.getElementById('tTitle').textContent = title;
+  document.getElementById('tSub').textContent = sub;
+  const el = document.getElementById('toastEl');
+  el.classList.add('show');
+  tTimer = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ─── CHARTS ─── */
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = '#9a9088';
+const NAVY='#12202e', GOLD='#c9922a', GOLD3='#e5b84a', GREEN='#2a7a50', BLUE='#2563eb', RED='#c0392b', PURPLE='#6d28d9';
+
+function mkGrad(ctx, c1, c2) { const g=ctx.createLinearGradient(0,0,0,200); g.addColorStop(0,c1); g.addColorStop(1,c2); return g; }
+
+// Revenue line
+(function() {
+  const ctx = document.getElementById('revenueChart').getContext('2d');
+  const g = mkGrad(ctx, 'rgba(201,146,42,.22)', 'rgba(201,146,42,.02)');
+  new Chart(ctx, { type:'line', data: { labels:['1','4','7','10','13','16','19','22','25','28','31'], datasets:[{ data:[82,95,88,120,105,145,138,160,142,175,190], borderColor:GOLD, backgroundColor:g, borderWidth:2.5, fill:true, tension:0.4, pointBackgroundColor:GOLD, pointRadius:3, pointHoverRadius:5 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} }, scales: { x:{grid:{color:'rgba(0,0,0,.04)'}}, y:{grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>v+'tr'}} } } });
+})();
+
+// Order donut
+(function() {
+  const ctx = document.getElementById('orderChart').getContext('2d');
+  new Chart(ctx, { type:'doughnut', data: { labels:['Hoàn thành','Đang giao','Chờ xác nhận','Đã hủy'], datasets:[{ data:[68,18,9,5], backgroundColor:[GREEN,BLUE,GOLD,RED], borderWidth:0, hoverOffset:6 }] }, options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'right', labels:{boxWidth:10,padding:12,font:{size:11}}} }, cutout:'66%' } });
+})();
+
+let extraChartsInit = false;
+function initExtraCharts() {
+  if (extraChartsInit) return;
+  extraChartsInit = true;
+  const ctx1 = document.getElementById('revMonthChart')?.getContext('2d');
+  if (ctx1) { const g1=mkGrad(ctx1,'rgba(201,146,42,.28)','rgba(201,146,42,.02)'); new Chart(ctx1,{type:'bar',data:{labels:['T6','T7','T8','T9','T10','T11','T12','T1','T2','T3','T4','T5'],datasets:[{data:[1.2,1.4,1.3,1.6,1.8,2.1,2.4,1.9,2.0,2.2,2.4,2.84],backgroundColor:g1,borderRadius:5,borderColor:GOLD,borderWidth:1.5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{ticks:{callback:v=>v+'tỷ'}}}}}); }
+  const ctx2 = document.getElementById('revCatChart')?.getContext('2d');
+  if (ctx2) { new Chart(ctx2,{type:'pie',data:{labels:['Phòng ngủ','Phòng khách','Văn phòng','Đèn','Khác'],datasets:[{data:[38,27,18,11,6],backgroundColor:[NAVY,GOLD,BLUE,GREEN,'#a78bfa'],borderWidth:0,hoverOffset:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:11}}}}}}); }
+  const ctx3 = document.getElementById('userChart')?.getContext('2d');
+  if (ctx3) { new Chart(ctx3,{type:'bar',data:{labels:['T1','T2','T3','T4','T5'],datasets:[{data:[210,185,230,276,312],backgroundColor:BLUE,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}}); }
+  const ctx4 = document.getElementById('catChart')?.getContext('2d');
+  if (ctx4) { new Chart(ctx4,{type:'doughnut',data:{labels:['Phòng ngủ','Phòng khách','Văn phòng','Đèn','Khác'],datasets:[{data:[38,27,18,11,6],backgroundColor:[NAVY,GOLD,BLUE,GREEN,'#a78bfa'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{boxWidth:10,padding:10,font:{size:11}}}},cutout:'55%'}}); }
+}
+
+function setPeriod(btn, p) {
+  document.querySelectorAll('.cp-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  toast('report', 'Đang tải dữ liệu...', p==='7d'?'7 ngày':p==='30d'?'30 ngày':'12 tháng');
+}
+
+document.addEventListener('keydown', e => { if (e.key==='Escape') closeModal(); });
+</script>
+</body>
+</html>

@@ -1,43 +1,63 @@
 import { storeToRefs } from 'pinia'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useRoom3DStore } from '../store/room3DStore'
-import { classifyRoomImage, getRoomTemplates, mapLabelToRoomType, predictRoomModel } from '../api/roomApi'
-import { PRODUCTS_3D, PRODUCT_FILTERS } from '../core/mockData'
+import { room3dApi } from '@shared/lib/api/services'
+const { getRoomTemplates } = room3dApi
+import { useCartStore } from '@features/cart/store/cartStore'
 import { formatCurrency } from '@shared/utils'
+import { useRoomCartBridge } from './useRoomCartBridge'
+import { useRoomDeepLink } from './useRoomDeepLink'
+import { useRoomRecommendations } from './useRoomRecommendations'
+import { useRoomUpload } from './useRoomUpload'
 
 export function useRoom3D() {
+  const route = useRoute()
+  const router = useRouter()
   const store = useRoom3DStore()
+  const cartStore = useCartStore()
   const state = storeToRefs(store)
+  const cartState = storeToRefs(cartStore)
   const roomTemplates = ref([])
   const isLoadingTemplates = ref(false)
-  const orderCode = ref('')
-  const uploadError = ref('')
 
-  const QUALITY_TO_MESH_RESOLUTION = {
-    '128': 128,
-    '256': 256,
-    '512': 512,
-    '1024': 1024,
-  }
-
-  const filteredProducts = computed(() => {
-    let result = PRODUCTS_3D
-
-    if (state.selectedCategory.value !== 'all') {
-      result = result.filter((item) => item.category === state.selectedCategory.value)
-    }
-
-    const keyword = state.searchKeyword.value.trim().toLowerCase()
-    if (keyword) {
-      result = result.filter((item) => item.name.toLowerCase().includes(keyword))
-    }
-
-    return result
+  const { uploadError, handleUploadImage } = useRoomUpload({ store, state })
+  const {
+    recommendationError,
+    productFilters,
+    filteredProducts,
+    selectRoomType,
+  } = useRoomRecommendations({ store, state })
+  const {
+    orderCode,
+    cartItems,
+    placedProductIds,
+    cartProductIds,
+    cartTotal,
+    cartCount,
+    addProductToCart,
+    openProductDetail,
+    removeProductFromCart,
+    updateCartQty,
+    goCheckout,
+  } = useRoomCartBridge({
+    store,
+    state,
+    cartStore,
+    cartState,
+    router,
+  })
+  useRoomDeepLink({
+    route,
+    store,
+    roomTemplates,
+    selectRoomType,
   })
 
   async function initRoomTemplates() {
     isLoadingTemplates.value = true
     try {
+      await cartStore.ensureHydrated()
       const { data } = await getRoomTemplates()
       roomTemplates.value = data
     } finally {
@@ -45,100 +65,66 @@ export function useRoom3D() {
     }
   }
 
-  async function handleUploadImage(file) {
-    if (!file) return
+  function addProductToScene(payload) {
+    if (!payload) return
+    if (typeof payload === 'number' || typeof payload === 'string') {
+      store.addToScene(payload)
+      return
+    }
 
-    uploadError.value = ''
-    store.clearAiRecognition()
-    store.setUploadedModelUrl('')
-    store.resetRenderSourceIfNoModel()
-    store.setAnalyzing(true)
-
-    try {
-      // 1) Nhan dien loai phong: file + image_type=normal -> label, confidence
-      let detectedRoomType = state.selectedRoomType.value ?? 'bedroom'
-      let detectedLabel = ''
-      let detectedConfidence = null
-      try {
-        const cls = await classifyRoomImage(file, 'normal')
-        const label = cls?.label
-        const confidence = cls?.confidence
-        store.setAiRecognition(label, confidence)
-        detectedLabel = label
-        detectedConfidence = confidence
-        detectedRoomType = mapLabelToRoomType(label)
-      } catch {
-        // Nhan dien loi: van sinh mesh duoc; mac dinh phong ngu de UI khong trong.
-        store.clearAiRecognition()
+    if (typeof payload === 'object') {
+      let defaultVariantId = payload.variantId ?? undefined;
+      if (!defaultVariantId && payload.variants?.length) {
+        const validVariant = payload.variants.find(v => v.modelUrl)
+        if (validVariant) {
+          defaultVariantId = validVariant.id
+        }
       }
 
-      // 2) Sinh mesh 3D: file + mesh_resolution -> model_url (endpoint khac, xem roomApi)
-      const meshResolution = QUALITY_TO_MESH_RESOLUTION[state.quality.value] ?? 512
-      const meshData = await predictRoomModel(file, meshResolution)
-      const modelUrl = meshData?.model_url
-
-      if (!modelUrl) {
-        throw new Error('Khong nhan duoc model_url tu backend sinh mesh.')
-      }
-
-      store.applyAiGeneratedModel({
-        roomType: detectedRoomType,
-        modelUrl,
-        label: detectedLabel,
-        confidence: detectedConfidence,
+      store.addToScene(payload.productId ?? payload.id, {
+        initialPosition: payload.initialPosition ?? null,
+        variantId: defaultVariantId,
       })
-    } catch (error) {
-      uploadError.value =
-        error?.response?.data?.detail ?? error?.message ?? 'Upload / sinh mesh that bai.'
-      store.setUploadedModelUrl('')
-      store.resetRenderSourceIfNoModel()
-    } finally {
-      store.setAnalyzing(false)
     }
   }
 
-  function selectRoomType(type) {
-    // Chon phong o => chu dong chuyen qua model phong mau.
-    store.selectTemplateRoom(type)
-  }
-
-  function addProductToCart(product) {
-    store.addToCart(product)
-  }
-
-  function removeProductFromCart(productId) {
-    store.removeFromCart(productId)
-  }
-
-  function submitCheckoutMock() {
-    orderCode.value = `LN${Date.now().toString().slice(-6)}`
-    store.closeCheckout()
-    store.openSuccess()
-    store.clearCart()
+  function removeProductFromScene(instanceId) {
+    store.removeFromScene(instanceId)
   }
 
   return {
     ...state,
+    cartItems,
+    placedProductIds,
+    cartProductIds,
+    cartTotal,
+    cartCount,
     roomTemplates,
     isLoadingTemplates,
-    productFilters: PRODUCT_FILTERS,
+    productFilters,
     filteredProducts,
     orderCode,
     uploadError,
+    recommendationError,
     formatCurrency,
+    setImageType: store.setImageType,
+    setMeshQuality: store.setMeshQuality,
     setMode: store.setMode,
     setQuality: store.setQuality,
     setSearchKeyword: store.setSearchKeyword,
     setCategory: store.setCategory,
     toggleCart: store.toggleCart,
-    openCheckout: store.openCheckout,
-    closeCheckout: store.closeCheckout,
-    closeSuccess: store.closeSuccess,
+    toggleShowAllRooms: store.toggleShowAllRooms,
+    goCheckout,
     initRoomTemplates,
     handleUploadImage,
     selectRoomType,
     addProductToCart,
+    openProductDetail,
+    addProductToScene,
     removeProductFromCart,
-    submitCheckoutMock,
+    updateCartQty,
+    removeProductFromScene,
+    handleUpdateVariant: store.updateSceneItemVariant,
   }
 }
