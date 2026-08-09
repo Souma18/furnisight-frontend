@@ -1,6 +1,6 @@
 <script setup>
 import AppButton from '@shared/ui/AppButton.vue'
-import AppInput from '@shared/ui/AppInput.vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppIcon from '@shared/ui/AppIcon.vue'
 
@@ -15,6 +15,11 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue', 'toggle-category', 'update:view-mode', 'open-filters'])
 const { t } = useI18n()
+
+const internalSearch = computed({
+  get: () => props.modelValue,
+  set: (val) => emit('update:modelValue', val)
+})
 
 function chipIsActive(chip) {
   if (!chip) return false
@@ -31,12 +36,11 @@ function chipClass(chip) {
     <div class="pl-inner pl-toolbar-inner">
       <label class="pl-search-wrap" :aria-label="t('products.searchPlaceholder')">
         <AppIcon name="search" :size="15" />
-        <AppInput
-          :value="modelValue"
+        <input
+          v-model="internalSearch"
           class="pl-search"
           type="text"
           :placeholder="t('products.searchPlaceholder')"
-          @input="emit('update:modelValue', $event.target.value)"
         />
       </label>
       <div class="pl-chips">

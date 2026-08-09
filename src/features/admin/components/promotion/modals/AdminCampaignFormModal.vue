@@ -92,7 +92,7 @@ function handleUnlayer() {
           </AppButton>
           <div v-show="showUserPicker" class="user-picker-wrapper">
             <label>Tìm người dùng
-              <AppInput :value="userQuery" @input="handleQueryInput" placeholder="Tên hoặc email..."/>
+              <AppInput :modelValue="userQuery" @update:modelValue="handleQueryInput" placeholder="Tên hoặc email..."/>
             </label>
             <div class="user-pick-list">
               <label v-for="user in users" :key="user.id" class="user-pick-item">

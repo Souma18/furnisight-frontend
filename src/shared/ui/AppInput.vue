@@ -1,19 +1,19 @@
 <script setup>
-import { computed, ref } from 'vue'
-import AppIcon from './AppIcon.vue'
+import { computed, ref } from "vue";
+import AppIcon from "./AppIcon.vue";
 
 const props = defineProps({
   modelValue: {
     type: [String, Number],
-    default: '',
+    default: "",
   },
   type: {
     type: String,
-    default: 'text',
+    default: "text",
   },
   placeholder: {
     type: String,
-    default: '',
+    default: "",
   },
   disabled: {
     type: Boolean,
@@ -23,26 +23,30 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-})
+  inputClass: {
+    type: [String, Object, Array],
+    default: "",
+  },
+});
 
-const emit = defineEmits(['update:modelValue', 'blur', 'focus'])
+const emit = defineEmits(["update:modelValue", "blur", "focus"]);
 
-const isPasswordVisible = ref(false)
+const isPasswordVisible = ref(false);
 
 const computedType = computed(() => {
-  if (props.type === 'password') {
-    return isPasswordVisible.value ? 'text' : 'password'
+  if (props.type === "password") {
+    return isPasswordVisible.value ? "text" : "password";
   }
-  return props.type
-})
+  return props.type;
+});
 
 const onInput = (event) => {
-  emit('update:modelValue', event.target.value)
-}
+  emit("update:modelValue", event.target.value);
+};
 
 const togglePasswordVisibility = () => {
-  isPasswordVisible.value = !isPasswordVisible.value
-}
+  isPasswordVisible.value = !isPasswordVisible.value;
+};
 </script>
 
 <template>
@@ -50,6 +54,7 @@ const togglePasswordVisibility = () => {
     <input
       :type="computedType"
       class="app-input"
+      :class="inputClass"
       :value="modelValue"
       :placeholder="placeholder"
       :disabled="disabled"
@@ -58,9 +63,9 @@ const togglePasswordVisibility = () => {
       @blur="emit('blur', $event)"
       @focus="emit('focus', $event)"
     />
-    <button 
-      v-if="type === 'password'" 
-      type="button" 
+    <button
+      v-if="type === 'password'"
+      type="button"
       class="password-toggle"
       @click="togglePasswordVisibility"
       tabindex="-1"

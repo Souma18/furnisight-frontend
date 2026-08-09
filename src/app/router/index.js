@@ -11,11 +11,13 @@ const routes = [
   },
   {
     path: '/products',
+    alias: '/san-pham',
     name: 'products',
     component: () => import('@features/product/pages/ProductListPage.vue'),
   },
   {
     path: '/products/:slug',
+    alias: '/san-pham/:slug',
     name: 'product-detail',
     component: () => import('@features/product/pages/ProductDetailPage.vue'),
     props: true,

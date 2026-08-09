@@ -114,7 +114,10 @@ class UsersApi {
    * @returns {Promise<import('axios').AxiosResponse<import('./users.model').UserResponse>>}
    */
   updateUserRole(userId, roleId, action = 'ASSIGN') {
-    return apiClient.put(`/admin/users/${userId}/role`, { roleId, action })
+    if (action === 'REVOKE') {
+      return apiClient.put(`/users/admin/accounts/${userId}/roles/revoke`, { roleId })
+    }
+    return apiClient.put(`/users/admin/accounts/${userId}/roles/assign`, { roleId })
   }
   
   /**

@@ -84,7 +84,7 @@ async function saveTemplate() {
         <div class="tpl-form-grid">
           <div class="tfg full">
             <label class="tfl">Tiêu đề *</label>
-            <AppInput v-model="currentForm.title" type="text" class="tfi" placeholder="VD: Chào hỏi khách mới" />
+            <AppInput v-model="currentForm.title" type="text" inputClass="tfi" placeholder="VD: Chào hỏi khách mới" />
           </div>
           <div class="tfg">
             <label class="tfl">Phân loại</label>

@@ -35,7 +35,7 @@ const { t } = useI18n();
 
     <div class="search-wrap">
       <span class="search-icon"><AppIcon name="search" :size="16" /></span>
-      <AppInput
+      <input
         class="search-input"
         :value="searchKeyword"
         :placeholder="t('room3d.products.search')"

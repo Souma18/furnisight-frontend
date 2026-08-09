@@ -239,11 +239,11 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Họ tên *</label
-          ><AppInput v-model="form.name" />
+          ><AppInput inputClass="mfi" v-model="form.name" />
         </div>
         <div class="mform-group">
           <label class="mfl">Email *</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.email"
             type="email"
             :disabled="modal.type === 'editUser'"
@@ -270,18 +270,18 @@ watch(
       </div>
       <div v-if="modal.type === 'addUser'" class="mform-group">
         <label class="mfl">Mật khẩu tạm</label
-        ><AppInput v-model="form.password" type="password" />
+        ><AppInput inputClass="mfi" v-model="form.password" type="password" />
       </div>
     </template>
 
     <template v-else-if="modal.type === 'addCat' || modal.type === 'editCat'">
       <div class="mform-group">
         <label class="mfl">Tên danh mục *</label>
-        <AppInput v-model="form.name" placeholder="Vd: Phòng ngủ" />
+        <AppInput inputClass="mfi" v-model="form.name" placeholder="Vd: Phòng ngủ" />
       </div>
       <div class="mform-group">
         <label class="mfl">Slug</label>
-        <AppInput v-model="form.slug" placeholder="phong-ngu" />
+        <AppInput inputClass="mfi" v-model="form.slug" placeholder="phong-ngu" />
       </div>
       <div class="mform-row mform-row--cat">
         <div class="mform-group">
@@ -360,14 +360,14 @@ watch(
     >
       <div class="mform-group">
         <label class="mfl">Tên loại phòng *</label>
-        <AppInput
+        <AppInput inputClass="mfi"
           v-model="form.name"
           placeholder="Vd: Phòng khách"
         />
       </div>
       <div class="mform-group">
         <label class="mfl">Slug</label>
-        <AppInput v-model="form.slug" placeholder="phong-khach" />
+        <AppInput inputClass="mfi" v-model="form.slug" placeholder="phong-khach" />
       </div>
       <div class="mform-row">
         <div class="mform-group">
@@ -432,7 +432,7 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Tên sản phẩm *</label>
-          <AppInput v-model="form.name" />
+          <AppInput inputClass="mfi" v-model="form.name" />
           <small
             v-if="form.errors?.name"
             class="variant-field-error"
@@ -463,7 +463,7 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">SKU Sản phẩm *</label>
-          <AppInput v-model="form.sku" />
+          <AppInput inputClass="mfi" v-model="form.sku" />
           <small
             v-if="form.errors?.sku"
             class="variant-field-error"
@@ -564,21 +564,21 @@ watch(
               <div class="mform-row">
                 <div class="mform-group">
                   <label class="mfl">Màu</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.color"
                     placeholder="Nâu"
                   />
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Chất liệu</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.material"
                     placeholder="Gỗ / Da / Vải"
                   />
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Bảo hành (năm)</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.warranty"
                     type="number"
                     min="1"
@@ -589,7 +589,7 @@ watch(
               <div class="mform-row">
                 <div class="mform-group">
                   <label class="mfl">Giá</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.price"
                     type="number"
                     min="0"
@@ -597,7 +597,7 @@ watch(
                 </div>
                 <div class="mform-group">
                   <label class="mfl">SKU variant *</label>
-                  <AppInput
+                  <AppInput inputClass="mfi"
                     v-model="variant.sku"
                     required
                     placeholder="VD: CHAIR-BROWN-L"
@@ -613,7 +613,7 @@ watch(
               <div class="mform-row">
                 <div class="mform-group">
                   <label class="mfl">Ngưỡng cảnh báo *</label>
-                  <AppInput
+                  <AppInput inputClass="mfi"
                     v-model.number="variant.lowStockThreshold"
                     type="number"
                     min="1"
@@ -623,7 +623,7 @@ watch(
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Nặng</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.weight"
                     type="number"
                     min="1"
@@ -631,7 +631,7 @@ watch(
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Dài</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.length"
                     type="number"
                     min="1"
@@ -639,7 +639,7 @@ watch(
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Rộng</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.width"
                     type="number"
                     min="1"
@@ -647,7 +647,7 @@ watch(
                 </div>
                 <div class="mform-group">
                   <label class="mfl">Cao</label
-                  ><AppInput
+                  ><AppInput inputClass="mfi"
                     v-model="variant.height"
                     type="number"
                     min="1"
@@ -753,11 +753,11 @@ watch(
       </div>
       <div class="mform-group">
         <label class="mfl">Mã vận đơn</label>
-        <AppInput
-          :value="trackingCodeLocked ? trackingCodeDisplay : form.trackingCode"
+        <AppInput inputClass="mfi"
+          :modelValue="trackingCodeLocked ? trackingCodeDisplay : form.trackingCode"
           :disabled="trackingCodeLocked"
           :placeholder="trackingCodeLocked ? '' : 'Nhập mã vận đơn'"
-          @input="form.trackingCode = $event.target.value"
+          @update:modelValue="form.trackingCode = $event"
         />
         <small v-if="trackingCodeLocked" class="mform-hint"
           >Chỉ nhập mã vận đơn khi chuyển đơn sang Đang vận chuyển.</small
@@ -772,11 +772,11 @@ watch(
     <template v-else-if="modal.type === 'addRole' || modal.type === 'editRole'">
       <div class="mform-group">
         <label class="mfl">Tên vai trò *</label
-        ><AppInput v-model="form.name" placeholder="Vd: Editor" />
+        ><AppInput inputClass="mfi" v-model="form.name" placeholder="Vd: Editor" />
       </div>
       <div class="mform-group">
         <label class="mfl">Mô tả</label
-        ><AppInput
+        ><AppInput inputClass="mfi"
           v-model="form.roleDescription"
           placeholder="Vai trò dành cho..."
         />
@@ -788,14 +788,14 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Họ tên *</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.name"
             placeholder="Nguyễn Văn X"
           />
         </div>
         <div class="mform-group">
           <label class="mfl">Email *</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.email"
             type="email"
             placeholder="email@furnisight.store"
@@ -814,7 +814,7 @@ watch(
         </div>
         <div class="mform-group">
           <label class="mfl">Mật khẩu tạm</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.password"
             type="password"
             placeholder="••••••••"
@@ -860,7 +860,7 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Số lượng nhập *</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.stockQty"
             type="number"
             min="1"
@@ -891,14 +891,14 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Mã voucher *</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.voucherCode"
             placeholder="SALE10"
           />
         </div>
         <div class="mform-group">
           <label class="mfl">Tên</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.voucherName"
             placeholder="Giảm 10%"
           />
@@ -915,7 +915,7 @@ watch(
         </div>
         <div class="mform-group">
           <label class="mfl">Giá trị</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.discountValue"
             type="number"
             min="0"
@@ -925,7 +925,7 @@ watch(
       <div class="mform-row">
         <div class="mform-group">
           <label class="mfl">Giảm tối đa</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.maxDiscount"
             type="number"
             min="0"
@@ -933,7 +933,7 @@ watch(
         </div>
         <div class="mform-group">
           <label class="mfl">Đơn tối thiểu</label
-          ><AppInput
+          ><AppInput inputClass="mfi"
             v-model="form.minOrder"
             type="number"
             min="0"

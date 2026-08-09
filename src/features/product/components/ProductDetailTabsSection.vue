@@ -151,7 +151,7 @@ function updateReviewField(field, value) {
           </AppButton>
           <span class="rating-picked-label">{{ t('productDetail.review.selectedStars', { n: Number(reviewForm.rating || 0) }) }}</span>
         </div>
-        <AppInput
+        <input
           class="review-title-input"
           type="text"
           :placeholder="t('productDetail.review.titlePlaceholder')"

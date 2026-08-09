@@ -239,7 +239,7 @@ export async function predictRoomModel(file, options = {}) {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
-    timeout: 120_000,
+    timeout: 300_000,
   })
 
   return response.data

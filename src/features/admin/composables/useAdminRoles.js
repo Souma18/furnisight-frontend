@@ -70,7 +70,7 @@ function normalizeRole(role = {}, adminAccounts = []) {
     permissionIds: perms,
     icon: role.icon || roleIconMap[roleKey] || 'shield',
     tagClass: role.tagClass || roleToneMap[roleKey] || 'rt-manager',
-    system: ['admin', 'super', 'super admin', 'manager', 'staff'].includes(roleKey),
+    system: ['admin', 'super', 'super admin'].includes(roleKey),
     userCount: userCount || role.userCount || 0,
     note: role.description || role.note || `${perms.length} quyền`,
   }

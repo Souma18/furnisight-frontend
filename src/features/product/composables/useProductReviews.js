@@ -146,10 +146,7 @@ export function useProductReviews(product) {
 
   function updateReviewField({ field, value }) {
     if (!Object.prototype.hasOwnProperty.call(reviewForm.value, field)) return
-    reviewForm.value = {
-      ...reviewForm.value,
-      [field]: value,
-    }
+    reviewForm.value[field] = value
     reviewSubmitError.value = ''
     reviewSubmitSuccess.value = ''
   }

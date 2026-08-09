@@ -2537,7 +2537,6 @@
 .cdp-file-row small {
   font-size: 10px;
   color: var(--text4);
-  white-space: nowrap;
 }
 
 .cdp-file-more {
@@ -3005,7 +3004,7 @@
   border-radius: 0 0 var(--r-xl) var(--r-xl);
 }
 
-.btn-primary {
+.cm-root .btn-primary {
   padding: 8px 18px;
   border-radius: 9px;
   background: linear-gradient(135deg, var(--gold3), var(--gold));
@@ -3022,18 +3021,18 @@
   gap: 6px;
 }
 
-.btn-primary:hover:not(:disabled) {
+.cm-root .btn-primary:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 5px 14px rgba(201, 146, 42, .45);
 }
 
-.btn-primary:disabled {
+.cm-root .btn-primary:disabled {
   opacity: .5;
   cursor: not-allowed;
   transform: none;
 }
 
-.btn-ghost {
+.cm-root .btn-ghost {
   padding: 8px 16px;
   border-radius: 9px;
   background: var(--white);
