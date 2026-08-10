@@ -68,7 +68,7 @@ export function useRoomRecommendations({ store, state }) {
     if (newVal) {
       fetchRecommendations()
     }
-  })
+  }, { immediate: true })
 
   watch(() => state.showAllRooms.value, () => {
     fetchRecommendations()

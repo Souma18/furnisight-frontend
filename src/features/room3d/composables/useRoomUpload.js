@@ -1,5 +1,8 @@
 import { ref } from 'vue'
+import { i18n } from '@shared/i18n'
 import { room3dApi } from '@shared/lib/api/services'
+import { useToast } from '@shared/composables/useToast'
+
 const { classifyRoomImage, predictRoomModel, mapLabelToRoomType } = room3dApi
 
 const QUALITY_TO_MESH_RESOLUTION = {
@@ -45,6 +48,7 @@ function normalizeUploadError(error, fallback = 'Không thể nhận diện phò
 
 export function useRoomUpload({ store, state }) {
   const uploadError = ref('')
+  const { show: showToast } = useToast()
 
   async function handleUploadImage(file) {
     if (!file) return
@@ -76,6 +80,13 @@ export function useRoomUpload({ store, state }) {
 
       if (predictionResult.status === 'fulfilled') {
         const prediction = predictionResult.value
+        
+        if (prediction.confidence != null && prediction.confidence < 0.6) {
+          prediction.label = ''
+          prediction.recommendations = []
+          uploadError.value = i18n.global.t('room3d.setup.invalidImage')
+        }
+        
         const detectedRoomType = mapLabelToRoomType(prediction?.label)
         
         store.applyPredictionResult(prediction)
@@ -89,6 +100,7 @@ export function useRoomUpload({ store, state }) {
               roomType: detectedRoomType,
               modelUrl,
             })
+            showToast(i18n.global.t('room3d.setup.toastSuccess'), 'success')
           } else {
             store.setUploadedModelUrl('')
             store.showPredictionRoom(null)
@@ -99,6 +111,7 @@ export function useRoomUpload({ store, state }) {
           store.setUploadedModelUrl('')
           store.showPredictionRoom(null)
           uploadError.value = normalizeUploadError(meshResult.reason, 'Không có kết quả trực quan 3D.')
+          showToast(i18n.global.t('room3d.setup.toastError'), 'error')
         }
       } else {
         store.setPredictionError()
@@ -114,6 +127,7 @@ export function useRoomUpload({ store, state }) {
               roomType: null,
               modelUrl,
             })
+            showToast(i18n.global.t('room3d.setup.toastSuccess'), 'success')
           }
         }
       }
@@ -125,6 +139,7 @@ export function useRoomUpload({ store, state }) {
           store.setUploadedModelUrl('')
           store.showPredictionRoom(null)
           uploadError.value = 'Không có kết quả trực quan 3D.'
+          showToast(i18n.global.t('room3d.setup.toastError'), 'error')
         }
       }
     } catch (error) {
@@ -132,6 +147,7 @@ export function useRoomUpload({ store, state }) {
       store.setPredictionError()
       store.setUploadedModelUrl('')
       store.showPredictionRoom(null)
+      showToast(i18n.global.t('room3d.setup.toastError'), 'error')
     } finally {
       store.setAnalyzing(false)
     }

@@ -227,6 +227,42 @@ export function useRoomModelLoader({
     }
   }
 
+  async function addFurnitureModel(instanceId) {
+    if (!sceneRef.value?.scene) return
+    const sceneItem = props.sceneItems.find((i) => i.instanceId === instanceId)
+    if (!sceneItem) return
+    const index = props.sceneItems.findIndex((i) => i.instanceId === instanceId)
+    
+    const product = productMap.value.get(String(sceneItem.productId))
+    const variant = product?.variants?.find(v => v.id === sceneItem.variantId) || product?.variants?.find(v => v.modelUrl || v.supports3d)
+    const modelUrl = variant?.modelUrl
+    if (!modelUrl) return
+
+    try {
+      const loader = await getLoader()
+      const gltf = await loader.loadAsync(modelUrl)
+      const model = gltf.scene
+      normalizeFurnitureModel(model, sceneItem, index)
+      applyUserOverrides(model)
+      sceneRef.value.scene.add(model)
+      furnitureGroups.value.push(model)
+      if (!loadedFurnitureIds.value.includes(instanceId)) {
+        loadedFurnitureIds.value.push(instanceId)
+      }
+    } catch (err) {
+      // Silent fail
+    }
+  }
+
+  function removeFurnitureModel(instanceId) {
+    const idx = furnitureGroups.value.findIndex(m => m.userData?.instanceId === instanceId)
+    if (idx !== -1) {
+      removeObject3D(furnitureGroups.value[idx])
+      furnitureGroups.value.splice(idx, 1)
+    }
+    loadedFurnitureIds.value = loadedFurnitureIds.value.filter(id => id !== instanceId)
+  }
+
   function cleanupModels() {
     removeObject3D(floorGridRef.value)
     floorGridRef.value = null
@@ -288,6 +324,8 @@ export function useRoomModelLoader({
     fallbackProductIds,
     loadRoomModel,
     loadFurnitureModels,
+    addFurnitureModel,
+    removeFurnitureModel,
     cleanupModels,
     reloadFurnitureModel,
   }
