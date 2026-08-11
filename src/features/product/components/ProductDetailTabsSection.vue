@@ -95,14 +95,14 @@ function updateReviewField(field, value) {
     <div v-else-if="activeTab === 'review'" class="pd-section-layout pd-review">
       <div class="review-summary">
         <div class="review-score">
-          <p class="score">{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</p>
+          <p class="score">{{ product.rating ? Number(product.rating).toFixed(1) : '0.0' }}</p>
           <p class="stars" aria-label="Đánh giá trung bình">
             <AppIcon
               v-for="star in 5"
               :key="`summary-star-${star}`"
               name="star"
               :size="19"
-              :class="{ active: star <= Math.round(product.rating || 5) }"
+              :class="{ active: star <= Math.round(product.rating || 0) }"
             />
           </p>
           <p class="count">{{ reviewCountLabel }} </p>
@@ -191,7 +191,7 @@ function updateReviewField(field, value) {
               :key="`${item.id}-star-${star}`"
               name="star"
               :size="13"
-              :class="{ active: star <= Math.round(item.rating || 5) }"
+              :class="{ active: star <= Math.round(item.rating || 0) }"
             />
           </span>
         </div>

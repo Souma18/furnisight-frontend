@@ -88,13 +88,20 @@ export function useRoomModelLoader({
 
     if (finalLength > 0 && finalWidth > 0 && finalHeight > 0) {
       // Convert cm → scene units (1 unit = 1 m)
+      // Chuyển đổi kích thước vật lý (cm) sang hệ mét (units trong 3D)
       const targetW = finalWidth * 0.01
       const targetH = finalHeight * 0.01
       const targetD = finalLength * 0.01
+      
+      // Tính tỷ lệ cần thu phóng trên từng trục (X, Y, Z)
       const sx = size.x > 0.001 ? targetW / size.x : 1
       const sy = size.y > 0.001 ? targetH / size.y : 1
       const sz = size.z > 0.001 ? targetD / size.z : 1
-      fitScale = Math.cbrt(sx * sy * sz) // geometric mean preserves proportions
+      
+      // geometric mean preserves proportions
+      // Dùng Trung bình nhân (Geometric mean) để tìm ra 1 hệ số scale chung (Uniform scale).
+      // Việc này giúp model đạt đúng kích thước vật lý mà KHÔNG bị bóp méo hình dạng gốc.
+      fitScale = Math.cbrt(sx * sy * sz) 
     } else {
       // 3rd priority: fallback box when no dimensions available at all
       const sx = fallback.width / Math.max(size.x || 1, 0.001)
