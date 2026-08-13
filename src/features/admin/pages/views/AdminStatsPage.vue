@@ -15,7 +15,15 @@ const ui = useAdminUiStore()
 const userCanvas = ref(null)
 const catCanvas = ref(null)
 const reviewCanvas = ref(null)
-const { data, bindCharts } = useAdminChartPage(adminApi.fetchStats.bind(adminApi))
+const startDate = ref('')
+const endDate = ref('')
+
+const fetcher = () => adminApi.fetchStats({
+  startDate: startDate.value || undefined,
+  endDate: endDate.value || undefined
+})
+
+const { data, bindCharts, load } = useAdminChartPage(fetcher)
 const reviewModal = useAdminProductReviews()
 
 const formatCurrency = PriceFormatter.format
@@ -31,7 +39,7 @@ const kpis = computed(() => {
       key: 'users',
       label: 'Người dùng',
       value: String(user.total || 0),
-      change: `${user.newThisMonth || 0} mới tháng này`,
+      change: `${user.newThisMonth || 0} mới trong kỳ`,
       up: true,
       tone: 'blue',
       icon: 'users',
@@ -40,7 +48,7 @@ const kpis = computed(() => {
       key: 'orders',
       label: 'Đơn hàng',
       value: String(orders.total || 0),
-      change: `${orders.today || 0} hôm nay`,
+      change: `${orders.today || 0} trong kỳ`,
       up: true,
       tone: 'red',
       icon: 'box',
@@ -49,7 +57,7 @@ const kpis = computed(() => {
       key: 'revenue',
       label: 'Doanh thu',
       value: formatCurrency(orders.totalRevenue),
-      change: `${formatCurrency(orders.revenueThisMonth)} tháng này`,
+      change: `${formatCurrency(orders.revenueThisMonth)} trong kỳ`,
       up: true,
       tone: 'gold',
       icon: 'trendingUp',
@@ -144,7 +152,7 @@ bindCharts((charts, payload) => {
 
   charts.renderBar(
     userCanvas.value,
-    ['Tổng', 'Hoạt động', 'Bị khóa', 'Mới tháng'],
+    ['Tổng', 'Hoạt động', 'Bị khóa', 'Mới trong kỳ'],
     [user.total || 0, user.active || 0, user.banned || 0, user.newThisMonth || 0],
   )
 
@@ -166,8 +174,6 @@ bindCharts((charts, payload) => {
   )
 })
 
-
-
 </script>
 
 <template>
@@ -177,15 +183,22 @@ bindCharts((charts, payload) => {
     subtitle="Tổng hợp dữ liệu kinh doanh"
   />
 
+  <div style="display:flex; justify-content: flex-end; margin-bottom: 20px; gap: 10px; align-items: center;">
+    <input type="date" v-model="startDate" @change="load" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none;" />
+    <span style="color: var(--text-secondary);">đến</span>
+    <input type="date" v-model="endDate" @change="load" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none;" />
+    <button @click="load()" style="padding: 6px 16px; background-color: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Lọc</button>
+  </div>
+
   <template v-if="data">
     <AdminKpiGrid :kpis="kpis" />
 
     <div class="stats-grid">
-      <AdminChartCard title="Người dùng mới theo tháng" subtitle="2026">
+      <AdminChartCard title="Tổng quan tài khoản" subtitle="Trạng thái người dùng">
         <canvas ref="userCanvas" />
       </AdminChartCard>
 
-      <AdminChartCard title="Top danh mục bán chạy" subtitle="Theo doanh thu">
+      <AdminChartCard title="Top danh mục" subtitle="Theo số lượng sản phẩm">
         <canvas ref="catCanvas" />
       </AdminChartCard>
     </div>

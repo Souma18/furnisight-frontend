@@ -90,7 +90,7 @@ watch(reloadTick, load)
               type="number"
               min="1"
               max="9999"
-              :value="row.threshold"
+              :modelValue="row.threshold"
               :disabled="savingThresholds[row.variantId]"
               @change="updateVariantThreshold(row, $event)"
             />

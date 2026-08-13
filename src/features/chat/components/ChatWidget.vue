@@ -151,7 +151,7 @@ function handleAddToCart(product) {
       <div v-if="search.visible" class="chat-search-panel">
         <label class="chat-search-field">
           <AppIcon name="search" :size="15" />
-          <AppInput
+          <input
             :value="search.query"
             type="search"
             placeholder="Tìm tin nhắn..."

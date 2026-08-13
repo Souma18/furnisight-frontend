@@ -22,7 +22,7 @@ const emit = defineEmits([
 
 <template>
   <div v-if="show" class="modal-backdrop picker-layer" @click.self="emit('close')">
-    <div class="modal-card modal-lg">
+    <div class="modal-card modal-xl">
       <header>
         <h2>Chọn <em>sản phẩm</em></h2>
         <AppButton variant="unstyled" type="button" @click="emit('close')"><AppIcon name="x" :size="18" /></AppButton>
@@ -63,9 +63,11 @@ const emit = defineEmits([
               <tr v-for="product in products" :key="product.id" :class="{ disabled: product.stock <= 0 }">
                 <td>
                   <input
+                    class="picker-checkbox"
                     :checked="picker.selected[product.id] !== undefined"
                     :disabled="product.stock <= 0"
                     type="checkbox"
+                    style="width: 18px; height: 18px; accent-color: var(--gold); cursor: pointer;"
                     @change="emit('toggle-product', product, $event.target.checked)"
                   >
                 </td>
@@ -88,8 +90,8 @@ const emit = defineEmits([
         <div class="selected-box">
           <b>Đã chọn {{ selectedProducts.length }} sản phẩm</b>
           <div v-for="product in selectedProducts" :key="product.id">
-            <span>{{ product.name }}</span>
-            <AppInput v-model.number="picker.selected[product.id]" type="number" min="1"/>
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ product.name }}</span>
+            <input class="mc-input" v-model.number="picker.selected[product.id]" type="number" min="1" style="padding: 4px 8px; min-height: 32px; text-align: center;" />
           </div>
         </div>
       </div>
@@ -102,3 +104,9 @@ const emit = defineEmits([
     </div>
   </div>
 </template>
+
+<style scoped>
+.modal-xl {
+  width: min(1000px, calc(100vw - 24px));
+}
+</style>

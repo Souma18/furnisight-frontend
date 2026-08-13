@@ -20,7 +20,7 @@ const { data, error, loading, load, bindCharts } = useAdminChartPage(() => admin
 const availableYears = computed(() => {
   const current = new Date().getFullYear()
   const years = []
-  for (let y = current; y >= 2024; y--) {
+  for (let y = current; y >= current - 10; y--) {
     years.push(y)
   }
   return years
@@ -114,9 +114,7 @@ bindCharts((charts, d) => {
       <select v-model="selectedYear" class="app-input" style="width: 120px; padding: 6px 12px; height: 32px;">
         <option v-for="y in availableYears" :key="y" :value="y">Năm {{ y }}</option>
       </select>
-      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất báo cáo doanh thu' })">
-        <AppIcon name="download" :size="15" />Xuất báo cáo
-      </AppButton>
+
     </template>
   </AdminPageHeader>
 

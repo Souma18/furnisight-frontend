@@ -102,14 +102,10 @@ export function useHomePage() {
     }
   }
 
-  async function loadProductsForCategory(categoryId) {
-    if (!categoryId) return
-    const selectedCategory = categories.value.find((category) => category.id === categoryId)
-    if (!selectedCategory) return
-
+  async function loadPopularProducts() {
     try {
       const { data } = await productsApi.getProducts({
-        roomType: selectedCategory.slug || selectedCategory.name,
+        sort: 'popular',
         size: 8,
       })
       const rawProducts = Array.isArray(data) ? data : data?.items ?? []
@@ -154,11 +150,10 @@ export function useHomePage() {
     }
   }
 
-  watch(activeCategoryId, loadProductsForCategory)
   watch(locale, async () => {
     await loadRoomTypes()
     await loadCombos()
-    await loadProductsForCategory(activeCategoryId.value)
+    await loadPopularProducts()
     await loadTopReviews()
     if (authStore.isAuthenticated) {
       await wishlistStore.loadWishlist().catch(() => [])
@@ -168,6 +163,7 @@ export function useHomePage() {
   onMounted(() => {
     loadRoomTypes()
     loadCombos()
+    loadPopularProducts()
     loadTopReviews()
 
     if (authStore.isAuthenticated) {

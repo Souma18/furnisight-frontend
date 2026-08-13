@@ -147,6 +147,7 @@ export function createTemplateFormState() {
     code: '',
     name: '',
     type: 'PROMOTION',
+    channel: 'IN_APP',
     titleTemplate: '',
     bodyTemplate: '',
   }

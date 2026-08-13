@@ -44,7 +44,21 @@ export function useAdminInventory() {
     error.value = ''
     try {
       const inventoryRes = await adminApi.fetchInventory()
-      data.value = inventoryRes.data
+      const rawData = inventoryRes.data
+      if (rawData && Array.isArray(rawData.kpis)) {
+        const kpiLabels = {
+          PRODUCTS: { label: 'Mẫu sản phẩm', icon: 'box' },
+          VARIANTS: { label: 'Phân loại (SKU)', icon: 'layers' },
+          STOCK: { label: 'Tổng tồn kho', icon: 'archive' },
+          LOW_STOCK: { label: 'Sắp hết hàng', icon: 'alertTriangle', tone: 'low' },
+          OUT_OF_STOCK: { label: 'Hết hàng', icon: 'xOctagon', tone: 'cancel' }
+        }
+        rawData.kpis = rawData.kpis.map(k => ({
+          ...k,
+          ...(kpiLabels[k.type] || { label: k.type, icon: 'info' })
+        }))
+      }
+      data.value = rawData
       if (groupedProducts.value.length && expandedProducts.value.size === 0) {
         groupedProducts.value.forEach(g => expandedProducts.value.add(g.productId))
       }

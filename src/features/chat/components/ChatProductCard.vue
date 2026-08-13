@@ -22,7 +22,7 @@ function openProduct() {
 <template>
   <article class="chat-product-card" style="cursor: pointer;" @click="openProduct">
     <div class="cpc-img">
-      <AppImage :src="product.image" :alt="product.name" loading="lazy"  />
+      <AppImage style="width: 100%; height: 100%; object-fit: cover;" :src="product.image" :alt="product.name" loading="lazy"  />
     </div>
     <div class="cpc-body">
       <div class="cpc-cat">{{ product.category }}</div>
