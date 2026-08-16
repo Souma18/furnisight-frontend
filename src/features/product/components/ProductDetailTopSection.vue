@@ -156,10 +156,10 @@ useDragScroll(thumbsRef)
               :key="`detail-star-${star}`"
               name="star"
               :size="15"
-              :class="{ active: star <= Math.round(product.rating || 5) }"
+              :class="{ active: star <= Math.round(product.rating || 0) }"
             />
           </span>
-          <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '5.0' }}</strong>
+          <strong>{{ product.rating ? Number(product.rating).toFixed(1) : '0.0' }}</strong>
           <small>({{ t('productDetail.top.reviews', { count: product.ratingCount || 0 }) }})</small>
           <small>{{ t('products.sold', { count: product.soldCount || 0 }) }}</small>
         </div>

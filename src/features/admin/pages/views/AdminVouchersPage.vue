@@ -270,9 +270,9 @@ const {
     </AdminPageHeader>
 
     <div class="mc-stats">
-      <article v-for="item in kpis" :key="item.label" class="mc-stat">
+      <article v-for="item in kpis" :key="item.label || item.title" class="mc-stat">
         <div class="stat-icon"><AppIcon :name="item.icon" :size="17" /></div>
-        <span>{{ item.label }}</span>
+        <span>{{ item.label || item.title }}</span>
         <strong :class="{ gold: item.gold }">{{ numberText(item.value) }}</strong>
         <small>{{ item.sub }}</small>
       </article>

@@ -180,11 +180,11 @@ function downloadAttachment(file) {
         <div class="cdp-message-search">
           <label class="cdp-message-search-field">
             <AppIcon name="search" :size="14" />
-            <AppInput
-              :modelValue="searchState.query"
+            <input
+              :value="searchState.query"
               type="search"
               placeholder="Tìm tin nhắn..."
-              @update:modelValue="(val) => store.setConversationSearchQuery(val)"
+              @input="(e) => store.setConversationSearchQuery(e.target.value)"
               @keydown.enter.prevent="store.goToNextConversationSearchResult()"
             />
           </label>
@@ -214,15 +214,16 @@ function downloadAttachment(file) {
         </div>
 
         <div>
-          <div class="cdp-info-label" style="margin-bottom: 4px">Giao cho</div>
+          <div class="cdp-info-label" style="margin-bottom: 4px; margin-top: 12px">Giao cho</div>
           <select
             class="cdp-priority-select"
             :value="assignedStaffId"
-            :disabled="store.assignableAdmins.loading"
+            :disabled="store.assignableAdmins.loading || !store.assignableAdmins.items.length"
             @focus="store.loadAssignableAdmins()"
             @change="(e) => store.assignConversation(e.target.value)"
           >
             <option value="">Chưa giao</option>
+            <option v-if="!store.assignableAdmins.loading && !store.assignableAdmins.items.length" value="" disabled>Không có nhân viên hỗ trợ</option>
             <option
               v-for="admin in store.assignableAdmins.items"
               :key="admin.staffId"
@@ -242,7 +243,7 @@ function downloadAttachment(file) {
             {{ store.assignableAdmins.error }}
           </div>
 
-          <div class="cdp-info-label" style="margin-bottom: 4px">Độ ưu tiên</div>
+          <div class="cdp-info-label" style="margin-bottom: 4px; margin-top: 12px">Độ ưu tiên</div>
           <select
             class="cdp-priority-select"
             :value="store.currentConv.priority"

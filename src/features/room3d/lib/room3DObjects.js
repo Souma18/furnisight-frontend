@@ -2,9 +2,15 @@ import { Box3, Vector3 } from 'three'
 
 export function removeObject3D(object3D) {
   if (!object3D) return
+  
+  // Quét đệ quy qua toàn bộ cây (group) của model 3D
   object3D.traverse?.((node) => {
+    // Nếu nó là một khối 3D (Mesh)
     if (node.isMesh) {
+      // Tiêu hủy Geometry khỏi bộ nhớ GPU (VRAM)
       node.geometry?.dispose?.()
+      
+      // Tiêu hủy Material (Vật liệu)
       if (Array.isArray(node.material)) {
         node.material.forEach((mat) => mat?.dispose?.())
       } else {
@@ -12,6 +18,8 @@ export function removeObject3D(object3D) {
       }
     }
   })
+  
+  // Gỡ object ra khỏi Scene cha
   object3D.parent?.remove(object3D)
 }
 

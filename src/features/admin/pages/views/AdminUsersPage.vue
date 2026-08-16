@@ -121,7 +121,7 @@ async function confirmDeleteUser() {
 <template>
   <AdminPageHeader eyebrow="Quản lý hệ thống" title-html="Người <em>dùng</em>" subtitle="1.243 tài khoản đã đăng ký">
     <template #actions>
-      <AppButton variant="unstyled" type="button" class="btn-export" @click="ui.showToast({ icon: 'download', title: 'Xuất danh sách' })"><AppIcon name="download" :size="15" />Xuất Excel</AppButton>
+
       <AppButton variant="unstyled" type="button" class="btn-add" @click="ui.openModal('addUser')"><AppIcon name="plus" :size="15" />Thêm người dùng</AppButton>
     </template>
   </AdminPageHeader>

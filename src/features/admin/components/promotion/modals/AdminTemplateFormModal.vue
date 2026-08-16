@@ -62,6 +62,12 @@ function handleUnlayer(initial = props.form.bodyTemplate) {
             <option value="ORDER">Đơn hàng (Order)</option>
           </select>
         </label>
+        <label>Kênh gửi (Channel)
+          <select v-model="form.channel" style="padding: 8px; border-radius: 6px; border: 1px solid var(--app-border); background: var(--app-control-bg); color: var(--app-text); width: 100%;">
+            <option value="IN_APP">Trong ứng dụng (In-App)</option>
+            <option value="EMAIL">Email</option>
+          </select>
+        </label>
         <label>Tiêu đề mẫu (Template)
           <AppInput v-model="form.titleTemplate" placeholder="Tặng bạn mã ưu đãi {{coupon_code}}"/>
         </label>

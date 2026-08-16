@@ -10,11 +10,11 @@ defineProps({
 
 <template>
   <div :class="variant === 'rev' ? 'rev-kpi' : compact ? 'inv-kpi-grid' : 'kpi-grid'">
-    <div v-for="kpi in kpis" :key="kpi.label" class="kpi-card" :class="`kpi-${kpi.tone}`">
+    <div v-for="kpi in kpis" :key="kpi.label || kpi.title || kpi.id" class="kpi-card" :class="`kpi-${kpi.tone}`">
       <div class="kpi-accent" />
       <div class="kpi-label" :style="compact ? 'margin-bottom:6px' : undefined">
         <AppIcon v-if="kpi.icon" :name="kpi.icon" :size="16" />
-        {{ kpi.label }}
+        {{ kpi.label || kpi.title }}
       </div>
       <div class="kpi-value" :style="compact ? 'font-size:28px' : undefined">
         {{ kpi.value }}<small v-if="kpi.suffix" style="font-size:18px">{{ kpi.suffix }}</small>

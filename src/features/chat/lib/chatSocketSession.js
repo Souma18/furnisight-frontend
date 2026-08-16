@@ -1,5 +1,11 @@
 import { createMessageServiceSocket } from '../api/messageServiceSocket'
 
+/**
+ * Quản lý phiên kết nối WebSocket Chat:
+ * - Khởi tạo & Ngắt kết nối STOMP.
+ * - Theo dõi trạng thái (connecting, open, closed, error).
+ * - Tự động đăng ký lắng nghe vào đúng kênh chat (conversationId) khi user mở chat.
+ */
 export function createChatSocketSession({
   connectionStatus,
   conversationId,

@@ -1,0 +1,17 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: furnisight_frontend
+    env_file:
+      - .env
+    volumes:
+      - ./public/models:/usr/share/nginx/html/models:ro
+    networks:
+      - be_default
+    restart: always
+
+networks:
+  be_default:
+    external: true

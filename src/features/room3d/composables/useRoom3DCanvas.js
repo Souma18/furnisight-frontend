@@ -146,6 +146,8 @@ export function useRoom3DCanvas(props, emit) {
     fallbackProductIds,
     loadRoomModel,
     loadFurnitureModels,
+    addFurnitureModel,
+    removeFurnitureModel,
     cleanupModels,
     reloadFurnitureModel,
   } = useRoomModelLoader({
@@ -235,7 +237,28 @@ export function useRoom3DCanvas(props, emit) {
         }
       }
       
-      loadFurnitureModels()
+      const changedEntries = newEntries.filter(e => !oldEntries.includes(e))
+      const removedEntries = oldEntries.filter(e => !newEntries.includes(e))
+      
+      if (oldEntries.length > 0 && (changedEntries.length > 0 || removedEntries.length > 0)) {
+        // Optimistic fast path: only add or remove missing models, rather than reloading everything
+        removedEntries.forEach(entry => {
+          const id = entry.split(':')[0]
+          removeFurnitureModel(id)
+        })
+        
+        changedEntries.forEach(entry => {
+          const id = entry.split(':')[0]
+          addFurnitureModel(id)
+        })
+      } else if (newEntries.length > 0) {
+        // Initial bulk load
+        loadFurnitureModels()
+      } else if (newEntries.length === 0) {
+        // Cleared everything
+        loadFurnitureModels()
+      }
+      
       prevItemsSnapshot.value = currentSnapshot
     },
     { deep: true },

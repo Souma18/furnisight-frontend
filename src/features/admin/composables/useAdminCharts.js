@@ -84,7 +84,7 @@ export function useAdminCharts() {
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
           scales: {
-            y: { ticks: { callback: (v) => `${v}tr` } },
+            y: { beginAtZero: true, suggestedMin: 0, ticks: { callback: (v) => `${v}tr` } },
           },
         },
       }),
@@ -139,7 +139,7 @@ export function useAdminCharts() {
       new Chart(ctx, {
         type: 'bar',
         data: { labels, datasets: [{ data, backgroundColor: color, borderRadius: 6 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, suggestedMin: 0 } } },
       }),
     )
   }
@@ -159,7 +159,7 @@ export function useAdminCharts() {
           responsive: true,
           maintainAspectRatio: false,
           plugins: { legend: { display: false } },
-          scales: { y: { ticks: { callback: (v) => `${v}tr` } } },
+          scales: { y: { beginAtZero: true, suggestedMin: 0, ticks: { callback: (v) => `${v}tr` } } },
         },
       }),
     )

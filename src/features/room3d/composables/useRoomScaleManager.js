@@ -143,7 +143,7 @@ export function useRoomScaleManager({
     if (!roomModelGroup.value) return
     const { length: lenCm, width: widCm, height: hgtCm } = dims
 
-    // Reset to neutral first so we measure the original bounding box
+    // Khôi phục mô hình phòng về tỷ lệ gốc để đo kích thước nguyên bản
     centerRoomModelOnXYGrid(roomModelGroup.value, ROOM_BASE_SCALE)
     const box = new Box3().setFromObject(roomModelGroup.value)
     const modelSpanX = Math.abs(box.max.x - box.min.x) // model units
@@ -151,15 +151,17 @@ export function useRoomScaleManager({
     const modelSpanY = Math.abs(box.max.y - box.min.y) // model units
 
     // 1 unit in 3D scene ≈ 1 metre → 1 cm = 0.01 units
+    // Đổi kích thước thật (cm) sang hệ mét (units trong 3D)
     const targetX = lenCm * 0.01 // desired X span in scene units
     const targetZ = widCm * 0.01 // desired Z span
     const targetY = hgtCm > 0 ? hgtCm * 0.01 : null
 
+    // Tính toán hệ số phóng to/thu nhỏ (Scale) bằng cách lấy: Kích thước thật chia cho Kích thước mô hình
     const scaleX = modelSpanX > 0.001 ? targetX / modelSpanX : 1
     const scaleZ = modelSpanZ > 0.001 ? targetZ / modelSpanZ : 1
     const scaleY = targetY && modelSpanY > 0.001 ? targetY / modelSpanY : Math.min(scaleX, scaleZ)
 
-    // Apply non-uniform scale to make the room exactly the specified dimensions
+    // Áp dụng scale không đồng đều (Non-uniform scale) để căn phòng khớp chính xác với Dài x Rộng x Cao
     const nonUniformScale = {
       x: scaleX * ROOM_BASE_SCALE,
       y: scaleY * ROOM_BASE_SCALE,

@@ -88,13 +88,20 @@ export function useRoomModelLoader({
 
     if (finalLength > 0 && finalWidth > 0 && finalHeight > 0) {
       // Convert cm → scene units (1 unit = 1 m)
+      // Chuyển đổi kích thước vật lý (cm) sang hệ mét (units trong 3D)
       const targetW = finalWidth * 0.01
       const targetH = finalHeight * 0.01
       const targetD = finalLength * 0.01
+      
+      // Tính tỷ lệ cần thu phóng trên từng trục (X, Y, Z)
       const sx = size.x > 0.001 ? targetW / size.x : 1
       const sy = size.y > 0.001 ? targetH / size.y : 1
       const sz = size.z > 0.001 ? targetD / size.z : 1
-      fitScale = Math.cbrt(sx * sy * sz) // geometric mean preserves proportions
+      
+      // geometric mean preserves proportions
+      // Dùng Trung bình nhân (Geometric mean) để tìm ra 1 hệ số scale chung (Uniform scale).
+      // Việc này giúp model đạt đúng kích thước vật lý mà KHÔNG bị bóp méo hình dạng gốc.
+      fitScale = Math.cbrt(sx * sy * sz) 
     } else {
       // 3rd priority: fallback box when no dimensions available at all
       const sx = fallback.width / Math.max(size.x || 1, 0.001)
@@ -227,6 +234,42 @@ export function useRoomModelLoader({
     }
   }
 
+  async function addFurnitureModel(instanceId) {
+    if (!sceneRef.value?.scene) return
+    const sceneItem = props.sceneItems.find((i) => i.instanceId === instanceId)
+    if (!sceneItem) return
+    const index = props.sceneItems.findIndex((i) => i.instanceId === instanceId)
+    
+    const product = productMap.value.get(String(sceneItem.productId))
+    const variant = product?.variants?.find(v => v.id === sceneItem.variantId) || product?.variants?.find(v => v.modelUrl || v.supports3d)
+    const modelUrl = variant?.modelUrl
+    if (!modelUrl) return
+
+    try {
+      const loader = await getLoader()
+      const gltf = await loader.loadAsync(modelUrl)
+      const model = gltf.scene
+      normalizeFurnitureModel(model, sceneItem, index)
+      applyUserOverrides(model)
+      sceneRef.value.scene.add(model)
+      furnitureGroups.value.push(model)
+      if (!loadedFurnitureIds.value.includes(instanceId)) {
+        loadedFurnitureIds.value.push(instanceId)
+      }
+    } catch (err) {
+      // Silent fail
+    }
+  }
+
+  function removeFurnitureModel(instanceId) {
+    const idx = furnitureGroups.value.findIndex(m => m.userData?.instanceId === instanceId)
+    if (idx !== -1) {
+      removeObject3D(furnitureGroups.value[idx])
+      furnitureGroups.value.splice(idx, 1)
+    }
+    loadedFurnitureIds.value = loadedFurnitureIds.value.filter(id => id !== instanceId)
+  }
+
   function cleanupModels() {
     removeObject3D(floorGridRef.value)
     floorGridRef.value = null
@@ -288,6 +331,8 @@ export function useRoomModelLoader({
     fallbackProductIds,
     loadRoomModel,
     loadFurnitureModels,
+    addFurnitureModel,
+    removeFurnitureModel,
     cleanupModels,
     reloadFurnitureModel,
   }

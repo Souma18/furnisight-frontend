@@ -157,13 +157,24 @@ export function useRoomFurnitureInteraction({
 
       const floorY = roomBoundsRef.value.floorY ?? 0
       dragPlane.constant = -floorY
+      
+      // Tia (raycaster) bắn từ chuột cắt qua mặt nền (dragPlane).
+      // Nếu cắt trúng, lưu tọa độ 3D chạm nền vào dragHitPoint.
       if (raycaster.ray.intersectPlane(dragPlane, dragHitPoint)) {
+        // Tính khoảng cách lệch giữa tâm đồ vật và vị trí click chuột thực tế
+        // để khi kéo, đồ vật không bị giật (snap) tâm về con trỏ chuột.
         dragOffset.set(picked.position.x - dragHitPoint.x, 0, picked.position.z - dragHitPoint.z)
+        
+        // Bật cờ bắt đầu quá trình kéo thả
         isDraggingProduct.value = true
+        
+        // Vô hiệu hóa tính năng xoay camera (OrbitControls)
+        // để tránh việc vừa kéo đồ vật vừa bị xoay cả căn phòng.
         setOrbitEnabled(false)
       }
     } else {
       isDraggingProduct.value = false
+      // Bật lại tính năng xoay camera khi thả chuột
       setOrbitEnabled(true)
     }
   }

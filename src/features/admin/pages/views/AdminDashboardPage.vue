@@ -4,7 +4,7 @@ import AdminChartCard from '../../components/shared/AdminChartCard.vue'
 import { useAdminDashboard } from '../../composables/useAdminDashboard'
 import { useAdminLayout } from '../../composables/useAdminLayout'
 
-const { data, revenueCanvas, orderCanvas } = useAdminDashboard()
+const { data, revenueCanvas, orderCanvas, startDate, endDate, load } = useAdminDashboard()
 const { simUser } = useAdminLayout()
 
 const badgeMap = {
@@ -30,10 +30,17 @@ const badgeMap = {
         <div class="welcome-desc">Hệ thống vận hành ổn định. Mọi thao tác đang được ghi nhận tại nhật ký bảo mật.</div>
       </div>
       <div class="welcome-stats">
-        <div class="welcome-stat"><div class="ws-val">{{ data.welcome.revenueLabel }}</div><div class="ws-label">Doanh thu T5</div></div>
-        <div class="welcome-stat"><div class="ws-val">{{ data.welcome.ordersToday }}</div><div class="ws-label">Đơn hôm nay</div></div>
+        <div class="welcome-stat"><div class="ws-val">{{ data.welcome.revenueLabel }}</div><div class="ws-label">Doanh thu trong kỳ</div></div>
+        <div class="welcome-stat"><div class="ws-val">{{ data.welcome.ordersToday }}</div><div class="ws-label">Đơn trong kỳ</div></div>
         <div class="welcome-stat"><div class="ws-val">{{ data.welcome.users }}</div><div class="ws-label">Người dùng</div></div>
       </div>
+    </div>
+
+    <div style="display:flex; justify-content: flex-end; margin-bottom: 20px; gap: 10px; align-items: center;">
+      <input type="date" v-model="startDate" @change="load" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none;" />
+      <span>đến</span>
+      <input type="date" v-model="endDate" @change="load" style="padding: 6px 12px; border: 1px solid var(--border); border-radius: 6px; outline: none;" />
+      <button @click="load()" style="padding: 6px 16px; background-color: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer;">Lọc</button>
     </div>
 
     <div class="kpi-grid">
@@ -49,7 +56,7 @@ const badgeMap = {
       <AdminChartCard title="Doanh thu theo thời gian" subtitle="Triệu VNĐ">
         <canvas ref="revenueCanvas" />
       </AdminChartCard>
-      <AdminChartCard title="Đơn theo trạng thái" subtitle="Tháng này">
+      <AdminChartCard title="Đơn theo trạng thái" subtitle="Trong kỳ">
         <canvas ref="orderCanvas" />
       </AdminChartCard>
     </div>

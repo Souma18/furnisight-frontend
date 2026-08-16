@@ -34,6 +34,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
     templateForm.code = row?.code || ''
     templateForm.name = row?.name || ''
     templateForm.type = row?.type || 'PROMOTION'
+    templateForm.channel = row?.channel || 'IN_APP'
     templateForm.titleTemplate = row?.titleTemplate || ''
     templateForm.bodyTemplate = row?.bodyTemplate || ''
   }
@@ -127,6 +128,7 @@ export function useAdminTemplates({ filters, modal, editing, notify }) {
       code: templateForm.code.trim(),
       name: templateForm.name.trim(),
       type: templateForm.type,
+      channel: templateForm.channel,
       titleTemplate: templateForm.titleTemplate.trim(),
       bodyTemplate: templateForm.bodyTemplate.trim(),
     }

@@ -25,6 +25,9 @@ function resolveWsUrl(explicitUrl) {
 
 /**
  * STOMP client qua SockJS cho MessageService.
+ * Sử dụng thư viện @stomp/stompjs kết hợp sockjs-client.
+ * - WebSocket giúp tạo luồng Real-time 2 chiều (tránh việc phải gọi API liên tục / HTTP Polling).
+ * - STOMP giúp định tuyến tin nhắn theo các kênh (Topic) giống Pub/Sub.
  */
 export function createMessageServiceSocket({ url, onConnect, onDisconnect, onError } = {}) {
   let client = null
@@ -84,6 +87,7 @@ export function createMessageServiceSocket({ url, onConnect, onDisconnect, onErr
     }
   }
 
+  // Đăng ký lắng nghe kênh chat cụ thể (Dành cho Khách hàng & Admin đang trực tiếp nhắn tin trong phòng này)
   function subscribeConversation(conversationId, handler) {
     return subscribe(`/topic/conversation/${conversationId}`, handler)
   }
@@ -92,15 +96,19 @@ export function createMessageServiceSocket({ url, onConnect, onDisconnect, onErr
     return subscribe(`/topic/conversation/${conversationId}/internal`, handler)
   }
 
+  // Đăng ký lắng nghe hộp thư đến chung (Dành riêng cho Admin - để nhận thông báo / ping ngay khi có bất kỳ khách hàng nào chat)
   function subscribeAdminInbox(handler) {
     return subscribe('/topic/admin/inbox', handler)
   }
 
+  // Gửi tin nhắn lên Server
   function sendChatMessage(dto) {
     if (!ensureConnected()) {
       console.warn('[messageServiceSocket] STOMP not connected')
       return false
     }
+    // Publish tin nhắn lên endpoint của Spring Boot (Backend)
+    // Sau đó Spring Boot sẽ lưu DB và tự động Broadcast ngược lại vào các /topic/ ở trên
     client.publish({
       destination: SEND_DESTINATION,
       body: JSON.stringify(dto),

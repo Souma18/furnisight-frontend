@@ -3,6 +3,12 @@ import { createMessageServiceSocket } from '@features/chat/api/messageServiceSoc
 import { mapMessageToAdminTimeline } from '@features/chat/lib/chatMappers'
 import { getStaffId } from '@features/chat/lib/chatUserIds'
 
+/**
+ * Quản lý kết nối WebSocket cho Admin:
+ * - Nhận thông báo tin nhắn mới (Admin Inbox).
+ * - Nghe Real-time tin nhắn công khai và ghi chú nội bộ.
+ * - Tự động xử lý kết nối/ngắt kết nối khi admin mở/đóng cửa sổ chat.
+ */
 export function useAdminSocket(ctx) {
   const socket = reactive({
     connected: false,
@@ -12,11 +18,11 @@ export function useAdminSocket(ctx) {
 
   function subscribeAdminTopics(id) {
     if (!socket.client?.isConnected?.()) return
-
+    // Đăng ký lắng nghe hộp thư đến chung của Admin
     socket.client.subscribeAdminInbox(ctx.inboxModule?.handleAdminInboxEvent)
 
     if (!id) return
-
+    
     if (socket.subscribedId && socket.subscribedId !== id) {
       socket.client.unsubscribe(`/topic/conversation/${socket.subscribedId}`)
       socket.client.unsubscribe(`/topic/conversation/${socket.subscribedId}/internal`)
