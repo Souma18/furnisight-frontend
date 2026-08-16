@@ -1,6 +1,7 @@
 import { reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../store/authStore'
+import { useCartStore } from '@features/cart/store/cartStore'
 import { authApi } from '@shared/lib/api/services'
 import { normalizeAuthSession } from '../utils/normalizeAuthSession'
 import { useAuthViewStateContext } from './useAuthViewState'
@@ -9,6 +10,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
   const router = useRouter()
   const route = useRoute()
   const authStore = useAuthStore()
+  const cartStore = useCartStore()
   const { AUTH_VIEWS, setView, showSuccess } = useAuthViewStateContext()
   const loading = ref(false)
   const errorMessage = ref('')
@@ -46,6 +48,7 @@ export function useLoginForm({ embedded = false, emit } = {}) {
 
       authStore.setSession(normalizeAuthSession(response))
       await authStore.ensureProfileLoaded()
+      await cartStore.ensureHydrated({ force: true }).catch(() => null)
       const isAdminLogin = authStore.isAdmin
       showSuccess({
         title: 'Đăng nhập thành công!',

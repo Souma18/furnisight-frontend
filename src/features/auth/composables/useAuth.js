@@ -25,7 +25,7 @@ export function useAuth(pinia) {
 
   /** @param {{ name: string } | string} [redirectTo] */
   async function logout(redirectTo = { name: 'home' }, options = {}) {
-    const { clearRemoteCart = true } = options
+    const { clearRemoteCart = false } = options
     await resetUserSessionState({ clearRemoteCart: clearRemoteCart && store.isAuthenticated })
     store.logout()
     if (redirectTo) {
