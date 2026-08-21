@@ -88,8 +88,19 @@ export const useAuthStore = defineStore('auth', () => {
     writeStoredRoles(roles.value)
   }
 
+  function saveIntendedRouteForOAuth() {
+    const isGuardSet = sessionStorage.getItem('furnisight:intended-route-guard') === 'true'
+    if (!isGuardSet) {
+      const currentPath = window.location.pathname + window.location.search + window.location.hash
+      if (!currentPath.startsWith('/auth')) {
+        sessionStorage.setItem('furnisight:intended-route', currentPath)
+      }
+    }
+  }
+
   async function loginGoogle() {
     try {
+      saveIntendedRouteForOAuth()
       const response = await authApi.loginGoogle()
       const redirectUrl = response.data?.data?.redirectUrl || response.data?.redirectUrl
       if (redirectUrl) {
@@ -102,6 +113,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function loginFacebook() {
+    saveIntendedRouteForOAuth()
     const beURL = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081'
     window.location.href = `${beURL}/oauth2/authorization/facebook`
   }

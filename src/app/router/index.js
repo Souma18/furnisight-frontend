@@ -131,6 +131,7 @@ router.beforeEach(async (to, from, next) => {
   
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     sessionStorage.setItem('furnisight:intended-route', to.fullPath)
+    sessionStorage.setItem('furnisight:intended-route-guard', 'true')
     openAuthModal('login')
     if (!from.name) {
       next({ name: 'home' })

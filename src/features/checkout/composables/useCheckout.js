@@ -1,4 +1,4 @@
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAddressStore } from '@features/account/store/addressStore'
@@ -105,6 +105,7 @@ export function useCheckout() {
           subtotal: voucherSubtotal.value,
           shippingFee: checkoutStore.shipFee,
           preferredVoucherCode: preferredCode,
+          forceRecommend: !checkoutStore.shopVoucher && !checkoutStore.shippingVoucher,
         })
       } catch {
         checkoutStore.shopVoucher = null
@@ -187,6 +188,29 @@ export function useCheckout() {
     }).catch(() => null)
     return requestId === voucherRequestId ? result : null
   }
+
+  onMounted(() => {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('furnisight_payment_channel')
+      channel.onmessage = (event) => {
+        if (event.data?.type === 'VNPAY_PAYMENT_RESULT') {
+          if (event.data.success) {
+            showSuccess.value = true
+            cartStore.hydrate({ force: true }).catch(() => null)
+          } else {
+            showToast({
+              icon: 'alert',
+              title: t('checkout.toast.vnpayFailed.title'),
+              subtitle: t('checkout.toast.vnpayFailed.sub', { status: 400 }),
+            })
+          }
+        }
+      }
+      onBeforeUnmount(() => {
+        channel.close()
+      })
+    }
+  })
 
   // Explicit UI-triggered API call
   watch(() => checkoutStore.selectedShippingId, refreshVoucherSelection)

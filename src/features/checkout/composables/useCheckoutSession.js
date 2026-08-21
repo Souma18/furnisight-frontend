@@ -168,8 +168,8 @@ export function useCheckoutSession(checkoutStore) {
     }
   }
 
-  async function revalidateVouchers({ subtotal, shippingFee, preferredVoucherCode = '' }) {
-    if (preferredVoucherCode) {
+  async function revalidateVouchers({ subtotal, shippingFee, preferredVoucherCode = '', forceRecommend = false }) {
+    if (preferredVoucherCode || forceRecommend) {
       const recommended = await recommendVouchers(subtotal, shippingFee, preferredVoucherCode)
       checkoutStore.shopVoucher = recommended.shopVoucher
       checkoutStore.shippingVoucher = recommended.shippingVoucher
@@ -195,15 +195,10 @@ export function useCheckoutSession(checkoutStore) {
       validateSelected(checkoutStore.shopVoucher, 'shop'),
       validateSelected(checkoutStore.shippingVoucher, 'ship'),
     ])
-    if (shop && shipping) {
-      checkoutStore.shopVoucher = shop
-      checkoutStore.shippingVoucher = shipping
-      return { shopVoucher: shop, shippingVoucher: shipping }
-    }
-    const recommended = await recommendVouchers(subtotal, shippingFee)
-    checkoutStore.shopVoucher = shop || recommended.shopVoucher
-    checkoutStore.shippingVoucher = shipping || recommended.shippingVoucher
-    return { shopVoucher: checkoutStore.shopVoucher, shippingVoucher: checkoutStore.shippingVoucher }
+
+    checkoutStore.shopVoucher = shop
+    checkoutStore.shippingVoucher = shipping
+    return { shopVoucher: shop, shippingVoucher: shipping }
   }
 
   return {

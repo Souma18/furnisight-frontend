@@ -130,7 +130,10 @@ export function useCheckoutOrder({
       lineIds: linesSnapshot.map((line) => line.id),
     })
 
-    window.location.href = paymentRes.paymentUrl
+    const paymentWindow = window.open(paymentRes.paymentUrl, '_blank')
+    if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed === 'undefined') {
+      window.location.href = paymentRes.paymentUrl
+    }
     return true
   }
 
