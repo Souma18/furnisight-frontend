@@ -7,12 +7,14 @@ import { useWishlistStore } from '@features/account/store/wishlistStore'
 import { useCartStore } from '@features/cart/store/cartStore'
 import { useCheckoutStore } from '@features/checkout/store/checkoutStore'
 import { useChatStore } from '@features/chat/store/chatStore'
+import { useRoom3DStore } from '@features/room3d/store/room3DStore'
 
 const USER_SESSION_STORAGE_KEYS = [
   'furnisight-cart-store-v1',
   'furnisight-cart-store-v2',
   'furnisight-cart-store-v3',
   'furnisight-cart-store-v4',
+  'room3d-store-v1',
 ]
 
 export async function resetUserSessionState(options = {}) {
@@ -31,6 +33,7 @@ export async function resetUserSessionState(options = {}) {
   useProfileStore(pinia).resetProfileState()
   useAccountStore(pinia).resetAccountState()
   useChatStore(pinia).resetSession()
+  useRoom3DStore(pinia).resetRoomStore()
 
   clearSessionStorage()
 }

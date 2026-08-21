@@ -87,9 +87,18 @@ function getDetail(item) {
   }
 }
 
+function cleanNotificationBody(body) {
+  if (!body) return ''
+  if (body.includes('<#if')) {
+    return 'Đơn hàng của bạn đã có cập nhật trạng thái mới.'
+  }
+  return body
+}
+
 export function mapInboxMessageToFrontend(item) {
   return {
     ...item,
+    body: cleanNotificationBody(item.body),
     isRead: item.read ?? item.isRead ?? false,
     type: typeMap[item.type] || 'system',
     time: formatTimeAgo(item.createdAt),

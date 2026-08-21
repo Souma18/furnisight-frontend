@@ -24,7 +24,16 @@ export function useOAuthCallback() {
         openAuthModal()
         return
       }
-      router.replace(route.query.redirect || '/account')
+      const queryRedirect = route.query.redirect
+      const intendedRoute = sessionStorage.getItem('furnisight:intended-route')
+      sessionStorage.removeItem('furnisight:intended-route')
+      sessionStorage.removeItem('furnisight:intended-route-guard')
+
+      let targetRoute = queryRedirect || intendedRoute
+      if (!targetRoute || targetRoute.startsWith('/auth')) {
+        targetRoute = authStore.isAdmin ? '/admin' : '/'
+      }
+      router.replace(targetRoute)
       return
     }
 

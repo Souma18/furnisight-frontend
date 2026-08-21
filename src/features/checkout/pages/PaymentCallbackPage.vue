@@ -83,11 +83,28 @@ async function redirectToOrderDetail() {
   })
 }
 
+function broadcastPaymentResult(successStatus, code) {
+  try {
+    if (typeof window !== 'undefined' && 'BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('furnisight_payment_channel')
+      channel.postMessage({
+        type: 'VNPAY_PAYMENT_RESULT',
+        success: successStatus,
+        orderCode: code,
+      })
+      channel.close()
+    }
+  } catch {
+    // Ignore channel errors
+  }
+}
+
 async function processCallback() {
   if (route.name === 'payment-success') {
     status.value = 'success'
     orderCode.value = pendingPayment.value?.orderCode || ''
     message.value = t('checkout.callback.status.success')
+    broadcastPaymentResult(true, orderCode.value)
     await removePaidCartLines()
     await redirectToOrderDetail()
     return
@@ -97,6 +114,7 @@ async function processCallback() {
     status.value = 'failure'
     orderCode.value = pendingPayment.value?.orderCode || ''
     message.value = t('checkout.callback.status.failed')
+    broadcastPaymentResult(false, orderCode.value)
     checkoutStore.clearPendingPayment()
     return
   }
@@ -109,6 +127,7 @@ async function processCallback() {
   if (!paymentMethod || !Object.keys(callbackParams).length) {
     status.value = 'failure'
     message.value = t('checkout.callback.status.notFound')
+    broadcastPaymentResult(false, orderCode.value)
     return
   }
 
@@ -118,6 +137,7 @@ async function processCallback() {
     if (isGatewaySuccess(paymentMethod, callbackParams)) {
       status.value = 'success'
       message.value = t('checkout.callback.status.success')
+      broadcastPaymentResult(true, orderCode.value)
       await removePaidCartLines()
       await redirectToOrderDetail()
       return
@@ -125,10 +145,12 @@ async function processCallback() {
 
     status.value = 'failure'
     message.value = t('checkout.callback.status.failed')
+    broadcastPaymentResult(false, orderCode.value)
     checkoutStore.clearPendingPayment()
   } catch (error) {
     status.value = 'failure'
     message.value = error?.response?.data?.message || error.message || 'Không thể xác nhận thanh toán.'
+    broadcastPaymentResult(false, orderCode.value)
   }
 }
 

@@ -42,8 +42,25 @@ export const useRoom3DStore = defineStore('room3d', () => {
       const parsed = JSON.parse(raw)
       if (!parsed || typeof parsed !== 'object') return
 
+      if (typeof parsed.mode === 'string') mode.value = parsed.mode
+      if (parsed.selectedRoomType !== undefined) selectedRoomType.value = parsed.selectedRoomType
+      if (typeof parsed.projectName === 'string') projectName.value = parsed.projectName
+      if (typeof parsed.imageType === 'string') imageType.value = parsed.imageType
+      if (typeof parsed.meshQuality === 'string') meshQuality.value = parsed.meshQuality
+      if (typeof parsed.quality === 'string') quality.value = parsed.quality
+      if (typeof parsed.uploadedModelUrl === 'string') uploadedModelUrl.value = parsed.uploadedModelUrl
+      if (typeof parsed.roomRenderSource === 'string') roomRenderSource.value = parsed.roomRenderSource
+      if (typeof parsed.predictionStatus === 'string') {
+        predictionStatus.value = parsed.predictionStatus === 'loading' ? 'idle' : parsed.predictionStatus
+      }
+      if (parsed.predictionResponseType !== undefined) predictionResponseType.value = parsed.predictionResponseType
+      if (parsed.recommendationMeta !== undefined) recommendationMeta.value = parsed.recommendationMeta
+      if (Array.isArray(parsed.recommendations)) recommendations.value = parsed.recommendations
+      if (typeof parsed.aiRecognitionLabel === 'string') aiRecognitionLabel.value = parsed.aiRecognitionLabel
+      if (parsed.aiRecognitionConfidence !== undefined) aiRecognitionConfidence.value = parsed.aiRecognitionConfidence
       if (typeof parsed.searchKeyword === 'string') searchKeyword.value = parsed.searchKeyword
       if (typeof parsed.selectedCategory === 'string') selectedCategory.value = parsed.selectedCategory
+      if (Array.isArray(parsed.sceneItems)) sceneItems.value = parsed.sceneItems
     } catch {
       // Ignore corrupted local storage data.
     }
@@ -55,12 +72,55 @@ export const useRoom3DStore = defineStore('room3d', () => {
       window.localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify({
+          mode: mode.value,
+          selectedRoomType: selectedRoomType.value,
+          projectName: projectName.value,
+          imageType: imageType.value,
+          meshQuality: meshQuality.value,
+          quality: quality.value,
+          uploadedModelUrl: uploadedModelUrl.value,
+          roomRenderSource: roomRenderSource.value,
+          predictionStatus: predictionStatus.value === 'loading' ? 'idle' : predictionStatus.value,
+          predictionResponseType: predictionResponseType.value,
+          recommendationMeta: recommendationMeta.value,
+          recommendations: recommendations.value,
+          aiRecognitionLabel: aiRecognitionLabel.value,
+          aiRecognitionConfidence: aiRecognitionConfidence.value,
           searchKeyword: searchKeyword.value,
           selectedCategory: selectedCategory.value,
+          sceneItems: sceneItems.value,
         }),
       )
     } catch {
       // Ignore storage write errors.
+    }
+  }
+
+  function resetRoomStore() {
+    mode.value = 'upload'
+    isAnalyzing.value = false
+    selectedRoomType.value = null
+    projectName.value = ''
+    imageType.value = 'normal'
+    meshQuality.value = 'medium'
+    quality.value = '512'
+    uploadedModelUrl.value = ''
+    roomRenderSource.value = 'none'
+    predictionStatus.value = 'idle'
+    predictionResponseType.value = null
+    recommendationMeta.value = null
+    recommendations.value = []
+    aiRecognitionLabel.value = ''
+    aiRecognitionConfidence.value = null
+    searchKeyword.value = ''
+    selectedCategory.value = 'all'
+    sceneItems.value = []
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(STORAGE_KEY)
+      } catch {
+        // Ignore storage write errors.
+      }
     }
   }
 
@@ -257,7 +317,25 @@ export const useRoom3DStore = defineStore('room3d', () => {
   }
 
   watch(
-    [searchKeyword, selectedCategory],
+    [
+      mode,
+      selectedRoomType,
+      projectName,
+      imageType,
+      meshQuality,
+      quality,
+      uploadedModelUrl,
+      roomRenderSource,
+      predictionStatus,
+      predictionResponseType,
+      recommendationMeta,
+      recommendations,
+      aiRecognitionLabel,
+      aiRecognitionConfidence,
+      searchKeyword,
+      selectedCategory,
+      sceneItems,
+    ],
     () => {
       persistState()
     },
@@ -318,5 +396,6 @@ export const useRoom3DStore = defineStore('room3d', () => {
     updateSceneItemVariant,
     toggleCart,
     toggleShowAllRooms,
+    resetRoomStore,
   }
 })

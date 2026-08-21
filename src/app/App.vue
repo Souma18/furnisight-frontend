@@ -52,6 +52,13 @@ function scrollToTop() {
 }
 
 function openAuthModalFromEvent(event) {
+  const isGuardSet = sessionStorage.getItem('furnisight:intended-route-guard') === 'true'
+  if (!isGuardSet) {
+    const currentPath = window.location.pathname + window.location.search + window.location.hash
+    if (!currentPath.startsWith('/auth')) {
+      sessionStorage.setItem('furnisight:intended-route', currentPath)
+    }
+  }
   initialAuthView.value = event?.detail?.initialView || 'login'
   isAuthModalOpen.value = true
 }
@@ -77,10 +84,11 @@ async function closeAuthModal() {
 }
 
 async function onAuthSuccess() {
-  await closeAuthModal()
   const intendedRoute = sessionStorage.getItem('furnisight:intended-route')
-  if (intendedRoute) {
-    sessionStorage.removeItem('furnisight:intended-route')
+  sessionStorage.removeItem('furnisight:intended-route')
+  sessionStorage.removeItem('furnisight:intended-route-guard')
+  await closeAuthModal()
+  if (intendedRoute && intendedRoute !== route.value.fullPath) {
     await router.push(intendedRoute)
   }
 }

@@ -10,8 +10,9 @@ export function calcLineTotal(line) {
 
 export function calcShopDiscount(subtotal, voucher) {
   if (!voucher) return 0
-  if (voucher.appliedDiscount != null) return Math.max(0, Number(voucher.appliedDiscount) || 0)
   const discountType = String(voucher.discountType || '').toLowerCase()
+  if (discountType === 'shipping_cap') return 0
+  if (voucher.appliedDiscount != null) return Math.max(0, Number(voucher.appliedDiscount) || 0)
 
   if (discountType === 'percent') {
     const raw = Math.round(subtotal * (Number(voucher.discountValue) / 100))
@@ -30,8 +31,13 @@ export function calcShippingDiscount(shipFee, voucher) {
   if (!voucher || !shipFee) return 0
   if (voucher.appliedDiscount != null) return Math.min(shipFee, Math.max(0, Number(voucher.appliedDiscount) || 0))
   const discountType = String(voucher.discountType || '').toLowerCase()
-  if (discountType === 'shipping_cap') {
+  if (discountType === 'shipping_cap' || discountType === 'fixed') {
     return Math.min(shipFee, Number(voucher.discountValue) || shipFee)
+  }
+  if (discountType === 'percent') {
+    const raw = Math.round(shipFee * (Number(voucher.discountValue) / 100))
+    const cap = Number(voucher.maxDiscount) || raw
+    return Math.min(shipFee, Math.min(raw, cap))
   }
   return 0
 }
